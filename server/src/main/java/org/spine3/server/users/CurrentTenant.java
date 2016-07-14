@@ -41,9 +41,7 @@ public class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
-    /**
-     * Have only static methods for this class.
-     */
+    /** Have only static methods for this class. */
     private CurrentTenant() {}
 
     /**

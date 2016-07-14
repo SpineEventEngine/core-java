@@ -39,24 +39,17 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 public abstract class MessageField {
-    /**
-     * The prefix of generated getter methods for fields.
-     */
+
+    /** The prefix of generated getter methods for fields. */
     private static final String GETTER_METHOD_PREFIX = "get";
 
-    /**
-     * By convention underscore is used for separating words in field names of Protobuf messages.
-     */
+    /** By convention underscore is used for separating words in field names of Protobuf messages. */
     private static final char PROPERTY_NAME_SEPARATOR = '_';
 
-    /**
-     * A zero-based index of the field in a Protobuf message.
-     */
+    /** A zero-based index of the field in a Protobuf message. */
     private final int index;
 
-    /**
-     * A map from message class to a getter method of the corresponding Java class.
-     */
+    /** A map from message class to a getter method of the corresponding Java class. */
     private static final Map<Class<? extends Message>, Method> accessors = Maps.newConcurrentMap();
 
     /**
@@ -68,9 +61,7 @@ public abstract class MessageField {
         this.index = index;
     }
 
-    /**
-     * @return a zero-based index of the field in a Protobuf message
-     */
+    /** Returns a zero-based index of the field in a Protobuf message. */
     protected int getIndex() {
         return index;
     }
@@ -149,9 +140,7 @@ public abstract class MessageField {
         return result;
     }
 
-    /**
-     * Converts Protobuf field name into Java accessor method name.
-     */
+    /** Converts Protobuf field name into Java accessor method name. */
     @VisibleForTesting
     static String toAccessorMethodName(CharSequence fieldName) {
         final StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);

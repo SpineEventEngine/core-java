@@ -29,9 +29,7 @@ import org.spine3.people.PersonName;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Subscribe;
 
-/**
- * This class prints events into {@link System#out}.
- */
+/** This class prints events into {@link System#out}. */
 public class Printer extends EventSubscriber {
 
     @Subscribe

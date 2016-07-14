@@ -135,9 +135,7 @@ public class Messages {
         }
     }
 
-    /**
-     * Returns descriptor for the passed message class.
-     */
+    /** Returns descriptor for the passed message class. */
     public static GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);

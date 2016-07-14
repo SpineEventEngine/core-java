@@ -44,14 +44,10 @@ import static java.lang.String.format;
  */
 /* package */ class ReferenceValidator {
 
-    /**
-     * The separator used in Protobuf fully-qualified names.
-     */
+    /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
 
-    /**
-     * The reference to the event context used in the `by` field option.
-     */
+    /** The reference to the event context used in the `by` field option. */
     private static final String CONTEXT_REFERENCE = "context";
 
     private final EventEnricher enricher;
@@ -76,9 +72,7 @@ import static java.lang.String.format;
         return sourceToTargetMap;
     }
 
-    /**
-     * @throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment
-     */
+    /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
     /* package */ List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
@@ -92,9 +86,7 @@ import static java.lang.String.format;
         return functions.build();
     }
 
-    /**
-     * Searches for the event/context field with the name parsed from the enrichment field `by` option.
-     */
+    /** Searches for the event/context field with the name parsed from the enrichment field `by` option. */
     private FieldDescriptor findSourceField(FieldDescriptor enrichmentField) {
         final String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
         checkSourceFieldName(fieldName, enrichmentField);
@@ -137,9 +129,7 @@ import static java.lang.String.format;
         return func.get();
     }
 
-    /**
-     * Checks if the source field name (from event or context) is not empty.
-     */
+    /** Checks if the source field name (from event or context) is not empty. */
     private static void checkSourceFieldName(String srcFieldName, FieldDescriptor enrichmentField) {
         if (srcFieldName.isEmpty()) {
             final String msg = format("There is no `by` option for the enrichment field `%s`",

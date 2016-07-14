@@ -50,9 +50,7 @@ public class CommandExpiredException extends CommandException {
         return result;
     }
 
-    /**
-     * Creates an instance of the command expired error.
-     */
+    /** Creates an instance of the command expired error. */
     public static Error commandExpiredError(Message commandMessage) {
         final String errMsg = format("Scheduled command of type `%s` expired.", CommandClass.of(commandMessage));
         final Error.Builder error = Error.newBuilder()

@@ -55,10 +55,9 @@ import java.util.Set;
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements EventDispatcher {
 
-    /**
-     * The enumeration of statuses in which a Projection Repository can be during its lifecycle.
-     */
+    /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
     private enum Status {
+
         /**
          * The repository instance has been created.
          *
@@ -66,35 +65,23 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
          */
         CREATED,
 
-        /**
-         * A storage has been assigned to the repository.
-         */
+        /** A storage has been assigned to the repository. */
         STORAGE_ASSIGNED,
 
-        /**
-         * The repository is getting events from EventStore and builds projections.
-         */
+        /** The repository is getting events from EventStore and builds projections. */
         CATCHING_UP,
 
-        /**
-         * The repository completed the catch-up process.
-         */
+        /** The repository completed the catch-up process. */
         ONLINE,
 
-        /**
-         * The repository is closed and no longer accept events.
-         */
+        /** The repository is closed and no longer accept events. */
         CLOSED
     }
 
-    /**
-     * The current status of the repository.
-     */
+    /** The current status of the repository. */
     private Status status = Status.CREATED;
 
-    /**
-     * An underlying entity storage used to store projections.
-     */
+    /** An underlying entity storage used to store projections. */
     private EntityStorage<I> entityStorage;
 
     protected ProjectionRepository(BoundedContext boundedContext) {
@@ -123,18 +110,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return projectionStorage;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void initStorage(StorageFactory factory) {
         super.initStorage(factory);
         setStatus(Status.STORAGE_ASSIGNED);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void close() throws Exception {
         super.close();
@@ -167,9 +150,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return checkStorage(storage);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Set<EventClass> getEventClasses() {
         final Class<? extends Projection> projectionClass = getEntityClass();
@@ -256,9 +237,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         storage.writeLastHandledEventTime(eventTime);
     }
 
-    /**
-     * Updates projections from the event stream obtained from {@code EventStore}.
-     */
+    /** Updates projections from the event stream obtained from {@code EventStore}. */
     public void catchUp() {
         // Get the timestamp of the last event. This also ensures we have the storage.
         final Timestamp timestamp = projectionStorage().readLastHandledEventTime();
@@ -275,9 +254,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         eventStore.read(query, new EventStreamObserver(this));
     }
 
-    /**
-     * Obtains event filters for event classes handled by projections of this repository.
-     */
+    /** Obtains event filters for event classes handled by projections of this repository. */
     private Set<EventFilter> getEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getEventClasses();
@@ -289,9 +266,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return builder.build();
     }
 
-    /**
-     * Sets the repository only bypassing updating from {@code EventStore}.
-     */
+    /** Sets the repository only bypassing updating from {@code EventStore}. */
     public void setOnline() {
         setStatus(Status.ONLINE);
     }

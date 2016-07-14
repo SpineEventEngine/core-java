@@ -67,12 +67,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .build();
         }
 
-        /**
-         * Creates a new ProjectId with the given UUID value.
-         *
-         * @param uuid the project id
-         * @return ProjectId instance
-         */
         public static ProjectId newProjectId(String uuid) {
             return ProjectId.newBuilder()
                             .setId(uuid)
@@ -129,36 +123,24 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private CommandMessage() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.test.reflect.command.CreateProject} command with the generated project ID.
-         */
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
         }
 
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        /**
-         * Creates a new {@link AddTask} command with the given project ID.
-         */
         public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
                           .setProjectId(id)
                           .build();
         }
 
-        /**
-         * Creates a new {@link StartProject} command with the given project ID.
-         */
         public static StartProject startProject(ProjectId id) {
             return StartProject.newBuilder()
                                .setProjectId(id)
@@ -175,7 +157,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
+         * Creates a new {@link Command} with the given command message, userId and timestamp using default
          * {@link CommandId} instance.
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
@@ -184,53 +166,33 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             return result;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
-         */
+        /** Creates a new {@link Command} with default properties (current time etc). */
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
-         */
         public static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
         public static org.spine3.base.Command addTask() {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final AddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
         public static org.spine3.base.Command startProject() {
             return startProject(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
             final StartProject command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
@@ -244,41 +206,27 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private Event() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with default properties.
-         */
+        /** Creates a new {@link Event} with default properties. */
         public static org.spine3.base.Event projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
             final org.spine3.base.Event event = Events.createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
         public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {
             final TaskAdded msg = EventMessage.taskAdded(projectId);
             final org.spine3.base.Event event = Events.createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
         public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext context) {
             final ProjectStarted msg = EventMessage.projectStarted(projectId);
             final org.spine3.base.Event event = Events.createEvent(msg, context);
@@ -291,18 +239,12 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private AggregateStorageRecord() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.storage.AggregateStorageRecord} with the given timestamp.
-         */
         public static org.spine3.server.storage.AggregateStorageRecord create(Timestamp timestamp) {
             final org.spine3.server.storage.AggregateStorageRecord.Builder builder = org.spine3.server.storage.AggregateStorageRecord.newBuilder()
                                                                                                                                      .setTimestamp(timestamp);
             return builder.build();
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.storage.AggregateStorageRecord} with the given timestamp and event record.
-         */
         public static org.spine3.server.storage.AggregateStorageRecord create(Timestamp timestamp, org.spine3.base.Event event) {
             final org.spine3.server.storage.AggregateStorageRecord.Builder builder = create(timestamp)
                     .toBuilder()
@@ -312,7 +254,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
         /**
          * Returns several records sorted by timestamp ascending.
-         * First record's timestamp is current time.
+         * First record's timestamp is the current time.
          */
         public static List<org.spine3.server.storage.AggregateStorageRecord> createSequentialRecords(ProjectId id) {
             return createSequentialRecords(id, getCurrentTime());

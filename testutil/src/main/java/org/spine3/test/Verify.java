@@ -195,9 +195,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two booleans are not equal.
-     */
+    /** Asserts that two booleans are not equal. */
     public static void assertNotEquals(String itemName, boolean notExpected, boolean actual) {
         try {
             if (notExpected == actual) {
@@ -208,9 +206,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two booleans are not equal.
-     */
+    /** Asserts that two booleans are not equal. */
     public static void assertNotEquals(boolean notExpected, boolean actual) {
         try {
             assertNotEquals("boolean", notExpected, actual);
@@ -219,9 +215,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two bytes are not equal.
-     */
+    /** Asserts that two bytes are not equal. */
     public static void assertNotEquals(String itemName, byte notExpected, byte actual) {
         try {
             if (notExpected == actual) {
@@ -232,9 +226,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two bytes are not equal.
-     */
+    /** Asserts that two bytes are not equal. */
     public static void assertNotEquals(byte notExpected, byte actual) {
         try {
             assertNotEquals("byte", notExpected, actual);
@@ -243,9 +235,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two chars are not equal.
-     */
+    /** Asserts that two chars are not equal. */
     public static void assertNotEquals(String itemName, char notExpected, char actual) {
         try {
             if (notExpected == actual) {
@@ -256,9 +246,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two chars are not equal.
-     */
+    /** Asserts that two chars are not equal. */
     public static void assertNotEquals(char notExpected, char actual) {
         try {
             assertNotEquals("char", notExpected, actual);
@@ -267,9 +255,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two shorts are not equal.
-     */
+    /** Asserts that two shorts are not equal. */
     public static void assertNotEquals(String itemName, short notExpected, short actual) {
         try {
             if (notExpected == actual) {
@@ -280,9 +266,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that two shorts are not equal.
-     */
+    /** Asserts that two shorts are not equal. */
     public static void assertNotEquals(short notExpected, short actual) {
         try {
             assertNotEquals("short", notExpected, actual);
@@ -291,9 +275,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} is empty.
-     */
+    /** Assert that the given {@link Iterable} is empty. */
     public static void assertIterableEmpty(Iterable<?> iterable) {
         try {
             assertIterableEmpty(ITERABLE, iterable);
@@ -302,9 +284,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} is empty.
-     */
+    /** Assert that the given {@link Iterable} is empty. */
     public static void assertIterableEmpty(String iterableName, Iterable<?> iterable) {
         try {
             assertObjectNotNull(iterableName, iterable);
@@ -318,9 +298,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given object is an instanceof expectedClassType.
-     */
+    /** Assert that the given object is an instanceof expectedClassType. */
     public static void assertInstanceOf(Class<?> expectedClassType, Object actualObject) {
         try {
             assertInstanceOf(actualObject.getClass()
@@ -330,9 +308,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given object is an instanceof expectedClassType.
-     */
+    /** Assert that the given object is an instanceof expectedClassType. */
     public static void assertInstanceOf(String objectName, Class<?> expectedClassType, Object actualObject) {
         try {
             if (!expectedClassType.isInstance(actualObject)) {
@@ -343,9 +319,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given object is not an instanceof expectedClassType.
-     */
+    /** Assert that the given object is not an instanceof expectedClassType. */
     public static void assertNotInstanceOf(Class<?> expectedClassType, Object actualObject) {
         try {
             assertNotInstanceOf(actualObject.getClass()
@@ -355,9 +329,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given object is not an instanceof expectedClassType.
-     */
+    /** Assert that the given object is not an instanceof expectedClassType. */
     public static void assertNotInstanceOf(String objectName, Class<?> expectedClassType, Object actualObject) {
         try {
             if (expectedClassType.isInstance(actualObject)) {
@@ -368,9 +340,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} is empty.
-     */
+    /** Assert that the given {@link Map} is empty. */
     public static void assertEmpty(Map<?, ?> actualMap) {
         try {
             assertEmpty("map", actualMap);
@@ -379,9 +349,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} is empty.
-     */
+    /** Assert that the given {@link Multimap} is empty. */
     public static void assertEmpty(Multimap<?, ?> actualMultimap) {
         try {
             assertEmpty("multimap", actualMultimap);
@@ -390,9 +358,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} is empty.
-     */
+    /** Assert that the given {@link Multimap} is empty. */
     public static void assertEmpty(String multimapName, Multimap<?, ?> actualMultimap) {
         try {
             assertObjectNotNull(multimapName, actualMultimap);
@@ -405,9 +371,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} is empty.
-     */
+    /** Assert that the given {@link Map} is empty. */
     @SuppressWarnings("MethodWithMoreThanThreeNegations")
     public static void assertEmpty(String mapName, Map<?, ?> actualMap) {
         try {
@@ -440,9 +404,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Iterable} is <em>not</em> empty. */
     public static void assertNotEmpty(Iterable<?> actualIterable) {
         try {
             assertNotEmpty(ITERABLE, actualIterable);
@@ -451,9 +413,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Iterable} is <em>not</em> empty. */
     public static void assertNotEmpty(String iterableName, Iterable<?> actualIterable) {
         try {
             assertObjectNotNull(iterableName, actualIterable);
@@ -464,9 +424,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Iterable} is <em>not</em> empty. */
     public static void assertIterableNotEmpty(Iterable<?> iterable) {
         try {
             assertNotEmpty(ITERABLE, iterable);
@@ -475,9 +433,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Map} is <em>not</em> empty. */
     public static void assertNotEmpty(Map<?, ?> actualMap) {
         try {
             assertNotEmpty("map", actualMap);
@@ -486,9 +442,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Map} is <em>not</em> empty. */
     public static void assertNotEmpty(String mapName, Map<?, ?> actualMap) {
         try {
             assertObjectNotNull(mapName, actualMap);
@@ -505,9 +459,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Multimap} is <em>not</em> empty. */
     public static void assertNotEmpty(Multimap<?, ?> actualMultimap) {
         try {
             assertNotEmpty("multimap", actualMultimap);
@@ -516,9 +468,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} is <em>not</em> empty.
-     */
+    /** Assert that the given {@link Multimap} is <em>not</em> empty. */
     public static void assertNotEmpty(String multimapName, Multimap<?, ?> actualMultimap) {
         try {
             assertObjectNotNull(multimapName, actualMultimap);
@@ -546,9 +496,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given array.
-     */
+    /** Assert the size of the given array. */
     public static void assertSize(int expectedSize, Object[] actualArray) {
         try {
             assertSize("array", expectedSize, actualArray);
@@ -557,9 +505,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given array.
-     */
+    /** Assert the size of the given array. */
     public static void assertSize(String arrayName, int expectedSize, Object[] actualArray) {
         try {
             Assert.assertNotNull(arrayName + " should not be null", actualArray);
@@ -579,9 +525,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Iterable}.
-     */
+    /** Assert the size of the given {@link Iterable}. */
     public static void assertSize(int expectedSize, Iterable<?> actualIterable) {
         try {
             assertSize(ITERABLE, expectedSize, actualIterable);
@@ -590,9 +534,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Iterable}.
-     */
+    /** Assert the size of the given {@link Iterable}. */
     public static void assertSize(
             String iterableName,
             int expectedSize,
@@ -616,9 +558,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Iterable}.
-     */
+    /** Assert the size of the given {@link Iterable}. */
     public static void assertIterableSize(int expectedSize, Iterable<?> actualIterable) {
         try {
             assertIterableSize(ITERABLE, expectedSize, actualIterable);
@@ -627,9 +567,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Iterable}.
-     */
+    /** Assert the size of the given {@link Iterable}. */
     public static void assertIterableSize(
             String iterableName,
             int expectedSize,
@@ -653,9 +591,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Map}.
-     */
+    /** Assert the size of the given {@link Map}. */
     public static void assertSize(String mapName, int expectedSize, Map<?, ?> actualMap) {
         try {
             assertSize(mapName, expectedSize, actualMap.keySet());
@@ -664,9 +600,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Map}.
-     */
+    /** Assert the size of the given {@link Map}. */
     public static void assertSize(int expectedSize, Map<?, ?> actualMap) {
         try {
             assertSize("map", expectedSize, actualMap);
@@ -675,9 +609,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Multimap}.
-     */
+    /** Assert the size of the given {@link Multimap}. */
     public static void assertSize(int expectedSize, Multimap<?, ?> actualMultimap) {
         try {
             assertSize("multimap", expectedSize, actualMultimap);
@@ -686,9 +618,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link Multimap}.
-     */
+    /** Assert the size of the given {@link Multimap}. */
     public static void assertSize(String multimapName, int expectedSize, Multimap<?, ?> actualMultimap) {
         try {
             final int actualSize = actualMultimap.size();
@@ -706,9 +636,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link ImmutableSet}.
-     */
+    /** Assert the size of the given {@link ImmutableSet}. */
     public static void assertSize(int expectedSize, Collection<?> actualImmutableSet) {
         try {
             assertSize("immutable set", expectedSize, actualImmutableSet);
@@ -717,9 +645,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert the size of the given {@link ImmutableSet}.
-     */
+    /** Assert the size of the given {@link ImmutableSet}. */
     public static void assertSize(String immutableSetName, int expectedSize, Collection<?> actualImmutableSet) {
         try {
             final int actualSize = actualImmutableSet.size();
@@ -737,9 +663,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}.
-     */
+    /** Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}. */
     public static void assertContains(CharSequence stringToFind, String stringToSearch) {
         try {
             assertContains("string", stringToFind, stringToSearch);
@@ -748,9 +672,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}.
-     */
+    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}. */
     public static void assertNotContains(CharSequence unexpectedString, String stringToSearch) {
         try {
             assertNotContains("string", unexpectedString, stringToSearch);
@@ -759,9 +681,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}.
-     */
+    /** Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}. */
     public static void assertContains(String stringName, CharSequence stringToFind, String stringToSearch) {
         try {
             Assert.assertNotNull("stringToFind should not be null", stringToFind);
@@ -780,9 +700,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}.
-     */
+    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}. */
     public static void assertNotContains(String stringName, CharSequence unexpectedString, String stringToSearch) {
         try {
             Assert.assertNotNull("unexpectedString should not be null", unexpectedString);
@@ -801,9 +719,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} contains the given item.
-     */
+    /** Assert that the given {@link Collection} contains the given item. */
     public static void assertContains(Object expectedItem, Collection<?> actualCollection) {
         try {
             assertContains("collection", expectedItem, actualCollection);
@@ -812,9 +728,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} contains the given item.
-     */
+    /** Assert that the given {@link Collection} contains the given item. */
     public static void assertContains(
             String collectionName,
             Object expectedItem,
@@ -830,9 +744,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link ImmutableCollection} contains the given item.
-     */
+    /** Assert that the given {@link ImmutableCollection} contains the given item. */
     public static void assertContains(Object expectedItem, ImmutableCollection<?> actualCollection) {
         try {
             assertContains("ImmutableCollection", expectedItem, actualCollection);
@@ -841,9 +753,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link ImmutableCollection} contains the given item.
-     */
+    /** Assert that the given {@link ImmutableCollection} contains the given item. */
     public static void assertContains(
             String collectionName,
             Object expectedItem,
@@ -936,9 +846,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} contains an entry with the given key and value.
-     */
+    /** Assert that the given {@link Multimap} contains an entry with the given key and value. */
     public static <K, V> void assertContainsEntry(
             K expectedKey,
             V expectedValue,
@@ -950,9 +858,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Multimap} contains an entry with the given key and value.
-     */
+    /** Assert that the given {@link Multimap} contains an entry with the given key and value. */
     public static <K, V> void assertContainsEntry(
             String multimapName,
             K expectedKey,
@@ -969,9 +875,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} contains an entry with the given key.
-     */
+    /** Assert that the given {@link Map} contains an entry with the given key. */
     public static void assertContainsKey(Object expectedKey, Map<?, ?> actualMap) {
         try {
             assertContainsKey("map", expectedKey, actualMap);
@@ -980,9 +884,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} contains an entry with the given key.
-     */
+    /** Assert that the given {@link Map} contains an entry with the given key. */
     public static void assertContainsKey(String mapName, Object expectedKey, Map<?, ?> actualMap) {
         try {
             Assert.assertNotNull(mapName, actualMap);
@@ -995,9 +897,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Deny that the given {@link Map} contains an entry with the given key.
-     */
+    /** Deny that the given {@link Map} contains an entry with the given key. */
     public static void denyContainsKey(Object unexpectedKey, Map<?, ?> actualMap) {
         try {
             denyContainsKey("map", unexpectedKey, actualMap);
@@ -1006,9 +906,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Deny that the given {@link Map} contains an entry with the given key.
-     */
+    /** Deny that the given {@link Map} contains an entry with the given key. */
     public static void denyContainsKey(String mapName, Object unexpectedKey, Map<?, ?> actualMap) {
         try {
             Assert.assertNotNull(mapName, actualMap);
@@ -1021,9 +919,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} contains an entry with the given key and value.
-     */
+    /** Assert that the given {@link Map} contains an entry with the given key and value. */
     public static void assertContainsKeyValue(
             Object expectedKey,
             Object expectedValue,
@@ -1035,9 +931,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Map} contains an entry with the given key and value.
-     */
+    /** Assert that the given {@link Map} contains an entry with the given key and value. */
     public static void assertContainsKeyValue(
             String mapName,
             Object expectedKey,
@@ -1065,9 +959,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Collection} does <em>not</em> contain the given item. */
     public static void assertNotContains(Object unexpectedItem, Collection<?> actualCollection) {
         try {
             assertNotContains("collection", unexpectedItem, actualCollection);
@@ -1076,9 +968,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Collection} does <em>not</em> contain the given item. */
     public static void assertNotContains(
             String collectionName,
             Object unexpectedItem,
@@ -1094,9 +984,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Iterable} does <em>not</em> contain the given item. */
     public static void assertNotContains(Object unexpectedItem, Iterable<?> iterable) {
         try {
             assertNotContains(ITERABLE, unexpectedItem, iterable);
@@ -1105,9 +993,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Iterable} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Iterable} does <em>not</em> contain the given item. */
     public static void assertNotContains(
             String collectionName,
             Object unexpectedItem,
@@ -1124,9 +1010,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Collection} does <em>not</em> contain the given item. */
     public static void assertNotContainsKey(Object unexpectedKey, Map<?, ?> actualMap) {
         try {
             assertNotContainsKey("map", unexpectedKey, actualMap);
@@ -1135,9 +1019,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@link Collection} does <em>not</em> contain the given item.
-     */
+    /** Assert that the given {@link Collection} does <em>not</em> contain the given item. */
     public static void assertNotContainsKey(String mapName, Object unexpectedKey, Map<?, ?> actualMap) {
         try {
             assertObjectNotNull(mapName, actualMap);
@@ -1205,9 +1087,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code item} is at the {@code index} in the given {@link List}.
-     */
+    /** Assert that the given {@code item} is at the {@code index} in the given {@link List}. */
     public static void assertItemAtIndex(Object expectedItem, int index, List<?> list) {
         try {
             assertItemAtIndex("list", expectedItem, index, list);
@@ -1216,9 +1096,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code item} is at the {@code index} in the given {@code array}.
-     */
+    /** Assert that the given {@code item} is at the {@code index} in the given {@code array}. */
     public static void assertItemAtIndex(Object expectedItem, int index, Object[] array) {
         try {
             assertItemAtIndex("array", expectedItem, index, array);
@@ -1297,9 +1175,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code item} is at the {@code index} in the given {@link List}.
-     */
+    /** Assert that the given {@code item} is at the {@code index} in the given {@link List}. */
     public static void assertItemAtIndex(
             String listName,
             Object expectedItem,
@@ -1320,9 +1196,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Assert that the given {@code item} is at the {@code index} in the given {@link List}.
-     */
+    /** Assert that the given {@code item} is at the {@code index} in the given {@link List}. */
     public static void assertItemAtIndex(
             String arrayName,
             Object expectedItem,
@@ -1354,9 +1228,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that a value is negative.
-     */
+    /** Asserts that a value is negative. */
     public static void assertNegative(int value) {
         try {
             Assert.assertTrue(value + " is not negative", value < 0);
@@ -1365,9 +1237,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that a value is positive.
-     */
+    /** Asserts that a value is positive. */
     public static void assertPositive(int value) {
         try {
             Assert.assertTrue(value + " is not positive", value > 0);
@@ -1376,9 +1246,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /**
-     * Asserts that a value is positive.
-     */
+    /** Asserts that a value is positive. */
     public static void assertZero(int value) {
         try {
             Assert.assertEquals(0, value);

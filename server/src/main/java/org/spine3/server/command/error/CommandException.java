@@ -65,23 +65,17 @@ public abstract class CommandException extends RuntimeException {
         return ImmutableMap.of(Attribute.COMMAND_TYPE_NAME, value);
     }
 
-    /**
-     * Returns a related command.
-     */
+    /** Returns a related command. */
     public Command getCommand() {
         return command;
     }
 
-    /**
-     * Returns an error occurred.
-     */
+    /** Returns an error occurred. */
     public Error getError() {
         return error;
     }
 
-    /**
-     * Attribute names for command-related business failures.
-     */
+    /** Attribute names for command-related business failures. */
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
     }

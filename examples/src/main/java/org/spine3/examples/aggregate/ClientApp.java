@@ -89,9 +89,7 @@ public class ClientApp {
         }
     };
 
-    /**
-     * Construct the client connecting to server at {@code host:port}.
-     */
+    /** Construct the client connecting to server at {@code host:port}. */
     public ClientApp(String host, int port) {
         commandFactory = CommandFactory.newBuilder()
                             .setActor(newUserId(Identifiers.newUuid()))
@@ -146,9 +144,7 @@ public class ClientApp {
         nonBlockingClient.subscribe(topic, observer);
     }
 
-    /**
-     * Sends requests to the server.
-     */
+    /** Sends requests to the server. */
     public static void main(String[] args) throws InterruptedException {
         final ClientApp client = new ClientApp(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT);
         client.subscribe();
@@ -164,9 +160,7 @@ public class ClientApp {
         client.shutdown();
     }
 
-    /**
-     * Creates several test requests.
-     */
+    /** Creates several test requests. */
     private List<Command> generateRequests() {
         final List<Command> result = newLinkedList();
         for (int i = 0; i < 10; i++) {
@@ -180,6 +174,7 @@ public class ClientApp {
 
     /**
      * Shutdown the connection channel.
+     *
      * @throws InterruptedException if waiting is interrupted.
      */
     private void shutdown() throws InterruptedException {
@@ -187,9 +182,7 @@ public class ClientApp {
         channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
-    /**
-     * Sends a request to the server.
-     */
+    /** Sends a request to the server. */
     private Response post(Command request) {
         Response result = null;
         try {

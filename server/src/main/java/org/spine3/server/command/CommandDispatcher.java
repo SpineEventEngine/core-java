@@ -45,9 +45,7 @@ public interface CommandDispatcher {
      */
     Set<CommandClass> getCommandClasses();
 
-    /**
-     * Dispatches the command to its handler.
-     */
+    /** Dispatches the command to its handler. */
     void dispatch(Command request) throws Exception;
 
 }

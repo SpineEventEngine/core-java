@@ -50,9 +50,7 @@ public class UnsupportedCommandException extends CommandException {
         return result;
     }
 
-    /**
-     * Creates an instance of unsupported command error.
-     */
+    /** Creates an instance of unsupported command error. */
     private static Error unsupportedCommandError(Message commandMessage) {
         final String commandType = commandMessage.getDescriptorForType().getFullName();
         final String errMsg = String.format("Commands of the type `%s` are not supported.", commandType);

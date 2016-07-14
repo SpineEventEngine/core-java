@@ -78,9 +78,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         grpcServer.start();
     }
 
-    /**
-     * Waits for the service to become terminated.
-     */
+    /** Waits for the service to become terminated. */
     public void awaitTermination() throws InterruptedException {
         checkState(grpcServer != null);
         grpcServer.awaitTermination();
@@ -117,9 +115,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         return isShutdown;
     }
 
-    /**
-     * Shuts the service down after completing queued requests.
-     */
+    /** Shuts the service down after completing queued requests. */
     public void shutdown() {
         checkState(grpcServer != null);
         grpcServer.shutdown();

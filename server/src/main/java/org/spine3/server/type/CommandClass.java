@@ -70,9 +70,7 @@ public final class CommandClass extends MessageClass {
         return result;
     }
 
-    /**
-     * Creates immutable set of {@code CommandClass} from the passed set.
-     */
+    /** Creates immutable set of {@code CommandClass} from the passed set. */
     public static ImmutableSet<CommandClass> setOf(Set<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
@@ -81,9 +79,7 @@ public final class CommandClass extends MessageClass {
         return builder.build();
     }
 
-    /**
-     * Creates immutable set of {@code CommandClass} from the passed classes.
-     */
+    /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
     public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();

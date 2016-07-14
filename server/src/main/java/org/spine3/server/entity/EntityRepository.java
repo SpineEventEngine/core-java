@@ -50,9 +50,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         super(boundedContext);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     protected Storage createStorage(StorageFactory factory) {
         final Storage result = factory.createEntityStorage(getEntityClass());
@@ -72,9 +70,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return checkStorage(storage);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void store(E entity) {
         final EntityStorage<I> storage = entityStorage();
@@ -82,9 +78,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         storage.write(entity.getId(), record);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Nullable
     @Override
     public E load(I id) {

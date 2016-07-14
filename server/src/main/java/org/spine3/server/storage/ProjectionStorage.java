@@ -74,8 +74,6 @@ public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStor
     @Nullable
     public abstract Timestamp readLastHandledEventTime();
 
-    /**
-     * Returns an entity storage implementation.
-     */
+    /** Returns an entity storage implementation. */
     public abstract EntityStorage<I> getEntityStorage();
 }

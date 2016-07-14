@@ -45,31 +45,21 @@ import static java.lang.reflect.Modifier.isPublic;
  */
 public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
-    /**
-     * The index of the declaration of the generic type {@code I} in this class.
-     */
+    /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
 
-    /**
-     * The index of the declaration of the generic type {@code E} in this class.
-     */
+    /** The index of the declaration of the generic type {@code E} in this class. */
     private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
 
     protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
-    /**
-     * The {@code BoundedContext} in which this repository works.
-     */
+    /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
 
-    /**
-     * The constructor for creating entity instances.
-     */
+    /** The constructor for creating entity instances. */
     private final Constructor<E> entityConstructor;
 
-    /**
-     * The data storage for this repository.
-     */
+    /** The data storage for this repository. */
     private Storage storage;
 
     /**
@@ -108,24 +98,18 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         return propagate(new NoSuchMethodException(message));
     }
 
-    /**
-     * @return the {@link BoundedContext} in which this repository works
-     */
+    /** Returns the {@link BoundedContext} in which this repository works. */
     protected BoundedContext getBoundedContext() {
         return boundedContext;
     }
 
-    /**
-     * @return the class of IDs used by this repository
-     */
+    /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
         return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
     }
 
-    /**
-     * @return the class of entities managed by this repository
-     */
+    /** Returns the class of entities managed by this repository. */
     @CheckReturnValue
     protected Class<E> getEntityClass() {
         return Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
@@ -169,18 +153,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Nullable
     protected abstract E load(I id);
 
-    /**
-     * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
-     */
+    /** Returns the storage assigned to this repository or {@code null} if the storage is not assigned yet. */
     @CheckReturnValue
     @Nullable
     protected AutoCloseable getStorage() {
         return this.storage;
     }
 
-    /**
-     * @return true if the storage is assigned, false otherwise
-     */
+    /** Returns true if the storage is assigned, false otherwise. */
     public boolean storageAssigned() {
         return this.storage != null;
     }

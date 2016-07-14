@@ -107,9 +107,7 @@ public class TaskImporter implements AutoCloseable {
         storageFactory.close();
     }
 
-    /**
-     * This class prints events to which it is subscribed via {@code System.out}.
-     */
+    /** This class prints events to which it is subscribed via {@code System.out}. */
     private static class EventPrinter extends EventSubscriber implements Closeable  {
 
         @Subscribe

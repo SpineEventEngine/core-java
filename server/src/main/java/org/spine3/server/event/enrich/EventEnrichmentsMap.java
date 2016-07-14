@@ -45,18 +45,14 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      */
     private static final String PROPS_FILE_PATH = "enrichments.properties";
 
-    /**
-     * A separator between event types in the `.properties` file.
-     */
+    /** A separator between event types in the `.properties` file. */
     private static final String EVENT_TYPE_SEPARATOR = ",";
 
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
     private EventEnrichmentsMap() {}
 
-    /**
-     * Returns the immutable map instance.
-     */
+    /** Returns the immutable map instance. */
     /* package */ static ImmutableMultimap<String, String> getInstance() {
         return enrichmentsMap;
     }

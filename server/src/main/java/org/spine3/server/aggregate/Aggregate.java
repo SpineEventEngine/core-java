@@ -108,9 +108,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @Nullable
     private volatile B builder;
 
-    /**
-     * Cached value of the ID in the form of Any instance.
-     */
+    /** Cached value of the ID in the form of Any instance. */
     private final Any idAsAny;
 
     /**
@@ -183,9 +181,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder;
     }
 
-    /**
-     * Updates the aggregate state and closes the update phase of the aggregate.
-     */
+    /** Updates the aggregate state and closes the update phase of the aggregate. */
     private void updateState() {
         @SuppressWarnings("unchecked") // It is safe to assume that correct builder type is passed to aggregate,
          // because otherwise it won't be possible to write the code of applier methods that make sense to the

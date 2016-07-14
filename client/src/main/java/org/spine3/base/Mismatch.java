@@ -29,9 +29,7 @@ import javax.annotation.Nullable;
 import static org.spine3.protobuf.Values.pack;
 
 
-/**
- * Factories for constructing {@link ValueMismatch} instances for different types of attributes.
- */
+/** Factories for constructing {@link ValueMismatch} instances for different types of attributes. */
 public class Mismatch {
 
     private Mismatch() {

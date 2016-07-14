@@ -48,26 +48,18 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  */
 /* package */ class EventMessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
 
-    /**
-     * A parent instance holding this instance and its siblings.
-     */
+    /** A parent instance holding this instance and its siblings. */
     private final EventEnricher enricher;
 
-    /**
-     * A map from source event field class to enrichment functions.
-     */
+    /** A map from source event field class to enrichment functions. */
     @Nullable
     private ImmutableMultimap<Class<?>, EnrichmentFunction> fieldFunctions;
 
-    /**
-     * A map from source event/context field to target enrichment field descriptors.
-     */
+    /** A map from source event/context field to target enrichment field descriptors. */
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-    /**
-     * Creates a new message enricher instance.
-     */
+    /** Creates a new message enricher instance. */
     /* package */ static <S extends Message, T extends Message> EventMessageEnricher<S, T> newInstance(
             EventEnricher enricher,
             Class<S> eventClass,

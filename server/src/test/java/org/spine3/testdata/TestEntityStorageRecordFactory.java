@@ -37,9 +37,7 @@ public class TestEntityStorageRecordFactory {
     private TestEntityStorageRecordFactory() {
     }
 
-    /**
-     * Creates a new record with all fields set.
-     */
+    /**  Creates a new record with all fields set. */
     public static EntityStorageRecord newEntityStorageRecord() {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                 .setState(AnyPacker.pack(newStringValue(newUuid())))

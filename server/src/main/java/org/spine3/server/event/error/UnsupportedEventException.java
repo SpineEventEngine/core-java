@@ -46,9 +46,7 @@ public class UnsupportedEventException extends EventException {
         return result;
     }
 
-    /**
-     * Creates an instance of unsupported event error.
-     */
+    /** Creates an instance of unsupported event error. */
     private static Error unsupportedEventError(Message eventMessage) {
         final String type = eventMessage.getDescriptorForType().getFullName();
         final String errMsg = String.format("Events of the type `%s` are not supported.", type);

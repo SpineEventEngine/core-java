@@ -34,9 +34,7 @@ import org.spine3.server.command.Assign;
 
 import java.util.List;
 
-/**
- * A sample aggregate that can import events passed in the special command.
- */
+/** A sample aggregate that can import events passed in the special command. */
 public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
     public TaskAggregate(TaskId id) {

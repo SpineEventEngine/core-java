@@ -435,9 +435,7 @@ public class AggregateShould {
         }
     }
 
-    /*
-     * Class only for test cases: exception if missing command handler or missing event applier.
-     */
+    /** Class only for test cases: exception if missing command handler or missing event applier. */
     private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
@@ -446,9 +444,7 @@ public class AggregateShould {
             super(id);
         }
 
-        /**
-         * There is no event applier for ProjectCreated event (intentionally).
-         */
+        /** There is no event applier for ProjectCreated event (intentionally). */
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
@@ -506,9 +502,7 @@ public class AggregateShould {
         assertTrue(Timestamps.isLaterThan(afterStart, afterCreate));
     }
 
-    /**
-     * The class to check raising and catching exceptions.
-     */
+    /** The class to check raising and catching exceptions. */
     @SuppressWarnings("unused")
     private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder>  {
 

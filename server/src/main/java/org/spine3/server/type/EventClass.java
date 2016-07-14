@@ -43,6 +43,7 @@ public final class EventClass extends MessageClass {
 
     /**
      * Creates a new instance of the event class.
+     *
      * @param value a value to hold
      * @return new instance
      */
@@ -70,9 +71,7 @@ public final class EventClass extends MessageClass {
         return result;
     }
 
-    /**
-     * Creates immutable set of {@code EventClass} from the passed set.
-     */
+    /** Creates immutable set of {@code EventClass} from the passed set. */
     public static ImmutableSet<EventClass> setOf(Set<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
@@ -81,9 +80,7 @@ public final class EventClass extends MessageClass {
         return builder.build();
     }
 
-    /**
-     * Creates immutable set of {@code EventClass} from the passed classes.
-     */
+    /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
     public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
         final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();

@@ -29,9 +29,7 @@ import static org.spine3.base.Commands.formatCommandTypeAndId;
 import static org.spine3.base.Commands.formatMessageTypeAndId;
 import static org.spine3.server.command.CommandBus.log;
 
-/**
- * Convenience wrapper for logging errors and warnings.
- */
+/** Convenience wrapper for logging errors and warnings. */
 /* package */ class ProblemLog {
     /* package */ void errorDispatching(Exception exception, Command command) {
         final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);

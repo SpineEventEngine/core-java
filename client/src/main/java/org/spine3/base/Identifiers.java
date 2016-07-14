@@ -58,19 +58,13 @@ public class Identifiers {
 
     private Identifiers() {}
 
-    /**
-     * A {@code null} ID string representation.
-     */
+    /** A {@code null} ID string representation. */
     public static final String NULL_ID = "NULL";
 
-    /**
-     * An empty ID string representation.
-     */
+    /** An empty ID string representation. */
     public static final String EMPTY_ID = "EMPTY";
 
-    /**
-     * The suffix of ID fields.
-     */
+    /** The suffix of ID fields. */
     public static final String ID_PROPERTY_SUFFIX = "id";
 
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
@@ -166,10 +160,10 @@ public class Identifiers {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     * <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
-     * <li>For {@code String} — {@link com.google.protobuf.StringValue}
-     * <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
-     * <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
+     *      <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
+     *      <li>For {@code String} — {@link com.google.protobuf.StringValue}
+     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
+     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -259,9 +253,7 @@ public class Identifiers {
         return new IllegalArgumentException("ID of unsupported type encountered: " + id);
     }
 
-    /**
-     * The registry of converters of ID types to string representations.
-     */
+    /** The registry of converters of ID types to string representations. */
     public static class ConverterRegistry {
 
         private final Map<Class<?>, Function<?, String>> entries = newHashMap(

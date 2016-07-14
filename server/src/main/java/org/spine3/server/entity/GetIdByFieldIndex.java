@@ -64,9 +64,7 @@ public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
         return id;
     }
 
-    /**
-     * Accessor object for entity ID fields.
-     */
+    /** Accessor object for entity ID fields. */
     private static class EntityIdField extends MessageField {
 
         private EntityIdField(int index) {

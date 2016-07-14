@@ -27,9 +27,7 @@ package org.spine3.client;
  */
 public interface ConnectionConstants {
 
-    /**
-     * The default port number on which a client server runs.
-     */
+    /** The default port number on which a client server runs. */
     int DEFAULT_CLIENT_SERVICE_PORT = 50051;
 
 }

@@ -63,8 +63,8 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
-         * {@link CommandId} instance.
+         * Creates a new {@link Command} with the given command message, userId and timestamp using default
+         * {@link Command} instance.
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
@@ -72,61 +72,38 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             return result;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
         public static org.spine3.base.Command addTask() {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final AddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
-         */
+        /** Creates a new {@link Command} with default properties (current time etc). */
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
-         */
         public static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given delay.
-         */
         public static org.spine3.base.Command createProject(Duration delay) {
             final org.spine3.base.Command cmd = Commands.create(CommandMessage.createProject(), createCommandContext(delay));
             return cmd;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
         public static org.spine3.base.Command startProject() {
             return startProject(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
         public static org.spine3.base.Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
             final StartProject command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
@@ -138,9 +115,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         private CommandMessage() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.test.command.AddTask} command with the given project ID.
-         */
         public static AddTask addTask(String projectId) {
             return AddTask.newBuilder()
                           .setProjectId(
@@ -150,36 +124,24 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                           .build();
         }
 
-        /**
-         * Creates a new {@link org.spine3.test.command.AddTask} command with the given project ID.
-         */
         public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
                           .setProjectId(id)
                           .build();
         }
 
-        /**
-         * Creates a new {@link org.spine3.test.command.CreateProject} command with the generated project ID.
-         */
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
         }
 
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        /**
-         * Creates {@link org.spine3.test.reflect.command.CreateProject} command for the passed project ID.
-         */
         public static CreateProject createProject(String projectId) {
             return CreateProject.newBuilder()
                                 .setProjectId(
@@ -189,9 +151,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                 .build();
         }
 
-        /**
-         * Creates a new {@link StartProject} command with the given project ID.
-         */
         public static StartProject startProject(ProjectId id) {
             return StartProject.newBuilder()
                                .setProjectId(id)

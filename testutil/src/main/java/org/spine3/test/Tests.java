@@ -97,9 +97,7 @@ public class Tests {
         return nullRef;
     }
 
-    /**
-     * The provider of current time, which is always the same.
-     */
+    /** The provider of current time, which is always the same. */
     public static class FrozenMadHatterParty implements Timestamps.Provider {
         private final Timestamp frozenTime;
 
@@ -107,9 +105,7 @@ public class Tests {
             this.frozenTime = frozenTime;
         }
 
-        /**
-         * @return the value passed to the constructor
-         */
+        /** Returns the value passed to the constructor. */
         @Override
         public Timestamp getCurrentTime() {
             return frozenTime;

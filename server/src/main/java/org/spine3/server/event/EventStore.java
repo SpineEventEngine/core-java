@@ -69,7 +69,7 @@ public abstract class EventStore implements AutoCloseable {
      * Constructs an instance with the passed executor for returning streams.
      *
      * @param streamExecutor the executor for updating new subscribers
-     * @param logger debug logger instance
+     * @param logger         debug logger instance
      */
     protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
         this.streamExecutor = streamExecutor;
@@ -125,7 +125,8 @@ public abstract class EventStore implements AutoCloseable {
     }
 
     /**
-     * Abstract builder base for building
+     * Abstract builder base for building.
+     *
      * @param <T> the type of the builder product
      */
     private abstract static class AbstractBuilder<T> {
@@ -176,6 +177,7 @@ public abstract class EventStore implements AutoCloseable {
 
         /**
          * Sets default logger.
+         *
          * @see EventStore#log()
          */
         public AbstractBuilder withDefaultLogger() {
@@ -184,9 +186,7 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    /**
-     * Builder for creating new local {@code EventStore} instance.
-     */
+    /** Builder for creating new local {@code EventStore} instance. */
     public static class Builder extends AbstractBuilder<EventStore> {
 
         @Override
@@ -221,9 +221,7 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    /**
-     * A locally running {@code EventStore} implementation.
-     */
+    /** A locally running {@code EventStore} implementation. */
     private static class LocalImpl extends EventStore {
 
         private final EventStorage storage;
@@ -295,9 +293,7 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    /**
-     * gRPC service over the locally running implementation.
-     */
+    /** gRPC service over the locally running implementation. */
     private static class GrpcService implements EventStoreGrpc.EventStore {
 
         private final LocalImpl eventStore;
@@ -363,9 +359,7 @@ public abstract class EventStore implements AutoCloseable {
         private final Logger value = LoggerFactory.getLogger(EventStore.class);
     }
 
-    /**
-     * @return default logger of {EventStore} class.
-     */
+    /** Returns default logger of {EventStore} class. */
     public static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

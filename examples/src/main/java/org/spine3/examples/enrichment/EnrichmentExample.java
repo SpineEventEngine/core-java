@@ -35,9 +35,7 @@ import org.spine3.users.UserId;
 import static org.spine3.base.Events.createImportEvent;
 import static org.spine3.protobuf.Values.newStringValue;
 
-/**
- * This example demonstrates how to create an {@code EventBus} with {@link EventEnricher} instance.
- */
+/** This example demonstrates how to create an {@code EventBus} with {@link EventEnricher} instance. */
 @SuppressWarnings("CallToPrintStackTrace") // Is OK for this example.
 public class EnrichmentExample implements AutoCloseable {
 

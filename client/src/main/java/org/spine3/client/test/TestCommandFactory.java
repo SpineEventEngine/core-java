@@ -55,9 +55,7 @@ public class TestCommandFactory extends CommandFactory {
         super(newBuilder().setActor(actor).setZoneOffset(zoneOffset));
     }
 
-    /**
-     * Creates new command with the passed timestamp.
-     */
+    /** Creates new command with the passed timestamp. */
     public Command create(Message message, Timestamp timestamp) {
         final Command.Builder command = create(message).toBuilder();
         final CommandContext.Builder context = command.getContext().toBuilder();

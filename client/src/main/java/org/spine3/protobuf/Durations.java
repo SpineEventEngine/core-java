@@ -120,16 +120,12 @@ public class Durations {
         return ofSeconds(seconds);
     }
 
-    /**
-     * This method allows for more compact code of creation of {@code Duration} instance with minutes.
-     */
+    /** This method allows for more compact code of creation of {@code Duration} instance with minutes. */
     public static Duration minutes(long minutes) {
         return ofMinutes(minutes);
     }
 
-    /**
-     * This method allows for more compact code of creation of {@code Duration} instance with hours.
-     */
+    /** This method allows for more compact code of creation of {@code Duration} instance with hours. */
     public static Duration hours(long hours) {
         return ofHours(hours);
     }
@@ -159,9 +155,7 @@ public class Durations {
         return result;
     }
 
-    /**
-     * Subtract a duration from another.
-     */
+    /** Subtract a duration from another. */
     public static Duration subtract(Duration d1, Duration d2) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
@@ -169,17 +163,13 @@ public class Durations {
         return result;
     }
 
-    /**
-     * This method allows for more compact code of creation of {@code Duration} instance with hours and minutes.
-     */
+    /** This method allows for more compact code of creation of {@code Duration} instance with hours and minutes. */
     public static Duration hoursAndMinutes(long hours, long minutes) {
         final Duration result = add(hours(hours), minutes(minutes));
         return result;
     }
 
-    /**
-     * Convert a duration to the number of nanoseconds.
-     */
+    /** Convert a duration to the number of nanoseconds. */
     public static long toNanos(Duration duration) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
@@ -187,9 +177,7 @@ public class Durations {
         return result;
     }
 
-    /**
-     * Convert a duration to the number of seconds.
-     */
+    /** Convert a duration to the number of seconds. */
     public static long toSeconds(Duration duration) {
         final long millis = TimeUtil.toMillis(duration);
         final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
@@ -235,18 +223,14 @@ public class Durations {
         return result;
     }
 
-    /**
-     * @return {@code true} of the passed value is greater or equal zero, {@code false} otherwise
-     */
+    /** Returns {@code true} of the passed value is greater or equal zero, {@code false} otherwise. */
     public static boolean isPositiveOrZero(Duration value) {
         final long millis = toMillis(value);
         final boolean result = millis >= 0;
         return result;
     }
 
-    /**
-     * @return {@code true} if the passed value is greater than zero, {@code false} otherwise
-     */
+    /** Returns {@code true} if the passed value is greater than zero, {@code false} otherwise. */
     public static boolean isPositive(DurationOrBuilder value) {
         final boolean secondsPositive = value.getSeconds() > 0;
         final boolean nanosPositive = value.getNanos() > 0;
@@ -255,9 +239,7 @@ public class Durations {
 
     }
 
-    /**
-     * @return {@code true} if the passed value is zero, {@code false} otherwise
-     */
+    /** Returns {@code true} if the passed value is zero, {@code false} otherwise. */
     public static boolean isZero(DurationOrBuilder value) {
         final boolean noSeconds = value.getSeconds() == 0;
         final boolean noNanos = value.getNanos() == 0;
@@ -265,9 +247,7 @@ public class Durations {
         return result;
     }
 
-    /**
-     * @return {@code true} if the first argument is greater than the second, {@code false} otherwise
-     */
+    /** Returns {@code true} if the first argument is greater than the second, {@code false} otherwise. */
     public static boolean isGreaterThan(Duration value, Duration another) {
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
@@ -275,9 +255,7 @@ public class Durations {
         return isGreater;
     }
 
-    /**
-     * @return {@code true} if the first argument is less than the second, {@code false} otherwise
-     */
+    /** Returns {@code true} if the first argument is less than the second, {@code false} otherwise. */
     public static boolean isLessThan(Duration value, Duration another) {
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
@@ -285,9 +263,7 @@ public class Durations {
         return isLessThan;
     }
 
-    /**
-     * Numerically compare passed durations as nanosecond values.
-     */
+    /** Numerically compare passed durations as nanosecond values. */
     public static int compare(Duration d1, Duration d2) {
         final long nanos = toNanos(d1);
         final long otherNanos = toNanos(d2);
@@ -295,9 +271,7 @@ public class Durations {
         return result;
     }
 
-    /**
-     * @return {@code true} if the passed duration is negative, {@code false} otherwise
-     */
+    /** Returns {@code true} if the passed duration is negative, {@code false} otherwise. */
     public static boolean isNegative(Duration value) {
         final long nanos = toNanos(value);
         final boolean isNegative = nanos < 0;

@@ -146,9 +146,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         }
     }
 
-    /**
-     * Returns an immutable list of the field values.
-     */
+    /** Returns an immutable list of the field values. */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable list
     protected ImmutableList<V> getValues() {
         return values;
@@ -204,9 +202,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         return result;
     }
 
-    /**
-     * Returns a path to the current field.
-     */
+    /** Returns a path to the current field. */
     protected FieldPath getFieldPath() {
         return fieldPath;
     }

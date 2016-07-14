@@ -56,9 +56,7 @@ import static org.spine3.validate.Validate.*;
  */
 public class Commands {
 
-    /**
-     * A suffix which the {@code .proto} file containing commands must have in its name.
-     */
+    /** A suffix which the {@code .proto} file containing commands must have in its name. */
     public static final String FILE_NAME_SUFFIX = "commands";
 
     private static final char FILE_PATH_SEPARATOR = '/';
@@ -129,25 +127,19 @@ public class Commands {
         return request.build();
     }
 
-    /**
-     * Extracts the message from the passed {@code Command} instance.
-     */
+    /** Extracts the message from the passed {@code Command} instance. */
     public static Message getMessage(Command command) {
         final Message result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 
-    /**
-     * Extracts a command ID from the passed {@code Command} instance.
-     */
+    /** Extracts a command ID from the passed {@code Command} instance. */
     public static CommandId getId(Command command) {
         final CommandId id = command.getContext().getCommandId();
         return id;
     }
 
-    /**
-     * Creates a predicate for filtering commands created after the passed timestamp.
-     */
+    /** Creates a predicate for filtering commands created after the passed timestamp. */
     public static Predicate<Command> wereAfter(final Timestamp from) {
         return new Predicate<Command>() {
             @Override
@@ -159,9 +151,7 @@ public class Commands {
         };
     }
 
-    /**
-     * Creates a predicate for filtering commands created withing given timerange.
-     */
+    /** Creates a predicate for filtering commands created withing given timerange. */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
         return new Predicate<Command>() {
             @Override

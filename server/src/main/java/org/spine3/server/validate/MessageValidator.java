@@ -42,9 +42,7 @@ public class MessageValidator {
 
     private final FieldPath rootFieldPath;
 
-    /**
-     * Creates a new validator instance.
-     */
+    /** Creates a new validator instance. */
     public static MessageValidator newInstance() {
         return new MessageValidator(FieldPath.getDefaultInstance());
     }

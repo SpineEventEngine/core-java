@@ -39,9 +39,7 @@ public abstract class MessageClass {
         this.value = value;
     }
 
-    /**
-     * @return value of the object
-     */
+    /** Returns value of the object. */
     public Class<? extends Message> value() {
         return this.value;
     }
@@ -51,24 +49,18 @@ public abstract class MessageClass {
         return String.valueOf(value);
     }
 
-    /**
-     * Obtains the {@code ClassName} for this message class.
-     */
+    /** Obtains the {@code ClassName} for this message class. */
     public ClassName getClassName() {
         return ClassName.of(value());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         return Objects.hash(value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) {

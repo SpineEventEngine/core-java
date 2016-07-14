@@ -52,9 +52,7 @@ public class Events {
     private Events() {
     }
 
-    /**
-     * Compares two events by their timestamps.
-     */
+    /** Compares two events by their timestamps. */
     public static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
         @Override
         public int compare(Event o1, Event o2) {
@@ -64,9 +62,7 @@ public class Events {
         }
     };
 
-    /**
-     * Generates a new random UUID-based {@code EventId}.
-     */
+    /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
         final String value = UUID.randomUUID().toString();
         return EventId.newBuilder().setUuid(value).build();
@@ -81,25 +77,19 @@ public class Events {
         Collections.sort(events, EVENT_TIMESTAMP_COMPARATOR);
     }
 
-    /**
-     * Obtains the timestamp of the event.
-     */
+    /** Obtains the timestamp of the event. */
     public static Timestamp getTimestamp(Event event) {
         final Timestamp result = event.getContext().getTimestamp();
         return result;
     }
 
-    /**
-     * Creates a new {@code Event} instance with the passed event message and context.
-     */
+    /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
         return createEvent(AnyPacker.pack(event), context);
     }
 
-    /**
-     * Creates a new {@code Event} instance with the passed event message wrapped to {@link Any} and context.
-     */
+    /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()
@@ -182,9 +172,7 @@ public class Events {
         return builder.build();
     }
 
-    /**
-     * The predicate to filter event records after some point in time.
-     */
+    /** The predicate to filter event records after some point in time. */
     public static class IsAfter implements Predicate<Event> {
 
         private final Timestamp timestamp;
@@ -204,9 +192,7 @@ public class Events {
         }
     }
 
-    /**
-     * The predicate to filter event records before some point in time.
-     */
+    /** The predicate to filter event records before some point in time. */
     public static class IsBefore implements Predicate<Event> {
 
         private final Timestamp timestamp;
@@ -227,9 +213,7 @@ public class Events {
         }
     }
 
-    /**
-     * The predicate to filter event records within a given time range.
-     */
+    /** The predicate to filter event records within a given time range. */
     public static class IsBetween implements Predicate<Event> {
 
         private final Timestamp start;
@@ -255,9 +239,7 @@ public class Events {
         }
     }
 
-    /**
-     * Verifies if the enrichment is not disabled in the passed event.
-     */
+    /** Verifies if the enrichment is not disabled in the passed event. */
     public static boolean isEnrichmentEnabled(Event event) {
         final EventContext context = event.getContext();
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();

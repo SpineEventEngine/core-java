@@ -96,9 +96,7 @@ public class MethodMap<H extends HandlerMethod> {
         return result;
     }
 
-    /**
-     * @return {@code true} if the map is empty, {@code false} otherwise
-     */
+    /** Returns {@code true} if the map is empty, {@code false} otherwise. */
     @CheckReturnValue
     public boolean isEmpty() {
         return map.isEmpty();

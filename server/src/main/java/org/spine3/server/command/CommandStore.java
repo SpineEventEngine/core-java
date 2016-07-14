@@ -164,16 +164,13 @@ public class CommandStore implements AutoCloseable {
         storage.close();
     }
 
-    /**
-     * @return true if the store is open, false otherwise
-     */
+    /** Returns true if the store is open, false otherwise */
     public boolean isOpen() {
         final boolean isOpened = storage.isOpen();
         return isOpened;
     }
 
-    /**
-     * @return true if the store is closed, false otherwise
+    /** Returns true if the store is closed, false otherwise
      */
     public boolean isClosed() {
         final boolean isClosed = !isOpen();

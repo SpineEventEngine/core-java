@@ -95,9 +95,7 @@ public class BoundedContextShould {
         boundedContext.close();
     }
 
-    /**
-     * Registers all test repositories, handlers etc.
-     */
+    /** Registers all test repositories, handlers etc. */
     private void registerAll() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());

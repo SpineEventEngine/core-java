@@ -47,34 +47,24 @@ import static org.spine3.server.storage.EventStorage.toEventList;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
 
-    /**
-     * Small positive delta in seconds or nanoseconds.
-     */
+    /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
 
-    /**
-     * Small negative delta in seconds or nanoseconds.
-     */
+    /** Small negative delta in seconds or nanoseconds. */
     private static final int NEGATIVE_DELTA = -POSITIVE_DELTA;
 
     private static final int ZERO = 0;
 
-    /**
-     * The point in time when the first event happened.
-     */
+    /** The point in time when the first event happened. */
     private Timestamp time1;
     private EventStorageRecord record1;
 
-    /**
-     * The point in time when the second event happened.
-     */
+    /** The point in time when the second event happened. */
     @SuppressWarnings("FieldCanBeLocal") // to be consistent
     private Timestamp time2;
     private EventStorageRecord record2;
 
-    /**
-     * The point in time when the third event happened.
-     */
+    /** The point in time when the third event happened. */
     private Timestamp time3;
     private EventStorageRecord record3;
 
@@ -167,9 +157,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertEquals(expected, newArrayList(actual));
     }
 
-    /**
+    /*
      * Find events which happened AFTER a point in time tests.
-     */
+     *************************************************************/
 
     @Test
     public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_BIGGER() {
@@ -241,9 +231,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertFalse(iterator.hasNext());
     }
 
-    /**
+    /*
      * Find events which happened BEFORE a point in time tests.
-     */
+     ***********************************************************/
 
     @Test
     public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_LESS() {
@@ -314,6 +304,10 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Iterator<Event> iterator = storage.iterator(query);
         assertFalse(iterator.hasNext());
     }
+
+    /*
+     * Find events which happened between two points in time, etc.
+     *************************************************************/
 
     @Test
     public void find_events_which_happened_between_two_points_in_time() {

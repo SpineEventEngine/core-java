@@ -96,9 +96,7 @@ public class EventBusShould {
         eventBus.subscribe(new EventSubscriber() {});
     }
 
-    /**
-     * A simple subscriber class used in tests below.
-     */
+    /** A simple subscriber class used in tests below. */
     private static class ProjectCreatedSubscriber extends EventSubscriber {
 
         private boolean methodCalled = false;
@@ -311,9 +309,7 @@ public class EventBusShould {
         }
     }
 
-    /**
-     * The subscriber which throws exception from the subscriber method.
-     */
+    /** The subscriber which throws exception from the subscriber method. */
     private static class FaultySubscriber extends EventSubscriber {
 
         private boolean methodCalled = false;
@@ -330,9 +326,7 @@ public class EventBusShould {
         }
     }
 
-    /**
-     * A simple dispatcher class, which only dispatch and does not have own event subscribing methods.
-     */
+    /** A simple dispatcher class, which only dispatch and does not have own event subscribing methods. */
     private static class BareDispatcher implements EventDispatcher {
 
         private boolean dispatchCalled = false;

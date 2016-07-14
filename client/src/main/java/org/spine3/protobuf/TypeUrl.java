@@ -172,9 +172,7 @@ public final class TypeUrl extends StringTypeValue {
         return typeUrl;
     }
 
-    /**
-     * Obtains the type URL for the passed message class.
-     */
+    /** Obtains the type URL for the passed message class. */
     public static TypeUrl of(Class<? extends Message> clazz) {
         final Message defaultInstance = com.google.protobuf.Internal.getDefaultInstance(clazz);
         final TypeUrl result = of(defaultInstance);

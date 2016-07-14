@@ -56,16 +56,12 @@ public class IntegrationEventBus {
 
     private StreamObserver<Response> responseObserver = new DefaultResponseObserver();
 
-    /**
-     * Returns an event bus instance.
-     */
+    /** Returns an event bus instance. */
     public static IntegrationEventBus getInstance() {
         return instance();
     }
 
-    /**
-     * Sets a response observer used in {@link IntegrationEventSubscriber#notify(IntegrationEvent, StreamObserver)}.
-     */
+    /** Sets a response observer used in {@link IntegrationEventSubscriber#notify(IntegrationEvent, StreamObserver)}. */
     public void setResponseObserver(StreamObserver<Response> responseObserver) {
         this.responseObserver = responseObserver;
     }
