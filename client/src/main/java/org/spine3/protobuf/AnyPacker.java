@@ -21,14 +21,13 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.protobuf.Messages.*;
 
 /**
  * Utilities for working with {@link Any}.
@@ -42,28 +41,13 @@ public class AnyPacker {
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
      *
-     * @param message message that should be put inside the {@link Any} instance.
-     * @return the instance of {@link Any} object that wraps given message.
+     * @param message message that should be put inside the {@link Any} instance
+     * @return the instance of {@link Any} object that wraps given message
      */
     public static Any pack(Message message) {
-        final Any result = Any.pack(message);
-        return result;
-    }
-
-    /**
-     * Creates a new instance of {@link Any} with the message represented by its byte
-     * content and the passed type.
-     *
-     * @param type the type of the message to be wrapped into {@code Any}
-     * @param value the byte content of the message
-     * @return new {@code Any} instance
-     */
-    public static Any pack(TypeName type, ByteString value) {
-        final String typeUrl = type.toTypeUrl();
-        final Any result = Any.newBuilder()
-                .setValue(value)
-                .setTypeUrl(typeUrl)
-                .build();
+        final TypeUrl typeUrl = TypeUrl.of(message.getDescriptorForType());
+        final String typeUrlPrefix = typeUrl.getPrefix();
+        final Any result = Any.pack(message, typeUrlPrefix);
         return result;
     }
 
@@ -81,21 +65,11 @@ public class AnyPacker {
      */
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
-        String typeStr = "";
+        final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
+        final Class<T> messageClass = toMessageClass(typeUrl);
         try {
-            final TypeName typeName = TypeName.ofEnclosed(any);
-            typeStr = typeName.value();
-            final Class<T> messageClass = Messages.toMessageClass(typeName);
             final T result = any.unpack(messageClass);
             return result;
-        } catch (RuntimeException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof ClassNotFoundException) {
-                // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw new UnknownTypeException(typeStr, cause);
-            } else {
-                throw e;
-            }
         } catch (InvalidProtocolBufferException e) {
             throw propagate(e);
         }

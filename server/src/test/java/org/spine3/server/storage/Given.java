@@ -37,7 +37,7 @@ import org.spine3.test.storage.command.StartProject;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.test.storage.event.ProjectStarted;
 import org.spine3.test.storage.event.TaskAdded;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.UserId;
 
 import java.util.List;
@@ -353,8 +353,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(time)
                             .setEventId("project_created")
-                            .setEventType(TypeName.of(ProjectCreated.getDescriptor())
-                                                  .value())
+                            .setEventType(TypeUrl.of(ProjectCreated.getDescriptor())
+                                                 .getTypeName())
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, time));
             return builder.build();
@@ -368,8 +368,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(when)
                             .setEventId("project_created_" + when.getSeconds())
-                            .setEventType(TypeName.of(ProjectCreated.getDescriptor())
-                                                  .value())
+                            .setEventType(TypeUrl.of(ProjectCreated.getDescriptor())
+                                                 .getTypeName())
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -383,8 +383,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.taskAddedAny())
                             .setTimestamp(when)
                             .setEventId("task_added_" + when.getSeconds())
-                            .setEventType(TypeName.of(TaskAdded.getDescriptor())
-                                                  .value())
+                            .setEventType(TypeUrl.of(TaskAdded.getDescriptor())
+                                                 .getTypeName())
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -398,8 +398,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectStartedAny())
                             .setTimestamp(when)
                             .setEventId("project_started_" + when.getSeconds())
-                            .setEventType(TypeName.of(ProjectStarted.getDescriptor())
-                                                  .value())
+                            .setEventType(TypeUrl.of(ProjectStarted.getDescriptor())
+                                                 .getTypeName())
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();

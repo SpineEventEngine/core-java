@@ -21,61 +21,66 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.TypeUrl.*;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class AnyPackerShould {
-    private final UserId id = newUserId(newUuid());
-    private final Any idAny = Any.pack(id);
+
+    private final StringValue googleMsg = newStringValue(newUuid());
+    private final UserId spineMsg = newUserId(newUuid());
 
     @Test
-    public void convert_id_to_Any() {
-        final Any test = AnyPacker.pack(id);
-        assertEquals(idAny, test);
+    public void pack_spine_message_to_Any() {
+        final Any actual = AnyPacker.pack(spineMsg);
+        final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, UserId.getDescriptor().getFullName());
+
+        assertEquals(Any.pack(spineMsg).getValue(), actual.getValue());
+        assertEquals(expectedUrl, actual.getTypeUrl());
     }
 
     @Test
-    public void convert_ByteString_to_Any() {
-        final StringValue message = newStringValue(newUuid());
-        final ByteString byteString = message.toByteString();
+    public void unpack_spine_message_from_Any() {
+        final Any any = AnyPacker.pack(spineMsg);
 
-        assertEquals(Any.pack(message), AnyPacker.pack(TypeName.of(message), byteString));
+        final UserId actual = AnyPacker.unpack(any);
+
+        assertEquals(spineMsg, actual);
     }
 
     @Test
-    public void convert_from_Any_to_id() {
-        final UserId test = unpack(idAny);
-        assertEquals(id, test);
-    }
+    public void pack_google_message_to_Any() {
+        final Any expected = Any.pack(googleMsg);
 
-    @Test
-    public void convert_from_Any_to_protobuf_class() {
-        final StringValue expected = newStringValue(newUuid());
-        final Any packedValue = AnyPacker.pack(expected);
-        final Message actual = unpack(packedValue);
+        final Any actual = AnyPacker.pack(googleMsg);
+
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void unpack_google_message_from_Any() {
+        final Any any = Any.pack(googleMsg);
+
+        final StringValue actual = AnyPacker.unpack(any);
+
+        assertEquals(googleMsg, actual);
+    }
+
     @Test(expected = NullPointerException.class)
-    public void fail_on_attempt_to_convert_null_id() {
+    public void fail_on_attempt_to_pack_null() {
         AnyPacker.pack(Tests.<Message>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
-    public void fail_on_attempt_to_convert_from_null_Any() {
-        unpack(Tests.<Any>nullRef());
+    public void fail_on_attempt_to_unpack_null() {
+        AnyPacker.unpack(Tests.<Any>nullRef());
     }
-
-
 }

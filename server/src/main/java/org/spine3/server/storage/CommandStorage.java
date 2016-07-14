@@ -36,7 +36,7 @@ import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -168,7 +168,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final String commandIdString = idToString(commandId);
 
         final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeName.of(commandMessage).nameOnly();
+        final String commandType = TypeUrl.of(commandMessage).getSimpleName();
 
         final Optional targetIdOptional = GetTargetIdFromCommand.asOptional(commandMessage);
         final String targetIdString;

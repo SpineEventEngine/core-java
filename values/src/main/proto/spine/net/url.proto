@@ -2,10 +2,13 @@ syntax = "proto3";
 
 package spine.net;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_package = "org.spine3.net";
 option java_outer_classname = "UrlProto";
+
+import "spine/annotations.proto";
 
 // Protobuf definition for URL.
 //
@@ -23,7 +26,6 @@ message Url {
     // Using this type makes it easier to operate concrete URL attributes.
     // Please see https://tools.ietf.org/html/rfc3986.
     message Record {
-
         // Application layer protocol
         Protocol protocol = 1;
 
@@ -89,4 +91,3 @@ message Url {
         }
     }
 }
-

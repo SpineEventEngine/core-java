@@ -21,11 +21,13 @@ syntax = "proto3";
 
 package spine.users;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "TenantIdProto";
 option java_package = "org.spine3.users";
 
+import "spine/annotations.proto";
 import "spine/net/internet_domain.proto";
 import "spine/net/email_address.proto";
 

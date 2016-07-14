@@ -59,7 +59,7 @@ public class EventEnricherShould {
 
     @Before
     public void setUp() {
-        this.enricher = Given.Enrichment.newEventEnricher();
+        enricher = Given.Enrichment.newEventEnricher();
         boundedContext = BoundedContextTestStubs.create(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();

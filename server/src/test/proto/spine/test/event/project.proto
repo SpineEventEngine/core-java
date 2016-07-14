@@ -21,9 +21,11 @@ syntax = "proto3";
 
 package spine.test.event;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.event";
 option java_multiple_files = true;
 
+import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/test/event/task.proto";
 

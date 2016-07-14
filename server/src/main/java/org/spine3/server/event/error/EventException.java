@@ -25,7 +25,7 @@ import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -63,7 +63,7 @@ public abstract class EventException extends RuntimeException {
      * @param eventMessage an event message to get the type from
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
-        final String type = TypeName.of(eventMessage).value();
+        final String type = TypeUrl.of(eventMessage).getTypeName();
         final Value value = Value.newBuilder()
                                  .setStringValue(type)
                                  .build();

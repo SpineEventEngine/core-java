@@ -21,11 +21,13 @@ syntax = "proto3";
 
 package spine_examples.importado;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.examples.importado";
 option java_outer_classname = "TaskProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+import "spine/annotations.proto";
 import "spine/validate.proto";
 import "spine/users/user_id.proto";
 
@@ -34,9 +36,6 @@ message TaskId {
 }
 
 message Task {
-    // Declare that this message is the state of the aggregate.
-    option (state_of) = AGGREGATE;
-
     // A task must have a non-default ID.
     TaskId id = 1 [(required).value = true];
 

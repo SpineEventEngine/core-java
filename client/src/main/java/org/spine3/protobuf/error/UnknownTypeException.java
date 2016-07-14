@@ -21,31 +21,31 @@ package org.spine3.protobuf.error;
 
 /**
  * Exception that is thrown when unsupported message is obtained
- * or in case there is no class for given Protobuf message.
+ * or in case when there is no class for given Protobuf message.
  *
  * @author Mikhail Melnik
  */
 public class UnknownTypeException extends RuntimeException {
 
-    private static final String ERR_MSG = "No Java class found for message type: ";
+    private static final String ERR_MSG = "No Java class found for the Protobuf message of type: ";
 
     /**
      * Creates a new instance.
      *
-     * @param typeUrl the unknown type URL
+     * @param typeName the unknown type
      */
-    public UnknownTypeException(String typeUrl) {
-        super(ERR_MSG + typeUrl);
+    public UnknownTypeException(String typeName) {
+        super(ERR_MSG + typeName);
     }
 
     /**
      * Creates a new instance.
      *
-     * @param typeUrl the unknown type URL
+     * @param typeName the unknown type
      * @param cause the exception cause
      */
-    public UnknownTypeException(String typeUrl, Throwable cause) {
-        super(ERR_MSG + typeUrl, cause);
+    public UnknownTypeException(String typeName, Throwable cause) {
+        super(ERR_MSG + typeName, cause);
     }
 
     private static final long serialVersionUID = 0L;

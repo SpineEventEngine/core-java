@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -292,18 +292,15 @@ public class Events {
         if (!value.isPresent()) {
             return Optional.absent();
         }
-
         final Enrichments enrichments = value.get();
-        final TypeName typeName = TypeName.of(enrichmentClass);
-
+        final String typeName = TypeUrl.of(enrichmentClass)
+                                       .getTypeName();
         final Any any = enrichments.getMap()
-                                   .get(typeName.value());
+                                   .get(typeName);
         if (any == null) {
             return Optional.absent();
         }
-
         final E result = unpack(enrichmentClass, any);
-
         return Optional.fromNullable(result);
     }
 

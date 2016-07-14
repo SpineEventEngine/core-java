@@ -21,12 +21,12 @@ syntax = "proto3";
 
 package spine.server.storage;
 
+option (type_url_prefix) = "type.spine3.org";
+option (SPI_all) = true;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EntityStorageProto";
 option java_package = "org.spine3.server.storage";
-
-option (SPI_all) = true;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";

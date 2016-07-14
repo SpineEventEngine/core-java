@@ -21,16 +21,18 @@ syntax = "proto3";
 
 package spine.time;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "TimeProto";
 option java_package = "org.spine3.time";
 
-import "spine/validate.proto";
-import "spine/time/zone_offset.proto";
-
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+
+import "spine/annotations.proto";
+import "spine/validate.proto";
+import "spine/time/zone_offset.proto";
 
 // Enum representing the 12 months of the year.
 enum MonthOfYear {

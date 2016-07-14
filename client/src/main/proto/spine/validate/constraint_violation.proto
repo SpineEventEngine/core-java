@@ -21,12 +21,15 @@ syntax = "proto3";
 
 package spine.validate;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "ConstraintViolationProto";
 option java_package = "org.spine3.validate";
 
 import "google/protobuf/any.proto";
+
+import "spine/annotations.proto";
 import "spine/base/field_path.proto";
 
 // A validation constraint violation for a message field.

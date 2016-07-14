@@ -23,11 +23,13 @@ package spine.client;
 
 // We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
 // to hide implementation details from the public API of the framework.
+option (type_url_prefix) = "type.spine3.org";
 option java_package = "org.spine3.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "ClientServiceProto";
 option java_generate_equals_and_hash = true;
 
+import "spine/annotations.proto";
 import "spine/base/command.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";

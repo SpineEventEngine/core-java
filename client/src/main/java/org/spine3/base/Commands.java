@@ -29,10 +29,9 @@ import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.EntityPackages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -226,9 +225,10 @@ public class Commands {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final TypeName commandType = TypeName.of(commandMessage);
+        final String cmdType = TypeUrl.of(commandMessage)
+                                      .getTypeName();
         final String id = idToString(commandId);
-        final String result = String.format(format, commandType, id);
+        final String result = String.format(format, cmdType, id);
         return result;
     }
 
@@ -245,20 +245,6 @@ public class Commands {
         final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
         final boolean isCommandsFile = fileName.endsWith(FILE_NAME_SUFFIX);
         return isCommandsFile;
-    }
-
-    /**
-     * Checks if the file belongs to an entity.
-     *
-     * <p>See {@link EntityPackages} for more info.
-     *
-     * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file belongs to an entity, {@code false} otherwise
-     */
-    public static boolean isEntityFile(FileDescriptor file) {
-        final String protoPackage = file.getPackage();
-        final boolean isCommandForEntity = EntityPackages.contains(protoPackage);
-        return isCommandForEntity;
     }
 
     /**

@@ -31,7 +31,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.grpc.EventStoreGrpc;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +63,7 @@ public class EventReader {
             final Event next = iterator.next();
             final Message event = Events.getMessage(next);
             final EventContext context = next.getContext();
-            log().info("Event: {} ({})", TypeName.of(event), TextFormat.shortDebugString(event));
+            log().info("Event: {} ({})", TypeUrl.of(event).getTypeName(), TextFormat.shortDebugString(event));
             log().info("Context: {}", TextFormat.shortDebugString(context));
         }
     }

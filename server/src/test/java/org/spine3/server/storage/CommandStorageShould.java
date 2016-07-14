@@ -38,7 +38,6 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.CreateProject;
-import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +51,7 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -85,11 +85,11 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Override
     protected CommandStorageRecord newStorageRecord() {
         final Any command = AnyPacker.pack(Given.Command.createProject());
-        final TypeName commandType = TypeName.ofEnclosed(command);
+        final String commandType = ofEnclosed(command).getTypeName();
         final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(getCurrentTime())
-                .setCommandType(commandType.nameOnly())
+                .setCommandType(commandType)
                 .setCommandId(idToString(context.getCommandId()))
                 .setStatus(RECEIVED)
                 .setTargetId(newUuid())
