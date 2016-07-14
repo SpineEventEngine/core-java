@@ -159,9 +159,7 @@ public class KnownTypes {
         return builder.build();
     }
 
-    /**
-     * The helper class for building internal immutable typeUrl-to-JavaClass map.
-     */
+    /** The helper class for building internal immutable typeUrl-to-JavaClass map. */
     private static class Builder {
 
         private final ImmutableBiMap.Builder<TypeUrl, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();
