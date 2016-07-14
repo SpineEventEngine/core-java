@@ -84,7 +84,7 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Supported ID types except {@link Message}s.
      */
-    private static final ImmutableSet<Class<?>> supportedSimpleIdTypes = ImmutableSet.<Class<?>>builder()
+    private static final ImmutableSet<Class<?>> SUPPORTED_SIMPLE_ID_TYPES = ImmutableSet.<Class<?>>builder()
             .add(String.class)
             .add(Long.class)
             .add(Integer.class)
@@ -272,7 +272,7 @@ public abstract class Entity<I, S extends Message> {
      */
     public static <I> void checkIdType(I entityId) {
         final Class<?> idClass = entityId.getClass();
-        if (supportedSimpleIdTypes.contains(idClass)) {
+        if (SUPPORTED_SIMPLE_ID_TYPES.contains(idClass)) {
             return;
         }
         final boolean isMessage = entityId instanceof Message;
@@ -310,7 +310,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     private static String supportedTypesToString() {
-        final List<Class<?>> supportedIdTypes = newLinkedList(supportedSimpleIdTypes);
+        final List<Class<?>> supportedIdTypes = newLinkedList(SUPPORTED_SIMPLE_ID_TYPES);
         supportedIdTypes.add(Message.class); // add Message only for string representation
         final Iterable<String> classStrings = transform(supportedIdTypes, new Function<Class<?>, String>() {
             @Override

@@ -21,11 +21,13 @@ syntax = "proto3";
 
 package spine.users;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "GroupProto";
 option java_package = "org.spine3.users";
 
+import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 
 message GroupId {
@@ -47,5 +49,4 @@ message Group {
     repeated UserId users = 20;
 
     repeated GroupId groups = 21;
-
 }

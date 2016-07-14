@@ -21,11 +21,13 @@ syntax = "proto3";
 
 package spine.test.clientservice.customer;
 
-import "spine/test/clientservice/customer/customer.proto";
-
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.clientservice.customer.event";
 option java_outer_classname = "CustomerEventsProto";
 option java_multiple_files = true;
+
+import "spine/annotations.proto";
+import "spine/test/clientservice/customer/customer.proto";
 
 message CustomerCreated {
     CustomerId customer_id = 1;

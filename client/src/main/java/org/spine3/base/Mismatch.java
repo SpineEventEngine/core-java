@@ -22,11 +22,11 @@ package org.spine3.base;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
 
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.protobuf.Messages.toAny;
 
 
 /**
@@ -170,14 +170,14 @@ public class Mismatch {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
 
         if (expected != null) {
-            builder.setExpected(toAny(expected));
+            builder.setExpected(AnyPacker.pack(expected));
         }
 
         if (actual != null) {
-            builder.setActual(toAny(actual));
+            builder.setActual(AnyPacker.pack(actual));
         }
 
-        final Any requestedAny = toAny(requested);
+        final Any requestedAny = AnyPacker.pack(requested);
 
         builder.setRequested(requestedAny);
         builder.setVersion(version);

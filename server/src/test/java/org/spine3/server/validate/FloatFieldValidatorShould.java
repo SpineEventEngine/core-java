@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FloatValue;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.AnyPacker;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,7 +54,7 @@ public class FloatFieldValidatorShould {
     @Test
     public void wrap_to_any() {
         final Any any = validator.wrap(VALUE);
-        final FloatValue msg = Messages.fromAny(any);
+        final FloatValue msg = AnyPacker.unpack(any);
         assertEquals(VALUE, (Float) msg.getValue());
     }
 }

@@ -21,9 +21,11 @@ syntax = "proto3";
 
 package spine.test.projection;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.projection";
 option java_multiple_files = true;
 
+import "spine/annotations.proto";
 import "spine/test/projection/task.proto";
 
 message ProjectId {

@@ -63,7 +63,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
@@ -161,7 +161,7 @@ public class ProcessManagerRepositoryShould {
         final Event event = argumentCaptor.getValue();
 
         assertNotNull(event);
-        final TaskAdded message = fromAny(event.getMessage());
+        final TaskAdded message = unpack(event.getMessage());
         assertEquals(ID, message.getProjectId());
     }
 

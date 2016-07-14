@@ -55,7 +55,7 @@ public class CommandValidatorShould {
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
-        assertEquals(2, violations.size());
+        assertEquals(3, violations.size());
     }
 
     @Test

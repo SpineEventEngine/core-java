@@ -27,8 +27,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.testdata.TestCommandContextFactory;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.List;
 
@@ -37,8 +38,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.*;
@@ -112,13 +112,13 @@ public class EventsShould {
     private void createEventTest(Message msg) {
         final Event event = createEvent(msg, context);
 
-        assertEquals(msg, fromAny(event.getMessage()));
+        assertEquals(msg, unpack(event.getMessage()));
         assertEquals(context, event.getContext());
     }
 
     @Test
     public void create_event_with_Any() {
-        final Any msg = toAny(stringValue);
+        final Any msg = AnyPacker.pack(stringValue);
         final Event event = createEvent(msg, context);
 
         assertEquals(msg, event.getMessage());
@@ -129,16 +129,16 @@ public class EventsShould {
     public void create_import_event() {
         final Event event = Events.createImportEvent(stringValue, doubleValue);
 
-        assertEquals(stringValue, fromAny(event.getMessage()));
-        assertEquals(doubleValue, fromAny(event.getContext()
-                                               .getProducerId()));
+        assertEquals(stringValue, unpack(event.getMessage()));
+        assertEquals(doubleValue, unpack(event.getContext()
+                                              .getProducerId()));
     }
 
     @Test
     public void create_import_event_context() {
         final EventContext context = Events.createImportEventContext(doubleValue);
 
-        assertEquals(doubleValue, fromAny(context.getProducerId()));
+        assertEquals(doubleValue, unpack(context.getProducerId()));
         assertTrue(isNotDefault(context.getEventId()));
         assertTrue(isNotDefault(context.getTimestamp()));
     }
@@ -165,7 +165,7 @@ public class EventsShould {
 
     @Test
     public void get_producer_from_event_context() {
-        final StringValue msg = fromAny(context.getProducerId());
+        final StringValue msg = unpack(context.getProducerId());
 
         final String id = getProducer(context);
 
@@ -191,8 +191,8 @@ public class EventsShould {
 
     @Test
     public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue)
-                                                                           .value(), stringValue);
+        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(stringValue)
+                                                                          .getTypeName(), stringValue);
 
         final Optional<Enrichments> enrichments = Events.getEnrichments(context);
 
@@ -208,7 +208,7 @@ public class EventsShould {
 
     @Test
     public void return_specific_event_enrichment() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue).value(), stringValue);
+        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(stringValue).getTypeName(), stringValue);
 
         final Optional<? extends StringValue> enrichment = Events.getEnrichment(stringValue.getClass(), context);
 
@@ -224,15 +224,15 @@ public class EventsShould {
 
     @Test
     public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue).value(), boolValue);
+        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(boolValue).getTypeName(), boolValue);
         assertFalse(Events.getEnrichment(StringValue.class, context)
                           .isPresent());
     }
 
-    private static EventContext newEventContextWithEnrichment(String key, Message enrichment) {
+    private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {
         final Enrichments.Builder enrichments = Enrichments.newBuilder();
         enrichments.getMutableMap()
-                   .put(key, toAny(enrichment));
+                   .put(enrichmentKey, AnyPacker.pack(enrichment));
         final EventContext context = newEventContext().toBuilder()
                                                       .setEnrichments(enrichments.build())
                                                       .build();
@@ -249,7 +249,7 @@ public class EventsShould {
         final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
-                                                         .setProducerId(toAny(producerId))
+                                                         .setProducerId(AnyPacker.pack(producerId))
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();

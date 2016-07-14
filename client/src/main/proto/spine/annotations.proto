@@ -29,18 +29,13 @@ syntax = "proto3";
 //      option (spine.base.internal) = true;
 //
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "AnnotationsProto";
 option java_package = "org.spine3.annotations";
 
 import "google/protobuf/descriptor.proto";
-
-// TODO:2016-02-18:alexander.litus: obtain globally unique field numbers for opts from Google.
-//TODO:2016-06-14:alexander.yevsyukov: Most likely we're not going to have that many indexes reserved just for us.
-// We'd better distribute indexes we use in a smart way and continue using the project-dependent indexes.
-// In the unlikely event of receiving global indexes before we go to publicly used versions of the framework, we can
-// change these values.
 
 extend google.protobuf.FieldOptions {
     // Indicates a field which is internal to Spine, not part of the public API, and should not be used by users of the framework.
@@ -76,40 +71,45 @@ extend google.protobuf.FieldOptions {
 extend google.protobuf.MessageOptions {
     // Indicates a file which is internal to Spine, not part of the public API, and should not be used by users of the framework.
     // See more info in `annotations.proto`.
-    bool internal_type = 58004;
+    bool internal_type = 58100;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
     // See more info in `annotations.proto`.
-    bool SPI_type = 58005;
+    bool SPI_type = 58101;
 
     // Indicates a public API that can change at any time, and has no guarantee of API stability and backward-compatibility.
     // See more info in `annotations.proto`.
-    bool experimental_type = 58006;
+    bool experimental_type = 58102;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future release.
     // See more info in `annotations.proto`.
-    bool beta_type = 58007;
+    bool beta_type = 58103;
 }
 
 extend google.protobuf.FileOptions {
     // Indicates a file which should not be used by users of the framework.
     // See more info in `annotations.proto`.
-    bool internal_all = 58008;
+    bool internal_all = 58200;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
     // See more info in `annotations.proto`.
-    bool SPI_all = 58009;
+    bool SPI_all = 58201;
 
     // Indicates a public API that can change at any time, and has no guarantee of API stability and backward-compatibility.
     // See more info in `annotations.proto`.
-    bool experimental_all = 58010;
+    bool experimental_all = 58202;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future release.
     // See more info in `annotations.proto`.
-    bool beta_all = 58011;
+    bool beta_all = 58203;
+
+    // Specifies a type URL prefix for all types within a file.
+    // This type URL will be used when packing messages into `Any`.
+    // See `any.proto` for more details.
+    string type_url_prefix = 58204;
 }
 
 extend google.protobuf.ServiceOptions {
     // Indicates that the service is a part of Service Provider Interface (SPI).
-    bool SPI_service = 58012;
+    bool SPI_service = 58300;
 }

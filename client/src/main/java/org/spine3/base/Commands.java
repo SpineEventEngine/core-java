@@ -28,11 +28,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
-import org.spine3.protobuf.EntityPackagesMap;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -48,7 +47,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.validate.Validate.*;
 
 /**
@@ -113,7 +111,7 @@ public class Commands {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Command create(Message message, CommandContext context) {
-        return create(toAny(message), context);
+        return create(AnyPacker.pack(message), context);
     }
 
     /**
@@ -135,7 +133,7 @@ public class Commands {
      * Extracts the message from the passed {@code Command} instance.
      */
     public static Message getMessage(Command command) {
-        final Message result = Messages.fromAny(command.getMessage());
+        final Message result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 
@@ -227,9 +225,10 @@ public class Commands {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final TypeName commandType = TypeName.of(commandMessage);
+        final String cmdType = TypeUrl.of(commandMessage)
+                                      .getTypeName();
         final String id = idToString(commandId);
-        final String result = String.format(format, commandType, id);
+        final String result = String.format(format, cmdType, id);
         return result;
     }
 
@@ -246,20 +245,6 @@ public class Commands {
         final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
         final boolean isCommandsFile = fileName.endsWith(FILE_NAME_SUFFIX);
         return isCommandsFile;
-    }
-
-    /**
-     * Checks if the file belongs to an entity.
-     *
-     * <p>See {@link EntityPackagesMap} for more info.
-     *
-     * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file belongs to an entity, {@code false} otherwise
-     */
-    public static boolean isEntityFile(FileDescriptor file) {
-        final String protoPackage = file.getPackage();
-        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
-        return isCommandForEntity;
     }
 
     /**

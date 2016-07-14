@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.AnyPacker;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,7 +54,7 @@ public class IntegerFieldValidatorShould {
     @Test
     public void wrap_to_any() {
         final Any any = validator.wrap(VALUE);
-        final Int32Value msg = Messages.fromAny(any);
+        final Int32Value msg = AnyPacker.unpack(any);
         assertEquals(VALUE, (Integer) msg.getValue());
     }
 }

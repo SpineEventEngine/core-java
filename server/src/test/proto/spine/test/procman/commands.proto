@@ -21,12 +21,14 @@ syntax = "proto3";
 
 package spine.test.procman.command;
 
-import "spine/test/procman/project.proto";
-import "spine/test/procman/task.proto";
-
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.procman.command";
 option java_outer_classname = "ProcmanCommandsProto";
 option java_multiple_files = true;
+
+import "spine/annotations.proto";
+import "spine/test/procman/project.proto";
+import "spine/test/procman/task.proto";
 
 message CreateProject {
     ProjectId project_id = 1;

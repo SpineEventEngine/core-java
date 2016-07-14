@@ -21,8 +21,11 @@ syntax = "proto3";
 
 package spine_examples.eventstore;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.examples.eventstore";
 option java_multiple_files = true;
+
+import "spine/annotations.proto";
 
 message ProjectId {
     string code = 1;

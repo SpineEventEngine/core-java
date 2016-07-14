@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.AnyPacker;
 
 import static java.lang.Math.abs;
 import static org.spine3.protobuf.Values.newIntegerValue;
-import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Validates fields of {@link Integer} types.
@@ -61,7 +61,7 @@ import static org.spine3.protobuf.Messages.toAny;
 
     @Override
     protected Any wrap(Integer value) {
-        final Any any = toAny(newIntegerValue(value));
+        final Any any = AnyPacker.pack(newIntegerValue(value));
         return any;
     }
 }

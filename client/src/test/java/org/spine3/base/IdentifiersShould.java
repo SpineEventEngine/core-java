@@ -27,6 +27,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
@@ -37,10 +38,7 @@ import javax.annotation.Nullable;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.*;
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Values.newIntegerValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
@@ -191,7 +189,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
         final StringValue messageToWrap = newStringValue(TEST_ID);
-        final Any any = toAny(messageToWrap);
+        final Any any = AnyPacker.pack(messageToWrap);
 
         final String result = idToString(any);
 

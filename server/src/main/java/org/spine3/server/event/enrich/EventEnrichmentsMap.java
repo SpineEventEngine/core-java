@@ -23,7 +23,6 @@ package org.spine3.server.event.enrich;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import org.spine3.type.TypeName;
 
 import java.util.Properties;
 import java.util.Set;
@@ -34,7 +33,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * A map from an event enrichment Protobuf type name to the corresponding type name(s) of event(s) to enrich.
  *
  * <p>Example:
- * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.MyEvent}
+ * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},{@code proto.type.SecondEvent}
  *
  * @author Alexander Litus
  */
@@ -51,36 +50,35 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      */
     private static final String EVENT_TYPE_SEPARATOR = ",";
 
-    private static final ImmutableMultimap<TypeName, TypeName> enrichmentsMap = buildEnrichmentsMap();
+    private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
     private EventEnrichmentsMap() {}
 
     /**
      * Returns the immutable map instance.
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
-    /* package */ static ImmutableMultimap<TypeName, TypeName> getInstance() {
+    /* package */ static ImmutableMultimap<String, String> getInstance() {
         return enrichmentsMap;
     }
 
-    private static ImmutableMultimap<TypeName, TypeName> buildEnrichmentsMap() {
+    private static ImmutableMultimap<String, String> buildEnrichmentsMap() {
         final ImmutableSet<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
         final Builder builder = new Builder(propertiesSet);
-        final ImmutableMultimap<TypeName, TypeName> result = builder.build();
+        final ImmutableMultimap<String, String> result = builder.build();
         return result;
     }
 
     private static class Builder {
 
         private final Iterable<Properties> properties;
-        private final ImmutableMultimap.Builder<TypeName, TypeName> builder;
+        private final ImmutableMultimap.Builder<String, String> builder;
 
         /* package */ Builder(Iterable<Properties> properties) {
             this.properties = properties;
             this.builder = ImmutableMultimap.builder();
         }
 
-        /* package */ ImmutableMultimap<TypeName, TypeName> build() {
+        /* package */ ImmutableMultimap<String, String> build() {
             for (Properties props : this.properties) {
                 put(props);
             }
@@ -88,18 +86,17 @@ import static org.spine3.io.IoUtil.loadAllProperties;
         }
 
         private void put(Properties props) {
-            final Set<String> enrichments = props.stringPropertyNames();
-            for (String enrichment : enrichments) {
-                final TypeName enrichmentType = TypeName.of(enrichment);
-                final String eventTypesStr = props.getProperty(enrichment);
+            final Set<String> enrichmentTypes = props.stringPropertyNames();
+            for (String enrichmentType : enrichmentTypes) {
+                final String eventTypesStr = props.getProperty(enrichmentType);
                 final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
                 put(enrichmentType, eventTypes);
             }
         }
 
-        private void put(TypeName enrichmentType, Iterable<String> eventTypes) {
+        private void put(String enrichmentType, Iterable<String> eventTypes) {
             for (String eventType : eventTypes) {
-                builder.put(enrichmentType, TypeName.of(eventType));
+                builder.put(enrichmentType, eventType);
             }
         }
     }

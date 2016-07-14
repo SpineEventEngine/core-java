@@ -31,9 +31,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.test.commands.TestCommand;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.List;
 
@@ -45,7 +46,6 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -93,7 +93,7 @@ public class CommandsShould {
 
     @Test
     public void create_command_with_Any() {
-        final Any msg = toAny(stringValue);
+        final Any msg = AnyPacker.pack(stringValue);
 
         final Command command = Commands.create(msg, CommandContext.getDefaultInstance());
 
@@ -141,7 +141,7 @@ public class CommandsShould {
     @Test
     public void create_logging_message_for_command_with_type_and_id() {
         final Command command = commandFactory.create(stringValue);
-        final String typeName = TypeName.ofCommand(command).toString();
+        final String typeName = TypeUrl.ofCommand(command).getTypeName();
         final String commandId = idToString(getId(command));
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
@@ -173,17 +173,6 @@ public class CommandsShould {
         final FileDescriptor file = StringValue.getDescriptor().getFile();
 
         assertFalse(Commands.isCommandsFile(file));
-    }
-
-    // TODO:2016-04-06:alexander.litus: implement (find out how to use entity.proto in test .proto files)
-    public void return_true_if_file_belongs_to_entity() {
-    }
-
-    @Test
-    public void return_false_if_file_does_not_belong_to_entity() {
-        final FileDescriptor file = StringValue.getDescriptor().getFile();
-
-        assertFalse(Commands.isEntityFile(file));
     }
 
     @Test

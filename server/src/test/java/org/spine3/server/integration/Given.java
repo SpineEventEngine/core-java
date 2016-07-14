@@ -20,12 +20,12 @@
 
 package org.spine3.server.integration;
 
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.integration.ProjectId;
 import org.spine3.test.integration.event.ProjectCreated;
 import org.spine3.test.integration.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 
 
@@ -96,7 +96,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                     org.spine3.server.integration.IntegrationEvent
                             .newBuilder()
                             .setContext(eventContext)
-                            .setMessage(toAny(event));
+                            .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
 
@@ -126,7 +126,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                     org.spine3.server.integration.IntegrationEvent
                             .newBuilder()
                             .setContext(context)
-                            .setMessage(toAny(event));
+                            .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
     }

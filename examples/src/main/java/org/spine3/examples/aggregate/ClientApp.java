@@ -36,6 +36,7 @@ import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
 import org.spine3.money.Money;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 import org.spine3.time.ZoneOffsets;
 
@@ -122,7 +123,7 @@ public class ClientApp {
         final int quantity = 1;
         final Money totalPrice = newMoney(bookPriceUsd * quantity, USD);
         final OrderLine orderLine = OrderLine.newBuilder()
-                .setProductId(Messages.toAny(book.getBookId()))
+                .setProductId(AnyPacker.pack(book.getBookId()))
                 .setQuantity(quantity)
                 .setPrice(totalPrice)
                 .build();
