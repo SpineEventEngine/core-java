@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.AnyPacker;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newFloatValue;
 
 /**
@@ -61,7 +61,7 @@ import static org.spine3.protobuf.Values.newFloatValue;
 
     @Override
     protected Any wrap(Float value) {
-        final Any any = toAny(newFloatValue(value));
+        final Any any = AnyPacker.pack(newFloatValue(value));
         return any;
     }
 }

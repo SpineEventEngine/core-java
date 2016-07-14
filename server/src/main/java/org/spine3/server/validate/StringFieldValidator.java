@@ -23,13 +23,13 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.PatternOption;
 import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -80,7 +80,7 @@ import static org.spine3.protobuf.Values.newStringValue;
                 .setMsgFormat(msg)
                 .addParam(regex)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(toAny(newStringValue(fieldValue)))
+                .setFieldValue(AnyPacker.pack(newStringValue(fieldValue)))
                 .build();
         return violation;
     }

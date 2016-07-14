@@ -21,6 +21,7 @@ syntax = "proto3";
 
 package spine.test.validate.msg;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ValidationTestMessagesProto";
@@ -28,6 +29,8 @@ option java_package = "org.spine3.test.validate.msg";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+
+import "spine/annotations.proto";
 import "spine/validate.proto";
 
 // Messages for "required" option tests.

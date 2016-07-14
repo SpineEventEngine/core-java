@@ -28,7 +28,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
 import org.spine3.server.type.CommandClass;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.validate.ConstraintViolation;
 
 import static org.spine3.base.Identifiers.idToString;
@@ -95,7 +95,7 @@ public class InvalidCommandException extends CommandException {
         final String errMsg = String.format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to multitenant Command Bus, " +
                         "but has no `tenant_id` attribute in the context.",
-                TypeName.of(commandMessage).value(),
+                TypeUrl.of(commandMessage).getTypeName(),
                 CommandClass.of(commandMessage).value(),
                 idToString(context.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);

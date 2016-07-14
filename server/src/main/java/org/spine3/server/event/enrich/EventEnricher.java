@@ -35,10 +35,11 @@ import com.google.protobuf.Message;
 import org.spine3.base.Enrichments;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.type.EventClass;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -90,12 +91,12 @@ public class EventEnricher {
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
     private void putMsgEnrichers(ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
-        final ImmutableMultimap<TypeName, TypeName> enrichmentsMap = EventEnrichmentsMap.getInstance();
-        for (TypeName enrichmentType : enrichmentsMap.keySet()) {
-            final Class<Message> enrichmentClass = toMessageClass(enrichmentType);
-            final ImmutableCollection<TypeName> eventTypes = enrichmentsMap.get(enrichmentType);
-            for (TypeName eventType : eventTypes) {
-                final Class<Message> eventClass = toMessageClass(eventType);
+        final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
+        for (String enrichmentType : enrichmentsMap.keySet()) {
+            final Class<Message> enrichmentClass = toMessageClass(TypeUrl.of(enrichmentType));
+            final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
+            for (String eventType : eventTypes) {
+                final Class<Message> eventClass = toMessageClass(TypeUrl.of(eventType));
                 final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this, eventClass, enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
@@ -149,9 +150,9 @@ public class EventEnricher {
             final Message enriched = apply(function, eventMessage);
             checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
                                     function, eventMessage);
-            final String typeName = TypeName.of(enriched)
-                                            .toString();
-            enrichments.put(typeName, Any.pack(enriched));
+            final String typeName = TypeUrl.of(enriched)
+                                           .getTypeName();
+            enrichments.put(typeName, AnyPacker.pack(enriched));
         }
         final EventContext enrichedContext = event.getContext()
                                                   .toBuilder()

@@ -21,12 +21,15 @@ syntax = "proto3";
 
 package spine.test.identifiers;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.identifiers";
 option java_multiple_files = true;
 option java_outer_classname = "IdentifiersShouldProto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+
+import "spine/annotations.proto";
 
 // Only for usage in `IdentifiersShould` class.
 

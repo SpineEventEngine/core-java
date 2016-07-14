@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package spine.work;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_package = "org.spine3.work";
 option java_outer_classname = "WorkProto";
 
+import "spine/annotations.proto";
+
 // Represents the amount of work done in minutes.
 message Work {
     int32 minutes = 1;
 }
-

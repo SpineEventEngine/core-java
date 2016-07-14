@@ -21,11 +21,13 @@ syntax = "proto3";
 
 package spine.sharing;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "SharingProto";
 option java_package = "org.spine3.sharing";
 
+import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/users/group.proto";
 

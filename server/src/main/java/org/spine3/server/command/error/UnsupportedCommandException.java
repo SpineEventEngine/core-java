@@ -25,7 +25,7 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.server.type.CommandClass;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 /**
  * Exception that is thrown when unsupported command is obtained
@@ -42,7 +42,7 @@ public class UnsupportedCommandException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final TypeName typeName = TypeName.ofCommand(command);
+        final String typeName = TypeUrl.ofCommand(command).getTypeName();
         final String result = String.format(
                 "There is no registered handler or dispatcher for the command of class: `%s`. Protobuf type: `%s`",
                 commandClass, typeName

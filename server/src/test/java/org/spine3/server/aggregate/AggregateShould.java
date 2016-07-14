@@ -53,7 +53,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.createEvent;
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -328,7 +328,7 @@ public class AggregateShould {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshot = aggregate.toSnapshot();
-        final Project state = fromAny(snapshot.getState());
+        final Project state = unpack(snapshot.getState());
 
         assertEquals(ID, state.getId());
         assertEquals(Project.Status.CREATED, state.getStatus());
@@ -600,7 +600,7 @@ public class AggregateShould {
                 if (record == null) {
                     return null;
                 }
-                return fromAny(record.getMessage()).getClass();
+                return unpack(record.getMessage()).getClass();
             }
         });
     }

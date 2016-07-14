@@ -59,11 +59,4 @@ public final class ClassName extends StringTypeValue {
         checkArgument(className.length() > 0, "Class name cannot me empty");
         return new ClassName(className);
     }
-
-    /** {@inheritDoc} */
-    @Override
-    public String value() {
-        // Open access to other packages.
-        return super.value();
-    }
 }

@@ -23,6 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -32,8 +33,7 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -93,14 +93,14 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
     private E toEntity(I id, EntityStorageRecord record) {
         final E entity = create(id);
-        final M state = fromAny(record.getState());
+        final M state = unpack(record.getState());
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
 
     private EntityStorageRecord toEntityRecord(E entity) {
         final M state = entity.getState();
-        final Any stateAny = toAny(state);
+        final Any stateAny = AnyPacker.pack(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()

@@ -30,6 +30,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
@@ -52,8 +53,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
 
@@ -192,7 +192,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
-        final Message eventMsg = fromAny(integrationEvent.getMessage());
+        final Message eventMsg = unpack(integrationEvent.getMessage());
         final boolean isValid = eventBus.validate(eventMsg, responseObserver);
         if (isValid) {
             final Event event = toEvent(integrationEvent);
@@ -206,7 +206,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         final EventContext context = EventContext.newBuilder()
                 .setEventId(sourceContext.getEventId())
                 .setTimestamp(sourceContext.getTimestamp())
-                .setProducerId(toAny(producerId))
+                .setProducerId(AnyPacker.pack(producerId))
                 .build();
         final Event result = Events.createEvent(integrationEvent.getMessage(), context);
         return result;

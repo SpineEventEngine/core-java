@@ -26,7 +26,6 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.Snapshot;
-import org.spine3.type.TypeName;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkTimestamp;
 
@@ -184,7 +184,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkArgument(event.hasMessage(), "Event message must be set.");
         final Any eventMsg = event.getMessage();
 
-        final String eventType = TypeName.ofEnclosed(eventMsg).nameOnly();
+        final String eventType = ofEnclosed(eventMsg).getTypeName();
         checkNotEmptyOrBlank(eventType, "Event type");
 
         final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Event time");

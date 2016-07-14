@@ -42,7 +42,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * Is for usage only in tests under the `event` package.
  */
-@SuppressWarnings("EmptyClass")
 public class Given {
 
     private Given() {}

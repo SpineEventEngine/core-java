@@ -21,9 +21,12 @@ syntax = "proto3";
 
 package spine.test.commands;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.commands";
 option java_multiple_files = true;
 option java_outer_classname = "CommandsShouldProto";
+
+import "spine/annotations.proto";
 
 // Only for usage in `CommandsShould` class.
 message TestCommand {

@@ -25,7 +25,7 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.server.type.CommandClass;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import static java.lang.String.*;
 
@@ -44,7 +44,7 @@ public class CommandExpiredException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final TypeName typeName = TypeName.ofCommand(command);
+        final String typeName = TypeUrl.ofCommand(command).getTypeName();
         final String result = format("A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
                                      commandClass, typeName);
         return result;

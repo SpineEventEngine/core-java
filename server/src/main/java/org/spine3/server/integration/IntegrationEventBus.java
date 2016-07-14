@@ -38,7 +38,7 @@ import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
@@ -77,7 +77,7 @@ public class IntegrationEventBus {
      * @param event an event to post
      */
     public void post(IntegrationEvent event) {
-        final Message msg = fromAny(event.getMessage());
+        final Message msg = unpack(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
         final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
         checkArgument(!subscribers.isEmpty(), "No integration event subscribers found for event " + msg.getClass().getName());

@@ -29,7 +29,6 @@ import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.type.TypeName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,85 +54,24 @@ public class Messages {
     private Messages() {}
 
     /**
-     * Wraps {@link Message} object inside of {@link Any} instance.
-     *
-     * @param message message that should be put inside the {@link Any} instance.
-     * @return the instance of {@link Any} object that wraps given message.
-     */
-    public static Any toAny(Message message) {
-        return Any.pack(message);
-    }
-
-    /**
-     * Creates a new instance of {@link Any} with the message represented by its byte
-     * content and the passed type.
-     *
-     * @param type the type of the message to be wrapped into {@code Any}
-     * @param value the byte content of the message
-     * @return new {@code Any} instance
-     */
-    public static Any toAny(TypeName type, ByteString value) {
-        final String typeUrl = type.toTypeUrl();
-        final Any result = Any.newBuilder()
-                .setValue(value)
-                .setTypeUrl(typeUrl)
-                .build();
-        return result;
-    }
-
-    /**
-     * Unwraps {@link Any} value into an instance of type specified by value
-     * returned by {@link Any#getTypeUrl()}.
-     *
-     * <p>If there is no Java class for the type, {@link UnknownTypeException}
-     * will be thrown.
-     *
-     * @param any instance of {@link Any} that should be unwrapped
-     * @param <T> the type enclosed into {@code Any}
-     * @return unwrapped message instance
-     * @throws UnknownTypeException if there is no Java class in the classpath for the enclosed type
-     */
-    public static <T extends Message> T fromAny(Any any) {
-        checkNotNull(any);
-        String typeStr = "";
-        try {
-            final TypeName typeName = TypeName.ofEnclosed(any);
-            typeStr = typeName.value();
-            final Class<T> messageClass = toMessageClass(typeName);
-            final T result = any.unpack(messageClass);
-            return result;
-        } catch (RuntimeException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof ClassNotFoundException) {
-                // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw new UnknownTypeException(typeStr, cause);
-            } else {
-                throw e;
-            }
-        } catch (InvalidProtocolBufferException e) {
-            throw propagate(e);
-        }
-    }
-
-    /**
      * Returns message {@link Class} for the given Protobuf message type.
      *
      * <p>This method is temporary until full support of {@link Any} is provided.
      *
-     * @param messageType full type name defined in the proto files
+     * @param typeUrl the type URL of the message
      * @return message class
-     * @throws RuntimeException wrapping {@link ClassNotFoundException} if there is no corresponding class
+     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if there is no corresponding class
      *                          for the given Protobuf message type
-     * @see #fromAny(Any) that uses the same convention
+     * @see AnyPacker#unpack(Any) that uses the same convention
      */
-    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
-        final ClassName className = TypeToClassMap.get(messageType);
+    public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
+        final ClassName className = KnownTypes.getClassName(typeUrl);
         try {
             @SuppressWarnings("unchecked") // the client considers this message is of this class
             final Class<T> result = (Class<T>) Class.forName(className.value());
             return result;
         } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(messageType.value(), e);
+            throw new UnknownTypeException(typeUrl.getTypeName(), e);
         }
     }
 
@@ -171,12 +109,11 @@ public class Messages {
      * Builds and returns the registry of types known in the application.
      *
      * @return {@code JsonFormat.TypeRegistry} instance
-     * @see TypeToClassMap#knownTypes()
      */
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeName typeName : TypeToClassMap.knownTypes()) {
-            final Class<? extends Message> clazz = toMessageClass(typeName);
+        for (TypeUrl typeUrl : KnownTypes.typeNames()) {
+            final Class<? extends Message> clazz = toMessageClass(typeUrl);
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.
             if (descriptor instanceof Descriptor) {
@@ -236,11 +173,11 @@ public class Messages {
                 return ByteString.class;
             case ENUM:
                 final String enumTypeName = field.getEnumType().getFullName();
-                final Class<? extends Message> enumClass = toMessageClass(TypeName.of(enumTypeName));
+                final Class<? extends Message> enumClass = toMessageClass(TypeUrl.of(enumTypeName));
                 return enumClass;
             case MESSAGE:
-                final TypeName typeName = TypeName.of(field.getMessageType());
-                final Class<? extends Message> msgClass = toMessageClass(typeName);
+                final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
+                final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
         }
         throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
