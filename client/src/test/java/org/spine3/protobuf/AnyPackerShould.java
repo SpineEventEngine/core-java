@@ -21,22 +21,33 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.TypeUrl.*;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class AnyPackerShould {
 
     private final StringValue googleMsg = newStringValue(newUuid());
     private final UserId spineMsg = newUserId(newUuid());
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(AnyPacker.class));
+    }
 
     @Test
     public void pack_spine_message_to_Any() {
