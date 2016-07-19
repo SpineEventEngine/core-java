@@ -21,21 +21,18 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.TypeUrl.*;
+import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
+import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 

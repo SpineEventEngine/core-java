@@ -20,10 +20,7 @@
 
 package org.spine3.protobuf.error;
 
-import com.google.protobuf.Any;
 import org.junit.Test;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
