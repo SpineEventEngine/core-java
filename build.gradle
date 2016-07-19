@@ -13,6 +13,7 @@ buildscript {
 allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
+    apply plugin: 'idea'
 
     group = 'org.spine3'
     version = '0.5.1-SNAPSHOT'
@@ -26,7 +27,7 @@ project.ext {
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
     SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.8"
     GRPC_VERSION = '0.14.0'
-    SLF4J_VERSION = '1.7.12'
+    SLF4J_VERSION = '1.7.21'
 }
 
 def repositoryUserName = null;
@@ -52,7 +53,6 @@ subprojects {
     }
 
     apply plugin: 'java';
-    apply plugin: 'idea';
     apply plugin: 'com.google.protobuf';
 
     sourceCompatibility = 1.7;
@@ -95,11 +95,6 @@ subprojects {
     final String GEN_ROOT_DIR = "$projectDir/generated";
     final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
     final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
-
-    idea.module {
-        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
-        testSourceDirs += file(GEN_TEST_JAVA_DIR);
-    }
 
     sourceSets {
         main {
@@ -144,6 +139,31 @@ subprojects {
     }
 
     check.dependsOn jacocoTestReport
+
+    idea.module.iml {
+        beforeMerged { final module ->
+            module.dependencies.clear()
+        }
+        whenMerged { final module ->
+            module.dependencies*.exported = true
+        }
+    }
+
+    idea.module {
+        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
+        testSourceDirs += file(GEN_TEST_JAVA_DIR);
+    }
+}
+
+idea.project.ipr {
+    beforeMerged { final project ->
+        project.modulePaths.clear()
+    }
+    withXml { final provider ->
+        provider.node.component
+                .find { it.@name == 'VcsDirectoryMappings' }
+                .mapping.@vcs = 'Git'
+    }
 }
 
 task readPublishingCredentials << {
@@ -156,7 +176,7 @@ task readPublishingCredentials << {
 
 task publish << {}
 
-void dependPublish(Project project) {
+void dependPublish(final Project project) {
     final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
     project.getTasksByName("publish", false).each { final task ->
         task.dependsOn credentialsTasks;
@@ -165,10 +185,10 @@ void dependPublish(Project project) {
 }
 
 // Artifacts to publish
-def publishingProjects = ["client", "server", "values", "testutil"];
+final def publishingProjects = ["client", "server", "values", "testutil"];
 
 publishingProjects.each {
-    project(":$it") { currentProject ->
+    project(":$it") { final currentProject ->
 
         apply plugin: 'maven-publish';
 
