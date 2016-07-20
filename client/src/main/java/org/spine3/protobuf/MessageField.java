@@ -22,15 +22,16 @@ package org.spine3.protobuf;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.FieldDescriptor;
 
 /**
  * Abstract base for classes working with message fields.
@@ -58,6 +59,7 @@ public abstract class MessageField {
      * @param index the zero-based index of the field
      */
     protected MessageField(int index) {
+        checkArgument(index >= 0, "Message field index must be a positive value, encountered: " + index);
         this.index = index;
     }
 
@@ -112,7 +114,7 @@ public abstract class MessageField {
         Method method = accessors.get(messageClass);
 
         if (method == null) {
-            final Descriptors.FieldDescriptor fieldDescriptor = getFieldDescriptor(message, this.index);
+            final FieldDescriptor fieldDescriptor = getFieldDescriptor(message, this.index);
             final String fieldName = fieldDescriptor.getName();
             final String methodName = toAccessorMethodName(fieldName);
 
@@ -135,14 +137,14 @@ public abstract class MessageField {
      * @param fieldIndex the index of the field
      * @return field descriptor
      */
-    public static Descriptors.FieldDescriptor getFieldDescriptor(Message msg, int fieldIndex) {
-        final Descriptors.FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
+    public static FieldDescriptor getFieldDescriptor(Message msg, int fieldIndex) {
+        final FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
         return result;
     }
 
     /** Converts Protobuf field name into Java accessor method name. */
     @VisibleForTesting
-    static String toAccessorMethodName(CharSequence fieldName) {
+    /* package */ static String toAccessorMethodName(CharSequence fieldName) {
         final StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
         out.append(GETTER_METHOD_PREFIX);
         final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));
@@ -170,7 +172,7 @@ public abstract class MessageField {
      * @return name of the field
      */
     public static String getFieldName(Message msg, int index) {
-        final Descriptors.FieldDescriptor fieldDescriptor = getFieldDescriptor(msg, index);
+        final FieldDescriptor fieldDescriptor = getFieldDescriptor(msg, index);
         final String fieldName = fieldDescriptor.getName();
         return fieldName;
     }
