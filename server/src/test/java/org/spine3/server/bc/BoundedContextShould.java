@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
@@ -36,6 +37,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
@@ -136,16 +138,30 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void notify_integration_event_subscribers() {
+    public void notify_integration_event_subscriber() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = Given.Event.projectCreatedIntegration();
+        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
 
         assertEquals(ok(), observer.getResponseHandled());
         assertEquals(subscriber.eventHandled, msg);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked") // have to cast to use Mockito
+    public void not_notify_integration_event_subscriber_if_event_is_invalid() {
+        final EventBus eventBus = mock(EventBus.class);
+        doReturn(false).when(eventBus)
+                       .validate(any(Message.class), (StreamObserver<Response>) any());
+        final BoundedContext boundedContext = BoundedContextTestStubs.create(eventBus);
+        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+
+        boundedContext.notify(event, new TestResponseObserver());
+
+        verify(eventBus, never()).post(any(Event.class));
     }
 
     @Test

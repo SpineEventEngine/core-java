@@ -21,7 +21,6 @@
 package org.spine3.server.bc;
 
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.event.ProjectCreated;
@@ -72,26 +71,28 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
     }
 
-    /* package */ static class Event {
+    /* package */ static class IntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
-        private Event() {
+        private IntegrationEvent() {
         }
 
-        public static IntegrationEvent projectCreatedIntegration() {
-            return projectCreatedIntegration(PROJECT_ID);
+        public static org.spine3.server.integration.IntegrationEvent projectCreated() {
+            return projectCreated(PROJECT_ID);
         }
 
-        public static IntegrationEvent projectCreatedIntegration(ProjectId projectId) {
+        public static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
-            return projectCreatedIntegration(projectId, context);
+            return projectCreated(projectId, context);
         }
 
-        public static IntegrationEvent projectCreatedIntegration(ProjectId projectId, IntegrationEventContext eventContext) {
+        public static org.spine3.server.integration.IntegrationEvent projectCreated(
+                ProjectId projectId,
+                IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final IntegrationEvent.Builder builder =
-                    IntegrationEvent.newBuilder()
+            final org.spine3.server.integration.IntegrationEvent.Builder builder =
+                    org.spine3.server.integration.IntegrationEvent.newBuilder()
                                     .setContext(eventContext)
                                     .setMessage(AnyPacker.pack(event));
             return builder.build();

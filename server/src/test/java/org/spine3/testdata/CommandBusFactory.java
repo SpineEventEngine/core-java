@@ -43,5 +43,4 @@ public class CommandBusFactory {
         final CommandBus commandBus = CommandBus.newInstance(store);
         return commandBus;
     }
-
 }
