@@ -22,10 +22,11 @@ package org.spine3.server.aggregate;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
+import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -34,18 +35,15 @@ import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.TestEventContextFactory;
 
-import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Events.createEvent;
+import static org.mockito.Mockito.*;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class AggregateRepositoryShould {
@@ -60,7 +58,7 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void return_default_aggregate_instance_if_no_aggregate_found() {
+    public void return_default_aggregate_state_if_no_aggregate_found() {
         final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId());
         final Project state = aggregate.getState();
 
@@ -70,17 +68,43 @@ public class AggregateRepositoryShould {
     @Test
     public void store_and_load_aggregate() {
         final ProjectId id = Given.AggregateId.newProjectId();
-        final ProjectAggregate expected = new ProjectAggregate(id);
-        repository.store(expected);
+        final ProjectAggregate expected = givenAggregateWithAppliedEvents(id);
 
+        repository.store(expected);
         final ProjectAggregate actual = repository.load(id);
 
-        final Project expectedState = expected.getState();
-        assertTrue(isNotDefault(expectedState));
-        final Project actualState = actual.getState();
-        assertTrue(isNotDefault(actualState));
-        assertEquals(expectedState, actualState);
+        assertEquals(expected.getState(), actual.getState());
         assertEquals(expected.getId(), actual.getId());
+    }
+
+
+    @Test
+    public void store_snapshot_if_needed() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repository = spy(this.repository);
+        @SuppressWarnings("unchecked")
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        doReturn(storage).when(repository).aggregateStorage();
+
+        final ProjectAggregate aggregate = givenAggregateWithAppliedEvents();
+        repository.setSnapshotTrigger(1);
+        repository.store(aggregate);
+
+        verify(storage).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), eq(0));
+    }
+
+    @Test
+    public void not_store_snapshot_if_not_needed() {
+        final AggregateRepository<ProjectId, ProjectAggregate> repository = spy(this.repository);
+        @SuppressWarnings("unchecked")
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        doReturn(storage).when(repository).aggregateStorage();
+
+        final ProjectAggregate aggregate = givenAggregateWithAppliedEvents();
+        repository.store(aggregate);
+
+        verify(storage, never()).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
     }
 
     @Test
@@ -118,6 +142,17 @@ public class AggregateRepositoryShould {
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
 
+    private static ProjectAggregate givenAggregateWithAppliedEvents() {
+        return givenAggregateWithAppliedEvents(Given.AggregateId.newProjectId());
+    }
+
+    private static ProjectAggregate givenAggregateWithAppliedEvents(ProjectId id) {
+        final ProjectAggregate aggregate = new ProjectAggregate(id);
+        aggregate.dispatchForTest(Given.CommandMessage.createProject(id), createCommandContext());
+        aggregate.dispatchForTest(Given.CommandMessage.addTask(id), createCommandContext());
+        return aggregate;
+    }
+
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
         private ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
@@ -128,10 +163,6 @@ public class AggregateRepositoryShould {
 
         public ProjectAggregate(ProjectId id) {
             super(id);
-            final Project state = Project.newBuilder()
-                                         .setId(id)
-                                         .build();
-            incrementState(state);
         }
 
         @Assign
@@ -146,23 +177,14 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectCreated event) {
-            getBuilder().setId(event.getProjectId());
+            getBuilder().setId(event.getProjectId())
+                        .setName("TestProject123");
         }
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .addTask(event.getTask());
-        }
-
-        @Override
-        @SuppressWarnings("RefusedBequest")
-        /* package */ List<Event> getUncommittedEvents() {
-            final ProjectCreated msg = Given.EventMessage.projectCreated(getId());
-            final Event event = createEvent(msg, TestEventContextFactory.createEventContext());
-            final List<Event> events = newArrayList(event);
-            return events;
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
     }
 }
