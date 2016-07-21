@@ -23,7 +23,6 @@ package org.spine3.server.entity;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -34,6 +33,7 @@ import org.spine3.test.entity.ProjectId;
 import javax.annotation.Nullable;
 
 import static org.junit.Assert.*;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class RepositoryShould {
@@ -44,7 +44,7 @@ public class RepositoryShould {
 
     @Before
     public void setUp() {
-        boundedContext = BoundedContextTestStubs.create();
+        boundedContext = newBoundedContext();
         repository = new TestRepo(boundedContext);
         storageFactory = InMemoryStorageFactory.getInstance();
     }

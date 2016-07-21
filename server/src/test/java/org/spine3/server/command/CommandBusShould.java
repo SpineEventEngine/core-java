@@ -56,7 +56,7 @@ import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.test.command.event.ProjectStarted;
 import org.spine3.test.command.event.TaskAdded;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -97,7 +97,7 @@ public class CommandBusShould {
         log = spy(new ProblemLog());
         // Do not create a spy of the command bus because it would be impossible to debug its code
         commandBus = new CommandBus(commandStore, scheduler, log);
-        eventBus = EventBusFactory.create(storageFactory);
+        eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
         responseObserver = new TestResponseObserver();

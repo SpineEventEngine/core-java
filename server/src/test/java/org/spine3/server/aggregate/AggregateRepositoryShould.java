@@ -25,9 +25,7 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -45,6 +43,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.createEvent;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -55,10 +54,9 @@ public class AggregateRepositoryShould {
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
+        final BoundedContext boundedContext = newBoundedContext();
         repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(storageFactory);
+        repository.initStorage(InMemoryStorageFactory.getInstance());
     }
 
     @Test

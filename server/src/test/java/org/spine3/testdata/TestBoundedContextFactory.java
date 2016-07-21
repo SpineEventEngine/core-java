@@ -32,32 +32,32 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("UtilityClass")
-public class BoundedContextTestStubs {
+public class TestBoundedContextFactory {
 
-    public static BoundedContext create() {
-        final BoundedContext bc = create(InMemoryStorageFactory.getInstance());
+    public static BoundedContext newBoundedContext() {
+        final BoundedContext bc = newBoundedContext(InMemoryStorageFactory.getInstance());
         return bc;
     }
 
-    public static BoundedContext create(StorageFactory storageFactory) {
+    public static BoundedContext newBoundedContext(StorageFactory storageFactory) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory);
         return builder.build();
     }
 
-    public static BoundedContext create(EventEnricher enricher) {
+    public static BoundedContext newBoundedContext(EventEnricher enricher) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setStorageFactory(InMemoryStorageFactory.getInstance())
                                                              .setEventEnricher(enricher);
         return builder.build();
     }
 
-    public static BoundedContext create(EventBus eventBus) {
+    public static BoundedContext newBoundedContext(EventBus eventBus) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setStorageFactory(InMemoryStorageFactory.getInstance())
                                                              .setEventBus(eventBus);
         return builder.build();
     }
 
-    private BoundedContextTestStubs() {}
+    private TestBoundedContextFactory() {}
 }

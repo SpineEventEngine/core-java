@@ -35,7 +35,6 @@ import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
@@ -55,8 +54,8 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
-import org.spine3.testdata.BoundedContextTestStubs;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestBoundedContextFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
@@ -82,8 +81,8 @@ public class ProcessManagerRepositoryShould {
 
     @Before
     public void setUp() {
-        eventBus = spy(EventBusFactory.create());
-        boundedContext = BoundedContextTestStubs.create(eventBus);
+        eventBus = spy(TestEventBusFactory.create());
+        boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
 
         boundedContext.getCommandBus().register(new CommandDispatcher() {
             @Override
@@ -109,49 +108,49 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void load_empty_manager_by_default() throws InvocationTargetException {
+    public void load_empty_manager_by_default() {
         final TestProcessManager manager = repository.load(ID);
         assertEquals(manager.getDefaultState(), manager.getState());
     }
 
     @Test
-    public void dispatch_event_and_load_manager() throws InvocationTargetException {
+    public void dispatch_event_and_load_manager() {
         testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
 
     @Test
-    public void dispatch_several_events() throws InvocationTargetException {
+    public void dispatch_several_events() {
         testDispatchEvent(Given.EventMessage.projectCreated(ID));
         testDispatchEvent(Given.EventMessage.taskAdded(ID));
         testDispatchEvent(Given.EventMessage.projectStarted(ID));
     }
 
-    private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
+    private void testDispatchEvent(Message eventMessage) {
         final Event event = Events.createEvent(eventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
         assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @Test
-    public void dispatch_command() throws InvocationTargetException, FailureThrowable {
+    public void dispatch_command() throws InvocationTargetException {
         testDispatchCommand(Given.CommandMessage.addTask(ID));
     }
 
     @Test
-    public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
+    public void dispatch_several_commands() throws InvocationTargetException {
         testDispatchCommand(Given.CommandMessage.createProject(ID));
         testDispatchCommand(Given.CommandMessage.addTask(ID));
         testDispatchCommand(Given.CommandMessage.startProject(ID));
     }
 
-    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
+    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
         final Command cmd = Commands.create(cmdMsg, CMD_CONTEXT);
         repository.dispatch(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
     @Test
-    public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
+    public void dispatch_command_and_return_events() throws InvocationTargetException {
         testDispatchCommand(Given.CommandMessage.addTask(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
@@ -172,14 +171,14 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
+    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
         final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
+    public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);

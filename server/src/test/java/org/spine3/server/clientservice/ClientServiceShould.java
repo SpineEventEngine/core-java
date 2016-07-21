@@ -55,7 +55,6 @@ import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
-import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
@@ -66,6 +65,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -75,13 +75,13 @@ public class ClientServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        final BoundedContext projectsContext = BoundedContextTestStubs.create();
+        final BoundedContext projectsContext = newBoundedContext();
         final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        final BoundedContext customersContext = BoundedContextTestStubs.create();
+        final BoundedContext customersContext = newBoundedContext();
         final CustomerAggregateRepository customerRepo = new CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);

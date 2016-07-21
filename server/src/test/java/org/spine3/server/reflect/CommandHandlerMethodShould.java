@@ -28,7 +28,7 @@ import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -45,7 +45,7 @@ import static org.spine3.base.Identifiers.newUuid;
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
 public class CommandHandlerMethodShould {
 
-    private final EventBus eventBus = EventBusFactory.create();
+    private final EventBus eventBus = TestEventBusFactory.create();
 
 
     @Test

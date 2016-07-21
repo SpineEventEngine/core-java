@@ -24,7 +24,6 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -58,9 +57,8 @@ import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
-import org.spine3.testdata.BoundedContextTestStubs;
-import org.spine3.testdata.CommandBusFactory;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestCommandBusFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.List;
 
@@ -70,6 +68,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alexander Litus
@@ -79,15 +78,11 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private StorageFactory storageFactory;
-    private BoundedContext boundedContext;
-    private boolean handlersRegistered = false;
+    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
-    @Before
-    public void setUp() {
-        storageFactory = InMemoryStorageFactory.getInstance();
-        boundedContext = BoundedContextTestStubs.create(storageFactory);
-    }
+    private final BoundedContext boundedContext = newBoundedContext();
+
+    private boolean handlersRegistered = false;
 
     @After
     public void tearDown() throws Exception {
@@ -156,7 +151,7 @@ public class BoundedContextShould {
         final EventBus eventBus = mock(EventBus.class);
         doReturn(false).when(eventBus)
                        .validate(any(Message.class), (StreamObserver<Response>) any());
-        final BoundedContext boundedContext = BoundedContextTestStubs.create(eventBus);
+        final BoundedContext boundedContext = newBoundedContext(eventBus);
         final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
 
         boundedContext.notify(event, new TestResponseObserver());
@@ -168,8 +163,8 @@ public class BoundedContextShould {
     public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                .setCommandBus(CommandBusFactory.create(storageFactory))
-                                                .setEventBus(EventBusFactory.create(storageFactory))
+                                                .setCommandBus(TestCommandBusFactory.create(storageFactory))
+                                                .setEventBus(TestEventBusFactory.create(storageFactory))
                                                 .setMultitenant(true)
                                                 .build();
         assertTrue(bc.isMultitenant());

@@ -32,9 +32,9 @@ import org.spine3.server.storage.StorageFactory;
  */
 
 @SuppressWarnings("UtilityClass")
-public class CommandBusFactory {
+public class TestCommandBusFactory {
 
-    private CommandBusFactory() {
+    private TestCommandBusFactory() {
     }
 
     /** Creates a new command bus with the given storage factory. */
