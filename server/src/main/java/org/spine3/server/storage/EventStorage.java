@@ -134,7 +134,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @SuppressWarnings("OverloadedVarargsMethod")
     @VisibleForTesting
     /* package */ static List<Event> toEventList(EventStorageRecord... records) {
-        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
+        return toEventList(ImmutableList.copyOf(records));
     }
 
     /** Converts {@code EventStorageRecord}s to {@code Event}s. */
