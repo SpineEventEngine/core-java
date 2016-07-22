@@ -35,9 +35,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /* package */ class InMemoryCommandStorage extends CommandStorage {
 
@@ -60,9 +62,6 @@ import static org.spine3.validate.Validate.checkNotDefault;
         checkNotClosed();
         checkNotDefault(id);
         final CommandStorageRecord record = get(id);
-        if (record == null) {
-            return CommandStorageRecord.getDefaultInstance();
-        }
         return record;
     }
 
@@ -93,17 +92,11 @@ import static org.spine3.validate.Validate.checkNotDefault;
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
-
-        final CommandStorageRecord record = get(id);
-        if (record == null) {
-            throw new IllegalStateException("No record found for command ID: " + idToString(id));
-        }
-
-        final CommandStorageRecord updatedRecord = record
-                .toBuilder()
-                .setStatus(CommandStatus.ERROR)
-                .setError(error)
-                .build();
+        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord updatedRecord = record.toBuilder()
+                                                         .setStatus(CommandStatus.ERROR)
+                                                         .setError(error)
+                                                         .build();
         put(id, updatedRecord);
     }
 
@@ -112,12 +105,11 @@ import static org.spine3.validate.Validate.checkNotDefault;
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
-
-        final CommandStorageRecord updatedRecord = get(id)
-                .toBuilder()
-                .setStatus(CommandStatus.FAILURE)
-                .setFailure(failure)
-                .build();
+        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord updatedRecord = record.toBuilder()
+                                                         .setStatus(CommandStatus.FAILURE)
+                                                         .setFailure(failure)
+                                                         .build();
         put(id, updatedRecord);
     }
 
@@ -125,10 +117,10 @@ import static org.spine3.validate.Validate.checkNotDefault;
     public void setOkStatus(CommandId id) {
         checkNotClosed();
         checkNotNull(id);
-        final CommandStorageRecord updatedRecord = get(id)
-                .toBuilder()
-                .setStatus(CommandStatus.OK)
-                .build();
+        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord updatedRecord = record.toBuilder()
+                                                         .setStatus(CommandStatus.OK)
+                                                         .build();
         put(id, updatedRecord);
     }
 
@@ -137,6 +129,15 @@ import static org.spine3.validate.Validate.checkNotDefault;
     }
 
     private CommandStorageRecord get(CommandId id) {
-        return storage.get(id);
+        final CommandStorageRecord record = storage.get(id);
+        if (record == null) {
+            return CommandStorageRecord.getDefaultInstance();
+        }
+        return record;
+    }
+
+    private static CommandStorageRecord check(CommandStorageRecord record, CommandId id) {
+        checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
+        return record;
     }
 }
