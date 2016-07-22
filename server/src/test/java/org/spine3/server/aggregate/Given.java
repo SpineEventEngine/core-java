@@ -141,6 +141,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             return createProject(getCurrentTime());
         }
 
+        public static org.spine3.base.Command createProject(ProjectId id) {
+            return createProject(USER_ID, id, getCurrentTime());
+        }
+
         public static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }

@@ -150,7 +150,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void dispatch_command_and_return_events() throws InvocationTargetException {
+    public void dispatch_command_and_post_events() throws InvocationTargetException {
         testDispatchCommand(Given.CommandMessage.addTask(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);

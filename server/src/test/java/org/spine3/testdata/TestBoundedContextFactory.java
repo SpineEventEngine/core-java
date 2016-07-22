@@ -21,6 +21,7 @@
 package org.spine3.testdata;
 
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
@@ -34,8 +35,10 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class TestBoundedContextFactory {
 
+    private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance();
+
     public static BoundedContext newBoundedContext() {
-        final BoundedContext bc = newBoundedContext(InMemoryStorageFactory.getInstance());
+        final BoundedContext bc = newBoundedContext(FACTORY);
         return bc;
     }
 
@@ -47,14 +50,22 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(EventEnricher enricher) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setStorageFactory(FACTORY)
                                                              .setEventEnricher(enricher);
         return builder.build();
     }
 
     public static BoundedContext newBoundedContext(EventBus eventBus) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setStorageFactory(FACTORY)
+                                                             .setEventBus(eventBus);
+        return builder.build();
+    }
+
+    public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(FACTORY)
+                                                             .setCommandBus(commandBus)
                                                              .setEventBus(eventBus);
         return builder.build();
     }
