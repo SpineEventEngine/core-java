@@ -45,10 +45,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Abstract base for aggregates.
@@ -202,10 +202,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param context the context of the command
      * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      */
-     /* package */ final void dispatch(Message command, CommandContext context) {
+    /* package */ void dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
-
         if (command instanceof Any) {
             // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
             // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
@@ -214,12 +213,11 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             //noinspection AssignmentToMethodParameter
             command = AnyPacker.unpack(any);
         }
-
         try {
             final List<? extends Message> events = invokeHandler(command, context);
             apply(events, context);
         } catch (InvocationTargetException e) {
-            propagate(e.getCause());
+            throw wrappedCause(e);
         }
     }
 
@@ -294,7 +292,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                     apply(message);
                     setVersion(context.getVersion(), context.getTimestamp());
                 } catch (InvocationTargetException e) {
-                    propagate(e.getCause());
+                    throw wrappedCause(e);
                 }
             }
         } finally {
