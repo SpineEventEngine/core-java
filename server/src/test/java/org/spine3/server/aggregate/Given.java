@@ -60,18 +60,17 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
-
         private EventMessage() {}
 
         public static ProjectCreated projectCreated() {
-            return PROJECT_CREATED;
+            final ProjectId id = AggregateId.newProjectId();
+            return projectCreated(id, newUuid());
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
+        public static ProjectCreated projectCreated(ProjectId id, String projectName) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
+                                 .setName(projectName)
                                  .build();
         }
 
@@ -101,7 +100,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
-            final ProjectCreated msg = EventMessage.projectCreated(projectId);
+            final ProjectCreated msg = EventMessage.projectCreated(projectId, newUuid());
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
@@ -147,6 +146,16 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             return create(command, userId, when);
         }
 
+        public static org.spine3.base.Command addTask(ProjectId id) {
+            final AddTask command = CommandMessage.addTask(id);
+            return create(command, USER_ID, getCurrentTime());
+        }
+
+        public static org.spine3.base.Command startProject(ProjectId id) {
+            final StartProject command = CommandMessage.startProject(id);
+            return create(command, USER_ID, getCurrentTime());
+        }
+
         /**
          * Creates a new {@link Command} with the given command message, userId and timestamp using default
          * {@link CommandId} instance.
@@ -163,21 +172,22 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private CommandMessage() {}
 
         public static CreateProject createProject(ProjectId id) {
-            return CreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+            final CreateProject.Builder builder = CreateProject.newBuilder()
+                                                               .setProjectId(id)
+                                                               .setName("Project_" + id.getId());
+            return builder.build();
         }
 
         public static AddTask addTask(ProjectId id) {
-            return AddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
+            final AddTask.Builder builder = AddTask.newBuilder()
+                                                   .setProjectId(id);
+            return builder.build();
         }
 
         public static StartProject startProject(ProjectId id) {
-            return StartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+            final StartProject.Builder builder = StartProject.newBuilder()
+                                                             .setProjectId(id);
+            return builder.build();
         }
     }
 }

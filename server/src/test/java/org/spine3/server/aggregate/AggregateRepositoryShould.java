@@ -22,6 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +47,9 @@ import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 
 import java.util.Map;
@@ -64,6 +67,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
+import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class AggregateRepositoryShould {
@@ -85,11 +89,16 @@ public class AggregateRepositoryShould {
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
         repository = new TestAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
+    }
+
+    @After
+    public void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
+        repository.close();
     }
 
     @Test
-    public void return_default_aggregate_state_if_no_aggregate_found() {
+    public void return_aggregate_with_default_state_if_no_aggregate_found() {
         final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId());
         final Project state = aggregate.getState();
 
@@ -99,23 +108,36 @@ public class AggregateRepositoryShould {
     @Test
     public void store_and_load_aggregate() {
         final ProjectId id = Given.AggregateId.newProjectId();
-        final ProjectAggregate expected = givenAggregateWithAppliedEvents(id);
+        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
         final ProjectAggregate actual = repository.load(id);
 
-        assertEquals(expected.getState(), actual.getState());
+        assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getState(), actual.getState());
     }
 
     @Test
-    public void store_snapshot_if_needed() {
-        @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        doReturn(storage).when(repositorySpy).aggregateStorage();
+    public void restore_aggregate_using_snapshot() {
+        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
-        final ProjectAggregate aggregate = givenAggregateWithAppliedEvents();
-        repositorySpy.setSnapshotTrigger(1);
+        repository.setSnapshotTrigger(expected.getUncommittedEvents().size());
+        repository.store(expected);
+
+        final ProjectAggregate actual = repository.load(id);
+
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getState(), actual.getState());
+    }
+
+    @Test
+    public void store_snapshot_and_set_event_count_to_zero_if_needed() {
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
+        repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents().size());
+
         repositorySpy.store(aggregate);
 
         verify(storage).write(any(ProjectId.class), any(Snapshot.class));
@@ -124,11 +146,9 @@ public class AggregateRepositoryShould {
 
     @Test
     public void not_store_snapshot_if_not_needed() {
-        @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        doReturn(storage).when(repositorySpy).aggregateStorage();// TODO:2016-07-22:alexander.litus: DRY
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
 
-        final ProjectAggregate aggregate = givenAggregateWithAppliedEvents();
         repositorySpy.store(aggregate);
 
         verify(storage, never()).write(any(ProjectId.class), any(Snapshot.class));
@@ -137,12 +157,15 @@ public class AggregateRepositoryShould {
 
     @Test
     public void dispatch_command() {
-        final Command cmd = Given.Command.createProject();
+        assertDispatches(Given.Command.createProject());
+    }
 
-        repository.dispatch(cmd);
-
-        final Command cmdHandled = ProjectAggregate.getCommandHandled(getId(cmd));
-        assertEquals(cmd, cmdHandled);
+    @Test
+    public void dispatch_several_commands() {
+        final ProjectId id = Given.AggregateId.newProjectId();
+        assertDispatches(Given.Command.createProject(id));
+        assertDispatches(Given.Command.addTask(id));
+        assertDispatches(Given.Command.startProject(id));
     }
 
     @Test
@@ -171,13 +194,13 @@ public class AggregateRepositoryShould {
     public void store_aggregate_on_command_dispatching() {
         final ProjectId id = Given.AggregateId.newProjectId();
         final Command cmd = Given.Command.createProject(id);
+        final CreateProject msg = Commands.getMessage(cmd);
 
         repositorySpy.dispatch(cmd);
 
         final ProjectAggregate aggregate = verifyAggregateStored(repositorySpy);
         assertEquals(id, aggregate.getId());
-        assertEquals(ProjectAggregate.NAME, aggregate.getState()
-                                                     .getName());
+        assertEquals(msg.getName(), aggregate.getState().getName());
     }
 
     @Test
@@ -264,14 +287,20 @@ public class AggregateRepositoryShould {
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
 
-    private static ProjectAggregate givenAggregateWithAppliedEvents() {
-        return givenAggregateWithAppliedEvents(Given.AggregateId.newProjectId());
+    /*
+     * Utility methods.
+     ****************************/
+
+    private static ProjectAggregate givenAggregateWithUncommittedEvents() {
+        return givenAggregateWithUncommittedEvents(Given.AggregateId.newProjectId());
     }
 
-    private static ProjectAggregate givenAggregateWithAppliedEvents(ProjectId id) {
+    private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
         final ProjectAggregate aggregate = new ProjectAggregate(id);
-        aggregate.dispatchForTest(Given.CommandMessage.createProject(id), createCommandContext());
-        aggregate.dispatchForTest(Given.CommandMessage.addTask(id), createCommandContext());
+        final CommandContext context = createCommandContext();
+        aggregate.dispatchForTest(Given.CommandMessage.createProject(id), context);
+        aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
+        aggregate.dispatchForTest(Given.CommandMessage.startProject(id), context);
         return aggregate;
     }
 
@@ -281,6 +310,18 @@ public class AggregateRepositoryShould {
         final RuntimeException wrapped = new RuntimeException(cause);
         doThrow(wrapped).when(throwingAggregate).dispatch(msg, cmd.getContext());
         doReturn(throwingAggregate).when(repositorySpy).load(any(ProjectId.class));
+    }
+
+    private AggregateStorage<ProjectId> givenAggregateStorageMock() {
+        @SuppressWarnings("unchecked")
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        doReturn(storage).when(repositorySpy).aggregateStorage();
+        return storage;
+    }
+
+    private void assertDispatches(Command cmd) {
+        repository.dispatch(cmd);
+        ProjectAggregate.assertHandled(cmd);
     }
 
     private Event verifyEventPosted() {
@@ -302,43 +343,64 @@ public class AggregateRepositoryShould {
         }
     }
 
+    /*
+     * Test classes.
+     ****************************/
+
+    @SuppressWarnings("TypeMayBeWeakened")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        // needs to be static
+        /** Needs to be static. */
         private static final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        private static final String NAME = "TestProject123";
-
+        @SuppressWarnings("PublicConstructorInNonPublicClass") /** It is required to be public. */
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
 
         @Assign
         public ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command command = Commands.create(msg, context);
-            commandsHandled.put(context.getCommandId(), command);
-            return Given.EventMessage.projectCreated(msg.getProjectId());
-        }
-
-        @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext context) {
-            return Given.EventMessage.taskAdded(cmd.getProjectId());
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            final ProjectCreated event = Given.EventMessage.projectCreated(msg.getProjectId(), msg.getName());
+            return event;
         }
 
         @Apply
         private void apply(ProjectCreated event) {
             getBuilder().setId(event.getProjectId())
-                        .setName(NAME);
+                        .setName(event.getName());
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask msg, CommandContext context) {
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            final TaskAdded event = Given.EventMessage.taskAdded(msg.getProjectId());
+            return event;
         }
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId())
-                        .addTask(event.getTask());
+            getBuilder().setId(event.getProjectId());
         }
 
-        /* package */ static Command getCommandHandled(CommandId id) {
-            return commandsHandled.get(id);
+        @Assign
+        public ProjectStarted handle(StartProject msg, CommandContext context) {
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            final ProjectStarted event = Given.EventMessage.projectStarted(msg.getProjectId());
+            return event;
+        }
+
+        @Apply
+        private void apply(ProjectStarted event) {
+        }
+
+        /* package */ static void assertHandled(Command expected) {
+            final CommandId id = Commands.getId(expected);
+            final Command actual = commandsHandled.get(id);
+            assertEquals(expected, actual);
         }
 
         /* package */ static void clearCommandsHandled() {

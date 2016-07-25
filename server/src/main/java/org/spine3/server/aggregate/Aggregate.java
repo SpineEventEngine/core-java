@@ -47,8 +47,10 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * Abstract base for aggregates.
@@ -289,7 +291,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    apply(message);
+                    doApply(message);
                     setVersion(context.getVersion(), context.getTimestamp());
                 } catch (InvocationTargetException e) {
                     throw wrappedCause(e);
@@ -319,24 +321,26 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    private void apply(Message eventMsgParam, CommandContext commandContext) throws InvocationTargetException {
-        Message eventMsg = eventMsgParam;
+    private void apply(Message eventOrMsg, CommandContext commandContext) throws InvocationTargetException {
+        final Message eventMsg;
         final EventContext eventContext;
-        if (eventMsg instanceof Event) {
+        incrementVersion(); // TODO:2016-07-25:alexander.litus: when to update time?
+        if (eventOrMsg instanceof Event) {
             // We are receiving the event during import or integration. This happened because
             // an aggregate's command handler returned either List<Event> or Event.
-            final Event event = (Event) eventMsg;
+            final Event event = (Event) eventOrMsg;
             eventMsg = getMessage(event);
-            apply(eventMsg);
             eventContext = event.getContext()
                                 .toBuilder()
                                 .setCommandContext(commandContext)
+                                .setTimestamp(getCurrentTime())
                                 .setVersion(getVersion())
                                 .build();
         } else {
-            apply(eventMsg);
+            eventMsg = eventOrMsg;
             eventContext = createEventContext(commandContext, eventMsg);
         }
+        doApply(eventMsg);
         final Event event = createEvent(eventMsg, eventContext);
         putUncommitted(event);
     }
@@ -351,7 +355,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void apply(Message eventMessage) throws InvocationTargetException {
+    private void doApply(Message eventMessage) throws InvocationTargetException {
         if (eventMessage instanceof Snapshot) {
             restore((Snapshot) eventMessage);
             return;
@@ -422,9 +426,11 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @CheckReturnValue
     protected EventContext createEventContext(CommandContext commandContext, Message event) {
         final EventId eventId = generateId();
+        final Timestamp whenModified = whenModified();
+        checkTimestamp(whenModified, "Aggregate modification time");
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setTimestamp(whenModified())
+                .setTimestamp(whenModified)
                 .setCommandContext(commandContext)
                 .setProducerId(getIdAsAny())
                 .setVersion(getVersion());

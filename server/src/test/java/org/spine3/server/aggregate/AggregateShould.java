@@ -384,13 +384,15 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreated(cmd.getProjectId());
+            final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
+            return event;
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return Given.EventMessage.taskAdded(cmd.getProjectId());
+            final TaskAdded event = Given.EventMessage.taskAdded(cmd.getProjectId());
+            return event;
         }
 
         @Assign
@@ -448,7 +450,7 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreated(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
         }
     }
 
@@ -523,7 +525,7 @@ public class AggregateShould {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }
-            return Given.EventMessage.projectCreated(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
         }
 
         @Apply

@@ -46,6 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
@@ -154,12 +155,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A load(I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().read(id);
-        final Snapshot snapshot = aggregateEvents.hasSnapshot() ?
-                                  aggregateEvents.getSnapshot() :
-                                  null;
+        final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
         final List<Event> events = aggregateEvents.getEventList();
-        if (snapshot != null) {
+        if (isNotDefault(snapshot)) {
             result.restore(snapshot);
         }
         result.play(events);
@@ -181,7 +180,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
             ++eventCount;
-            if (eventCount > snapshotTrigger) {
+            if (eventCount >= snapshotTrigger) {
                 final Snapshot snapshot = aggregate.toSnapshot();
                 storage.write(id, snapshot);
                 eventCount = 0;
