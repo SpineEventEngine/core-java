@@ -30,8 +30,8 @@ import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.time.ZoneOffset;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -127,9 +127,15 @@ public class Commands {
         return request.build();
     }
 
-    /** Extracts the message from the passed {@code Command} instance. */
-    public static Message getMessage(Command command) {
-        final Message result = AnyPacker.unpack(command.getMessage());
+    /**
+     * Extracts the message from the passed {@code Command} instance.
+     *
+     * @param command a command to extract a message from
+     * @param <M> a type of the command message
+     * @return an unpacked message
+     */
+    public static <M extends Message> M getMessage(Command command) {
+        final M result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 
