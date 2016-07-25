@@ -53,4 +53,3 @@ message Snapshot {
     // corresponding event), and before the time of the next event in the aggregate history.
     google.protobuf.Timestamp timestamp = 4;
 }
-

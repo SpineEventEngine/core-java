@@ -48,8 +48,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class AggregateId {
 
-        private AggregateId() {
-        }
+        private AggregateId() {}
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
@@ -64,8 +63,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
-        private EventMessage() {
-        }
+        private EventMessage() {}
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -92,13 +90,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class Event {
 
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
-
-        private Event() {
-        }
+        private Event() {}
 
         public static org.spine3.base.Event projectCreated() {
-            return projectCreated(PROJECT_ID);
+            return projectCreated(AggregateId.newProjectId());
         }
 
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
@@ -126,7 +121,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
-
     }
 
     /* package */ static class Command {
@@ -134,8 +128,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
-        private Command() {
-        }
+        private Command() {}
 
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
@@ -167,8 +160,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class CommandMessage {
 
-        private CommandMessage() {
-        }
+        private CommandMessage() {}
 
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
