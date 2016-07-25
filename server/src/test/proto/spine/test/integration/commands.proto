@@ -28,7 +28,6 @@ option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/test/integration/project.proto";
-import "spine/test/integration/task.proto";
 
 message CreateProject {
     ProjectId project_id = 1;
