@@ -95,7 +95,6 @@ public class CommandBusShould {
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new ProblemLog());
-        // Do not create a spy of the command bus because it would be impossible to debug its code
         commandBus = new CommandBus(commandStore, scheduler, log);
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
