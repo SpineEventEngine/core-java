@@ -23,17 +23,16 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.currentTimeSeconds;
+import static org.spine3.test.Tests.nullRef;
 
 /**
  * @author Alexander Litus
@@ -41,25 +40,21 @@ import static org.spine3.test.Tests.currentTimeSeconds;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
-    private static final String ID = newUuid();
-    private final Project state = newProject();
+    private final Project state = Given.newProject();
 
-    private Given.TestEntity entity = new Given.TestEntity(ID);
+    private final Given.TestEntity entityNew = Given.TestEntity.newInstance(newUuid());
 
-    @Before
-    public void setUp() {
-        entity = new Given.TestEntity(ID);
-    }
+    private final Given.TestEntity entityWithState = Given.TestEntity.withState();
 
     @Test
     public void return_default_state() {
-        final Project state = entity.getDefaultState();
+        final Project state = entityNew.getDefaultState();
         assertEquals(Project.getDefaultInstance(), state);
     }
 
     @Test
     public void return_default_state_for_different_entities() {
-        assertEquals(Project.getDefaultInstance(), entity.getDefaultState());
+        assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
 
         final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
         final StringValue expected = StringValue.getDefaultInstance();
@@ -68,36 +63,40 @@ public class EntityShould {
 
     @Test
     public void set_id_in_constructor() {
-        assertEquals(ID, entity.getId());
+        final String id = newUuid();
+
+        final Given.TestEntity entity = Given.TestEntity.newInstance(id);
+
+        assertEquals(id, entity.getId());
     }
 
     @Test
-    public void store_state() {
-        final Project state = newProject();
-        final Timestamp whenLastModified = getCurrentTime();
+    public void have_state() {
         final int version = 3;
+        final Timestamp whenModified = getCurrentTime();
 
-        entity.setState(state, version, whenLastModified);
+        entityNew.setState(state, version, whenModified);
 
-        assertEquals(state, entity.getState());
-        assertEquals(whenLastModified, entity.whenModified());
-        assertEquals(version, entity.getVersion());
+        assertEquals(state, entityNew.getState());
+        assertEquals(version, entityNew.getVersion());
+        assertEquals(whenModified, entityNew.whenModified());
     }
 
     @Test
     public void validate_state_when_set_it() {
-        entity.setState(state, 0, TimeUtil.getCurrentTime());
-        assertTrue(entity.isValidateMethodCalled());
+        entityNew.setState(state, 0, TimeUtil.getCurrentTime());
+
+        assertTrue(entityNew.isValidateMethodCalled());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entity.setState(Tests.<Project>nullRef(), 0, TimeUtil.getCurrentTime());
+        entityNew.setState(Tests.<Project>nullRef(), 0, TimeUtil.getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_modification_time() {
-        entity.setState(state, 0, Tests.<Timestamp>nullRef());
+        entityNew.setState(state, 0, Tests.<Timestamp>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -108,55 +107,56 @@ public class EntityShould {
 
     @Test
     public void set_default_state() {
-        entity.incrementState(newProject());
+        final Given.TestEntity entity = Given.TestEntity.withState();
         entity.setDefault();
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(entity.getDefaultState(), entity.getState());
         assertEquals(expectedTimeSec, entity.whenModified()
                                             .getSeconds());
-        assertEquals(0, entity.getVersion());
+        assertEquals(0, this.entityNew.getVersion());
     }
 
     @Test
     public void have_zero_version_by_default() {
-        assertEquals(0, entity.getVersion());
+        assertEquals(0, entityNew.getVersion());
     }
 
     @Test
     public void increment_version_by_one() {
-        final int version = entity.incrementVersion();
+        final int version = entityNew.incrementVersion();
         assertEquals(1, version);
     }
 
     @Test
     public void record_modification_time_when_incrementing_version() {
-        entity.incrementVersion();
+        entityNew.incrementVersion();
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entity.whenModified()
+        assertEquals(expectedTimeSec, entityNew.whenModified()
                                             .getSeconds());
     }
 
     @Test
     public void update_state() {
-        final Project newState = newProject();
-        entity.incrementState(newState);
-        assertEquals(newState, entity.getState());
+        entityNew.incrementState(state);
+
+        assertEquals(state, entityNew.getState());
     }
 
     @Test
     public void increment_version_when_updating_state() {
-        entity.incrementState(state);
-        assertEquals(1, entity.getVersion());
+        entityNew.incrementState(state);
+
+        assertEquals(1, entityNew.getVersion());
     }
 
     @Test
     public void record_modification_time_when_updating_state() {
-        entity.incrementState(state);
+        entityNew.incrementState(state);
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entity.whenModified()
+        assertEquals(expectedTimeSec, entityNew.whenModified()
                                             .getSeconds());
     }
 
@@ -169,10 +169,10 @@ public class EntityShould {
 
     @Test
     public void return_id_simple_class_name() {
-        final String expected = entity.getId()
+        final String expected = entityNew.getId()
                                       .getClass()
                                       .getSimpleName();
-        final String actual = entity.getShortIdTypeName();
+        final String actual = entityNew.getShortIdTypeName();
         assertEquals(expected, actual);
     }
 
@@ -185,11 +185,81 @@ public class EntityShould {
         assertEquals(expected, actual);
     }
 
-    private static Project newProject() {
-        final Project.Builder project = Project.newBuilder()
-                                               .setId(Given.AggregateId.newProjectId())
-                                               .setStatus(Project.Status.CREATED);
-        return project.build();
+    @Test
+    public void generate_non_zero_hash_code() {
+        final int hashCode = entityWithState.hashCode();
+
+        assertTrue(hashCode != 0);
+    }
+
+    @Test
+    public void generate_same_hash_code_for_one_instance() {
+        assertEquals(entityWithState.hashCode(), entityWithState.hashCode());
+    }
+
+    @Test
+    public void generate_unique_hash_code_for_different_instances() {
+        final Given.TestEntity another = Given.TestEntity.withState();
+
+        assertNotEquals(entityWithState.hashCode(), another.hashCode());
+    }
+
+    @Test
+    public void assure_same_entities_are_equal() {
+        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
+
+        assertTrue(entityWithState.equals(another));
+    }
+
+    @Test
+    public void assure_entity_is_equal_to_itself() {
+        // noinspection EqualsWithItself
+        assertTrue(entityWithState.equals(entityWithState));
+    }
+
+    @Test
+    public void assure_entity_is_not_equal_to_null() {
+        assertFalse(entityWithState.equals(nullRef()));
+    }
+
+    @Test
+    public void assure_entity_is_not_equal_to_object_of_another_class() {
+        //noinspection EqualsBetweenInconvertibleTypes
+        assertFalse(entityWithState.equals(newUuid()));
+    }
+
+    @Test
+    public void assure_entities_with_different_ids_are_not_equal() {
+        final Given.TestEntity another = Given.TestEntity.newInstance(newUuid());
+
+        assertNotEquals(entityWithState.getId(), another.getId());
+        assertFalse(entityWithState.equals(another));
+    }
+
+    @Test
+    public void assure_entities_with_different_states_are_not_equal() {
+        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
+        another.setState(Given.newProject(), another.getVersion(), another.whenModified());
+
+        assertNotEquals(entityWithState.getState(), another.getState());
+        assertFalse(entityWithState.equals(another));
+    }
+
+    @Test
+    public void assure_entities_with_different_versions_are_not_equal() {
+        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
+        another.setVersion(entityWithState.getVersion() + 5, another.whenModified());
+
+        assertFalse(entityWithState.equals(another));
+    }
+
+    @Test
+    public void assure_entities_with_different_modification_times_are_not_equal() {
+        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
+        another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
+
+        assertNotEquals(entityWithState.whenModified(), another.whenModified());
+        assertFalse(entityWithState.equals(another));
     }
 
     private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
