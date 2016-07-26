@@ -291,7 +291,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    doApply(message);
+                    applyEventOrSnapshot(message);
                     setVersion(context.getVersion(), context.getTimestamp());
                 } catch (InvocationTargetException e) {
                     throw wrappedCause(e);
@@ -324,7 +324,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private void apply(Message eventOrMsg, CommandContext commandContext) throws InvocationTargetException {
         final Message eventMsg;
         final EventContext eventContext;
-        incrementVersion(); // TODO:2016-07-25:alexander.litus: when to update time?
+        final Timestamp currentTime = getCurrentTime();
         if (eventOrMsg instanceof Event) {
             // We are receiving the event during import or integration. This happened because
             // an aggregate's command handler returned either List<Event> or Event.
@@ -333,14 +333,15 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             eventContext = event.getContext()
                                 .toBuilder()
                                 .setCommandContext(commandContext)
-                                .setTimestamp(getCurrentTime())
+                                .setTimestamp(currentTime)
                                 .setVersion(getVersion())
                                 .build();
         } else {
             eventMsg = eventOrMsg;
-            eventContext = createEventContext(commandContext, eventMsg);
+            eventContext = createEventContext(eventMsg, commandContext, currentTime);
         }
-        doApply(eventMsg);
+        applyEventOrSnapshot(eventMsg);
+        incrementVersion();
         final Event event = createEvent(eventMsg, eventContext);
         putUncommitted(event);
     }
@@ -351,17 +352,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
-     * @param eventMessage the event to apply
+     * @param eventOrSnapshot an event to apply or a snapshot to use to restore state
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void doApply(Message eventMessage) throws InvocationTargetException {
-        if (eventMessage instanceof Snapshot) {
-            restore((Snapshot) eventMessage);
-            return;
+    private void applyEventOrSnapshot(Message eventOrSnapshot) throws InvocationTargetException {
+        if (eventOrSnapshot instanceof Snapshot) {
+            restore((Snapshot) eventOrSnapshot);
+        } else {
+            invokeApplier(eventOrSnapshot);
         }
-        invokeApplier(eventMessage);
-        incrementVersion(); // This will also update whenModified field.
     }
 
     /**
@@ -418,16 +418,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
      *
-     * @param commandContext the context of the command, execution of which produced the event
      * @param event          the event for which to create the context
+     * @param commandContext the context of the command, execution of which produced the event
+     * @param whenModified   the time when an aggregate was modified
      * @return new instance of the {@code EventContext}
      * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandContext commandContext, Message event) {
-        final EventId eventId = generateId();
-        final Timestamp whenModified = whenModified();
+    protected EventContext createEventContext(Message event, CommandContext commandContext, Timestamp whenModified) {
         checkTimestamp(whenModified, "Aggregate modification time");
+        final EventId eventId = generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(whenModified)
@@ -445,7 +445,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param event          the event message
      * @param builder        a builder for the event context
-     * @see #createEventContext(CommandContext, Message)
+     * @see #createEventContext(Message, CommandContext, Timestamp)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void extendEventContext(Message event, EventContext.Builder builder, CommandContext commandContext) {

@@ -117,7 +117,7 @@ public class CommandBusShould {
      *********************/
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_CommandStore_on_construction() {
+    public void not_accept_null_CommandStore_on_construction() {
         CommandBus.newInstance(Tests.<CommandStore>nullRef());
     }
 
@@ -171,17 +171,17 @@ public class CommandBusShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_empty_dispatchers() {
+    public void not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_command_handlers_without_methods() {
+    public void not_accept_command_handlers_without_methods() {
         commandBus.register(new EmptyCommandHandler());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_allow_another_dispatcher_for_already_registered_commands() {
+    public void not_allow_another_dispatcher_for_already_registered_commands() {
         commandBus.register(new AllCommandDispatcher());
         commandBus.register(new AllCommandDispatcher());
     }
@@ -191,14 +191,14 @@ public class CommandBusShould {
      ******************************************************************/
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
+    public void not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
         commandBus.register(createProjectHandler);
         commandBus.register(createProjectDispatcher);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
+    public void not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
         commandBus.register(createProjectDispatcher);
         commandBus.register(createProjectHandler);
@@ -494,7 +494,7 @@ public class CommandBusShould {
     }
 
     @Test
-    public void do_not_schedule_command_if_no_scheduling_options_are_set() {
+    public void not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler(newUuid()));
         final Command cmd = commandFactory.create(Given.CommandMessage.createProject());
 
