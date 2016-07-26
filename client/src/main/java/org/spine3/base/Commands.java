@@ -285,7 +285,7 @@ public class Commands {
      */
     @Internal
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
-        checkTimestamp(schedulingTime, "command scheduling time");
+        checkIsPositive(schedulingTime, "command scheduling time");
         final CommandContext context = command.getContext();
         final CommandContext.Schedule scheduleUpdated = context.getSchedule()
                                                                .toBuilder()

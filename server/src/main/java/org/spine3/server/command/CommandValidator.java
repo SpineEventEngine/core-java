@@ -119,7 +119,7 @@ public class CommandValidator {
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
         checkValid(context.getCommandId());
-        checkTimestamp(context.getTimestamp(), "Command time");
+        checkIsPositive(context.getTimestamp(), "Command time");
         final Message commandMessage = Commands.getMessage(command);
         final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
         if (targetId.isPresent()) { // else - consider the command is not for an entity

@@ -50,7 +50,7 @@ import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
-import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.validate.Validate.checkIsPositive;
 
 /**
  * Abstract base for aggregates.
@@ -426,7 +426,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     protected EventContext createEventContext(Message event, CommandContext commandContext, Timestamp whenModified) {
-        checkTimestamp(whenModified, "Aggregate modification time");
+        checkIsPositive(whenModified, "Aggregate modification time");
         final EventId eventId = generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
