@@ -57,8 +57,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyIterator;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Events.getMessage;
@@ -69,7 +68,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
@@ -400,6 +399,8 @@ public class AggregateRepositoryShould {
         /* package */ static void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
+            final String cmdName = Commands.getMessage(expected).getClass().getName();
+            assertNotNull("No such command handled: " + cmdName, actual);
             assertEquals(expected, actual);
         }
 
