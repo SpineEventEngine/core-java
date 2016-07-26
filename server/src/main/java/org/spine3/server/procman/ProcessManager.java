@@ -82,10 +82,10 @@ import static org.spine3.base.Identifiers.idToAny;
  * </ul>
  *
  * @param <I> the type of the process manager IDs
- * @param <M> the type of the process manager state
+ * @param <S> the type of the process manager state
  * @author Alexander Litus
  */
-public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
+public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> {
 
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
@@ -166,10 +166,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     @CheckReturnValue
     private EventContext createEventContext(CommandContext cmdContext,
-            Message event,
-            M currentState,
-            Timestamp whenModified,
-            int currentVersion) {
+                                            Message event,
+                                            S currentState,
+                                            Timestamp whenModified,
+                                            int currentVersion) {
         final EventId eventId = Events.generateId();
         final Any producerId = idToAny(getId());
         final CommandId commandId = cmdContext.getCommandId();
@@ -196,7 +196,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
-            CommandId commandId, Message event, M currentState, int currentVersion) {
+                                             CommandId commandId,
+                                             Message event,
+                                             S currentState,
+                                             int currentVersion) {
         // Do nothing.
     }
 
