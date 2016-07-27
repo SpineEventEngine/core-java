@@ -1,9 +1,13 @@
 final String CREDENTIALS_LOCATION = 'credentials.properties'
 
+
 buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven {
+            url = 'http://maven.teamdev.com/repository/spine'
+        }
     }
     dependencies {
         classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7'
@@ -28,7 +32,6 @@ project.ext {
     // is updated with new Message types introduced in the new version of Protobuf.
     PROTOBUF_VERSION = '3.0.0-beta-3'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
     GRPC_VERSION = '0.14.0'
     SLF4J_VERSION = '1.7.21'
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
@@ -45,16 +48,6 @@ if (credentialsFile.exists()) {
 }
 
 subprojects {
-
-    buildscript {
-        repositories {
-            mavenLocal()
-            maven {
-                url = project.MAVEN_REPOSITORY_URL
-            }
-            mavenCentral()
-        }
-    }
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
@@ -217,7 +210,7 @@ publishingProjects.each {
                         username = "${repositoryUserName}"
                         password = "${repositoryUserPassword}"
                     }
-                    url = project.MAVEN_REPOSITORY_URL
+                    url = 'http://maven.teamdev.com/repository/spine'
                 }
             }
         }
