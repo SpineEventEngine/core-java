@@ -92,7 +92,7 @@ import static org.spine3.validate.Validate.isNotDefault;
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
-        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.ERROR)
                                                          .setError(error)
@@ -105,7 +105,7 @@ import static org.spine3.validate.Validate.isNotDefault;
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
-        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.FAILURE)
                                                          .setFailure(failure)
@@ -117,7 +117,7 @@ import static org.spine3.validate.Validate.isNotDefault;
     public void setOkStatus(CommandId id) {
         checkNotClosed();
         checkNotNull(id);
-        final CommandStorageRecord record = check(get(id), id);
+        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.OK)
                                                          .build();
@@ -136,7 +136,7 @@ import static org.spine3.validate.Validate.isNotDefault;
         return record;
     }
 
-    private static CommandStorageRecord check(CommandStorageRecord record, CommandId id) {
+    private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
         checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
         return record;
     }

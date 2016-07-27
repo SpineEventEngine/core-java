@@ -308,7 +308,6 @@ public class EventBusShould {
 
         private Event eventHandled;
 
-        // OK for the test class.
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             this.eventHandled = Events.createEvent(event, context);

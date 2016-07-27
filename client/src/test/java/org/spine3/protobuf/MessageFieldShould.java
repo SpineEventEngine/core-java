@@ -41,8 +41,18 @@ public class MessageFieldShould {
     private final StringValue stringValue = newStringValue(newUuid());
 
     @Test
-    public void have_index() {
+    public void accept_positive_index() {
         final int index = 5;
+
+        final MessageField field = new TestMessageField(index);
+
+        assertEquals(index, field.getIndex());
+    }
+
+    @Test
+    public void accept_zero_index() {
+        final int index = 0;
+
         final MessageField field = new TestMessageField(index);
 
         assertEquals(index, field.getIndex());
@@ -64,8 +74,7 @@ public class MessageFieldShould {
 
     @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void throw_exception_if_no_field_by_given_index() {
-        @SuppressWarnings("MagicNumber")
-        final TestMessageField field = new TestMessageField(256);
+        final TestMessageField field = new TestMessageField(Integer.MAX_VALUE);
 
         field.getValue(stringValue);
     }

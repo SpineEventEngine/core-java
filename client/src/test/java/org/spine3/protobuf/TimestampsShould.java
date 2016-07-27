@@ -50,7 +50,7 @@ public class TimestampsShould {
     }
 
     @Test
-    public void do_not_throw_exception_if_timestamp_is_valid() {
+    public void not_throw_exception_if_timestamp_is_valid() {
         Timestamps.checkTimestamp(Timestamp.newBuilder()
                                            .setSeconds(8)
                                            .setNanos(7)

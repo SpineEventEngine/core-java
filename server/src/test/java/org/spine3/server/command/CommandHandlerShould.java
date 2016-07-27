@@ -105,8 +105,11 @@ public class CommandHandlerShould {
     }
 
     @Test
-    public void generate_non_zero_hash_code() {
+    public void generate_non_zero_hash_code_if_handler_has_non_empty_id() {
+        assertFalse(handler.getId().trim().isEmpty());
+
         final int hashCode = handler.hashCode();
+
         assertTrue(hashCode != 0);
     }
 

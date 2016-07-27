@@ -186,7 +186,9 @@ public class EntityShould {
     }
 
     @Test
-    public void generate_non_zero_hash_code() {
+    public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
+        assertFalse(entityWithState.getId().trim().isEmpty());
+
         final int hashCode = entityWithState.hashCode();
 
         assertTrue(hashCode != 0);

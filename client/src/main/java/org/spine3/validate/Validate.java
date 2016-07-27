@@ -178,8 +178,8 @@ public class Validate {
      */
     public static Timestamp checkIsPositive(Timestamp timestamp, String nameToLog) {
         checkNotNull(timestamp, nameToLog + " is null.");
-        checkArgument(timestamp.getSeconds() > 0, nameToLog + " must have positive seconds.");
-        checkArgument(timestamp.getNanos() >= 0, nameToLog + " must have positive nanoseconds.");
+        checkArgument(timestamp.getSeconds() > 0, nameToLog + " must have a positive number of seconds.");
+        checkArgument(timestamp.getNanos() >= 0, nameToLog + " must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
