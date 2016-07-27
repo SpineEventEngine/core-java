@@ -1,12 +1,3 @@
-buildscript {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-    dependencies {
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: "$SPINE_PROTOBUF_PLUGIN_VERSION", changing: true
-    }
-}
-
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
 
@@ -15,8 +6,6 @@ dependencies {
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
 }
-
-apply plugin: 'org.spine3.tools.protobuf-plugin';
 
 sourceSets {
     main {
@@ -53,3 +42,5 @@ task testJar(type: Jar) {
 artifacts {
     testArtifacts testJar
 }
+
+apply plugin: 'org.spine3.tools.protobuf-plugin';
