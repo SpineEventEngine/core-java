@@ -343,7 +343,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         applyEventOrSnapshot(eventMsg);
         incrementVersion();
         final Event event = createEvent(eventMsg, eventContext);
-        putUncommitted(event);
+        uncommittedEvents.add(event);
     }
 
     /**
@@ -386,14 +386,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    private void putUncommitted(Event record) {
-        uncommittedEvents.add(record);
-    }
-
     /**
      * Returns all uncommitted events.
      *
-     * @return immutable view of records for all uncommitted events
+     * @return immutable view of all uncommitted events
      */
     @CheckReturnValue
     /* package */ List<Event> getUncommittedEvents() {
@@ -403,7 +399,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Returns and clears all the events that were uncommitted before the call of this method.
      *
-     * @return the list of event records
+     * @return the list of events
      */
     /* package */ List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
