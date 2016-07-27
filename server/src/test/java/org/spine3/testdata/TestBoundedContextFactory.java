@@ -62,6 +62,13 @@ public class TestBoundedContextFactory {
         return builder.build();
     }
 
+    public static BoundedContext newBoundedContext(CommandBus commandBus) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(FACTORY)
+                                                             .setCommandBus(commandBus);
+        return builder.build();
+    }
+
     public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setStorageFactory(FACTORY)

@@ -18,18 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.clientservice;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
+import org.spine3.base.Identifiers;
+import org.spine3.people.PersonName;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.clientservice.command.CreateProject;
+import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.clientservice.customer.CustomerId;
+import org.spine3.test.clientservice.customer.command.CreateCustomer;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
+import org.spine3.time.LocalDate;
+import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -43,10 +50,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     /* package */ static class AggregateId {
 
-        private AggregateId() {
-        }
+        private AggregateId() {}
 
-        public static ProjectId newProjectId() {
+        /* package */ static ProjectId newProjectId() {
             final String uuid = newUuid();
             return ProjectId.newBuilder()
                             .setId(uuid)
@@ -56,22 +62,21 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     /* package */ static class EventMessage {
 
-        private EventMessage() {
-        }
+        private EventMessage() {}
 
-        public static TaskAdded taskAdded(ProjectId id) {
+        /* package */ static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
+        /* package */ static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static ProjectStarted projectStarted(ProjectId id) {
+        /* package */ static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
@@ -95,30 +100,55 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
-        private Command() {
-        }
+        private Command() {}
 
         /**
          * Creates a new {@link Command} with the given command message, userId and timestamp using default
          * {@link Command} instance.
          */
-        public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
+        /* package */ static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.create(command, context);
             return result;
         }
 
-        public static org.spine3.base.Command createProject() {
+        /* package */ static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        public static org.spine3.base.Command createProject(Timestamp when) {
+        /* package */ static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        /* package */ static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
+        }
+
+        @SuppressWarnings("StaticNonFinalField") /* This hack is just for the testing purposes.
+        The production code should use more sane approach to generating the IDs. */
+        private static int customerNumber = 1;
+
+        /* package */ static org.spine3.base.Command createCustomer() {
+            final LocalDate localDate = LocalDates.today();
+            final CustomerId customerId = CustomerId.newBuilder()
+                                                    .setRegistrationDate(localDate)
+                                                    .setNumber(customerNumber)
+                                                    .build();
+            customerNumber++;
+            final Message msg = CreateCustomer.newBuilder()
+                                              .setCustomerId(customerId)
+                                              .setCustomer(Customer.newBuilder()
+                                                                   .setId(customerId)
+                                                                   .setName(PersonName.newBuilder()
+                                                                                      .setGivenName("Kreat")
+                                                                                      .setFamilyName("C'Ustomer")
+                                                                                      .setHonorificSuffix("Cmd")))
+                                              .build();
+            final UserId userId = newUserId(Identifiers.newUuid());
+            final org.spine3.base.Command result = Given.Command.create(msg, userId, TimeUtil.getCurrentTime());
+
+            return result;
         }
     }
 }

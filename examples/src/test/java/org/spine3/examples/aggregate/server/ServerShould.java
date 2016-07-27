@@ -43,8 +43,8 @@ public class ServerShould {
                 try {
                     server.start();
                     server.awaitTermination();
-                } catch (IOException | InterruptedException e) {
-                    propagate(e);
+                } catch (IOException e) {
+                    throw propagate(e);
                 }
             }
         });
