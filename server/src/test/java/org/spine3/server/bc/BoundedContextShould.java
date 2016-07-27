@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -146,11 +147,10 @@ public class BoundedContextShould {
     }
 
     @Test
-    @SuppressWarnings("unchecked") // have to cast to use Mockito
     public void not_notify_integration_event_subscriber_if_event_is_invalid() {
         final EventBus eventBus = mock(EventBus.class);
         doReturn(false).when(eventBus)
-                       .validate(any(Message.class), (StreamObserver<Response>) any());
+                       .validate(any(Message.class), anyResponseObserver());
         final BoundedContext boundedContext = newBoundedContext(eventBus);
         final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
 
@@ -168,6 +168,29 @@ public class BoundedContextShould {
                                                 .setMultitenant(true)
                                                 .build();
         assertTrue(bc.isMultitenant());
+    }
+
+    @Test
+    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
+        assertTrue(repository.storageAssigned());
+    }
+
+    @Test
+    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
+    }
+
+    /** Returns {@link Mockito#any()} matcher for response observer. */
+    @SuppressWarnings("unchecked")
+    private static StreamObserver<Response> anyResponseObserver() {
+        return (StreamObserver<Response>) any();
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {
@@ -330,22 +353,5 @@ public class BoundedContextShould {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
-    }
-
-    @Test
-    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        boundedContext.register(repository);
-        assertTrue(repository.storageAssigned());
-    }
-
-    @Test
-    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(storageFactory);
-
-        final Repository spy = spy(repository);
-        boundedContext.register(repository);
-        verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 }
