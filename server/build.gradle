@@ -21,7 +21,7 @@ apply plugin: 'org.spine3.tools.protobuf-plugin';
 sourceSets {
     main {
         proto {
-            srcDirs += ["${project(":server").projectDir}/src/main/proto"]
+            srcDirs += ["$projectDir/src/main/proto"]
         }
         java {
             srcDir "$projectDir/generated/main/grpc"
@@ -35,7 +35,7 @@ protobuf {
             task.plugins {
                 grpc {}
                 task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
+                task.descriptorSetOptions.path = "$projectDir/build/descriptors/${task.sourceSet.name}.desc"
                 task.descriptorSetOptions.includeImports = true
             }
         }
