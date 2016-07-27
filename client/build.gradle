@@ -1,7 +1,7 @@
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: "$GRPC_VERSION"
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: "$GRPC_VERSION"
-    compile group: 'io.grpc', name: 'grpc-stub', version: "$GRPC_VERSION"
+    compile group: 'io.grpc', name: 'grpc-okhttp', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-stub', version: GRPC_VERSION
 
     testCompile project(path: ":testutil", configuration: 'testArtifacts')
 }
