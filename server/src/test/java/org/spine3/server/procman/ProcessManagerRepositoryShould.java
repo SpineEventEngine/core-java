@@ -57,6 +57,7 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
@@ -208,7 +209,7 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }
