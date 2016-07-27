@@ -30,7 +30,6 @@ import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/validate.proto";
 import "spine/test/event/project.proto";
-import "spine/test/event/task.proto";
 import "spine/event_annotations.proto";
 
 message ProjectCreated {

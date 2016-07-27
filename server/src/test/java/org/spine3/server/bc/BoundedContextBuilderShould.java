@@ -32,8 +32,8 @@ import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
-import org.spine3.testdata.CommandBusFactory;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestCommandBusFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.concurrent.Executor;
 
@@ -76,7 +76,7 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_CommandBus() {
-        final CommandBus expected = CommandBusFactory.create(storageFactory);
+        final CommandBus expected = TestCommandBusFactory.create(storageFactory);
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
@@ -84,7 +84,7 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_EventBus() {
-        final EventBus expected = EventBusFactory.create(storageFactory);
+        final EventBus expected = TestEventBusFactory.create(storageFactory);
         builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
@@ -131,7 +131,7 @@ public class BoundedContextBuilderShould {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
                 .setStorageFactory(storageFactory)
-                .setEventBus(EventBusFactory.create(storageFactory))
+                .setEventBus(TestEventBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getCommandBus());
     }
@@ -141,7 +141,7 @@ public class BoundedContextBuilderShould {
         // Pass CommandBus to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
                 .setStorageFactory(storageFactory)
-                .setCommandBus(CommandBusFactory.create(storageFactory))
+                .setCommandBus(TestCommandBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getEventBus());
     }

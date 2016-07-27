@@ -23,7 +23,6 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
@@ -79,13 +78,35 @@ public class ValidateShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_timestamp_seconds_are_not_positive() {
-        Validate.checkTimestamp(Timestamp.getDefaultInstance(), "");
+    public void throw_exception_if_timestamp_seconds_value_is_zero() {
+        Validate.checkIsPositive(Timestamp.newBuilder()
+                                          .setSeconds(0)
+                                          .setNanos(5)
+                                          .build(), "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_timestamp_seconds_value_is_negative() {
+        Validate.checkIsPositive(Timestamp.newBuilder()
+                                          .setSeconds(-5)
+                                          .setNanos(5)
+                                          .build(), "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_timestamp_nanos_value_is_negative() {
+        Validate.checkIsPositive(Timestamp.newBuilder()
+                                          .setSeconds(5)
+                                          .setNanos(-5)
+                                          .build(), "");
     }
 
     @Test
-    public void do_not_throw_exception_if_timestamp_seconds_are_positive() {
-        Validate.checkTimestamp(TimeUtil.getCurrentTime(), "");
+    public void do_not_throw_exception_if_timestamp_seconds_and_nanos_are_positive() {
+        Validate.checkIsPositive(Timestamp.newBuilder()
+                                          .setSeconds(5)
+                                          .setNanos(5)
+                                          .build(), "");
     }
 
     @Test(expected = NullPointerException.class)

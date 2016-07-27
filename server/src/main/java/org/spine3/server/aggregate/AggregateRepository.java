@@ -45,8 +45,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Commands.getMessage;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
@@ -155,20 +155,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A load(I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().read(id);
-        try {
-            final Snapshot snapshot = aggregateEvents.hasSnapshot()
-                    ? aggregateEvents.getSnapshot()
-                    : null;
-            final A result = create(id);
-            final List<Event> events = aggregateEvents.getEventList();
-            if (snapshot != null) {
-                result.restore(snapshot);
-            }
-            result.play(events);
-            return result;
-        } catch (Throwable e) {
-            throw propagate(e);
+        final Snapshot snapshot = aggregateEvents.getSnapshot();
+        final A result = create(id);
+        final List<Event> events = aggregateEvents.getEventList();
+        if (isNotDefault(snapshot)) {
+            result.restore(snapshot);
         }
+        result.play(events);
+        return result;
     }
 
     /**
@@ -186,7 +180,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
             ++eventCount;
-            if (eventCount > snapshotTrigger) {
+            if (eventCount >= snapshotTrigger) {
                 final Snapshot snapshot = aggregate.toSnapshot();
                 storage.write(id, snapshot);
                 eventCount = 0;
@@ -194,13 +188,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
         aggregate.commitEvents();
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
-    }
-
-    /** Posts passed events to {@link EventBus}. */
-    private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            eventBus.post(event);
-        }
     }
 
     /**
@@ -246,6 +233,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
         postEvents(events);
         commandStatusService.setOk(commandId);
+    }
+
+    /** Posts passed events to {@link EventBus}. */
+    private void postEvents(Iterable<Event> events) {
+        for (Event event : events) {
+            eventBus.post(event);
+        }
     }
 
     private I getAggregateId(Message command) {

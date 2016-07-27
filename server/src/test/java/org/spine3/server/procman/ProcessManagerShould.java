@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -56,6 +55,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
+import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
@@ -160,7 +160,7 @@ public class ProcessManagerShould {
         final CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertTrue(Commands.getMessage(commandRouted.getSource()) instanceof StartProject);
+        assertTrue(getMessage(commandRouted.getSource()) instanceof StartProject);
         verifyPostedCmd(commandRouted.getProduced(0));
     }
 

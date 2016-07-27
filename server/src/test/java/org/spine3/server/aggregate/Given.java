@@ -48,8 +48,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class AggregateId {
 
-        private AggregateId() {
-        }
+        private AggregateId() {}
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
@@ -61,19 +60,17 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
-
-        private EventMessage() {
-        }
+        private EventMessage() {}
 
         public static ProjectCreated projectCreated() {
-            return PROJECT_CREATED;
+            final ProjectId id = AggregateId.newProjectId();
+            return projectCreated(id, newUuid());
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
+        public static ProjectCreated projectCreated(ProjectId id, String projectName) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
+                                 .setName(projectName)
                                  .build();
         }
 
@@ -92,13 +89,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class Event {
 
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
-
-        private Event() {
-        }
+        private Event() {}
 
         public static org.spine3.base.Event projectCreated() {
-            return projectCreated(PROJECT_ID);
+            return projectCreated(AggregateId.newProjectId());
         }
 
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
@@ -106,7 +100,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
-            final ProjectCreated msg = EventMessage.projectCreated(projectId);
+            final ProjectCreated msg = EventMessage.projectCreated(projectId, newUuid());
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
@@ -126,7 +120,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
-
     }
 
     /* package */ static class Command {
@@ -134,11 +127,14 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
-        private Command() {
-        }
+        private Command() {}
 
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
+        }
+
+        public static org.spine3.base.Command createProject(ProjectId id) {
+            return createProject(USER_ID, id, getCurrentTime());
         }
 
         public static org.spine3.base.Command createProject(Timestamp when) {
@@ -148,6 +144,16 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
+        }
+
+        public static org.spine3.base.Command addTask(ProjectId id) {
+            final AddTask command = CommandMessage.addTask(id);
+            return create(command, USER_ID, getCurrentTime());
+        }
+
+        public static org.spine3.base.Command startProject(ProjectId id) {
+            final StartProject command = CommandMessage.startProject(id);
+            return create(command, USER_ID, getCurrentTime());
         }
 
         /**
@@ -163,25 +169,25 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class CommandMessage {
 
-        private CommandMessage() {
-        }
+        private CommandMessage() {}
 
         public static CreateProject createProject(ProjectId id) {
-            return CreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+            final CreateProject.Builder builder = CreateProject.newBuilder()
+                                                               .setProjectId(id)
+                                                               .setName("Project_" + id.getId());
+            return builder.build();
         }
 
         public static AddTask addTask(ProjectId id) {
-            return AddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
+            final AddTask.Builder builder = AddTask.newBuilder()
+                                                   .setProjectId(id);
+            return builder.build();
         }
 
         public static StartProject startProject(ProjectId id) {
-            return StartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+            final StartProject.Builder builder = StartProject.newBuilder()
+                                                             .setProjectId(id);
+            return builder.build();
         }
     }
 }

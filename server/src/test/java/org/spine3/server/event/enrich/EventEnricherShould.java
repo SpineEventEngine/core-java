@@ -39,13 +39,13 @@ import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
-import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 public class EventEnricherShould {
@@ -60,7 +60,7 @@ public class EventEnricherShould {
     @Before
     public void setUp() {
         enricher = Given.Enrichment.newEventEnricher();
-        boundedContext = BoundedContextTestStubs.create(enricher);
+        boundedContext = newBoundedContext(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();
         eventBus.subscribe(subscriber);

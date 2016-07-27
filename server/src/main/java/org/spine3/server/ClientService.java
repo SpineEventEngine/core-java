@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * The {@code ClientService} allows client applications to post commands and
@@ -53,8 +54,12 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.ClientService {
 
-    private final ImmutableMap<CommandClass, BoundedContext> commandToBoundedContext;
+    private static final String SERVICE_NOT_STARTED_MSG = "Service was not started or is shutdown already.";
+
     private final int port;
+
+    private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
+
     @Nullable
     private io.grpc.Server grpcServer;
 
@@ -64,7 +69,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     protected ClientService(Builder builder) {
         this.port = builder.getPort();
-        this.commandToBoundedContext = builder.commandToBoundedContextMap().build();
+        this.boundedContextMap = builder.getBoundedContextMap();
     }
 
     /**
@@ -73,15 +78,19 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
      * @throws IOException if unable to bind
      */
     public void start() throws IOException {
-        checkState(grpcServer == null, "Already started");
-        grpcServer = createGrpcServer(this, this.port);
+        checkState(grpcServer == null, "Service is started already.");
+        grpcServer = createGrpcServer(port);
         grpcServer.start();
     }
 
     /** Waits for the service to become terminated. */
-    public void awaitTermination() throws InterruptedException {
-        checkState(grpcServer != null);
-        grpcServer.awaitTermination();
+    public void awaitTermination() {
+        checkState(grpcServer != null, SERVICE_NOT_STARTED_MSG);
+        try {
+            grpcServer.awaitTermination();
+        } catch (InterruptedException e) {
+            throw propagate(e);
+        }
     }
 
     /**
@@ -95,35 +104,40 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                final String serverClass = ClientService.this.getClass().getName();
-                System.err.println("Shutting down " + serverClass + " since JVM is shutting down...");
+                final String serviceClass = ClientService.this.getClass().getName();
                 try {
                     if (!isShutdown()) {
+                        System.err.println("Shutting down " + serviceClass + " since JVM is shutting down...");
                         shutdown();
+                        System.err.println(serviceClass + " shut down.");
                     }
                 } catch (RuntimeException e) {
                     e.printStackTrace(System.err);
                 }
-                System.err.println(serverClass + " shut down.");
             }
         }));
     }
 
-    @VisibleForTesting
+    /**
+     * Returns {@code true} if the service is shutdown or was not started at all, {@code false} otherwise.
+     *
+     * @see ClientService#shutdown()
+     */
     public boolean isShutdown() {
         final boolean isShutdown = grpcServer == null;
         return isShutdown;
     }
 
-    /** Shuts the service down after completing queued requests. */
+    /** Initiates an orderly shutdown in which existing calls continue but new calls are rejected. */
     public void shutdown() {
-        checkState(grpcServer != null);
+        checkState(grpcServer != null, SERVICE_NOT_STARTED_MSG);
         grpcServer.shutdown();
         grpcServer = null;
     }
 
-    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService clientService, int port) {
-        final ServerServiceDefinition service = ClientServiceGrpc.bindService(clientService);
+    @VisibleForTesting
+    /* package */ io.grpc.Server createGrpcServer(int port) {
+        final ServerServiceDefinition service = ClientServiceGrpc.bindService(this);
         final ServerBuilder builder = ServerBuilder.forPort(port)
                                                    .addService(service);
         return builder.build();
@@ -132,12 +146,12 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
-        final BoundedContext boundedContext = commandToBoundedContext.get(commandClass);
+        final BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
-            return;
+        } else {
+            boundedContext.getCommandBus().post(request, responseObserver);
         }
-        boundedContext.getCommandBus().post(request, responseObserver);
     }
 
     private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {
@@ -161,10 +175,14 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
     }
 
     public static class Builder {
+
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+        private ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
+
         private int port = ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
         public Builder addBoundedContext(BoundedContext boundedContext) {
+            // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
@@ -183,22 +201,33 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
             return this.port;
         }
 
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
+        public ImmutableMap<CommandClass, BoundedContext> getBoundedContextMap() {
+            return boundedContextMap;
+        }
+
+        /**
+         * Builds the {@link ClientService}.
+         * {@link ConnectionConstants#DEFAULT_CLIENT_SERVICE_PORT} is used by default.
+         */
         public ClientService build() {
+            this.boundedContextMap = createBoundedContextMap();
             final ClientService result = new ClientService(this);
             return result;
         }
 
-        private ImmutableMap.Builder<CommandClass, BoundedContext> commandToBoundedContextMap() {
-            final ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder = ImmutableMap.builder();
+        private ImmutableMap<CommandClass, BoundedContext> createBoundedContextMap() {
+            final ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
-                addBoundedContext(mapBuilder, boundedContext);
+                addBoundedContext(builder, boundedContext);
             }
-            return mapBuilder;
+            return builder.build();
         }
 
         private static void addBoundedContext(ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder,
                                               BoundedContext boundedContext) {
-            for (CommandClass commandClass : boundedContext.getCommandBus().getSupportedCommandClasses()) {
+            final Set<CommandClass> cmdClasses = boundedContext.getCommandBus().getSupportedCommandClasses();
+            for (CommandClass commandClass : cmdClasses) {
                 mapBuilder.put(commandClass, boundedContext);
             }
         }

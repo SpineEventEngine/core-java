@@ -28,7 +28,6 @@ option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/test/clientservice/project.proto";
-import "spine/test/clientservice/task.proto";
 import "spine/base/event.proto";
 
 message CreateProject {

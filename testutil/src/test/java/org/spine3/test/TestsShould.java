@@ -38,9 +38,22 @@ public class TestsShould {
     }
 
     @Test
-    public void verify_public_constructor() {
+    public void return_false_if_no_private_but_public_ctor() {
         assertFalse(Tests.hasPrivateUtilityConstructor(ClassWithPublicCtor.class));
-        assertTrue(Tests.hasPrivateUtilityConstructor(TestsTest.class));
+    }
+
+    @Test
+    public void return_false_if_only_ctor_with_args_found() {
+        assertFalse(Tests.hasPrivateUtilityConstructor(ClassWithCtorWithArgs.class));
+    }
+
+    @Test
+    public void return_true_if_class_has_private_ctor() {
+        assertTrue(Tests.hasPrivateUtilityConstructor(ClassWithPrivateCtor.class));
+    }
+
+    @Test
+    public void return_true_if_class_has_private_throwing_ctor() {
         assertTrue(Tests.hasPrivateUtilityConstructor(ClassThrowingExceptionInConstructor.class));
     }
 
@@ -49,11 +62,23 @@ public class TestsShould {
         assertNotEquals(0, Tests.currentTimeSeconds());
     }
 
-    private static class TestsTest {
+    @Test
+    public void return_null_reference() {
+        assertNull(Tests.nullRef());
+    }
+
+    @Test
+    public void have_frozen_time_provider() {
+        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+
+        final Tests.FrozenMadHatterParty provider = new Tests.FrozenMadHatterParty(fiveMinutesAgo);
+
+        assertEquals(fiveMinutesAgo, provider.getCurrentTime());
+    }
+
+    private static class ClassWithPrivateCtor {
         @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.
-        private TestsTest() {
-            // Do nothing.
-        }
+        private ClassWithPrivateCtor() {}
     }
 
     private static class ClassWithPublicCtor {
@@ -66,12 +91,7 @@ public class TestsShould {
         }
     }
 
-    @Test
-    public void have_frozen_time_provider() {
-        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
-
-        Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
-
-        assertEquals(fiveMinutesAgo, Timestamps.getCurrentTime());
+    private static class ClassWithCtorWithArgs {
+        private ClassWithCtorWithArgs(int i) {}
     }
 }

@@ -124,13 +124,6 @@ public class EventBus implements AutoCloseable {
         return new Builder();
     }
 
-    /** Determines the class of the event from the passed event record. */
-    public static EventClass getEventClass(Event event) {
-        final Message message = getMessage(event);
-        final EventClass result = EventClass.of(message);
-        return result;
-    }
-
     @VisibleForTesting
     /* package */ Executor getExecutor() {
         return executor;
@@ -230,7 +223,7 @@ public class EventBus implements AutoCloseable {
     }
 
     private void callDispatchers(Event event) {
-        final EventClass eventClass = getEventClass(event);
+        final EventClass eventClass = EventClass.of(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
             dispatcher.dispatch(event);

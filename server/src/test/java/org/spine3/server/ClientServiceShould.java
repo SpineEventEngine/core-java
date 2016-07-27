@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.clientservice;
+package org.spine3.server;
 
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.util.TimeUtil;
+import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
@@ -32,16 +31,13 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.people.PersonName;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.ClientService;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.test.clientservice.Project;
 import org.spine3.test.clientservice.ProjectId;
@@ -55,33 +51,40 @@ import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
-import org.spine3.testdata.BoundedContextTestStubs;
-import org.spine3.time.LocalDate;
-import org.spine3.time.LocalDates;
-import org.spine3.users.UserId;
+import org.spine3.testdata.TestCommandBusFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.spine3.client.UserUtil.newUserId;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClientServiceShould {
 
+    private ClientService service;
+    private Server server;
+
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+    private BoundedContext projectsContext;
+
+    private BoundedContext customersContext;
+    private final TestResponseObserver responseObserver = new TestResponseObserver();
+
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        final BoundedContext projectsContext = BoundedContextTestStubs.create();
+        projectsContext = newBoundedContext(spy(TestCommandBusFactory.create()));
         final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        final BoundedContext customersContext = BoundedContextTestStubs.create();
+        customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
         final CustomerAggregateRepository customerRepo = new CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
@@ -91,75 +94,120 @@ public class ClientServiceShould {
         for (BoundedContext context : boundedContexts) {
             builder.addBoundedContext(context);
         }
-
-        clientService = builder.build();
+        service = spy(builder.build());
+        server = mock(Server.class);
+        doReturn(server).when(service).createGrpcServer(anyInt());
     }
-
-    private ClientService clientService;
 
     @After
     public void tearDown() throws Exception {
-        if (!clientService.isShutdown()) {
-            clientService.shutdown();
+        if (!service.isShutdown()) {
+            service.shutdown();
         }
-
         for (BoundedContext boundedContext : boundedContexts) {
             boundedContext.close();
         }
     }
 
     @Test
-    public void accept_commands_for_linked_bounded_contexts() {
-        final TestResponseObserver responseObserver = new TestResponseObserver();
-        final Command createProject = Given.Command.createProject();
-        clientService.post(createProject, responseObserver);
-        assertEquals(Responses.ok(), responseObserver.getResponseHandled());
+    public void post_commands_to_appropriate_bounded_context() {
+        verifyPostsCommand(Given.Command.createProject(), projectsContext.getCommandBus());
+        verifyPostsCommand(Given.Command.createCustomer(), customersContext.getCommandBus());
+    }
 
-        final Command createCustomer = createCustomerCmd();
-        clientService.post(createCustomer, responseObserver);
+    private void verifyPostsCommand(Command cmd, CommandBus commandBus) {
+        service.post(cmd, responseObserver);
+
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
+        assertTrue(responseObserver.isCompleted());
+        assertNull(responseObserver.getThrowable());
+        verify(commandBus).post(cmd, responseObserver);
     }
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final TestResponseObserver responseObserver = new TestResponseObserver();
         final Command unsupportedCmd = Commands.create(StringValue.getDefaultInstance(), createCommandContext());
 
-        clientService.post(unsupportedCmd, responseObserver);
+        service.post(unsupportedCmd, responseObserver);
 
-        final Throwable exception = responseObserver.getThrowable()
-                                                    .getCause();
+        final Throwable exception = responseObserver.getThrowable().getCause();
         assertEquals(UnsupportedCommandException.class, exception.getClass());
     }
 
-    /*
-     * Commands stubs
-     *********************/
+    @Test
+    public void start_server() throws IOException {
+        service.start();
 
-    @SuppressWarnings("StaticNonFinalField") /* This hack is just for the testing purposes. The production code should
-                                                use more sane approach to generating the IDs. */
-    private static int customerNumber = 1;
+        verify(server).start();
+    }
 
-    private static Command createCustomerCmd() {
-        final LocalDate localDate = LocalDates.today();
-        final CustomerId customerId = CustomerId.newBuilder()
-                                                .setRegistrationDate(localDate)
-                                                .setNumber(customerNumber)
-                                                .build();
-        customerNumber++;
-        final Message msg = CreateCustomer.newBuilder()
-                                          .setCustomerId(customerId)
-                                          .setCustomer(Customer.newBuilder()
-                                                               .setId(customerId)
-                                                               .setName(PersonName.newBuilder()
-                                                                                  .setGivenName("Kreat")
-                                                                                  .setFamilyName("C'Ustomer")
-                                                                                  .setHonorificSuffix("Cmd")))
-                                          .build();
-        final UserId userId = newUserId(Identifiers.newUuid());
-        final Command result = Given.Command.create(msg, userId, TimeUtil.getCurrentTime());
+    @Test
+    public void throw_exception_if_started_already() throws IOException {
+        service.start();
+        try {
+            service.start();
+        } catch (IllegalStateException expected) {
+            return;
+        }
+        fail("Exception must be thrown.");
+    }
 
-        return result;
+    @Test
+    public void await_termination() throws IOException, InterruptedException {
+        service.start();
+        service.awaitTermination();
+
+        verify(server).awaitTermination();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_call_await_termination_on_not_started_service() {
+        service.awaitTermination();
+    }
+
+    @Test
+    public void assure_service_is_shutdown() throws IOException {
+        service.start();
+        service.shutdown();
+
+        assertTrue(service.isShutdown());
+    }
+
+    @Test
+    public void assure_service_was_not_started() throws IOException {
+        assertTrue(service.isShutdown());
+    }
+
+    @Test
+    public void assure_service_is_not_shut_down() throws IOException {
+        service.start();
+
+        assertFalse(service.isShutdown());
+    }
+
+    @Test
+    public void shutdown_itself() throws IOException, InterruptedException {
+        service.start();
+        service.shutdown();
+
+        verify(server).shutdown();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_call_shutdown_on_not_started_service() {
+        service.shutdown();
+    }
+
+    @Test
+    public void throw_exception_if_shutdown_already() throws IOException {
+        service.start();
+        service.shutdown();
+        try {
+            service.shutdown();
+        } catch (IllegalStateException expected) {
+            return;
+        }
+        fail("Expected an exception.");
     }
 
     /*
@@ -247,8 +295,8 @@ public class ClientServiceShould {
     private static class TestResponseObserver implements StreamObserver<Response> {
 
         private Response responseHandled;
-
         private Throwable throwable;
+        private boolean isCompleted = false;
 
         @Override
         public void onNext(Response response) {
@@ -262,15 +310,19 @@ public class ClientServiceShould {
 
         @Override
         public void onCompleted() {
+            this.isCompleted = true;
         }
 
-        public Response getResponseHandled() {
+        /* package */ Response getResponseHandled() {
             return responseHandled;
         }
 
-        public Throwable getThrowable() {
+        /* package */ Throwable getThrowable() {
             return throwable;
         }
-    }
 
+        /* package */ boolean isCompleted() {
+            return isCompleted;
+        }
+    }
 }

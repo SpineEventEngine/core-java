@@ -18,29 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.protobuf.error;
 
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.server.event.EventDispatcher;
-import org.spine3.server.type.EventClass;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Delivers events to handlers (which are supposed to be entities).
- *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
- */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
+public class MissingDescriptorExceptionShould {
+    
+    @Test
+    public void have_ctor() {
+        final Class<StringValue> clazz = StringValue.class;
+        final RuntimeException cause = new RuntimeException("");
 
-    /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
-     */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass);
+        final MissingDescriptorException exception = new MissingDescriptorException(clazz, cause);
+
+        assertTrue(exception.getMessage().contains(clazz.getName()));
+        assertEquals(cause, exception.getCause());
+    }
 }

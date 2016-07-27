@@ -20,22 +20,32 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.command.CreateProject;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 
 
-@SuppressWarnings("EmptyClass")
 /* package */ class Given {
+
+    private Given() {}
+
+    /* package */ static Project newProject() {
+        final Project.Builder project = Project.newBuilder()
+                                               .setId(AggregateId.newProjectId())
+                                               .setName("Project-" + newUuid())
+                                               .setStatus(Project.Status.CREATED);
+        return project.build();
+    }
 
     /* package */ static class AggregateId {
 
-        private AggregateId() {
-        }
+        private AggregateId() {}
 
-        public static ProjectId newProjectId() {
+        /* package */ static ProjectId newProjectId() {
             final String uuid = newUuid();
             return ProjectId.newBuilder()
                             .setId(uuid)
@@ -45,10 +55,9 @@ import static org.spine3.base.Identifiers.newUuid;
 
     /* package */ static class CommandMessage {
 
-        private CommandMessage() {
-        }
+        private CommandMessage() {}
 
-        public static CreateProject createProject() {
+        /* package */ static CreateProject createProject() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
@@ -64,7 +73,27 @@ import static org.spine3.base.Identifiers.newUuid;
 
         private boolean isValidateMethodCalled = false;
 
-        /* package */ TestEntity(String id) {
+        /* package */ static TestEntity newInstance(String id) {
+            final TestEntity entity = new TestEntity(id);
+            return entity;
+        }
+
+        /* package */ static TestEntity withState() {
+            final Project state = newProject();
+            final int version = 3;
+            final Timestamp whenModified = getCurrentTime();
+            final TestEntity entity = new TestEntity(newUuid());
+            entity.setState(state, version, whenModified);
+            return entity;
+        }
+
+        /* package */ static TestEntity withState(TestEntity entity) {
+            final TestEntity result = new TestEntity(entity.getId());
+            result.setState(entity.getState(), entity.getVersion(), entity.whenModified());
+            return result;
+        }
+
+        private TestEntity(String id) {
             super(id);
         }
 
@@ -74,7 +103,7 @@ import static org.spine3.base.Identifiers.newUuid;
             isValidateMethodCalled = true;
         }
 
-        public boolean isValidateMethodCalled() {
+        /* package */ boolean isValidateMethodCalled() {
             return isValidateMethodCalled;
         }
     }

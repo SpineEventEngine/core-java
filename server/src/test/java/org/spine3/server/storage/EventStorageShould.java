@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -155,6 +156,25 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Iterator<Event> actual = storage.iterator(query);
 
         assertEquals(expected, newArrayList(actual));
+    }
+
+    @Test
+    public void convert_record_list_to_events() {
+        givenSequentialRecords();
+        final ImmutableList<EventStorageRecord> records = ImmutableList.of(record1, record2, record3);
+
+        final List<Event> events = toEventList(records);
+
+        assertAreSame(records, events);
+    }
+
+    @Test
+    public void convert_records_to_events() {
+        givenSequentialRecords();
+
+        final List<Event> events = toEventList(record1, record2, record3);
+
+        assertAreSame(ImmutableList.of(record1, record2, record3), events);
     }
 
     /*
@@ -388,6 +408,16 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Iterator<Event> iterator = findAll();
         final List<Event> actual = newArrayList(iterator);
         assertEquals(expectedRecords, actual);
+    }
+
+    private static void assertAreSame(ImmutableList<EventStorageRecord> records, List<Event> events) {
+        assertEquals(records.size(), events.size());
+        for (int i = 0; i < records.size(); i++) {
+            final Event event = events.get(i);
+            final EventStorageRecord record = records.get(i);
+            assertEquals(event.getMessage(), record.getMessage());
+            assertEquals(event.getContext(), record.getContext());
+        }
     }
 
     protected Iterator<Event> findAll() {

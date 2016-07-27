@@ -277,15 +277,14 @@ public class Timestamps {
      * @return the moment `value` seconds ago
      */
     @VisibleForTesting
-    public static Timestamp secondsAgo(int value) {
+    public static Timestamp secondsAgo(long value) {
         checkPositive(value);
         final Timestamp currentTime = getCurrentTime();
         final Timestamp result = subtract(currentTime, Durations.ofSeconds(value));
         return result;
     }
 
-    private static void checkPositive(int value) {
+    private static void checkPositive(long value) {
         checkArgument(value > 0, "value must be positive");
     }
-
 }

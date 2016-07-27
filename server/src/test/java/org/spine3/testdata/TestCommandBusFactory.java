@@ -18,29 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.testdata;
 
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.server.event.EventDispatcher;
-import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nonnull;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
- * Delivers events to handlers (which are supposed to be entities).
+ * Creates {@link org.spine3.server.command.CommandBus}s for tests.
  *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
+ * @author Andrey Lavrov
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
 
-    /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
-     */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass);
+@SuppressWarnings("UtilityClass")
+public class TestCommandBusFactory {
+
+    private TestCommandBusFactory() {
+    }
+
+    /** Creates a new command bus with the {@link InMemoryStorageFactory}. */
+    public static CommandBus create() {
+        return create(InMemoryStorageFactory.getInstance());
+    }
+
+    /** Creates a new command bus with the given storage factory. */
+    public static CommandBus create(StorageFactory storageFactory) {
+        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
+        final CommandBus commandBus = CommandBus.newInstance(store);
+        return commandBus;
+    }
 }

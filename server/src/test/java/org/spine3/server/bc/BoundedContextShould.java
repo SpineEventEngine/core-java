@@ -24,9 +24,10 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
@@ -36,6 +37,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
@@ -56,10 +58,10 @@ import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
-import org.spine3.testdata.BoundedContextTestStubs;
-import org.spine3.testdata.CommandBusFactory;
-import org.spine3.testdata.EventBusFactory;
+import org.spine3.testdata.TestCommandBusFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -68,6 +70,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alexander Litus
@@ -77,15 +80,11 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private StorageFactory storageFactory;
-    private BoundedContext boundedContext;
-    private boolean handlersRegistered = false;
+    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
-    @Before
-    public void setUp() {
-        storageFactory = InMemoryStorageFactory.getInstance();
-        boundedContext = BoundedContextTestStubs.create(storageFactory);
-    }
+    private final BoundedContext boundedContext = newBoundedContext();
+
+    private boolean handlersRegistered = false;
 
     @After
     public void tearDown() throws Exception {
@@ -136,10 +135,10 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void notify_integration_event_subscribers() {
+    public void notify_integration_event_subscriber() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = Given.Event.projectCreatedIntegration();
+        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
@@ -149,14 +148,50 @@ public class BoundedContextShould {
     }
 
     @Test
+    public void not_notify_integration_event_subscriber_if_event_is_invalid() {
+        final EventBus eventBus = mock(EventBus.class);
+        doReturn(false).when(eventBus)
+                       .validate(any(Message.class), anyResponseObserver());
+        final BoundedContext boundedContext = newBoundedContext(eventBus);
+        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+
+        boundedContext.notify(event, new TestResponseObserver());
+
+        verify(eventBus, never()).post(any(Event.class));
+    }
+
+    @Test
     public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                .setCommandBus(CommandBusFactory.create(storageFactory))
-                                                .setEventBus(EventBusFactory.create(storageFactory))
+                                                .setCommandBus(TestCommandBusFactory.create(storageFactory))
+                                                .setEventBus(TestEventBusFactory.create(storageFactory))
                                                 .setMultitenant(true)
                                                 .build();
         assertTrue(bc.isMultitenant());
+    }
+
+    @Test
+    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
+        assertTrue(repository.storageAssigned());
+    }
+
+    @Test
+    public void not_change_storage_during_registration_if_a_repository_has_one() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
+    }
+
+    /** Returns {@link Mockito#any()} matcher for response observer. */
+    @SuppressWarnings("unchecked")
+    private static StreamObserver<Response> anyResponseObserver() {
+        return (StreamObserver<Response>) any();
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {
@@ -295,7 +330,7 @@ public class BoundedContextShould {
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }
@@ -319,22 +354,5 @@ public class BoundedContextShould {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
-    }
-
-    @Test
-    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        boundedContext.register(repository);
-        assertTrue(repository.storageAssigned());
-    }
-
-    @Test
-    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(storageFactory);
-
-        final Repository spy = spy(repository);
-        boundedContext.register(repository);
-        verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 }

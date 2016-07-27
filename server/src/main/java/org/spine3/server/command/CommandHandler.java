@@ -30,7 +30,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
@@ -40,6 +39,8 @@ import org.spine3.server.reflect.MethodRegistry;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import static org.spine3.base.Events.createEvent;
+import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 
 /**
@@ -102,14 +103,14 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         final ImmutableList.Builder<Event> builder = ImmutableList.builder();
         for (Message eventMessage : eventMessages) {
             final EventContext eventContext = createEventContext(context);
-            final Event event = Events.createEvent(eventMessage, eventContext);
+            final Event event = createEvent(eventMessage, eventContext);
             builder.add(event);
         }
         return builder.build();
     }
 
     private EventContext createEventContext(CommandContext commandContext) {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = generateId();
         final Timestamp now = TimeUtil.getCurrentTime();
         final Any producerId = idToAny(getId());
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -125,5 +126,26 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         for (Event event : events) {
             eventBus.post(event);
         }
+    }
+
+    @Override
+    @SuppressWarnings("ConstantConditions" /** It is required to check for null. */)
+    public boolean equals(Object otherObj) {
+        if (this == otherObj) {
+            return true;
+        }
+        if (otherObj == null ||
+            getClass() != otherObj.getClass()) {
+            return false;
+        }
+        final CommandHandler otherHandler = (CommandHandler) otherObj;
+        final boolean equals = getId().equals(otherHandler.getId());
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        final int result = getId().hashCode();
+        return result;
     }
 }

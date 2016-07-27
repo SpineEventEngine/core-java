@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.enrich.EventEnricher;
@@ -96,22 +97,6 @@ public class EventBusShould {
         eventBus.subscribe(new EventSubscriber() {});
     }
 
-    /** A simple subscriber class used in tests below. */
-    private static class ProjectCreatedSubscriber extends EventSubscriber {
-
-        private boolean methodCalled = false;
-
-        // OK for the test class.
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            this.methodCalled = true;
-        }
-
-        /* package */ boolean isMethodCalled() {
-            return methodCalled;
-        }
-    }
-
     @Test
     public void register_event_subscriber() {
         final EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
@@ -152,13 +137,14 @@ public class EventBusShould {
     }
 
     @Test
-    public void call_subscribers_when_event_posted() {
+    public void call_subscriber_when_event_posted() {
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-
+        final Event event = Given.Event.projectCreated();
         eventBus.subscribe(subscriber);
-        eventBus.post(Given.Event.projectCreated());
 
-        assertTrue(subscriber.isMethodCalled());
+        eventBus.post(event);
+
+        assertEquals(event, subscriber.getEventHandled());
     }
 
     @Test
@@ -212,14 +198,21 @@ public class EventBusShould {
     }
 
     @Test
-    public void return_ok_response_if_event_is_valid() {
-        eventBus.subscribe(new TestEventSubscriber());
+    public void assure_that_event_is_valid_and_subscriber_registered() {
+        eventBus.subscribe(new ProjectCreatedSubscriber());
 
         final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
         assertTrue(isValid);
-        assertEquals(Responses.ok(), responseObserver.getResponse());
-        assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertResponseIsOk(responseObserver);
+    }
+
+    @Test
+    public void assure_that_event_is_valid_and_dispatcher_registered() {
+        eventBus.register(new BareDispatcher());
+
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
+        assertTrue(isValid);
+        assertResponseIsOk(responseObserver);
     }
 
     @Test
@@ -233,14 +226,12 @@ public class EventBusShould {
                                           .setEventStore(eventStore)
                                           .setEventValidator(validator)
                                           .build();
-        eventBus.subscribe(new TestEventSubscriber());
+        eventBus.subscribe(new ProjectCreatedSubscriber());
 
         final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
 
         assertFalse(isValid);
-        final Throwable cause = responseObserver.getThrowable().getCause();
-        assertEquals(InvalidEventException.class, cause.getClass());
-        assertNull(responseObserver.getResponse());
+        assertReturnedExceptionAndNoResponse(InvalidEventException.class, responseObserver);
     }
 
     @Test
@@ -248,9 +239,7 @@ public class EventBusShould {
         final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
 
         assertFalse(isValid);
-        final Throwable cause = responseObserver.getThrowable().getCause();
-        assertEquals(UnsupportedEventException.class, cause.getClass());
-        assertNull(responseObserver.getResponse());
+        assertReturnedExceptionAndNoResponse(UnsupportedEventException.class, responseObserver);
     }
 
     @Test
@@ -302,10 +291,30 @@ public class EventBusShould {
         verify(enricher, never()).enrich(any(Event.class));
     }
 
-    private static class TestEventSubscriber extends EventSubscriber {
+    private static void assertResponseIsOk(TestResponseObserver responseObserver) {
+        assertEquals(Responses.ok(), responseObserver.getResponse());
+        assertTrue(responseObserver.isCompleted());
+        assertNull(responseObserver.getThrowable());
+    }
+
+    private static void assertReturnedExceptionAndNoResponse(Class<? extends Exception> exceptionClass,
+                                                             TestResponseObserver responseObserver) {
+        final Throwable cause = responseObserver.getThrowable().getCause();
+        assertEquals(exceptionClass, cause.getClass());
+        assertNull(responseObserver.getResponse());
+    }
+
+    private static class ProjectCreatedSubscriber extends EventSubscriber {
+
+        private Event eventHandled;
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
+            this.eventHandled = Events.createEvent(event, context);
+        }
+
+        /* package */ Event getEventHandled() {
+            return eventHandled;
         }
     }
 

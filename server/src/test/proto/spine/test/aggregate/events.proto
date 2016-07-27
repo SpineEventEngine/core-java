@@ -28,10 +28,10 @@ option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/test/aggregate/project.proto";
-import "spine/test/aggregate/task.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;
+    string name = 2;
 }
 
 message TaskAdded {

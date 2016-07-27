@@ -20,23 +20,60 @@
 
 package org.spine3.server.projection;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newIntegerValue;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
 
-    private static class TestProjection extends Projection<Integer, StringValue> {
+    private TestProjection projection;
 
-        protected TestProjection(Integer id) {
+    @Before
+    public void setUp() {
+        projection = new TestProjection(newUuid());
+    }
+
+    @Test
+    public void handle_events() {
+        final String stringValue = newUuid();
+        projection.handle(newStringValue(stringValue), EventContext.getDefaultInstance());
+        assertTrue(projection.getState()
+                             .getValue()
+                             .contains(stringValue));
+
+        final Integer integerValue = 1024;
+        projection.handle(newIntegerValue(integerValue), EventContext.getDefaultInstance());
+        assertTrue(projection.getState()
+                             .getValue()
+                             .contains(String.valueOf(integerValue)));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_no_handler_for_event() {
+        projection.handle(BoolValue.getDefaultInstance(), EventContext.getDefaultInstance());
+    }
+
+    @Test
+    public void return_event_classes_which_it_handles() {
+        final ImmutableSet<Class<? extends Message>> classes = Projection.getEventClasses(TestProjection.class);
+
+    }
+
+    private static class TestProjection extends Projection<String, StringValue> {
+
+        protected TestProjection(String id) {
             super(id);
         }
 
@@ -47,7 +84,7 @@ public class ProjectionShould {
         }
 
         @Subscribe
-        public void on(UInt32Value event, EventContext ignored) {
+        public void on(Int32Value event) {
             final StringValue newSate = createNewState("integerState", String.valueOf(event.getValue()));
             incrementState(newSate);
         }
@@ -58,34 +95,5 @@ public class ProjectionShould {
                     type + '(' + value + ')' + System.lineSeparator();
             return newStringValue(result);
         }
-
-        /**
-         * We expose this method to be called directly in {@link #setUp()}.
-         * Normally this method would be called by a repository upon creation of a new instance.
-         */
-        @Override
-        @VisibleForTesting
-        protected void setDefault() {
-            super.setDefault();
-        }
-    }
-
-    private TestProjection test;
-
-    @Before
-    public void setUp() {
-        test = new TestProjection(1);
-        test.setDefault();
-    }
-
-    @Test
-    public void handle_events() {
-        final String stringValue = "something new";
-        test.handle(newStringValue(stringValue), EventContext.getDefaultInstance());
-        assertTrue(test.getState().getValue().contains(stringValue));
-
-        final Integer integerValue = 1024;
-        test.handle(UInt32Value.newBuilder().setValue(integerValue).build(), EventContext.getDefaultInstance());
-        assertTrue(test.getState().getValue().contains(String.valueOf(integerValue)));
     }
 }

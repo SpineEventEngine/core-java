@@ -21,21 +21,24 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.EventContext;
+import org.spine3.server.reflect.HandlerMethod;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.event.ProjectCreated;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.spine3.test.Verify.assertContains;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventApplierMethodShould {
+
+    private HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
 
     @Test
     public void invoke_applier_method() throws InvocationTargetException {
@@ -49,56 +52,95 @@ public class EventApplierMethodShould {
     }
 
     @Test
+    public void have_deprecated_invoke_method_with_context() throws InvocationTargetException {
+        final ValidApplier applierObject = new ValidApplier();
+        final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
+        final ProjectCreated event = Given.EventMessage.projectCreated();
+
+        //noinspection deprecation
+        applier.invoke(applierObject, event, Empty.getDefaultInstance());
+
+        assertEquals(event, applierObject.eventApplied);
+    }
+
+    @Test
+    public void return_factory_instance() {
+        assertNotNull(factory);
+    }
+
+    @Test
+    public void return_method_class() {
+        assertEquals(EventApplierMethod.class, factory.getMethodClass());
+    }
+
+    @Test
+    public void create_method() {
+        final Method method = new ValidApplier().getMethod();
+
+        final EventApplierMethod actual = factory.create(method);
+
+        assertEquals(new EventApplierMethod(method), actual);
+    }
+
+    @Test
+    public void return_method_predicate() {
+        assertEquals(EventApplierMethod.PREDICATE, factory.getPredicate());
+    }
+
+    @Test
+    public void check_method_access_modifier() {
+        final Method method = new ValidApplierButNotPrivate().getMethod();
+
+        factory.checkAccessModifier(method);
+    }
+
+    @Test
     public void consider_applier_with_one_msg_param_valid() {
         final Method applier = new ValidApplier().getMethod();
 
-        assertIsEventApplier(applier, true);
+        assertIsEventApplier(applier);
     }
 
     @Test
     public void consider_not_private_applier_valid() {
         final Method method = new ValidApplierButNotPrivate().getMethod();
 
-        assertIsEventApplier(method, true);
+        assertIsEventApplier(method);
     }
 
     @Test
     public void consider_not_annotated_applier_invalid() {
         final Method applier = new InvalidApplierNoAnnotation().getMethod();
 
-        assertIsEventApplier(applier, false);
+        assertIsNotEventApplier(applier);
     }
 
     @Test
     public void consider_applier_without_params_invalid() {
         final Method applier = new InvalidApplierNoParams().getMethod();
 
-        assertIsEventApplier(applier, false);
+        assertIsNotEventApplier(applier);
     }
 
     @Test
     public void consider_applier_with_too_many_params_invalid() {
         final Method applier = new InvalidApplierTooManyParams().getMethod();
 
-        assertIsEventApplier(applier, false);
+        assertIsNotEventApplier(applier);
     }
 
     @Test
     public void consider_applier_with_one_invalid_param_invalid() {
         final Method applier = new InvalidApplierOneNotMsgParam().getMethod();
 
-        assertIsEventApplier(applier, false);
+        assertIsNotEventApplier(applier);
     }
 
     @Test
     public void consider_not_void_applier_invalid() {
         final Method applier = new InvalidApplierNotVoid().getMethod();
 
-        assertIsEventApplier(applier, false);
-    }
-
-    private static void assertIsEventApplier(Method applier, boolean isApplier) {
-        assertEquals(isApplier, EventApplierMethod.PREDICATE.apply(applier));
+        assertIsNotEventApplier(applier);
     }
 
     @Test
@@ -114,6 +156,14 @@ public class EventApplierMethodShould {
 
         // The method is counted and the event is present.
         assertContains(ProjectCreated.class, eventClasses);
+    }
+
+    private static void assertIsEventApplier(Method applier) {
+        assertTrue(EventApplierMethod.PREDICATE.apply(applier));
+    }
+
+    private static void assertIsNotEventApplier(Method applier) {
+        assertFalse(EventApplierMethod.PREDICATE.apply(applier));
     }
     
     /*

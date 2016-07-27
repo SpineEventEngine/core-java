@@ -34,9 +34,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  */
 
 @SuppressWarnings("UtilityClass")
-public class EventBusFactory {
+public class TestEventBusFactory {
 
-    private EventBusFactory() {
+    private TestEventBusFactory() {
     }
 
     public static EventBus create() {
@@ -63,5 +63,4 @@ public class EventBusFactory {
                                           .build();
         return eventBus;
     }
-
 }

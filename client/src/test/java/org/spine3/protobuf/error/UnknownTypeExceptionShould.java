@@ -18,29 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.protobuf.error;
 
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.server.event.EventDispatcher;
-import org.spine3.server.type.EventClass;
+import org.junit.Test;
 
-import javax.annotation.Nonnull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 
-/**
- * Delivers events to handlers (which are supposed to be entities).
- *
- * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
- */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
+public class UnknownTypeExceptionShould {
 
-    /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
-     */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass);
+    @Test
+    public void have_ctor_with_type_name() {
+        final String str = newUuid();
+        final UnknownTypeException exception = new UnknownTypeException(str);
+
+        assertTrue(exception.getMessage().contains(str));
+    }
+
+    @Test
+    public void have_ctor_with_type_name_and_cause() {
+        final String str = newUuid();
+        RuntimeException cause = new RuntimeException("");
+        final UnknownTypeException exception = new UnknownTypeException(str, cause);
+
+        assertTrue(exception.getMessage().contains(str));
+        assertEquals(cause, exception.getCause());
+    }
 }

@@ -143,7 +143,9 @@ public abstract class Entity<I, S extends Message> {
      */
     @CheckReturnValue
     public S getState() {
-        final S result = (state == null) ? getDefaultState() : state;
+        final S result = state == null ?
+                         getDefaultState() :
+                         state;
         return result;
     }
 
@@ -244,7 +246,10 @@ public abstract class Entity<I, S extends Message> {
     @CheckReturnValue
     @Nonnull
     public Timestamp whenModified() {
-        return (whenModified == null) ? Timestamp.getDefaultInstance() : whenModified;
+        final Timestamp result = whenModified == null ?
+                                 Timestamp.getDefaultInstance() :
+                                 whenModified;
+        return result;
     }
 
     /**
@@ -314,6 +319,40 @@ public abstract class Entity<I, S extends Message> {
             }
         });
         final String result = Joiner.on(", ").join(classStrings);
+        return result;
+    }
+
+    @Override
+    @SuppressWarnings("ConstantConditions" /** It is required to check for null. */)
+    public boolean equals(Object anotherObj) {
+        if (this == anotherObj) {
+            return true;
+        }
+        if (anotherObj == null ||
+            getClass() != anotherObj.getClass()) {
+            return false;
+        }
+        @SuppressWarnings("unchecked") // parameter must have the same generics
+        final Entity<I, S> another = (Entity<I, S>) anotherObj;
+        if (!getId().equals(another.getId())) {
+            return false;
+        }
+        if (!getState().equals(another.getState())) {
+            return false;
+        }
+        if (getVersion() != another.getVersion()) {
+            return false;
+        }
+        final boolean result = whenModified().equals(another.whenModified());
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId().hashCode();
+        result = 31 * result + getState().hashCode();
+        result = 31 * result + whenModified().hashCode();
+        result = 31 * result + getVersion();
         return result;
     }
 }

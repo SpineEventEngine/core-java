@@ -21,6 +21,7 @@
 package org.spine3.testdata;
 
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
@@ -32,32 +33,49 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("UtilityClass")
-public class BoundedContextTestStubs {
+public class TestBoundedContextFactory {
 
-    public static BoundedContext create() {
-        final BoundedContext bc = create(InMemoryStorageFactory.getInstance());
+    private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance();
+
+    public static BoundedContext newBoundedContext() {
+        final BoundedContext bc = newBoundedContext(FACTORY);
         return bc;
     }
 
-    public static BoundedContext create(StorageFactory storageFactory) {
+    public static BoundedContext newBoundedContext(StorageFactory storageFactory) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory);
         return builder.build();
     }
 
-    public static BoundedContext create(EventEnricher enricher) {
+    public static BoundedContext newBoundedContext(EventEnricher enricher) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setStorageFactory(FACTORY)
                                                              .setEventEnricher(enricher);
         return builder.build();
     }
 
-    public static BoundedContext create(EventBus eventBus) {
+    public static BoundedContext newBoundedContext(EventBus eventBus) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setStorageFactory(FACTORY)
                                                              .setEventBus(eventBus);
         return builder.build();
     }
 
-    private BoundedContextTestStubs() {}
+    public static BoundedContext newBoundedContext(CommandBus commandBus) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(FACTORY)
+                                                             .setCommandBus(commandBus);
+        return builder.build();
+    }
+
+    public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(FACTORY)
+                                                             .setCommandBus(commandBus)
+                                                             .setEventBus(eventBus);
+        return builder.build();
+    }
+
+    private TestBoundedContextFactory() {}
 }

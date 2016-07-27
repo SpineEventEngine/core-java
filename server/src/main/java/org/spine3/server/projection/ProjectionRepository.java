@@ -56,7 +56,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         extends EntityRepository<I, P, M> implements EventDispatcher {
 
     /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
-    private enum Status {
+    protected enum Status {
 
         /**
          * The repository instance has been created.

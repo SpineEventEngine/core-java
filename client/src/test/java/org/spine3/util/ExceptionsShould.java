@@ -23,7 +23,9 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Litus
@@ -43,6 +45,26 @@ public class ExceptionsShould {
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
-        Exceptions.unsupported("msg");
+        Exceptions.unsupported(newUuid());
+    }
+
+    @Test
+    public void wrap_exception_and_throw() {
+        final RuntimeException exception = new RuntimeException(newUuid());
+        try {
+            Exceptions.wrapped(exception);
+        } catch (Exception e) {
+            assertEquals(exception, e.getCause());
+        }
+    }
+
+    @Test
+    public void wrap_exception_cause_and_throw() {
+        final RuntimeException cause = new RuntimeException(newUuid());
+        try {
+            Exceptions.wrappedCause(new RuntimeException(cause));
+        } catch (Exception e) {
+            assertEquals(cause, e.getCause());
+        }
     }
 }

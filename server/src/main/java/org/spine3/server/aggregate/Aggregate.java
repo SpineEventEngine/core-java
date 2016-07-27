@@ -31,7 +31,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandler;
@@ -46,9 +45,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
+import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.validate.Validate.checkIsPositive;
 
 /**
  * Abstract base for aggregates.
@@ -202,10 +204,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param context the context of the command
      * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      */
-     /* package */ final void dispatch(Message command, CommandContext context) {
+    /* package */ void dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
-
         if (command instanceof Any) {
             // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
             // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
@@ -214,12 +215,11 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             //noinspection AssignmentToMethodParameter
             command = AnyPacker.unpack(any);
         }
-
         try {
             final List<? extends Message> events = invokeHandler(command, context);
             apply(events, context);
         } catch (InvocationTargetException e) {
-            propagate(e.getCause());
+            throw wrappedCause(e);
         }
     }
 
@@ -288,13 +288,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         createBuilder();
         try {
             for (Event event : events) {
-                final Message message = Events.getMessage(event);
+                final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    apply(message);
+                    applyEventOrSnapshot(message);
                     setVersion(context.getVersion(), context.getTimestamp());
                 } catch (InvocationTargetException e) {
-                    propagate(e.getCause());
+                    throw wrappedCause(e);
                 }
             }
         } finally {
@@ -305,38 +305,45 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies event messages to the aggregate.
      *
-     * @param messages the event message to apply
+     * @param events the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> messages, CommandContext commandContext)
+    private void apply(Iterable<? extends Message> events, CommandContext commandContext)
             throws InvocationTargetException {
         createBuilder();
         try {
-            for (Message message : messages) {
-                final EventContext eventContext;
-                if (message instanceof Event) {
-                    // We are receiving the event during import or integration. This happened because
-                    // an aggregate's command handler returned either List<Event> or Event.
-                    final Event receivedEvent = (Event) message;
-                    message = Events.getMessage(receivedEvent);
-                    apply(message);
-                    // Copy event context and set command context and the aggregate version.
-                    eventContext = receivedEvent.getContext()
-                                                .toBuilder()
-                                                .setCommandContext(commandContext)
-                                                .setVersion(getVersion())
-                                                .build();
-                } else {
-                    apply(message);
-                    eventContext = createEventContext(commandContext, message);
-                }
-                final Event event = Events.createEvent(message, eventContext);
-                putUncommitted(event);
+            for (Message message : events) {
+                apply(message, commandContext);
             }
         } finally {
             updateState();
         }
+    }
+
+    private void apply(Message eventOrMsg, CommandContext commandContext) throws InvocationTargetException {
+        final Message eventMsg;
+        final EventContext eventContext;
+        final Timestamp currentTime = getCurrentTime();
+        if (eventOrMsg instanceof Event) {
+            // We are receiving the event during import or integration. This happened because
+            // an aggregate's command handler returned either List<Event> or Event.
+            final Event event = (Event) eventOrMsg;
+            eventMsg = getMessage(event);
+            eventContext = event.getContext()
+                                .toBuilder()
+                                .setCommandContext(commandContext)
+                                .setTimestamp(currentTime)
+                                .setVersion(getVersion())
+                                .build();
+        } else {
+            eventMsg = eventOrMsg;
+            eventContext = createEventContext(eventMsg, commandContext, currentTime);
+        }
+        applyEventOrSnapshot(eventMsg);
+        incrementVersion();
+        final Event event = createEvent(eventMsg, eventContext);
+        uncommittedEvents.add(event);
     }
 
     /**
@@ -345,17 +352,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
-     * @param eventMessage the event to apply
+     * @param eventOrSnapshot an event to apply or a snapshot to use to restore state
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void apply(Message eventMessage) throws InvocationTargetException {
-        if (eventMessage instanceof Snapshot) {
-            restore((Snapshot) eventMessage);
-            return;
+    private void applyEventOrSnapshot(Message eventOrSnapshot) throws InvocationTargetException {
+        if (eventOrSnapshot instanceof Snapshot) {
+            restore((Snapshot) eventOrSnapshot);
+        } else {
+            invokeApplier(eventOrSnapshot);
         }
-        invokeApplier(eventMessage);
-        incrementVersion(); // This will also update whenModified field.
     }
 
     /**
@@ -380,14 +386,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    private void putUncommitted(Event record) {
-        uncommittedEvents.add(record);
-    }
-
     /**
      * Returns all uncommitted events.
      *
-     * @return immutable view of records for all uncommitted events
+     * @return immutable view of all uncommitted events
      */
     @CheckReturnValue
     /* package */ List<Event> getUncommittedEvents() {
@@ -397,7 +399,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Returns and clears all the events that were uncommitted before the call of this method.
      *
-     * @return the list of event records
+     * @return the list of events
      */
     /* package */ List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
@@ -412,17 +414,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
      *
-     * @param commandContext the context of the command, execution of which produced the event
      * @param event          the event for which to create the context
+     * @param commandContext the context of the command, execution of which produced the event
+     * @param whenModified   the time when an aggregate was modified
      * @return new instance of the {@code EventContext}
      * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandContext commandContext, Message event) {
-        final EventId eventId = Events.generateId();
+    protected EventContext createEventContext(Message event, CommandContext commandContext, Timestamp whenModified) {
+        checkIsPositive(whenModified, "Aggregate modification time");
+        final EventId eventId = generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setTimestamp(whenModified())
+                .setTimestamp(whenModified)
                 .setCommandContext(commandContext)
                 .setProducerId(getIdAsAny())
                 .setVersion(getVersion());
@@ -437,7 +441,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param event          the event message
      * @param builder        a builder for the event context
-     * @see #createEventContext(CommandContext, Message)
+     * @see #createEventContext(Message, CommandContext, Timestamp)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void extendEventContext(Message event, EventContext.Builder builder, CommandContext commandContext) {

@@ -18,30 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testdata;
+package org.spine3.server;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.junit.Test;
 
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.storage.StorageFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-/**
- * Creates {@link org.spine3.server.command.CommandBus}s for tests.
- *
- * @author Andrey Lavrov
- */
+public class StatusesShould {
 
-@SuppressWarnings("UtilityClass")
-public class CommandBusFactory {
-
-    private CommandBusFactory() {
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Statuses.class));
     }
 
-    /** Creates a new command bus with the given storage factory. */
-    public static CommandBus create(StorageFactory storageFactory) {
-        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-        final CommandBus commandBus = CommandBus.newInstance(store);
-        return commandBus;
-    }
+    @Test
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public void create_invalid_argument_status_exception() {
+        final IllegalArgumentException exception = new IllegalArgumentException("");
 
+        final StatusRuntimeException statusRuntimeException = Statuses.invalidArgumentWithCause(exception);
+
+        assertEquals(exception, statusRuntimeException.getCause());
+        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus().getCode());
+    }
 }

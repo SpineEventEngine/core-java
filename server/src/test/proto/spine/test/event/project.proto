@@ -27,14 +27,12 @@ option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/users/user_id.proto";
-import "spine/test/event/task.proto";
 
 message ProjectId {
     string id = 1;
 }
 
 message Project {
-
     ProjectId id = 1;
 
     string name = 2;
@@ -52,4 +50,14 @@ message Project {
     Status status = 4;
 
     spine.users.UserId owner_id = 5;
+}
+
+message TaskId {
+    int32 id = 1;
+}
+
+message Task {
+    TaskId task_id = 1;
+    string title = 2;
+    string description = 3;
 }

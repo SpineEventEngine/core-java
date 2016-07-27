@@ -134,7 +134,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @SuppressWarnings("OverloadedVarargsMethod")
     @VisibleForTesting
     /* package */ static List<Event> toEventList(EventStorageRecord... records) {
-        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
+        return toEventList(ImmutableList.copyOf(records));
     }
 
     /** Converts {@code EventStorageRecord}s to {@code Event}s. */
@@ -152,7 +152,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
-        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "event time");
+        final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(timestamp)
                 .setEventType(eventType)

@@ -23,6 +23,7 @@ package org.spine3.protobuf;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.test.Tests;
 
 import java.util.Date;
 
@@ -48,14 +49,24 @@ public class TimestampsShould {
         assertTrue(hasPrivateUtilityConstructor(Timestamps.class));
     }
 
+    @Test
+    public void not_throw_exception_if_timestamp_is_valid() {
+        Timestamps.checkTimestamp(Timestamp.newBuilder()
+                                           .setSeconds(8)
+                                           .setNanos(7)
+                                           .build());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void not_have_negative_nanos() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos(-1).build());
+        Timestamps.checkTimestamp(Timestamp.newBuilder()
+                                           .setNanos(-1)
+                                           .build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_have_negative_greater_than_NANOS_PER_SECOND() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos((int)Timestamps.NANOS_PER_SECOND + 1).build());
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos((int) Timestamps.NANOS_PER_SECOND + 1).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -76,11 +87,21 @@ public class TimestampsShould {
     }
 
     @Test
-    public void calculate_timestamp_of_moment_minute_ago_from_now() {
+    public void calculate_timestamp_of_moment_minute_ago() {
         final Timestamp currentTime = Timestamps.getCurrentTime();
         final Timestamp expected = subtract(currentTime, MINUTE);
 
         final Timestamp actual = Timestamps.minutesAgo(1);
+
+        assertEquals(expected.getSeconds(), actual.getSeconds());
+    }
+
+    @Test
+    public void calculate_timestamp_of_moment_seconds_ago() {
+        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp expected = subtract(currentTime, TEN_SECONDS);
+
+        final Timestamp actual = Timestamps.secondsAgo(TEN_SECONDS.getSeconds());
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }
@@ -250,5 +271,14 @@ public class TimestampsShould {
         final long expectedNanos = expectedTime.getSeconds() * NANOS_IN_SECOND + expectedTime.getNanos();
 
         assertEquals(expectedNanos, nanos);
+    }
+
+    @Test
+    public void accept_time_provider() {
+        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+
+        Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
+
+        assertEquals(fiveMinutesAgo, Timestamps.getCurrentTime());
     }
 }

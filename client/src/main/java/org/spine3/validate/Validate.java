@@ -164,16 +164,22 @@ public class Validate {
     }
 
     /**
-     * Ensures that the passed timestamp is not {@code null} and has {@code seconds} value which is greater than zero.
+     * Ensures that the passed timestamp:
+     * <ul>
+     * <li>is not {@code null};
+     * <li>{@code seconds} > 0;
+     * <li>{@code nanos} >= 0.
+     * </ul>
      *
      * @param timestamp the timestamp to check
+     * @param nameToLog the name of the checked timestamp used in logging
      * @return the passed timestamp
-     * @throws IllegalArgumentException if the timestamp {@code seconds} value is less or equal to zero
+     * @throws IllegalArgumentException if any of the requirements are not met
      */
-    public static Timestamp checkTimestamp(Timestamp timestamp, String fieldName) {
-        checkNotNull(timestamp);
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, fieldName + " is invalid.");
+    public static Timestamp checkIsPositive(Timestamp timestamp, String nameToLog) {
+        checkNotNull(timestamp, nameToLog + " is null.");
+        checkArgument(timestamp.getSeconds() > 0, nameToLog + " must have a positive number of seconds.");
+        checkArgument(timestamp.getNanos() >= 0, nameToLog + " must not have a negative number of nanoseconds.");
         return timestamp;
     }
 

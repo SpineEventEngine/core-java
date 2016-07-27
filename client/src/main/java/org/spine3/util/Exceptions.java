@@ -20,6 +20,8 @@
 
 package org.spine3.util;
 
+import com.google.common.base.Throwables;
+
 /**
  * Utility class for working with exceptions for cases that are not
  * supported by {@link com.google.common.base.Throwables}.
@@ -73,5 +75,31 @@ public class Exceptions {
     @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
     public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets a throwable as the cause of a {@link RuntimeException} and throws it.
+     *
+     * <p>Can be used instead of {@link Throwables#propagate(Throwable)} if it is needed to wrap the param anyway.
+     * Google's implementation throws {@link RuntimeException} and {@link Error} as-is.
+     *
+     * @param throwable to wrap
+     * @return always throws an exception, the return type is for convenience
+     */
+    public static RuntimeException wrapped(Throwable throwable) {
+        throw new RuntimeException(throwable);
+    }
+
+    /**
+     * Sets a throwable's cause as the cause of a {@link RuntimeException} and throws it.
+     *
+     * <p>Can be used instead of {@link Throwables#propagate(Throwable)} if it is needed to wrap the param anyway.
+     * Google's implementation throws {@link RuntimeException} and {@link Error} as-is.
+     *
+     * @param throwable to wrap
+     * @return always throws an exception, the return type is for convenience
+     */
+    public static RuntimeException wrappedCause(Throwable throwable) {
+        throw new RuntimeException(throwable.getCause());
     }
 }

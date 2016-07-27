@@ -67,7 +67,7 @@ public class Server {
         clientService.addShutdownHook();
     }
 
-    public void awaitTermination() throws InterruptedException {
+    public void awaitTermination() {
         clientService.awaitTermination();
     }
 
@@ -77,7 +77,7 @@ public class Server {
     }
 
     /** The entry point of the server application. */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         final Server server = new Server(InMemoryStorageFactory.getInstance());
         server.start();
         log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
