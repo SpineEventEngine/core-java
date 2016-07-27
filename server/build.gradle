@@ -1,8 +1,8 @@
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
 
-    compile project(path: ':client');
-    compile project(path: ':values');
+    compile project(path: ':client')
+    compile project(path: ':values')
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
 }
@@ -43,4 +43,4 @@ artifacts {
     testArtifacts testJar
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID

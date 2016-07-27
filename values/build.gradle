@@ -1,7 +1,7 @@
 dependencies {
     testCompile project(path: ":client", configuration: 'testArtifacts')
 
-    compile project(path: ':client');
+    compile project(path: ':client')
 }
 
 sourceSets {
@@ -27,4 +27,4 @@ protobuf {
     }
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID

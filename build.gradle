@@ -1,4 +1,4 @@
-final String CREDENTIALS_LOCATION = 'credentials.properties';
+final String CREDENTIALS_LOCATION = 'credentials.properties'
 
 buildscript {
     repositories {
@@ -26,21 +26,22 @@ allprojects {
 project.ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-3';
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
+    PROTOBUF_VERSION = '3.0.0-beta-3'
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
     GRPC_VERSION = '0.14.0'
     SLF4J_VERSION = '1.7.21'
+    SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
 }
 
-def repositoryUserName = null;
-def repositoryUserPassword = null;
-final Properties properties = new Properties();
-final File credentialsFile = project.file(CREDENTIALS_LOCATION);
+def repositoryUserName = null
+def repositoryUserPassword = null
+final Properties properties = new Properties()
+final File credentialsFile = project.file(CREDENTIALS_LOCATION)
 if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream());
-    repositoryUserName = properties.getProperty("user.name");
-    repositoryUserPassword = properties.getProperty("user.password");
+    properties.load(credentialsFile.newDataInputStream())
+    repositoryUserName = properties.getProperty("user.name")
+    repositoryUserPassword = properties.getProperty("user.password")
 }
 
 subprojects {
@@ -55,11 +56,11 @@ subprojects {
         }
     }
 
-    apply plugin: 'java';
-    apply plugin: 'com.google.protobuf';
+    apply plugin: 'java'
+    apply plugin: 'com.google.protobuf'
 
-    sourceCompatibility = 1.7;
-    targetCompatibility = 1.7;
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
     // Set Java home to point to JDK7 in gradle.properties file.
     //
@@ -93,10 +94,10 @@ subprojects {
         testCompile 'org.mockito:mockito-core:2.+'
     }
 
-    final String SRC_ROOT_DIR = "$projectDir/src";
-    final String GEN_ROOT_DIR = "$projectDir/generated";
-    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
-    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
+    final String SRC_ROOT_DIR = "$projectDir/src"
+    final String GEN_ROOT_DIR = "$projectDir/generated"
+    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java"
+    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java"
 
     sourceSets {
         main {
@@ -152,8 +153,8 @@ subprojects {
     }
 
     idea.module {
-        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
-        testSourceDirs += file(GEN_TEST_JAVA_DIR);
+        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR)
+        testSourceDirs += file(GEN_TEST_JAVA_DIR)
     }
 }
 
@@ -171,40 +172,40 @@ idea.project.ipr {
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.");
+                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.")
     }
-    println "Publishing build as ${repositoryUserName}";
+    println "Publishing build as ${repositoryUserName}"
 }
 
 task publish << {}
 
 void dependPublish(final Project project) {
-    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
+    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false)
     project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTasks;
+        task.dependsOn credentialsTasks
     }
-    publish.dependsOn project.getTasksByName("publish", false);
+    publish.dependsOn project.getTasksByName("publish", false)
 }
 
 // Artifacts to publish
-final def publishingProjects = ["client", "server", "values", "testutil"];
+final def publishingProjects = ["client", "server", "values", "testutil"]
 
 publishingProjects.each {
     project(":$it") { final currentProject ->
 
-        apply plugin: 'maven-publish';
+        apply plugin: 'maven-publish'
 
         publishing {
             publications {
                 mavenJava(MavenPublication) {
-                    groupId = "${group}";
-                    artifactId = "${currentProject.name}";
-                    version = "${currentProject.version}";
+                    groupId = "${group}"
+                    artifactId = "${currentProject.name}"
+                    version = "${currentProject.version}"
 
-                    from components.java;
+                    from components.java
 
-                    artifact sourceJar;
-                    artifact testOutputJar;
+                    artifact sourceJar
+                    artifact testOutputJar
                 }
             }
         }
@@ -213,14 +214,14 @@ publishingProjects.each {
             repositories {
                 maven {
                     credentials {
-                        username = "${repositoryUserName}";
-                        password = "${repositoryUserPassword}";
+                        username = "${repositoryUserName}"
+                        password = "${repositoryUserPassword}"
                     }
-                    url = project.MAVEN_REPOSITORY_URL;
+                    url = project.MAVEN_REPOSITORY_URL
                 }
             }
         }
 
-        dependPublish(project);
+        dependPublish(project)
     }
 }

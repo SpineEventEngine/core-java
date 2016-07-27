@@ -41,4 +41,4 @@ artifacts {
     testArtifacts testJar
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID
