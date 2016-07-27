@@ -93,15 +93,13 @@ public class CommandHandlerShould {
 
         handler.handle(cmd);
 
-        final int postedEventCount = 2;
-        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus, times(postedEventCount)).post(eventCaptor.capture());
-        final List<Event> events = eventCaptor.getAllValues();
-        assertEquals(postedEventCount, events.size());
-        assertEquals(ProjectStarted.class, Events.getMessage(events.get(0))
-                                                 .getClass());
-        assertEquals(StringValue.class, Events.getMessage(events.get(1))
-                                              .getClass());
+        final ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
+        final List<Event> actualEvents = verifyPostedEvents(expectedMessages.size());
+        for (int i = 0; i < expectedMessages.size(); i++) {
+            final Message expected = expectedMessages.get(i);
+            final Message actual = Events.getMessage(actualEvents.get(i));
+            assertEquals(expected, actual);
+        }
     }
 
     @Test
@@ -155,13 +153,23 @@ public class CommandHandlerShould {
         assertFalse(handler.equals(another));
     }
 
+    private List<Event> verifyPostedEvents(int expectedEventCount) {
+        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus, times(expectedEventCount)).post(eventCaptor.capture());
+        final List<Event> events = eventCaptor.getAllValues();
+        assertEquals(expectedEventCount, events.size());
+        return events;
+    }
+
     private void assertHandles(Command cmd) {
         handler.handle(cmd);
         handler.assertHandled(cmd);
     }
 
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
+    @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters", "ReturnOfCollectionOrArrayField"})
     private class TestCommandHandler extends CommandHandler {
+
+        private final ImmutableList<Message> eventsOnStartProjectCmd = createEventsOnStartProjectCmd();
 
         private final Map<CommandId, Command> commandsHandled = newHashMap();
 
@@ -183,6 +191,10 @@ public class CommandHandlerShould {
 
         /* package */ void handle(Command cmd) {
             handle(getMessage(cmd), cmd.getContext());
+        }
+
+        /* package */ ImmutableList<Message> getEventsOnStartProjectCmd() {
+            return eventsOnStartProjectCmd;
         }
 
         @Override
@@ -212,6 +224,10 @@ public class CommandHandlerShould {
         public List<Message> handle(StartProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
+            return eventsOnStartProjectCmd;
+        }
+
+        private ImmutableList<Message> createEventsOnStartProjectCmd() {
             final ImmutableList.Builder<Message> builder = ImmutableList.builder();
             builder.add(ProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
             return builder.build();

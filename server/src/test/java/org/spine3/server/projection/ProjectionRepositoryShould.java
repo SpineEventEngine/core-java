@@ -85,7 +85,7 @@ public class ProjectionRepositoryShould {
     public void not_dispatch_event_if_is_not_online() {
         for (ProjectionRepository.Status status : ProjectionRepository.Status.values()) {
             if (status != ONLINE) {
-                checkDoesNotDispatchEvent(status);
+                checkDoesNotDispatchEventWith(status);
             }
         }
     }
@@ -103,7 +103,7 @@ public class ProjectionRepositoryShould {
         assertTrue(TestProjection.processed(eventMessage));
     }
 
-    private void checkDoesNotDispatchEvent(ProjectionRepository.Status status) {
+    private void checkDoesNotDispatchEventWith(ProjectionRepository.Status status) {
         repository.setStatus(status);
         final ProjectCreated eventMsg = Given.EventMessage.projectCreated(ID);
         final Event event = Events.createEvent(eventMsg, createEventContext(ID));
@@ -116,7 +116,9 @@ public class ProjectionRepositoryShould {
     @Test(expected = RuntimeException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
+
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
+
         repository.dispatch(event);
     }
 
@@ -166,6 +168,7 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_true_if_status_is_ONLINE() {
+        /** ONLINE status is set in the {@link ProjectionRepositoryShould#setUp()} method. */
         assertTrue(repository.isOnline());
     }
 
