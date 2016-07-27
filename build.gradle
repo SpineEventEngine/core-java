@@ -1,5 +1,15 @@
-final String CREDENTIALS_LOCATION = 'credentials.properties'
 
+project.ext {
+    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
+    // is updated with new Message types introduced in the new version of Protobuf.
+    PROTOBUF_VERSION = '3.0.0-beta-3'
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+    GRPC_VERSION = '0.14.0'
+    SLF4J_VERSION = '1.7.21'
+    SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
+}
+
+final String CREDENTIALS_LOCATION = 'credentials.properties'
 
 buildscript {
     repositories {
@@ -25,26 +35,6 @@ allprojects {
 
     group = 'org.spine3'
     version = '0.5.1-SNAPSHOT'
-}
-
-project.ext {
-    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
-    // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-3'
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-    GRPC_VERSION = '0.14.0'
-    SLF4J_VERSION = '1.7.21'
-    SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
-}
-
-def repositoryUserName = null
-def repositoryUserPassword = null
-final Properties properties = new Properties()
-final File credentialsFile = project.file(CREDENTIALS_LOCATION)
-if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream())
-    repositoryUserName = properties.getProperty("user.name")
-    repositoryUserPassword = properties.getProperty("user.password")
 }
 
 subprojects {
@@ -162,6 +152,16 @@ idea.project.ipr {
     }
 }
 
+def repositoryUserName = null
+def repositoryUserPassword = null
+final Properties properties = new Properties()
+final File credentialsFile = project.file(CREDENTIALS_LOCATION)
+if (credentialsFile.exists()) {
+    properties.load(credentialsFile.newDataInputStream())
+    repositoryUserName = properties.getProperty("user.name")
+    repositoryUserPassword = properties.getProperty("user.password")
+}
+
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
@@ -185,7 +185,6 @@ final def publishingProjects = ["client", "server", "values", "testutil"]
 
 publishingProjects.each {
     project(":$it") { final currentProject ->
-
         apply plugin: 'maven-publish'
 
         publishing {
