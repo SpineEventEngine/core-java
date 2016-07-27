@@ -27,10 +27,11 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
-import org.spine3.server.type.CommandClass;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 
+import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -60,8 +61,8 @@ public class InvalidCommandException extends CommandException {
     public static InvalidCommandException onConstraintViolations(Command command,
                                                                  Iterable<ConstraintViolation> violations) {
         final Error error = invalidCommandMessageError(Commands.getMessage(command), violations, MSG_VALIDATION_ERROR);
-        final String text = MSG_VALIDATION_ERROR + " Message class: " + CommandClass.of(command) +
-                " See Error.getValidationError() for details.";
+        final String text = format("%s Message class: %s. See Error.getValidationError() for details.",
+                                   MSG_VALIDATION_ERROR, CommandClass.of(command));
         //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.
         return new InvalidCommandException(text, command, error);
     }
@@ -92,11 +93,13 @@ public class InvalidCommandException extends CommandException {
     public static InvalidCommandException onMissingTenantId(Command command) {
         final Message commandMessage = Commands.getMessage(command);
         final CommandContext context = command.getContext();
-        final String errMsg = String.format(
+        final String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to multitenant Command Bus, " +
-                        "but has no `tenant_id` attribute in the context.",
-                TypeUrl.of(commandMessage).getTypeName(),
-                CommandClass.of(commandMessage).value(),
+                "but has no `tenant_id` attribute in the context.",
+                TypeUrl.of(commandMessage)
+                       .getTypeName(),
+                CommandClass.of(commandMessage)
+                            .value(),
                 idToString(context.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);

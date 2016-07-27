@@ -68,7 +68,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return enrichmentClass;
     }
 
-    protected EventContext getContext() {
+    /* package */ EventContext getContext() {
         return context;
     }
 

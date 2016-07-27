@@ -323,9 +323,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     @Override
-    @SuppressWarnings({
-    "ConstantConditions" /** It is required to check for null. */,
-    "NonFinalFieldReferenceInEquals" /** It is required to check all fields. */})
+    @SuppressWarnings("ConstantConditions" /** It is required to check for null. */)
     public boolean equals(Object anotherObj) {
         if (this == anotherObj) {
             return true;
@@ -350,7 +348,6 @@ public abstract class Entity<I, S extends Message> {
     }
 
     @Override
-    @SuppressWarnings("NonFinalFieldReferencedInHashCode")
     public int hashCode() {
         int result = getId().hashCode();
         result = 31 * result + getState().hashCode();
