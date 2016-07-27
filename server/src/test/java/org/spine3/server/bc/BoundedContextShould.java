@@ -179,7 +179,7 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
+    public void not_change_storage_during_registration_if_a_repository_has_one() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
 
