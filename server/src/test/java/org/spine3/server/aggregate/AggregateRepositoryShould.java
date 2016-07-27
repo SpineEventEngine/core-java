@@ -73,11 +73,13 @@ public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems. */
+    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
     private CommandStore commandStore;
     private EventBus eventBus;
+
+    private final ProjectId projectId = Given.AggregateId.newProjectId();
 
     @Before
     public void setUp() {
@@ -169,14 +171,13 @@ public class AggregateRepositoryShould {
 
     @Test
     public void post_events_on_command_dispatching() {
-        final ProjectId id = Given.AggregateId.newProjectId();
-        final Command cmd = Given.Command.createProject(id);
+        final Command cmd = Given.Command.createProject(projectId);
 
         repository.dispatch(cmd);
 
         final Event event = verifyEventPosted();
         final ProjectCreated msg = getMessage(event);
-        assertEquals(id, msg.getProjectId());
+        assertEquals(projectId, msg.getProjectId());
     }
 
     @Test
@@ -204,8 +205,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void set_cmd_status_to_error_if_failed_to_store_aggregate_on_dispatching() {
-        final ProjectId id = Given.AggregateId.newProjectId();
-        final Command cmd = Given.Command.createProject(id);
+        final Command cmd = Given.Command.createProject();
         final RuntimeException exception = new RuntimeException(newUuid());
         doThrow(exception).when(repositorySpy)
                           .store(any(ProjectAggregate.class));
@@ -217,38 +217,29 @@ public class AggregateRepositoryShould {
 
     @Test
     public void set_cmd_status_to_error_if_got_exception_on_dispatching() {
-        final Command cmd = Given.Command.createProject(); // TODO:2016-07-22:alexander.litus: DRY
-        final CommandId commandId = getId(cmd);
         final Exception exception = new Exception(newUuid());
-        givenThrowingAggregate(exception, cmd);
 
-        repositorySpy.dispatch(cmd);
+        final CommandId id = dispatchCmdToAggregateThrowing(exception);
 
-        verify(commandStore).updateStatus(commandId, exception);
+        verify(commandStore).updateStatus(id, exception);
     }
 
     @Test
     public void set_cmd_status_to_failure_if_got_failure_on_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final CommandId commandId = getId(cmd);
         final TestFailure failure = new TestFailure();
-        givenThrowingAggregate(failure, cmd);
 
-        repositorySpy.dispatch(cmd);
+        final CommandId id = dispatchCmdToAggregateThrowing(failure);
 
-        verify(commandStore).updateStatus(commandId, failure.toMessage());
+        verify(commandStore).updateStatus(id, failure.toMessage());
     }
 
     @Test
     public void set_cmd_status_to_error_if_got_unknown_throwable_on_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final CommandId commandId = getId(cmd);
         final TestThrowable throwable = new TestThrowable();
-        givenThrowingAggregate(throwable, cmd);
 
-        repositorySpy.dispatch(cmd);
+        final CommandId id = dispatchCmdToAggregateThrowing(throwable);
 
-        verify(commandStore).updateStatus(commandId, Errors.fromThrowable(throwable));
+        verify(commandStore).updateStatus(id, Errors.fromThrowable(throwable));
     }
 
     @Test
@@ -274,7 +265,9 @@ public class AggregateRepositoryShould {
     @Test
     public void allow_to_change_snapshot_trigger() {
         final int newSnapshotTrigger = 1000;
+
         repository.setSnapshotTrigger(newSnapshotTrigger);
+
         assertEquals(newSnapshotTrigger, repository.getSnapshotTrigger());
     }
 
@@ -303,7 +296,18 @@ public class AggregateRepositoryShould {
         return aggregate;
     }
 
-    private void givenThrowingAggregate(Throwable cause, Command cmd) {
+    private CommandId dispatchCmdToAggregateThrowing(Throwable throwable) {
+        final Command cmd = Given.Command.createProject();
+        givenThrowingAggregate(throwable, cmd, repositorySpy);
+        repositorySpy.dispatch(cmd);
+        final CommandId commandId = getId(cmd);
+        return commandId;
+    }
+
+    private static void givenThrowingAggregate(
+            Throwable cause,
+            Command cmd,
+            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy) {
         final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
         final RuntimeException wrapped = new RuntimeException(cause);
