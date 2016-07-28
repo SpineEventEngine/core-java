@@ -5,16 +5,6 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-            }
-        }
-    }
-}
+apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
 
 apply plugin: SPINE_PROTOBUF_PLUGIN_ID

@@ -19,16 +19,6 @@ protobuf {
     }
 }
 
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
-}
+apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
 apply plugin: SPINE_PROTOBUF_PLUGIN_ID

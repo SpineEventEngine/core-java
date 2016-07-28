@@ -6,7 +6,14 @@ project.ext {
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
     GRPC_VERSION = '0.14.0'
     SLF4J_VERSION = '1.7.21'
+
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
+    TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
+    GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
+    PUBLISH_PLUGIN_PATH = '/gradle/plugins/publish.gradle'
+
+    CREDENTIALS_FILE_PATH = 'credentials.properties'
+    PROJECTS_TO_PUBLISH = ["client", "server", "values", "testutil"]
 }
 
 buildscript {
@@ -158,69 +165,4 @@ idea.project.ipr {
     }
 }
 
-final String CREDENTIALS_FILE_PATH = 'credentials.properties'
-String repositoryUserName = null
-String repositoryUserPassword = null
-
-task readPublishingCredentials << {
-    final Properties properties = new Properties()
-    final File credentialsFile = project.file(CREDENTIALS_FILE_PATH)
-    if (credentialsFile.exists()) {
-        properties.load(credentialsFile.newDataInputStream())
-        repositoryUserName = properties.getProperty("user.name")
-        repositoryUserPassword = properties.getProperty("user.password")
-    }
-    if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials must be set in '${CREDENTIALS_FILE_PATH}' file in the project\'s root.")
-    }
-    println "Publishing build as ${repositoryUserName}"
-}
-
-task publish << {}
-
-void dependPublish(final Project project) {
-    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false)
-    project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTasks
-    }
-    publish.dependsOn project.getTasksByName("publish", false)
-}
-
-// Artifacts to publish
-final def publishingProjects = ["client", "server", "values", "testutil"]
-
-publishingProjects.each {
-    project(":$it") { final currentProject ->
-        apply plugin: 'maven-publish'
-
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    groupId = "${group}"
-                    artifactId = "${currentProject.name}"
-                    version = "${currentProject.version}"
-
-                    from components.java
-
-                    artifact sourceJar
-                    artifact testOutputJar
-                }
-            }
-        }
-
-        publishing {
-            repositories {
-                maven {
-                    url = 'http://maven.teamdev.com/repository/spine'
-                    credentials {
-                        username = "${repositoryUserName}"
-                        password = "${repositoryUserPassword}"
-                    }
-                }
-            }
-        }
-
-        dependPublish(project)
-    }
-}
+apply from: PUBLISH_PLUGIN_PATH

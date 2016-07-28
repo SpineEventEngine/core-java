@@ -16,24 +16,13 @@ protobuf {
         all().each { final task ->
             task.plugins {
                 grpc {}
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "$projectDir/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
             }
         }
     }
 }
 
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
-}
+apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+
+apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
 apply plugin: SPINE_PROTOBUF_PLUGIN_ID
