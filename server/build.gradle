@@ -9,16 +9,7 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-sourceSets {
-    main {
-        proto {
-            srcDirs += ["$projectDir/src/main/proto"]
-        }
-        java {
-            srcDir "$projectDir/generated/main/grpc"
-        }
-    }
-}
+sourceSets.main.java.srcDir GEN_MAIN_GRPC_DIR
 
 protobuf {
     generateProtoTasks {

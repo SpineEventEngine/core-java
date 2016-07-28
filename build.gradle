@@ -3,7 +3,7 @@ project.ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
     PROTOBUF_VERSION = '3.0.0-beta-3'
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
     GRPC_VERSION = '0.14.0'
     SLF4J_VERSION = '1.7.21'
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
@@ -50,6 +50,15 @@ subprojects {
     // # suppress inspection "UnusedProperty"
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
 
+    project.ext {
+        SRC_DIR = "$projectDir/src"
+        GEN_DIR = "$projectDir/generated"
+        GEN_MAIN_JAVA_DIR = "${GEN_DIR}/main/java"
+        GEN_TEST_JAVA_DIR = "${GEN_DIR}/test/java"
+        GEN_MAIN_GRPC_DIR = "${GEN_DIR}/main/grpc"
+        GEN_MAIN_SPINE_DIR = "${GEN_DIR}/main/spine"
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -75,21 +84,16 @@ subprojects {
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
     }
 
-    final String SRC_ROOT_DIR = "$projectDir/src"
-    final String GEN_ROOT_DIR = "$projectDir/generated"
-    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java"
-    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java"
-
     sourceSets {
         main {
-            proto.srcDirs = ["${SRC_ROOT_DIR}/main/proto"]
-            java.srcDirs = [GEN_MAIN_JAVA_DIR, "${SRC_ROOT_DIR}/main/java"]
-            resources.srcDirs = ["${GEN_ROOT_DIR}/main/resources"]
+            proto.srcDirs = ["${SRC_DIR}/main/proto"]
+            java.srcDirs = [GEN_MAIN_JAVA_DIR, "${SRC_DIR}/main/java"]
+            resources.srcDirs = ["${GEN_DIR}/main/resources"]
         }
         test {
-            proto.srcDirs = ["${SRC_ROOT_DIR}/test/proto"]
-            java.srcDirs = [GEN_TEST_JAVA_DIR, "${SRC_ROOT_DIR}/test/java"]
-            resources.srcDirs = ["${GEN_ROOT_DIR}/test/resources"]
+            proto.srcDirs = ["${SRC_DIR}/test/proto"]
+            java.srcDirs = [GEN_TEST_JAVA_DIR, "${SRC_DIR}/test/java"]
+            resources.srcDirs = ["${GEN_DIR}/test/resources"]
         }
     }
 
@@ -99,7 +103,7 @@ subprojects {
                 artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION"
             }
         }
-        generatedFilesBaseDir = GEN_ROOT_DIR
+        generatedFilesBaseDir = GEN_DIR
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
         }
