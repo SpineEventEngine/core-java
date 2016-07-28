@@ -6,6 +6,7 @@ dependencies {
     compile project(path: ':values')
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
+    testCompile project(path: ":testutil")
 }
 
 sourceSets {
