@@ -9,8 +9,6 @@ project.ext {
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
 }
 
-final String CREDENTIALS_LOCATION = 'credentials.properties'
-
 buildscript {
     repositories {
         mavenCentral()
@@ -152,20 +150,21 @@ idea.project.ipr {
     }
 }
 
-def repositoryUserName = null
-def repositoryUserPassword = null
-final Properties properties = new Properties()
-final File credentialsFile = project.file(CREDENTIALS_LOCATION)
-if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream())
-    repositoryUserName = properties.getProperty("user.name")
-    repositoryUserPassword = properties.getProperty("user.password")
-}
+final String CREDENTIALS_FILE_PATH = 'credentials.properties'
+String repositoryUserName = null
+String repositoryUserPassword = null
 
 task readPublishingCredentials << {
+    final Properties properties = new Properties()
+    final File credentialsFile = project.file(CREDENTIALS_FILE_PATH)
+    if (credentialsFile.exists()) {
+        properties.load(credentialsFile.newDataInputStream())
+        repositoryUserName = properties.getProperty("user.name")
+        repositoryUserPassword = properties.getProperty("user.password")
+    }
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.")
+                "Credentials must be set in '${CREDENTIALS_FILE_PATH}' file in the project\'s root.")
     }
     println "Publishing build as ${repositoryUserName}"
 }
@@ -205,11 +204,11 @@ publishingProjects.each {
         publishing {
             repositories {
                 maven {
+                    url = 'http://maven.teamdev.com/repository/spine'
                     credentials {
                         username = "${repositoryUserName}"
                         password = "${repositoryUserPassword}"
                     }
-                    url = 'http://maven.teamdev.com/repository/spine'
                 }
             }
         }
