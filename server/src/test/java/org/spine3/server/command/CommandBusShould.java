@@ -66,8 +66,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.abs;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.CommandValidationError.*;
