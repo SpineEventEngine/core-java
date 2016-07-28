@@ -53,9 +53,13 @@ subprojects {
     project.ext {
         SRC_DIR = "$projectDir/src"
         GEN_DIR = "$projectDir/generated"
+
         GEN_MAIN_JAVA_DIR = "${GEN_DIR}/main/java"
         GEN_TEST_JAVA_DIR = "${GEN_DIR}/test/java"
+
         GEN_MAIN_GRPC_DIR = "${GEN_DIR}/main/grpc"
+        GEN_TEST_GRPC_DIR = "${GEN_DIR}/test/grpc"
+
         GEN_MAIN_SPINE_DIR = "${GEN_DIR}/main/spine"
     }
 

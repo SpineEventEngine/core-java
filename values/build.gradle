@@ -5,8 +5,6 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-sourceSets.main.java.srcDir GEN_MAIN_GRPC_DIR
-
 protobuf {
     generateProtoTasks {
         all().each { final task ->

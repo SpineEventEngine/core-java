@@ -7,7 +7,7 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-sourceSets.main.java.srcDir GEN_MAIN_GRPC_DIR
+sourceSets.main.java.srcDirs += [GEN_MAIN_GRPC_DIR, GEN_TEST_GRPC_DIR]
 
 protobuf {
     generateProtoTasks {
