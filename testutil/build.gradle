@@ -4,19 +4,5 @@ dependencies {
     // that are based on JUnit.
     compile group: 'junit', name: 'junit', version: '4.12'
 
-    compile project(path: ':client');
+    compile project(path: ':client')
 }
-
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
-}
-

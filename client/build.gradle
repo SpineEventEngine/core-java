@@ -1,53 +1,14 @@
-buildscript {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-    dependencies {
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: "$SPINE_PROTOBUF_PLUGIN_VERSION", changing: true
-    }
-}
 
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: "$GRPC_VERSION"
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: "$GRPC_VERSION"
-    compile group: 'io.grpc', name: 'grpc-stub', version: "$GRPC_VERSION"
+    compile group: 'io.grpc', name: 'grpc-okhttp', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-stub', version: GRPC_VERSION
 
-    testCompile project(path: ":testutil", configuration: 'testArtifacts')
+    testCompile project(path: ":testutil")
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply from: GRPC_PLUGIN_PATH
 
-sourceSets {
-    main {
-        proto {
-            srcDirs += ["${project(":client").projectDir}/src/main/proto"]
-        }
-        java {
-            srcDir "$projectDir/generated/main/grpc"
-        }
-    }
-}
+apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                grpc {}
-            }
-        }
-    }
-}
-
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-
-artifacts {
-    testArtifacts testJar
-}
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID

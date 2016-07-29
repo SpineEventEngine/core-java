@@ -1,40 +1,10 @@
 
-buildscript {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-    dependencies {
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: "$SPINE_PROTOBUF_PLUGIN_VERSION", changing: true
-    }
-}
-
 dependencies {
-    testCompile project(path: ":client", configuration: 'testArtifacts')
+    compile project(path: ':client')
 
-    compile project(path: ':client');
+    testCompile project(path: ":testutil")
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
 
-sourceSets {
-    main {
-        proto {
-            srcDirs += ["${project(":values").projectDir}/src/main/proto"]
-        }
-        java {
-            srcDir "$projectDir/generated/main/grpc"
-        }
-    }
-}
-
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-            }
-        }
-    }
-}
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID
