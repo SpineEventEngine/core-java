@@ -42,19 +42,6 @@ allprojects {
 
 subprojects {
 
-    apply plugin: 'java'
-    apply plugin: 'com.google.protobuf'
-
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
-
-    // Set Java home to point to JDK7 in gradle.properties file.
-    //
-    // For Mac OS X, it looks like this:
-    //
-    // # suppress inspection "UnusedProperty"
-    // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
-
     project.ext {
         SRC_DIR = "$projectDir/src"
         GEN_DIR = "$projectDir/generated"
@@ -70,7 +57,22 @@ subprojects {
         TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
         GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
         GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
+        JACOCO_PLUGIN_PATH = '../gradle/plugins/jacoco.gradle'
     }
+
+    apply plugin: 'java'
+    apply plugin: 'com.google.protobuf'
+    apply from: JACOCO_PLUGIN_PATH
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    // Set Java home to point to JDK7 in gradle.properties file.
+    //
+    // For Mac OS X, it looks like this:
+    //
+    // # suppress inspection "UnusedProperty"
+    // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
 
     repositories {
         mavenLocal()
@@ -131,15 +133,6 @@ subprojects {
         from sourceSets.test.output
         classifier "test"
     }
-
-    jacocoTestReport {
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
-
-    check.dependsOn jacocoTestReport
 
     idea.module.iml {
         beforeMerged { final module ->
