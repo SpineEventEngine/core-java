@@ -8,10 +8,7 @@ project.ext {
     SLF4J_VERSION = '1.7.21'
 
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
-    TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
-    GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
-    GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
-    PUBLISH_PLUGIN_PATH = '/gradle/plugins/publish.gradle' // is applied from the root script
+    PUBLISH_PLUGIN_PATH = "$projectDir/gradle/plugins/publish.gradle"
 
     CREDENTIALS_FILE_PATH = 'credentials.properties'
     PROJECTS_TO_PUBLISH = ["client", "server", "values", "testutil"]
@@ -69,6 +66,10 @@ subprojects {
         GEN_TEST_GRPC_DIR = "$GEN_DIR/test/grpc"
 
         GEN_MAIN_SPINE_DIR = "$GEN_DIR/main/spine"
+
+        TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
+        GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
+        GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
     }
 
     repositories {
