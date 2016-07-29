@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;

@@ -47,7 +47,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

@@ -1,55 +1,18 @@
-buildscript {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-    dependencies {
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: "$SPINE_PROTOBUF_PLUGIN_VERSION", changing: true
-    }
-}
 
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
+    compile group: 'io.grpc', name: 'grpc-all', version: GRPC_VERSION
 
-    compile project(path: ':client');
-    compile project(path: ':values');
+    compile project(path: ':client')
+    compile project(path: ':values')
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
+    testCompile project(path: ":testutil")
 }
 
-apply plugin: 'org.spine3.tools.protobuf-plugin';
+apply from: GRPC_PLUGIN_PATH
 
-sourceSets {
-    main {
-        proto {
-            srcDirs += ["${project(":server").projectDir}/src/main/proto"]
-        }
-        java {
-            srcDir "$projectDir/generated/main/grpc"
-        }
-    }
-}
+apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
 
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                grpc {}
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-            }
-        }
-    }
-}
+apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
-}
+apply plugin: SPINE_PROTOBUF_PLUGIN_ID

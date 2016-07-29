@@ -1,13 +1,34 @@
-final String CREDENTIALS_LOCATION = 'credentials.properties';
+
+project.ext {
+    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
+    // is updated with new Message types introduced in the new version of Protobuf.
+    PROTOBUF_VERSION = '3.0.0-beta-3'
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
+    GRPC_VERSION = '0.14.0'
+    SLF4J_VERSION = '1.7.21'
+
+    SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
+    PUBLISH_PLUGIN_PATH = "$projectDir/gradle/plugins/publish.gradle"
+
+    CREDENTIALS_FILE_PATH = 'credentials.properties'
+    PROJECTS_TO_PUBLISH = ["client", "server", "values", "testutil"]
+}
 
 buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven {
+            url = 'http://maven.teamdev.com/repository/spine'
+        }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.7'
+        classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7'
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.8', changing: true
     }
+    configurations.all({
+        resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+    })
 }
 
 allprojects {
@@ -19,44 +40,32 @@ allprojects {
     version = '0.5.1-SNAPSHOT'
 }
 
-project.ext {
-    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
-    // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-3';
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
-    SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.8"
-    GRPC_VERSION = '0.14.0'
-    SLF4J_VERSION = '1.7.21'
-}
-
-def repositoryUserName = null;
-def repositoryUserPassword = null;
-final Properties properties = new Properties();
-final File credentialsFile = file(CREDENTIALS_LOCATION);
-if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream());
-    repositoryUserName = properties.getProperty("user.name");
-    repositoryUserPassword = properties.getProperty("user.password");
-}
-
 subprojects {
 
-    buildscript {
-        repositories {
-            mavenLocal()
-            maven {
-                url = project.MAVEN_REPOSITORY_URL
-            }
-            mavenCentral()
-        }
+    project.ext {
+        SRC_DIR = "$projectDir/src"
+        GEN_DIR = "$projectDir/generated"
+
+        GEN_MAIN_JAVA_DIR = "$GEN_DIR/main/java"
+        GEN_TEST_JAVA_DIR = "$GEN_DIR/test/java"
+
+        GEN_MAIN_GRPC_DIR = "$GEN_DIR/main/grpc"
+        GEN_TEST_GRPC_DIR = "$GEN_DIR/test/grpc"
+
+        GEN_MAIN_SPINE_DIR = "$GEN_DIR/main/spine"
+
+        TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
+        GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
+        GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
+        JACOCO_PLUGIN_PATH = '../gradle/plugins/jacoco.gradle'
     }
 
-    apply plugin: 'java';
-    apply plugin: 'com.google.protobuf';
+    apply plugin: 'java'
+    apply plugin: 'com.google.protobuf'
+    apply from: JACOCO_PLUGIN_PATH
 
-    sourceCompatibility = 1.7;
-    targetCompatibility = 1.7;
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
     // Set Java home to point to JDK7 in gradle.properties file.
     //
@@ -68,7 +77,6 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
@@ -88,24 +96,19 @@ subprojects {
             exclude(module: 'hamcrest-core')
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-        testCompile 'org.mockito:mockito-core:2.+'
+        testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
     }
-
-    final String SRC_ROOT_DIR = "$projectDir/src";
-    final String GEN_ROOT_DIR = "$projectDir/generated";
-    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
-    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
 
     sourceSets {
         main {
-            proto.srcDirs = ["${SRC_ROOT_DIR}/main/proto"]
-            java.srcDirs = [GEN_MAIN_JAVA_DIR, "${SRC_ROOT_DIR}/main/java"]
-            resources.srcDirs = ["${GEN_ROOT_DIR}/main/resources"]
+            proto.srcDirs = ["$SRC_DIR/main/proto"]
+            java.srcDirs = [GEN_MAIN_JAVA_DIR, "$SRC_DIR/main/java"]
+            resources.srcDirs = ["$GEN_DIR/main/resources"]
         }
         test {
-            proto.srcDirs = ["${SRC_ROOT_DIR}/test/proto"]
-            java.srcDirs = [GEN_TEST_JAVA_DIR, "${SRC_ROOT_DIR}/test/java"]
-            resources.srcDirs = ["${GEN_ROOT_DIR}/test/resources"]
+            proto.srcDirs = ["$SRC_DIR/test/proto"]
+            java.srcDirs = [GEN_TEST_JAVA_DIR, "$SRC_DIR/test/java"]
+            resources.srcDirs = ["$GEN_DIR/test/resources"]
         }
     }
 
@@ -115,7 +118,7 @@ subprojects {
                 artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION"
             }
         }
-        generatedFilesBaseDir = GEN_ROOT_DIR
+        generatedFilesBaseDir = GEN_DIR
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
         }
@@ -131,15 +134,6 @@ subprojects {
         classifier "test"
     }
 
-    jacocoTestReport {
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
-
-    check.dependsOn jacocoTestReport
-
     idea.module.iml {
         beforeMerged { final module ->
             module.dependencies.clear()
@@ -150,8 +144,8 @@ subprojects {
     }
 
     idea.module {
-        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
-        testSourceDirs += file(GEN_TEST_JAVA_DIR);
+        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR)
+        testSourceDirs += file(GEN_TEST_JAVA_DIR)
     }
 }
 
@@ -166,59 +160,4 @@ idea.project.ipr {
     }
 }
 
-task readPublishingCredentials << {
-    if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.");
-    }
-    println "Publishing build as ${repositoryUserName}";
-}
-
-task publish << {}
-
-void dependPublish(final Project project) {
-    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
-    project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTasks;
-    }
-    publish.dependsOn project.getTasksByName("publish", false);
-}
-
-// Artifacts to publish
-final def publishingProjects = ["client", "server", "values", "testutil"];
-
-publishingProjects.each {
-    project(":$it") { final currentProject ->
-
-        apply plugin: 'maven-publish';
-
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    groupId = "${group}";
-                    artifactId = "${currentProject.name}";
-                    version = "${currentProject.version}";
-
-                    from components.java;
-
-                    artifact sourceJar;
-                    artifact testOutputJar;
-                }
-            }
-        }
-
-        publishing {
-            repositories {
-                maven {
-                    credentials {
-                        username = "${repositoryUserName}";
-                        password = "${repositoryUserPassword}";
-                    }
-                    url = project.MAVEN_REPOSITORY_URL;
-                }
-            }
-        }
-
-        dependPublish(project);
-    }
-}
+apply from: PUBLISH_PLUGIN_PATH

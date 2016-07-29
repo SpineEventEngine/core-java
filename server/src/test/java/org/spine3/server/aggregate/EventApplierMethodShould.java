@@ -38,7 +38,7 @@ import static org.spine3.test.Verify.assertContains;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventApplierMethodShould {
 
-    private HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
+    private final HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
 
     @Test
     public void invoke_applier_method() throws InvocationTargetException {
@@ -52,12 +52,12 @@ public class EventApplierMethodShould {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void have_deprecated_invoke_method_with_context() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
         final ProjectCreated event = Given.EventMessage.projectCreated();
 
-        //noinspection deprecation
         applier.invoke(applierObject, event, Empty.getDefaultInstance());
 
         assertEquals(event, applierObject.eventApplied);
@@ -165,7 +165,7 @@ public class EventApplierMethodShould {
     private static void assertIsNotEventApplier(Method applier) {
         assertFalse(EventApplierMethod.PREDICATE.apply(applier));
     }
-    
+
     /*
      * Valid appliers
      ****************/
