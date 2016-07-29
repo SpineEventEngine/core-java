@@ -10,7 +10,8 @@ project.ext {
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
     TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
     GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
-    PUBLISH_PLUGIN_PATH = '/gradle/plugins/publish.gradle'
+    GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
+    PUBLISH_PLUGIN_PATH = '/gradle/plugins/publish.gradle' // is applied from the root script
 
     CREDENTIALS_FILE_PATH = 'credentials.properties'
     PROJECTS_TO_PUBLISH = ["client", "server", "values", "testutil"]

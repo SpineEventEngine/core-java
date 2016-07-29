@@ -7,17 +7,7 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-sourceSets.main.java.srcDirs += [GEN_MAIN_GRPC_DIR, GEN_TEST_GRPC_DIR]
-
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                grpc {}
-            }
-        }
-    }
-}
+apply from: GRPC_PLUGIN_PATH
 
 apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
