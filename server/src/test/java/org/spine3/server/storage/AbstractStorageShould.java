@@ -83,8 +83,8 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         }
     }
 
-    /** Closes the storage and fails the test on an exception if any occurs. */
-    protected void closeAndFailOnException(AbstractStorage<I, R> storage) {
+    /** Closes the storage and fails the test if any exception occurs. */
+    protected void closeAndFailIfException(AbstractStorage<I, R> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -147,7 +147,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
 
     @Test(expected = IllegalStateException.class)
     public void assure_it_is_closed() throws Exception {
-        closeAndFailOnException(storage);
+        closeAndFailIfException(storage);
 
         storage.checkNotClosed();
     }
@@ -182,22 +182,22 @@ public abstract class AbstractStorageShould<I, R extends Message> {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void close_itself_and_throw_exception_if_read_then() throws Exception {
-        closeAndFailOnException(storage);
+    public void close_itself_and_throw_exception_if_read_after() throws Exception {
+        closeAndFailIfException(storage);
 
         storage.read(newId());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void close_itself_and_throw_exception_if_write_then() throws Exception {
-        closeAndFailOnException(storage);
+    public void close_itself_and_throw_exception_if_write_after() throws Exception {
+        closeAndFailIfException(storage);
 
         storage.write(newId(), newStorageRecord());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_close_twice() {
-        closeAndFailOnException(storage);
+        closeAndFailIfException(storage);
 
         storage.read(newId());
     }
