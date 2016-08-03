@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
@@ -68,9 +69,9 @@ public abstract class AbstractStorageShould<I, R extends Message> {
     protected abstract I newId();
 
     /**
-     * Closes the storage.
+     * Closes the storage and propagates an exception if any occurs.
      *
-     * @throws RuntimeException which wraps the primary one if occurs
+     * @see Throwables#propagate(Throwable)
      */
     protected void close(AbstractStorage storage) {
         if (storage.isOpen()) {
@@ -80,6 +81,27 @@ public abstract class AbstractStorageShould<I, R extends Message> {
                 throw propagate(e);
             }
         }
+    }
+
+    /** Closes the storage and fails the test on an exception if any occurs. */
+    protected void closeAndFailOnException(AbstractStorage<I, R> storage) {
+        try {
+            storage.close();
+        } catch (Exception e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+            fail("An unexpected exception: " + e.getClass() + "; " + e.getMessage());
+        }
+    }
+
+    /** Writes a record, reads it and asserts it is the same as the expected one. */
+    protected void writeAndReadRecordTest(I id) {
+        final R expected = newStorageRecord();
+        storage.write(id, expected);
+
+        final R actual = storage.read(id);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -123,25 +145,11 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         writeAndReadRecordTest(id);
     }
 
-    protected void writeAndReadRecordTest(I id) {
-        final R expected = newStorageRecord();
-        storage.write(id, expected);
+    @Test(expected = IllegalStateException.class)
+    public void assure_it_is_closed() throws Exception {
+        closeAndFailOnException(storage);
 
-        final R actual = storage.read(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void throw_exception_if_it_is_closed_on_check() throws Exception {
-        storage.close();
-
-        try {
-            storage.checkNotClosed();
-            fail("An exception must be thrown.");
-        } catch (IllegalStateException e) {
-            // is OK because it is closed
-        }
+        storage.checkNotClosed();
     }
 
     @Test
@@ -173,27 +181,24 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         assertFalse(storage.isClosed());
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void close_itself_and_throw_exception_if_read_then() throws Exception {
-        storage.close();
+        closeAndFailOnException(storage);
 
-        try {
-            storage.read(newId());
-            fail("An exception must be thrown on attempt to read.");
-        } catch (IllegalStateException e) {
-            // is OK because storage is closed
-        }
+        storage.read(newId());
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void close_itself_and_throw_exception_if_write_then() throws Exception {
-        storage.close();
+        closeAndFailOnException(storage);
 
-        try {
-            storage.write(newId(), newStorageRecord());
-            fail("An exception must be thrown on attempt to write.");
-        } catch (IllegalStateException e) {
-            // is OK because storage is closed
-        }
+        storage.write(newId(), newStorageRecord());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_close_twice() {
+        closeAndFailOnException(storage);
+
+        storage.read(newId());
     }
 }
