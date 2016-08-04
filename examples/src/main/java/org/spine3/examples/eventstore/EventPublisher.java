@@ -43,7 +43,7 @@ import static org.spine3.examples.eventstore.SampleData.events;
 public class EventPublisher {
 
     private final ManagedChannel channel;
-    private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
+    private final EventStoreGrpc.EventStoreBlockingStub blockingClient;
 
     public EventPublisher(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)

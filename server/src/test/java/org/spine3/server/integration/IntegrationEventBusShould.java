@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase;
 import org.spine3.test.integration.event.ProjectCreated;
 
 import static org.junit.Assert.*;
@@ -82,10 +82,11 @@ public class IntegrationEventBusShould {
         eventBus.post(event);
     }
 
-    private static class TestIntEventSubscriber implements IntegrationEventSubscriber {
+    private static class TestIntEventSubscriber extends IntegrationEventSubscriberImplBase {
 
         private IntegrationEvent eventHandled;
 
+        @SuppressWarnings("RefusedBequest") // we override `unimplemented` default behaviour.
         @Override
         public void notify(IntegrationEvent event, StreamObserver<Response> observer) {
             this.eventHandled = event;

@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.grpc.EventStoreGrpc;
-import org.spine3.protobuf.TypeUrl;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +48,7 @@ import static org.spine3.examples.eventstore.Constants.*;
 public class EventReader {
 
     private final ManagedChannel channel;
-    private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
+    private final EventStoreGrpc.EventStoreBlockingStub blockingClient;
 
     public EventReader(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)

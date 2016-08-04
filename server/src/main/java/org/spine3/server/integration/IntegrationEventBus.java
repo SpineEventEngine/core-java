@@ -39,7 +39,7 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase;
 
 /**
  * Allows to register {@link IntegrationEvent} subscribers and deliver events to them.
@@ -52,7 +52,7 @@ import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.
  */
 public class IntegrationEventBus {
 
-    private final Multimap<EventClass, IntegrationEventSubscriber> subscribersMap = HashMultimap.create();
+    private final Multimap<EventClass, IntegrationEventSubscriberImplBase> subscribersMap = HashMultimap.create();
 
     private StreamObserver<Response> responseObserver = new DefaultResponseObserver();
 
@@ -61,7 +61,7 @@ public class IntegrationEventBus {
         return instance();
     }
 
-    /** Sets a response observer used in {@link IntegrationEventSubscriber#notify(IntegrationEvent, StreamObserver)}. */
+    /** Sets a response observer used in {@link IntegrationEventSubscriberImplBase#notify(IntegrationEvent, StreamObserver)}. */
     public void setResponseObserver(StreamObserver<Response> responseObserver) {
         this.responseObserver = responseObserver;
     }
@@ -79,9 +79,9 @@ public class IntegrationEventBus {
     public void post(IntegrationEvent event) {
         final Message msg = unpack(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
-        final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
+        final Collection<IntegrationEventSubscriberImplBase> subscribers = subscribersMap.get(eventClass);
         checkArgument(!subscribers.isEmpty(), "No integration event subscribers found for event " + msg.getClass().getName());
-        for (IntegrationEventSubscriber subscriber : subscribers) {
+        for (IntegrationEventSubscriberImplBase subscriber : subscribers) {
             subscriber.notify(event, responseObserver);
         }
     }
@@ -92,7 +92,7 @@ public class IntegrationEventBus {
      * @param subscriber a subscriber to register (typically it is a {@link BoundedContext})
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
-    public void subscribe(IntegrationEventSubscriber subscriber, Iterable<Class<? extends Message>> eventClasses) {
+    public void subscribe(IntegrationEventSubscriberImplBase subscriber, Iterable<Class<? extends Message>> eventClasses) {
         checkNotNull(subscriber);
         for (Class<? extends Message> eventClass : eventClasses) {
             subscribersMap.put(EventClass.of(eventClass), subscriber);
@@ -106,7 +106,7 @@ public class IntegrationEventBus {
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
     @SafeVarargs
-    public final void subscribe(IntegrationEventSubscriber subscriber, Class<? extends Message>... eventClasses) {
+    public final void subscribe(IntegrationEventSubscriberImplBase subscriber, Class<? extends Message>... eventClasses) {
         subscribe(subscriber, FluentIterable.of(eventClasses));
     }
 
