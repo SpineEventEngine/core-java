@@ -21,10 +21,12 @@
 package org.spine3.server.event.error;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 
 import java.io.Serializable;
@@ -46,13 +48,17 @@ public abstract class EventException extends RuntimeException {
      * Creates a new instance.
      *
      * @param messageText  an error message text
-     * @param eventMessage a related event
+     * @param eventMessage a related event message
      * @param error        an error occurred
      */
     protected EventException(String messageText, Message eventMessage, Error error) {
         super(messageText);
-        //TODO:2016-08-04:alexander.yevsyukov: What do we do if the passed message isn't of type GeneratedMessageV3?
-        this.eventMessage = (GeneratedMessageV3) eventMessage;
+        if (eventMessage instanceof GeneratedMessageV3) {
+            this.eventMessage = (GeneratedMessageV3) eventMessage;
+        } else {
+            // In an unlikely case on encountering a message, which is not `GeneratedMessageV3`, wrap it into `Any`.
+            this.eventMessage = AnyPacker.pack(eventMessage);
+        }
         this.error = error;
     }
 
@@ -69,17 +75,28 @@ public abstract class EventException extends RuntimeException {
         return ImmutableMap.of(Attribute.EVENT_TYPE_NAME, value);
     }
 
-    /** Returns a related event. */
+    /**
+     * Returns a related event message.
+     */
     public Message getEventMessage() {
+        if (eventMessage instanceof Any) {
+            final Any any = (Any) eventMessage;
+            Message unpacked = AnyPacker.unpack(any);
+            return unpacked;
+        }
         return eventMessage;
     }
 
-    /** Returns an error occurred. */
+    /**
+     * Returns an error occurred.
+     */
     public Error getError() {
         return error;
     }
 
-    /** Attribute names for event-related business failures. */
+    /**
+     * Attribute names for event-related business failures.
+     */
     public interface Attribute {
         String EVENT_TYPE_NAME = "eventType";
     }
