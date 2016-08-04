@@ -20,7 +20,7 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
@@ -56,7 +56,7 @@ public class FailureThrowableShould {
 
     private static class TestFailure extends FailureThrowable {
 
-        protected TestFailure(GeneratedMessage failure) {
+        protected TestFailure(GeneratedMessageV3 failure) {
             super(failure);
         }
 

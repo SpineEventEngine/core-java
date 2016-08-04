@@ -27,11 +27,9 @@ import org.spine3.test.Tests;
 
 import java.util.Date;
 
-import static com.google.protobuf.util.TimeUtil.*;
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.subtract;
 import static org.junit.Assert.*;
-import static org.spine3.protobuf.Timestamps.MICROS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.NANOS_PER_MICROSECOND;
 import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -71,12 +69,12 @@ public class TimestampsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void have_seconds_greater_than_TIMESTAMP_SECONDS_MIN() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(TIMESTAMP_SECONDS_MIN).build());
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps.TIMESTAMP_SECONDS_MIN).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void have_seconds_lower_than_TIMESTAMP_SECONDS_MAX() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(TIMESTAMP_SECONDS_MAX).build());
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps.TIMESTAMP_SECONDS_MAX).build());
     }
 
     @Test
@@ -89,7 +87,7 @@ public class TimestampsShould {
     @Test
     public void calculate_timestamp_of_moment_minute_ago() {
         final Timestamp currentTime = Timestamps.getCurrentTime();
-        final Timestamp expected = subtract(currentTime, MINUTE);
+        final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, MINUTE);
 
         final Timestamp actual = Timestamps.minutesAgo(1);
 
@@ -99,7 +97,7 @@ public class TimestampsShould {
     @Test
     public void calculate_timestamp_of_moment_seconds_ago() {
         final Timestamp currentTime = Timestamps.getCurrentTime();
-        final Timestamp expected = subtract(currentTime, TEN_SECONDS);
+        final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, TEN_SECONDS);
 
         final Timestamp actual = Timestamps.secondsAgo(TEN_SECONDS.getSeconds());
 
@@ -153,7 +151,7 @@ public class TimestampsShould {
     @Test
     public void compare_two_timestamps_return_positive_int_if_first_greater_than_second_one() {
         final Timestamp currentTime = Timestamps.getCurrentTime();
-        final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
+        final Timestamp timeAfterCurrent = com.google.protobuf.util.Timestamps.add(currentTime, TEN_SECONDS);
 
         final int result = Timestamps.compare(timeAfterCurrent, currentTime);
 
@@ -172,8 +170,8 @@ public class TimestampsShould {
     @Test
     public void return_true_if_timestamp_is_between_two_timestamps() {
         final Timestamp start = Timestamps.getCurrentTime();
-        final Timestamp timeBetween = add(start, TEN_SECONDS);
-        final Timestamp finish = add(timeBetween, TEN_SECONDS);
+        final Timestamp timeBetween = com.google.protobuf.util.Timestamps.add(start, TEN_SECONDS);
+        final Timestamp finish = com.google.protobuf.util.Timestamps.add(timeBetween, TEN_SECONDS);
 
         final boolean isBetween = Timestamps.isBetween(timeBetween, start, finish);
 
@@ -275,7 +273,7 @@ public class TimestampsShould {
 
     @Test
     public void accept_time_provider() {
-        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
 
         Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
 

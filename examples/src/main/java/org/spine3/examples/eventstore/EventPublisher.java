@@ -20,7 +20,7 @@
 
 package org.spine3.examples.eventstore;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.TextFormat;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -66,7 +66,7 @@ public class EventPublisher {
         final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, PORT);
 
         try {
-            for (GeneratedMessage message : events) {
+            for (GeneratedMessageV3 message : events) {
                 // Simulate event id generation.
                 final EventId eventId = Events.generateId();
 
