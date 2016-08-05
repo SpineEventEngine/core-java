@@ -113,7 +113,7 @@ public class KnownTypes {
 
     /** Retrieves names of Java classes generated for Protobuf types known to the application. */
     @VisibleForTesting
-    /* package */ static ImmutableSet<ClassName> getJavaClasses() {
+    public static ImmutableSet<ClassName> getJavaClasses() {
         final Set<ClassName> result = typeToClassMap.values();
         return ImmutableSet.copyOf(result);
     }
