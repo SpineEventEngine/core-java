@@ -23,14 +23,15 @@
 String repositoryUserName = null
 String repositoryUserPassword = null
 
-task readPublishingCredentials << {
-    final Properties properties = new Properties()
-    final File credentialsFile = project.file(project.CREDENTIALS_FILE_PATH)
-    if (credentialsFile.exists()) {
-        properties.load(credentialsFile.newDataInputStream())
-        repositoryUserName = properties.getProperty("user.name")
-        repositoryUserPassword = properties.getProperty("user.password")
-    }
+final Properties properties = new Properties()
+final File credentialsFile = project.file(project.CREDENTIALS_FILE_PATH)
+if (credentialsFile.exists()) {
+    properties.load(credentialsFile.newDataInputStream())
+    repositoryUserName = properties.getProperty("user.name")
+    repositoryUserPassword = properties.getProperty("user.password")
+}
+
+task checkPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
                 "Credentials must be set in '${project.CREDENTIALS_FILE_PATH}' file in the project\'s root.")
