@@ -136,12 +136,13 @@ public class Timestamps {
     /**
      * Default implementation of current time provider based on {@link System#currentTimeMillis()}.
      *
-     * <p>This is the only place, which should invoke obtaining current time from {@code TimeUtil} directly.
+     * <p>This is the only place, which should invoke obtaining current time from the system millis.
      */
     private static class SystemTimeProvider implements Provider {
         @Override
         public Timestamp getCurrentTime() {
-            return com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+            final Timestamp result = com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+            return result;
         }
     }
 
@@ -277,7 +278,9 @@ public class Timestamps {
     }
 
     /**
-     * @param value a positive number of minutes
+     * Obtains timestamp in the past a number of seconds ago.
+     *
+     * @param value a positive number of seconds
      * @return the moment `value` seconds ago
      */
     @VisibleForTesting
@@ -290,5 +293,19 @@ public class Timestamps {
 
     private static void checkPositive(long value) {
         checkArgument(value > 0, "value must be positive");
+    }
+
+    /**
+     * Obtains timestamp in the future a number of seconds from current time.
+     *
+     * @param seconds a positive number of seconds
+     * @return the moment `value` seconds from now
+     */
+    @VisibleForTesting
+    public static Timestamp secondsFromNow(int seconds) {
+        checkPositive(seconds);
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp result = com.google.protobuf.util.Timestamps.add(currentTime, Durations.ofSeconds(seconds));
+        return result;
     }
 }

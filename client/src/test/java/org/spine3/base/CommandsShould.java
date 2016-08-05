@@ -33,21 +33,19 @@ import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
-import org.spine3.test.commands.TestCommand;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.test.commands.TestCommand;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;

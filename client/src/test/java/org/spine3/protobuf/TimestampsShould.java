@@ -27,8 +27,8 @@ import org.spine3.test.Tests;
 
 import java.util.Date;
 
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.subtract;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -75,13 +75,6 @@ public class TimestampsShould {
     @Test(expected = IllegalArgumentException.class)
     public void have_seconds_lower_than_TIMESTAMP_SECONDS_MAX() {
         Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps.TIMESTAMP_SECONDS_MAX).build());
-    }
-
-    @Test
-    @SuppressWarnings("MagicNumber")
-    public void expose_some_private_constants_from_TimeUtil() {
-        assertEquals(1000L, NANOS_PER_MICROSECOND);
-        assertEquals(1_000_000L, MICROS_PER_SECOND);
     }
 
     @Test

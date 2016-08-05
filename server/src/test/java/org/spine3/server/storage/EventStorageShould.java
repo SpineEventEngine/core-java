@@ -36,12 +36,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
 

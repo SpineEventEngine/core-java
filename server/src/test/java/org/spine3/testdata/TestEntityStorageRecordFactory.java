@@ -23,8 +23,8 @@ package org.spine3.testdata;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.storage.EntityStorageRecord;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**

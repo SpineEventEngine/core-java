@@ -55,10 +55,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.time.Intervals.between;

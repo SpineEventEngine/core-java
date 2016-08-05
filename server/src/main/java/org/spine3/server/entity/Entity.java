@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * A server-side object with an identity.

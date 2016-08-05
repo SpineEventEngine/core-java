@@ -22,15 +22,14 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.Tests.nullRef;
 
@@ -84,14 +83,14 @@ public class EntityShould {
 
     @Test
     public void validate_state_when_set_it() {
-        entityNew.setState(state, 0, TimeUtil.getCurrentTime());
+        entityNew.setState(state, 0, getCurrentTime());
 
         assertTrue(entityNew.isValidateMethodCalled());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entityNew.setState(Tests.<Project>nullRef(), 0, TimeUtil.getCurrentTime());
+        entityNew.setState(Tests.<Project>nullRef(), 0, getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)

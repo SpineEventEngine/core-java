@@ -30,6 +30,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -37,17 +38,16 @@ import org.spine3.test.storage.command.StartProject;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.test.storage.event.ProjectStarted;
 import org.spine3.test.storage.event.TaskAdded;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.UserId;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 

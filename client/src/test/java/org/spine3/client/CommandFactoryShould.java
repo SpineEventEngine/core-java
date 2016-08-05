@@ -22,11 +22,9 @@ package org.spine3.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -101,7 +99,7 @@ public class CommandFactoryShould {
         // and to add coverage.
         final Timestamp beforeCall = Timestamps.secondsAgo(1);
         final Command command = commandFactory.create(StringValue.getDefaultInstance());
-        final Timestamp afterCall = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(1));
+        final Timestamp afterCall = Timestamps.secondsFromNow(1);
 
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
     }

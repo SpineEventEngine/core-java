@@ -41,12 +41,12 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.Timestamps.add;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * @author Alexander Litus

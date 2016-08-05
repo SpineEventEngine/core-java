@@ -25,9 +25,8 @@ import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.command.CreateProject;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
-
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /* package */ class Given {
 

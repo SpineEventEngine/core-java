@@ -28,19 +28,17 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.testdata.TestCommandContextFactory;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.testdata.TestCommandContextFactory;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.protobuf.Values.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 import static org.spine3.validate.Validate.isNotDefault;

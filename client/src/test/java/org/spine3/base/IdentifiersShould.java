@@ -35,9 +35,9 @@ import org.spine3.test.identifiers.TimestampFieldId;
 
 import javax.annotation.Nullable;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.*;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 

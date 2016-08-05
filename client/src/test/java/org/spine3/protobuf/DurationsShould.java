@@ -21,7 +21,6 @@ package org.spine3.protobuf;
 
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -54,7 +53,7 @@ public class DurationsShould {
     }
 
     private static void convertMillisecondsToDurationTest(long millis) {
-        final Duration expected = TimeUtil.createDurationFromMillis(millis);
+        final Duration expected = com.google.protobuf.util.Durations.fromMillis(millis);
         assertEquals(expected, ofMilliseconds(millis));
         assertEquals(expected, milliseconds(millis));
     }

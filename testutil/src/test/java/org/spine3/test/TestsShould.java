@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 
-import static com.google.protobuf.util.TimeUtil.subtract;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
