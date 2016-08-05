@@ -22,7 +22,6 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
@@ -39,13 +38,11 @@ import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-
-@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {
@@ -146,7 +143,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                                                                       .setHonorificSuffix("Cmd")))
                                               .build();
             final UserId userId = newUserId(Identifiers.newUuid());
-            final org.spine3.base.Command result = Given.Command.create(msg, userId, TimeUtil.getCurrentTime());
+            final org.spine3.base.Command result = Given.Command.create(msg, userId, getCurrentTime());
 
             return result;
         }

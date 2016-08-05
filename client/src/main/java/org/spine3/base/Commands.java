@@ -43,11 +43,13 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.*;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.

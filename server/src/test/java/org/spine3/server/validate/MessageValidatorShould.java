@@ -61,10 +61,14 @@ import org.spine3.validate.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.protobuf.util.TimeUtil.*;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static java.lang.String.format;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * @author Alexander Litus

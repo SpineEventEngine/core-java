@@ -43,8 +43,14 @@ import org.spine3.test.projection.event.TaskAdded;
 
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.spine3.server.projection.ProjectionRepository.Status.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
+import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
+import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
+import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;

@@ -21,7 +21,7 @@
 package org.spine3.examples.eventstore;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import org.spine3.examples.eventstore.events.ProjectCreated;
 import org.spine3.examples.eventstore.events.TaskAssigned;
 import org.spine3.examples.eventstore.events.TaskCreated;
@@ -37,7 +37,7 @@ import static org.spine3.client.UserUtil.newUserId;
  */
 public class SampleData {
 
-    static final ImmutableList<GeneratedMessage> events = generateEvents();
+    static final ImmutableList<GeneratedMessageV3> events = generateEvents();
 
     static final ImmutableList<UserId> userIds = ImmutableList.of(
             newUserId("diane.riley@spine3.org"),
@@ -93,7 +93,7 @@ public class SampleData {
         return userIds.get(id);
     }
 
-    private static ImmutableList<GeneratedMessage> generateEvents() {
+    private static ImmutableList<GeneratedMessageV3> generateEvents() {
         final Task task1 = newTask(ALPHA, "Annotate internal API", "Use @Internal annotation.");
         final TaskId taskId1 = task1.getId();
 

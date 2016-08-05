@@ -29,9 +29,9 @@ import org.spine3.base.Commands;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.time.ZoneOffsets.UTC;
 
 

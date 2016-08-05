@@ -28,7 +28,9 @@ import org.spine3.base.CommandContext;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 

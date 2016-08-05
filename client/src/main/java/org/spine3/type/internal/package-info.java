@@ -29,4 +29,5 @@
 package org.spine3.type.internal;
 
 import org.spine3.Internal;
+
 import javax.annotation.ParametersAreNonnullByDefault;

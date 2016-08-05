@@ -7,18 +7,20 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
-import com.google.protobuf.util.TimeUtil;
 
 import javax.annotation.Nullable;
 
-import static com.google.protobuf.util.TimeUtil.createDurationFromMillis;
-import static com.google.protobuf.util.TimeUtil.toMillis;
-import static org.spine3.protobuf.Timestamps.*;
+import static com.google.protobuf.util.Durations.fromMillis;
+import static com.google.protobuf.util.Durations.toMillis;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
+import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 
 /**
- * Utility class for working with durations in addition to those available from {@link TimeUtil}.
+ * Utility class for working with durations in addition to those available from
+ * {@link com.google.protobuf.util.Durations}.
  *
  * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
  * <pre>
@@ -26,12 +28,11 @@ import static org.spine3.util.Math.safeMultiply;
  * </pre>
  *
  * @author Alexander Yevsyukov
- * @see TimeUtil
  */
 @SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
 public class Durations {
 
-    public static final com.google.protobuf.Duration ZERO = createDurationFromMillis(0L);
+    public static final com.google.protobuf.Duration ZERO = fromMillis(0L);
 
     private Durations() {}
 
@@ -48,7 +49,7 @@ public class Durations {
      * @return a non-null {@code Duration}
      */
     public static Duration ofMilliseconds(long milliseconds) {
-        final Duration result = createDurationFromMillis(milliseconds);
+        final Duration result = fromMillis(milliseconds);
         return result;
     }
 
@@ -59,7 +60,7 @@ public class Durations {
      * @return a non-null {@code Duration}
      */
     public static Duration ofSeconds(long seconds) {
-        final Duration result = createDurationFromMillis(safeMultiply(seconds, (int)MILLIS_PER_SECOND));
+        final Duration result = fromMillis(safeMultiply(seconds, (int)MILLIS_PER_SECOND));
         return result;
     }
 
@@ -96,7 +97,7 @@ public class Durations {
      * @return a non-null {@code Duration}
      */
     public static Duration nanos(long nanos) {
-        final Duration duration = TimeUtil.createDurationFromNanos(nanos);
+        final Duration duration = com.google.protobuf.util.Durations.fromNanos(nanos);
         return duration;
     }
 
@@ -151,7 +152,7 @@ public class Durations {
         if (d2 == null) {
             return d1;
         }
-        final Duration result = TimeUtil.add(d1, d2);
+        final Duration result = com.google.protobuf.util.Durations.add(d1, d2);
         return result;
     }
 
@@ -159,7 +160,7 @@ public class Durations {
     public static Duration subtract(Duration d1, Duration d2) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
-        final Duration result = TimeUtil.subtract(d1, d2);
+        final Duration result = com.google.protobuf.util.Durations.subtract(d1, d2);
         return result;
     }
 
@@ -173,13 +174,13 @@ public class Durations {
     public static long toNanos(Duration duration) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
-        final long result = TimeUtil.toNanos(duration);
+        final long result = com.google.protobuf.util.Durations.toNanos(duration);
         return result;
     }
 
     /** Convert a duration to the number of seconds. */
     public static long toSeconds(Duration duration) {
-        final long millis = TimeUtil.toMillis(duration);
+        final long millis = com.google.protobuf.util.Durations.toMillis(duration);
         final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
         return seconds;
     }

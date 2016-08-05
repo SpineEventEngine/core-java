@@ -2,9 +2,9 @@
 project.ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-3'
+    PROTOBUF_VERSION = '3.0.0'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
-    GRPC_VERSION = '0.14.0'
+    GRPC_VERSION = '1.0.0-pre2'
     SLF4J_VERSION = '1.7.21'
 
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'

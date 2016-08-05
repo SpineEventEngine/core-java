@@ -20,7 +20,6 @@
 
 package org.spine3.client;
 
-import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;

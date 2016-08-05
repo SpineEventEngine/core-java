@@ -24,6 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.event.EnrichmentByContextFields;
 import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
@@ -33,11 +34,12 @@ import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
-import org.spine3.protobuf.TypeUrl;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**

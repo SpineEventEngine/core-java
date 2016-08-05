@@ -68,7 +68,7 @@ public class ClientApp {
     private final CommandFactory commandFactory;
     private final Topic topic = Topic.getDefaultInstance();
     private final ManagedChannel channel;
-    private final ClientServiceGrpc.ClientServiceBlockingClient blockingClient;
+    private final ClientServiceGrpc.ClientServiceBlockingStub blockingClient;
     private final ClientServiceGrpc.ClientServiceStub nonBlockingClient;
 
     private final StreamObserver<Event> observer = new StreamObserver<Event>() {

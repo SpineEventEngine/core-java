@@ -26,12 +26,12 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
@@ -45,7 +45,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.*;
+import static org.spine3.base.Events.createEvent;
+import static org.spine3.base.Events.generateId;
+import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
@@ -462,7 +464,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setState(state)
                 .setWhenModified(whenModified)
                 .setVersion(version)
-                .setTimestamp(TimeUtil.getCurrentTime());
+                .setTimestamp(Timestamps.getCurrentTime());
         return builder.build();
     }
 

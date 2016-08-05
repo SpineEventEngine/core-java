@@ -28,7 +28,9 @@ import org.spine3.type.ClassName;
 
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "EmptyClass"})
 public class MessageClassShould {

@@ -26,7 +26,6 @@ import org.spine3.test.reflect.event.ProjectCreated;
 
 import static org.spine3.base.Identifiers.newUuid;
 
-@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {

@@ -24,10 +24,10 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.server.type.CommandClass;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.type.CommandClass;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 /**
  * Exception that is thrown when a scheduled command was not delivered to the target in time.

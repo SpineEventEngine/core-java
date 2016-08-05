@@ -25,7 +25,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -42,6 +41,7 @@ import java.util.List;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * The abstract base for classes that expose command handling methods
@@ -111,7 +111,7 @@ public abstract class CommandHandler extends Entity<String, Empty> {
 
     private EventContext createEventContext(CommandContext commandContext) {
         final EventId eventId = generateId();
-        final Timestamp now = TimeUtil.getCurrentTime();
+        final Timestamp now = getCurrentTime();
         final Any producerId = idToAny(getId());
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)

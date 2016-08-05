@@ -33,21 +33,21 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**

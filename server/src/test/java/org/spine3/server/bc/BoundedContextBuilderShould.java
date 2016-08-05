@@ -37,7 +37,10 @@ import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

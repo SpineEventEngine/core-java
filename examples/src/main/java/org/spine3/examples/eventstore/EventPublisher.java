@@ -20,7 +20,7 @@
 
 package org.spine3.examples.eventstore;
 
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.TextFormat;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -34,7 +34,10 @@ import org.spine3.server.event.grpc.EventStoreGrpc;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.spine3.examples.eventstore.Constants.*;
+import static org.spine3.examples.eventstore.Constants.CHANNEL_SHUT_DOWN;
+import static org.spine3.examples.eventstore.Constants.EVENT_STORE_SERVICE_HOST;
+import static org.spine3.examples.eventstore.Constants.PORT;
+import static org.spine3.examples.eventstore.Constants.SHUTDOWN_TIMEOUT_SEC;
 import static org.spine3.examples.eventstore.SampleData.events;
 
 /**
@@ -43,7 +46,7 @@ import static org.spine3.examples.eventstore.SampleData.events;
 public class EventPublisher {
 
     private final ManagedChannel channel;
-    private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
+    private final EventStoreGrpc.EventStoreBlockingStub blockingClient;
 
     public EventPublisher(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)
@@ -66,7 +69,7 @@ public class EventPublisher {
         final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, PORT);
 
         try {
-            for (GeneratedMessage message : events) {
+            for (GeneratedMessageV3 message : events) {
                 // Simulate event id generation.
                 final EventId eventId = Events.generateId();
 
