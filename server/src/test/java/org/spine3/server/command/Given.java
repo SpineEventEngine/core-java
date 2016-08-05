@@ -36,9 +36,7 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-
-@SuppressWarnings("EmptyClass")
-/*package */ class Given {
+/* package */ class Given {
 
     /* package */ static class AggregateId {
 
