@@ -45,7 +45,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.*;
+import static org.spine3.base.Events.createEvent;
+import static org.spine3.base.Events.generateId;
+import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;

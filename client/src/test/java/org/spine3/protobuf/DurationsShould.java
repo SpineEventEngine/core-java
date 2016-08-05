@@ -23,8 +23,33 @@ package org.spine3.protobuf;
 import com.google.protobuf.Duration;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.spine3.protobuf.Durations.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Durations.ZERO;
+import static org.spine3.protobuf.Durations.add;
+import static org.spine3.protobuf.Durations.compare;
+import static org.spine3.protobuf.Durations.getHours;
+import static org.spine3.protobuf.Durations.getMinutes;
+import static org.spine3.protobuf.Durations.hoursAndMinutes;
+import static org.spine3.protobuf.Durations.isGreaterThan;
+import static org.spine3.protobuf.Durations.isLessThan;
+import static org.spine3.protobuf.Durations.isNegative;
+import static org.spine3.protobuf.Durations.isPositive;
+import static org.spine3.protobuf.Durations.isPositiveOrZero;
+import static org.spine3.protobuf.Durations.isZero;
+import static org.spine3.protobuf.Durations.milliseconds;
+import static org.spine3.protobuf.Durations.minutes;
+import static org.spine3.protobuf.Durations.nanos;
+import static org.spine3.protobuf.Durations.ofHours;
+import static org.spine3.protobuf.Durations.ofMilliseconds;
+import static org.spine3.protobuf.Durations.ofMinutes;
+import static org.spine3.protobuf.Durations.ofSeconds;
+import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Durations.subtract;
+import static org.spine3.protobuf.Durations.toMinutes;
+import static org.spine3.protobuf.Durations.toNanos;
+import static org.spine3.protobuf.Durations.toSeconds;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 

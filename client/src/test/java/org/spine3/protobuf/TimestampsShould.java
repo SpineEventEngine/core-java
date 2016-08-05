@@ -29,8 +29,12 @@ import java.util.Date;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static org.junit.Assert.*;
-import static org.spine3.protobuf.Timestamps.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps.convertToDate;
+import static org.spine3.protobuf.Timestamps.convertToNanos;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

@@ -36,10 +36,10 @@ import org.spine3.base.Enrichments;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.type.EventClass;
-import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -48,7 +48,9 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.*;
+import static org.spine3.base.Events.createEvent;
+import static org.spine3.base.Events.getMessage;
+import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**

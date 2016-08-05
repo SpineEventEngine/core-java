@@ -28,7 +28,9 @@ import org.spine3.base.Responses;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase;
 import org.spine3.test.integration.event.ProjectCreated;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus

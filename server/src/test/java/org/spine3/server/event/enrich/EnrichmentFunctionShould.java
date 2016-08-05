@@ -31,7 +31,12 @@ import org.spine3.test.event.ProjectCreated;
 
 import javax.annotation.Nullable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class EnrichmentFunctionShould {
 

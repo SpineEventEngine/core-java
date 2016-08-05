@@ -42,8 +42,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.*;
-import static org.spine3.base.CommandStatus.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.base.CommandStatus.ERROR;
+import static org.spine3.base.CommandStatus.FAILURE;
+import static org.spine3.base.CommandStatus.OK;
+import static org.spine3.base.CommandStatus.RECEIVED;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;

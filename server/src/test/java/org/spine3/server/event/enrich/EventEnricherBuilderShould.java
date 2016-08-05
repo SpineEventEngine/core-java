@@ -35,7 +35,9 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EventEnricherBuilderShould {
