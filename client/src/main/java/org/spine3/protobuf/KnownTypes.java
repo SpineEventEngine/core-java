@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -104,18 +105,21 @@ public class KnownTypes {
 
     private KnownTypes() {}
 
-    /**
-     * Retrieves Protobuf types known to the application.
-     *
-     * @return immutable set of Protobuf types known to the application
-     */
-    public static ImmutableSet<TypeUrl> typeNames() {
+    /** Retrieves Protobuf types known to the application. */
+    public static ImmutableSet<TypeUrl> getTypeNames() {
         final Set<TypeUrl> result = typeToClassMap.keySet();
         return ImmutableSet.copyOf(result);
     }
 
+    /** Retrieves names of Java classes generated for Protobuf types known to the application. */
+    @VisibleForTesting
+    /* package */ static ImmutableSet<ClassName> getJavaClasses() {
+        final Set<ClassName> result = typeToClassMap.values();
+        return ImmutableSet.copyOf(result);
+    }
+
     /**
-     * Retrieves compiled proto's java class name by proto type url
+     * Retrieves a Java class name generated for the Protobuf type by its type url
      * to be used to parse {@link Message} from {@link Any}.
      *
      * @param typeUrl {@link Any} type url

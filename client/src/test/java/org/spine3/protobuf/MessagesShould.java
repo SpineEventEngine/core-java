@@ -74,7 +74,7 @@ public class MessagesShould {
         final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
 
         final List<Descriptors.Descriptor> found = Lists.newLinkedList();
-        for (TypeUrl typeUrl : KnownTypes.typeNames()) {
+        for (TypeUrl typeUrl : KnownTypes.getTypeNames()) {
             final Descriptors.Descriptor descriptor = typeRegistry.find(typeUrl.getTypeName());
             if (descriptor != null) {
                 found.add(descriptor);
