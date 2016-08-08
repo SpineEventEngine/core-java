@@ -277,7 +277,7 @@ public class Events {
         final Enrichments enrichments = value.get();
         final String typeName = TypeUrl.of(enrichmentClass)
                                        .getTypeName();
-        final Any any = enrichments.getMap()
+        final Any any = enrichments.getMapMap()
                                    .get(typeName);
         if (any == null) {
             return Optional.absent();
