@@ -24,7 +24,11 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7'
+        classpath group: 'com.google.guava', name: 'guava', version: '19.0'
+        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7') {
+            // exclude an old Guava version
+            exclude group: 'com.google.guava'
+        }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.8', changing: true
     }
     configurations.all({
