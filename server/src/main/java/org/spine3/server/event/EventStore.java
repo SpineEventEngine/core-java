@@ -255,7 +255,7 @@ public abstract class EventStore implements AutoCloseable {
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
-     * @see EventStoreGrpc.EventStore
+     * @see EventStoreGrpc.EventStoreImplBase
      */
     public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
 
@@ -263,8 +263,8 @@ public abstract class EventStore implements AutoCloseable {
         public ServerServiceDefinition build() {
             checkState();
             final LocalImpl eventStore = new LocalImpl(getStreamExecutor(), getEventStorage(), getLogger());
-            final EventStoreGrpc.EventStore grpcService = new GrpcService(eventStore);
-            final ServerServiceDefinition result = EventStoreGrpc.bindService(grpcService);
+            final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
+            final ServerServiceDefinition result = grpcService.bindService();
             return result;
         }
 
@@ -294,7 +294,7 @@ public abstract class EventStore implements AutoCloseable {
     }
 
     /** gRPC service over the locally running implementation. */
-    private static class GrpcService implements EventStoreGrpc.EventStore {
+    private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
         private final LocalImpl eventStore;
 
@@ -302,6 +302,7 @@ public abstract class EventStore implements AutoCloseable {
             this.eventStore = eventStore;
         }
 
+        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void append(Event request, StreamObserver<Response> responseObserver) {
             try {
@@ -313,6 +314,7 @@ public abstract class EventStore implements AutoCloseable {
             }
         }
 
+        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
             eventStore.read(request, responseObserver);

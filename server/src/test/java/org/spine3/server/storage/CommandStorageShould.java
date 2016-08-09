@@ -23,7 +23,6 @@ package org.spine3.server.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,14 +42,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
-import static org.spine3.base.CommandStatus.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.base.CommandStatus.ERROR;
+import static org.spine3.base.CommandStatus.FAILURE;
+import static org.spine3.base.CommandStatus.OK;
+import static org.spine3.base.CommandStatus.RECEIVED;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
@@ -355,7 +360,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         return Failure.newBuilder()
                 .setInstance(Given.EventMessage.projectCreatedAny())
                 .setStacktrace("failure stacktrace")
-                .setTimestamp(TimeUtil.getCurrentTime())
+                .setTimestamp(getCurrentTime())
                 .build();
     }
 

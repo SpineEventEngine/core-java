@@ -47,7 +47,9 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.*;
+import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.

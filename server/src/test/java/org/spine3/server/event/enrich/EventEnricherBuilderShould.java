@@ -23,7 +23,7 @@ package org.spine3.server.event.enrich;
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
@@ -56,7 +56,7 @@ public class EventEnricherBuilderShould {
                 if (input == null) {
                     return null;
                 }
-                return Values.newStringValue(TimeUtil.toString(input));
+                return Values.newStringValue(Timestamps.toString(input));
             }
         };
         this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);

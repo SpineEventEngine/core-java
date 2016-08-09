@@ -30,8 +30,6 @@ import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-
-@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {

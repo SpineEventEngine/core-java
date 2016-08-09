@@ -22,7 +22,6 @@ package org.spine3.protobuf;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.Internal;
 
 import javax.annotation.Nullable;
@@ -32,14 +31,14 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.*;
+import static com.google.protobuf.util.Timestamps.subtract;
 
 /**
- * Utilities class for working with {@link Timestamp}s in addition to those available from {@link TimeUtil}.
+ * Utilities class for working with {@link Timestamp}s in addition to those available from
+ * {@link com.google.protobuf.util.Timestamps}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @see TimeUtil
  */
 public class Timestamps {
 
@@ -47,9 +46,11 @@ public class Timestamps {
     }
 
     /**
-     * The following constants are taken from {@link com.google.protobuf.util.TimeUtil}
+     * The following constants are taken from {@link com.google.protobuf.util.Timestamps}
      * in order to make them publicly visible to time management utils:
      * <ul>
+     *   <li>{@link #TIMESTAMP_SECONDS_MIN}
+     *   <li>{@link #TIMESTAMP_SECONDS_MAX}
      *   <li>{@link #NANOS_PER_SECOND}
      *   <li>{@link #NANOS_PER_MILLISECOND}
      *   <li>{@link #NANOS_PER_MICROSECOND}
@@ -58,6 +59,12 @@ public class Timestamps {
      * </ul>
      * Consider removing these constants if they become public in the Protobuf utils API.
      **/
+
+    /** Timestamp for "0001-01-01T00:00:00Z" */
+    public static final long TIMESTAMP_SECONDS_MIN = -62135596800L;
+
+    /** Timestamp for "9999-12-31T23:59:59Z" */
+    public static final long TIMESTAMP_SECONDS_MAX = 253402300799L;
 
     /** The count of nanoseconds in one second. */
     public static final long NANOS_PER_SECOND = 1_000_000_000L;
@@ -94,9 +101,6 @@ public class Timestamps {
     /**
      * Obtains current time.
      *
-     * <p>This method should be used instead of {@link TimeUtil#getCurrentTime()} for testability
-     * of time-related code.
-     *
      * @return current time
      */
     public static Timestamp getCurrentTime() {
@@ -130,14 +134,15 @@ public class Timestamps {
     }
 
     /**
-     * Default implementation of current time provider based on {@link TimeUtil#getCurrentTime()}.
+     * Default implementation of current time provider based on {@link System#currentTimeMillis()}.
      *
-     * <p>This is the only place, which should invoke obtaining current time from {@code TimeUtil} directly.
+     * <p>This is the only place, which should invoke obtaining current time from the system millis.
      */
     private static class SystemTimeProvider implements Provider {
         @Override
         public Timestamp getCurrentTime() {
-            return TimeUtil.getCurrentTime();
+            final Timestamp result = com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+            return result;
         }
     }
 
@@ -273,7 +278,9 @@ public class Timestamps {
     }
 
     /**
-     * @param value a positive number of minutes
+     * Obtains timestamp in the past a number of seconds ago.
+     *
+     * @param value a positive number of seconds
      * @return the moment `value` seconds ago
      */
     @VisibleForTesting
@@ -286,5 +293,19 @@ public class Timestamps {
 
     private static void checkPositive(long value) {
         checkArgument(value > 0, "value must be positive");
+    }
+
+    /**
+     * Obtains timestamp in the future a number of seconds from current time.
+     *
+     * @param seconds a positive number of seconds
+     * @return the moment `value` seconds from now
+     */
+    @VisibleForTesting
+    public static Timestamp secondsFromNow(int seconds) {
+        checkPositive(seconds);
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp result = com.google.protobuf.util.Timestamps.add(currentTime, Durations.ofSeconds(seconds));
+        return result;
     }
 }

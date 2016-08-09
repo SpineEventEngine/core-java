@@ -30,7 +30,7 @@ import com.google.protobuf.StringValueOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import com.google.protobuf.util.TimeUtil;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
@@ -231,7 +231,7 @@ public class Identifiers {
      * @return string representation of timestamp-based ID
      */
     public static String timestampToIdString(Timestamp timestamp) {
-        String result = TimeUtil.toString(timestamp);
+        String result = Timestamps.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
 

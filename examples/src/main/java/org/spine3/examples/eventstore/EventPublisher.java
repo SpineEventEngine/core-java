@@ -34,7 +34,10 @@ import org.spine3.server.event.grpc.EventStoreGrpc;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.spine3.examples.eventstore.Constants.*;
+import static org.spine3.examples.eventstore.Constants.CHANNEL_SHUT_DOWN;
+import static org.spine3.examples.eventstore.Constants.EVENT_STORE_SERVICE_HOST;
+import static org.spine3.examples.eventstore.Constants.PORT;
+import static org.spine3.examples.eventstore.Constants.SHUTDOWN_TIMEOUT_SEC;
 import static org.spine3.examples.eventstore.SampleData.events;
 
 /**
@@ -43,7 +46,7 @@ import static org.spine3.examples.eventstore.SampleData.events;
 public class EventPublisher {
 
     private final ManagedChannel channel;
-    private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
+    private final EventStoreGrpc.EventStoreBlockingStub blockingClient;
 
     public EventPublisher(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)

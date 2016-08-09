@@ -34,7 +34,7 @@ import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.internal.Time.FUTURE;

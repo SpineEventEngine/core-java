@@ -27,9 +27,9 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.setSchedulingTime;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.

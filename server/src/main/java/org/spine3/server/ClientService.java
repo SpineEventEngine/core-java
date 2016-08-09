@@ -33,7 +33,6 @@ import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.ConnectionConstants;
-import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -52,7 +51,7 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Alexander Yevsyukov
  */
-public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.ClientService {
+public class ClientService extends org.spine3.client.grpc.ClientServiceGrpc.ClientServiceImplBase {
 
     private static final String SERVICE_NOT_STARTED_MSG = "Service was not started or is shutdown already.";
 
@@ -137,12 +136,13 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     @VisibleForTesting
     /* package */ io.grpc.Server createGrpcServer(int port) {
-        final ServerServiceDefinition service = ClientServiceGrpc.bindService(this);
+        final ServerServiceDefinition service = bindService();
         final ServerBuilder builder = ServerBuilder.forPort(port)
                                                    .addService(service);
         return builder.build();
     }
 
+    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
@@ -160,6 +160,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
+    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
     public void subscribe(Topic request, StreamObserver<Event> responseObserver) {
         //TODO:2016-05-25:alexander.yevsyukov: Subscribe the client to the topic in the corresponding BoundedContext.
@@ -167,6 +168,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         // done by the client SDK implementation.
     }
 
+    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
     public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
         //TODO:2016-05-25:alexander.yevsyukov: Unsubscribe the client from the topic in the corresponding BoundedContext.

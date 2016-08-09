@@ -35,10 +35,21 @@ import org.spine3.test.identifiers.TimestampFieldId;
 
 import javax.annotation.Nullable;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
-import static org.spine3.base.Identifiers.*;
-import static org.spine3.protobuf.Values.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.CommandIdToStringConverter;
+import static org.spine3.base.Identifiers.ConverterRegistry;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.NULL_ID;
+import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.timestampToIdString;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newLongValue;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**

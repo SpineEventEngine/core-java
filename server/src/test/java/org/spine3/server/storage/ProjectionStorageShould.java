@@ -27,10 +27,10 @@ import org.junit.Test;
 import org.spine3.protobuf.Durations;
 import org.spine3.test.Tests;
 
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**

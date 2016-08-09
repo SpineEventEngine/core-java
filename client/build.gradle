@@ -9,6 +9,8 @@ dependencies {
 
 apply from: GRPC_PLUGIN_PATH
 
+apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+
 apply from: TEST_ARTIFACTS_PLUGIN_PATH
 
 apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH

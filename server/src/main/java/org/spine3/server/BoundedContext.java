@@ -42,7 +42,7 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
-import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.validate.Validate;
 
@@ -63,7 +63,8 @@ import static org.spine3.util.Logging.closed;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable {
+public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
+                            implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
     public static final String DEFAULT_NAME = "Main";
@@ -190,6 +191,8 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         }
     }
 
+    @SuppressWarnings("RefusedBequest") /* We ignore method from super because the default
+                                         implementation sets unimplemented status. */
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         final Message eventMsg = unpack(integrationEvent.getMessage());

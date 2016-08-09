@@ -23,8 +23,9 @@ package org.spine3.base;
 import com.google.common.base.Throwables;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.protobuf.AnyPacker;
+
+import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
  * Abstract base for throwable business failures.
@@ -40,7 +41,7 @@ public abstract class FailureThrowable extends Throwable {
 
     protected FailureThrowable(GeneratedMessageV3 failure) {
         this.failure = failure;
-        this.timestamp = TimeUtil.getCurrentTime();
+        this.timestamp = getCurrentTime();
     }
 
     public GeneratedMessageV3 getFailure() {
