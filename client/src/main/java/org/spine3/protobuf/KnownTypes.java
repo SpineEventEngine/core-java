@@ -38,7 +38,7 @@ import com.google.protobuf.EnumValue;
 import com.google.protobuf.Field;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.FloatValue;
-import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Internal.EnumLite;
@@ -302,7 +302,7 @@ public class KnownTypes {
             return this;
         }
 
-        private void put(Class<? extends GeneratedMessage> clazz) {
+        private void put(Class<? extends GeneratedMessageV3> clazz) {
             final TypeUrl typeUrl = TypeUrl.of(clazz);
             final ClassName className = ClassName.of(clazz);
             mapBuilder.put(typeUrl, className);

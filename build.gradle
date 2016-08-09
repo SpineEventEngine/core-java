@@ -2,10 +2,11 @@
 project.ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-3'
+    PROTOBUF_VERSION = '3.0.0'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
     GRPC_VERSION = '0.14.0'
     SLF4J_VERSION = '1.7.21'
+    JUNIT_VERSION = '4.12'
 
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
     PUBLISH_PLUGIN_PATH = "$projectDir/gradle/plugins/publish.gradle"
@@ -92,7 +93,7 @@ subprojects {
 
         //Use jdk14 bindings for test purposes only.
         testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: project.SLF4J_VERSION
-        testCompile(group: 'junit', name: 'junit', version: '4.12') {
+        testCompile(group: 'junit', name: 'junit', version: JUNIT_VERSION) {
             exclude(module: 'hamcrest-core')
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'

@@ -22,6 +22,7 @@ package org.spine3.server.event.error;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
@@ -38,7 +39,7 @@ import java.util.Map;
 public abstract class EventException extends RuntimeException {
 
     /** Use {@link GeneratedMessage} because it is {@link Serializable}. */
-    private final GeneratedMessage eventMessage;
+    private final GeneratedMessageV3 eventMessage;
 
     private final Error error;
 
@@ -51,7 +52,7 @@ public abstract class EventException extends RuntimeException {
      */
     protected EventException(String messageText, Message eventMessage, Error error) {
         super(messageText);
-        this.eventMessage = (GeneratedMessage) eventMessage;
+        this.eventMessage = (GeneratedMessageV3) eventMessage;
         this.error = error;
     }
 

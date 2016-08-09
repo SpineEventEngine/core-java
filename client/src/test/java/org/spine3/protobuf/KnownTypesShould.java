@@ -28,6 +28,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
+import java.util.Set;
+
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -38,6 +40,8 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class KnownTypesShould {
 
+    // TODO:2016-08-04:alexander.litus: tests for Spine/google msgs, check that all classes and urls are correct
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(KnownTypes.class));
@@ -45,7 +49,7 @@ public class KnownTypesShould {
 
     @Test
     public void return_known_proto_message_types() {
-        final ImmutableSet<TypeUrl> types = KnownTypes.typeNames();
+        final ImmutableSet<TypeUrl> types = KnownTypes.getTypeNames();
 
         assertFalse(types.isEmpty());
     }
@@ -84,6 +88,19 @@ public class KnownTypesShould {
         final TypeUrl typeUrlActual = KnownTypes.getTypeUrl(typeUrlExpected.getTypeName());
 
         assertEquals(typeUrlExpected, typeUrlActual);
+    }
+
+    @Test
+    public void have_all_valid_java_class_names() {
+        final Set<ClassName> classes = KnownTypes.getJavaClasses();
+        assertFalse(classes.isEmpty());
+        for (ClassName name : classes) {
+            try {
+                Class.forName(name.value());
+            } catch (ClassNotFoundException e) {
+                fail("Invalid Java class name in the '.properties' file: " + name.value());
+            }
+        }
     }
 
     @Test(expected = IllegalStateException.class)
