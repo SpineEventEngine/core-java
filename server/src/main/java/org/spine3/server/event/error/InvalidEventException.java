@@ -54,7 +54,6 @@ public class InvalidEventException extends EventException {
     public static InvalidEventException onConstraintViolations(Message eventMsg,
                                                                  Iterable<ConstraintViolation> violations) {
         final Error error = invalidEventMessageError(eventMsg, violations, MSG_VALIDATION_ERROR);
-        @SuppressWarnings("DuplicateStringLiteralInspection")
         final String text = MSG_VALIDATION_ERROR + " Message class: " + EventClass.of(eventMsg) +
                 " See Error.getValidationError() for details.";
         //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.

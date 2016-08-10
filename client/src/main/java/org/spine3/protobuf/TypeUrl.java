@@ -132,11 +132,11 @@ public final class TypeUrl extends StringTypeValue {
         return str.contains(SEPARATOR);
     }
 
-    private static TypeUrl ofTypeUrl(String typeNameOrUrl) {
-        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeNameOrUrl);
+    private static TypeUrl ofTypeUrl(String typeUrl) {
+        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
         if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
             throw propagate(
-                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeNameOrUrl));
+                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
         }
         return new TypeUrl(parts[0], parts[1]);
     }

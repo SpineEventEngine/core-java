@@ -21,16 +21,26 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
+
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -46,19 +56,35 @@ public class KnownTypesShould {
     }
 
     @Test
-    public void return_known_proto_message_types() {
-        final ImmutableSet<TypeUrl> types = KnownTypes.typeNames();
+    public void return_known_proto_message_type_urls() {
+        final ImmutableSet<TypeUrl> typeUrls = KnownTypes.getTypeUrls();
 
-        assertFalse(types.isEmpty());
+        assertFalse(typeUrls.isEmpty());
     }
 
     @Test
-    public void return_java_class_name_by_proto_type_url() {
-        final TypeUrl typeUrl = TypeUrl.of(Command.getDescriptor());
+    public void return_spine_java_class_names_by_proto_type_urls() {
+        assertHasClassNameByTypeUrlOf(Command.class);
+        assertHasClassNameByTypeUrlOf(CommandContext.class);
+        assertHasClassNameByTypeUrlOf(Event.class);
+        assertHasClassNameByTypeUrlOf(EventContext.class);
+        assertHasClassNameByTypeUrlOf(org.spine3.base.Error.class);
+    }
+
+    @Test
+    public void return_google_java_class_names_by_proto_type_urls() {
+        assertHasClassNameByTypeUrlOf(Any.class);
+        assertHasClassNameByTypeUrlOf(Timestamp.class);
+        assertHasClassNameByTypeUrlOf(Duration.class);
+        assertHasClassNameByTypeUrlOf(Empty.class);
+    }
+
+    private static void assertHasClassNameByTypeUrlOf(Class<? extends Message> msgClass) {
+        final TypeUrl typeUrl = TypeUrl.of(msgClass);
 
         final ClassName className = KnownTypes.getClassName(typeUrl);
 
-        assertEquals(ClassName.of(Command.class), className);
+        assertEquals(ClassName.of(msgClass), className);
     }
 
     @Test
@@ -86,6 +112,19 @@ public class KnownTypesShould {
         final TypeUrl typeUrlActual = KnownTypes.getTypeUrl(typeUrlExpected.getTypeName());
 
         assertEquals(typeUrlExpected, typeUrlActual);
+    }
+
+    @Test
+    public void have_all_valid_java_class_names() {
+        final Set<ClassName> classes = KnownTypes.getJavaClasses();
+        assertFalse(classes.isEmpty());
+        for (ClassName name : classes) {
+            try {
+                Class.forName(name.value());
+            } catch (ClassNotFoundException e) {
+                fail("Invalid Java class name in the '.properties' file: " + name.value());
+            }
+        }
     }
 
     @Test(expected = IllegalStateException.class)

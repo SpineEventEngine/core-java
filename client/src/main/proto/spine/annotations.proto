@@ -106,7 +106,8 @@ extend google.protobuf.FileOptions {
     // Specifies a type URL prefix for all types within a file.
     // This type URL will be used when packing messages into `Any`.
     // See `any.proto` for more details.
-    string type_url_prefix = 58204;
+    string type_url_prefix = 58204; // NOTE: this field number is used in `tools` project,
+                                    // ProtoToJavaMapperPlugin (update it there on changing).
 }
 
 extend google.protobuf.ServiceOptions {

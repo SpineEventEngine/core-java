@@ -72,7 +72,8 @@ public abstract class EventException extends RuntimeException {
         final Value value = Value.newBuilder()
                                  .setStringValue(type)
                                  .build();
-        return ImmutableMap.of(Attribute.EVENT_TYPE_NAME, value);
+        final Map<String, Value> result = ImmutableMap.of(Attribute.EVENT_TYPE_NAME, value);
+        return result;
     }
 
     /**

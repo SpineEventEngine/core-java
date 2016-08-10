@@ -20,7 +20,7 @@ message Url {
         Record record = 2;
     }
 
-    // Structurized record.
+    // Structured record.
     //
     // This type represents URL according to RFC 3986.
     // Using this type makes it easier to operate concrete URL attributes.
@@ -59,7 +59,7 @@ message Url {
             }
         }
 
-        // Most often used application layer procotols.
+        // Most often used application layer protocols.
         enum Schema {
             UNDEFINED = 0;
             HTTP = 1;
