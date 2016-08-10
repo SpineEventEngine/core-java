@@ -146,7 +146,11 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
     }
 
-    /** The predicate class that allows to filter command handling methods. */
+    /**
+     * The predicate class that allows to filter command handling methods.
+     *
+     * <p>See {@link Assign} annotation for more info about such methods.
+     */
     private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
         @Override
