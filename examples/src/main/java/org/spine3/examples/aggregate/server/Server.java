@@ -26,6 +26,7 @@ import org.spine3.server.ClientService;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.transport.GrpcContainer;
 
 import java.io.IOException;
 
@@ -39,7 +40,7 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  */
 public class Server {
 
-    private final ClientService clientService;
+    private final GrpcContainer grpcContainer;
     private final BoundedContext boundedContext;
 
     public Server(StorageFactory storageFactory) {
@@ -53,26 +54,32 @@ public class Server {
 
         // Subscribe an event subscriber in the bounded context.
         final EventSubscriber eventLogger = new EventLogger();
-        boundedContext.getEventBus().subscribe(eventLogger);
+        boundedContext.getEventBus()
+                      .subscribe(eventLogger);
 
         // Create a client service with this bounded context.
-        this.clientService = ClientService.newBuilder()
-                                          .addBoundedContext(boundedContext)
+        final ClientService clientService = ClientService.newBuilder()
+                                                         .addBoundedContext(boundedContext)
+                                                         .build();
+
+        // Create a gRPC server and schedule the client service instance for deployment.
+        this.grpcContainer = GrpcContainer.newBuilder()
                                           .setPort(DEFAULT_CLIENT_SERVICE_PORT)
+                                          .addService(clientService)
                                           .build();
     }
 
     public void start() throws IOException {
-        clientService.start();
-        clientService.addShutdownHook();
+        grpcContainer.start();
+        grpcContainer.addShutdownHook();
     }
 
     public void awaitTermination() {
-        clientService.awaitTermination();
+        grpcContainer.awaitTermination();
     }
 
     public void shutdown() throws Exception {
-        clientService.shutdown();
+        grpcContainer.shutdown();
         boundedContext.close();
     }
 

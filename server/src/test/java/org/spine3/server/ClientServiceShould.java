@@ -23,7 +23,6 @@ package org.spine3.server;
 
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
-import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
@@ -53,19 +52,13 @@ import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
 import org.spine3.testdata.TestCommandBusFactory;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
@@ -75,7 +68,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class ClientServiceShould {
 
     private ClientService service;
-    private Server server;
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
     private BoundedContext projectsContext;
@@ -103,15 +95,10 @@ public class ClientServiceShould {
             builder.addBoundedContext(context);
         }
         service = spy(builder.build());
-        server = mock(Server.class);
-        doReturn(server).when(service).createGrpcServer(anyInt());
     }
 
     @After
     public void tearDown() throws Exception {
-        if (!service.isShutdown()) {
-            service.shutdown();
-        }
         for (BoundedContext boundedContext : boundedContexts) {
             boundedContext.close();
         }
@@ -138,85 +125,11 @@ public class ClientServiceShould {
 
         service.post(unsupportedCmd, responseObserver);
 
-        final Throwable exception = responseObserver.getThrowable().getCause();
+        final Throwable exception = responseObserver.getThrowable()
+                                                    .getCause();
         assertEquals(UnsupportedCommandException.class, exception.getClass());
     }
 
-    @Test
-    public void start_server() throws IOException {
-        service.start();
-
-        verify(server).start();
-    }
-
-    @Test
-    public void throw_exception_if_started_already() throws IOException {
-        service.start();
-        try {
-            service.start();
-        } catch (IllegalStateException expected) {
-            return;
-        }
-        fail("Exception must be thrown.");
-    }
-
-    @Test
-    public void await_termination() throws IOException, InterruptedException {
-        service.start();
-        service.awaitTermination();
-
-        verify(server).awaitTermination();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_call_await_termination_on_not_started_service() {
-        service.awaitTermination();
-    }
-
-    @Test
-    public void assure_service_is_shutdown() throws IOException {
-        service.start();
-        service.shutdown();
-
-        assertTrue(service.isShutdown());
-    }
-
-    @Test
-    public void assure_service_was_not_started() throws IOException {
-        assertTrue(service.isShutdown());
-    }
-
-    @Test
-    public void assure_service_is_not_shut_down() throws IOException {
-        service.start();
-
-        assertFalse(service.isShutdown());
-    }
-
-    @Test
-    public void shutdown_itself() throws IOException, InterruptedException {
-        service.start();
-        service.shutdown();
-
-        verify(server).shutdown();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_call_shutdown_on_not_started_service() {
-        service.shutdown();
-    }
-
-    @Test
-    public void throw_exception_if_shutdown_already() throws IOException {
-        service.start();
-        service.shutdown();
-        try {
-            service.shutdown();
-        } catch (IllegalStateException expected) {
-            return;
-        }
-        fail("Expected an exception.");
-    }
 
     /*
      * Stub repositories and aggregates
@@ -247,7 +160,7 @@ public class ClientServiceShould {
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            final ProjectStarted message =  Given.EventMessage.projectStarted(cmd.getProjectId());
+            final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
