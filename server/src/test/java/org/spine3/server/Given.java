@@ -143,7 +143,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                                                                       .setHonorificSuffix("Cmd")))
                                               .build();
             final UserId userId = newUserId(Identifiers.newUuid());
-            final org.spine3.base.Command result = Given.Command.create(msg, userId, getCurrentTime());
+            final org.spine3.base.Command result = create(msg, userId, getCurrentTime());
 
             return result;
         }
