@@ -56,10 +56,10 @@ public class KnownTypesShould {
     }
 
     @Test
-    public void return_known_proto_message_types() {
-        final ImmutableSet<TypeUrl> types = KnownTypes.getTypeNames();
+    public void return_known_proto_message_type_urls() {
+        final ImmutableSet<TypeUrl> typeUrls = KnownTypes.getTypeUrls();
 
-        assertFalse(types.isEmpty());
+        assertFalse(typeUrls.isEmpty());
     }
 
     @Test

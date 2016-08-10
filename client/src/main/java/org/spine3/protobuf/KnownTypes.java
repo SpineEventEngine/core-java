@@ -63,9 +63,11 @@ import org.spine3.Internal;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
@@ -86,11 +88,12 @@ public class KnownTypes {
     private static final String PROPS_FILE_PATH = "known_types.properties";
 
     /**
-     * A map from Protobuf type name to Java class name.
+     * A map from Protobuf type URL to Java class name.
      *
-     * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
+     * <p>For example, for a key {@code type.spine3.org/spine.base.EventId},
+     * there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final BiMap<TypeUrl, ClassName> typeToClassMap = Builder.build();
+    private static final BiMap<TypeUrl, ClassName> knownTypes = Builder.build();
 
     /**
      * A map from Protobuf type name to type URL.
@@ -100,21 +103,21 @@ public class KnownTypes {
      *
      * @see TypeUrl
      */
-    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(typeToClassMap);
+    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(knownTypes);
 
 
     private KnownTypes() {}
 
-    /** Retrieves Protobuf types known to the application. */
-    public static ImmutableSet<TypeUrl> getTypeNames() {
-        final Set<TypeUrl> result = typeToClassMap.keySet();
+    /** Retrieves Protobuf type URLs known to the application. */
+    public static ImmutableSet<TypeUrl> getTypeUrls() {
+        final Set<TypeUrl> result = knownTypes.keySet();
         return ImmutableSet.copyOf(result);
     }
 
     /** Retrieves names of Java classes generated for Protobuf types known to the application. */
     @VisibleForTesting
     public static ImmutableSet<ClassName> getJavaClasses() {
-        final Set<ClassName> result = typeToClassMap.values();
+        final Set<ClassName> result = knownTypes.values();
         return ImmutableSet.copyOf(result);
     }
 
@@ -127,10 +130,10 @@ public class KnownTypes {
      * @throws UnknownTypeException if there is no such type known to the application
      */
     public static ClassName getClassName(TypeUrl typeUrl) throws UnknownTypeException {
-        if (!typeToClassMap.containsKey(typeUrl)) {
+        if (!knownTypes.containsKey(typeUrl)) {
             throw new UnknownTypeException(typeUrl.getTypeName());
         }
-        final ClassName result = typeToClassMap.get(typeUrl);
+        final ClassName result = knownTypes.get(typeUrl);
         return result;
     }
 
@@ -142,7 +145,7 @@ public class KnownTypes {
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
     public static TypeUrl getTypeUrl(ClassName className) {
-        final TypeUrl result = typeToClassMap.inverse().get(className);
+        final TypeUrl result = knownTypes.inverse().get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type URL found for the Java class " + className);
         }
@@ -155,9 +158,9 @@ public class KnownTypes {
         return typeUrl;
     }
 
-    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> typeToClassMap) {
+    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {
         final ImmutableMap.Builder<String, TypeUrl> builder = ImmutableMap.builder();
-        for (TypeUrl typeUrl : typeToClassMap.keySet()) {
+        for (TypeUrl typeUrl : knownTypes.keySet()) {
             builder.put(typeUrl.getTypeName(), typeUrl);
         }
         return builder.build();
@@ -166,19 +169,13 @@ public class KnownTypes {
     /** The helper class for building internal immutable typeUrl-to-JavaClass map. */
     private static class Builder {
 
-        private final ImmutableBiMap.Builder<TypeUrl, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();
+        private final Map<TypeUrl, ClassName> resultMap = newHashMap();
 
-        private static BiMap<TypeUrl, ClassName> build() {
+        private static ImmutableBiMap<TypeUrl, ClassName> build() {
             final Builder builder = new Builder()
                     .addStandardProtobufTypes()
                     .loadNamesFromProperties();
-
-            final ImmutableBiMap<TypeUrl, ClassName> result = builder.mapBuilder.build();
-
-            if (log().isDebugEnabled()) {
-                log().debug("Total classes in TypeToClassMap: " + result.size());
-            }
-
+            final ImmutableBiMap<TypeUrl, ClassName> result = ImmutableBiMap.copyOf(builder.resultMap);
             return result;
         }
 
@@ -190,24 +187,23 @@ public class KnownTypes {
             return this;
         }
 
-        private Builder putProperties(Properties properties) {
+        private void putProperties(Properties properties) {
             final Set<String> typeUrls = properties.stringPropertyNames();
             for (String typeUrlStr : typeUrls) {
                 final TypeUrl typeUrl = TypeUrl.of(typeUrlStr);
                 final ClassName className = ClassName.of(properties.getProperty(typeUrlStr));
-                mapBuilder.put(typeUrl, className);
+                put(typeUrl, className);
             }
-            return this;
         }
 
         /**
          * Returns classes from the {@code com.google.protobuf} package that need to be present
-         * in the type-to-class map.
+         * in the result map.
          *
          * <p>This method needs to be updated with introduction of new Google Protobuf types
          * after they are used in the framework.
          */
-        @SuppressWarnings("OverlyLongMethod") // OK as there are many types in Protobuf.
+        @SuppressWarnings("OverlyLongMethod") // OK as there are many types in Protobuf and we want to keep this code in one place.
         private Builder addStandardProtobufTypes() {
             // Types from `any.proto`.
             put(Any.class);
@@ -305,13 +301,22 @@ public class KnownTypes {
         private void put(Class<? extends GeneratedMessageV3> clazz) {
             final TypeUrl typeUrl = TypeUrl.of(clazz);
             final ClassName className = ClassName.of(clazz);
-            mapBuilder.put(typeUrl, className);
+            put(typeUrl, className);
         }
 
         private void putEnum(EnumDescriptor desc, Class<? extends EnumLite> enumClass) {
             final TypeUrl typeUrl = TypeUrl.of(desc);
             final ClassName className = ClassName.of(enumClass);
-            mapBuilder.put(typeUrl, className);
+            put(typeUrl, className);
+        }
+
+        private void put(TypeUrl typeUrl, ClassName className) {
+            if (resultMap.containsKey(typeUrl)) {
+                log().warn("Duplicate key in the " + KnownTypes.class.getName() + " map: " + typeUrl +
+                ". This can be because `task.descriptorSetOptions.includeImports` is set to `true` in the `build.gradle`.");
+                return;
+            }
+            resultMap.put(typeUrl, className);
         }
 
         private static Logger log() {
