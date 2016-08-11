@@ -1,5 +1,5 @@
 
-project.ext {
+ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
     protobufVersion = '3.0.0'
@@ -29,7 +29,7 @@ buildscript {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.9', changing: true
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.10', changing: true
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
