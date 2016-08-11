@@ -4,8 +4,9 @@ dependencies {
     compile project(path: ':server')
 }
 
-sourceSets.main.java.srcDir GEN_MAIN_SPINE_DIR
+sourceSets.main.java.srcDir generatedSpineDir
 
-apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+apply from: generateDescriptorSetPlugin
 
-apply plugin: SPINE_PROTOBUF_PLUGIN_ID
+apply plugin: spineProtobufPluginId
+

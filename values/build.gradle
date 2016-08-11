@@ -5,6 +5,7 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+apply from: generateDescriptorSetPlugin
 
-apply plugin: SPINE_PROTOBUF_PLUGIN_ID
+apply plugin: spineProtobufPluginId
+

@@ -1,6 +1,6 @@
 
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
     compile project(path: ':client')
     compile project(path: ':values')
@@ -9,10 +9,10 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-apply from: GRPC_PLUGIN_PATH
+apply from: gRpcPlugin
 
-apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+apply from: generateDescriptorSetPlugin
 
-apply from: TEST_ARTIFACTS_PLUGIN_PATH
+apply from: testArtifactsPlugin
 
-apply plugin: SPINE_PROTOBUF_PLUGIN_ID
+apply plugin: spineProtobufPluginId

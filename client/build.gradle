@@ -1,18 +1,16 @@
 
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: GRPC_VERSION
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: GRPC_VERSION
-    compile group: 'io.grpc', name: 'grpc-stub', version: GRPC_VERSION
+    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
+    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
 
     testCompile project(path: ":testutil")
 }
 
-apply from: GRPC_PLUGIN_PATH
+apply from: gRpcPlugin
 
-apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
+apply from: generateDescriptorSetPlugin
 
-apply from: TEST_ARTIFACTS_PLUGIN_PATH
+apply from: testArtifactsPlugin
 
-apply from: GEN_DESCRIPTOR_SET_PLUGIN_PATH
-
-apply plugin: SPINE_PROTOBUF_PLUGIN_ID
+apply plugin: spineProtobufPluginId
