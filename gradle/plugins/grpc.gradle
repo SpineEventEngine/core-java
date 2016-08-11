@@ -32,4 +32,4 @@ protobuf {
     }
 }
 
-sourceSets.main.java.srcDirs += [GEN_MAIN_GRPC_DIR, GEN_TEST_GRPC_DIR]
+sourceSets.main.java.srcDirs += [generatedGrpcDir]

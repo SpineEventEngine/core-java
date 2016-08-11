@@ -244,9 +244,8 @@ public class EventsShould {
     }
 
     private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {
-        final Enrichments.Builder enrichments = Enrichments.newBuilder();
-        enrichments.getMutableMap()
-                   .put(enrichmentKey, AnyPacker.pack(enrichment));
+        final Enrichments.Builder enrichments = Enrichments.newBuilder()
+                                                           .putMap(enrichmentKey, AnyPacker.pack(enrichment));
         final EventContext context = newEventContext().toBuilder()
                                                       .setEnrichments(enrichments.build())
                                                       .build();

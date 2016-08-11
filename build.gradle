@@ -1,18 +1,18 @@
 
-project.ext {
+ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0'
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
-    GRPC_VERSION = '1.0.0-pre2'
-    SLF4J_VERSION = '1.7.21'
-    JUNIT_VERSION = '4.12'
+    protobufVersion = '3.0.0'
+    protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
+    gRpcVersion = '1.0.0-pre2'
+    slf4JVersion = '1.7.21'
+    jUnitVersion = '4.12'
 
-    SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
-    PUBLISH_PLUGIN_PATH = "$projectDir/gradle/plugins/publish.gradle"
+    spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
+    publishPlugin = "$projectDir/gradle/plugins/publish.gradle"
 
-    CREDENTIALS_FILE_PATH = 'credentials.properties'
-    PROJECTS_TO_PUBLISH = ["client", "server", "values", "testutil"]
+    credentialsPropertyFile = 'credentials.properties'
+    projectsToPublish = ["client", "server", "values", "testutil"]
 }
 
 buildscript {
@@ -29,7 +29,7 @@ buildscript {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.9', changing: true
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.10', changing: true
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -42,32 +42,32 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.5.3-SNAPSHOT'
+    version = '0.5.4-SNAPSHOT'
 }
 
 subprojects {
 
     project.ext {
-        SRC_DIR = "$projectDir/src"
-        GEN_DIR = "$projectDir/generated"
+        sourcesRootDir = "$projectDir/src"
+        generatedRootDir = "$projectDir/generated"
 
-        GEN_MAIN_JAVA_DIR = "$GEN_DIR/main/java"
-        GEN_TEST_JAVA_DIR = "$GEN_DIR/test/java"
+        generatedJavaDir = "$generatedRootDir/main/java"
+        generatedTestJavaDir = "$generatedRootDir/test/java"
 
-        GEN_MAIN_GRPC_DIR = "$GEN_DIR/main/grpc"
-        GEN_TEST_GRPC_DIR = "$GEN_DIR/test/grpc"
+        generatedGrpcDir = "$generatedRootDir/main/grpc"
+        generatedTestGrpcDir = "$generatedRootDir/test/grpc"
 
-        GEN_MAIN_SPINE_DIR = "$GEN_DIR/main/spine"
+        generatedSpineDir = "$generatedRootDir/main/spine"
 
-        TEST_ARTIFACTS_PLUGIN_PATH = '../gradle/plugins/test-artifacts.gradle'
-        GEN_DESCRIPTOR_SET_PLUGIN_PATH = '../gradle/plugins/generate-descriptor-set.gradle'
-        GRPC_PLUGIN_PATH = '../gradle/plugins/grpc.gradle'
-        JACOCO_PLUGIN_PATH = '../gradle/plugins/jacoco.gradle'
+        testArtifactsPlugin = '../gradle/plugins/test-artifacts.gradle'
+        generateDescriptorSetPlugin = '../gradle/plugins/generate-descriptor-set.gradle'
+        gRpcPlugin = '../gradle/plugins/grpc.gradle'
+        jacocoPlugin = '../gradle/plugins/jacoco.gradle'
     }
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
-    apply from: JACOCO_PLUGIN_PATH
+    apply from: jacocoPlugin
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -90,14 +90,14 @@ subprojects {
 
         //As a Library, we provide logging facade API, not specific logger bindings.
         //Target apps are free to use any binding they need.
-        compile group: 'org.slf4j', name: 'slf4j-api', version: project.SLF4J_VERSION
+        compile group: 'org.slf4j', name: 'slf4j-api', version: slf4JVersion
 
-        compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
-        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
+        compile group: 'com.google.protobuf', name: 'protobuf-java', version: protobufVersion
+        compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
 
         //Use jdk14 bindings for test purposes only.
-        testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: project.SLF4J_VERSION
-        testCompile(group: 'junit', name: 'junit', version: JUNIT_VERSION) {
+        testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4JVersion
+        testCompile(group: 'junit', name: 'junit', version: jUnitVersion) {
             exclude(module: 'hamcrest-core')
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
@@ -106,26 +106,26 @@ subprojects {
 
     sourceSets {
         main {
-            proto.srcDirs = ["$SRC_DIR/main/proto"]
-            java.srcDirs = [GEN_MAIN_JAVA_DIR, "$SRC_DIR/main/java"]
-            resources.srcDirs = ["$GEN_DIR/main/resources"]
+            proto.srcDirs = ["$sourcesRootDir/main/proto"]
+            java.srcDirs = [generatedJavaDir, "$sourcesRootDir/main/java"]
+            resources.srcDirs = ["$generatedRootDir/main/resources"]
         }
         test {
-            proto.srcDirs = ["$SRC_DIR/test/proto"]
-            java.srcDirs = [GEN_TEST_JAVA_DIR, "$SRC_DIR/test/java"]
-            resources.srcDirs = ["$GEN_DIR/test/resources"]
+            proto.srcDirs = ["$sourcesRootDir/test/proto"]
+            java.srcDirs = [generatedTestJavaDir, "$sourcesRootDir/test/java"]
+            resources.srcDirs = ["$generatedRootDir/test/resources"]
         }
     }
 
     protobuf {
         plugins {
             grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION"
+                artifact = "io.grpc:protoc-gen-grpc-java:$gRpcVersion"
             }
         }
-        generatedFilesBaseDir = GEN_DIR
+        generatedFilesBaseDir = generatedRootDir
         protoc {
-            artifact = project.PROTOBUF_DEPENDENCY
+            artifact = protobufDependency
         }
     }
 
@@ -149,8 +149,8 @@ subprojects {
     }
 
     idea.module {
-        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR)
-        testSourceDirs += file(GEN_TEST_JAVA_DIR)
+        generatedSourceDirs += file(generatedJavaDir)
+        testSourceDirs += file(generatedTestJavaDir)
     }
 }
 
@@ -165,4 +165,4 @@ idea.project.ipr {
     }
 }
 
-apply from: PUBLISH_PLUGIN_PATH
+apply from: publishPlugin
