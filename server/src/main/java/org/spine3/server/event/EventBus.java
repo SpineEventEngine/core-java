@@ -53,11 +53,11 @@ import static org.spine3.base.Events.getMessage;
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
  *
  * <h2>Receiving Events</h2>
- * <p>To receive events a subscriber object should:
+ * <p>To receive event messages a subscriber object should:
  * <ol>
- *    <li>Expose a public method that accepts the type of the event as the first parameter,
- *        and {@link EventContext} as the second parameter;
- *    <li>Mark the method with {@link Subscribe} annotation;
+ *    <li>Expose a public method that accepts an event message as the first parameter
+ *        and an {@link EventContext} as the second (optional) parameter;
+ *    <li>Mark the method with the {@link Subscribe} annotation;
  *    <li>Register with an instance of EventBus using {@link #subscribe(EventSubscriber)}.
  * </ol>
  * Note: Since Protobuf messages are final classes, a subscriber method cannot accept just {@link Message}

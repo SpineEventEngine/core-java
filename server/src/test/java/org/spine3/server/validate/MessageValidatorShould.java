@@ -92,6 +92,7 @@ public class MessageValidatorShould {
     private static final double FRACTIONAL_DIGIT_COUNT_EQUAL_MAX = 1.12;
     private static final double FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX = 1.0;
 
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String VALUE = "value";
     private static final String OUTER_MSG_FIELD = "outer_msg_field";
 

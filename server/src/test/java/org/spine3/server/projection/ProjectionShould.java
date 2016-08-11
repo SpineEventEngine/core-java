@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newIntegerValue;
@@ -69,9 +70,15 @@ public class ProjectionShould {
     public void return_event_classes_which_it_handles() {
         final ImmutableSet<Class<? extends Message>> classes = Projection.getEventClasses(TestProjection.class);
 
+        assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
+        assertTrue(classes.contains(StringValue.class));
+        assertTrue(classes.contains(Int32Value.class));
     }
 
     private static class TestProjection extends Projection<String, StringValue> {
+
+        /** The number of events this class handles. */
+        private static final int HANDLING_EVENT_COUNT = 2;
 
         protected TestProjection(String id) {
             super(id);

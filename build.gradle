@@ -6,6 +6,7 @@ project.ext {
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${PROTOBUF_VERSION}"
     GRPC_VERSION = '1.0.0-pre2'
     SLF4J_VERSION = '1.7.21'
+    JUNIT_VERSION = '4.12'
 
     SPINE_PROTOBUF_PLUGIN_ID = 'org.spine3.tools.protobuf-plugin'
     PUBLISH_PLUGIN_PATH = "$projectDir/gradle/plugins/publish.gradle"
@@ -23,8 +24,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7'
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.8', changing: true
+        classpath group: 'com.google.guava', name: 'guava', version: '19.0'
+        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7') {
+            // exclude an old Guava version
+            exclude group: 'com.google.guava'
+        }
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.9', changing: true
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -92,7 +97,7 @@ subprojects {
 
         //Use jdk14 bindings for test purposes only.
         testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: project.SLF4J_VERSION
-        testCompile(group: 'junit', name: 'junit', version: '4.12') {
+        testCompile(group: 'junit', name: 'junit', version: JUNIT_VERSION) {
             exclude(module: 'hamcrest-core')
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
