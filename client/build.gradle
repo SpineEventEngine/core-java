@@ -7,10 +7,10 @@ dependencies {
     testCompile project(path: ":testutil")
 }
 
-apply from: gRpcPlugin
+apply from: gRpcScript
 
-apply from: generateDescriptorSetPlugin
+apply from: generateDescriptorSetScript
 
-apply from: testArtifactsPlugin
+apply from: testArtifactsScript
 
 apply plugin: spineProtobufPluginId
