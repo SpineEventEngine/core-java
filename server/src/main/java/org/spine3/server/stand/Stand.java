@@ -72,7 +72,6 @@ public class Stand {
      */
     public void updateAggregateState(Any newAggregateState) {
         // TODO[alex.tymchenko]: should we also check the given Aggregate is allowed to be published? Or is it an AggregateRepository responsibility?
-        checkState(newAggregateState != null, "newAggregateState must not be null");
 
         for (StandStorage storage : storages) {
             storage.write(newAggregateState);
