@@ -19,6 +19,7 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -26,12 +27,14 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.Storage;
@@ -81,6 +84,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
     private final CommandStatusService commandStatusService;
     private final EventBus eventBus;
+    private final StandFunnel standFunnel;
 
     /**
      * Creates a new repository instance.
@@ -91,6 +95,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.commandStatusService = boundedContext.getCommandBus().getCommandStatusService();
         this.eventBus = boundedContext.getEventBus();
+        this.standFunnel = boundedContext.getStandFunnel();
     }
 
     @Override
@@ -228,6 +233,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         //noinspection OverlyBroadCatchBlock
         try {
             store(aggregate);
+            final Any packedAny = AnyPacker.pack(aggregate.getState());
+            standFunnel.post(packedAny);
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }
