@@ -42,7 +42,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.5.4-SNAPSHOT'
+    version = '0.5.5-SNAPSHOT'
 }
 
 subprojects {
@@ -59,15 +59,15 @@ subprojects {
 
         generatedSpineDir = "$generatedRootDir/main/spine"
 
-        testArtifactsPlugin = '../gradle/plugins/test-artifacts.gradle'
-        generateDescriptorSetPlugin = '../gradle/plugins/generate-descriptor-set.gradle'
-        gRpcPlugin = '../gradle/plugins/grpc.gradle'
-        jacocoPlugin = '../gradle/plugins/jacoco.gradle'
+        testArtifactsScript = '../gradle/plugins/test-artifacts.gradle'
+        generateDescriptorSetScript = '../gradle/plugins/generate-descriptor-set.gradle'
+        gRpcScript = '../gradle/plugins/grpc.gradle'
+        jacocoScript = '../gradle/plugins/jacoco.gradle'
     }
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
-    apply from: jacocoPlugin
+    apply from: jacocoScript
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
