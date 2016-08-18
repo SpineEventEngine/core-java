@@ -38,6 +38,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.transport.GrpcContainer;
 import org.spine3.test.clientservice.Project;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.clientservice.command.AddTask;
@@ -52,11 +53,13 @@ import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
 import org.spine3.testdata.TestCommandBusFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -128,6 +131,27 @@ public class ClientServiceShould {
         final Throwable exception = responseObserver.getThrowable()
                                                     .getCause();
         assertEquals(UnsupportedCommandException.class, exception.getClass());
+    }
+
+    @Test
+    public void deploy_to_grpc_container() throws IOException {
+        final GrpcContainer grpcContainer = GrpcContainer.newBuilder()
+                                                 .addService(service)
+                                                 .build();
+        try {
+            assertTrue(grpcContainer.isScheduledForDeployment(service));
+
+            grpcContainer.start();
+            assertTrue(grpcContainer.isLive(service));
+
+            grpcContainer.shutdown();
+            assertFalse(grpcContainer.isLive(service));
+        } finally {
+            if(!grpcContainer.isShutdown()) {
+                grpcContainer.shutdown();
+            }
+        }
+
     }
 
 
