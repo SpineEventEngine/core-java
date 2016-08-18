@@ -44,6 +44,7 @@ import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.stand.Stand;
+import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.validate.Validate;
@@ -83,6 +84,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
+    private final StandFunnel standFunnel;
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
@@ -93,6 +95,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
+        this.standFunnel = builder.standFunnel;
     }
 
     /**
@@ -231,6 +234,12 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         return this.eventBus;
     }
 
+    /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public StandFunnel getStandFunnel() {
+        return this.standFunnel;
+    }
+
     /**
      * A builder for producing {@code BoundedContext} instances.
      *
@@ -249,6 +258,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private boolean multitenant;
         private EventEnricher eventEnricher;
         private Stand stand;
+        private StandFunnel standFunnel;
+        private Executor standFunnelExecutor;
 
         /**
          * Sets the name for a new bounded context.
@@ -386,6 +397,16 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return stand;
         }
 
+        @Nullable
+        public Executor getStandFunnelExecutor() {
+            return standFunnelExecutor;
+        }
+
+        public Builder setStandFunnelExecutor(Executor standFunnelExecutor) {
+            this.standFunnelExecutor = standFunnelExecutor;
+            return this;
+        }
+
         public BoundedContext build() {
             checkNotNull(storageFactory, "storageFactory must be set");
 
@@ -407,12 +428,29 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
                 stand = createStand(storageFactory);
             }
 
+            standFunnel = createStandFunnel(standFunnelExecutor);
+
             commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 
             log().info(result.nameForLogging() + " created.");
             return result;
+        }
+
+        private StandFunnel createStandFunnel(@Nullable Executor standFunnelExecutor) {
+            StandFunnel standFunnel;
+            if (standFunnelExecutor == null) {
+                standFunnel = StandFunnel.newBuilder()
+                                         .setStand(stand)
+                                         .build();
+            } else {
+                standFunnel = StandFunnel.newBuilder()
+                                         .setExecutor(standFunnelExecutor)
+                                         .setStand(stand)
+                                         .build();
+            }
+            return standFunnel;
         }
 
         private CommandStore createCommandStore() {
