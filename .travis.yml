@@ -7,6 +7,4 @@ before_install:
 after_success:
   - codecov
 
-script:
-  - ./gradlew assemble
-  - ./gradlew check --info
+script: ./gradlew check --info
