@@ -27,6 +27,7 @@ import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 
 /**
@@ -55,6 +56,14 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public EventStorage createEventStorage() {
         return new InMemoryEventStorage(isMultitenant());
+    }
+
+    @Override
+    public StandStorage createStandStorage() {
+        final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
+                                                                .setMultitenant(isMultitenant())
+                                                                .build();
+        return result;
     }
 
     /** NOTE: the parameter is unused. */

@@ -45,6 +45,10 @@ public interface StorageFactory extends AutoCloseable {
     /** Creates a new {@link EventStorage} instance. */
     EventStorage createEventStorage();
 
+    /** Creates a new {@link StandStorage} instance. */
+    StandStorage createStandStorage();
+
+
     /**
      * Creates a new {@link AggregateStorage} instance.
      *
@@ -68,4 +72,6 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>             the type of stream projection IDs
      */
     <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> projectionClass);
+
+
 }
