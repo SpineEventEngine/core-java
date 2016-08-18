@@ -19,9 +19,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
 /**
- * @author Alex Tymchenko
- *
  * This package contains classes and interfaces defining data transport options between Spine apps and the outer world.
  *
  * <p>Typical transport options include gRPC servers, Firebase adapters etc.
