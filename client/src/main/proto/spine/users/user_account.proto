@@ -1,0 +1,106 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.users;
+
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "UserInfoProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/annotations.proto";
+import "spine/users/user_id.proto";
+import "spine/people/person_name.proto";
+import "spine/people/photo.proto";
+import "spine/net/email_address.proto";
+
+// Public details of a user account in the system.
+message UserAccount {
+
+    // The identifier of the account.
+    UserId user_id = 1;
+
+    // The name of the human user.
+    people.PersonName name = 2;
+
+    // The primary email address of the user.
+    //
+    // This address will be used by the system for sending notifications from a backend code.
+    net.EmailAddress email = 3;
+
+    // The photo of the user.
+    people.Photo photo = 4;
+
+    // This field is `true` if the user is an administrator of the Google Apps domain.
+    bool admin = 5;
+
+    // This field is `true` if the user is not from the domain of the current tenant.
+    bool external = 6;
+
+    // A status of the user account.
+    enum Status {
+
+        // Reserved for errors.
+        UAS_UNKNOWN = 0;
+
+        // An invitation is set to an external email address of a person.
+        INVITED = 1;
+
+        // The new user is in the process of registering his account in the system.
+        REGISTERING = 2;
+
+        // The user account is fully created.
+        ACTIVE = 3;
+
+        // The user account is suspended.
+        //
+        // An account could become suspended when:
+        // <ul>
+        //   <li>the corresponding Google Apps account was suspended;
+        //   <li>an application admin suspended the account from within the application.
+        // </ul>
+        // Suspending an application account does not affect the corresponding Google Apps account.
+        //
+        SUSPENDED = 4;
+
+        // The user account was deleted.
+        //
+        // An account gets this status when:
+        // <ul>
+        //   <li>the corresponding account in Google Apps was deleted.
+        //   <li>an application admin denied access to the application for the user.
+        // </ul>
+        // We keep the account record for referential integrity and historical purposes.
+        //
+        DELETED = 5;
+    }
+
+    // The status of the account.
+    Status status = 7;
+
+    // The moment the user account was created.
+    google.protobuf.Timestamp when_created = 8;
+}
+
