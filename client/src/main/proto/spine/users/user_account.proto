@@ -35,6 +35,7 @@ import "spine/users/user_id.proto";
 import "spine/people/person_name.proto";
 import "spine/people/photo.proto";
 import "spine/net/email_address.proto";
+import "spine/net/internet_domain.proto";
 
 // Public details of a user account in the system.
 message UserAccount {
@@ -48,16 +49,21 @@ message UserAccount {
     // The primary email address of the user.
     //
     // This address will be used by the system for sending notifications from a backend code.
+    //
     net.EmailAddress email = 3;
 
     // The photo of the user.
     people.Photo photo = 4;
 
-    // This field is `true` if the user is an administrator of the Google Apps domain.
-    bool domain_admin = 5;
-
     // This field is `true` if the user is not from the domain of the current application tenant.
-    bool external = 6;
+    bool external = 5;
+
+    // The domain the user logged in to.
+    //
+    // For users logging via Google, it would contain a Google Apps domain or "gmail.com" for
+    // a normal Google account.
+    //
+    net.InternetDomain auth_domain = 6;
 
     // A status of the user account.
     enum Status {
