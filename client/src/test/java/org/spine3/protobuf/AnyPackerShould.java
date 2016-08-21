@@ -30,11 +30,11 @@ import org.spine3.users.UserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.newUserId;
 
 public class AnyPackerShould {
 

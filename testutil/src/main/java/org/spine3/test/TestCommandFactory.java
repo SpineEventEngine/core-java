@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client.test;
+package org.spine3.test;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
@@ -31,7 +31,7 @@ import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.UserId;
 
-import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.test.Tests.newUserId;
 
 /**
  * The command factory, which allows generating commands as if the were

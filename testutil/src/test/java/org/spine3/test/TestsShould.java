@@ -24,6 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
@@ -32,6 +33,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.newUserId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention"})
 public class TestsShould {
@@ -69,6 +71,22 @@ public class TestsShould {
     @Test
     public void return_null_reference() {
         assertNull(Tests.nullRef());
+    }
+
+    @Test
+    public void create_UserId_by_string() {
+
+        final String testIdString = "12345";
+        final UserId userId = newUserId(testIdString);
+
+        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+
+        assertEquals(expected, userId);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_UseId_value() {
+        newUserId(Tests.<String>nullRef());
     }
 
     @Test
