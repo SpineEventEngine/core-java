@@ -39,7 +39,7 @@ import "spine/users/user_account.proto";
 // The request for obtaining multiple user accounts at once.
 message UserAccountRequest {
 
-    // Identifiers pf users for whom we need account details.
+    // Identifiers of users for whom we need account details.
     repeated UserId user_id = 1;
 
     // Specification of fields to be included into the returned results.
@@ -51,5 +51,7 @@ message UserAccountRequest {
 service UserAccountService {
 
     // The request to obtain multiple user account details.
+    //
+    // If one of the user IDs is not found, the call will result in error with status `NOT_FOUND`.
     rpc GetMany(UserAccountRequest) returns (stream UserAccount);
 }
