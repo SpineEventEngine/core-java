@@ -54,9 +54,9 @@ message UserAccount {
     people.Photo photo = 4;
 
     // This field is `true` if the user is an administrator of the Google Apps domain.
-    bool admin = 5;
+    bool domain_admin = 5;
 
-    // This field is `true` if the user is not from the domain of the current tenant.
+    // This field is `true` if the user is not from the domain of the current application tenant.
     bool external = 6;
 
     // A status of the user account.

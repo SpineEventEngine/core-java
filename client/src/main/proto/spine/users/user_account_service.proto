@@ -50,9 +50,6 @@ message UserAccountRequest {
 // The service for obtaining information about user accounts.
 service UserAccountService {
 
-    // The request to obtain user account details for one user.
-    rpc Get(UserId) returns (UserAccount);
-
     // The request to obtain multiple user account details.
     rpc GetMany(UserAccountRequest) returns (stream UserAccount);
 }
