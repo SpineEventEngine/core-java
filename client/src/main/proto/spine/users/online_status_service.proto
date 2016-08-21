@@ -27,32 +27,24 @@ option (type_url_prefix) = "type.spine3.org";
 option java_package = "org.spine3.users.grpc";
 
 option java_multiple_files = true;
-option java_outer_classname = "UserInfoServiceProto";
+option java_outer_classname = "OnlineStatusServiceProto";
 option java_generate_equals_and_hash = true;
-
-import "google/protobuf/field_mask.proto";
 
 import "spine/annotations.proto";
 import "spine/users/user_id.proto";
-import "spine/users/user_account.proto";
+import "spine/users/online_status.proto";
 
-// The request for obtaining multiple user accounts at once.
-message UserAccountRequest {
+// The request to obtain online status for one or more users.
+message OnlineStatusRequest {
 
-    // Identifiers pf users for whom we need account details.
+    // Identifiers of users for whom we need updates on online status.
     repeated UserId user_id = 1;
 
-    // Specification of fields to be included into the returned results.
-    // If not set, all fields will be returned.
-    google.protobuf.FieldMask field_mask = 2;
 }
 
-// The service for obtaining information about user accounts.
-service UserAccountService {
+// The service to obtain online status of a user.
+service OnlineStatusService {
 
-    // The request to obtain user account details for one user.
-    rpc Get(UserId) returns (UserAccount);
-
-    // The request to obtain multiple user account details.
-    rpc GetMany(UserAccountRequest) returns (stream UserAccount);
+    // The request to obtain online statuses for one or more users.
+    rpc GetMany(OnlineStatusRequest) returns (stream OnlineStatus);
 }

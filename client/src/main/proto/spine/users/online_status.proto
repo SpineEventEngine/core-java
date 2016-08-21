@@ -22,37 +22,35 @@ syntax = "proto3";
 package spine.users;
 
 option (type_url_prefix) = "type.spine3.org";
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
-option java_package = "org.spine3.users.grpc";
 
+option java_package = "org.spine3.users";
 option java_multiple_files = true;
-option java_outer_classname = "UserInfoServiceProto";
+option java_outer_classname = "OnlineStatusProto";
 option java_generate_equals_and_hash = true;
 
-import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
 import "spine/users/user_id.proto";
-import "spine/users/user_account.proto";
 
-// The request for obtaining multiple user accounts at once.
-message UserAccountRequest {
+// Details about online activity of a user.
+message OnlineStatus {
 
-    // Identifiers pf users for whom we need account details.
-    repeated UserId user_id = 1;
+    // The id of the user.
+    UserId user_id = 1;
 
-    // Specification of fields to be included into the returned results.
-    // If not set, all fields will be returned.
-    google.protobuf.FieldMask field_mask = 2;
-}
+    // This field is `true` is the user is logged in the system at the moment of creation of this message.
+    bool online = 2;
 
-// The service for obtaining information about user accounts.
-service UserAccountService {
+    // The moment the user logged in into the system last time.
+    //
+    // If the user is currently logged in, this field stores the moment of the user login of the current session.
+    //
+    google.protobuf.Timestamp when_logged_in = 3;
 
-    // The request to obtain user account details for one user.
-    rpc Get(UserId) returns (UserAccount);
-
-    // The request to obtain multiple user account details.
-    rpc GetMany(UserAccountRequest) returns (stream UserAccount);
+    // The moment the user logged out from the system last time.
+    //
+    // If the user is currently logged in, this field contains the log-out time of the previous session.
+    //
+    google.protobuf.Timestamp when_logged_out = 4;
 }
