@@ -1,3 +1,42 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = 'http://maven.teamdev.com/repository/spine'
+        }
+    }
+
+    ext {
+        guavaVersion = '19.0'
+        protobufGradlePluginVerison = '0.8.0'
+        spineProtobufPluginVersion = '1.4.10'
+    }
+
+    dependencies {
+        classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
+        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin',
+                                                 version: protobufGradlePluginVerison) {
+            // exclude an old Guava version
+            exclude group: 'com.google.guava'
+        }
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
+                                             version: spineProtobufPluginVersion,
+                                             changing: true
+    }
+    configurations.all({
+        resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+    })
+}
+
+allprojects {
+    apply plugin: 'maven'
+    apply plugin: 'jacoco'
+    apply plugin: 'idea'
+
+    group = 'org.spine3'
+    version = '0.5.6-SNAPSHOT'
+}
 
 ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
@@ -13,36 +52,6 @@ ext {
 
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ["client", "server", "values", "testutil"]
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url = 'http://maven.teamdev.com/repository/spine'
-        }
-    }
-    dependencies {
-        classpath group: 'com.google.guava', name: 'guava', version: '19.0'
-        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7') {
-            // exclude an old Guava version
-            exclude group: 'com.google.guava'
-        }
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.10', changing: true
-    }
-    configurations.all({
-        resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
-    })
-}
-
-allprojects {
-    apply plugin: 'maven'
-    apply plugin: 'jacoco'
-    apply plugin: 'idea'
-
-    group = 'org.spine3'
-    version = '0.5.6-SNAPSHOT'
 }
 
 subprojects {
@@ -85,7 +94,7 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'com.google.guava', name: 'guava', version: '19.0'
+        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         //As a Library, we provide logging facade API, not specific logger bindings.
