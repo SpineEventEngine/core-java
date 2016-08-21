@@ -33,7 +33,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 
-// Details about online activity of a user.
+// Details about online status of a user.
 message OnlineStatus {
 
     // The id of the user.
