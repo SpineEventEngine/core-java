@@ -25,7 +25,7 @@ option (type_url_prefix) = "type.spine3.org";
 
 option java_package = "org.spine3.users";
 option java_multiple_files = true;
-option java_outer_classname = "UserInfoProto";
+option java_outer_classname = "UserAccountProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
@@ -33,37 +33,65 @@ import "google/protobuf/timestamp.proto";
 import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/people/person_name.proto";
-import "spine/people/photo.proto";
+import "spine/net/url.proto";
 import "spine/net/email_address.proto";
 import "spine/net/internet_domain.proto";
+
+// General profile information for a user.
+//
+// This message is used for displaying user information.
+//
+message UserProfile {
+
+    // The user's display name, if available.
+    string display_name = 1;
+
+    // The email address corresponding to the user's account in the specified provider, if available.
+    net.EmailAddress email = 2;
+
+    // The URL to the user's profile picture, if available.
+    net.Url photo_url = 3;
+}
+
+// Information exposed by an identity provider such as Google Sign-In or Facebook Login.
+//
+// Under Android this message will be populated from instances implementing `firebase.UserInfo` interface.
+//
+message UserInfo {
+
+    // The user identifier as specified by the authentication provider.
+    string uid = 1;
+
+    // The unique identifier of the authentication provider type that this instance corresponds to.
+    string provider_id = 2;
+
+    // The user profile.
+    UserProfile profile = 3;
+}
 
 // Public details of a user account in the system.
 message UserAccount {
 
-    // The identifier of the account.
+    // The identifier of the user account in the application.
     UserId user_id = 1;
 
     // The name of the human user.
     people.PersonName name = 2;
 
-    // The primary email address of the user.
-    //
-    // This address will be used by the system for sending notifications from a backend code.
-    //
-    net.EmailAddress email = 3;
-
-    // The photo of the user.
-    people.Photo photo = 4;
+    // Standard profile information of the user.
+    UserProfile profile = 3;
 
     // This field is `true` if the user is not from the domain of the current application tenant.
-    bool external = 5;
+    bool external = 4;
 
     // The domain the user logged in to.
     //
     // For users logging via Google, it would contain a Google Apps domain or "gmail.com" for
     // a normal Google account.
     //
-    net.InternetDomain auth_domain = 6;
+    net.InternetDomain auth_domain = 5;
+
+    reserved 6 to 10; // for possible future usage.
 
     // A status of the user account.
     enum Status {
@@ -104,9 +132,16 @@ message UserAccount {
     }
 
     // The status of the account.
-    Status status = 7;
+    Status status = 11;
 
     // The moment the user account was created.
-    google.protobuf.Timestamp when_created = 8;
+    google.protobuf.Timestamp when_created = 12;
+
+    reserved 13 to 19; // for possible future usage.
+
+    // The linked identities of the user obtained from different authentication providers.
+    repeated UserInfo linked_identity = 20;
+
+    reserved 21 to 99; // for possible future usage.
 }
 
