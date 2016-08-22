@@ -4,5 +4,6 @@ dependencies {
     // that are based on JUnit.
     compile group: 'junit', name: 'junit', version: jUnitVersion
 
+    // Depend on the client module that contains `Timestamps` and other utility classes.
     compile project(path: ':client')
 }

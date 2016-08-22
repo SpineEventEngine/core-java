@@ -18,32 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.users;
 
-import org.spine3.users.UserId;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Optional;
 
 /**
- * Utilities for working with user-related {@code Message} classes.
- *
- * @author Alexander Yevsyukov
+ * Utility routines for working with {@link UserAccount}.
  */
-public class UserUtil {
+public class UserAccounts {
+
+    private static final String GOOGLE_AUTH_PROVIDER_ID = "google.com";
 
     /**
-     * Creates a new user ID instance by passed string value.
+     * A suggested congnitive limit to the number of people with whom one can maintain stable social relationships.
      *
-     * @param value new user ID value
-     * @return new instance
+     * <p>This value should be used for calculating the cache size for storing {@code UserAccount} instances.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Dunbar%27s_number">Dunbar's number</a>
      */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
+    public static final int DUNBARS_NUMBER = 150;
 
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
+    private UserAccounts() {}
+
+    public static Optional<String> getGoogleUid(UserAccount account) {
+        for (UserInfo userInfo : account.getLinkedIdentityList()) {
+            if (userInfo.getProviderId().equals(GOOGLE_AUTH_PROVIDER_ID)) {
+                return Optional.of(userInfo.getUid());
+            }
+        }
+        return Optional.absent();
     }
-
-    private UserUtil() {}
 }

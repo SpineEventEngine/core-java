@@ -4,3 +4,5 @@ include 'testutil'
 include 'client'
 include 'server'
 include 'values'
+include 'users'
+

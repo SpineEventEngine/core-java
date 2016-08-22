@@ -30,10 +30,10 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.client.test.TestCommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
 
 import java.util.List;

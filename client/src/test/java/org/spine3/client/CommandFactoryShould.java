@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.test.Tests.newUserId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {

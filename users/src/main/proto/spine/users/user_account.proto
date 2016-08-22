@@ -1,0 +1,159 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.users;
+
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "UserAccountProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/annotations.proto";
+import "spine/users/user_id.proto";
+import "spine/people/person_name.proto";
+import "spine/net/url.proto";
+import "spine/net/email_address.proto";
+import "spine/net/internet_domain.proto";
+
+// General profile information for a user.
+//
+// This message is used for displaying user information.
+//
+message UserProfile {
+
+    // The user's display name, if available.
+    string display_name = 1;
+
+    // The email address corresponding to the user's account in the specified provider, if available.
+    net.EmailAddress email = 2;
+
+    // The URL to the user's profile picture, if available.
+    net.Url photo_url = 3;
+}
+
+// Information exposed by an identity provider such as Google Sign-In or Facebook Login.
+//
+// Under Android this message will be populated from instances implementing `firebase.UserInfo` interface.
+//
+message UserInfo {
+
+    // The user identifier as specified by the authentication provider.
+    string uid = 1;
+
+    // The unique identifier of the authentication provider type that this instance corresponds to.
+    string provider_id = 2;
+
+    // The domain of the user.
+    //
+    // If the authentication provider is "google.com" then this attribute contains Google Apps domain
+    // of the user or "gmail.com" for normal Google account.
+    //
+    // For authentication providers other than "google.com", this field is empty.
+    //
+    net.InternetDomain domain = 3;
+
+    // The user profile.
+    UserProfile profile = 4;
+}
+
+// Public details of a user account in the system.
+message UserAccount {
+
+    // The identifier of the user account in the application.
+    UserId user_id = 1;
+
+    // The name of the human user.
+    people.PersonName name = 2;
+
+    // Standard profile information of the user.
+    UserProfile profile = 3;
+
+    // This field is `true` if the user is not from the domain of the current application tenant.
+    bool external = 4;
+
+    // The domain the user logged in to.
+    //
+    // For users logging via Google, it would contain a Google Apps domain or "gmail.com" for
+    // a normal Google account.
+    //
+    net.InternetDomain auth_domain = 5;
+
+    reserved 6 to 10; // for possible future usage.
+
+    // A status of the user account.
+    enum Status {
+
+        // Reserved for errors.
+        UAS_UNKNOWN = 0;
+
+        // An invitation is set to an external email address of a person.
+        INVITED = 1;
+
+        // The new user is in the process of registering his account in the system.
+        REGISTERING = 2;
+
+        // The user account is fully created.
+        ACTIVE = 3;
+
+        // The user account is suspended.
+        //
+        // An account could become suspended when:
+        // <ul>
+        //   <li>the corresponding Google Apps account was suspended;
+        //   <li>an application admin suspended the account from within the application.
+        // </ul>
+        // Suspending an application account does not affect the corresponding Google Apps account.
+        //
+        SUSPENDED = 4;
+
+        // The user account was deleted.
+        //
+        // An account gets this status when:
+        // <ul>
+        //   <li>the corresponding account in Google Apps was deleted.
+        //   <li>an application admin denied access to the application for the user.
+        // </ul>
+        // We keep the account record for referential integrity and historical purposes.
+        //
+        DELETED = 5;
+    }
+
+    // The status of the account.
+    Status status = 11;
+
+    // The moment the user account was created.
+    google.protobuf.Timestamp when_created = 12;
+
+    reserved 13 to 19; // for possible future usage.
+
+    // The linked identities of the user obtained from different authentication providers.
+    //
+    // For getting Google Account Id from Java, please use `org.spine3.users.UserAccounts.getGoogleUid()`
+    //
+    repeated UserInfo linked_identity = 20;
+
+    reserved 21 to 99; // for possible future usage.
+}
+

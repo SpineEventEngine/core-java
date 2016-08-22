@@ -18,38 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+/**
+ * This package contains gRPC-based implementation of user-related services.
+ *
+ * <p>This package is not a part of public API of the framework.
+ */
 
-import org.junit.Test;
-import org.spine3.test.Tests;
-import org.spine3.users.UserId;
+@ParametersAreNonnullByDefault
+package org.spine3.users.gprc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class UserUtilShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(UserUtil.class));
-    }
-
-    @Test
-    public void create_UserId_by_string() {
-
-        final String testIdString = "12345";
-        final UserId userId = newUserId(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-
-        assertEquals(expected, userId);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_UseId_value() {
-        newUserId(Tests.<String>nullRef());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

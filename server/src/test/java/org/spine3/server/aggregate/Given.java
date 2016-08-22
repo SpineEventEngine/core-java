@@ -37,8 +37,8 @@ import org.spine3.users.UserId;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 

@@ -22,9 +22,12 @@ package org.spine3.test;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utilities for testing.
@@ -95,6 +98,20 @@ public class Tests {
         final T nullRef = null;
         //noinspection ConstantConditions
         return nullRef;
+    }
+
+    /**
+     * Creates a new user ID instance by passed string value.
+     *
+     * @param value new user ID value
+     * @return new instance
+     */
+    public static UserId newUserId(String value) {
+        checkNotNull(value);
+
+        return UserId.newBuilder()
+                .setValue(value)
+                .build();
     }
 
     /** The provider of current time, which is always the same. */
