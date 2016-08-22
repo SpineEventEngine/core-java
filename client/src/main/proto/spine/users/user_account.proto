@@ -140,6 +140,9 @@ message UserAccount {
     reserved 13 to 19; // for possible future usage.
 
     // The linked identities of the user obtained from different authentication providers.
+    //
+    // For getting Google Account Id from Java, please use `org.spine3.users.UserAccounts.getGoogleUid()`
+    //
     repeated UserInfo linked_identity = 20;
 
     reserved 21 to 99; // for possible future usage.

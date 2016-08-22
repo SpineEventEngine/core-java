@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class UrlParserShould {
 
-    private static final String HOST = "google.com";
+    private static final String HOST = "ulr-parser-should.com";
     private static final String HTTP_PROTOCOL = "http";
     private static final String UNKNOWN_PROTOCOL = "http5";
     private static final String PROTOCOL_HOST = HTTP_PROTOCOL + "://" + HOST;
