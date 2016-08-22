@@ -23,11 +23,18 @@ package org.spine3.users;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UserAccountsShould {
 
     @Test
     public void return_absent_for_google_uid_if_no_linked_account_added() {
         assertFalse(UserAccounts.getGoogleUid(UserAccount.getDefaultInstance()).isPresent());
+    }
+
+    @Test
+    public void declare_Dubars_number() {
+        //noinspection MagicNumber
+        assertTrue(UserAccounts.DUNBARS_NUMBER > 100 && UserAccounts.DUNBARS_NUMBER < 250);
     }
 }
