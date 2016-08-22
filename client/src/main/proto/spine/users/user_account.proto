@@ -65,8 +65,17 @@ message UserInfo {
     // The unique identifier of the authentication provider type that this instance corresponds to.
     string provider_id = 2;
 
+    // The domain of the user.
+    //
+    // If the authentication provider is "google.com" then this attribute contains Google Apps domain
+    // of the user or "gmail.com" for normal Google account.
+    //
+    // For authentication providers other than "google.com", this field is empty.
+    //
+    net.InternetDomain domain = 3;
+
     // The user profile.
-    UserProfile profile = 3;
+    UserProfile profile = 4;
 }
 
 // Public details of a user account in the system.
