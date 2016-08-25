@@ -58,13 +58,40 @@ public class StandFunnel {
         this.executor = builder.getExecutor();
     }
 
-    public void post(final Any aggregateState) {
+    // TODO[alex.tymchenko]: Currently this method exists in order to distinguish the Aggregate state posted
+    // from the other entities. Stand may have a different behaviour handling the Aggregate.
+    // TODO[alex.tymchenko]: Try to get rid of this method in favour of {@link #update).
+    /**
+     * Post the state of an {@link org.spine3.server.aggregate.Aggregate} to an instance of {@link Stand}.
+     *
+     * <p>The data is posted as {@link Any} to allow transferring over the network.
+     *
+     * @param aggregateState the state of an {@code Aggregate}
+     */
+    public void updateAggregateState(final Any aggregateState) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 stand.updateAggregateState(aggregateState);
             }
         });
+    }
+
+    /**
+     * Post the state of an {@link org.spine3.server.entity.Entity} to an instance of {@link Stand}.
+     *
+     * <p>The data is posted as {@link Any} to allow transferring over the network.
+     *
+     * @param entityState the state of an {@code Entity}
+     */
+    public void post(final Any entityState) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                stand.update(entityState);
+            }
+        });
+
     }
 
     /**

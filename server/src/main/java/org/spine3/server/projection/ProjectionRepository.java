@@ -21,6 +21,7 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -29,12 +30,14 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.Storage;
@@ -84,8 +87,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /** An underlying entity storage used to store projections. */
     private EntityStorage<I> entityStorage;
 
+    /** An instance of {@link StandFunnel} to be informed about state updates */
+    private StandFunnel standFunnel;
+
     protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
+        this.standFunnel = boundedContext.getStandFunnel();
     }
 
     protected Status getStatus() {
@@ -223,6 +230,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /**
      * Dispatches event to a projection without checking the status of the repository.
      *
+     * <p>Also posts an update to the {@code StandFunnel} instance for this repository.
+     *
      * @param event the event to dispatch
      */
     /* package */ void internalDispatch(Event event) {
@@ -232,6 +241,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final P projection = load(id);
         projection.handle(eventMessage, context);
         store(projection);
+        final M state = projection.getState();
+        final Any packedState = AnyPacker.pack(state);
+        standFunnel.post(packedState);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);

@@ -233,8 +233,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         //noinspection OverlyBroadCatchBlock
         try {
             store(aggregate);
-            final Any packedAny = AnyPacker.pack(aggregate.getState());
-            standFunnel.post(packedAny);
+            final Message state = aggregate.getState();
+            final Any packedAny = AnyPacker.pack(state);
+            standFunnel.updateAggregateState(packedAny);
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }

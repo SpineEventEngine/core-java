@@ -23,13 +23,18 @@ package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
 
 /**
  * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -48,9 +53,12 @@ import static com.google.common.base.Preconditions.checkState;
 public class Stand {
 
     private final ImmutableSet<StandStorage> storages;
+    private final ConcurrentMap<TypeUrl, Set<StandUpdateCallback>> callbacks = new ConcurrentHashMap<>();
+    private final Executor callbackExecutor;
 
     private Stand(Builder builder) {
         storages = builder.getEnabledStorages();
+        callbackExecutor = builder.getCallbackExecutor();
     }
 
     public static Builder newBuilder() {
@@ -76,13 +84,102 @@ public class Stand {
         for (StandStorage storage : storages) {
             storage.write(newAggregateState);
         }
+        feedToCallbacks(newAggregateState, callbacks, callbackExecutor);
     }
+
+    /**
+     * Update the state of an entity inside of the current instance of {@code Stand}.
+     *
+     * @param entityState the entity state
+     */
+    public void update(Any entityState) {
+        feedToCallbacks(entityState, callbacks, callbackExecutor);
+    }
+
+    /**
+     * Watch for a change of an entity state with a certain {@link TypeUrl}.
+     *
+     * <p>Once this instance of {@code Stand} receives an update of an entity with the given {@code TypeUrl},
+     * all such callbacks are executed.
+     *
+     * @param typeUrl  an instance of entity {@link TypeUrl} to watch for changes
+     * @param callback an instance of {@link StandUpdateCallback} executed upon entity update.
+     */
+    public void watch(TypeUrl typeUrl, StandUpdateCallback callback) {
+        if (!callbacks.containsKey(typeUrl)) {
+            final Set<StandUpdateCallback> emptySet = Collections.synchronizedSet(new HashSet<StandUpdateCallback>());
+            callbacks.put(typeUrl, emptySet);
+        }
+
+        callbacks.get(typeUrl)
+                 .add(callback);
+    }
+
+    /**
+     * Stop watching for a change of an entity state with a certain {@link TypeUrl}.
+     *
+     * <p>Typically invoked to cancel the previous {@link #watch(TypeUrl, StandUpdateCallback)} call with the same arguments.
+     * <p>If no {@code watch} method was executed for the same {@code TypeUrl} and {@code StandUpdateCallback},
+     * then {@code unwatch} has no effect.
+     *
+     * @param typeUrl  an instance of entity {@link TypeUrl} to stop watch for changes
+     * @param callback an instance of {@link StandUpdateCallback} to be cancelled upon entity update.
+     */
+    public void unwatch(TypeUrl typeUrl, StandUpdateCallback callback) {
+        final Set<StandUpdateCallback> registeredCallbacks = callbacks.get(typeUrl);
+
+        if (registeredCallbacks != null && registeredCallbacks.contains(callback)) {
+            registeredCallbacks.remove(callback);
+        }
+    }
+
+
+    private static void feedToCallbacks(
+            final Any entityState,
+            final ConcurrentMap<TypeUrl, Set<StandUpdateCallback>> callbacks,
+            final Executor callbackExecutor
+    ) {
+        final String typeUrlString = entityState.getTypeUrl();
+        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
+
+        if (callbacks.containsKey(typeUrl)) {
+            for (final StandUpdateCallback callback : callbacks.get(typeUrl)) {
+
+                callbackExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onEntityStateUpdate(entityState);
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * A contract for the callbacks to be executed upon entity state change.
+     *
+     * @see #watch(TypeUrl, StandUpdateCallback)
+     * @see #unwatch(TypeUrl, StandUpdateCallback)
+     */
+    @SuppressWarnings("InterfaceNeverImplemented")      //it's OK, there may be no callbacks in the codebase
+    public interface StandUpdateCallback {
+
+        void onEntityStateUpdate(Any newEntityState);
+    }
+
 
     public static class Builder {
         private final Set<StandStorage> userProvidedStorages = Sets.newHashSet();
         private ImmutableSet<StandStorage> enabledStorages;
+        private Executor callbackExecutor;
 
 
+        /**
+         * Add an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
+         *
+         * @param storage an instance of {@code StandStorage}
+         * @return this instance of {@code Builder}
+         */
         public Builder addStorage(StandStorage storage) {
             userProvidedStorages.add(storage);
             return this;
@@ -90,6 +187,23 @@ public class Stand {
 
         public Builder removeStorage(StandStorage storage) {
             userProvidedStorages.remove(storage);
+            return this;
+        }
+
+        public Executor getCallbackExecutor() {
+            return callbackExecutor;
+        }
+
+        /**
+         * Sets an {@code Executor} to be used for executing callback methods.
+         *
+         * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
+         *
+         * @param callbackExecutor the instance of {@code Executor}
+         * @return this instance of {@code Builder}
+         */
+        public Builder setCallbackExecutor(Executor callbackExecutor) {
+            this.callbackExecutor = callbackExecutor;
             return this;
         }
 
@@ -118,6 +232,10 @@ public class Stand {
          */
         public Stand build() {
             this.enabledStorages = composeEnabledStorages();
+            if (callbackExecutor == null) {
+                callbackExecutor = MoreExecutors.directExecutor();
+            }
+
             final Stand result = new Stand(this);
             return result;
         }
