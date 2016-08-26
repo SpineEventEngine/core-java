@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity;
 
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.Storage;
@@ -113,6 +115,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @CheckReturnValue
     protected Class<E> getEntityClass() {
         return Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+    }
+
+    /** Returns the {@link TypeUrl} for the entities managed by this repository */
+    @CheckReturnValue
+    public TypeUrl getEntityType() {
+        final Class<E> entityClass = getEntityClass();
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(entityClass.getSimpleName());
+        return typeUrl;
     }
 
     /**
