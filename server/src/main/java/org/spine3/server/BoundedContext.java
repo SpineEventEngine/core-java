@@ -140,6 +140,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
 
     private void shutDownRepositories() throws Exception {
         for (Repository<?, ?> repository : repositories) {
+            stand.deregisterSupplierForType(repository.getEntityType());
             repository.close();
         }
         repositories.clear();
@@ -190,6 +191,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         if (repository instanceof EventDispatcher) {
             eventBus.register((EventDispatcher) repository);
         }
+        stand.registerTypeSupplier(repository);
     }
 
     private void checkStorageAssigned(Repository repository) {

@@ -26,6 +26,9 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
@@ -52,9 +55,36 @@ import java.util.concurrent.Executor;
  */
 public class Stand {
 
+    /**
+     * Persistent storages for the latest {@link org.spine3.server.aggregate.Aggregate} states.
+     *
+     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is persisted in all of the storages.
+     */
     private final ImmutableSet<StandStorage> storages;
+
+    /**
+     * A set of callbacks to be executed upon the incoming updates.
+     *
+     * <p>Each callback is triggerred if the entity with a matching {@code TypeUrl} is delivered to this {@code Stand}.
+     * <p>There may be any number of callbacks for a given {@code TypeUrl}.
+     */
     private final ConcurrentMap<TypeUrl, Set<StandUpdateCallback>> callbacks = new ConcurrentHashMap<>();
+
+    /** An instance of executor used to invoke callbacks */
     private final Executor callbackExecutor;
+
+    /** The mapping between {@code TypeUrl} instances and repositories providing the entities of this type */
+    private final ConcurrentMap<TypeUrl, Repository> typeToRepositoryMap = new ConcurrentHashMap<>();
+
+    /**
+     * Store the known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
+     * instances of {@code TypeUrl}.
+     *
+     * <p>Once this instance of {@code Stand} receives an update as {@link Any}, the {@code Aggregate} states
+     * are persisted for further usage. While the rest of entity updates are not; they are only propagated to
+     * the registered callbacks.
+     */
+    private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
     private Stand(Builder builder) {
         storages = builder.getEnabledStorages();
@@ -66,34 +96,49 @@ public class Stand {
     }
 
     /**
-     * Store the new value for the {@link org.spine3.server.aggregate.Aggregate} to each of the configured
-     * instances of {@link StandStorage}.
+     * Update the state of an entity inside of the current instance of {@code Stand}.
      *
-     * <p>Each state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl} obtained
+     * <p>In case the entity update represents the new {@link org.spine3.server.aggregate.Aggregate} state,
+     * store the new value for the {@code Aggregate} to each of the configured instances of {@link StandStorage}.
+     *
+     * <p>Each {@code Aggregate } state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl} obtained
      * via {@link Any#getTypeUrl()}.
      *
      * <p>In case {@code Stand} already contains the state for this {@code Aggregate}, the value will be replaced.
      *
-     * <p>The state of an {@code Aggregate} must not be null.
+     * <p>The state updates which are not originated from the {@code Aggregate} are not stored in the {@code Stand}.
      *
-     * @param newAggregateState the state of an {@link org.spine3.server.aggregate.Aggregate} put into Stand
-     */
-    public void updateAggregateState(Any newAggregateState) {
-        // TODO[alex.tymchenko]: should we also check the given Aggregate is allowed to be published? Or is it an AggregateRepository responsibility?
-
-        for (StandStorage storage : storages) {
-            storage.write(newAggregateState);
-        }
-        feedToCallbacks(newAggregateState, callbacks, callbackExecutor);
-    }
-
-    /**
-     * Update the state of an entity inside of the current instance of {@code Stand}.
+     * <p>In any case, the state update is then propagated to the callbacks. The set of matched callbacks
+     * is determined by filtering all the registered callbacks by the entity {@code TypeUrl}.
+     *
+     * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
      * @param entityState the entity state
      */
-    public void update(Any entityState) {
-        feedToCallbacks(entityState, callbacks, callbackExecutor);
+    @SuppressWarnings("MethodWithMultipleLoops")    /* It's fine, since the second loop is most likely
+                                                     * executed in async fashion. */
+    public void update(final Any entityState) {
+        final String typeUrlString = entityState.getTypeUrl();
+        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
+
+        final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
+
+        if (isAggregateUpdate) {
+            for (StandStorage storage : storages) {
+                storage.write(entityState);
+            }
+        }
+
+        if (callbacks.containsKey(typeUrl)) {
+            for (final StandUpdateCallback callback : callbacks.get(typeUrl)) {
+                callbackExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onEntityStateUpdate(entityState);
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -134,25 +179,31 @@ public class Stand {
     }
 
 
-    private static void feedToCallbacks(
-            final Any entityState,
-            final ConcurrentMap<TypeUrl, Set<StandUpdateCallback>> callbacks,
-            final Executor callbackExecutor
-    ) {
-        final String typeUrlString = entityState.getTypeUrl();
-        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
-
-        if (callbacks.containsKey(typeUrl)) {
-            for (final StandUpdateCallback callback : callbacks.get(typeUrl)) {
-
-                callbackExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onEntityStateUpdate(entityState);
-                    }
-                });
-            }
+    /**
+     * Register a supplier for the objects of a certain {@link TypeUrl} to be able
+     * to read them in response to a {@link org.spine3.client.Query}.
+     *
+     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository} is not registered
+     * as type supplier, since the {@code Aggregate} reads are performed by accessing
+     * the latest state in the supplied {@code StandStorage}.
+     *
+     * <p>However, the type of the {@code AggregateRepository} instance is recorded for the postponed processing
+     * of updates.
+     *
+     * @see #update(Any)
+     */
+    public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
+        final TypeUrl entityType = repository.getEntityType();
+        if (!(repository instanceof AggregateRepository)) {
+            typeToRepositoryMap.put(entityType, repository);
+        } else {
+            knownAggregateTypes.add(entityType);
         }
+    }
+
+    // TODO[alex.tymchenko]: perhaps, we need to close Stand instead of doing this upon repository shutdown (see usages).
+    public void deregisterSupplierForType(TypeUrl typeUrl) {
+        typeToRepositoryMap.remove(typeUrl);
     }
 
     /**
