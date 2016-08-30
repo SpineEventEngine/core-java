@@ -63,6 +63,24 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
         writeInternal(id, record);
     }
 
+    /**
+     * Reads the records from the storage with the given IDs.
+     *
+     * <p>The size of {@link Iterable} returned is always the same as the size of given IDs.
+     *
+     * <p>In case there is no record for a particular ID, {@code null} will be present in the result.
+     *
+     * @param ids record IDs of interest
+     * @return the {@link Iterable} containing the records matching the given IDs
+     * @throws IllegalStateException if the storage was closed before
+     */
+    public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids) {
+        checkNotClosed();
+        checkNotNull(ids);
+
+        return readBulkInternal(ids);
+    }
+
     //
     // Internal storage methods
     //---------------------------
@@ -81,8 +99,11 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param id an ID of the record
+     * @param id     an ID of the record
      * @param record a record to store
      */
     protected abstract void writeInternal(I id, EntityStorageRecord record);
+
+    /** @see org.spine3.server.storage.EntityStorage#readBulk(java.lang.Iterable) */
+    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
 }

@@ -22,6 +22,7 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.ProjectionStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -68,5 +69,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
     public void close() throws Exception {
         entityStorage.close();
         super.close();
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+        final Iterable<EntityStorageRecord> result = entityStorage.readBulk(ids);
+        return result;
     }
 }

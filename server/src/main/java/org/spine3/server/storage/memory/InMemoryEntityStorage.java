@@ -25,6 +25,8 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -44,6 +46,26 @@ import static com.google.common.collect.Maps.newHashMap;
 
     protected InMemoryEntityStorage(boolean multitenant) {
         super(multitenant);
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")    /* It's OK for in-memory implementation
+                                                     * as it is used primarily in tests. */
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds) {
+        final Map<I, EntityStorageRecord> storage = getStorage();
+
+        final Collection<EntityStorageRecord> result = new LinkedList<>();
+        for (I recordId : storage.keySet()) {
+            for (I givenId : givenIds) {
+                if(recordId.equals(givenId)) {
+                    final EntityStorageRecord matchingRecord = storage.get(recordId);
+                    result.add(matchingRecord);
+                    continue;
+                }
+                result.add(null);
+            }
+        }
+        return result;
     }
 
     protected static <I> InMemoryEntityStorage<I> newInstance(boolean multitenant) {

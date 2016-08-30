@@ -45,6 +45,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -88,7 +89,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     private EntityStorage<I> entityStorage;
 
     /** An instance of {@link StandFunnel} to be informed about state updates */
-    private StandFunnel standFunnel;
+    private final StandFunnel standFunnel;
 
     protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);

@@ -21,10 +21,13 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import org.spine3.client.QueryOrBuilder;
+import org.spine3.client.Target;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
@@ -32,6 +35,8 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
+import javax.annotation.CheckReturnValue;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -178,6 +183,39 @@ public class Stand {
         }
     }
 
+    /**
+     * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
+     *
+     * @return the set of types as {@link TypeUrl} instances
+     */
+    @CheckReturnValue
+    public ImmutableSet<TypeUrl> getAvailableTypes() {
+        final Set<TypeUrl> types = typeToRepositoryMap.keySet();
+        final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(types);
+        return result;
+    }
+
+    @CheckReturnValue
+    public ImmutableCollection<Any> read(QueryOrBuilder query) {
+        final Collection<Any> result = new HashSet<>();
+
+        final Target target = query.getTarget();
+        final String type = target.getType();
+
+        final TypeUrl typeUrl = TypeUrl.of(type);
+        final Repository repository = typeToRepositoryMap.get(typeUrl);
+
+        if (repository != null) {
+            if(target.getIncludeAll()) {
+
+            }
+        }
+
+        final ImmutableCollection<Any> immutableResult = new ImmutableSet.Builder<Any>().addAll(result)
+                                                                                        .build();
+        return immutableResult;
+    }
+
 
     /**
      * Register a supplier for the objects of a certain {@link TypeUrl} to be able
@@ -193,7 +231,7 @@ public class Stand {
      * @see #update(Any)
      */
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
-        final TypeUrl entityType = repository.getEntityType();
+        final TypeUrl entityType = repository.getEntityStateType();
         if (!(repository instanceof AggregateRepository)) {
             typeToRepositoryMap.put(entityType, repository);
         } else {

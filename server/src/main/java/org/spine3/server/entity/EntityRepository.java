@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -30,8 +32,10 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.validate.Validate.isDefault;
@@ -91,6 +95,66 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return entity;
     }
 
+    /**
+     * Finds the entity with the passed ID.
+     *
+     * <p>As opposed to {@link #load(Object)}, the invocation of this method never leads to creation of a new entity.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param id the id of the entity to find.
+     * @return the entity or {@code null} if there's no entity with such id
+     */
+    @CheckReturnValue
+    @Nullable
+    public E find(I id) {
+        // TODO[alex.tymchenko]: check whether using #load(id) straightaway is a good idea;
+        return this.load(id);
+    }
+
+
+    /**
+     * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
+     *
+     * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
+     * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
+     *
+     * <p>The order of resulting objects in the {@link Iterable} is not guaranteed to be the same as the order
+     * of IDs passed as argument.
+     *
+     * <p>The instance of {@code Iterable} is always returned with no {@code null} values.
+     *
+     * <p>In case IDs contain duplicates, the resulting {@code Iterable} may also contain duplicates, depending
+     * on particular implementation.
+     *
+     * <p>Similar to {@link #find(Object)}, the invocation of this method never leads to creation of new objects.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param ids entity IDs to search for
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
+     */
+    @CheckReturnValue
+    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
+        final EntityStorage<I> storage = entityStorage();
+        final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
+
+        final Iterator<I> idIterator = ids.iterator();
+        final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
+        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+
+        while (idIterator.hasNext() && recordIterator.hasNext()) {
+            final I id = idIterator.next();
+            final EntityStorageRecord record = recordIterator.next();
+            final E entity = toEntity(id, record);
+            builder.add(entity);
+        }
+
+        final ImmutableList<E> result = builder.build();
+        return result;
+
+    }
+
     private E toEntity(I id, EntityStorageRecord record) {
         final E entity = create(id);
         final M state = unpack(record.getState());
@@ -104,9 +168,9 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(stateAny)
-                .setWhenModified(whenModified)
-                .setVersion(version);
+                                                                       .setState(stateAny)
+                                                                       .setWhenModified(whenModified)
+                                                                       .setVersion(version);
         return builder.build();
     }
 }
