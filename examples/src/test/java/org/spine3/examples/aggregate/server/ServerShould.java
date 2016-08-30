@@ -25,6 +25,8 @@ import org.spine3.examples.aggregate.ClientApp;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -34,6 +36,7 @@ public class ServerShould {
     @Test
     public void run_on_in_memory_storage() throws Exception {
         final Server[] serverRef = new Server[1];
+        final CountDownLatch serverStartLatch = new CountDownLatch(1);
 
         final Thread serverThread = new Thread(new Runnable() {
             @Override
@@ -43,6 +46,7 @@ public class ServerShould {
                 try {
                     server.start();
                     server.awaitTermination();
+                    serverStartLatch.countDown();
                 } catch (IOException e) {
                     throw propagate(e);
                 }
@@ -51,6 +55,7 @@ public class ServerShould {
 
         serverThread.start();
 
+        serverStartLatch.await(5, TimeUnit.SECONDS);
         //noinspection ZeroLengthArrayAllocation
         ClientApp.main(new String[0]);
 

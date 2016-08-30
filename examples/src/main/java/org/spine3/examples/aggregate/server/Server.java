@@ -72,6 +72,7 @@ public class Server {
     public void start() throws IOException {
         grpcContainer.start();
         grpcContainer.addShutdownHook();
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     public void awaitTermination() {
@@ -87,7 +88,6 @@ public class Server {
     public static void main(String[] args) throws IOException {
         final Server server = new Server(InMemoryStorageFactory.getInstance());
         server.start();
-        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
         server.awaitTermination();
     }
 
