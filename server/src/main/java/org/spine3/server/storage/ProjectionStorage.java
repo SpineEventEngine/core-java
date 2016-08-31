@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
  * @author Alexander Litus
  */
 @SPI
-public abstract class ProjectionStorage<I> extends EntityStorage<I> {
+public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     public ProjectionStorage(boolean multitenant) {
         super(multitenant);
@@ -45,14 +45,14 @@ public abstract class ProjectionStorage<I> extends EntityStorage<I> {
     @Nullable
     @Override
     protected EntityStorageRecord readInternal(I id) {
-        final EntityStorage<I> storage = getEntityStorage();
+        final RecordStorage<I> storage = getRecordStorage();
         final EntityStorageRecord record = storage.read(id);
         return record;
     }
 
     @Override
     protected void writeInternal(I id, EntityStorageRecord record) {
-        final EntityStorage<I> storage = getEntityStorage();
+        final RecordStorage<I> storage = getRecordStorage();
         storage.write(id, record);
     }
 
@@ -72,5 +72,5 @@ public abstract class ProjectionStorage<I> extends EntityStorage<I> {
     public abstract Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
-    public abstract EntityStorage<I> getEntityStorage();
+    public abstract RecordStorage<I> getRecordStorage();
 }

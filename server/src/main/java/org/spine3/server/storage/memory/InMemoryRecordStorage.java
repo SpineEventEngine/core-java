@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
@@ -33,18 +33,18 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * Memory-based implementation of {@link EntityStorage}.
+ * Memory-based implementation of {@link RecordStorage}.
  *
  * @author Alexander Litus
  */
-/* package */ class InMemoryEntityStorage<I> extends EntityStorage<I> {
+/* package */ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder().setValue("SINGLE_TENANT").build();
 
     private final Map<TenantId, Map<I, EntityStorageRecord>> tenantToStorageMap = newHashMap();
 
-    protected InMemoryEntityStorage(boolean multitenant) {
+    protected InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
     }
 
@@ -68,8 +68,8 @@ import static com.google.common.collect.Maps.newHashMap;
         return result;
     }
 
-    protected static <I> InMemoryEntityStorage<I> newInstance(boolean multitenant) {
-        return new InMemoryEntityStorage<>(multitenant);
+    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
+        return new InMemoryRecordStorage<>(multitenant);
     }
 
     private Map<I, EntityStorageRecord> getStorage() {

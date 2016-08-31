@@ -58,12 +58,12 @@ public interface StorageFactory extends AutoCloseable {
     <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> aggregateClass);
 
     /**
-     * Creates a new {@link EntityStorage} instance.
+     * Creates a new {@link RecordStorage} instance.
      *
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.

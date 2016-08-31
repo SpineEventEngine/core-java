@@ -29,16 +29,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An entity storage keeps messages with identity.
+ * A storage keeping messages with identity.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  * @see Entity
  */
 @SPI
-public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
+public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    protected EntityStorage(boolean multitenant) {
+    protected RecordStorage(boolean multitenant) {
         super(multitenant);
     }
 
@@ -104,6 +104,6 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
      */
     protected abstract void writeInternal(I id, EntityStorageRecord record);
 
-    /** @see org.spine3.server.storage.EntityStorage#readBulk(java.lang.Iterable) */
+    /** @see RecordStorage#readBulk(java.lang.Iterable) */
     protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
 }

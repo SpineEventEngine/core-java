@@ -25,7 +25,7 @@ option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EntityStorageProto";
+option java_outer_classname = "RecordStorageProto";
 option java_package = "org.spine3.server.storage";
 
 import "google/protobuf/timestamp.proto";
@@ -33,7 +33,7 @@ import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
 
-// Used to store entities in the entity storage.
+// Used to store entities in the record storage.
 message EntityStorageRecord {
     // The timestamp of the last entity modification.
     google.protobuf.Timestamp when_modified = 1;

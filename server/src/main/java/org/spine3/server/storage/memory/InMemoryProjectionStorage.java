@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.ProjectionStorage;
 
@@ -35,18 +35,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 /* package */ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
-    private final InMemoryEntityStorage<I> entityStorage;
+    private final InMemoryRecordStorage<I> recordStorage;
 
     /** The time of the last handled event. */
     private Timestamp timestampOfLastEvent;
 
-    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage, boolean multitenant) {
+    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage, boolean multitenant) {
         return new InMemoryProjectionStorage<>(entityStorage, multitenant);
     }
 
-    private InMemoryProjectionStorage(InMemoryEntityStorage<I> entityStorage, boolean multitenant) {
+    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage, boolean multitenant) {
         super(multitenant);
-        this.entityStorage = entityStorage;
+        this.recordStorage = recordStorage;
     }
 
     @Override
@@ -61,19 +61,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
-    public EntityStorage<I> getEntityStorage() {
-        return entityStorage;
+    public RecordStorage<I> getRecordStorage() {
+        return recordStorage;
     }
 
     @Override
     public void close() throws Exception {
-        entityStorage.close();
+        recordStorage.close();
         super.close();
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        final Iterable<EntityStorageRecord> result = entityStorage.readBulk(ids);
+        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids);
         return result;
     }
 }

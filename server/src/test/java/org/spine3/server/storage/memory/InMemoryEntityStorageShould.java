@@ -21,26 +21,26 @@
 package org.spine3.server.storage.memory;
 
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageShould;
 
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
- * Tests of an in-memory {@link EntityStorage} implementation.
+ * Tests of an in-memory {@link RecordStorage} implementation.
  *
  * @author Alexander Litus
  */
 public class InMemoryEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
-    protected EntityStorage<String> getStorage() {
-        return InMemoryEntityStorage.newInstance(false);
+    protected RecordStorage<String> getStorage() {
+        return InMemoryRecordStorage.newInstance(false);
     }
 
     @Override
-    protected <Id> EntityStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass) {
-        return InMemoryEntityStorage.newInstance(false);
+    protected <Id> RecordStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass) {
+        return InMemoryRecordStorage.newInstance(false);
     }
 
     @Override

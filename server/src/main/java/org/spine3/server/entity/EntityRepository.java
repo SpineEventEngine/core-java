@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -57,7 +57,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     /** {@inheritDoc} */
     @Override
     protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createEntityStorage(getEntityClass());
+        final Storage result = factory.createRecordStorage(getEntityClass());
         return result;
     }
 
@@ -68,16 +68,16 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @throws IllegalStateException if the storage is null
      */
     @Nonnull
-    protected EntityStorage<I> entityStorage() {
+    protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
-        final EntityStorage<I> storage = (EntityStorage<I>) getStorage();
+        final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return checkStorage(storage);
     }
 
     /** {@inheritDoc} */
     @Override
     public void store(E entity) {
-        final EntityStorage<I> storage = entityStorage();
+        final RecordStorage<I> storage = recordStorage();
         final EntityStorageRecord record = toEntityRecord(entity);
         storage.write(entity.getId(), record);
     }
@@ -86,7 +86,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     @Nullable
     @Override
     public E load(I id) {
-        final EntityStorage<I> storage = entityStorage();
+        final RecordStorage<I> storage = recordStorage();
         final EntityStorageRecord record = storage.read(id);
         if (isDefault(record)) {
             return null;
@@ -136,7 +136,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      */
     @CheckReturnValue
     public ImmutableCollection<E> findBulk(Iterable<I> ids) {
-        final EntityStorage<I> storage = entityStorage();
+        final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
 
         final Iterator<I> idIterator = ids.iterator();

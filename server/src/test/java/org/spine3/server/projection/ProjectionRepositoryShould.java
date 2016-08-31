@@ -32,7 +32,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.projection.Project;
@@ -145,8 +145,8 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_entity_storage() {
-        final EntityStorage<ProjectId> entityStorage = repository.entityStorage();
-        assertNotNull(entityStorage);
+        final RecordStorage<ProjectId> recordStorage = repository.recordStorage();
+        assertNotNull(recordStorage);
     }
 
     @Test

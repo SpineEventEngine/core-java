@@ -38,14 +38,13 @@ import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -86,7 +85,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     private Status status = Status.CREATED;
 
     /** An underlying entity storage used to store projections. */
-    private EntityStorage<I> entityStorage;
+    private RecordStorage<I> recordStorage;
 
     /** An instance of {@link StandFunnel} to be informed about state updates */
     private final StandFunnel standFunnel;
@@ -114,7 +113,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
-        this.entityStorage = projectionStorage.getEntityStorage();
+        this.recordStorage = projectionStorage.getRecordStorage();
         return projectionStorage;
     }
 
@@ -141,8 +140,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Override
     @Nonnull
     @SuppressWarnings("RefusedBequest")
-    protected EntityStorage<I> entityStorage() {
-        return checkStorage(entityStorage);
+    protected RecordStorage<I> recordStorage() {
+        return checkStorage(recordStorage);
     }
 
     /**
