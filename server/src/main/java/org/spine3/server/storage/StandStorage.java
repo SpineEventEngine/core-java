@@ -22,34 +22,21 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.Stand;
 
 /**
  * Contract for {@link Stand} storage.
  *
- * <p>Stores the latest {@link org.spine3.server.aggregate.Aggregate} states. The state is passed as {@link Any} proto message
- * and stored by its {@link TypeUrl}.
- *
- * <p>Not more than one {@code Aggregate} state object is stored for a single {@code TypeUrl}.
- *
- * <p>Allows to access the states via {@link TypeUrl} its.
+ * // TODO[alex.tymchenko]: describe
  *
  * @author Alex Tymchenko
  * @see Any#getTypeUrl()
  * @see Stand
  */
-public abstract class StandStorage extends AbstractStorage<TypeUrl, Any> {
+public abstract class StandStorage extends AbstractStorage<AggregateStateId, Any> {
 
     protected StandStorage(boolean multitenant) {
         super(multitenant);
     }
-
-    /**
-     * Update the storage with the {@link org.spine3.server.aggregate.Aggregate} state.
-     *
-     * @param aggregateState the state of {@code Aggregate} to store.
-     */
-    public abstract void write(Any aggregateState);
-
 }

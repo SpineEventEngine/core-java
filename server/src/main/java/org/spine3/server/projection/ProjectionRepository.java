@@ -243,7 +243,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         store(projection);
         final M state = projection.getState();
         final Any packedState = AnyPacker.pack(state);
-        standFunnel.post(packedState);
+        standFunnel.post(id, packedState);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);

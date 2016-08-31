@@ -131,15 +131,17 @@ public class Stand {
      */
     @SuppressWarnings("MethodWithMultipleLoops")    /* It's fine, since the second loop is most likely
                                                      * executed in async fashion. */
-    public void update(final Any entityState) {
+    public void update(final Object id, final Any entityState) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
         final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
 
         if (isAggregateUpdate) {
+            final AggregateStateId aggregateStateId = AggregateStateId.of(id, typeUrl);
+
             for (StandStorage storage : storages) {
-                storage.write(entityState);
+                storage.write(aggregateStateId, entityState);
             }
         }
 
@@ -229,7 +231,7 @@ public class Stand {
         final ImmutableSet.Builder<Any> resultBuilder = ImmutableSet.builder();
 
         final Target target = query.getTarget();
-        
+
         final String type = target.getType();
         final ClassName typeClassName = ClassName.of(type);
         final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeClassName);

@@ -22,12 +22,13 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.collect.MapMaker;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.StandStorage;
 
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,7 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class InMemoryStandStorage extends StandStorage {
 
-    private final ConcurrentMap<TypeUrl, Any> aggregateStates;
+    private final ConcurrentMap<AggregateStateId, Any> aggregateStates;
 
     private InMemoryStandStorage(Builder builder) {
         super(builder.isMultitenant());
@@ -54,28 +55,23 @@ public class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public Any read(TypeUrl id) {
+    public Any read(AggregateStateId id) {
         final Any result = aggregateStates.get(id);
         return result;
     }
 
     @Override
-    public void write(TypeUrl id, Any record) {
+    public void write(AggregateStateId id, Any record) {
         final TypeUrl recordType = TypeUrl.of(record.getTypeUrl());
-        checkState(id == recordType, "The typeUrl of the record does not correspond to id");
+        checkState(id.getStateType() == recordType, "The typeUrl of the record does not correspond to id");
 
-        doPut(aggregateStates, record);
-    }
-
-    @Override
-    public void write(Any aggregateState) {
-        doPut(aggregateStates, aggregateState);
+        doPut(aggregateStates, id, record);
     }
 
     public static class Builder {
 
-        private final Set<Any> seedData = Sets.newHashSet();
-        private ConcurrentMap<TypeUrl, Any> seedDataMap;
+        private final Map<Object, Any> seedData = Maps.newHashMap();
+        private ConcurrentMap<AggregateStateId, Any> seedDataMap;
         private boolean multitenant;
 
         /**
@@ -85,12 +81,15 @@ public class InMemoryStandStorage extends StandStorage {
          *
          * <p>The argument value must not be null.
          *
+         * @param id          the id of state object
          * @param stateObject the state object to be added
          * @return {@code this} instance of {@code Builder}
          */
-        public Builder addStateObject(Any stateObject) {
+        public Builder addStateObject(Object id, Any stateObject) {
             checkNotNull(stateObject, "stateObject must not be null");
-            seedData.add(stateObject);
+            checkNotNull(id, "id must not be null");
+
+            seedData.put(id, stateObject);
             return this;
         }
 
@@ -99,20 +98,21 @@ public class InMemoryStandStorage extends StandStorage {
          *
          * <p>The argument value must not be null.
          *
-         * @param stateObject the state object to be removed
+         * @param id the ID of state object to be removed
          * @return {@code this} instance of {@code Builder}
          */
-        public Builder removeStateObject(Any stateObject) {
-            checkNotNull(stateObject, "Cannot remove null stateObject");
-            seedData.remove(stateObject);
+        public Builder removeStateObject(Object id) {
+            checkNotNull(id, "Cannot remove the object with null");
+            seedData.remove(id);
             return this;
         }
 
-        private ConcurrentMap<TypeUrl, Any> buildSeedDataMap() {
-            final ConcurrentMap<TypeUrl, Any> stateMap = new MapMaker().initialCapacity(seedData.size())
-                                                                       .makeMap();
-            for (final Any any : seedData) {
-                doPut(stateMap, any);
+        private ConcurrentMap<AggregateStateId, Any> buildSeedDataMap() {
+            final ConcurrentMap<AggregateStateId, Any> stateMap = new MapMaker().initialCapacity(seedData.size())
+                                                                                .makeMap();
+            for (Object id : seedData.keySet()) {
+                final Any state = seedData.get(id);
+                doPut(stateMap, id, state);
             }
             return stateMap;
         }
@@ -120,7 +120,7 @@ public class InMemoryStandStorage extends StandStorage {
         /**
          * Do not expose the contents to public, as the returned {@code ConcurrentMap} must be mutable.
          */
-        private ConcurrentMap<TypeUrl, Any> getSeedDataMap() {
+        private ConcurrentMap<AggregateStateId, Any> getSeedDataMap() {
             return seedDataMap;
         }
 
@@ -146,10 +146,11 @@ public class InMemoryStandStorage extends StandStorage {
 
     }
 
-    private static void doPut(final ConcurrentMap<TypeUrl, Any> targetMap, final Any any) {
+    private static void doPut(final ConcurrentMap<AggregateStateId, Any> targetMap, final Object id, final Any any) {
         final String typeUrlString = any.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
-        targetMap.put(typeUrl, any);
+        final AggregateStateId statId = AggregateStateId.of(id, typeUrl);
+        targetMap.put(statId, any);
     }
 
 }

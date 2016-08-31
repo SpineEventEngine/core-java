@@ -61,15 +61,16 @@ public class StandFunnel {
     /**
      * Post the state of an {@link org.spine3.server.entity.Entity} to an instance of {@link Stand}.
      *
-     * <p>The data is posted as {@link Any} to allow transferring over the network.
+     * <p>The state data is posted as {@link Any} to allow transferring over the network.
      *
+     * @param id          the id of an entity
      * @param entityState the state of an {@code Entity}
      */
-    public void post(final Any entityState) {
+    public void post(final Object id, final Any entityState) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                stand.update(entityState);
+                stand.update(id, entityState);
             }
         });
 
