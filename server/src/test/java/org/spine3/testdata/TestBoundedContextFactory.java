@@ -24,6 +24,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
+import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -59,6 +60,13 @@ public class TestBoundedContextFactory {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setStorageFactory(FACTORY)
                                                              .setEventBus(eventBus);
+        return builder.build();
+    }
+
+    public static BoundedContext newBoundedContext(Stand stand) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(FACTORY)
+                                                             .setStand(stand);
         return builder.build();
     }
 

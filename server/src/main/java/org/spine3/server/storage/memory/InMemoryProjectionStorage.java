@@ -25,6 +25,8 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.ProjectionStorage;
 
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -74,6 +76,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
     @Override
     protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
         final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids);
+        return result;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal() {
+        final Map<I, EntityStorageRecord> result = recordStorage.readAll();
         return result;
     }
 }

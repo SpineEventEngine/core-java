@@ -24,6 +24,7 @@ import org.spine3.SPI;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -81,6 +82,22 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         return readBulkInternal(ids);
     }
 
+    /**
+     * Reads all the records from the storage.
+     *
+     * <p>Each record is returned as a {@link Map} of record ID to the instance of {@link EntityStorageRecord}.
+     * Such an approach enables turning the records into entities for callees.
+     *
+     * @return the {@code Map} containing the ID -> record entries.
+     * @throws IllegalStateException if the storage was closed before
+     */
+    public Map<I, EntityStorageRecord> readAll() {
+        checkNotClosed();
+
+        return readAllInternal();
+    }
+
+
     //
     // Internal storage methods
     //---------------------------
@@ -94,6 +111,13 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     @Nullable
     protected abstract EntityStorageRecord readInternal(I id);
 
+    /** @see RecordStorage#readBulk(java.lang.Iterable) */
+    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
+
+
+    /** @see RecordStorage#readAll() */
+    protected abstract Map<I, EntityStorageRecord> readAllInternal();
+
     /**
      * Writes a record into the storage.
      *
@@ -104,6 +128,4 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      */
     protected abstract void writeInternal(I id, EntityStorageRecord record);
 
-    /** @see RecordStorage#readBulk(java.lang.Iterable) */
-    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
 }

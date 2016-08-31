@@ -20,24 +20,35 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -152,7 +163,72 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
         final ImmutableList<E> result = builder.build();
         return result;
+    }
 
+    @CheckReturnValue
+    public ImmutableCollection<E> findAll() {
+        final RecordStorage<I> storage = recordStorage();
+        final Map<I, EntityStorageRecord> recordMap = storage.readAll();
+
+        final ImmutableCollection<E> entities =
+                FluentIterable.from(recordMap.entrySet())
+                              .transform(new Function<Map.Entry<I, EntityStorageRecord>, E>() {
+
+                                  @Nullable
+                                  @Override
+                                  public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
+                                      Preconditions.checkNotNull(input);
+                                      return toEntity(input.getKey(), input.getValue());
+                                  }
+
+                              })
+                              .toList();
+
+        return entities;
+    }
+
+    /**
+     * Find all the entities passing the given filters.
+     *
+     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported. All other filters are ignored.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param filters entity filters
+     * @return all the entities in this repository passed the filters.
+     */
+    @CheckReturnValue
+    public ImmutableCollection findAll(EntityFilters filters) {
+        final List<EntityId> idsList = filters.getIdFilter()
+                                              .getIdsList();
+        final Class<I> expectedIdClass = getIdClass();
+
+        final Collection<I> domainIds = Collections2.transform(idsList, new Function<EntityId, I>() {
+            @Nullable
+            @Override
+            public I apply(@Nullable EntityId input) {
+                Preconditions.checkNotNull(input);
+                final Any idAsAny = input.getId();
+
+                final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
+                final Class messageClass = toMessageClass(typeUrl);
+
+                if (!expectedIdClass.equals(messageClass)) {
+                    throw new IllegalArgumentException("Unexpected ID of type " + messageClass + " encountered. " +
+                                                               "Expected: " + expectedIdClass);
+                }
+                final Message idAsMessage = AnyPacker.unpack(idAsAny);
+
+                // As the message class is the same as expected, the conversion is safe.
+                @SuppressWarnings("unchecked")
+                final I id = (I) idAsMessage;
+                return id;
+
+            }
+        });
+
+        final ImmutableCollection<E> result = findBulk(domainIds);
+        return result;
     }
 
     private E toEntity(I id, EntityStorageRecord record) {

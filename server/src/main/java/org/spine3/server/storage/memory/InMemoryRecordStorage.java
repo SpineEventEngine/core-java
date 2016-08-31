@@ -20,8 +20,10 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.RecordStorage;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
@@ -67,6 +69,15 @@ import static com.google.common.collect.Maps.newHashMap;
         }
         return result;
     }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal() {
+        final Map<I, EntityStorageRecord> storage = getStorage();
+
+        final ImmutableMap<I, EntityStorageRecord> result = ImmutableMap.copyOf(storage);
+        return result;
+    }
+
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
         return new InMemoryRecordStorage<>(multitenant);

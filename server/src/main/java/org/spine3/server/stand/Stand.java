@@ -26,17 +26,26 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
+import org.spine3.base.Responses;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.Query;
 import org.spine3.client.QueryOrBuilder;
+import org.spine3.client.QueryResponse;
 import org.spine3.client.Target;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
+import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,7 +88,7 @@ public class Stand {
     private final Executor callbackExecutor;
 
     /** The mapping between {@code TypeUrl} instances and repositories providing the entities of this type */
-    private final ConcurrentMap<TypeUrl, Repository> typeToRepositoryMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TypeUrl, EntityRepository> typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
      * Store the known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
@@ -195,25 +204,60 @@ public class Stand {
         return result;
     }
 
-    @CheckReturnValue
-    public ImmutableCollection<Any> read(QueryOrBuilder query) {
-        final Collection<Any> result = new HashSet<>();
+    /**
+     * Read a particular set of items from the read-side of the application and feed the result into an instance
+     *
+     * <p>{@link Query} defines the query target and the expected detail level for response.
+     *
+     * <p>The query results are fed to an instance of {@link StreamObserver<QueryResponse>}.
+     *
+     * @param query            an instance of query
+     * @param responseObserver an observer to feed the query results to.
+     */
+    public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
+        final ImmutableCollection<Any> readResult = internalExecute(query);
+        final QueryResponse response = QueryResponse.newBuilder()
+                                                    .addAllMessages(readResult)
+                                                    .setResponse(Responses.ok())
+                                                    .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    private ImmutableCollection<Any> internalExecute(QueryOrBuilder query) {
+
+        final ImmutableSet.Builder<Any> resultBuilder = ImmutableSet.builder();
 
         final Target target = query.getTarget();
+        
         final String type = target.getType();
-
-        final TypeUrl typeUrl = TypeUrl.of(type);
-        final Repository repository = typeToRepositoryMap.get(typeUrl);
+        final ClassName typeClassName = ClassName.of(type);
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeClassName);
+        final EntityRepository repository = typeToRepositoryMap.get(typeUrl);
 
         if (repository != null) {
-            if(target.getIncludeAll()) {
-
+            if (target.getIncludeAll()) {
+                final ImmutableCollection all = repository.findAll();
+                feedToBuilder(resultBuilder, all);
+            } else {
+                final EntityFilters filters = target.getFilters();
+                final ImmutableCollection bulkResults = repository.findAll(filters);
+                feedToBuilder(resultBuilder, bulkResults);
             }
         }
 
-        final ImmutableCollection<Any> immutableResult = new ImmutableSet.Builder<Any>().addAll(result)
-                                                                                        .build();
-        return immutableResult;
+        final ImmutableSet<Any> result = resultBuilder.build();
+
+        return result;
+    }
+
+    private static void feedToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection all) {
+        for (Object rawEntity : all) {
+            final Entity entity = (Entity) rawEntity;
+            final Message state = entity.getState();
+            final Any packedState = AnyPacker.pack(state);
+            resultBuilder.add(packedState);
+        }
     }
 
 
@@ -230,13 +274,17 @@ public class Stand {
      *
      * @see #update(Any)
      */
+    @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
-        if (!(repository instanceof AggregateRepository)) {
-            typeToRepositoryMap.put(entityType, repository);
-        } else {
+
+        if (repository instanceof EntityRepository) {
+            typeToRepositoryMap.put(entityType, (EntityRepository) repository);
+        }
+        if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
         }
+
     }
 
     // TODO[alex.tymchenko]: perhaps, we need to close Stand instead of doing this upon repository shutdown (see usages).

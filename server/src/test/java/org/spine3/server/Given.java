@@ -25,12 +25,21 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
+import org.spine3.client.Target;
 import org.spine3.people.PersonName;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.Apply;
+import org.spine3.server.command.Assign;
+import org.spine3.test.clientservice.Project;
 import org.spine3.test.clientservice.ProjectId;
+import org.spine3.test.clientservice.command.AddTask;
 import org.spine3.test.clientservice.command.CreateProject;
+import org.spine3.test.clientservice.command.StartProject;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.clientservice.customer.command.CreateCustomer;
+import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
@@ -38,6 +47,9 @@ import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
@@ -146,6 +158,102 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             final org.spine3.base.Command result = create(msg, userId, getCurrentTime());
 
             return result;
+        }
+    }
+
+    /* package */ static class Query {
+
+        private Query() {};
+
+        /* package */ static org.spine3.client.Query readAllProjects() {
+
+            final Target queryTarget = Target.newBuilder()
+                                       .setType(org.spine3.test.projection.Project.class.getName())
+                                       .setIncludeAll(true)
+                                       .build();
+
+            final org.spine3.client.Query query = org.spine3.client.Query.newBuilder()
+                                                                         .setTarget(queryTarget)
+                                                                         .build();
+            return query;
+        }
+    }
+
+    /* package */ static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        /* package */ ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+        // an aggregate constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
+        public ProjectAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            return EventMessage.projectCreated(cmd.getProjectId());
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+            return EventMessage.taskAdded(cmd.getProjectId());
+        }
+
+        @Assign
+        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            final ProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
+            return newArrayList(message);
+        }
+
+        @Apply
+        private void event(ProjectCreated event) {
+            getBuilder()
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.CREATED)
+                    .build();
+        }
+
+        @Apply
+        private void event(TaskAdded event) {
+        }
+
+        @Apply
+        private void event(ProjectStarted event) {
+            getBuilder()
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.STARTED)
+                    .build();
+        }
+    }
+
+    /* package */ static class CustomerAggregateRepository extends AggregateRepository<CustomerId, CustomerAggregate> {
+        /* package */ CustomerAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
+
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // by convention (as it's used by Reflection).
+        public CustomerAggregate(CustomerId id) {
+            super(id);
+        }
+
+        @Assign
+        public CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
+            final CustomerCreated event = CustomerCreated.newBuilder()
+                                                         .setCustomerId(cmd.getCustomerId())
+                                                         .setCustomer(cmd.getCustomer())
+                                                         .build();
+            return event;
+        }
+
+        @Apply
+        private void event(CustomerCreated event) {
+            incrementState(event.getCustomer());
         }
     }
 }

@@ -242,6 +242,12 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         return this.standFunnel;
     }
 
+    /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public Stand getStand() {
+        return stand;
+    }
+
     /**
      * A builder for producing {@code BoundedContext} instances.
      *
