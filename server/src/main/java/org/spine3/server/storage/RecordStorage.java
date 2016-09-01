@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import org.spine3.SPI;
 import org.spine3.server.entity.Entity;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -37,7 +38,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Entity
  */
 @SPI
-public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
+public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageRecord>
+        implements BulkStorageOperationsMixin<I, EntityStorageRecord> {
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -64,17 +66,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         writeInternal(id, record);
     }
 
-    /**
-     * Reads the records from the storage with the given IDs.
-     *
-     * <p>The size of {@link Iterable} returned is always the same as the size of given IDs.
-     *
-     * <p>In case there is no record for a particular ID, {@code null} will be present in the result.
-     *
-     * @param ids record IDs of interest
-     * @return the {@link Iterable} containing the records matching the given IDs
-     * @throws IllegalStateException if the storage was closed before
-     */
+
+    @Override
     public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids) {
         checkNotClosed();
         checkNotNull(ids);
@@ -82,15 +75,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         return readBulkInternal(ids);
     }
 
-    /**
-     * Reads all the records from the storage.
-     *
-     * <p>Each record is returned as a {@link Map} of record ID to the instance of {@link EntityStorageRecord}.
-     * Such an approach enables turning the records into entities for callees.
-     *
-     * @return the {@code Map} containing the ID -> record entries.
-     * @throws IllegalStateException if the storage was closed before
-     */
+    @Override
     public Map<I, EntityStorageRecord> readAll() {
         checkNotClosed();
 
@@ -111,11 +96,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     @Nullable
     protected abstract EntityStorageRecord readInternal(I id);
 
-    /** @see RecordStorage#readBulk(java.lang.Iterable) */
+    /** @see BulkStorageOperationsMixin#readBulk(java.lang.Iterable) */
     protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
 
 
-    /** @see RecordStorage#readAll() */
+    /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityStorageRecord> readAllInternal();
 
     /**

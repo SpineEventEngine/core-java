@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
@@ -37,12 +36,14 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
- * @author Alexander Litus
+ * @author Alexander Litus, Alex Tymchenko
  */
 /* package */ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder().setValue("SINGLE_TENANT").build();
+    private static final TenantId singleTenant = TenantId.newBuilder()
+                                                         .setValue("SINGLE_TENANT")
+                                                         .build();
 
     private final Map<TenantId, Map<I, EntityStorageRecord>> tenantToStorageMap = newHashMap();
 
@@ -56,10 +57,12 @@ import static com.google.common.collect.Maps.newHashMap;
     protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds) {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
+        // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
+
         for (I recordId : storage.keySet()) {
             for (I givenId : givenIds) {
-                if(recordId.equals(givenId)) {
+                if (recordId.equals(givenId)) {
                     final EntityStorageRecord matchingRecord = storage.get(recordId);
                     result.add(matchingRecord);
                     continue;

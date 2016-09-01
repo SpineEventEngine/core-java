@@ -21,7 +21,9 @@
  */
 package org.spine3.server.storage;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.Stand;
 
@@ -34,9 +36,18 @@ import org.spine3.server.stand.Stand;
  * @see Any#getTypeUrl()
  * @see Stand
  */
-public abstract class StandStorage extends AbstractStorage<AggregateStateId, Any> {
+public abstract class StandStorage extends RecordStorage<AggregateStateId> {
 
     protected StandStorage(boolean multitenant) {
         super(multitenant);
     }
+
+
+    /**
+     * Reads all the state records by the given type.
+     *
+     * @param type a {@link TypeUrl} instance
+     * @return the state records which {@link Any#getTypeUrl()} equals the argument value
+     */
+    public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type);
 }

@@ -21,7 +21,12 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -30,28 +35,35 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
-import org.spine3.client.QueryOrBuilder;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -70,11 +82,11 @@ import java.util.concurrent.Executor;
 public class Stand {
 
     /**
-     * Persistent storages for the latest {@link org.spine3.server.aggregate.Aggregate} states.
+     * Persistent storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
      *
-     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is persisted in all of the storages.
+     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is persisted to this storage.
      */
-    private final ImmutableSet<StandStorage> storages;
+    private final StandStorage storage;
 
     /**
      * A set of callbacks to be executed upon the incoming updates.
@@ -88,7 +100,7 @@ public class Stand {
     private final Executor callbackExecutor;
 
     /** The mapping between {@code TypeUrl} instances and repositories providing the entities of this type */
-    private final ConcurrentMap<TypeUrl, EntityRepository> typeToRepositoryMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TypeUrl, EntityRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
      * Store the known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
@@ -101,7 +113,7 @@ public class Stand {
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
     private Stand(Builder builder) {
-        storages = builder.getEnabledStorages();
+        storage = builder.getStorage();
         callbackExecutor = builder.getCallbackExecutor();
     }
 
@@ -140,9 +152,11 @@ public class Stand {
         if (isAggregateUpdate) {
             final AggregateStateId aggregateStateId = AggregateStateId.of(id, typeUrl);
 
-            for (StandStorage storage : storages) {
-                storage.write(aggregateStateId, entityState);
-            }
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(entityState)
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .build();
+            storage.write(aggregateStateId, record);
         }
 
         if (callbacks.containsKey(typeUrl)) {
@@ -226,7 +240,7 @@ public class Stand {
         responseObserver.onCompleted();
     }
 
-    private ImmutableCollection<Any> internalExecute(QueryOrBuilder query) {
+    private ImmutableCollection<Any> internalExecute(Query query) {
 
         final ImmutableSet.Builder<Any> resultBuilder = ImmutableSet.builder();
 
@@ -235,17 +249,20 @@ public class Stand {
         final String type = target.getType();
         final ClassName typeClassName = ClassName.of(type);
         final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeClassName);
-        final EntityRepository repository = typeToRepositoryMap.get(typeUrl);
+        final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(typeUrl);
 
         if (repository != null) {
-            if (target.getIncludeAll()) {
-                final ImmutableCollection all = repository.findAll();
-                feedToBuilder(resultBuilder, all);
-            } else {
-                final EntityFilters filters = target.getFilters();
-                final ImmutableCollection bulkResults = repository.findAll(filters);
-                feedToBuilder(resultBuilder, bulkResults);
-            }
+
+            // the target references an entity state
+            ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(target, repository);
+
+            feedEntitiesToBuilder(resultBuilder, entities);
+        } else if (knownAggregateTypes.contains(typeUrl)) {
+
+            // the target relates to an {@code Aggregate} state
+            ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(target, typeUrl);
+
+            feedStateRecordsToBuilder(resultBuilder, stateRecords);
         }
 
         final ImmutableSet<Any> result = resultBuilder.build();
@@ -253,10 +270,70 @@ public class Stand {
         return result;
     }
 
-    private static void feedToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection all) {
-        for (Object rawEntity : all) {
-            final Entity entity = (Entity) rawEntity;
-            final Message state = entity.getState();
+    private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Target target, final TypeUrl typeUrl) {
+        final ImmutableCollection<EntityStorageRecord> result;
+
+        if (target.getIncludeAll()) {
+            result = storage.readAllByType(typeUrl);
+
+        } else {
+            final EntityFilters filters = target.getFilters();
+            if (filters != null && filters.getIdFilter() != null) {
+                final EntityIdFilter idFilter = filters.getIdFilter();
+                final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(), aggregateStateIdTransformer(typeUrl));
+
+                final Iterable<EntityStorageRecord> bulkReadResults = storage.readBulk(stateIds);
+                result = FluentIterable.from(bulkReadResults)
+                                       .filter(new Predicate<EntityStorageRecord>() {
+                                           @Override
+                                           public boolean apply(@Nullable EntityStorageRecord input) {
+                                               return input != null;
+                                           }
+                                       })
+                                       .toList();
+            } else {
+                result = ImmutableList.of();
+            }
+
+        }
+        return result;
+    }
+
+    private static Function<EntityId, AggregateStateId> aggregateStateIdTransformer(final TypeUrl typeUrl) {
+        return new Function<EntityId, AggregateStateId>() {
+            @Nullable
+            @Override
+            public AggregateStateId apply(@Nullable EntityId input) {
+                checkNotNull(input);
+
+                final AggregateStateId stateId = AggregateStateId.of(input.getId(), typeUrl);
+                return stateId;
+            }
+        };
+    }
+
+    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(Target target, EntityRepository<?, ? extends Entity, ?> repository) {
+        final ImmutableCollection<? extends Entity> result;
+        if (target.getIncludeAll()) {
+            result = repository.findAll();
+        } else {
+            final EntityFilters filters = target.getFilters();
+            result = repository.findAll(filters);
+        }
+        return result;
+    }
+
+    private static void feedEntitiesToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection<? extends Entity> all) {
+        for (Entity record : all) {
+            final Message state = record.getState();
+            final Any packedState = AnyPacker.pack(state);
+            resultBuilder.add(packedState);
+        }
+    }
+
+    private static void feedStateRecordsToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection<EntityStorageRecord> all) {
+        for (EntityStorageRecord record : all) {
+            final Message state = record.getState();
             final Any packedState = AnyPacker.pack(state);
             resultBuilder.add(packedState);
         }
@@ -274,14 +351,14 @@ public class Stand {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for the postponed processing
      * of updates.
      *
-     * @see #update(Any)
+     * @see #update(Object, Any)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof EntityRepository) {
-            typeToRepositoryMap.put(entityType, (EntityRepository) repository);
+            typeToRepositoryMap.put(entityType, (EntityRepository<I, E, ? extends Message>) repository);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
@@ -308,33 +385,30 @@ public class Stand {
 
 
     public static class Builder {
-        private final Set<StandStorage> userProvidedStorages = Sets.newHashSet();
-        private ImmutableSet<StandStorage> enabledStorages;
+        private StandStorage storage;
         private Executor callbackExecutor;
 
 
         /**
-         * Add an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
+         * Set an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
+         *
+         * <p>If no {@code storage} is assigned, the {@link InMemoryStandStorage} is be set by default.
          *
          * @param storage an instance of {@code StandStorage}
          * @return this instance of {@code Builder}
          */
-        public Builder addStorage(StandStorage storage) {
-            userProvidedStorages.add(storage);
+        public Builder setStorage(StandStorage storage) {
+            this.storage = storage;
             return this;
         }
 
-        public Builder removeStorage(StandStorage storage) {
-            userProvidedStorages.remove(storage);
-            return this;
-        }
 
         public Executor getCallbackExecutor() {
             return callbackExecutor;
         }
 
         /**
-         * Sets an {@code Executor} to be used for executing callback methods.
+         * Set an {@code Executor} to be used for executing callback methods.
          *
          * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
          *
@@ -346,31 +420,23 @@ public class Stand {
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection is immutable
-        public ImmutableSet<StandStorage> getEnabledStorages() {
-            return enabledStorages;
-        }
-
-
-        private ImmutableSet<StandStorage> composeEnabledStorages() {
-            final ImmutableSet.Builder<StandStorage> builder = ImmutableSet.builder();
-            if (userProvidedStorages.isEmpty()) {
-                final InMemoryStandStorage inMemoryStandStorage = InMemoryStandStorage.newBuilder()
-                                                                                      .build();
-                builder.add(inMemoryStandStorage);
-            }
-            builder.addAll(userProvidedStorages);
-            return builder.build();
+        public StandStorage getStorage() {
+            return storage;
         }
 
 
         /**
-         * Build an instance of {@code Stand}
+         * Build an instance of {@code Stand}.
          *
          * @return the instance of Stand
          */
         public Stand build() {
-            this.enabledStorages = composeEnabledStorages();
+
+            if (storage == null) {
+                storage = InMemoryStandStorage.newBuilder()
+                                              .build();
+            }
+
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();
             }

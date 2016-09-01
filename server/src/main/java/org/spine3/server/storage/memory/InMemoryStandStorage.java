@@ -21,13 +21,16 @@
  */
 package org.spine3.server.storage.memory;
 
-import com.google.common.collect.MapMaker;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.protobuf.Any;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -43,11 +46,11 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class InMemoryStandStorage extends StandStorage {
 
-    private final ConcurrentMap<AggregateStateId, Any> aggregateStates;
+    private final InMemoryRecordStorage<AggregateStateId> recordStorage;
 
     private InMemoryStandStorage(Builder builder) {
         super(builder.isMultitenant());
-        aggregateStates = builder.getSeedDataMap();
+        recordStorage = new InMemoryRecordStorage<>(builder.isMultitenant());
     }
 
     public static Builder newBuilder() {
@@ -55,74 +58,54 @@ public class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public Any read(AggregateStateId id) {
-        final Any result = aggregateStates.get(id);
+    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type) {
+        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll();
+        final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
+            @Override
+            public boolean apply(@Nullable AggregateStateId stateId) {
+                checkNotNull(stateId);
+                final boolean typeMatches = stateId.getStateType()
+                                                   .equals(type);
+                return typeMatches;
+            }
+        });
+
+        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(resultMap.values());
+        return result;
+    }
+
+    @Nullable
+    @Override
+    protected EntityStorageRecord readInternal(AggregateStateId id) {
+        final EntityStorageRecord result = recordStorage.read(id);
         return result;
     }
 
     @Override
-    public void write(AggregateStateId id, Any record) {
-        final TypeUrl recordType = TypeUrl.of(record.getTypeUrl());
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<AggregateStateId> ids) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids);
+        return result;
+    }
+
+    @Override
+    protected Map<AggregateStateId, EntityStorageRecord> readAllInternal() {
+        final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll();
+        return result;
+    }
+
+    @Override
+    protected void writeInternal(AggregateStateId id, EntityStorageRecord record) {
+        final TypeUrl recordType = TypeUrl.of(record.getState()
+                                                    .getTypeUrl());
         checkState(id.getStateType() == recordType, "The typeUrl of the record does not correspond to id");
 
-        doPut(aggregateStates, id, record);
+        recordStorage.write(id, record);
     }
+
 
     public static class Builder {
 
-        private final Map<Object, Any> seedData = Maps.newHashMap();
-        private ConcurrentMap<AggregateStateId, Any> seedDataMap;
         private boolean multitenant;
-
-        /**
-         * Add a seed data item.
-         *
-         * <p>Use this method to pre-fill the {@link StandStorage}.
-         *
-         * <p>The argument value must not be null.
-         *
-         * @param id          the id of state object
-         * @param stateObject the state object to be added
-         * @return {@code this} instance of {@code Builder}
-         */
-        public Builder addStateObject(Object id, Any stateObject) {
-            checkNotNull(stateObject, "stateObject must not be null");
-            checkNotNull(id, "id must not be null");
-
-            seedData.put(id, stateObject);
-            return this;
-        }
-
-        /**
-         * Remove a previously added seed data item.
-         *
-         * <p>The argument value must not be null.
-         *
-         * @param id the ID of state object to be removed
-         * @return {@code this} instance of {@code Builder}
-         */
-        public Builder removeStateObject(Object id) {
-            checkNotNull(id, "Cannot remove the object with null");
-            seedData.remove(id);
-            return this;
-        }
-
-        private ConcurrentMap<AggregateStateId, Any> buildSeedDataMap() {
-            final ConcurrentMap<AggregateStateId, Any> stateMap = new MapMaker().initialCapacity(seedData.size())
-                                                                                .makeMap();
-            for (Object id : seedData.keySet()) {
-                final Any state = seedData.get(id);
-                doPut(stateMap, id, state);
-            }
-            return stateMap;
-        }
-
-        /**
-         * Do not expose the contents to public, as the returned {@code ConcurrentMap} must be mutable.
-         */
-        private ConcurrentMap<AggregateStateId, Any> getSeedDataMap() {
-            return seedDataMap;
-        }
 
         public boolean isMultitenant() {
             return multitenant;
@@ -139,18 +122,9 @@ public class InMemoryStandStorage extends StandStorage {
          * @return an instance of in-memory storage
          */
         public InMemoryStandStorage build() {
-            this.seedDataMap = buildSeedDataMap();
             final InMemoryStandStorage result = new InMemoryStandStorage(this);
             return result;
         }
 
     }
-
-    private static void doPut(final ConcurrentMap<AggregateStateId, Any> targetMap, final Object id, final Any any) {
-        final String typeUrlString = any.getTypeUrl();
-        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
-        final AggregateStateId statId = AggregateStateId.of(id, typeUrl);
-        targetMap.put(statId, any);
-    }
-
 }

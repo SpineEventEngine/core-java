@@ -501,7 +501,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private static Stand createStand(StorageFactory storageFactory) {
             final StandStorage standStorage = storageFactory.createStandStorage();
             final Stand result = Stand.newBuilder()
-                                      .addStorage(standStorage)
+                                      .setStorage(standStorage)
                                       .build();
             return result;
         }

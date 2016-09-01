@@ -198,7 +198,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @return all the entities in this repository passed the filters.
      */
     @CheckReturnValue
-    public ImmutableCollection findAll(EntityFilters filters) {
+    public ImmutableCollection<E> findAll(EntityFilters filters) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
