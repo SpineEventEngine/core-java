@@ -58,9 +58,11 @@ public class QueryService
 
     @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
-    public void read(Query request, StreamObserver<QueryResponse> responseObserver) {
-        final String typeAsString = request.getTarget()
-                                           .getType();
+    public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
+
+        log().debug("Incoming query: {}", query);
+        final String typeAsString = query.getTarget()
+                                         .getType();
 
         // TODO[alex.tymchenko]: too complex  
         final ClassName typeClassName = ClassName.of(typeAsString);
@@ -69,11 +71,12 @@ public class QueryService
 
         try {
             boundedContext.getStand()
-                          .execute(request, responseObserver);
+                          .execute(query, responseObserver);
 
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing query", e);
             responseObserver.onError(e);
+            responseObserver.onCompleted();
         }
     }
 
@@ -101,8 +104,13 @@ public class QueryService
 
         /**
          * Builds the {@link QueryService}.
+         *
+         * @throws IllegalStateException if no bounded contexts were added.
          */
-        public QueryService build() {
+        public QueryService build() throws IllegalStateException {
+            if(boundedContexts.isEmpty()) {
+                throw new IllegalStateException("Query service must have at least one bounded context.");
+            }
             this.typeToContextMap = createBoundedContextMap();
             final QueryService result = new QueryService(this);
             return result;

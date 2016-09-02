@@ -22,8 +22,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +37,6 @@ import org.spine3.server.stand.Stand;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.projection.Project;
-import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestStandFactory;
 
 import java.util.Set;
@@ -48,9 +45,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 
@@ -66,6 +64,7 @@ public class QueryServiceShould {
     private BoundedContext projectsContext;
     private BoundedContext customersContext;
     private final TestQueryResponseObserver responseObserver = new TestQueryResponseObserver();
+    private ProjectDetailsRepository projectDetailsRepository;
 
     @Before
     public void setUp() {
@@ -74,17 +73,18 @@ public class QueryServiceShould {
 
         final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
-        final ProjectDetailsRepository projectDetailsRepository = new ProjectDetailsRepository(projectsContext);
+        projectDetailsRepository = spy(new ProjectDetailsRepository(projectsContext));
         projectsContext.register(projectDetailsRepository);
 
         boundedContexts.add(projectsContext);
 
 
         // Create Customers Bounded Context with one repository.
-        customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
+        customersContext = newBoundedContext(spy(TestStandFactory.create()));
         final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
+
 
         final QueryService.Builder builder = QueryService.newBuilder();
 
@@ -106,16 +106,62 @@ public class QueryServiceShould {
     @Test
     public void execute_queries() {
         final Query query = Given.Query.readAllProjects();
+        service.read(query, responseObserver);
+        checkOkResponse(responseObserver);
+    }
+
+    @Test
+    public void dispatch_queries_to_proper_bounded_context() {
+        final Query query = Given.Query.readAllProjects();
         final Stand stand = projectsContext.getStand();
         service.read(query, responseObserver);
 
+        checkOkResponse(responseObserver);
+        verify(stand).execute(query, responseObserver);
+
+        verify(customersContext.getStand(), never()).execute(query, responseObserver);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_create_with_removed_bounded_context_from_builder() {
+        final BoundedContext boundedContext = newBoundedContext(TestStandFactory.create());
+
+        final QueryService.Builder builder = QueryService.newBuilder();
+        builder.addBoundedContext(boundedContext)
+               .removeBoundedContext(boundedContext)
+               .build();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_create_with_no_bounded_context() {
+        QueryService.newBuilder()
+                    .build();
+    }
+
+
+    @Test
+    public void return_error_if_query_failed_to_execute() {
+        when(projectDetailsRepository.findAll()).thenThrow(RuntimeException.class);
+        final Query query = Given.Query.readAllProjects();
+        service.read(query, responseObserver);
+        checkFailureResponse(responseObserver);
+    }
+
+
+    private static void checkOkResponse(TestQueryResponseObserver responseObserver) {
         final QueryResponse responseHandled = responseObserver.getResponseHandled();
         assertNotNull(responseHandled);
         assertEquals(Responses.ok(), responseHandled.getResponse());
         assertTrue(responseObserver.isCompleted());
         assertNull(responseObserver.getThrowable());
-        verify(stand).execute(query, responseObserver);
+    }
 
+    private static void checkFailureResponse(TestQueryResponseObserver responseObserver) {
+        final QueryResponse responseHandled = responseObserver.getResponseHandled();
+        assertNull(responseHandled);
+        assertTrue(responseObserver.isCompleted());
+        assertNotNull(responseObserver.getThrowable());
     }
 
 
