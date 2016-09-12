@@ -21,6 +21,17 @@
  */
 package org.spine3.server.stand;
 
+import com.google.protobuf.Any;
+import org.junit.Assert;
+import org.junit.Test;
+import org.spine3.testdata.TestStandFactory;
+
+import java.util.concurrent.Executor;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
 /**
  * @author Alex Tymchenko
  */
@@ -33,12 +44,52 @@ public class StandFunnelShould {
      * - deliver mock updates to the stand (invoke proper methods with particular arguments) - test the delivery only.
      */
 
+    @Test
+    public void initialize_properly_with_stand_only() {
+        final Stand stand = TestStandFactory.create();
+        final StandFunnel.Builder builder = StandFunnel.newBuilder()
+                                                       .setStand(stand);
+        final StandFunnel standFunnel = builder.build();
+        Assert.assertNotNull(standFunnel);
+    }
+
+
+    @Test
+    public void use_executor_from_builder() {
+        final Stand stand = spy(TestStandFactory.create());
+        final Executor executor = spy(new Executor() {
+            @Override
+            public void execute(Runnable command) {
+
+            }
+        });
+        final StandFunnel.Builder builder = StandFunnel.newBuilder()
+                                                       .setStand(stand)
+                                                       .setExecutor(executor);
+
+        final StandFunnel standFunnel = builder.build();
+        Assert.assertNotNull(standFunnel);
+
+        final Any someState = Any.getDefaultInstance();
+        final Object someId = new Object();
+        standFunnel.post(someId, someState);
+
+        verify(executor).execute(any(Runnable.class));
+    }
+
 
     // **** Negative scenarios (unit) ****
 
     /**
      * - Fail to initialise with improper stand.
      */
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_initialize_from_empty_builder() {
+        final StandFunnel.Builder builder = StandFunnel.newBuilder();
+        builder.build();
+    }
 
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
@@ -47,4 +98,6 @@ public class StandFunnelShould {
      * - deliver updates from aggregate repo on update;
      * - deliver the updates from several projection and aggregate repositories.
      */
+
+
 }
