@@ -63,7 +63,7 @@ public class StandShould {
         assertNotNull(stand);
         assertTrue("Available types must be empty after the initialization.", stand.getAvailableTypes()
                                                                                    .isEmpty());
-        assertTrue("Known aggregate types must be emtpy after the initialization", stand.getKnownAggregateTypes()
+        assertTrue("Known aggregate types must be empty after the initialization", stand.getKnownAggregateTypes()
                                                                                         .isEmpty());
 
     }
