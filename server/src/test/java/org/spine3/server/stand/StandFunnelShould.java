@@ -111,8 +111,6 @@ public class StandFunnelShould {
                                               .setStand(stand)
                                               .build();
 
-        final Object id = new Object();
-        final Any state = Any.getDefaultInstance();
         funnel.post(id, state);
 
         verify(stand).update(id, state);
@@ -153,7 +151,6 @@ public class StandFunnelShould {
 
         builder.build();
     }
-
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = IllegalStateException.class)
