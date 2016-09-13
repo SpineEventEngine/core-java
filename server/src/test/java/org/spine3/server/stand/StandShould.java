@@ -23,7 +23,6 @@ package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
-import org.junit.Assert;
 import org.junit.Test;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -33,6 +32,11 @@ import org.spine3.server.storage.StandStorage;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
@@ -56,9 +60,12 @@ public class StandShould {
         final Stand.Builder builder = Stand.newBuilder();
         final Stand stand = builder.build();
 
-        Assert.assertNotNull(stand);
-        Assert.assertTrue("Available types must be empty after initialization.", stand.getAvailableTypes()
-                                                                                      .isEmpty());
+        assertNotNull(stand);
+        assertTrue("Available types must be empty after the initialization.", stand.getAvailableTypes()
+                                                                                   .isEmpty());
+        assertTrue("Known aggregate types must be emtpy after the initialization", stand.getKnownAggregateTypes()
+                                                                                        .isEmpty());
+
     }
 
     @Test
@@ -68,7 +75,7 @@ public class StandShould {
         final Stand stand = Stand.newBuilder()
                                  .setStorage(standStorageMock)
                                  .build();
-        Assert.assertNotNull(stand);
+        assertNotNull(stand);
     }
 
     @Test
@@ -77,25 +84,30 @@ public class StandShould {
                                  .build();
         final BoundedContext boundedContext = newBoundedContext(stand);
 
-        Assert.assertTrue(stand.getAvailableTypes()
-                               .isEmpty());
+        assertTrue(stand.getAvailableTypes()
+                        .isEmpty());
+        assertTrue(stand.getKnownAggregateTypes()
+                        .isEmpty());
 
         final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
+        final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getKnownAggregateTypes();
+        // As we registered a projection repo, known aggregate types should be still empty.
+        assertTrue("For some reason an aggregate type was registered", knownAggregateTypes.isEmpty());
 
         final StandTestProjectionRepository anotherTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(anotherTestProjectionRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
     }
 
-    private static void checkHasExactlyOne(ImmutableSet<TypeUrl> availableTypes, Descriptors.Descriptor expectedType) {
-        Assert.assertEquals(1, availableTypes.size());
+    private static void checkHasExactlyOne(Set<TypeUrl> availableTypes, Descriptors.Descriptor expectedType) {
+        assertEquals(1, availableTypes.size());
 
         final TypeUrl actualTypeUrl = availableTypes.iterator()
                                                     .next();
         final TypeUrl expectedTypeUrl = TypeUrl.of(expectedType);
-        Assert.assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
+        assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
     }
 
 

@@ -221,6 +221,18 @@ public class Stand {
     }
 
     /**
+     * Read all {@link org.spine3.server.aggregate.Aggregate} entity types exposed for reading
+     * by this instance of {@code Stand}.
+     *
+     * @return the set of types as {@link TypeUrl} instances
+     */
+    @CheckReturnValue
+    public ImmutableSet<TypeUrl> getKnownAggregateTypes() {
+        final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
+        return result;
+    }
+
+    /**
      * Read a particular set of items from the read-side of the application and feed the result into an instance
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
