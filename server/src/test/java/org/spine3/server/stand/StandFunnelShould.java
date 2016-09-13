@@ -105,16 +105,14 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_mock_updates_to_stand() {
-        final Object id = new Object();
-        final Any state = Any.getDefaultInstance();
-
-        final Stand stand = mock(Stand.class);
-        doNothing().when(stand).update(id, state);
+        final Stand stand = spy(TestStandFactory.create());
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
 
+        final Object id = new Object();
+        final Any state = Any.getDefaultInstance();
         funnel.post(id, state);
 
         verify(stand).update(id, state);
@@ -149,12 +147,13 @@ public class StandFunnelShould {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = NullPointerException.class)
-    public void fail_to_initialize_with_inproper_stand() {
+    public void fail_to_initialize_with_null_stand() {
         @SuppressWarnings("ConstantConditions")
         final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
 
         builder.build();
     }
+
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = IllegalStateException.class)
