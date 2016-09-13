@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -89,14 +91,16 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_mock_updates_to_stand() {
-        final Stand stand = spy(TestStandFactory.create());
+        final Object id = new Object();
+        final Any state = Any.getDefaultInstance();
+
+        final Stand stand = mock(Stand.class);
+        doNothing().when(stand).update(id, state);
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
 
-        final Object id = new Object();
-        final Any state = Any.getDefaultInstance();
         funnel.post(id, state);
 
         verify(stand).update(id, state);
@@ -131,20 +135,11 @@ public class StandFunnelShould {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = NullPointerException.class)
-    public void fail_to_initialize_with_null_stand() {
+    public void fail_to_initialize_with_inproper_stand() {
         @SuppressWarnings("ConstantConditions")
         final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
 
         builder.build();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = NullPointerException.class)
-    public void fail_to_initialize_with_importer_stand() {
-        // TODO:13-09-16:dmytro.dashenkov: Implement.
-//        @SuppressWarnings("ConstantConditions")
-//        final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
-//        builder.build();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -161,6 +156,11 @@ public class StandFunnelShould {
      * - deliver updates from aggregate repo on update;
      * - deliver the updates from several projection and aggregate repositories.
      */
+
+    @Test
+    public void deliver_updates_from_projection_repo() {
+
+    }
 
 
 }
