@@ -211,12 +211,17 @@ public class Stand {
     /**
      * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
+     * <p>The result includes all values from {@link #getKnownAggregateTypes()} as well.
+     *
      * @return the set of types as {@link TypeUrl} instances
      */
     @CheckReturnValue
     public ImmutableSet<TypeUrl> getAvailableTypes() {
-        final Set<TypeUrl> types = typeToRepositoryMap.keySet();
-        final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(types);
+        final ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
+        final Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
+        resultBuilder.addAll(projectionTypes)
+                     .addAll(knownAggregateTypes);
+        final ImmutableSet<TypeUrl> result = resultBuilder.build();
         return result;
     }
 

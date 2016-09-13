@@ -26,9 +26,11 @@ import com.google.protobuf.Descriptors;
 import org.junit.Test;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.Given;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StandStorage;
+import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
@@ -84,14 +86,12 @@ public class StandShould {
                                  .build();
         final BoundedContext boundedContext = newBoundedContext(stand);
 
-        assertTrue(stand.getAvailableTypes()
-                        .isEmpty());
-        assertTrue(stand.getKnownAggregateTypes()
-                        .isEmpty());
+        checkTypesEmpty(stand);
 
         final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
+
         final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getKnownAggregateTypes();
         // As we registered a projection repo, known aggregate types should be still empty.
         assertTrue("For some reason an aggregate type was registered", knownAggregateTypes.isEmpty());
@@ -99,6 +99,35 @@ public class StandShould {
         final StandTestProjectionRepository anotherTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(anotherTestProjectionRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
+    }
+
+    @Test
+    public void register_aggregate_repositories() {
+        final Stand stand = Stand.newBuilder()
+                                 .build();
+        final BoundedContext boundedContext = newBoundedContext(stand);
+
+        checkTypesEmpty(stand);
+
+        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        stand.registerTypeSupplier(customerAggregateRepo);
+
+        final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
+        checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
+
+        @SuppressWarnings("LocalVariableNamingConvention")
+        final Given.CustomerAggregateRepository anotherCustomerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        stand.registerTypeSupplier(anotherCustomerAggregateRepo);
+        checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
+    }
+
+    private static void checkTypesEmpty(Stand stand) {
+        assertTrue(stand.getAvailableTypes()
+                        .isEmpty());
+        assertTrue(stand.getKnownAggregateTypes()
+                        .isEmpty());
     }
 
     private static void checkHasExactlyOne(Set<TypeUrl> availableTypes, Descriptors.Descriptor expectedType) {

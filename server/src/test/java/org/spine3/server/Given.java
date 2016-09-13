@@ -55,7 +55,7 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-/* package */ class Given {
+public class Given {
 
     /* package */ static class AggregateId {
 
@@ -229,8 +229,8 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
     }
 
-    /* package */ static class CustomerAggregateRepository extends AggregateRepository<CustomerId, CustomerAggregate> {
-        /* package */ CustomerAggregateRepository(BoundedContext boundedContext) {
+    public static class CustomerAggregateRepository extends AggregateRepository<CustomerId, CustomerAggregate> {
+        public CustomerAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
