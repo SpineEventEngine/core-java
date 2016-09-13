@@ -166,8 +166,8 @@ public class StandFunnelShould {
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
     /**
-     * - Deliver updates from projection projectionRepo on update;
-     * - deliver updates from aggregate projectionRepo on update;
+     * - Deliver updates from projection repo on update;
+     * - deliver updates from aggregate repo on update;
      * - deliver the updates from several projection and aggregate repositories.
      */
 
