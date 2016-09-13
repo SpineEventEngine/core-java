@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.spine3.testdata.TestStandFactory;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
@@ -40,7 +42,6 @@ public class StandFunnelShould {
     // **** Positive scenarios (unit) ****
 
     /**
-     * - Initialize properly with various Builder options;
      * - deliver mock updates to the stand (invoke proper methods with particular arguments) - test the delivery only.
      */
 
@@ -51,6 +52,39 @@ public class StandFunnelShould {
                                                        .setStand(stand);
         final StandFunnel standFunnel = builder.build();
         Assert.assertNotNull(standFunnel);
+    }
+
+    @Test
+    public void initialize_properly_with_various_builder_options() {
+        final Stand stand = TestStandFactory.create();
+        final Executor executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                return Thread.currentThread();
+            }
+        });
+
+        final StandFunnel blockingFunnel = StandFunnel.newBuilder()
+                                                      .setStand(stand)
+                                                      .setExecutor(executor)
+                                                      .build();
+        Assert.assertNotNull(blockingFunnel);
+
+        final StandFunnel funnelForBusyStand = StandFunnel.newBuilder()
+                                                          .setStand(stand)
+                                                          .setExecutor(Executors.newSingleThreadExecutor())
+                                                          .build();
+        Assert.assertNotNull(funnelForBusyStand);
+
+
+        final StandFunnel emptyExecutorFunnel = StandFunnel.newBuilder()
+                                                           .setStand(TestStandFactory.create())
+                                                           .setExecutor(new Executor() {
+                                                               @Override
+                                                               public void execute(Runnable neverCalled) { }
+                                                           })
+                                                           .build();
+        Assert.assertNotNull(emptyExecutorFunnel);
     }
 
 

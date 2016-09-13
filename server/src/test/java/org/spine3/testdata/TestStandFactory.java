@@ -22,13 +22,13 @@
 package org.spine3.testdata;
 
 import org.spine3.server.stand.Stand;
-import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 /**
  * Creates stands for tests.
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("UtilityClass")
 public class TestStandFactory {
 
     private TestStandFactory() {}
