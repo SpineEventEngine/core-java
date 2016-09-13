@@ -22,25 +22,38 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Given;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.calls;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.never;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
@@ -68,16 +81,6 @@ public class StandShould {
         assertTrue("Known aggregate types must be empty after the initialization", stand.getKnownAggregateTypes()
                                                                                         .isEmpty());
 
-    }
-
-    @Test
-    // TODO[alex.tymchenko]: either add more meaningful checks or remove it.
-    public void initialize_with_storage_provided_through_builder() {
-        final StandStorage standStorageMock = spy(mock(StandStorage.class));
-        final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorageMock)
-                                 .build();
-        assertNotNull(stand);
     }
 
     @Test
@@ -123,6 +126,77 @@ public class StandShould {
         checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
     }
 
+    @Test
+    public void use_provided_executor_upon_update_of_watched_type() {
+        final Executor executor = mock(Executor.class);
+        final InOrder executorInOrder = inOrder(executor);
+        final Stand stand = Stand.newBuilder()
+                                 .setCallbackExecutor(executor)
+                                 .build();
+        final BoundedContext boundedContext = newBoundedContext(stand);
+        final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
+        stand.registerTypeSupplier(standTestProjectionRepo);
+
+        final TypeUrl projectProjectionType = TypeUrl.of(Project.class);
+        stand.watch(projectProjectionType, emptyUpdateCallback());
+
+        executorInOrder.verify(executor, never())
+                       .execute(any(Runnable.class));
+
+        final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
+        final Object someId = new Object();
+        stand.update(someId, someUpdate);
+
+        executorInOrder.verify(executor, calls(1))
+                       .execute(any(Runnable.class));
+    }
+
+    @Test
+    public void operate_with_storage_provided_through_builder() {
+        final StandStorage standStorageMock = mock(StandStorage.class);
+        final InOrder standStorageInOrder = inOrder(standStorageMock);
+        final Stand stand = Stand.newBuilder()
+                                 .setStorage(standStorageMock)
+                                 .build();
+        assertNotNull(stand);
+
+        final BoundedContext boundedContext = newBoundedContext(stand);
+        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        stand.registerTypeSupplier(customerAggregateRepo);
+
+
+        final int numericIdValue = 17;
+        final CustomerId customerId = CustomerId.newBuilder()
+                                                .setNumber(numericIdValue)
+                                                .build();
+        final Given.CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
+        final Customer customerState = customerAggregate.getState();
+        final Any packedState = AnyPacker.pack(customerState);
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        standStorageInOrder.verify(standStorageMock, never())
+                           .write(any(AggregateStateId.class), any(EntityStorageRecord.class));
+
+        stand.update(customerId, packedState);
+
+        final AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
+        final EntityStorageRecord expectedRecord = EntityStorageRecord.newBuilder()
+                                                                      .setState(packedState)
+                                                                      .build();
+        standStorageInOrder.verify(standStorageMock, calls(1))
+                           .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
+    }
+
+    private static EntityStorageRecord recordStateMatcher(final EntityStorageRecord expectedRecord) {
+        return argThat(new ArgumentMatcher<EntityStorageRecord>() {
+            @Override
+            public boolean matches(EntityStorageRecord argument) {
+                final boolean matchResult = Objects.equals(expectedRecord.getState(), argument.getState());
+                return matchResult;
+            }
+        });
+    }
+
     private static void checkTypesEmpty(Stand stand) {
         assertTrue(stand.getAvailableTypes()
                         .isEmpty());
@@ -137,6 +211,15 @@ public class StandShould {
                                                     .next();
         final TypeUrl expectedTypeUrl = TypeUrl.of(expectedType);
         assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
+    }
+
+    private static Stand.StandUpdateCallback emptyUpdateCallback() {
+        return new Stand.StandUpdateCallback() {
+            @Override
+            public void onEntityStateUpdate(Any newEntityState) {
+                //do nothing
+            }
+        };
     }
 
 

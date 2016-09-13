@@ -235,7 +235,7 @@ public class Given {
         }
     }
 
-    private static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
+    public static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass") // by convention (as it's used by Reflection).
         public CustomerAggregate(CustomerId id) {
