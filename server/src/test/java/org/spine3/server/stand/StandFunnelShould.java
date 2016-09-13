@@ -87,6 +87,21 @@ public class StandFunnelShould {
         Assert.assertNotNull(emptyExecutorFunnel);
     }
 
+    @Test
+    public void deliver_mock_updates_to_stand() {
+        final Stand stand = spy(TestStandFactory.create());
+
+        final StandFunnel funnel = StandFunnel.newBuilder()
+                                              .setStand(stand)
+                                              .build();
+
+        final Object id = new Object();
+        final Any state = Any.getDefaultInstance();
+        funnel.post(id, state);
+
+        verify(stand).update(id, state);
+    }
+
 
     @Test
     public void use_executor_from_builder() {
@@ -114,9 +129,23 @@ public class StandFunnelShould {
 
     // **** Negative scenarios (unit) ****
 
-    /**
-     * - Fail to initialise with improper stand.
-     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test(expected = NullPointerException.class)
+    public void fail_to_initialize_with_null_stand() {
+        @SuppressWarnings("ConstantConditions")
+        final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
+
+        builder.build();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test(expected = NullPointerException.class)
+    public void fail_to_initialize_with_importer_stand() {
+        // TODO:13-09-16:dmytro.dashenkov: Implement.
+//        @SuppressWarnings("ConstantConditions")
+//        final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
+//        builder.build();
+    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = IllegalStateException.class)
