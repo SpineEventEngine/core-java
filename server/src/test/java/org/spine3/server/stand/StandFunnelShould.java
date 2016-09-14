@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
@@ -42,7 +43,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
@@ -166,22 +166,21 @@ public class StandFunnelShould {
      * - deliver the updates from several projection and aggregate repositories.
      */
 
-    //@Test
+    @Test
     public void deliver_updates_from_projection_repository() throws Exception {
-        final BoundedContext boundedContext = mock(BoundedContext.class);
         final Stand stand = mock(Stand.class);
-        when(boundedContext.getStandFunnel()).thenReturn(StandFunnel.newBuilder()
-                                                                    .setStand(stand)
-                                                                    .setExecutor(new Executor() {
-                                                                        @Override
-                                                                        public void execute(Runnable command) {
-                                                                            command.run();
-                                                                        }
-                                                                    })
-                                                                    .build());
-
+        final BoundedContext boundedContext = spy(BoundedContext.newBuilder()
+                                                                .setStand(stand)
+                                                                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                                .setStandFunnelExecutor(new Executor() { // Straightforward executor
+                                                                    @Override
+                                                                    public void execute(Runnable command) {
+                                                                        command.run();
+                                                                    }
+                                                                })
+                                                                .build());
         // Init repository
-        final Given.StandTestProjectionRepository repository = new Given.StandTestProjectionRepository(boundedContext);
+        final ProjectionRepository repository = Given.repo(boundedContext);
 
         stand.registerTypeSupplier(repository);
         repository.initStorage(InMemoryStorageFactory.getInstance());

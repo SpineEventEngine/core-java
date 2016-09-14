@@ -20,11 +20,16 @@
 
 package org.spine3.server.stand;
 
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.test.projection.Project;
@@ -36,9 +41,19 @@ import org.spine3.test.projection.event.ProjectCreated;
  */
 /*package*/ class Given {
 
+    private static final String PROJECT_UUID = Identifiers.newUuid();
+
+    private Given() {
+    }
+
     /*package*/static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         /*package*/ StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @Override
+        protected ProjectId getEntityId(Message event, EventContext context) {
+            return ProjectId.newBuilder().setId(PROJECT_UUID).build();
         }
     }
 
@@ -54,6 +69,11 @@ import org.spine3.test.projection.event.ProjectCreated;
         public StandTestProjection(ProjectId id) {
             super(id);
         }
+
+        @Subscribe
+        public void handle(ProjectCreated event, EventContext context) {
+            // Do nothing
+        }
     }
 
     /*package*/ static Event validEvent() {
@@ -62,10 +82,20 @@ import org.spine3.test.projection.event.ProjectCreated;
                                                              .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
                                                              .build())
                                          .toBuilder()
-                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' +
-                                                              ProjectCreated.getDescriptor().getFullName())
+                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + "/" + ProjectCreated.getDescriptor().getFullName())
                                          .build())
-                    .setContext(EventContext.getDefaultInstance())
+                    .setContext(EventContext.newBuilder()
+                                            .setDoNotEnrich(true)
+                                            .setCommandContext(CommandContext.getDefaultInstance())
+                                            .setEventId(EventId.newBuilder()
+                                                               .setUuid(PROJECT_UUID)
+                                                               .build()))
                     .build();
     }
+
+    /*package*/ static ProjectionRepository<?, ?, ?> repo(BoundedContext context) {
+        return new StandTestProjectionRepository(context);
+    }
+
+
 }
