@@ -21,12 +21,18 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
+import org.spine3.base.Responses;
+import org.spine3.client.Query;
+import org.spine3.client.QueryResponse;
+import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -40,17 +46,20 @@ import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.calls;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -59,6 +68,7 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass") //It's OK for a test.
 public class StandShould {
 
 // **** Positive scenarios ****
@@ -187,6 +197,47 @@ public class StandShould {
                            .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
 
+    @Test
+    public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
+        final StandStorage standStorageMock = mock(StandStorage.class);
+
+        // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
+        final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
+        doReturn(emptyResultList).when(standStorageMock)
+                                 .readAllByType(any(TypeUrl.class));
+        final Stand stand = Stand.newBuilder()
+                                 .setStorage(standStorageMock)
+                                 .build();
+        assertNotNull(stand);
+
+        final BoundedContext boundedContext = newBoundedContext(stand);
+        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        stand.registerTypeSupplier(customerAggregateRepo);
+
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(true)
+                                            .setType(customerType.getTypeName())
+                                            .build();
+        final Query readAllCustomers = Query.newBuilder()
+                                            .setTarget(customerTarget)
+                                            .build();
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readAllCustomers, responseObserver);
+
+        assertTrue("Query has not completed successfully", responseObserver.isCompleted);
+        assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
+
+        final QueryResponse response = responseObserver.responseHandled;
+        assertEquals("Query response is not OK", Responses.ok(), response.getResponse());
+        assertNotNull("Query response must not be null", response);
+
+        final List<Any> messagesList = response.getMessagesList();
+        assertNotNull("Query response has null message list", messagesList);
+        assertTrue("Query returned a non-empty response message list though the target was empty", messagesList
+                                                                                                           .isEmpty());
+    }
+
     private static EntityStorageRecord recordStateMatcher(final EntityStorageRecord expectedRecord) {
         return argThat(new ArgumentMatcher<EntityStorageRecord>() {
             @Override
@@ -249,5 +300,32 @@ public class StandShould {
         protected StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
+    }
+
+
+    /**
+     * A {@link StreamObserver} storing the state of {@link Query} execution.
+     */
+    private static class MemoizeQueryResponseObserver implements StreamObserver<QueryResponse> {
+
+        private QueryResponse responseHandled;
+        private Throwable throwable;
+        private boolean isCompleted = false;
+
+        @Override
+        public void onNext(QueryResponse response) {
+            this.responseHandled = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.isCompleted = true;
+        }
+
     }
 }
