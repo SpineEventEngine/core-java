@@ -58,7 +58,7 @@ import java.util.concurrent.Executors;
     /*package*/ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
 
     private static final String PROJECT_UUID = Identifiers.newUuid();
-    /*package*/ static final int AWAIT_SECONDS = 10;
+    /*package*/ static final int AWAIT_SECONDS = 6;
 
     private Given() {
     }
