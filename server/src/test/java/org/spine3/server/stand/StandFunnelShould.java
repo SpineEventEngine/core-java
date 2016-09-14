@@ -31,6 +31,8 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
@@ -167,6 +169,8 @@ public class StandFunnelShould {
      * - deliver the updates from several projection and aggregate repositories.
      */
 
+
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_from_projection_repository() {
         deliverUpdates(false, projectionRepositoryDispatch());
