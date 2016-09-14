@@ -20,21 +20,33 @@
 
 package org.spine3.server.stand;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.FailureThrowable;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.Apply;
+import org.spine3.server.command.Assign;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * @author Dmytro Dashenkov
@@ -46,7 +58,7 @@ import org.spine3.test.projection.event.ProjectCreated;
     private Given() {
     }
 
-    /*package*/static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+    /*package*/ static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         /*package*/ StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -54,6 +66,48 @@ import org.spine3.test.projection.event.ProjectCreated;
         @Override
         protected ProjectId getEntityId(Message event, EventContext context) {
             return ProjectId.newBuilder().setId(PROJECT_UUID).build();
+        }
+    }
+
+    /*package*/ static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+
+        /**
+         * Creates a new repository instance.
+         *
+         * @param boundedContext the bounded context to which this repository belongs
+         */
+        /*package*/ StandTestAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    /*package*/ static class TestFailure extends FailureThrowable {
+
+        /*package*/ TestFailure() {
+            super(/*generatedMessage=*/null);
+        }
+    }
+
+    private static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
+
+        /**
+         * Creates a new aggregate instance.
+         *
+         * @param id the ID for the new aggregate
+         * @throws IllegalArgumentException if the ID is not of one of the supported types
+         */
+        public StandTestAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        public List<? extends Event> handle(CreateProject createProject, CommandContext context) {
+            return null;
+        }
+
+        @Apply
+        public void handle(ProjectCreated event) {
+            // Do nothing
         }
     }
 
@@ -76,7 +130,7 @@ import org.spine3.test.projection.event.ProjectCreated;
         }
     }
 
-    /*package*/ static Event validEvent() {
+     /*package*/ static Event validEvent() {
         return Event.newBuilder()
                     .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
                                                              .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
@@ -93,9 +147,31 @@ import org.spine3.test.projection.event.ProjectCreated;
                     .build();
     }
 
-    /*package*/ static ProjectionRepository<?, ?, ?> repo(BoundedContext context) {
+    /*package*/ static Command validCommand() {
+        return Command.newBuilder()
+                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
+                      .setContext(CommandContext.getDefaultInstance())
+                      .build();
+    }
+
+    /*package*/ static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
         return new StandTestProjectionRepository(context);
     }
 
+    /*package*/ static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
+        return new StandTestAggregateRepository(context);
+    }
 
+    /*package*/ static BoundedContext boundedContext(Stand stand) {
+        return BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                             .setStandFunnelExecutor(new Executor() { // Straightforward executor
+                                 @Override
+                                 public void execute(Runnable command) {
+                                     command.run();
+                                 }
+                             })
+                             .build();
+    }
 }
