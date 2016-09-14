@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
@@ -161,28 +162,18 @@ public class StandFunnelShould {
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
     /**
-     * - Deliver updates from projection repo on update;
-     * - deliver updates from aggregate repo on update;
+     * - Deliver updates from projection projectionRepo on update;
+     * - deliver updates from aggregate projectionRepo on update;
      * - deliver the updates from several projection and aggregate repositories.
      */
 
     @Test
-    public void deliver_updates_from_projection_repository() throws Exception {
+    public void deliver_updates_from_projection_repository() {
         final Stand stand = mock(Stand.class);
-        final BoundedContext boundedContext = spy(BoundedContext.newBuilder()
-                                                                .setStand(stand)
-                                                                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                                .setStandFunnelExecutor(new Executor() { // Straightforward executor
-                                                                    @Override
-                                                                    public void execute(Runnable command) {
-                                                                        command.run();
-                                                                    }
-                                                                })
-                                                                .build());
+        final BoundedContext boundedContext = spy(Given.boundedContext(stand));
         // Init repository
-        final ProjectionRepository repository = Given.repo(boundedContext);
+        final ProjectionRepository repository = Given.projectionRepo(boundedContext);
 
-        stand.registerTypeSupplier(repository);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         repository.setOnline();
 
@@ -194,6 +185,29 @@ public class StandFunnelShould {
         verify(stand).update(ArgumentMatchers.any(), any(Any.class));
     }
 
+    @Test
+    public void deliver_updates_form_aggregate_repository() {
+        final Stand stand = mock(Stand.class);
+
+        final BoundedContext boundedContext = spy(Given.boundedContext(stand));
+        // Init repository
+        final AggregateRepository<?, ?> repository = Given.aggregateRepo(boundedContext);
+
+        stand.registerTypeSupplier(repository);
+        repository.initStorage(InMemoryStorageFactory.getInstance());
+
+        // Dispatch an update from projection projectionRepo
+        try {
+            repository.dispatch(Given.validCommand());
+        } catch (IllegalStateException e) {
+            // Handle null event dispatch after command handling.
+            Assert.assertTrue(e.getMessage().contains("No record found for command ID: EMPTY"));
+        }
+
+        // Was called ONCE
+        verify(boundedContext).getStandFunnel();
+        verify(stand).update(ArgumentMatchers.any(), any(Any.class));
+    }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
