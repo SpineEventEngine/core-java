@@ -214,10 +214,21 @@ public class StandFunnelShould {
             dispatchAction.perform(boundedContext);
         }
 
-
-        // Was called ONCE
+        // Was called as much times as there are dispatch actions.
         verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
+
+        if (isMultiThread) {
+            await(Given.AWAIT_SECONDS);
+        }
+
         verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class));
+    }
+
+    private static void await(int seconds) {
+        try {
+            Thread.sleep(seconds);
+        } catch (InterruptedException ignore) {
+        }
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
@@ -256,13 +267,12 @@ public class StandFunnelShould {
     }
 
 
-
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
         final int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
         @SuppressWarnings("LocalVariableNamingConvention") // Too long variable name
-        final int threadExecutionMaxAwaitSeconds = 2;
+        final int threadExecutionMaxAwaitSeconds = Given.AWAIT_SECONDS;
 
         final Map<String, Object> threadInvocationRegistry = new ConcurrentHashMap<>(threadsCount);
 
