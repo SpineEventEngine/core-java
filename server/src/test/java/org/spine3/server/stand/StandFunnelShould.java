@@ -31,7 +31,9 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
+import java.security.SecureRandom;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.security.SecureRandom;
 import java.util.Map;
