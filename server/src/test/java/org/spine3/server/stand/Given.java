@@ -128,7 +128,7 @@ import java.util.concurrent.Executors;
         }
     }
 
-     /*package*/ static Event validEvent() {
+    /*package*/ static Event validEvent() {
         return Event.newBuilder()
                     .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
                                                              .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
