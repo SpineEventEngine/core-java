@@ -45,15 +45,12 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Given;
-import org.spine3.server.projection.Projection;
-import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
-import org.spine3.test.projection.ProjectId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
