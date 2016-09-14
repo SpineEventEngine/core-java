@@ -168,6 +168,7 @@ public class StandFunnelShould {
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
         final int threadsCount = 10;
+        final int threadExecuteionMaxAwaitSeconds = 2;
 
         final Map<String, Object> threadInvakationRegistry = new ConcurrentHashMap<>(threadsCount);
 
@@ -197,7 +198,7 @@ public class StandFunnelShould {
             processes.execute(task);
         }
 
-        processes.awaitTermination(10, TimeUnit.SECONDS);
+        processes.awaitTermination(threadExecuteionMaxAwaitSeconds, TimeUnit.SECONDS);
 
         Assert.assertEquals(threadInvakationRegistry.size(), threadsCount);
 
