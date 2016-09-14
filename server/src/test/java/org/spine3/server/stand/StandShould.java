@@ -30,7 +30,6 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -67,10 +66,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
@@ -150,7 +149,6 @@ public class StandShould {
     @Test
     public void use_provided_executor_upon_update_of_watched_type() {
         final Executor executor = mock(Executor.class);
-        final InOrder executorInOrder = inOrder(executor);
         final Stand stand = Stand.newBuilder()
                                  .setCallbackExecutor(executor)
                                  .build();
@@ -161,21 +159,18 @@ public class StandShould {
         final TypeUrl projectProjectionType = TypeUrl.of(Project.class);
         stand.watch(projectProjectionType, emptyUpdateCallback());
 
-        executorInOrder.verify(executor, never())
-                       .execute(any(Runnable.class));
+        verify(executor, never()).execute(any(Runnable.class));
 
         final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
         final Object someId = new Object();
         stand.update(someId, someUpdate);
 
-        executorInOrder.verify(executor, calls(1))
-                       .execute(any(Runnable.class));
+        verify(executor, times(1)).execute(any(Runnable.class));
     }
 
     @Test
     public void operate_with_storage_provided_through_builder() {
         final StandStorage standStorageMock = mock(StandStorage.class);
-        final InOrder standStorageInOrder = inOrder(standStorageMock);
         final Stand stand = Stand.newBuilder()
                                  .setStorage(standStorageMock)
                                  .build();
@@ -195,8 +190,7 @@ public class StandShould {
         final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
 
-        standStorageInOrder.verify(standStorageMock, never())
-                           .write(any(AggregateStateId.class), any(EntityStorageRecord.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityStorageRecord.class));
 
         stand.update(customerId, packedState);
 
@@ -204,8 +198,7 @@ public class StandShould {
         final EntityStorageRecord expectedRecord = EntityStorageRecord.newBuilder()
                                                                       .setState(packedState)
                                                                       .build();
-        standStorageInOrder.verify(standStorageMock, calls(1))
-                           .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
+        verify(standStorageMock, times(1)).write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
 
     @Test
