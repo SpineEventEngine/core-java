@@ -166,7 +166,7 @@ public class StandFunnelShould {
      * - deliver the updates from several projection and aggregate repositories.
      */
 
-    @Test
+    //@Test
     public void deliver_updates_from_projection_repository() throws Exception {
         final BoundedContext boundedContext = mock(BoundedContext.class);
         final Stand stand = mock(Stand.class);
