@@ -24,11 +24,16 @@ package org.spine3.server.stand;
 import com.google.protobuf.Any;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.spine3.testdata.TestStandFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -38,6 +43,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 public class StandFunnelShould {
 
@@ -157,10 +163,44 @@ public class StandFunnelShould {
      * - deliver the updates from several projection and aggregate repositories.
      */
 
+
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void deliver_updates_from_projection_repo() {
+    public void deliver_updates_through_several_threads() throws InterruptedException {
+        final int threadsCount = 10;
+
+        final Map<String, Object> threadInvakationRegistry = new ConcurrentHashMap<>(threadsCount);
+
+        final Stand stand = mock(Stand.class);
+        doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class));
+
+        final StandFunnel standFunnel = StandFunnel.newBuilder()
+                                                   .setStand(stand)
+                                                   .build();
+
+        final ExecutorService processes = Executors.newFixedThreadPool(threadsCount);
+
+
+        final Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                final String threadName = Thread.currentThread().getName();
+                Assert.assertFalse(threadInvakationRegistry.containsKey(threadName));
+
+                standFunnel.post(new Object(), Any.getDefaultInstance());
+
+                threadInvakationRegistry.put(threadName, new Object());
+            }
+        };
+
+        for (int i = 0; i < threadsCount; i++) {
+            processes.execute(task);
+        }
+
+        processes.awaitTermination(10, TimeUnit.SECONDS);
+
+        Assert.assertEquals(threadInvakationRegistry.size(), threadsCount);
 
     }
-
 
 }
