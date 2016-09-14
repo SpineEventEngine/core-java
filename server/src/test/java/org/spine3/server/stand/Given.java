@@ -23,6 +23,7 @@ package org.spine3.server.stand;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -60,7 +61,10 @@ import org.spine3.test.projection.event.ProjectCreated;
                     .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
                                                              .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
                                                              .build())
-                    .toBuilder().setTypeUrl(ProjectCreated.getDescriptor().getFullName()).build())
+                                         .toBuilder()
+                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' +
+                                                              ProjectCreated.getDescriptor().getFullName())
+                                         .build())
                     .setContext(EventContext.getDefaultInstance())
                     .build();
     }
