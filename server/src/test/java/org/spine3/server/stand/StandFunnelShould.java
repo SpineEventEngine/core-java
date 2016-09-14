@@ -174,7 +174,7 @@ public class StandFunnelShould {
         final Random random = new SecureRandom();
 
         for (int i = 0; i < result.length; i++) {
-            result[i] = random.nextBoolean() ? aggregateRepositoryDispatch() : projectionRepositoryDispatch();
+            result[i] = (i % 2 == 0) ? aggregateRepositoryDispatch() : projectionRepositoryDispatch();
         }
 
         return result;
