@@ -32,7 +32,6 @@ import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.type.ClassName;
 
 import java.util.Set;
 
@@ -64,9 +63,7 @@ public class QueryService
         final String typeAsString = query.getTarget()
                                          .getType();
 
-        // TODO[alex.tymchenko]: too complex  
-        final ClassName typeClassName = ClassName.of(typeAsString);
-        final TypeUrl type = KnownTypes.getTypeUrl(typeClassName);
+        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
         final BoundedContext boundedContext = typeToContextMap.get(type);
 
         try {
@@ -108,7 +105,7 @@ public class QueryService
          * @throws IllegalStateException if no bounded contexts were added.
          */
         public QueryService build() throws IllegalStateException {
-            if(boundedContexts.isEmpty()) {
+            if (boundedContexts.isEmpty()) {
                 throw new IllegalStateException("Query service must have at least one bounded context.");
             }
             this.typeToContextMap = createBoundedContextMap();

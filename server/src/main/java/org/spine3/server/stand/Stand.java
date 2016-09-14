@@ -264,8 +264,7 @@ public class Stand {
         final Target target = query.getTarget();
 
         final String type = target.getType();
-        final ClassName typeClassName = ClassName.of(type);
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeClassName);
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(type);
         final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(typeUrl);
 
         if (repository != null) {

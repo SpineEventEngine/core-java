@@ -27,6 +27,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -167,10 +168,12 @@ public class Given {
 
         /* package */ static org.spine3.client.Query readAllProjects() {
 
+            final String typeName = TypeUrl.of(org.spine3.test.projection.Project.class)
+                                           .getTypeName();
             final Target queryTarget = Target.newBuilder()
-                                       .setType(org.spine3.test.projection.Project.class.getName())
-                                       .setIncludeAll(true)
-                                       .build();
+                                             .setType(typeName)
+                                             .setIncludeAll(true)
+                                             .build();
 
             final org.spine3.client.Query query = org.spine3.client.Query.newBuilder()
                                                                          .setTarget(queryTarget)
