@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
 import java.util.Map;
@@ -40,6 +42,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
@@ -163,14 +166,44 @@ public class StandFunnelShould {
      * - deliver the updates from several projection and aggregate repositories.
      */
 
+    @Test
+    public void deliver_updates_from_projection_repository() throws Exception {
+        final BoundedContext boundedContext = mock(BoundedContext.class);
+        final Stand stand = mock(Stand.class);
+        when(boundedContext.getStandFunnel()).thenReturn(StandFunnel.newBuilder()
+                                                                    .setStand(stand)
+                                                                    .setExecutor(new Executor() {
+                                                                        @Override
+                                                                        public void execute(Runnable command) {
+                                                                            command.run();
+                                                                        }
+                                                                    })
+                                                                    .build());
+
+        // Init repository
+        final Given.StandTestProjectionRepository repository = new Given.StandTestProjectionRepository(boundedContext);
+
+        stand.registerTypeSupplier(repository);
+        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.setOnline();
+
+        // Dispatch an update from projection repo
+        repository.dispatch(Given.validEvent());
+
+        // Was called ONCE
+        verify(boundedContext).getStandFunnel();
+        verify(stand).update(ArgumentMatchers.any(), any(Any.class));
+    }
+
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
         final int threadsCount = 10;
-        final int threadExecuteionMaxAwaitSeconds = 2;
+        @SuppressWarnings("LocalVariableNamingConvention") // Too long variable name
+        final int threadExecutionMaxAwaitSeconds = 2;
 
-        final Map<String, Object> threadInvakationRegistry = new ConcurrentHashMap<>(threadsCount);
+        final Map<String, Object> threadInvocationRegistry = new ConcurrentHashMap<>(threadsCount);
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class));
@@ -186,11 +219,11 @@ public class StandFunnelShould {
             @Override
             public void run() {
                 final String threadName = Thread.currentThread().getName();
-                Assert.assertFalse(threadInvakationRegistry.containsKey(threadName));
+                Assert.assertFalse(threadInvocationRegistry.containsKey(threadName));
 
                 standFunnel.post(new Object(), Any.getDefaultInstance());
 
-                threadInvakationRegistry.put(threadName, new Object());
+                threadInvocationRegistry.put(threadName, new Object());
             }
         };
 
@@ -198,9 +231,9 @@ public class StandFunnelShould {
             processes.execute(task);
         }
 
-        processes.awaitTermination(threadExecuteionMaxAwaitSeconds, TimeUnit.SECONDS);
+        processes.awaitTermination(threadExecutionMaxAwaitSeconds, TimeUnit.SECONDS);
 
-        Assert.assertEquals(threadInvakationRegistry.size(), threadsCount);
+        Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
 
     }
 
