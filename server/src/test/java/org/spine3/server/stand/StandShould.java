@@ -34,11 +34,11 @@ import org.spine3.server.Given;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
-import org.spine3.test.projection.ProjectId;
 
 import java.util.Objects;
 import java.util.Set;
@@ -229,25 +229,4 @@ public class StandShould {
      * - fail to initialize with improper build arguments.
      */
 
-
-    // ***** Inner classes used for tests. *****
-
-    private static class StandTestProjection extends Projection<ProjectId, Project> {
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
-        public StandTestProjection(ProjectId id) {
-            super(id);
-        }
-    }
-
-
-    private static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        protected StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
 }
