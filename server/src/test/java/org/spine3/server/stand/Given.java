@@ -20,6 +20,7 @@
 
 package org.spine3.server.stand;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
@@ -139,7 +140,7 @@ import java.util.concurrent.Executors;
                                             .setDoNotEnrich(true)
                                             .setCommandContext(CommandContext.getDefaultInstance())
                                             .setEventId(EventId.newBuilder()
-                                                               .setUuid(PROJECT_UUID)
+                                                               .setUuid(Identifiers.newUuid())
                                                                .build()))
                     .build();
     }
@@ -161,12 +162,7 @@ import java.util.concurrent.Executors;
 
     /*package*/ static BoundedContext boundedContext(Stand stand, int concurrentThreads) {
         final Executor executor = concurrentThreads > 0 ? Executors.newFixedThreadPool(concurrentThreads) :
-                                  new Executor() { // Straightforward executor
-                                      @Override
-                                      public void execute(Runnable command) {
-                                          command.run();
-                                      }
-                                  };
+                                  MoreExecutors.directExecutor();
 
         return boundedContextBuilder(stand)
                              .setStandFunnelExecutor(executor)
