@@ -46,11 +46,15 @@ import org.spine3.test.projection.event.ProjectCreated;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author Dmytro Dashenkov
  */
 /*package*/ class Given {
+
+    /*package*/ static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
+    /*package*/ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
 
     private static final String PROJECT_UUID = Identifiers.newUuid();
 
@@ -154,16 +158,23 @@ import java.util.concurrent.Executor;
         return new StandTestAggregateRepository(context);
     }
 
-    /*package*/ static BoundedContext boundedContext(Stand stand) {
+    /*package*/ static BoundedContext boundedContext(Stand stand, int concurrentThreads) {
+        final Executor executor = concurrentThreads > 0 ? Executors.newFixedThreadPool(concurrentThreads) :
+                                  new Executor() { // Straightforward executor
+                                      @Override
+                                      public void execute(Runnable command) {
+                                          command.run();
+                                      }
+                                  };
+
+        return boundedContextBuilder(stand)
+                             .setStandFunnelExecutor(executor)
+                             .build();
+    }
+
+    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
         return BoundedContext.newBuilder()
                              .setStand(stand)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance())
-                             .setStandFunnelExecutor(new Executor() { // Straightforward executor
-                                 @Override
-                                 public void execute(Runnable command) {
-                                     command.run();
-                                 }
-                             })
-                             .build();
+                             .setStorageFactory(InMemoryStorageFactory.getInstance());
     }
 }
