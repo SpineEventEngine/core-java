@@ -51,7 +51,6 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
-import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -298,20 +297,35 @@ public class Stand {
                 final EntityIdFilter idFilter = filters.getIdFilter();
                 final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(), aggregateStateIdTransformer(typeUrl));
 
-                final Iterable<EntityStorageRecord> bulkReadResults = storage.readBulk(stateIds);
-                result = FluentIterable.from(bulkReadResults)
-                                       .filter(new Predicate<EntityStorageRecord>() {
-                                           @Override
-                                           public boolean apply(@Nullable EntityStorageRecord input) {
-                                               return input != null;
-                                           }
-                                       })
-                                       .toList();
+                if (stateIds.size() == 1) {
+                    // no need to trigger bulk reading.
+                    // may be more effective, as bulk reading implies additional time and performance expenses.
+                    final AggregateStateId singleId = stateIds.iterator()
+                                                              .next();
+                    final EntityStorageRecord singleResult = storage.read(singleId);
+                    result = ImmutableList.of(singleResult);
+                } else {
+                    result = handleBulkRead(stateIds);
+                }
             } else {
                 result = ImmutableList.of();
             }
 
         }
+        return result;
+    }
+
+    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds) {
+        ImmutableCollection<EntityStorageRecord> result;
+        final Iterable<EntityStorageRecord> bulkReadResults = storage.readBulk(stateIds);
+        result = FluentIterable.from(bulkReadResults)
+                               .filter(new Predicate<EntityStorageRecord>() {
+                                   @Override
+                                   public boolean apply(@Nullable EntityStorageRecord input) {
+                                       return input != null;
+                                   }
+                               })
+                               .toList();
         return result;
     }
 
@@ -322,7 +336,9 @@ public class Stand {
             public AggregateStateId apply(@Nullable EntityId input) {
                 checkNotNull(input);
 
-                final AggregateStateId stateId = AggregateStateId.of(input.getId(), typeUrl);
+                final Any rawId = input.getId();
+                final Message unpackedId = AnyPacker.unpack(rawId);
+                final AggregateStateId stateId = AggregateStateId.of(unpackedId, typeUrl);
                 return stateId;
             }
         };
@@ -349,9 +365,8 @@ public class Stand {
 
     private static void feedStateRecordsToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection<EntityStorageRecord> all) {
         for (EntityStorageRecord record : all) {
-            final Message state = record.getState();
-            final Any packedState = AnyPacker.pack(state);
-            resultBuilder.add(packedState);
+            final Any state = record.getState();
+            resultBuilder.add(state);
         }
     }
 

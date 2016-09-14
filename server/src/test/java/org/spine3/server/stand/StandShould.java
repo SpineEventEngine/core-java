@@ -25,11 +25,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.spine3.base.Responses;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Target;
@@ -59,10 +63,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
@@ -199,20 +203,13 @@ public class StandShould {
 
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
-        final StandStorage standStorageMock = mock(StandStorage.class);
 
+        final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
         final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
-        doReturn(emptyResultList).when(standStorageMock)
-                                 .readAllByType(any(TypeUrl.class));
-        final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorageMock)
-                                 .build();
-        assertNotNull(stand);
+        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
 
-        final BoundedContext boundedContext = newBoundedContext(stand);
-        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
-        stand.registerTypeSupplier(customerAggregateRepo);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Target customerTarget = Target.newBuilder()
@@ -222,9 +219,64 @@ public class StandShould {
         final Query readAllCustomers = Query.newBuilder()
                                             .setTarget(customerTarget)
                                             .build();
+
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
 
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertTrue("Query returned a non-empty response message list though the target was empty", messageList
+                .isEmpty());
+    }
+
+    @Test
+    public void return_single_result_for_aggregate_state_read_by_id() {
+
+        // Define the types and values used as a test data.
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final Customer customer = Customer.getDefaultInstance();
+        final Any customerState = AnyPacker.pack(customer);
+        final CustomerId customerId = CustomerId.newBuilder()
+                                                .setNumber(42)
+                                                .build();
+        final AggregateStateId stateId = AggregateStateId.of(customerId, customerType);
+
+
+        // Prepare the stand and its mock storage to act.
+        final StandStorage standStorageMock = mock(StandStorage.class);
+        final EntityStorageRecord entityStorageRecord = EntityStorageRecord.newBuilder()
+                                                                           .setState(customerState)
+                                                                           .build();
+        when(standStorageMock.read(eq(stateId))).thenReturn(entityStorageRecord);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+
+        // Trigger the update.
+        stand.update(customerId, customerState);
+
+        // Now we are ready to query.
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(EntityId.newBuilder()
+                                                                      .setId(AnyPacker.pack(customerId)))
+                                                      .build();
+        final Target customerTarget = Target.newBuilder()
+                                            .setFilters(EntityFilters.newBuilder()
+                                                                     .setIdFilter(idFilter))
+                                            .setType(customerType.getTypeName())
+                                            .build();
+        final Query readSingleCustomer = Query.newBuilder()
+                                              .setTarget(customerTarget)
+                                              .build();
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readSingleCustomer, responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertEquals(1, messageList.size());
+        final Any singleRecord = messageList.get(0);
+        final Message unpackedSingleResult = AnyPacker.unpack(singleRecord);
+        assertEquals(customer, unpackedSingleResult);
+    }
+
+    private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue("Query has not completed successfully", responseObserver.isCompleted);
         assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
 
@@ -232,10 +284,22 @@ public class StandShould {
         assertEquals("Query response is not OK", Responses.ok(), response.getResponse());
         assertNotNull("Query response must not be null", response);
 
-        final List<Any> messagesList = response.getMessagesList();
-        assertNotNull("Query response has null message list", messagesList);
-        assertTrue("Query returned a non-empty response message list though the target was empty", messagesList
-                                                                                                           .isEmpty());
+        final List<Any> messageList = response.getMessagesList();
+        assertNotNull("Query response has null message list", messageList);
+        return messageList;
+    }
+
+
+    private static Stand prepareStandWithAggregateRepo(StandStorage standStorageMock) {
+        final Stand stand = Stand.newBuilder()
+                                 .setStorage(standStorageMock)
+                                 .build();
+        assertNotNull(stand);
+
+        final BoundedContext boundedContext = newBoundedContext(stand);
+        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        stand.registerTypeSupplier(customerAggregateRepo);
+        return stand;
     }
 
     private static EntityStorageRecord recordStateMatcher(final EntityStorageRecord expectedRecord) {
