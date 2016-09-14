@@ -21,11 +21,15 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -50,14 +54,17 @@ import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -80,6 +87,7 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 @SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class StandShould {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
+    private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
 // **** Positive scenarios ****
 
@@ -286,6 +294,17 @@ public class StandShould {
         doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
     }
 
+
+    @Test
+    public void return_single_result_for_projection_read_by_id() {
+        doCheckReadingProjectsById(1);
+    }
+
+    @Test
+    public void return_multiple_results_for_projection_batch_read_by_ids() {
+        doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
+    }
+
     private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
@@ -305,6 +324,42 @@ public class StandShould {
         assertTrue("Query returned a non-empty response message list though the target was empty", messageList.isEmpty());
     }
 
+    private static void doCheckReadingProjectsById(int numberOfProjects) {
+        // Define the types and values used as a test data.
+        final Map<ProjectId, Project> sampleProjects = newHashMap();
+        final TypeUrl projectType = TypeUrl.of(Project.class);
+        fillSampleProjects(sampleProjects, numberOfProjects);
+
+        final StandTestProjectionRepository projectionRepository = mock(StandTestProjectionRepository.class);
+        when(projectionRepository.getEntityStateType()).thenReturn(projectType);
+        setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
+
+        final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
+
+        // Now we are ready to query.
+        final EntityIdFilter idFilter = idFilterForProjection(sampleProjects.keySet());
+
+        final Target projectTarget = Target.newBuilder()
+                                           .setFilters(EntityFilters.newBuilder()
+                                                                    .setIdFilter(idFilter))
+                                           .setType(projectType.getTypeName())
+                                           .build();
+        final Query readMultipleProjects = Query.newBuilder()
+                                                .setTarget(projectTarget)
+                                                .build();
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readMultipleProjects, responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertEquals(sampleProjects.size(), messageList.size());
+        final Collection<Project> allCustomers = sampleProjects.values();
+        for (Any singleRecord : messageList) {
+            final Project unpackedSingleResult = AnyPacker.unpack(singleRecord);
+            assertTrue(allCustomers.contains(unpackedSingleResult));
+        }
+    }
+
     private static void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
         final Map<CustomerId, Customer> sampleCustomers = newHashMap();
@@ -319,7 +374,7 @@ public class StandShould {
         triggerMultipleUpdates(sampleCustomers, stand);
 
         // Now we are ready to query.
-        final EntityIdFilter idFilter = idFilterFor(sampleCustomers.keySet());
+        final EntityIdFilter idFilter = idFilterForAggregate(sampleCustomers.keySet());
 
         final Target customerTarget = Target.newBuilder()
                                             .setFilters(EntityFilters.newBuilder()
@@ -340,7 +395,6 @@ public class StandShould {
             final Customer unpackedSingleResult = AnyPacker.unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
-
     }
 
     private static void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
@@ -370,7 +424,8 @@ public class StandShould {
 
 
     @SuppressWarnings("ConstantConditions")
-    private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType, StandStorage standStorageMock) {
+    private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType,
+            StandStorage standStorageMock) {
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityStorageRecord> recordsBuilder = ImmutableList.builder();
         for (CustomerId customerId : sampleCustomers.keySet()) {
@@ -393,6 +448,64 @@ public class StandShould {
         when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
     }
 
+
+    @SuppressWarnings("ConstantConditions")
+    private static void setupExpectedFindAllBehaviour(Map<ProjectId, Project> sampleProjects,
+            StandTestProjectionRepository projectionRepository) {
+
+        final Set<ProjectId> projectIds = sampleProjects.keySet();
+        final ImmutableCollection<StandTestProjection> allResults = toProjectionCollection(projectIds);
+
+        for (ProjectId projectId : projectIds) {
+            when(projectionRepository.find(eq(projectId))).thenReturn(new StandTestProjection(projectId));
+        }
+
+        final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
+        when(projectionRepository.findBulk(matchingIds)).thenReturn(allResults);
+
+        when(projectionRepository.findAll()).thenReturn(allResults);
+
+        final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
+        when(projectionRepository.findAll(matchingFilter)).thenReturn(allResults);
+    }
+
+    @SuppressWarnings("OverlyComplexAnonymousInnerClass")
+    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(final Set<ProjectId> projectIds) {
+        // This argument matcher does NOT mimic the exact repository behavior.
+        // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with ALL the expected IDs.
+        return new ArgumentMatcher<EntityFilters>() {
+            @Override
+            public boolean matches(EntityFilters argument) {
+                boolean everyElementPresent = true;
+                for (EntityId entityId : argument.getIdFilter()
+                                                 .getIdsList()) {
+                    final Any idAsAny = entityId.getId();
+                    final Message rawId = AnyPacker.unpack(idAsAny);
+                    if (rawId instanceof ProjectId) {
+                        final ProjectId convertedProjectId = (ProjectId) rawId;
+                        everyElementPresent = everyElementPresent && projectIds.contains(convertedProjectId);
+                    } else {
+                        everyElementPresent = false;
+                    }
+                }
+                return everyElementPresent;
+            }
+        };
+    }
+
+    private static ImmutableCollection<StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
+        final Collection<StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, StandTestProjection>() {
+            @Nullable
+            @Override
+            public StandTestProjection apply(@Nullable ProjectId input) {
+                checkNotNull(input);
+                return new StandTestProjection(input);
+            }
+        });
+        final ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
+        return result;
+    }
+
     private static EntityId wrapCustomerId(int number) {
         final CustomerId customerId = CustomerId.newBuilder()
                                                 .setNumber(number)
@@ -403,7 +516,20 @@ public class StandShould {
                        .build();
     }
 
-    private static ArgumentMatcher<Iterable<AggregateStateId>> aggregateIdsIterableMatcher(final ImmutableList<AggregateStateId> stateIds) {
+    private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(final Set<ProjectId> projectIds) {
+        return new ArgumentMatcher<Iterable<ProjectId>>() {
+            @Override
+            public boolean matches(Iterable<ProjectId> argument) {
+                boolean everyElementPresent = true;
+                for (ProjectId projectId : argument) {
+                    everyElementPresent = everyElementPresent && projectIds.contains(projectId);
+                }
+                return everyElementPresent;
+            }
+        };
+    }
+
+    private static ArgumentMatcher<Iterable<AggregateStateId>> aggregateIdsIterableMatcher(final List<AggregateStateId> stateIds) {
         return new ArgumentMatcher<Iterable<AggregateStateId>>() {
             @Override
             public boolean matches(Iterable<AggregateStateId> argument) {
@@ -416,9 +542,19 @@ public class StandShould {
         };
     }
 
-    private static EntityIdFilter idFilterFor(Collection<CustomerId> customerIds) {
+    private static EntityIdFilter idFilterForAggregate(Collection<CustomerId> customerIds) {
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
         for (CustomerId id : customerIds) {
+            idFilterBuilder
+                    .addIds(EntityId.newBuilder()
+                                    .setId(AnyPacker.pack(id)));
+        }
+        return idFilterBuilder.build();
+    }
+
+    private static EntityIdFilter idFilterForProjection(Collection<ProjectId> projectIds) {
+        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
+        for (ProjectId id : projectIds) {
             idFilterBuilder
                     .addIds(EntityId.newBuilder()
                                     .setId(AnyPacker.pack(id)));
@@ -448,6 +584,17 @@ public class StandShould {
         }
     }
 
+    private static void fillSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {
+        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
+            final Project project = Project.getDefaultInstance();
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(UUID.randomUUID()
+                                                            .toString())
+                                                 .build();
+            sampleProjects.put(projectId, project);
+        }
+    }
+
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue("Query has not completed successfully", responseObserver.isCompleted);
         assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
@@ -471,6 +618,14 @@ public class StandShould {
         final BoundedContext boundedContext = newBoundedContext(stand);
         final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
+        return stand;
+    }
+
+    private static Stand prepareStandWithProjectionRepo(ProjectionRepository projectionRepository) {
+        final Stand stand = Stand.newBuilder()
+                                 .build();
+        assertNotNull(stand);
+        stand.registerTypeSupplier(projectionRepository);
         return stand;
     }
 
