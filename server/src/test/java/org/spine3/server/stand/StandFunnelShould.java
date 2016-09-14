@@ -22,6 +22,7 @@
 package org.spine3.server.stand;
 
 import com.google.protobuf.Any;
+import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -32,13 +33,11 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
 import java.security.SecureRandom;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -57,10 +56,6 @@ public class StandFunnelShould {
 
     // **** Positive scenarios (unit) ****
 
-    /**
-     * - deliver mock updates to the stand (invoke proper methods with particular arguments) - test the delivery only.
-     */
-
     @Test
     public void initialize_properly_with_stand_only() {
         final Stand stand = TestStandFactory.create();
@@ -71,36 +66,25 @@ public class StandFunnelShould {
     }
 
     @Test
-    public void initialize_properly_with_various_builder_options() {
+    public void initialize_properly_with_all_builder_options() {
         final Stand stand = TestStandFactory.create();
-        final Executor executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return Thread.currentThread();
-            }
-        });
+        final Executor executor = Executors.newSingleThreadExecutor();
 
-        final StandFunnel blockingFunnel = StandFunnel.newBuilder()
+        final StandFunnel funnel = StandFunnel.newBuilder()
                                                       .setStand(stand)
                                                       .setExecutor(executor)
                                                       .build();
-        Assert.assertNotNull(blockingFunnel);
+        Assert.assertNotNull(funnel);
+    }
+
+    @Test
+    public void initialize_properly_with_no_executor() {
+        final Stand stand = TestStandFactory.create();
 
         final StandFunnel funnelForBusyStand = StandFunnel.newBuilder()
                                                           .setStand(stand)
-                                                          .setExecutor(Executors.newSingleThreadExecutor())
                                                           .build();
         Assert.assertNotNull(funnelForBusyStand);
-
-
-        final StandFunnel emptyExecutorFunnel = StandFunnel.newBuilder()
-                                                           .setStand(TestStandFactory.create())
-                                                           .setExecutor(new Executor() {
-                                                               @Override
-                                                               public void execute(Runnable neverCalled) { }
-                                                           })
-                                                           .build();
-        Assert.assertNotNull(emptyExecutorFunnel);
     }
 
     @Test
@@ -149,8 +133,8 @@ public class StandFunnelShould {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = NullPointerException.class)
-    public void fail_to_initialize_with_inproper_stand() {
-        @SuppressWarnings("ConstantConditions")
+    public void fail_to_initialize_with_improper_stand() {
+        @SuppressWarnings("ConstantConditions") // null is marked as improper with this warning
         final StandFunnel.Builder builder = StandFunnel.newBuilder().setStand(null);
 
         builder.build();
@@ -165,30 +149,24 @@ public class StandFunnelShould {
 
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
 
-    /**
-     * - Deliver updates from projection projectionRepo on update;
-     * - deliver updates from aggregate projectionRepo on update;
-     * - deliver the updates from several projection and aggregate repositories.
-     */
-
     @Test
     public void deliver_updates_from_projection_repository() {
-        deliverUpdates(false, projectionRepositoryDispatch());
+        checkUpdatesDelivery(false, projectionRepositoryDispatch());
     }
 
     @Test
     public void deliver_updates_form_aggregate_repository() {
-        deliverUpdates(false, aggregateRepositoryDispatch());
+        checkUpdatesDelivery(false, aggregateRepositoryDispatch());
     }
 
     @Test
     public void deliver_updates_from_several_repositories_in_single_thread() {
-        deliverUpdates(false, getSeveralRepositoryDispatchCalls());
+        checkUpdatesDelivery(false, getSeveralRepositoryDispatchCalls());
     }
 
     @Test
     public void deliver_updates_from_several_repositories_in_multiple_threads() {
-        deliverUpdates(true, getSeveralRepositoryDispatchCalls());
+        checkUpdatesDelivery(true, getSeveralRepositoryDispatchCalls());
     }
 
     private static BoundedContextAction[] getSeveralRepositoryDispatchCalls() {
@@ -202,22 +180,22 @@ public class StandFunnelShould {
         return result;
     }
 
-    private static void deliverUpdates(boolean isMultiThread, BoundedContextAction... dispatchActions) {
+    private static void checkUpdatesDelivery(boolean isConcurrent, BoundedContextAction... dispatchActions) {
         checkNotNull(dispatchActions);
 
         final Stand stand = mock(Stand.class);
         final BoundedContext boundedContext = spy(Given.boundedContext(stand,
-                                                                       isMultiThread ?
+                                                                       isConcurrent ?
                                                                        Given.THREADS_COUNT_IN_POOL_EXECUTOR : 0));
 
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
         }
 
-        // Was called as much times as there are dispatch actions.
+        // Was called as many times as there are dispatch actions.
         verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
 
-        if (isMultiThread) {
+        if (isConcurrent) {
             await(Given.AWAIT_SECONDS);
         }
 
@@ -241,10 +219,19 @@ public class StandFunnelShould {
                 repository.initStorage(InMemoryStorageFactory.getInstance());
 
                 try {
+                    // Mock aggregate and mock stand are not able to handle events returned after command handling.
+                    // This causes IllegalStateException to be thrown.
+                    // Note that this is not the end of a test case, so we can't just "expect=IllegalStateException"
                     repository.dispatch(Given.validCommand());
                 } catch (IllegalStateException e) {
-                    // Handle null event dispatch after command handling.
-                    Assert.assertTrue(e.getMessage().contains("No record found for command ID: EMPTY"));
+                    // Handle null event dispatching after the command is handled.
+
+                    // Check if this error is caused by returning nuu or empty list after command processing.
+                    // Proceed crash if it's not
+                    if (!e.getMessage()
+                          .contains("No record found for command ID: EMPTY")) {
+                        throw e;
+                    }
                 }
             }
         };
@@ -274,7 +261,7 @@ public class StandFunnelShould {
         @SuppressWarnings("LocalVariableNamingConvention") // Too long variable name
         final int threadExecutionMaxAwaitSeconds = Given.AWAIT_SECONDS;
 
-        final Map<String, Object> threadInvocationRegistry = new ConcurrentHashMap<>(threadsCount);
+        final Set<String> threadInvocationRegistry = new ConcurrentSet<>();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class));
@@ -283,26 +270,26 @@ public class StandFunnelShould {
                                                    .setStand(stand)
                                                    .build();
 
-        final ExecutorService processes = Executors.newFixedThreadPool(threadsCount);
+        final ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
 
 
         final Runnable task = new Runnable() {
             @Override
             public void run() {
                 final String threadName = Thread.currentThread().getName();
-                Assert.assertFalse(threadInvocationRegistry.containsKey(threadName));
+                Assert.assertFalse(threadInvocationRegistry.contains(threadName));
 
                 standFunnel.post(new Object(), Any.getDefaultInstance());
 
-                threadInvocationRegistry.put(threadName, new Object());
+                threadInvocationRegistry.add(threadName);
             }
         };
 
         for (int i = 0; i < threadsCount; i++) {
-            processes.execute(task);
+            executor.execute(task);
         }
 
-        processes.awaitTermination(threadExecutionMaxAwaitSeconds, TimeUnit.SECONDS);
+        executor.awaitTermination(threadExecutionMaxAwaitSeconds, TimeUnit.SECONDS);
 
         Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
 
