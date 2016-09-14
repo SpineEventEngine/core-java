@@ -258,7 +258,7 @@ public class Stand {
 
     private ImmutableCollection<Any> internalExecute(Query query) {
 
-        final ImmutableSet.Builder<Any> resultBuilder = ImmutableSet.builder();
+        final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
 
         final Target target = query.getTarget();
 
@@ -280,7 +280,7 @@ public class Stand {
             feedStateRecordsToBuilder(resultBuilder, stateRecords);
         }
 
-        final ImmutableSet<Any> result = resultBuilder.build();
+        final ImmutableList<Any> result = resultBuilder.build();
 
         return result;
     }
@@ -355,7 +355,7 @@ public class Stand {
         return result;
     }
 
-    private static void feedEntitiesToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection<? extends Entity> all) {
+    private static void feedEntitiesToBuilder(ImmutableList.Builder<Any> resultBuilder, ImmutableCollection<? extends Entity> all) {
         for (Entity record : all) {
             final Message state = record.getState();
             final Any packedState = AnyPacker.pack(state);
@@ -363,7 +363,7 @@ public class Stand {
         }
     }
 
-    private static void feedStateRecordsToBuilder(ImmutableSet.Builder<Any> resultBuilder, ImmutableCollection<EntityStorageRecord> all) {
+    private static void feedStateRecordsToBuilder(ImmutableList.Builder<Any> resultBuilder, ImmutableCollection<EntityStorageRecord> all) {
         for (EntityStorageRecord record : all) {
             final Any state = record.getState();
             resultBuilder.add(state);

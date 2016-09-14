@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -50,11 +49,15 @@ import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -72,8 +75,9 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings("OverlyCoupledClass") //It's OK for a test.
+@SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention"}) //It's OK for a test.
 public class StandShould {
+    private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
 
 // **** Positive scenarios ****
 
@@ -230,50 +234,120 @@ public class StandShould {
 
     @Test
     public void return_single_result_for_aggregate_state_read_by_id() {
+        doCheckReadingCustomersById(1);
+    }
 
+    @Test
+    public void return_multiple_results_for_aggregate_state_batch_read_by_ids() {
+        doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
+    }
+
+
+    private static void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
+        final Map<CustomerId, Customer> sampleCustomers = newHashMap();
         final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final Customer customer = Customer.getDefaultInstance();
-        final Any customerState = AnyPacker.pack(customer);
-        final CustomerId customerId = CustomerId.newBuilder()
-                                                .setNumber(42)
-                                                .build();
-        final AggregateStateId stateId = AggregateStateId.of(customerId, customerType);
-
+        fillSampleCustomers(sampleCustomers, numberOfCustomers);
 
         // Prepare the stand and its mock storage to act.
         final StandStorage standStorageMock = mock(StandStorage.class);
-        final EntityStorageRecord entityStorageRecord = EntityStorageRecord.newBuilder()
-                                                                           .setState(customerState)
-                                                                           .build();
-        when(standStorageMock.read(eq(stateId))).thenReturn(entityStorageRecord);
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+        setupExpectedBulkReadBehaviour(sampleCustomers, customerType, standStorageMock);
 
-        // Trigger the update.
-        stand.update(customerId, customerState);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+        triggerMultipleUpdates(sampleCustomers, stand);
 
         // Now we are ready to query.
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(EntityId.newBuilder()
-                                                                      .setId(AnyPacker.pack(customerId)))
-                                                      .build();
+        final EntityIdFilter idFilter = idFilterFor(sampleCustomers.keySet());
+
         final Target customerTarget = Target.newBuilder()
                                             .setFilters(EntityFilters.newBuilder()
                                                                      .setIdFilter(idFilter))
                                             .setType(customerType.getTypeName())
                                             .build();
-        final Query readSingleCustomer = Query.newBuilder()
-                                              .setTarget(customerTarget)
-                                              .build();
+        final Query readMultipleCustomers = Query.newBuilder()
+                                                 .setTarget(customerTarget)
+                                                 .build();
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readSingleCustomer, responseObserver);
+        stand.execute(readMultipleCustomers, responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertEquals(1, messageList.size());
-        final Any singleRecord = messageList.get(0);
-        final Message unpackedSingleResult = AnyPacker.unpack(singleRecord);
-        assertEquals(customer, unpackedSingleResult);
+        assertEquals(sampleCustomers.size(), messageList.size());
+        final Collection<Customer> allCustomers = sampleCustomers.values();
+        for (Any singleRecord : messageList) {
+            final Customer unpackedSingleResult = AnyPacker.unpack(singleRecord);
+            assertTrue(allCustomers.contains(unpackedSingleResult));
+        }
+
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType, StandStorage standStorageMock) {
+        final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<EntityStorageRecord> recordsBuilder = ImmutableList.builder();
+        for (CustomerId customerId : sampleCustomers.keySet()) {
+            final AggregateStateId stateId = AggregateStateId.of(customerId, customerType);
+            final Customer customer = Customer.getDefaultInstance();
+            final Any customerState = AnyPacker.pack(customer);
+            final EntityStorageRecord entityStorageRecord = EntityStorageRecord.newBuilder()
+                                                                               .setState(customerState)
+                                                                               .build();
+            stateIdsBuilder.add(stateId);
+            recordsBuilder.add(entityStorageRecord);
+
+            when(standStorageMock.read(eq(stateId))).thenReturn(entityStorageRecord);
+        }
+
+        final ImmutableList<AggregateStateId> stateIds = stateIdsBuilder.build();
+        final ImmutableList<EntityStorageRecord> records = recordsBuilder.build();
+
+        final Iterable<AggregateStateId> matchingIds = argThat(aggregateIdsIterableMatcher(stateIds));
+        when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
+    }
+
+    private static ArgumentMatcher<Iterable<AggregateStateId>> aggregateIdsIterableMatcher(final ImmutableList<AggregateStateId> stateIds) {
+        return new ArgumentMatcher<Iterable<AggregateStateId>>() {
+            @Override
+            public boolean matches(Iterable<AggregateStateId> argument) {
+                boolean everyElementPresent = true;
+                for (AggregateStateId aggregateStateId : argument) {
+                    everyElementPresent = everyElementPresent && stateIds.contains(aggregateStateId);
+                }
+                return everyElementPresent;
+            }
+        };
+    }
+
+    private static EntityIdFilter idFilterFor(Collection<CustomerId> customerIds) {
+        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
+        for (CustomerId id : customerIds) {
+            idFilterBuilder
+                    .addIds(EntityId.newBuilder()
+                                    .setId(AnyPacker.pack(id)));
+        }
+        return idFilterBuilder.build();
+    }
+
+    private static void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
+        // Trigger the aggregate state updates.
+        for (CustomerId id : sampleCustomers.keySet()) {
+            final Customer sampleCustomer = sampleCustomers.get(id);
+            final Any customerState = AnyPacker.pack(sampleCustomer);
+            stand.update(id, customerState);
+        }
+    }
+
+    private static void fillSampleCustomers(Map<CustomerId, Customer> sampleCustomers, int numberOfCustomers) {
+        for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
+            final Customer customer = Customer.getDefaultInstance();
+
+            @SuppressWarnings("UnsecureRandomNumberGeneration")
+            final Random randomizer = new Random();
+            final CustomerId customerId = CustomerId.newBuilder()
+                                                    .setNumber(randomizer.nextInt())
+                                                    .build();
+            sampleCustomers.put(customerId, customer);
+        }
     }
 
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
