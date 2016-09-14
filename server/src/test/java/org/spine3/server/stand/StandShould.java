@@ -23,11 +23,13 @@ package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
@@ -75,7 +77,8 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention"}) //It's OK for a test.
+//It's OK for a test.
+@SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class StandShould {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
 
@@ -208,28 +211,76 @@ public class StandShould {
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
 
-        final StandStorage standStorageMock = mock(StandStorage.class);
-        // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
-        final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
-        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
-
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
-
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Target customerTarget = Target.newBuilder()
                                             .setIncludeAll(true)
                                             .setType(customerType.getTypeName())
                                             .build();
-        final Query readAllCustomers = Query.newBuilder()
-                                            .setTarget(customerTarget)
+
+        checkEmptyResultForTargetOnEmptyStorage(customerTarget);
+    }
+
+    @Test
+    public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
+
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final EntityId firstId = wrapCustomerId(1);
+        final EntityId anotherId = wrapCustomerId(2);
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(firstId)
+                                                      .addIds(anotherId)
+                                                      .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .build();
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(false)
+                                            .setType(customerType.getTypeName())
+                                            .setFilters(filters)
                                             .build();
 
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readAllCustomers, responseObserver);
+        checkEmptyResultForTargetOnEmptyStorage(customerTarget);
+    }
 
-        final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list though the target was empty", messageList
-                .isEmpty());
+    @Test
+    public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
+
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(false)
+                                            .setType(customerType.getTypeName())
+                                            .build();
+        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
+    }
+
+    @Test
+    public void return_empty_list_for_aggregate_reads_with_id_filter_not_set() {
+
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .build();
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(false)
+                                            .setType(customerType.getTypeName())
+                                            .setFilters(filters)
+                                            .build();
+        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
+    }
+
+    @Test
+    public void return_empty_list_for_aggregate_reads_with_empty_list_of_ids() {
+
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(EntityIdFilter.getDefaultInstance())
+                                                   .build();
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(false)
+                                            .setType(customerType.getTypeName())
+                                            .setFilters(filters)
+                                            .build();
+        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
     }
 
     @Test
@@ -242,6 +293,24 @@ public class StandShould {
         doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
     }
 
+    private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
+        final StandStorage standStorageMock = mock(StandStorage.class);
+        // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
+        final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
+        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
+
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+
+        final Query readAllCustomers = Query.newBuilder()
+                                            .setTarget(customerTarget)
+                                            .build();
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readAllCustomers, responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertTrue("Query returned a non-empty response message list though the target was empty", messageList.isEmpty());
+    }
 
     private static void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
@@ -281,6 +350,32 @@ public class StandShould {
 
     }
 
+    private static void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
+        final StandStorage standStorageMock = mock(StandStorage.class);
+
+        // Return non-empty results on any storage read call.
+        final EntityStorageRecord someRecord = EntityStorageRecord.getDefaultInstance();
+        final ImmutableList<EntityStorageRecord> nonEmptyList = ImmutableList.<EntityStorageRecord>builder().add(someRecord)
+                                                                                                            .build();
+        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(nonEmptyList);
+        when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(someRecord);
+        when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityStorageRecord>newHashMap());
+        when(standStorageMock.readBulk(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
+
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+
+        final Query queryWithNoFilters = Query.newBuilder()
+                                              .setTarget(customerTarget)
+                                              .build();
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(queryWithNoFilters, responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertTrue("Query returned a non-empty response message list though the filter was not set", messageList.isEmpty());
+    }
+
+
     @SuppressWarnings("ConstantConditions")
     private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType, StandStorage standStorageMock) {
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
@@ -303,6 +398,16 @@ public class StandShould {
 
         final Iterable<AggregateStateId> matchingIds = argThat(aggregateIdsIterableMatcher(stateIds));
         when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
+    }
+
+    private static EntityId wrapCustomerId(int number) {
+        final CustomerId customerId = CustomerId.newBuilder()
+                                                .setNumber(number)
+                                                .build();
+        final Any packedId = AnyPacker.pack(customerId);
+        return EntityId.newBuilder()
+                       .setId(packedId)
+                       .build();
     }
 
     private static ArgumentMatcher<Iterable<AggregateStateId>> aggregateIdsIterableMatcher(final ImmutableList<AggregateStateId> stateIds) {
