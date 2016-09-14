@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -169,40 +170,52 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_updates_from_projection_repository() {
-        final Stand stand = mock(Stand.class);
-        final BoundedContext boundedContext = spy(Given.boundedContext(stand));
-        // Init repository
-        final ProjectionRepository repository = Given.projectionRepo(boundedContext);
+        deliverUpdatesTest(new BoundedContextAction() {
+            @Override
+            public void perform(BoundedContext context) {
+                // Init repository
+                final ProjectionRepository repository = Given.projectionRepo(context);
 
-        repository.initStorage(InMemoryStorageFactory.getInstance());
-        repository.setOnline();
+                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.setOnline();
 
-        // Dispatch an update from projection repo
-        repository.dispatch(Given.validEvent());
-
-        // Was called ONCE
-        verify(boundedContext).getStandFunnel();
-        verify(stand).update(ArgumentMatchers.any(), any(Any.class));
+                // Dispatch an update from projection repo
+                repository.dispatch(Given.validEvent());
+            }
+        });
     }
 
     @Test
     public void deliver_updates_form_aggregate_repository() {
+        deliverUpdatesTest(new BoundedContextAction() {
+            @Override
+            public void perform(BoundedContext context) {
+                // Init repository
+                final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
+
+                repository.initStorage(InMemoryStorageFactory.getInstance());
+
+                try {
+                    repository.dispatch(Given.validCommand());
+                } catch (IllegalStateException e) {
+                    // Handle null event dispatch after command handling.
+                    Assert.assertTrue(e.getMessage().contains("No record found for command ID: EMPTY"));
+                }
+
+            }
+        });
+    }
+
+    private static void deliverUpdatesTest(BoundedContextAction... dispatchActions) {
+        checkNotNull(dispatchActions);
+
         final Stand stand = mock(Stand.class);
-
         final BoundedContext boundedContext = spy(Given.boundedContext(stand));
-        // Init repository
-        final AggregateRepository<?, ?> repository = Given.aggregateRepo(boundedContext);
 
-        stand.registerTypeSupplier(repository);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
-
-        // Dispatch an update from projection projectionRepo
-        try {
-            repository.dispatch(Given.validCommand());
-        } catch (IllegalStateException e) {
-            // Handle null event dispatch after command handling.
-            Assert.assertTrue(e.getMessage().contains("No record found for command ID: EMPTY"));
+        for (BoundedContextAction dispatchAction : dispatchActions) {
+            dispatchAction.perform(boundedContext);
         }
+
 
         // Was called ONCE
         verify(boundedContext).getStandFunnel();
@@ -248,6 +261,10 @@ public class StandFunnelShould {
 
         Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
 
+    }
+
+    private interface BoundedContextAction {
+        void perform(BoundedContext context);
     }
 
 }
