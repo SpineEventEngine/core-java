@@ -31,7 +31,9 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
+import java.security.SecureRandom;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -44,6 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -170,24 +173,55 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_updates_from_projection_repository() {
-        deliverUpdatesTest(new BoundedContextAction() {
-            @Override
-            public void perform(BoundedContext context) {
-                // Init repository
-                final ProjectionRepository repository = Given.projectionRepo(context);
-
-                repository.initStorage(InMemoryStorageFactory.getInstance());
-                repository.setOnline();
-
-                // Dispatch an update from projection repo
-                repository.dispatch(Given.validEvent());
-            }
-        });
+        deliverUpdates(false, projectionRepositoryDispatch());
     }
 
     @Test
     public void deliver_updates_form_aggregate_repository() {
-        deliverUpdatesTest(new BoundedContextAction() {
+        deliverUpdates(false, aggregateRepositoryDispatch());
+    }
+
+    @Test
+    public void deliver_updates_from_several_repositories_in_single_thread() {
+        deliverUpdates(false, getSeveralRepositoryDispatchCalls());
+    }
+
+    @Test
+    public void deliver_updates_from_several_repositories_in_multiple_threads() {
+        deliverUpdates(true, getSeveralRepositoryDispatchCalls());
+    }
+
+    private static BoundedContextAction[] getSeveralRepositoryDispatchCalls() {
+        final BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
+        final Random random = new SecureRandom();
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = random.nextBoolean() ? aggregateRepositoryDispatch() : projectionRepositoryDispatch();
+        }
+
+        return result;
+    }
+
+    private static void deliverUpdates(boolean isMultiThread, BoundedContextAction... dispatchActions) {
+        checkNotNull(dispatchActions);
+
+        final Stand stand = mock(Stand.class);
+        final BoundedContext boundedContext = spy(Given.boundedContext(stand,
+                                                                       isMultiThread ?
+                                                                       Given.THREADS_COUNT_IN_POOL_EXECUTOR : 0));
+
+        for (BoundedContextAction dispatchAction : dispatchActions) {
+            dispatchAction.perform(boundedContext);
+        }
+
+
+        // Was called ONCE
+        verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
+        verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class));
+    }
+
+    private static BoundedContextAction aggregateRepositoryDispatch() {
+        return new BoundedContextAction() {
             @Override
             public void perform(BoundedContext context) {
                 // Init repository
@@ -201,31 +235,32 @@ public class StandFunnelShould {
                     // Handle null event dispatch after command handling.
                     Assert.assertTrue(e.getMessage().contains("No record found for command ID: EMPTY"));
                 }
-
             }
-        });
+        };
     }
 
-    private static void deliverUpdatesTest(BoundedContextAction... dispatchActions) {
-        checkNotNull(dispatchActions);
+    private static BoundedContextAction projectionRepositoryDispatch() {
+        return new BoundedContextAction() {
+            @Override
+            public void perform(BoundedContext context) {
+                // Init repository
+                final ProjectionRepository repository = Given.projectionRepo(context);
 
-        final Stand stand = mock(Stand.class);
-        final BoundedContext boundedContext = spy(Given.boundedContext(stand));
+                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.setOnline();
 
-        for (BoundedContextAction dispatchAction : dispatchActions) {
-            dispatchAction.perform(boundedContext);
-        }
-
-
-        // Was called ONCE
-        verify(boundedContext).getStandFunnel();
-        verify(stand).update(ArgumentMatchers.any(), any(Any.class));
+                // Dispatch an update from projection repo
+                repository.dispatch(Given.validEvent());
+            }
+        };
     }
+
+
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
-        final int threadsCount = 10;
+        final int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
         @SuppressWarnings("LocalVariableNamingConvention") // Too long variable name
         final int threadExecutionMaxAwaitSeconds = 2;
 
