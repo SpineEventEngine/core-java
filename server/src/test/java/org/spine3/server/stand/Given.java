@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
@@ -78,13 +77,6 @@ import java.util.concurrent.Executor;
          */
         /*package*/ StandTestAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-    }
-
-    /*package*/ static class TestFailure extends FailureThrowable {
-
-        /*package*/ TestFailure() {
-            super(/*generatedMessage=*/null);
         }
     }
 
