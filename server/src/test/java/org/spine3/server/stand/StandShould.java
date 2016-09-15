@@ -222,6 +222,32 @@ public class StandShould {
     }
 
     @Test
+    public void return_empty_list_to_unknown_type_reading() {
+
+        final Stand stand = Stand.newBuilder()
+                                 .build();
+
+        checkTypesEmpty(stand);
+
+        // Customer type was NOT registered.
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(true)
+                                            .setType(customerType.getTypeName())
+                                            .build();
+        final Query readAllCustomers = Query.newBuilder()
+                                            .setTarget(customerTarget)
+                                            .build();
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readAllCustomers, responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+
+        assertTrue("Query returned a non-empty response message list for an unknown type", messageList.isEmpty());
+    }
+
+    @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
         final TypeUrl customerType = TypeUrl.of(Customer.class);
