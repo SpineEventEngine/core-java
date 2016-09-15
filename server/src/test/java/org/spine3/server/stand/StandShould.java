@@ -90,14 +90,7 @@ public class StandShould {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
-// **** Positive scenarios ****
 
-    /**
-     * - initialize properly with various Builder options;
-     * - register aggregate repositories by changing the known aggregate types.
-     * - register entity repositories properly
-     * - avoid duplicates while registering repositories
-     */
 
     @Test
     public void initialize_with_empty_builder() {
@@ -728,13 +721,6 @@ public class StandShould {
             }
         };
     }
-
-
-    // **** Negative scenarios ****
-
-    /**
-     * - fail to initialize with improper build arguments.
-     */
 
 
     // ***** Inner classes used for tests. *****
