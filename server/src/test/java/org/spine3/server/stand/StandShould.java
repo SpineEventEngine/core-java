@@ -41,6 +41,7 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Target;
+import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -50,6 +51,7 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
+import org.spine3.server.storage.memory.InMemoryStandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
@@ -68,6 +70,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -360,6 +363,55 @@ public class StandShould {
         stand.update(customerId, packedState);
 
         assertEquals(packedState, memoizeCallback.newEntityState);
+    }
+
+    @Test
+    public void retrieve_all_data_if_field_mask_is_not_set() {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        final Query customerQuery = Query.newBuilder()
+                                         .setTarget(
+                                                 Target.newBuilder().setIncludeAll(true)
+                                                       .setType(customerType.getTypeName())
+                                                       .build())
+                                         .build();
+
+
+        //noinspection OverlyComplexAnonymousInnerClass
+        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                for (Descriptors.FieldDescriptor field : customer.getDescriptorForType().getFields()) {
+                    assertTrue(customer.getField(field).equals(sampleCustomer.getField(field)));
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    private static Customer getSampleCustomer() {
+        return Customer.newBuilder()
+                       .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
+                                                                          .getLeastSignificantBits()))
+                       .setName(PersonName.newBuilder().setGivenName("Socrates").build())
+                       .build();
+
     }
 
     private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
@@ -667,14 +719,14 @@ public class StandShould {
     }
 
 
-    private static Stand prepareStandWithAggregateRepo(StandStorage standStorageMock) {
+    private static Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
         final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorageMock)
+                                 .setStorage(standStorage)
                                  .build();
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final org.spine3.server.Given.CustomerAggregateRepository customerAggregateRepo = new org.spine3.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         return stand;
     }
