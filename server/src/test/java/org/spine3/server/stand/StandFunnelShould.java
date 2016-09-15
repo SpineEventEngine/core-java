@@ -21,7 +21,6 @@
  */
 package org.spine3.server.stand;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
@@ -99,7 +98,11 @@ public class StandFunnelShould {
     @Test
     public void use_executor_from_builder() {
         final Stand stand = TestStandFactory.createMock();
-        final Executor executor = spy(MoreExecutors.directExecutor());
+        final Executor executor = spy(new Executor() {
+            @Override
+            public void execute(Runnable command) {
+            }
+        });
         final StandFunnel.Builder builder = StandFunnel.newBuilder()
                                                        .setStand(stand)
                                                        .setExecutor(executor);
