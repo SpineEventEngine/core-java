@@ -41,6 +41,8 @@ service SubscriptionService {
     // The result is a SubscriptionUpdate stream,
     rpc Subscribe (Topic) returns (stream SubscriptionUpdate);
 
-    // Cancel the subscription by its ID.
-    rpc CancelSubscription (SubscriptionId) returns (base.Response);
+    // Cancel the given subscription.
+    //
+    // Clients will stop receiving the SubscriptionUpdate after this method is called.
+    rpc Cancel (Subscription) returns (base.Response);
 }

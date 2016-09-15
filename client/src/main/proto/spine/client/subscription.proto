@@ -52,11 +52,11 @@ message Topic {
     reserved 3 to 6;
 }
 
-// Wrapped set of read-side entity updates on a topic with the specific subscription ID.
+// Wrapped collection of read-side entity updates on a topic with the specific subscription ID.
 message SubscriptionUpdate {
 
-    // The ID of the current subscription.
-    SubscriptionId id = 1;
+    // The subscription in which scope this update is propagated.
+    Subscription subscription = 1;
 
     // Represents the base part of the response. I.e. whether the Topic subscription requires has been acked or not.
     base.Response response = 2;
@@ -70,14 +70,15 @@ message SubscriptionUpdate {
     repeated google.protobuf.Any updates = 10;
 }
 
-// The ID of the subscription.
+// The subscription object.
 //
 // Created when the client subscribes to a topic.
 // See SubscriptionService#Subscribe(Topic).
-message SubscriptionId {
+message Subscription {
 
     // Unique identifier of the subscription.
     //
     // Typically built using Java's UUID.toString() functionality.
-    string uuid = 1;
+    // Must be unique in scope of a bounded context.
+    string id = 1;
 }

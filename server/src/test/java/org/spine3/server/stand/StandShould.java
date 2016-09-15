@@ -49,7 +49,6 @@ import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
@@ -167,7 +166,16 @@ public class StandShould {
         stand.registerTypeSupplier(standTestProjectionRepo);
 
         final TypeUrl projectProjectionType = TypeUrl.of(Project.class);
-        stand.watch(projectProjectionType, emptyUpdateCallback());
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .build();
+        final Target projectProjectionTarget = Target.newBuilder()
+                                                     .setIncludeAll(true)
+                                                     .setType(projectProjectionType.getTypeName())
+                                                     .setFilters(filters)
+                                                     .build();
+
+
+        stand.subscribe(projectProjectionTarget, emptyUpdateCallback());
 
         verify(executor, never()).execute(any(Runnable.class));
 
@@ -338,8 +346,16 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final TypeUrl customerType = TypeUrl.of(Customer.class);
 
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .build();
+        final Target customerTarget = Target.newBuilder()
+                                            .setIncludeAll(true)
+                                            .setType(customerType.getTypeName())
+                                            .setFilters(filters)
+                                            .build();
+
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        stand.watch(customerType, memoizeCallback);
+        stand.subscribe(customerTarget, memoizeCallback);
         assertNull(memoizeCallback.newEntityState);
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()

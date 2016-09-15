@@ -22,6 +22,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
@@ -39,6 +40,7 @@ import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
+import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
@@ -55,9 +57,11 @@ import org.spine3.server.storage.memory.InMemoryStandStorage;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
@@ -88,12 +92,10 @@ public class Stand {
     private final StandStorage storage;
 
     /**
-     * A set of callbacks to be executed upon the incoming updates.
-     *
-     * <p>Each callback is triggerred if the entity with a matching {@code TypeUrl} is delivered to this {@code Stand}.
-     * <p>There may be any number of callbacks for a given {@code TypeUrl}.
+     * Manages the subscriptions for this instance of {@code Stand}.
      */
-    private final ConcurrentMap<TypeUrl, Set<StandUpdateCallback>> callbacks = new ConcurrentHashMap<>();
+    private final StandSubscriptionRegistry subscriptionRegistry = new StandSubscriptionRegistry();
+
 
     /** An instance of executor used to invoke callbacks */
     private final Executor callbackExecutor;
@@ -158,53 +160,48 @@ public class Stand {
             storage.write(aggregateStateId, record);
         }
 
-        if (callbacks.containsKey(typeUrl)) {
-            for (final StandUpdateCallback callback : callbacks.get(typeUrl)) {
-                callbackExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onEntityStateUpdate(entityState);
-                    }
-                });
+        if (subscriptionRegistry.hasType(typeUrl)) {
+            final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
+            for (final SubscriptionRecord subscriptionRecord : allRecords) {
+                if (subscriptionRecord.matches(typeUrl, id, entityState)) {
+                    callbackExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            subscriptionRecord.callback.onEntityStateUpdate(entityState);
+                        }
+                    });
+                }
             }
         }
     }
 
     /**
-     * Watch for a change of an entity state with a certain {@link TypeUrl}.
+     * Subscribe for all further changes of an entity state, which satisfies the {@link Target}.
      *
      * <p>Once this instance of {@code Stand} receives an update of an entity with the given {@code TypeUrl},
      * all such callbacks are executed.
      *
-     * @param typeUrl  an instance of entity {@link TypeUrl} to watch for changes
+     * @param target   an instance {@link Target}, defining the entity and criteria,
+     *                 which changes should be propagated to the {@code callback}
      * @param callback an instance of {@link StandUpdateCallback} executed upon entity update.
      */
-    public void watch(TypeUrl typeUrl, StandUpdateCallback callback) {
-        if (!callbacks.containsKey(typeUrl)) {
-            final Set<StandUpdateCallback> emptySet = Collections.synchronizedSet(new HashSet<StandUpdateCallback>());
-            callbacks.put(typeUrl, emptySet);
-        }
-
-        callbacks.get(typeUrl)
-                 .add(callback);
+    @CheckReturnValue
+    public Subscription subscribe(Target target, StandUpdateCallback callback) {
+        final Subscription subscription = subscriptionRegistry.addSubscription(target, callback);
+        return subscription;
     }
 
     /**
-     * Stop watching for a change of an entity state with a certain {@link TypeUrl}.
+     * Cancel the {@link Subscription}.
      *
-     * <p>Typically invoked to cancel the previous {@link #watch(TypeUrl, StandUpdateCallback)} call with the same arguments.
-     * <p>If no {@code watch} method was executed for the same {@code TypeUrl} and {@code StandUpdateCallback},
-     * then {@code unwatch} has no effect.
+     * <p>Typically invoked to cancel the previous {@link #subscribe(Target, StandUpdateCallback)} call.
+     * <p>After this method is called, the subscribers stop receiving the updates,
+     * related to the given {@code Subscription}.
      *
-     * @param typeUrl  an instance of entity {@link TypeUrl} to stop watch for changes
-     * @param callback an instance of {@link StandUpdateCallback} to be cancelled upon entity update.
+     * @param subscription a subscription to cancel.
      */
-    public void unwatch(TypeUrl typeUrl, StandUpdateCallback callback) {
-        final Set<StandUpdateCallback> registeredCallbacks = callbacks.get(typeUrl);
-
-        if (registeredCallbacks != null && registeredCallbacks.contains(callback)) {
-            registeredCallbacks.remove(callback);
-        }
+    public void cancel(Subscription subscription) {
+        subscriptionRegistry.removeSubscription(subscription);
     }
 
     /**
@@ -295,7 +292,9 @@ public class Stand {
             final EntityFilters filters = target.getFilters();
 
             // TODO[alex.tymchenko]: do we need to check for null at all? How about, say, Python gRPC client?
-            if (filters != null && filters.getIdFilter() != null && !filters.getIdFilter().getIdsList().isEmpty()) {
+            if (filters != null && filters.getIdFilter() != null && !filters.getIdFilter()
+                                                                            .getIdsList()
+                                                                            .isEmpty()) {
                 final EntityIdFilter idFilter = filters.getIdFilter();
                 final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(), aggregateStateIdTransformer(typeUrl));
 
@@ -407,8 +406,8 @@ public class Stand {
     /**
      * A contract for the callbacks to be executed upon entity state change.
      *
-     * @see #watch(TypeUrl, StandUpdateCallback)
-     * @see #unwatch(TypeUrl, StandUpdateCallback)
+     * @see #subscribe(Target, StandUpdateCallback)
+     * @see #cancel(Subscription)
      */
     @SuppressWarnings("InterfaceNeverImplemented")      //it's OK, there may be no callbacks in the codebase
     public interface StandUpdateCallback {
@@ -476,6 +475,101 @@ public class Stand {
 
             final Stand result = new Stand(this);
             return result;
+        }
+    }
+
+    /**
+     * Registry for subscription management.
+     *
+     * <p>Provides a quick access to the subscription records by {@link TypeUrl}.
+     * <p>Responsible for {@link Subscription} object instantiation.
+     */
+    private static final class StandSubscriptionRegistry {
+        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = new HashMap<>();
+        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
+
+
+        private synchronized Subscription addSubscription(Target target, StandUpdateCallback callback) {
+            final String subscriptionId = UUID.randomUUID()
+                                              .toString();
+            final Subscription subscription = Subscription.newBuilder()
+                                                          .setId(subscriptionId)
+                                                          .build();
+            final TypeUrl type = TypeUrl.of(target.getType());
+            final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type, callback);
+
+            if (!typeToAttrs.containsKey(type)) {
+                typeToAttrs.put(type, new HashSet<SubscriptionRecord>());
+            }
+            typeToAttrs.get(type)
+                       .add(attributes);
+
+            subscriptionToAttrs.put(subscription, attributes);
+            return subscription;
+        }
+
+        private synchronized void removeSubscription(Subscription subscription) {
+            if (!subscriptionToAttrs.containsKey(subscription)) {
+                return;
+            }
+            final SubscriptionRecord attributes = subscriptionToAttrs.get(subscription);
+
+            if (typeToAttrs.containsKey(attributes.type)) {
+                typeToAttrs.get(attributes.type)
+                           .remove(attributes);
+            }
+
+            subscriptionToAttrs.remove(subscription);
+        }
+
+        private synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
+            final Set<SubscriptionRecord> result = typeToAttrs.get(type);
+            return result;
+        }
+
+        private synchronized boolean hasType(TypeUrl type) {
+            final boolean result = typeToAttrs.containsKey(type);
+            return result;
+        }
+    }
+
+    /**
+     * Represents the attributes of a single subscription.
+     */
+    private static final class SubscriptionRecord {
+        private final Subscription subscription;
+        private final Target target;
+        private final TypeUrl type;
+        private final StandUpdateCallback callback;
+
+        private SubscriptionRecord(Subscription subscription, Target target, TypeUrl type, StandUpdateCallback callback) {
+            this.subscription = subscription;
+            this.target = target;
+            this.type = type;
+            this.callback = callback;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof SubscriptionRecord)) {
+                return false;
+            }
+            SubscriptionRecord that = (SubscriptionRecord) o;
+            return Objects.equal(subscription, that.subscription);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(subscription);
+        }
+
+        private boolean matches(TypeUrl type, Object id, Any entityState) {
+            final boolean typeMatches = this.type.equals(type);
+            // TODO[alex.tymchenko]: use EntityFilter to match ID and state against it
+            return typeMatches;
         }
     }
 }
