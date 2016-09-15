@@ -35,10 +35,6 @@ import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.security.SecureRandom;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +48,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
@@ -110,7 +105,10 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_mock_updates_to_stand() {
-        final Stand stand = spy(TestStandFactory.create());
+        final Stand stand = TestStandFactory.createMock();
+        doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class));
+        final Object id = new Object();
+        final Any state = Any.getDefaultInstance();
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
