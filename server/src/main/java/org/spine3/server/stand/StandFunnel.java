@@ -108,9 +108,6 @@ public class StandFunnel {
          *
          * <p> The value must not be null.
          *
-         * <p> If this method is not used, a default value will be used.
-         * // TODO:13-09-16:dmytro.dashenkov: Correct docs. No default value for Stand is used, null value leads to a fail instead.
-         *
          * @param stand the instance of {@link Stand}.
          * @return {@code this} instance of {@code Builder}
          */
@@ -123,11 +120,12 @@ public class StandFunnel {
             return executor;
         }
 
-        // TODO:13-09-16:dmytro.dashenkov: Complete docs. Here is the place where a default value is used in case of not using the method.
         /**
          * Set the {@code Executor} instance for this {@code StandFunnel}.
          *
          * <p>The value must not be {@code null}.
+         *
+         * <p> If this method is not used, a default value will be used.
          *
          * @param executor the instance of {@code Executor}.
          * @return {@code this} instance of {@code Builder}
