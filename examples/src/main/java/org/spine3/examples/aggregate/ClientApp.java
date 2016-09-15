@@ -31,7 +31,6 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.grpc.ClientServiceGrpc;
-import org.spine3.client.grpc.Topic;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
@@ -66,9 +65,9 @@ public class ClientApp {
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
     private final CommandFactory commandFactory;
-    private final Topic topic = Topic.getDefaultInstance();
     private final ManagedChannel channel;
     private final ClientServiceGrpc.ClientServiceBlockingStub blockingClient;
+    // TODO[alex.tymchenko]: switch to SubscriptionService instead.  
     private final ClientServiceGrpc.ClientServiceStub nonBlockingClient;
 
     private final StreamObserver<Event> observer = new StreamObserver<Event>() {
@@ -140,14 +139,10 @@ public class ClientApp {
         return commandFactory.create(msg);
     }
 
-    private void subscribe() {
-        nonBlockingClient.subscribe(topic, observer);
-    }
 
     /** Sends requests to the server. */
     public static void main(String[] args) throws InterruptedException {
         final ClientApp client = new ClientApp(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT);
-        client.subscribe();
 
         final List<Command> requests = client.generateRequests();
 
@@ -178,7 +173,6 @@ public class ClientApp {
      * @throws InterruptedException if waiting is interrupted.
      */
     private void shutdown() throws InterruptedException {
-        blockingClient.unsubscribe(topic);
         channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
