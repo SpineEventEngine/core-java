@@ -331,6 +331,26 @@ public class StandShould {
         doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
     }
 
+    @Test
+    public void trigger_callback_upon_change_of_watched_aggregate_state() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        stand.watch(customerType, memoizeCallback);
+        assertNull(memoizeCallback.newEntityState);
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Any packedState = AnyPacker.pack(customer);
+        stand.update(customerId, packedState);
+
+        assertEquals(packedState, memoizeCallback.newEntityState);
+    }
+
     private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
@@ -388,9 +408,8 @@ public class StandShould {
 
     private static void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
-        final Map<CustomerId, Customer> sampleCustomers = newHashMap();
         final TypeUrl customerType = TypeUrl.of(Customer.class);
-        fillSampleCustomers(sampleCustomers, numberOfCustomers);
+        final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(numberOfCustomers);
 
         // Prepare the stand and its mock storage to act.
         final StandStorage standStorageMock = mock(StandStorage.class);
@@ -597,7 +616,8 @@ public class StandShould {
         }
     }
 
-    private static void fillSampleCustomers(Map<CustomerId, Customer> sampleCustomers, int numberOfCustomers) {
+    private static Map<CustomerId, Customer> fillSampleCustomers(int numberOfCustomers) {
+        final Map<CustomerId, Customer> sampleCustomers = newHashMap();
         for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
             final Customer customer = Customer.getDefaultInstance();
 
@@ -608,6 +628,7 @@ public class StandShould {
                                                     .build();
             sampleCustomers.put(customerId, customer);
         }
+        return sampleCustomers;
     }
 
     private static void fillSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {
@@ -744,5 +765,19 @@ public class StandShould {
             this.isCompleted = true;
         }
 
+    }
+
+
+    /**
+     * A {@link StreamObserver} storing the state of {@link Query} execution.
+     */
+    private static class MemoizeStandUpdateCallback implements Stand.StandUpdateCallback {
+
+        private Any newEntityState;
+
+        @Override
+        public void onEntityStateUpdate(Any newEntityState) {
+            this.newEntityState = newEntityState;
+        }
     }
 }
