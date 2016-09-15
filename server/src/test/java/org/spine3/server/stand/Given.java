@@ -109,7 +109,7 @@ import java.util.concurrent.Executors;
         }
     }
 
-    private static class StandTestProjection extends Projection<ProjectId, Project> {
+    /*package*/ static class StandTestProjection extends Projection<ProjectId, Project> {
         /**
          * Creates a new instance.
          *

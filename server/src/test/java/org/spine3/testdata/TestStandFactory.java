@@ -21,6 +21,7 @@
  */
 package org.spine3.testdata;
 
+import org.mockito.Mockito;
 import org.spine3.server.stand.Stand;
 
 /**
@@ -37,5 +38,9 @@ public class TestStandFactory {
         final Stand stand = Stand.newBuilder()
                                  .build();
         return stand;
+    }
+
+    public static Stand createMock() {
+        return Mockito.mock(Stand.class);
     }
 }
