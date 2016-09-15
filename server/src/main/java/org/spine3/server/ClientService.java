@@ -26,10 +26,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
-import org.spine3.base.Event;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.grpc.Topic;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
@@ -73,22 +70,6 @@ public class ClientService
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to ClientService", unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
-    }
-
-    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
-    @Override
-    public void subscribe(Topic request, StreamObserver<Event> responseObserver) {
-        //TODO:2016-05-25:alexander.yevsyukov: Subscribe the client to the topic in the corresponding BoundedContext.
-        // This API is likely to change to support Firebase-like registration where listening is
-        // done by the client SDK implementation.
-    }
-
-    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
-    @Override
-    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
-        //TODO:2016-05-25:alexander.yevsyukov: Unsubscribe the client from the topic in the corresponding BoundedContext.
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
     }
 
     public static class Builder {

@@ -31,26 +31,11 @@ option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
 import "spine/base/command.proto";
-import "spine/base/event.proto";
 import "spine/base/response.proto";
 
-// A topic of interest the client can subscribe and unsubscribe.
-message Topic {
-    //TODO:2016-01-14:alexander.yevsyukov: Define this type. E.g. there can be some structure, which describes many
-    // points of interest at once. See Pub-sub for possible API inspiration. Chances are it's going to be one of underlying
-    // implementations.
-    string value = 1;
-}
 
 // A service for sending commands from clients.
 service ClientService {
     // Request to handle a command.
     rpc Post(base.Command) returns (base.Response);
-
-    // Request to receive events on the topic of interest.
-    rpc Subscribe(Topic) returns (stream base.Event);
-
-    // The request to unsubscribe from the topic.
-    // This should close the stream opened by `Subscribe` call with the same `Topic` value.
-    rpc Unsubscribe(Topic) returns (base.Response);
 }

@@ -28,11 +28,8 @@ option java_outer_classname = "EntitiesProto";
 option java_package = "org.spine3.client";
 
 import "google/protobuf/any.proto";
-import "google/protobuf/field_mask.proto";
 
 import "spine/annotations.proto";
-import "spine/ui/language.proto";
-import "spine/base/response.proto";
 
 // Represents an ID of an entity.
 //

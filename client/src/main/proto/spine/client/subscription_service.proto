@@ -24,16 +24,23 @@ package spine.client;
 option (type_url_prefix) = "type.spine3.org";
 option java_package = "org.spine3.client.grpc";
 option java_multiple_files = true;
-option java_outer_classname = "QueryServiceProto";
+option java_outer_classname = "SubscriptionServiceProto";
 option java_generate_equals_and_hash = true;
 
 
 import "spine/annotations.proto";
-import "spine/client/query.proto";
+import "spine/client/subscription.proto";
+import "spine/base/response.proto";
 
-// A service for querying the read-side from clients.
-service QueryService {
+// A service for subscribing to the read-side changes by clients.
+service SubscriptionService {
 
-    // Reads a certain data from the read-side by setting the criteria via Query.
-    rpc Read (Query) returns (QueryResponse);
+    // Subscribe to a particular read-side updates.
+    //
+    // Topic defines the target of subscription and other attributes (like field masks).
+    // The result is a SubscriptionUpdate stream,
+    rpc Subscribe (Topic) returns (stream SubscriptionUpdate);
+
+    // Cancel the subscription by its ID.
+    rpc CancelSubscription (SubscriptionId) returns (base.Response);
 }
