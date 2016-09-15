@@ -31,7 +31,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.ProtocolStringList;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
@@ -54,9 +56,11 @@ import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -249,7 +253,7 @@ public class Stand {
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
         final ImmutableCollection<Any> readResult = internalExecute(query);
         final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(readResult)
+                                                    .addAllMessages(applyFieldMask(readResult, query.getFieldMask()))
                                                     .setResponse(Responses.ok())
                                                     .build();
         responseObserver.onNext(response);
@@ -283,6 +287,23 @@ public class Stand {
         final ImmutableList<Any> result = resultBuilder.build();
 
         return result;
+    }
+
+    private static Iterable<? extends Any> applyFieldMask(Collection<? extends Any> entities, FieldMask mask) {
+        final List<Any> filtered = new ArrayList<>();
+        final ProtocolStringList filter = mask.getPathsList();
+
+        if (filter.isEmpty()) {
+            return Collections.unmodifiableCollection(entities);
+        }
+
+        for (Any any : entities) {
+            if (filter.contains(any.getTypeUrl())) {
+                filtered.add(any);
+            }
+        }
+
+        return Collections.unmodifiableList(filtered);
     }
 
     private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Target target, final TypeUrl typeUrl) {
