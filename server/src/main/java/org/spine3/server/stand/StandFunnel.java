@@ -108,8 +108,6 @@ public class StandFunnel {
          *
          * <p> The value must not be null.
          *
-         * <p> If this method is not used, a default value will be used.
-         *
          * @param stand the instance of {@link Stand}.
          * @return {@code this} instance of {@code Builder}
          */
@@ -126,6 +124,8 @@ public class StandFunnel {
          * Set the {@code Executor} instance for this {@code StandFunnel}.
          *
          * <p>The value must not be {@code null}.
+         *
+         * <p> If this method is not used, a default value will be used.
          *
          * @param executor the instance of {@code Executor}.
          * @return {@code this} instance of {@code Builder}

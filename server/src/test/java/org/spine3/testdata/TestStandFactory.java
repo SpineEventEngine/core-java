@@ -21,14 +21,15 @@
  */
 package org.spine3.testdata;
 
+import org.mockito.Mockito;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 /**
  * Creates stands for tests.
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("UtilityClass")
 public class TestStandFactory {
 
     private TestStandFactory() {}
@@ -37,5 +38,9 @@ public class TestStandFactory {
         final Stand stand = Stand.newBuilder()
                                  .build();
         return stand;
+    }
+
+    public static Stand createMock() {
+        return Mockito.mock(Stand.class);
     }
 }

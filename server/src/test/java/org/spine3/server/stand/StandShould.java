@@ -44,10 +44,12 @@ import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.Given;
-import org.spine3.server.projection.Projection;
+import org.spine3.server.Given.CustomerAggregate;
+import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
@@ -140,7 +142,7 @@ public class StandShould {
 
         checkTypesEmpty(stand);
 
-        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
@@ -148,7 +150,7 @@ public class StandShould {
         checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        final Given.CustomerAggregateRepository anotherCustomerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository anotherCustomerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
@@ -185,7 +187,7 @@ public class StandShould {
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
 
@@ -193,7 +195,7 @@ public class StandShould {
         final CustomerId customerId = CustomerId.newBuilder()
                                                 .setNumber(numericIdValue)
                                                 .build();
-        final Given.CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
+        final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
         final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
@@ -499,10 +501,10 @@ public class StandShould {
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<StandTestProjection> allResults = toProjectionCollection(projectIds);
+        final ImmutableCollection<org.spine3.server.stand.Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId))).thenReturn(new StandTestProjection(projectId));
+            when(projectionRepository.find(eq(projectId))).thenReturn(new Given.StandTestProjection(projectId));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
@@ -538,16 +540,16 @@ public class StandShould {
         };
     }
 
-    private static ImmutableCollection<StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
-        final Collection<StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, StandTestProjection>() {
+    private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
+        final Collection<Given.StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, Given.StandTestProjection>() {
             @Nullable
             @Override
-            public StandTestProjection apply(@Nullable ProjectId input) {
+            public Given.StandTestProjection apply(@Nullable ProjectId input) {
                 checkNotNull(input);
-                return new StandTestProjection(input);
+                return new Given.StandTestProjection(input);
             }
         });
-        final ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
+        final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
     }
 
@@ -663,7 +665,7 @@ public class StandShould {
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final Given.CustomerAggregateRepository customerAggregateRepo = new Given.CustomerAggregateRepository(boundedContext);
+        final org.spine3.server.Given.CustomerAggregateRepository customerAggregateRepo = new org.spine3.server.Given.CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         return stand;
     }
@@ -720,26 +722,6 @@ public class StandShould {
 
 
     // ***** Inner classes used for tests. *****
-
-    private static class StandTestProjection extends Projection<ProjectId, Project> {
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
-        public StandTestProjection(ProjectId id) {
-            super(id);
-        }
-    }
-
-
-    private static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        protected StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
 
     /**
      * A {@link StreamObserver} storing the state of {@link Query} execution.
