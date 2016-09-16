@@ -32,7 +32,6 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import io.grpc.stub.StreamObserver;
@@ -59,7 +58,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -256,18 +254,8 @@ public class Stand {
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
         final ImmutableCollection<Any> readResult = internalExecute(query);
-
-        Class<? extends Message.Builder> builderClass;
-        try {
-            //noinspection unchecked
-            builderClass = (Class<? extends Message.Builder>) Class.forName(KnownTypes.getClassName(TypeUrl.of(query.getTarget().getType())).value())
-                                                                   .getClasses()[0];
-        } catch (ClassNotFoundException | ClassCastException e) {
-            builderClass = null;
-        }
-
         final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(applyFieldMask(readResult, query.getFieldMask(), builderClass))
+                                                    .addAllMessages(applyFieldMask(readResult, query))
                                                     .setResponse(Responses.ok())
                                                     .build();
         responseObserver.onNext(response);
@@ -304,9 +292,11 @@ public class Stand {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // Nested loops: each field in each entity.
-    private static <B extends Message.Builder> Iterable<? extends Any> applyFieldMask(Collection<? extends Any> entities, FieldMask mask, @Nullable Class<B> builderClass) {
+    private static <B extends Message.Builder> Iterable<? extends Any> applyFieldMask(Collection<? extends Any> entities, Query query) {
         final List<Any> filtered = new ArrayList<>();
-        final ProtocolStringList filter = mask.getPathsList();
+        final ProtocolStringList filter = query.getFieldMask().getPathsList();
+
+        final Class<B> builderClass = getBuilderForType(query.getTarget().getType());
 
         if (filter.isEmpty() || builderClass == null) {
             return Collections.unmodifiableCollection(entities);
@@ -322,7 +312,7 @@ public class Stand {
 
                 for (Descriptors.FieldDescriptor field : wholeMessage.getDescriptorForType().getFields()) {
                     if (filter.contains(field.getFullName())) {
-                        invokeSetterOnBuilder(builder, field, wholeMessage.getField(field));
+                        builder.setField(field, wholeMessage.getField(field));
                     }
                 }
 
@@ -331,23 +321,25 @@ public class Stand {
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
             // If any reflection failure happens, return all the data without any mask applied.
-            // TODO:16-09-16:dmytro.dashenkov: Handle this exception for each field separately.
             return Collections.unmodifiableCollection(entities);
         }
 
         return Collections.unmodifiableList(filtered);
     }
 
-    private static <B extends Message.Builder> void invokeSetterOnBuilder(B builder, Descriptors.FieldDescriptor descriptor, Object argument)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        // TODO:16-09-16:dmytro.dashenkov: Handle collection case.
-        final String fieldName = descriptor.getName();
+    @Nullable
+    private static <B extends Message.Builder> Class<B> getBuilderForType(String typeUrlString) {
+        Class<B> builderClass;
+        try {
+            //noinspection unchecked
+            builderClass = (Class<B>) Class.forName(KnownTypes.getClassName(TypeUrl.of(typeUrlString)).value())
+                                                                   .getClasses()[0];
+        } catch (ClassNotFoundException | ClassCastException e) {
+            builderClass = null;
+        }
 
-        final Method setter = builder.getClass().getDeclaredMethod(
-                String.format("set%s%s", fieldName.substring(0, 1).toUpperCase(), fieldName.substring(1)),
-                argument.getClass());
+        return builderClass;
 
-        setter.invoke(builder, argument);
     }
 
     private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Target target, final TypeUrl typeUrl) {

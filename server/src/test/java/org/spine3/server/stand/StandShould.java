@@ -397,33 +397,44 @@ public class StandShould {
     }
 
     @Test
-    public void retrieve_only_selected_params_for_query() {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-
-        final Customer sampleCustomer = getSampleCustomer();
-
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
-
-        final Query customerQuery = Query.newBuilder()
-                                         .setTarget(
-                                                 Target.newBuilder().setIncludeAll(true)
-                                                       .setType(customerType.getTypeName())
-                                                       .build())
-                                         .setFieldMask(FieldMask.newBuilder()
-                                                                .addPaths(Customer.getDescriptor().getFields().get(1).getFullName()))
-                                         .build();
-
-
-        //noinspection OverlyComplexAnonymousInnerClass
-        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+    public void retrieve_only_selected_param_for_query() {
+        reqestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
             @Override
             public void onNext(QueryResponse value) {
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
+                final Customer sampleCustomer = getSampleCustomer();
                 final Customer customer = AnyPacker.unpack(messages.get(0));
-                assertTrue(customer.getName().equals(sampleCustomer.getName()));
+                assertTrue(customer.getName()
+                                   .equals(sampleCustomer.getName()));
+                assertFalse(customer.hasId());
+                assertTrue(customer.getFamilyList().isEmpty());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_collection_fields_if_required() {
+        reqestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer sampleCustomer = getSampleCustomer();
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertEquals(customer.getFamilyList(), sampleCustomer.getFamilyList());
+
+                assertFalse(customer.hasName());
                 assertFalse(customer.hasId());
             }
 
@@ -442,8 +453,40 @@ public class StandShould {
                        .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
                                                                           .getLeastSignificantBits()))
                        .setName(PersonName.newBuilder().setGivenName("Socrates").build())
+                       .addFamily(PersonName.newBuilder().setGivenName("Socrates's mother"))
+                       .addFamily(PersonName.newBuilder().setGivenName("Socrates's father"))
                        .build();
 
+    }
+
+    private static void reqestSampleCustomer(int[] fieldIndexes, StreamObserver<QueryResponse> observer) {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        final FieldMask.Builder fieldMask = FieldMask.newBuilder();
+
+        for (int index : fieldIndexes) {
+            fieldMask.addPaths(Customer.getDescriptor()
+                                       .getFields()
+                                       .get(index)
+                                       .getFullName());
+        }
+
+        final Query customerQuery = Query.newBuilder()
+                                         .setTarget(
+                                                 Target.newBuilder()
+                                                       .setIncludeAll(true)
+                                                       .setType(customerType.getTypeName())
+                                                       .build())
+                                         .setFieldMask(fieldMask)
+                                         .build();
+
+
+        stand.execute(customerQuery, observer);
     }
 
     private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
