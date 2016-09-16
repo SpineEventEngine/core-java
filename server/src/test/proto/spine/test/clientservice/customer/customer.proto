@@ -46,4 +46,7 @@ message Customer {
 
     // The name of the customer.
     people.PersonName name = 2;
+
+    // Info about customer's family
+    repeated people.PersonName family = 3;
 }
