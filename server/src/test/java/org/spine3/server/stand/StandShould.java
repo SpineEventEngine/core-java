@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
@@ -383,6 +384,47 @@ public class StandShould {
                 for (Descriptors.FieldDescriptor field : customer.getDescriptorForType().getFields()) {
                     assertTrue(customer.getField(field).equals(sampleCustomer.getField(field)));
                 }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_only_selected_params_for_query() {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        final Query customerQuery = Query.newBuilder()
+                                         .setTarget(
+                                                 Target.newBuilder().setIncludeAll(true)
+                                                       .setType(customerType.getTypeName())
+                                                       .build())
+                                         .setFieldMask(FieldMask.newBuilder()
+                                                                .addPaths(Customer.getDescriptor().getFields().get(1).getFullName()))
+                                         .build();
+
+
+        //noinspection OverlyComplexAnonymousInnerClass
+        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertTrue(customer.getName().equals(sampleCustomer.getName()));
+                assertFalse(customer.hasId());
             }
 
             @Override
