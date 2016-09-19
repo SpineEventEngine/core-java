@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -59,6 +60,12 @@ public class InMemoryStandStorage extends StandStorage {
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type) {
+        return readAllByType(type, null);
+    }
+
+    @Override
+    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, @Nullable FieldMask fieldMask) {
+        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
         final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll();
         final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
             @Override

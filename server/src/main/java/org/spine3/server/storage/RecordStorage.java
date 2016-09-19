@@ -20,10 +20,10 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
 import org.spine3.server.entity.Entity;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -47,6 +47,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
 
     @Override
     public EntityStorageRecord read(I id) {
+        return read(id, null);
+    }
+
+    public EntityStorageRecord read(I id, @Nullable FieldMask fieldMask) {
+        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
         checkNotClosed();
         checkNotNull(id);
 
@@ -56,6 +61,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         }
         return record;
     }
+
+
 
     @Override
     public void write(I id, EntityStorageRecord record) {
@@ -69,6 +76,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
 
     @Override
     public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids) {
+        checkNotClosed();
+        checkNotNull(ids);
+
+        return readBulkInternal(ids);
+    }
+
+    public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids, FieldMask fieldMask) {
+        // TODO:19-09-16:dmytro.dashenkov: Support field mask processing.
         checkNotClosed();
         checkNotNull(ids);
 

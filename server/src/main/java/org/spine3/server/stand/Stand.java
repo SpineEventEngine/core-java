@@ -268,8 +268,7 @@ public class Stand {
         if (repository != null) {
 
             // the target references an entity state
-            // TODO:19-09-16:dmytro.dashenkov: Apply field mask.
-            ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(target, repository);
+            ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(query, repository);
 
             feedEntitiesToBuilder(resultBuilder, entities);
         } else if (knownAggregateTypes.contains(typeUrl)) {
@@ -292,9 +291,12 @@ public class Stand {
         ImmutableCollection<EntityStorageRecord> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
+        final boolean shouldApplyFieldMask = FieldMasks.isEffective(fieldMask);
 
         if (target.getIncludeAll()) {
-            result = storage.readAllByType(typeUrl);
+            result = shouldApplyFieldMask ?
+                     storage.readAllByType(typeUrl, fieldMask) :
+                     storage.readAllByType(typeUrl);
 
         } else {
             final EntityFilters filters = target.getFilters();
@@ -311,10 +313,12 @@ public class Stand {
                     // may be more effective, as bulk reading implies additional time and performance expenses.
                     final AggregateStateId singleId = stateIds.iterator()
                                                               .next();
-                    final EntityStorageRecord singleResult = storage.read(singleId);
+                    final EntityStorageRecord singleResult = shouldApplyFieldMask ?
+                                                             storage.read(singleId, fieldMask) :
+                                                             storage.read(singleId);
                     result = ImmutableList.of(singleResult);
                 } else {
-                    result = handleBulkRead(stateIds);
+                    result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
                 }
             } else {
                 result = ImmutableList.of();
@@ -322,17 +326,14 @@ public class Stand {
 
         }
 
-        if (fieldMask != null && !fieldMask.getPathsList().isEmpty()) {
-            //noinspection unchecked
-            result = ImmutableList.copyOf((Collection<EntityStorageRecord>) FieldMasks.applyMask(fieldMask, result, typeUrl));
-        }
-
-        return ImmutableList.copyOf(result);
+        return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds) {
+    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds, FieldMask fieldMask, boolean applyFieldMask) {
         ImmutableCollection<EntityStorageRecord> result;
-        final Iterable<EntityStorageRecord> bulkReadResults = storage.readBulk(stateIds);
+        final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask ?
+                                                              storage.readBulk(stateIds, fieldMask) :
+                                                              storage.readBulk(stateIds);
         result = FluentIterable.from(bulkReadResults)
                                .filter(new Predicate<EntityStorageRecord>() {
                                    @Override
@@ -359,13 +360,16 @@ public class Stand {
         };
     }
 
-    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(Target target, EntityRepository<?, ? extends Entity, ?> repository) {
+    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(Query query, EntityRepository<?, ? extends Entity, ?> repository) {
         final ImmutableCollection<? extends Entity> result;
-        if (target.getIncludeAll()) {
+        final Target target = query.getTarget();
+        final FieldMask fieldMask = query.getFieldMask();
+
+        if (target.getIncludeAll() && !FieldMasks.isEffective(fieldMask)) {
             result = repository.findAll();
         } else {
             final EntityFilters filters = target.getFilters();
-            result = repository.findAll(filters);
+            result = repository.findAll(filters, fieldMask);
         }
         return result;
     }

@@ -27,6 +27,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
@@ -198,7 +199,8 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @return all the entities in this repository passed the filters.
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findAll(EntityFilters filters) {
+    public ImmutableCollection<E> findAll(EntityFilters filters, @Nullable FieldMask fieldMask) {
+        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();

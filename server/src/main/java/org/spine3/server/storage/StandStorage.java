@@ -23,9 +23,12 @@ package org.spine3.server.storage;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.Stand;
+
+import javax.annotation.Nullable;
 
 /**
  * Contract for {@link Stand} storage.
@@ -50,4 +53,12 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link Any#getTypeUrl()} equals the argument value
      */
     public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type);
+
+    /**
+     * Reads all the state records by the given type.
+     *
+     * @param type a {@link TypeUrl} instance
+     * @return the state records which {@link Any#getTypeUrl()} equals the argument value
+     */
+    public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, @Nullable FieldMask fieldMask);
 }

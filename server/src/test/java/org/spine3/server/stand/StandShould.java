@@ -767,7 +767,7 @@ public class StandShould {
         when(projectionRepository.findAll()).thenReturn(allResults);
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
-        when(projectionRepository.findAll(matchingFilter)).thenReturn(allResults);
+        when(projectionRepository.findAll(matchingFilter, null)).thenReturn(allResults);
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
