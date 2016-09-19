@@ -32,9 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import com.google.protobuf.ProtocolStringList;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
@@ -51,6 +49,7 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
@@ -58,14 +57,9 @@ import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -252,8 +246,11 @@ public class Stand {
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
         final ImmutableCollection<Any> readResult = internalExecute(query);
+        final Collection<Any> queryResult = FieldMasks.applyMask(query.getFieldMask(),
+                                                                 readResult,
+                                                                 TypeUrl.of(query.getTarget().getType()));
         final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(applyFieldMask(readResult, query))
+                                                    .addAllMessages(queryResult)
                                                     .setResponse(Responses.ok())
                                                     .build();
         responseObserver.onNext(response);
@@ -289,56 +286,7 @@ public class Stand {
         return result;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // Nested loops: each field in each entity.
-    private static <B extends Message.Builder> Iterable<? extends Any> applyFieldMask(Collection<? extends Any> entities, Query query) {
-        final List<Any> filtered = new ArrayList<>();
-        final ProtocolStringList filter = query.getFieldMask().getPathsList();
 
-        final Class<B> builderClass = getBuilderForType(query.getTarget().getType());
-
-        if (filter.isEmpty() || builderClass == null) {
-            return Collections.unmodifiableCollection(entities);
-        }
-
-        try {
-            final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
-            builderConstructor.setAccessible(true);
-
-            for (Any any : entities) {
-                final Message wholeMessage = AnyPacker.unpack(any);
-                final B builder = builderConstructor.newInstance();
-
-                for (Descriptors.FieldDescriptor field : wholeMessage.getDescriptorForType().getFields()) {
-                    if (filter.contains(field.getFullName())) {
-                        builder.setField(field, wholeMessage.getField(field));
-                    }
-                }
-
-                filtered.add(AnyPacker.pack(builder.build()));
-            }
-
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-            // If any reflection failure happens, return all the data without any mask applied.
-            return Collections.unmodifiableCollection(entities);
-        }
-
-        return Collections.unmodifiableList(filtered);
-    }
-
-    @Nullable
-    private static <B extends Message.Builder> Class<B> getBuilderForType(String typeUrlString) {
-        Class<B> builderClass;
-        try {
-            //noinspection unchecked
-            builderClass = (Class<B>) Class.forName(KnownTypes.getClassName(TypeUrl.of(typeUrlString)).value())
-                                                                   .getClasses()[0];
-        } catch (ClassNotFoundException | ClassCastException e) {
-            builderClass = null;
-        }
-
-        return builderClass;
-
-    }
 
     private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Target target, final TypeUrl typeUrl) {
         final ImmutableCollection<EntityStorageRecord> result;
