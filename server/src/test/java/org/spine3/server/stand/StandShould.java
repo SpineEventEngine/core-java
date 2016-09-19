@@ -72,6 +72,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -87,6 +88,7 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 //It's OK for a test.
 @SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
@@ -398,7 +400,7 @@ public class StandShould {
 
     @Test
     public void retrieve_only_selected_param_for_query() {
-        reqestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
             @Override
             public void onNext(QueryResponse value) {
                 final List<Any> messages = value.getMessagesList();
@@ -424,7 +426,7 @@ public class StandShould {
 
     @Test
     public void retrieve_collection_fields_if_required() {
-        reqestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
             @Override
             public void onNext(QueryResponse value) {
                 final List<Any> messages = value.getMessagesList();
@@ -448,6 +450,112 @@ public class StandShould {
         });
     }
 
+    @Test
+    public void retrieve_all_requested_fields() {
+        requestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer sampleCustomer = getSampleCustomer();
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertEquals(customer.getFamilyList(), sampleCustomer.getFamilyList());
+
+                assertFalse(customer.hasName());
+                assertTrue(customer.hasId());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_whole_entity_if_nothing_is_requested() {
+        //noinspection ZeroLengthArrayAllocation
+        requestSampleCustomer(new int[] {}, getDuplicateCostumerStreamObserver());
+    }
+
+    @Test
+    public void handle_mistakes_in_query_silently() {
+        //noinspection ZeroLengthArrayAllocation
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final TypeUrl customerType = TypeUrl.of(Customer.class);
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        // FieldMask with invalid type URLs.
+        final FieldMask.Builder fieldMask = FieldMask.newBuilder()
+                .addPaths("blablabla")
+                .addPaths(Project.getDescriptor().getFields().get(2).getFullName());
+        final Query customerQuery = Query.newBuilder()
+                                         .setTarget(
+                                                 Target.newBuilder()
+                                                       .setIncludeAll(true)
+                                                       .setType(customerType.getTypeName())
+                                                       .build())
+                                         .setFieldMask(fieldMask)
+                                         .build();
+
+
+        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+
+                assertNotEquals(customer, null);
+
+                assertFalse(customer.hasId());
+                assertFalse(customer.hasName());
+                assertTrue(customer.getFamilyList().isEmpty());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        });
+    }
+
+    private static StreamObserver<QueryResponse> getDuplicateCostumerStreamObserver() {
+        return new StreamObserver<QueryResponse>() {
+            @Override
+            public void onNext(QueryResponse value) {
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer sampleCustomer = getSampleCustomer();
+
+                assertEquals(sampleCustomer.getName(), customer.getName());
+                assertEquals(sampleCustomer.getFamilyList(), customer.getFamilyList());
+                assertTrue(customer.hasId());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        };
+    }
+
     private static Customer getSampleCustomer() {
         return Customer.newBuilder()
                        .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
@@ -459,7 +567,7 @@ public class StandShould {
 
     }
 
-    private static void reqestSampleCustomer(int[] fieldIndexes, StreamObserver<QueryResponse> observer) {
+    private static void requestSampleCustomer(int[] fieldIndexes, StreamObserver<QueryResponse> observer) {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
         final TypeUrl customerType = TypeUrl.of(Customer.class);
 
