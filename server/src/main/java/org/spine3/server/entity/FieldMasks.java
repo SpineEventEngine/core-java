@@ -96,6 +96,37 @@ public class FieldMasks {
         return applyMask(maskBuilder.build(), entities, typeUrl);
     }
 
+    // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
+    public static <B extends Message.Builder> Message applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Message entity, TypeUrl typeUrl) {
+        final ProtocolStringList filter = mask.getPathsList();
+
+        final Class<B> builderClass = getBuilderForType(typeUrl);
+
+        if (filter.isEmpty() || builderClass == null) {
+            return entity;
+        }
+
+        try {
+            final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
+            builderConstructor.setAccessible(true);
+
+            final B builder = builderConstructor.newInstance();
+
+            for (Descriptors.FieldDescriptor field : entity.getDescriptorForType().getFields()) {
+                if (filter.contains(field.getFullName())) {
+                    builder.setField(field, entity.getField(field));
+                }
+            }
+
+            return builder.build();
+
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+            return entity;
+        }
+
+
+    }
+
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;
