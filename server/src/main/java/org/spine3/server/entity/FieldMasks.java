@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -56,8 +55,8 @@ public class FieldMasks {
      * @return
      */
     @SuppressWarnings("MethodWithMultipleLoops")
-    public static <B extends Message.Builder> Collection<Any> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<Any> entities, TypeUrl typeUrl) {
-        final List<Any> filtered = new ArrayList<>();
+    public static <B extends Message.Builder> Collection<? extends Message> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<? extends Message> entities, TypeUrl typeUrl) {
+        final List<Message> filtered = new ArrayList<>();
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
@@ -70,8 +69,7 @@ public class FieldMasks {
             final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
-            for (Any any : entities) {
-                final Message wholeMessage = AnyPacker.unpack(any);
+            for (Message wholeMessage : entities) {
                 final B builder = builderConstructor.newInstance();
 
                 for (Descriptors.FieldDescriptor field : wholeMessage.getDescriptorForType().getFields()) {
@@ -92,7 +90,7 @@ public class FieldMasks {
     }
 
     // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
-    public static Collection<Any> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask.Builder maskBuilder, Collection<Any> entities, TypeUrl typeUrl) {
+    public static Collection<? extends Message> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask.Builder maskBuilder, Collection<? extends Message> entities, TypeUrl typeUrl) {
         return applyMask(maskBuilder.build(), entities, typeUrl);
     }
 

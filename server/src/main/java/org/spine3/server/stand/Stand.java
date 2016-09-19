@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Responses;
@@ -246,11 +247,8 @@ public class Stand {
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
         final ImmutableCollection<Any> readResult = internalExecute(query);
-        final Collection<Any> queryResult = FieldMasks.applyMask(query.getFieldMask(),
-                                                                 readResult,
-                                                                 TypeUrl.of(query.getTarget().getType()));
         final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(queryResult)
+                                                    .addAllMessages(readResult)
                                                     .setResponse(Responses.ok())
                                                     .build();
         responseObserver.onNext(response);
@@ -270,13 +268,14 @@ public class Stand {
         if (repository != null) {
 
             // the target references an entity state
+            // TODO:19-09-16:dmytro.dashenkov: Apply field mask.
             ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(target, repository);
 
             feedEntitiesToBuilder(resultBuilder, entities);
         } else if (knownAggregateTypes.contains(typeUrl)) {
 
             // the target relates to an {@code Aggregate} state
-            ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(target, typeUrl);
+            ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(query, typeUrl);
 
             feedStateRecordsToBuilder(resultBuilder, stateRecords);
         }
@@ -288,8 +287,11 @@ public class Stand {
 
 
 
-    private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Target target, final TypeUrl typeUrl) {
-        final ImmutableCollection<EntityStorageRecord> result;
+    @SuppressWarnings("MethodWithMoreThanThreeNegations") // A lot of small logical conditions is checked.
+    private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Query query, final TypeUrl typeUrl) {
+        ImmutableCollection<EntityStorageRecord> result;
+        final Target target = query.getTarget();
+        final FieldMask fieldMask = query.getFieldMask();
 
         if (target.getIncludeAll()) {
             result = storage.readAllByType(typeUrl);
@@ -319,7 +321,13 @@ public class Stand {
             }
 
         }
-        return result;
+
+        if (fieldMask != null && !fieldMask.getPathsList().isEmpty()) {
+            //noinspection unchecked
+            result = ImmutableList.copyOf((Collection<EntityStorageRecord>) FieldMasks.applyMask(fieldMask, result, typeUrl));
+        }
+
+        return ImmutableList.copyOf(result);
     }
 
     private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds) {
