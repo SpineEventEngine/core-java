@@ -24,7 +24,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
@@ -41,6 +40,7 @@ import java.util.List;
  * // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("UtilityClass")
 public class FieldMasks {
 
     private FieldMasks() {
@@ -54,9 +54,9 @@ public class FieldMasks {
      * @param <B>
      * @return
      */
-    @SuppressWarnings("MethodWithMultipleLoops")
-    public static <B extends Message.Builder> Collection<? extends Message> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<? extends Message> entities, TypeUrl typeUrl) {
-        final List<Message> filtered = new ArrayList<>();
+    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
+    public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> entities, TypeUrl typeUrl) {
+        final List<M> filtered = new ArrayList<>();
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
@@ -78,7 +78,7 @@ public class FieldMasks {
                     }
                 }
 
-                filtered.add(AnyPacker.pack(builder.build()));
+                filtered.add((M) builder.build());
             }
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
@@ -89,13 +89,13 @@ public class FieldMasks {
         return Collections.unmodifiableList(filtered);
     }
 
-    // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
-    public static Collection<? extends Message> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask.Builder maskBuilder, Collection<? extends Message> entities, TypeUrl typeUrl) {
-        return applyMask(maskBuilder.build(), entities, typeUrl);
+    public static boolean isEffective(@Nullable FieldMask fieldMask) {
+        return fieldMask != null && !fieldMask.getPathsList().isEmpty();
     }
 
     // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
-    public static <B extends Message.Builder> Message applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Message entity, TypeUrl typeUrl) {
+    @SuppressWarnings("unchecked")
+    public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
@@ -116,7 +116,7 @@ public class FieldMasks {
                 }
             }
 
-            return builder.build();
+            return (M) builder.build();
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
             return entity;
