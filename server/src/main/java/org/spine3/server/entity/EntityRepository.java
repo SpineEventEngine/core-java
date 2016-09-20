@@ -43,6 +43,7 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -147,23 +148,22 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
+    public ImmutableCollection<E> findBulk(Iterable<I> ids, @Nullable FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
-        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+        final List<E> entities = new ArrayList<>();
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
-            final E entity = toEntity(id, record);
-            builder.add(entity);
+            final E entity = toEntity(id, record, fieldMask);
+            entities.add(entity);
         }
 
-        final ImmutableList<E> result = builder.build();
-        return result;
+        return ImmutableList.copyOf(entities);
     }
 
     @CheckReturnValue
@@ -200,7 +200,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      */
     @CheckReturnValue
     public ImmutableCollection<E> findAll(EntityFilters filters, @Nullable FieldMask fieldMask) {
-        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
@@ -229,16 +228,23 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             }
         });
 
-        final ImmutableCollection<E> result = findBulk(domainIds);
+        final ImmutableCollection<E> result = findBulk(domainIds, fieldMask);
         return result;
     }
 
     private E toEntity(I id, EntityStorageRecord record) {
+        return toEntity(id, record, null);
+    }
+
+    private E toEntity(I id, EntityStorageRecord record, @Nullable FieldMask fieldMask) {
         final E entity = create(id);
-        final M state = unpack(record.getState());
+        @SuppressWarnings("unchecked")
+        final M state = (M) FieldMasks.applyIfEffective(fieldMask, unpack(record.getState()), getEntityStateType());
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
+
+
 
     private EntityStorageRecord toEntityRecord(E entity) {
         final M state = entity.getState();
