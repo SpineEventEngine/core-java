@@ -35,12 +35,14 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
+import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
+import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
@@ -60,6 +62,7 @@ import org.spine3.test.projection.ProjectId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +73,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -96,7 +100,6 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 public class StandShould {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
-
 
 
     @Test
@@ -165,17 +168,9 @@ public class StandShould {
         final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
 
-        final TypeUrl projectProjectionType = TypeUrl.of(Project.class);
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .build();
-        final Target projectProjectionTarget = Target.newBuilder()
-                                                     .setIncludeAll(true)
-                                                     .setType(projectProjectionType.getTypeName())
-                                                     .setFilters(filters)
-                                                     .build();
-
-
-        stand.subscribe(projectProjectionTarget, emptyUpdateCallback());
+        final Target projectProjectionTarget = Queries.Targets.allOf(Project.class);
+        final Subscription subscription = stand.subscribe(projectProjectionTarget, emptyUpdateCallback());
+        assertNotNull(subscription);
 
         verify(executor, never()).execute(any(Runnable.class));
 
@@ -200,9 +195,7 @@ public class StandShould {
 
 
         final int numericIdValue = 17;
-        final CustomerId customerId = CustomerId.newBuilder()
-                                                .setNumber(numericIdValue)
-                                                .build();
+        final CustomerId customerId = customerIdFor(numericIdValue);
         final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
         final Any packedState = AnyPacker.pack(customerState);
@@ -221,14 +214,8 @@ public class StandShould {
 
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
-
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(true)
-                                            .setType(customerType.getTypeName())
-                                            .build();
-
-        checkEmptyResultForTargetOnEmptyStorage(customerTarget);
+        final Query readAllCustomers = Queries.readAll(Customer.class);
+        checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
     }
 
     @Test
@@ -240,14 +227,8 @@ public class StandShould {
         checkTypesEmpty(stand);
 
         // Customer type was NOT registered.
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(true)
-                                            .setType(customerType.getTypeName())
-                                            .build();
-        final Query readAllCustomers = Query.newBuilder()
-                                            .setTarget(customerTarget)
-                                            .build();
+        // So create a query for an unknown type.
+        final Query readAllCustomers = Queries.readAll(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
@@ -260,64 +241,19 @@ public class StandShould {
     @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
 
-        final EntityId firstId = wrapCustomerId(1);
-        final EntityId anotherId = wrapCustomerId(2);
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(firstId)
-                                                      .addIds(anotherId)
-                                                      .build();
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .build();
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(false)
-                                            .setType(customerType.getTypeName())
-                                            .setFilters(filters)
-                                            .build();
+        final Query readCustomersById = Queries.readByIds(Customer.class, newHashSet(
+                customerIdFor(1), customerIdFor(2)
+        ));
 
-        checkEmptyResultForTargetOnEmptyStorage(customerTarget);
+        checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
     }
 
     @Test
     public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
 
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(false)
-                                            .setType(customerType.getTypeName())
-                                            .build();
-        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
-    }
-
-    @Test
-    public void return_empty_list_for_aggregate_reads_with_id_filter_not_set() {
-
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .build();
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(false)
-                                            .setType(customerType.getTypeName())
-                                            .setFilters(filters)
-                                            .build();
-        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
-    }
-
-    @Test
-    public void return_empty_list_for_aggregate_reads_with_empty_list_of_ids() {
-
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(EntityIdFilter.getDefaultInstance())
-                                                   .build();
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(false)
-                                            .setType(customerType.getTypeName())
-                                            .setFilters(filters)
-                                            .build();
-        checkEmptyResultOnNonEmptyStorageForQueryTarget(customerTarget);
+        final Target noneOfCustomers = Queries.Targets.someOf(Customer.class, Collections.<Message>emptySet());
+        checkEmptyResultOnNonEmptyStorageForQueryTarget(noneOfCustomers);
     }
 
     @Test
@@ -330,11 +266,11 @@ public class StandShould {
         doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
     }
 
-
     @Test
     public void return_single_result_for_projection_read_by_id() {
         doCheckReadingProjectsById(1);
     }
+
 
     @Test
     public void return_multiple_results_for_projection_batch_read_by_ids() {
@@ -344,18 +280,10 @@ public class StandShould {
     @Test
     public void trigger_callback_upon_change_of_watched_aggregate_state() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
-
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .build();
-        final Target customerTarget = Target.newBuilder()
-                                            .setIncludeAll(true)
-                                            .setType(customerType.getTypeName())
-                                            .setFilters(filters)
-                                            .build();
+        final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        stand.subscribe(customerTarget, memoizeCallback);
+        stand.subscribe(allCustomers, memoizeCallback);
         assertNull(memoizeCallback.newEntityState);
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
@@ -369,6 +297,13 @@ public class StandShould {
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
 
+    private static CustomerId customerIdFor(int numericId) {
+        return CustomerId.newBuilder()
+                         .setNumber(numericId)
+                         .build();
+    }
+
+    private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
@@ -616,12 +551,8 @@ public class StandShould {
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
-        final Query readAllCustomers = Query.newBuilder()
-                                            .setTarget(customerTarget)
-                                            .build();
-
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(readAllCustomers, responseObserver);
+        stand.execute(readCustomersQuery, responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
         assertTrue("Query returned a non-empty response message list though the target was empty", messageList.isEmpty());
@@ -639,17 +570,7 @@ public class StandShould {
 
         final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
-        // Now we are ready to query.
-        final EntityIdFilter idFilter = idFilterForProjection(sampleProjects.keySet());
-
-        final Target projectTarget = Target.newBuilder()
-                                           .setFilters(EntityFilters.newBuilder()
-                                                                    .setIdFilter(idFilter))
-                                           .setType(projectType.getTypeName())
-                                           .build();
-        final Query readMultipleProjects = Query.newBuilder()
-                                                .setTarget(projectTarget)
-                                                .build();
+        final Query readMultipleProjects = Queries.readByIds(Project.class, sampleProjects.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -810,16 +731,6 @@ public class StandShould {
         return result;
     }
 
-    private static EntityId wrapCustomerId(int number) {
-        final CustomerId customerId = CustomerId.newBuilder()
-                                                .setNumber(number)
-                                                .build();
-        final Any packedId = AnyPacker.pack(customerId);
-        return EntityId.newBuilder()
-                       .setId(packedId)
-                       .build();
-    }
-
     private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(final Set<ProjectId> projectIds) {
         return new ArgumentMatcher<Iterable<ProjectId>>() {
             @Override
@@ -882,9 +793,7 @@ public class StandShould {
 
             @SuppressWarnings("UnsecureRandomNumberGeneration")
             final Random randomizer = new Random();
-            final CustomerId customerId = CustomerId.newBuilder()
-                                                    .setNumber(randomizer.nextInt())
-                                                    .build();
+            final CustomerId customerId = customerIdFor(randomizer.nextInt());
             sampleCustomers.put(customerId, customer);
         }
         return sampleCustomers;
