@@ -65,8 +65,7 @@ public class InMemoryStandStorage extends StandStorage {
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, @Nullable FieldMask fieldMask) {
-        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
-        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll();
+        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll(fieldMask);
         final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
             @Override
             public boolean apply(@Nullable AggregateStateId stateId) {
@@ -95,8 +94,20 @@ public class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids, fieldMask);
+        return result;
+    }
+
+    @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllInternal() {
         final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll();
+        return result;
+    }
+
+    @Override
+    protected Map<AggregateStateId, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 

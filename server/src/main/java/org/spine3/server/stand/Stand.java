@@ -268,13 +268,13 @@ public class Stand {
         if (repository != null) {
 
             // the target references an entity state
-            ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(query, repository);
+            final ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(query, repository);
 
             feedEntitiesToBuilder(resultBuilder, entities);
         } else if (knownAggregateTypes.contains(typeUrl)) {
 
             // the target relates to an {@code Aggregate} state
-            ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(query, typeUrl);
+            final ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(query, typeUrl);
 
             feedStateRecordsToBuilder(resultBuilder, stateRecords);
         }

@@ -84,6 +84,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.stand.Given.StandTestProjection;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
@@ -755,19 +756,21 @@ public class StandShould {
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<org.spine3.server.stand.Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
+        final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId))).thenReturn(new Given.StandTestProjection(projectId));
+            when(projectionRepository.find(eq(projectId))).thenReturn(new StandTestProjection(projectId));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
-        when(projectionRepository.findBulk(matchingIds, null)).thenReturn(allResults);
+
+        when(projectionRepository.findBulk(matchingIds, any(FieldMask.class))).thenReturn(allResults);
 
         when(projectionRepository.findAll()).thenReturn(allResults);
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
-        when(projectionRepository.findAll(matchingFilter, null)).thenReturn(allResults);
+        //noinspection deprecation
+        when(projectionRepository.findAll(matchingFilter, any(FieldMask.class))).thenReturn(allResults);
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
@@ -798,9 +801,9 @@ public class StandShould {
         final Collection<Given.StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, Given.StandTestProjection>() {
             @Nullable
             @Override
-            public Given.StandTestProjection apply(@Nullable ProjectId input) {
+            public StandTestProjection apply(@Nullable ProjectId input) {
                 checkNotNull(input);
-                return new Given.StandTestProjection(input);
+                return new StandTestProjection(input);
             }
         });
         final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);

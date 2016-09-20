@@ -20,9 +20,13 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.FieldMasks;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -47,11 +51,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
 
     @Override
     public EntityStorageRecord read(I id) {
-        return read(id, null);
-    }
-
-    public EntityStorageRecord read(I id, @Nullable FieldMask fieldMask) {
-        // TODO:19-09-16:dmytro.dashenkov: Add support for field mask processing.
         checkNotClosed();
         checkNotNull(id);
 
@@ -62,6 +61,13 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         return record;
     }
 
+    // TODO:20-09-16:dmytro.dashenkov: Add javadoc.
+    public EntityStorageRecord read(I id, FieldMask fieldMask) {
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder(read(id));
+        final Any state = builder.getState();
+        builder.setState(AnyPacker.pack(FieldMasks.applyIfEffective(fieldMask, AnyPacker.unpack(state), TypeUrl.of(state.getTypeUrl()))));
+        return builder.build();
+    }
 
 
     @Override
@@ -73,7 +79,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         writeInternal(id, record);
     }
 
-
     @Override
     public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids) {
         checkNotClosed();
@@ -83,11 +88,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     }
 
     public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids, FieldMask fieldMask) {
-        // TODO:19-09-16:dmytro.dashenkov: Support field mask processing.
         checkNotClosed();
         checkNotNull(ids);
 
-        return readBulkInternal(ids);
+        return readBulkInternal(ids, fieldMask);
     }
 
     @Override
@@ -95,6 +99,12 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         checkNotClosed();
 
         return readAllInternal();
+    }
+
+    public Map<I, EntityStorageRecord> readAll(FieldMask fieldMask) {
+        checkNotClosed();
+
+        return readAllInternal(fieldMask);
     }
 
 
@@ -114,9 +124,15 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     /** @see BulkStorageOperationsMixin#readBulk(java.lang.Iterable) */
     protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
 
+    /** @see BulkStorageOperationsMixin#readBulk(java.lang.Iterable) */
+    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask);
+
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityStorageRecord> readAllInternal();
+
+    /** @see BulkStorageOperationsMixin#readAll() */
+    protected abstract Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask);
 
     /**
      * Writes a record into the storage.

@@ -20,13 +20,23 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -54,7 +64,7 @@ import static com.google.common.collect.Maps.newHashMap;
     @SuppressWarnings("MethodWithMultipleLoops")    /* It's OK for in-memory implementation
                                                      * as it is used primarily in tests. */
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds) {
+    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, @Nullable FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
@@ -63,14 +73,28 @@ import static com.google.common.collect.Maps.newHashMap;
         for (I recordId : storage.keySet()) {
             for (I givenId : givenIds) {
                 if (recordId.equals(givenId)) {
-                    final EntityStorageRecord matchingRecord = storage.get(recordId);
-                    result.add(matchingRecord);
+                    final EntityStorageRecord.Builder matchingRecord = storage.get(recordId).toBuilder();
+                    final Any state = matchingRecord.getState();
+
+                    matchingRecord.setState(
+                            AnyPacker.pack(
+                                    FieldMasks.applyIfEffective(
+                                            fieldMask,
+                                            AnyPacker.unpack(state),
+                                            TypeUrl.of(state.getTypeUrl()))));
+
+                    result.add(matchingRecord.build());
                     continue;
                 }
                 result.add(null);
             }
         }
         return result;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+        return readBulkInternal(ids, null);
     }
 
     @Override
@@ -81,6 +105,36 @@ import static com.google.common.collect.Maps.newHashMap;
         return result;
     }
 
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        // TODO:20-09-16:dmytro.dashenkov: Increase efficiency.
+        if (!FieldMasks.isEffective(fieldMask)) {
+            return readAllInternal();
+        }
+
+        final Map<I, EntityStorageRecord> storage = getStorage();
+
+        if (storage.isEmpty()) {
+            return newHashMap();
+        }
+
+        final Map<I, EntityStorageRecord> result = newHashMap();
+
+        final Collection<Message> records = FieldMasks.applyMask(fieldMask, Collections2.transform(storage.values(), new Function<EntityStorageRecord, Message>() {
+            @Nullable
+            @Override
+            public Message apply(@Nullable EntityStorageRecord input) {
+                return input == null ? null : AnyPacker.unpack(input.getState());
+            }
+        }), TypeUrl.of(storage.entrySet().iterator().next().getValue().getState().getTypeUrl()));
+
+        final Iterator<Message> messageIterator = records.iterator();
+        for (I key : storage.keySet()) {
+            result.put(key, storage.get(key).toBuilder().setState(AnyPacker.pack(messageIterator.next())).build());
+        }
+
+        return ImmutableMap.copyOf(result);
+    }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
         return new InMemoryRecordStorage<>(multitenant);

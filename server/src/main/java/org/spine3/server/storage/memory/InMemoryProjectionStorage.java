@@ -20,10 +20,11 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 
 import java.util.Map;
 
@@ -80,8 +81,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
+        return recordStorage.readBulk(ids, fieldMask);
+    }
+
+
+    @Override
     protected Map<I, EntityStorageRecord> readAllInternal() {
         final Map<I, EntityStorageRecord> result = recordStorage.readAll();
+        return result;
+    }
+
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        final Map<I, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 }
