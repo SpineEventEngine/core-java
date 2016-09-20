@@ -303,7 +303,6 @@ public class StandShould {
                          .build();
     }
 
-    private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
@@ -543,7 +542,7 @@ public class StandShould {
         stand.execute(customerQuery, observer);
     }
 
-    private static void checkEmptyResultForTargetOnEmptyStorage(Target customerTarget) {
+    private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
         final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
