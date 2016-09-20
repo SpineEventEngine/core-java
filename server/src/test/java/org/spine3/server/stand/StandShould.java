@@ -43,6 +43,7 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
+import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -80,6 +81,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -271,12 +273,13 @@ public class StandShould {
     }
 
     @Test
-    public void trigger_callback_upon_subscription_update_of_aggregate() {
+    public void trigger_subscription_callback_upon_update_of_aggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        stand.subscribe(allCustomers, memoizeCallback);
+        final Subscription subscription = stand.subscribe(allCustomers, memoizeCallback);
+        assertNotNull(subscription);
         assertNull(memoizeCallback.newEntityState);
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
@@ -290,10 +293,155 @@ public class StandShould {
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
 
+
+    @Test
+    public void trigger_subscription_callback_upon_update_of_projection() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allProjects = Queries.Targets.allOf(Project.class);
+
+        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        final Subscription subscription = stand.subscribe(allProjects, memoizeCallback);
+        assertNotNull(subscription);
+        assertNull(memoizeCallback.newEntityState);
+
+        final Map.Entry<ProjectId, Project> sampleData = fillSampleProjects(1).entrySet()
+                                                                              .iterator()
+                                                                              .next();
+        final ProjectId projectId = sampleData.getKey();
+        final Project project = sampleData.getValue();
+        final Any packedState = AnyPacker.pack(project);
+        stand.update(projectId, packedState);
+
+        assertEquals(packedState, memoizeCallback.newEntityState);
+    }
+
+
+    @Test
+    public void allow_cancelling_subscriptions() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allCustomers = Queries.Targets.allOf(Customer.class);
+
+        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        final Subscription subscription = stand.subscribe(allCustomers, memoizeCallback);
+        assertNull(memoizeCallback.newEntityState);
+
+        stand.cancel(subscription);
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Any packedState = AnyPacker.pack(customer);
+        stand.update(customerId, packedState);
+
+        assertNull(memoizeCallback.newEntityState);
+    }
+
+    @Test
+    public void do_not_fail_if_cancelling_inexistent_subscription() {
+        final Stand stand = Stand.newBuilder()
+                                 .build();
+        final Subscription inexistentSubscription = Subscription.newBuilder()
+                                                                .setId(UUID.randomUUID()
+                                                                           .toString())
+                                                                .build();
+        stand.cancel(inexistentSubscription);
+    }
+
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allCustomers = Queries.Targets.allOf(Customer.class);
+
+        final Set<MemoizeStandUpdateCallback> callbacks = newHashSet();
+        final int totalCallbacks = 100;
+
+        for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
+            final MemoizeStandUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
+            callbacks.add(callback);
+        }
+
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Any packedState = AnyPacker.pack(customer);
+        stand.update(customerId, packedState);
+
+
+        for (MemoizeStandUpdateCallback callback : callbacks) {
+            assertEquals(packedState, callback.newEntityState);
+            verify(callback, times(1)).onEntityStateUpdate(any(Any.class));
+        }
+    }
+
+    @Test
+    public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allProjects = Queries.Targets.allOf(Project.class);
+        final MemoizeStandUpdateCallback callback = subscribeWithCallback(stand, allProjects);
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Any packedState = AnyPacker.pack(customer);
+        stand.update(customerId, packedState);
+
+        verify(callback, never()).onEntityStateUpdate(any(Any.class));
+    }
+
+    @Test
+    public void trigger_subscription_callbacks_matching_by_id() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+
+        final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
+
+        final Target someCustomers = Queries.Targets.someOf(Customer.class, sampleCustomers.keySet());
+        final Set<Customer> callbackStates = newHashSet();
+        final MemoizeStandUpdateCallback callback = new MemoizeStandUpdateCallback() {
+            @Override
+            public void onEntityStateUpdate(Any newEntityState) {
+                super.onEntityStateUpdate(newEntityState);
+                final Customer customerInCallback = AnyPacker.unpack(newEntityState);
+                callbackStates.add(customerInCallback);
+            }
+        };
+        stand.subscribe(someCustomers, callback);
+
+        for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
+            final CustomerId customerId = sampleEntry.getKey();
+            final Customer customer = sampleEntry.getValue();
+            final Any packedState = AnyPacker.pack(customer);
+            stand.update(customerId, packedState);
+        }
+
+        assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
+    }
+
+    private static MemoizeStandUpdateCallback subscribeWithCallback(Stand stand, Target subscriptionTarget) {
+        final MemoizeStandUpdateCallback callback = spy(new MemoizeStandUpdateCallback());
+        stand.subscribe(subscriptionTarget, callback);
+        assertNull(callback.newEntityState);
+        return callback;
+    }
+
     private static CustomerId customerIdFor(int numericId) {
         return CustomerId.newBuilder()
                          .setNumber(numericId)
                          .build();
+    }
+
+    private static ProjectId projectIdFor(int numericId) {
+        return ProjectId.newBuilder()
+                        .setId(String.valueOf(numericId))
+                        .build();
     }
 
     private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
@@ -539,15 +687,41 @@ public class StandShould {
 
     private static Map<CustomerId, Customer> fillSampleCustomers(int numberOfCustomers) {
         final Map<CustomerId, Customer> sampleCustomers = newHashMap();
-        for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
-            final Customer customer = Customer.getDefaultInstance();
 
-            @SuppressWarnings("UnsecureRandomNumberGeneration")
-            final Random randomizer = new Random();
-            final CustomerId customerId = customerIdFor(randomizer.nextInt());
+        @SuppressWarnings("UnsecureRandomNumberGeneration")
+        final Random randomizer = new Random(Integer.MAX_VALUE);    // force non-negative numeric ID values.
+
+        for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
+
+
+            final int numericId = randomizer.nextInt();
+            final CustomerId customerId = customerIdFor(numericId);
+            final Customer customer = Customer.newBuilder()
+                                              .setName(PersonName.newBuilder()
+                                                                 .setGivenName(String.valueOf(numericId)))
+                                              .build();
             sampleCustomers.put(customerId, customer);
         }
         return sampleCustomers;
+    }
+
+    private static Map<ProjectId, Project> fillSampleProjects(int numberOfProjects) {
+        final Map<ProjectId, Project> sampleProjects = newHashMap();
+
+        @SuppressWarnings("UnsecureRandomNumberGeneration")
+        final Random randomizer = new Random(Integer.MAX_VALUE);    // force non-negative numeric ID values.
+
+        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
+
+            final int numericId = randomizer.nextInt();
+            final ProjectId customerId = projectIdFor(numericId);
+
+            final Project project = Project.newBuilder()
+                                           .setName(String.valueOf(numericId))
+                                           .build();
+            sampleProjects.put(customerId, project);
+        }
+        return sampleProjects;
     }
 
     private static void fillSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {

@@ -78,7 +78,7 @@ public class Queries {
         private Targets() {
         }
 
-        public static Target someOf(Class<? extends Message> entityClass, Set<Message> ids) {
+        public static Target someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
             final Target result = composeTarget(entityClass, ids);
             return result;
         }
