@@ -271,7 +271,7 @@ public class StandShould {
     }
 
     @Test
-    public void trigger_callback_upon_change_of_watched_aggregate_state() {
+    public void trigger_callback_upon_subscription_update_of_aggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
