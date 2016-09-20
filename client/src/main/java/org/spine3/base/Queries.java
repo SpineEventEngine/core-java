@@ -24,7 +24,6 @@ package org.spine3.base;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.sun.tools.javac.util.List;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -34,6 +33,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Set;
 
 import static org.spine3.base.Queries.Targets.composeTarget;
@@ -53,7 +53,7 @@ public class Queries {
         //noinspection ConstantConditions
         final FieldMask fieldMask = paths != null ?
                                     FieldMask.newBuilder()
-                                             .addAllPaths(List.from(paths))
+                                             .addAllPaths(Arrays.asList(paths))
                                              .build() :
                                     null;
         final Query result = composeQuery(entityClass, ids, fieldMask);
@@ -64,7 +64,7 @@ public class Queries {
         //noinspection ConstantConditions
         final FieldMask fieldMask = paths != null ?
                               FieldMask.newBuilder()
-                                       .addAllPaths(List.from(paths))
+                                       .addAllPaths(Arrays.asList(paths))
                                        .build() :
                               null;
         final Query result = composeQuery(entityClass, null, fieldMask);
