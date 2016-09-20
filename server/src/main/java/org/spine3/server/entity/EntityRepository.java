@@ -129,6 +129,20 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     /**
      * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
      *
+     * <p>Same as calling <pre>{@code findBulk(id, FieldMask.getDefaultInstance());}</pre>
+     *
+     * @param ids entity IDs to search for
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
+     * @see #findBulk(Iterable, FieldMask)
+     */
+    @CheckReturnValue
+    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
+        return findBulk(ids, FieldMask.getDefaultInstance());
+    }
+
+    /**
+     * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
+     *
      * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
      * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
      *
@@ -145,10 +159,11 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param ids entity IDs to search for
+     * @param fieldMask mask to apply on entities
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findBulk(Iterable<I> ids, @Nullable FieldMask fieldMask) {
+    public ImmutableCollection<E> findBulk(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
 
@@ -196,10 +211,11 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters entity filters
+     * @param fieldMask mask to apply to the entities
      * @return all the entities in this repository passed the filters.
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findAll(EntityFilters filters, @Nullable FieldMask fieldMask) {
+    public ImmutableCollection<E> findAll(EntityFilters filters, FieldMask fieldMask) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
@@ -233,10 +249,10 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     private E toEntity(I id, EntityStorageRecord record) {
-        return toEntity(id, record, null);
+        return toEntity(id, record, FieldMask.getDefaultInstance());
     }
 
-    private E toEntity(I id, EntityStorageRecord record, @Nullable FieldMask fieldMask) {
+    private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
         final E entity = create(id);
         @SuppressWarnings("unchecked")
         final M state = (M) FieldMasks.applyIfValid(fieldMask, unpack(record.getState()), getEntityStateType());

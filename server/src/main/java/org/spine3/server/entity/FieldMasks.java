@@ -36,8 +36,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>Util class for filtering fields that are included in an instance of {@link Message} or collection of {@link Message}s.
- * Provides basic functionality for processing of e.g. a {@code org.spine3.client.Query} to in-memory storage.</p>
+ * A utility class for {@code FieldMask} processing against instances of {@link Message}.
+ * <p>Provides basic functionality for processing of e.g. a {@code org.spine3.client.Query} to in-memory storage.
  *
  * @author Dmytro Dashenkov
  */
@@ -48,10 +48,10 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies given {@code FieldMask} to givem collection of {@link Message}s.
-     * Does not change the {@link Collection} itself.</p>
+     * <p>Applies given {@code FieldMask} to given collection of {@link Message}s.
+     * Does not change the {@link Collection} itself.
      *
-     * <p>The {@code FieldMask} must be valid for this operation.</p>
+     * <p>The {@code FieldMask} must be valid for this operation.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param entities {@link Message}s to filter.
@@ -96,19 +96,20 @@ public class FieldMasks {
 
     /**
      * <p>Checks whether the given {@code FieldMask} is valid of not.
-     * This also includes a null check.</p>
+     * This also includes a null check.
      *
      * @param fieldMask Nullable {@code FieldMask} to check.
      * @return {@code true} if the {@code FieldMask} is valid for use, {@code} false otherwise.
      */
-    public static boolean isValid(@Nullable FieldMask fieldMask) {
+    public static boolean isValid(FieldMask fieldMask) {
+        //noinspection ConstantConditions - redundant null check.
         return fieldMask != null && !fieldMask.getPathsList().isEmpty();
     }
 
     /**
-     * <p>Applies given {@code FieldMask} to a single {@link Message}.</p>
+     * <p>Applies given {@code FieldMask} to a single {@link Message}.
      *
-     * <p>The {@code FieldMask} must be valid for this operation.</p>
+     * <p>The {@code FieldMask} must be valid for this operation.
      *
      * @param mask {@code FieldMask} instance to apply.
      * @param entity The {@link Message} to apply given {@code FieldMask} to.
@@ -148,13 +149,13 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.</p>
+     * <p>Applies {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
      *
      * @param mask    The {@code FieldMask} to apply.
      * @param entity  The {@link Message} to apply given mask to.
      * @param typeUrl Type of given {@link Message}.
-     * @return <p>A {@link Message} of the same type as the given one with only selected fields
-     *          if the {@code mask} is valid, {@code entity} itself otherwise.</p>
+     * @return A {@link Message} of the same type as the given one with only selected fields
+     *          if the {@code mask} is valid, {@code entity} itself otherwise.
      * @see #isValid(FieldMask)
      */
     public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") @Nullable FieldMask mask, M entity, TypeUrl typeUrl) {

@@ -356,7 +356,7 @@ public class StandShould {
                 assertTrue(customer.getName()
                                    .equals(sampleCustomer.getName()));
                 assertFalse(customer.hasId());
-                assertTrue(customer.getFamilyList().isEmpty());
+                assertTrue(customer.getFamilyInfoList().isEmpty());
             }
 
             @Override
@@ -371,7 +371,7 @@ public class StandShould {
 
     @Test
     public void retrieve_collection_fields_if_required() {
-        requestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.FAMILYINFO_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
             @Override
             public void onNext(QueryResponse value) {
                 final List<Any> messages = value.getMessagesList();
@@ -379,7 +379,7 @@ public class StandShould {
 
                 final Customer sampleCustomer = getSampleCustomer();
                 final Customer customer = AnyPacker.unpack(messages.get(0));
-                assertEquals(customer.getFamilyList(), sampleCustomer.getFamilyList());
+                assertEquals(customer.getFamilyInfoList(), sampleCustomer.getFamilyInfoList());
 
                 assertFalse(customer.hasName());
                 assertFalse(customer.hasId());
@@ -397,7 +397,7 @@ public class StandShould {
 
     @Test
     public void retrieve_all_requested_fields() {
-        requestSampleCustomer(new int[] {Customer.FAMILY_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.FAMILYINFO_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
             @Override
             public void onNext(QueryResponse value) {
                 final List<Any> messages = value.getMessagesList();
@@ -405,7 +405,7 @@ public class StandShould {
 
                 final Customer sampleCustomer = getSampleCustomer();
                 final Customer customer = AnyPacker.unpack(messages.get(0));
-                assertEquals(customer.getFamilyList(), sampleCustomer.getFamilyList());
+                assertEquals(customer.getFamilyInfoList(), sampleCustomer.getFamilyInfoList());
 
                 assertFalse(customer.hasName());
                 assertTrue(customer.hasId());
@@ -463,7 +463,7 @@ public class StandShould {
 
                 assertFalse(customer.hasId());
                 assertFalse(customer.hasName());
-                assertTrue(customer.getFamilyList().isEmpty());
+                assertTrue(customer.getFamilyInfoList().isEmpty());
             }
 
             @Override
@@ -487,7 +487,7 @@ public class StandShould {
                 final Customer sampleCustomer = getSampleCustomer();
 
                 assertEquals(sampleCustomer.getName(), customer.getName());
-                assertEquals(sampleCustomer.getFamilyList(), customer.getFamilyList());
+                assertEquals(sampleCustomer.getFamilyInfoList(), customer.getFamilyInfoList());
                 assertTrue(customer.hasId());
             }
 
@@ -506,8 +506,8 @@ public class StandShould {
                        .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
                                                                           .getLeastSignificantBits()))
                        .setName(PersonName.newBuilder().setGivenName("Socrates").build())
-                       .addFamily(PersonName.newBuilder().setGivenName("Socrates's mother"))
-                       .addFamily(PersonName.newBuilder().setGivenName("Socrates's father"))
+                       .addFamilyInfo(PersonName.newBuilder().setGivenName("Socrates's mother"))
+                       .addFamilyInfo(PersonName.newBuilder().setGivenName("Socrates's father"))
                        .build();
 
     }
