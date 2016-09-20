@@ -37,7 +37,6 @@ import java.util.List;
 
 /**
  * A utility class for {@code FieldMask} processing against instances of {@link Message}.
- * <p>Provides basic functionality for processing of e.g. a {@code org.spine3.client.Query} to in-memory storage.
  *
  * @author Dmytro Dashenkov
  */
@@ -158,7 +157,7 @@ public class FieldMasks {
      *          if the {@code mask} is valid, {@code entity} itself otherwise.
      * @see #isValid(FieldMask)
      */
-    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") @Nullable FieldMask mask, M entity, TypeUrl typeUrl) {
+    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
         if (isValid(mask)) {
             return applyMask(mask, entity, typeUrl);
         }
