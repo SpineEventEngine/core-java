@@ -35,6 +35,8 @@ import org.spine3.protobuf.TypeUrl;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static org.spine3.base.Queries.Targets.composeTarget;
+
 /**
  * Client-side utilities for working with queries.
  *
@@ -45,7 +47,7 @@ public class Queries {
     private Queries() {
     }
 
-    public static Query readByIds(Class<? extends Message> entityClass, Set<Message> ids) {
+    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
         final Query result = composeQuery(entityClass, ids, null);
         return result;
     }
@@ -55,19 +57,8 @@ public class Queries {
         return result;
     }
 
-    public static Target someOf(Class<? extends Message> entityClass, Set<Message> ids) {
-        final Target result = composeTarget(entityClass, ids);
-        return result;
-    }
 
-    public static Target allOf(Class<? extends Message> entityClass) {
-        final Target result = composeTarget(entityClass, null);
-        return result;
-    }
-
-
-    // TODO[alex.tymchenko]: think of Optional instead. Consider Java 8 vs Guava Optional.
-    private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<Message> ids, @Nullable FieldMask fieldMask) {
+    private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {
         final Target target = composeTarget(entityClass, ids);
 
 
@@ -81,31 +72,48 @@ public class Queries {
         return result;
     }
 
-    private static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<Message> ids) {
-        final TypeUrl type = TypeUrl.of(entityClass);
 
-        final boolean includeAll = ids == null;
+    public static class Targets {
 
-        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
-
-        if (!includeAll) {
-            for (Message rawId : ids) {
-                final Any packedId = AnyPacker.pack(rawId);
-                final EntityId entityId = EntityId.newBuilder()
-                                                  .setId(packedId)
-                                                  .build();
-                idFilterBuilder.addIds(entityId);
-            }
+        private Targets() {
         }
-        final EntityIdFilter idFilter = idFilterBuilder.build();
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .build();
 
-        return Target.newBuilder()
-                     .setIncludeAll(includeAll)
-                     .setType(type.getTypeName())
-                     .setFilters(filters)
-                     .build();
+        public static Target someOf(Class<? extends Message> entityClass, Set<Message> ids) {
+            final Target result = composeTarget(entityClass, ids);
+            return result;
+        }
+
+        public static Target allOf(Class<? extends Message> entityClass) {
+            final Target result = composeTarget(entityClass, null);
+            return result;
+        }
+
+        /* package */ static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids) {
+            final TypeUrl type = TypeUrl.of(entityClass);
+
+            final boolean includeAll = ids == null;
+
+            final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
+
+            if (!includeAll) {
+                for (Message rawId : ids) {
+                    final Any packedId = AnyPacker.pack(rawId);
+                    final EntityId entityId = EntityId.newBuilder()
+                                                      .setId(packedId)
+                                                      .build();
+                    idFilterBuilder.addIds(entityId);
+                }
+            }
+            final EntityIdFilter idFilter = idFilterBuilder.build();
+            final EntityFilters filters = EntityFilters.newBuilder()
+                                                       .setIdFilter(idFilter)
+                                                       .build();
+
+            return Target.newBuilder()
+                         .setIncludeAll(includeAll)
+                         .setType(type.getTypeName())
+                         .setFilters(filters)
+                         .build();
+        }
     }
 }
