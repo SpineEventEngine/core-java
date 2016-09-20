@@ -50,7 +50,6 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
@@ -291,7 +290,7 @@ public class Stand {
         ImmutableCollection<EntityStorageRecord> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
-        final boolean shouldApplyFieldMask = FieldMasks.isValid(fieldMask);
+        final boolean shouldApplyFieldMask = !fieldMask.getPathsList().isEmpty();
 
         if (target.getIncludeAll()) {
             result = shouldApplyFieldMask ?
@@ -365,7 +364,7 @@ public class Stand {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        if (target.getIncludeAll() && !FieldMasks.isValid(fieldMask)) {
+        if (target.getIncludeAll() && fieldMask.getPathsList().isEmpty()) {
             result = repository.findAll();
         } else {
             final EntityFilters filters = target.getFilters();

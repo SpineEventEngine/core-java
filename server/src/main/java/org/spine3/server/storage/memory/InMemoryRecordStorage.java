@@ -114,7 +114,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
-        if (!FieldMasks.isValid(fieldMask)) {
+        if (fieldMask.getPathsList().isEmpty()) {
             return readAllInternal();
         }
 

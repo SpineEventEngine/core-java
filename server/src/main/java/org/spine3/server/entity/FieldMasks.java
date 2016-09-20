@@ -50,7 +50,7 @@ public class FieldMasks {
      * <p>Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
-     * <p>The {@code FieldMask} must be valid for this operation.
+     * <p>The {@code FieldMask} must not be empty for this operation.
      *
      * <p>n case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
@@ -59,7 +59,6 @@ public class FieldMasks {
      * @param entities {@link Message}s to filter.
      * @param typeUrl  Type of the {@link Message}s.
      * @return Non-null unmodifiable {@link Collection} of {@link Message}s of the same type that the input had.
-     * @see #isValid(FieldMask)
      */
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
     public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> entities, TypeUrl typeUrl) {
@@ -97,17 +96,6 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Checks whether the given {@code FieldMask} is valid of not.
-     * This also includes a null check.
-     *
-     * @param fieldMask {@code FieldMask} to check.
-     * @return {@code true} if the {@code FieldMask} is valid for use, {@code} false otherwise.
-     */
-    public static boolean isValid(FieldMask fieldMask) {
-        return !fieldMask.getPathsList().isEmpty();
-    }
-
-    /**
      * <p>Applies the given {@code FieldMask} to a single {@link Message}.
      *
      * <p>The {@code FieldMask} must be valid for this operation.
@@ -119,7 +107,6 @@ public class FieldMasks {
      * @param entity The {@link Message} to apply given {@code FieldMask} to.
      * @param typeUrl Type of the {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields.
-     * @see #isValid(FieldMask)
      */
     @SuppressWarnings("unchecked")
     public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
@@ -163,10 +150,9 @@ public class FieldMasks {
      * @param typeUrl Type of given {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields
      *          if the {@code mask} is valid, {@code entity} itself otherwise.
-     * @see #isValid(FieldMask)
      */
     public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
-        if (isValid(mask)) {
+        if (!mask.getPathsList().isEmpty()) {
             return applyMask(mask, entity, typeUrl);
         }
 
