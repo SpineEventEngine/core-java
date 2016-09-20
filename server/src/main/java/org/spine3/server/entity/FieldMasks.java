@@ -30,9 +30,9 @@ import org.spine3.protobuf.TypeUrl;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -47,13 +47,13 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies given {@code FieldMask} to given collection of {@link Message}s.
+     * <p>Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
      * <p>The {@code FieldMask} must be valid for this operation.
      *
-     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
-     * without any exception or error thrown.
+     * <p>n case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
+     * do not affect the execution result.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param entities {@link Message}s to filter.
@@ -63,7 +63,7 @@ public class FieldMasks {
      */
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
     public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> entities, TypeUrl typeUrl) {
-        final List<M> filtered = new ArrayList<>();
+        final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
@@ -100,21 +100,20 @@ public class FieldMasks {
      * <p>Checks whether the given {@code FieldMask} is valid of not.
      * This also includes a null check.
      *
-     * @param fieldMask Nullable {@code FieldMask} to check.
+     * @param fieldMask {@code FieldMask} to check.
      * @return {@code true} if the {@code FieldMask} is valid for use, {@code} false otherwise.
      */
     public static boolean isValid(FieldMask fieldMask) {
-        //noinspection ConstantConditions - redundant null check.
-        return fieldMask != null && !fieldMask.getPathsList().isEmpty();
+        return !fieldMask.getPathsList().isEmpty();
     }
 
     /**
-     * <p>Applies given {@code FieldMask} to a single {@link Message}.
+     * <p>Applies the given {@code FieldMask} to a single {@link Message}.
      *
      * <p>The {@code FieldMask} must be valid for this operation.
      *
-     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
-     * without any exception or error thrown.
+     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
+     * do not affect the execution result.
      *
      * @param mask {@code FieldMask} instance to apply.
      * @param entity The {@link Message} to apply given {@code FieldMask} to.
@@ -154,10 +153,10 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
+     * <p>Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
      *
-     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
-     * without any exception or error thrown.
+     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
+     * do not affect the execution result.
      *
      * @param mask    The {@code FieldMask} to apply.
      * @param entity  The {@link Message} to apply given mask to.

@@ -60,11 +60,11 @@ public class InMemoryStandStorage extends StandStorage {
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type) {
-        return readAllByType(type, null);
+        return readAllByType(type, FieldMask.getDefaultInstance());
     }
 
     @Override
-    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, @Nullable FieldMask fieldMask) {
+    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
         final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll(fieldMask);
         final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
             @Override

@@ -62,12 +62,12 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     }
 
     /**
-     * Read one specific item form storage.
+     * Read a single item from the storage.
      *
-     * @param id id of the item to read.
-     * @param fieldMask Fields to read. Can be {@code null}, but it's more convenient to call {@link #read(Object)}
-     *                  in order to get all the fields.
+     * @param id ID of the item to read.
+     * @param fieldMask Fields to read.
      * @return Non-null {@code EntityStorageRecord} instance.
+     * @see #read(Object)
      */
     public EntityStorageRecord read(I id, FieldMask fieldMask) {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder(read(id));

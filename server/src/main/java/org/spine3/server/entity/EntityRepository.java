@@ -43,9 +43,9 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -169,7 +169,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
-        final List<E> entities = new ArrayList<>();
+        final List<E> entities = new LinkedList<>();
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();

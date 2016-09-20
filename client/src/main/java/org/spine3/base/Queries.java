@@ -50,35 +50,27 @@ public class Queries {
     }
 
     public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids, String... paths) {
-        //noinspection ConstantConditions
-        final FieldMask fieldMask = paths != null ?
-                                    FieldMask.newBuilder()
+        final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
-                                             .build() :
-                                    null;
+                                             .build();
         final Query result = composeQuery(entityClass, ids, fieldMask);
         return result;
     }
 
     public static Query readAll(Class<? extends Message> entityClass, String... paths) {
-        //noinspection ConstantConditions
-        final FieldMask fieldMask = paths != null ?
-                              FieldMask.newBuilder()
+        final FieldMask fieldMask = FieldMask.newBuilder()
                                        .addAllPaths(Arrays.asList(paths))
-                                       .build() :
-                              null;
+                                       .build();
         final Query result = composeQuery(entityClass, null, fieldMask);
         return result;
     }
 
     public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
-        //noinspection ConstantConditions
-        return readByIds(entityClass, ids, (String[]) null);
+        return composeQuery(entityClass, ids, null);
     }
 
     public static Query readAll(Class<? extends Message> entityClass) {
-        //noinspection ConstantConditions
-        return readAll(entityClass, (String[]) null);
+        return composeQuery(entityClass, null, null);
     }
 
     private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {

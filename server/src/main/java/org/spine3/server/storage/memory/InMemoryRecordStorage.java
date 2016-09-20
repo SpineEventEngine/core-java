@@ -64,11 +64,13 @@ import static com.google.common.collect.Maps.newHashMap;
     @SuppressWarnings("MethodWithMultipleLoops")    /* It's OK for in-memory implementation
                                                      * as it is used primarily in tests. */
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, @Nullable FieldMask fieldMask) {
+    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
+
+        TypeUrl typeUrl = null;
 
         for (I recordId : storage.keySet()) {
             for (I givenId : givenIds) {
@@ -76,12 +78,17 @@ import static com.google.common.collect.Maps.newHashMap;
                     final EntityStorageRecord.Builder matchingRecord = storage.get(recordId).toBuilder();
                     final Any state = matchingRecord.getState();
 
-                    matchingRecord.setState(
-                            AnyPacker.pack(
-                                    FieldMasks.applyIfValid(
-                                            fieldMask,
-                                            AnyPacker.unpack(state),
-                                            TypeUrl.of(state.getTypeUrl()))));
+                    if (typeUrl == null) {
+                        typeUrl = TypeUrl.of(state.getTypeUrl());
+                    }
+
+                    final Any processed = AnyPacker.pack(
+                            FieldMasks.applyIfValid(
+                                    fieldMask,
+                                    AnyPacker.unpack(state),
+                                    typeUrl));
+
+                    matchingRecord.setState(processed);
 
                     result.add(matchingRecord.build());
                     continue;
