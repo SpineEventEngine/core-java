@@ -61,11 +61,18 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         return record;
     }
 
-    // TODO:20-09-16:dmytro.dashenkov: Add javadoc.
+    /**
+     * Read one specific item form storage.
+     *
+     * @param id id of the item to read.
+     * @param fieldMask Fields to read. Can be {@code null}, but it's more convenient to call {@link #read(Object)}
+     *                  in order to get all the fields.
+     * @return Non-null {@code EntityStorageRecord} instance.
+     */
     public EntityStorageRecord read(I id, FieldMask fieldMask) {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder(read(id));
         final Any state = builder.getState();
-        builder.setState(AnyPacker.pack(FieldMasks.applyIfEffective(fieldMask, AnyPacker.unpack(state), TypeUrl.of(state.getTypeUrl()))));
+        builder.setState(AnyPacker.pack(FieldMasks.applyIfValid(fieldMask, AnyPacker.unpack(state), TypeUrl.of(state.getTypeUrl()))));
         return builder.build();
     }
 

@@ -36,8 +36,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * <p>Util class for filtering fields that are included in an instance of {@link Message} or collection of {@link Message}s.
+ * Provides basic functionality for processing of e.g. a {@code org.spine3.client.Query} to in-memory storage.</p>
  *
- * // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("UtilityClass")
@@ -47,12 +48,16 @@ public class FieldMasks {
     }
 
     /**
-     * // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
-     * @param mask
-     * @param entities
-     * @param typeUrl
-     * @param <B>
-     * @return
+     * <p>Applies given {@code FieldMask} to givem collection of {@link Message}s.
+     * Does not change the {@link Collection} itself.</p>
+     *
+     * <p>The {@code FieldMask} must be valid for this operation.</p>
+     *
+     * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
+     * @param entities {@link Message}s to filter.
+     * @param typeUrl  Type of the {@link Message}s.
+     * @return Non-null unmodifiable {@link Collection} of {@link Message}s of the same type that the input had.
+     * @see #isValid(FieldMask)
      */
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
     public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> entities, TypeUrl typeUrl) {
@@ -89,11 +94,28 @@ public class FieldMasks {
         return Collections.unmodifiableList(filtered);
     }
 
-    public static boolean isEffective(@Nullable FieldMask fieldMask) {
+    /**
+     * <p>Checks whether the given {@code FieldMask} is valid of not.
+     * This also includes a null check.</p>
+     *
+     * @param fieldMask Nullable {@code FieldMask} to check.
+     * @return {@code true} if the {@code FieldMask} is valid for use, {@code} false otherwise.
+     */
+    public static boolean isValid(@Nullable FieldMask fieldMask) {
         return fieldMask != null && !fieldMask.getPathsList().isEmpty();
     }
 
-    // TODO:19-09-16:dmytro.dashenkov: Add javadoc.
+    /**
+     * <p>Applies given {@code FieldMask} to a single {@link Message}.</p>
+     *
+     * <p>The {@code FieldMask} must be valid for this operation.</p>
+     *
+     * @param mask {@code FieldMask} instance to apply.
+     * @param entity The {@link Message} to apply given {@code FieldMask} to.
+     * @param typeUrl Type of the {@link Message}.
+     * @return A {@link Message} of the same type as the given one with only selected fields.
+     * @see #isValid(FieldMask)
+     */
     @SuppressWarnings("unchecked")
     public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
         final ProtocolStringList filter = mask.getPathsList();
@@ -125,8 +147,18 @@ public class FieldMasks {
 
     }
 
-    public static <M extends  Message> M applyIfEffective(@SuppressWarnings("TypeMayBeWeakened") @Nullable FieldMask mask, M entity, TypeUrl typeUrl) {
-        if (isEffective(mask)) {
+    /**
+     * <p>Applies {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.</p>
+     *
+     * @param mask    The {@code FieldMask} to apply.
+     * @param entity  The {@link Message} to apply given mask to.
+     * @param typeUrl Type of given {@link Message}.
+     * @return <p>A {@link Message} of the same type as the given one with only selected fields
+     *          if the {@code mask} is valid, {@code entity} itself otherwise.</p>
+     * @see #isValid(FieldMask)
+     */
+    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") @Nullable FieldMask mask, M entity, TypeUrl typeUrl) {
+        if (isValid(mask)) {
             return applyMask(mask, entity, typeUrl);
         }
 

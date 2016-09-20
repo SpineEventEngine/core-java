@@ -291,7 +291,7 @@ public class Stand {
         ImmutableCollection<EntityStorageRecord> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
-        final boolean shouldApplyFieldMask = FieldMasks.isEffective(fieldMask);
+        final boolean shouldApplyFieldMask = FieldMasks.isValid(fieldMask);
 
         if (target.getIncludeAll()) {
             result = shouldApplyFieldMask ?
@@ -365,7 +365,7 @@ public class Stand {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        if (target.getIncludeAll() && !FieldMasks.isEffective(fieldMask)) {
+        if (target.getIncludeAll() && !FieldMasks.isValid(fieldMask)) {
             result = repository.findAll();
         } else {
             final EntityFilters filters = target.getFilters();

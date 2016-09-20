@@ -78,7 +78,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
                     matchingRecord.setState(
                             AnyPacker.pack(
-                                    FieldMasks.applyIfEffective(
+                                    FieldMasks.applyIfValid(
                                             fieldMask,
                                             AnyPacker.unpack(state),
                                             TypeUrl.of(state.getTypeUrl()))));
@@ -108,7 +108,7 @@ import static com.google.common.collect.Maps.newHashMap;
     @Override
     protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
         // TODO:20-09-16:dmytro.dashenkov: Increase efficiency.
-        if (!FieldMasks.isEffective(fieldMask)) {
+        if (!FieldMasks.isValid(fieldMask)) {
             return readAllInternal();
         }
 
