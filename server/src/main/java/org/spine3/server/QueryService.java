@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
- * <p> For asynchronous read-side updates please see {@code SubscriptionService}.
+ * <p> For asynchronous read-side updates please see {@link SubscriptionService}.
  *
  * @author Alex Tymchenko
  */

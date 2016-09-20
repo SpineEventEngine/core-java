@@ -81,4 +81,11 @@ message Subscription {
     // Typically built using Java's UUID.toString() functionality.
     // Must be unique in scope of a bounded context.
     string id = 1;
+
+    // Represents TypeUrl of the target entity for this subscription.
+    string type = 2;
+
+    // Reserved for subscription attributes.
+    reserved 3 to 10;
+
 }

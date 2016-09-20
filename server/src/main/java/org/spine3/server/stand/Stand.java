@@ -409,7 +409,6 @@ public class Stand {
      * @see #subscribe(Target, StandUpdateCallback)
      * @see #cancel(Subscription)
      */
-    @SuppressWarnings("InterfaceNeverImplemented")      //it's OK, there may be no callbacks in the codebase
     public interface StandUpdateCallback {
 
         void onEntityStateUpdate(Any newEntityState);
@@ -492,10 +491,12 @@ public class Stand {
         private synchronized Subscription addSubscription(Target target, StandUpdateCallback callback) {
             final String subscriptionId = UUID.randomUUID()
                                               .toString();
+            final String typeAsString = target.getType();
+            final TypeUrl type = TypeUrl.of(typeAsString);
             final Subscription subscription = Subscription.newBuilder()
                                                           .setId(subscriptionId)
+                                                          .setType(typeAsString)
                                                           .build();
-            final TypeUrl type = TypeUrl.of(target.getType());
             final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type, callback);
 
             if (!typeToAttrs.containsKey(type)) {
