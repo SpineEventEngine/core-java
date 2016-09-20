@@ -107,7 +107,6 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
-        // TODO:20-09-16:dmytro.dashenkov: Increase efficiency.
         if (!FieldMasks.isValid(fieldMask)) {
             return readAllInternal();
         }
@@ -118,7 +117,7 @@ import static com.google.common.collect.Maps.newHashMap;
             return newHashMap();
         }
 
-        final Map<I, EntityStorageRecord> result = newHashMap();
+        final ImmutableMap.Builder<I, EntityStorageRecord> result = ImmutableMap.builder();
 
         final Collection<Message> records = FieldMasks.applyMask(fieldMask, Collections2.transform(storage.values(), new Function<EntityStorageRecord, Message>() {
             @Nullable
@@ -133,7 +132,7 @@ import static com.google.common.collect.Maps.newHashMap;
             result.put(key, storage.get(key).toBuilder().setState(AnyPacker.pack(messageIterator.next())).build());
         }
 
-        return ImmutableMap.copyOf(result);
+        return result.build();
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
