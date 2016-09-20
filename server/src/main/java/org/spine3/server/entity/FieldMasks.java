@@ -52,6 +52,9 @@ public class FieldMasks {
      *
      * <p>The {@code FieldMask} must be valid for this operation.
      *
+     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
+     * without any exception or error thrown.
+     *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param entities {@link Message}s to filter.
      * @param typeUrl  Type of the {@link Message}s.
@@ -110,6 +113,9 @@ public class FieldMasks {
      *
      * <p>The {@code FieldMask} must be valid for this operation.
      *
+     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
+     * without any exception or error thrown.
+     *
      * @param mask {@code FieldMask} instance to apply.
      * @param entity The {@link Message} to apply given {@code FieldMask} to.
      * @param typeUrl Type of the {@link Message}.
@@ -149,6 +155,9 @@ public class FieldMasks {
 
     /**
      * <p>Applies {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
+     *
+     * <p>In case of failure (e.g. wrong {@code TypeUrl} in the field mask) this method silently handles it
+     * without any exception or error thrown.
      *
      * @param mask    The {@code FieldMask} to apply.
      * @param entity  The {@link Message} to apply given mask to.
