@@ -125,6 +125,14 @@ public class FieldMasks {
 
     }
 
+    public static <M extends  Message> M applyIfEffective(@SuppressWarnings("TypeMayBeWeakened") @Nullable FieldMask mask, M entity, TypeUrl typeUrl) {
+        if (isEffective(mask)) {
+            return applyMask(mask, entity, typeUrl);
+        }
+
+        return entity;
+    }
+
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;
