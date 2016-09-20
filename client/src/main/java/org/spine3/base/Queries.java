@@ -46,18 +46,42 @@ public class Queries {
     }
 
     public static Query readByIds(Class<? extends Message> entityClass, Set<Message> ids) {
-        final Query result = compose(entityClass, ids, null);
+        final Query result = composeQuery(entityClass, ids, null);
         return result;
     }
 
     public static Query readAll(Class<? extends Message> entityClass) {
-        final Query result = compose(entityClass, null, null);
+        final Query result = composeQuery(entityClass, null, null);
+        return result;
+    }
+
+    public static Target someOf(Class<? extends Message> entityClass, Set<Message> ids) {
+        final Target result = composeTarget(entityClass, ids);
+        return result;
+    }
+
+    public static Target allOf(Class<? extends Message> entityClass) {
+        final Target result = composeTarget(entityClass, null);
         return result;
     }
 
 
     // TODO[alex.tymchenko]: think of Optional instead. Consider Java 8 vs Guava Optional.
-    private static Query compose(Class<? extends Message> entityClass, @Nullable Set<Message> ids, @Nullable FieldMask fieldMask) {
+    private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<Message> ids, @Nullable FieldMask fieldMask) {
+        final Target target = composeTarget(entityClass, ids);
+
+
+        final Query.Builder queryBuilder = Query.newBuilder()
+                                                .setTarget(target);
+        if (fieldMask != null) {
+            queryBuilder.setFieldMask(fieldMask);
+        }
+        final Query result = queryBuilder
+                .build();
+        return result;
+    }
+
+    private static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<Message> ids) {
         final TypeUrl type = TypeUrl.of(entityClass);
 
         final boolean includeAll = ids == null;
@@ -78,20 +102,10 @@ public class Queries {
                                                    .setIdFilter(idFilter)
                                                    .build();
 
-        final Target target = Target.newBuilder()
-                                    .setIncludeAll(includeAll)
-                                    .setType(type.getTypeName())
-                                    .setFilters(filters)
-                                    .build();
-
-
-        final Query.Builder queryBuilder = Query.newBuilder()
-                                                .setTarget(target);
-        if (fieldMask != null) {
-            queryBuilder.setFieldMask(fieldMask);
-        }
-        final Query result = queryBuilder
-                .build();
-        return result;
+        return Target.newBuilder()
+                     .setIncludeAll(includeAll)
+                     .setType(type.getTypeName())
+                     .setFilters(filters)
+                     .build();
     }
 }
