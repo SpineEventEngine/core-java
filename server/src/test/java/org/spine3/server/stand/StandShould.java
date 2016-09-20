@@ -306,19 +306,12 @@ public class StandShould {
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
 
         final Customer sampleCustomer = getSampleCustomer();
 
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
 
-        final Query customerQuery = Query.newBuilder()
-                                         .setTarget(
-                                                 Target.newBuilder().setIncludeAll(true)
-                                                       .setType(customerType.getTypeName())
-                                                       .build())
-                                         .build();
-
+        final Query customerQuery = Queries.readAll(Customer.class);
 
         //noinspection OverlyComplexAnonymousInnerClass
         stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
@@ -431,25 +424,15 @@ public class StandShould {
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
 
         final Customer sampleCustomer = getSampleCustomer();
 
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
 
         // FieldMask with invalid type URLs.
-        final FieldMask.Builder fieldMask = FieldMask.newBuilder()
-                .addPaths("blablabla")
-                .addPaths(Project.getDescriptor().getFields().get(2).getFullName());
-        final Query customerQuery = Query.newBuilder()
-                                         .setTarget(
-                                                 Target.newBuilder()
-                                                       .setIncludeAll(true)
-                                                       .setType(customerType.getTypeName())
-                                                       .build())
-                                         .setFieldMask(fieldMask)
-                                         .build();
+        final String[] paths = {"blablabla", Project.getDescriptor().getFields().get(2).getFullName()};
 
+        final Query customerQuery = Queries.readAll(Customer.class, paths);
 
         stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
             @Override
@@ -502,6 +485,7 @@ public class StandShould {
     }
 
     private static Customer getSampleCustomer() {
+        //noinspection NumericCastThatLosesPrecision
         return Customer.newBuilder()
                        .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
                                                                           .getLeastSignificantBits()))
@@ -514,30 +498,21 @@ public class StandShould {
 
     private static void requestSampleCustomer(int[] fieldIndexes, StreamObserver<QueryResponse> observer) {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
-        final TypeUrl customerType = TypeUrl.of(Customer.class);
 
         final Customer sampleCustomer = getSampleCustomer();
 
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
 
-        final FieldMask.Builder fieldMask = FieldMask.newBuilder();
+        final String[] paths = new String[fieldIndexes.length];
 
-        for (int index : fieldIndexes) {
-            fieldMask.addPaths(Customer.getDescriptor()
-                                       .getFields()
-                                       .get(index)
-                                       .getFullName());
+        for (int i = 0; i < fieldIndexes.length; i++) {
+            paths[i] = Customer.getDescriptor()
+                                   .getFields()
+                                   .get(fieldIndexes[i])
+                                   .getFullName();
         }
 
-        final Query customerQuery = Query.newBuilder()
-                                         .setTarget(
-                                                 Target.newBuilder()
-                                                       .setIncludeAll(true)
-                                                       .setType(customerType.getTypeName())
-                                                       .build())
-                                         .setFieldMask(fieldMask)
-                                         .build();
-
+        final Query customerQuery = Queries.readAll(Customer.class, paths);
 
         stand.execute(customerQuery, observer);
     }

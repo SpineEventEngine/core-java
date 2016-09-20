@@ -24,6 +24,7 @@ package org.spine3.base;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.sun.tools.javac.util.List;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -41,22 +42,44 @@ import static org.spine3.base.Queries.Targets.composeTarget;
  * Client-side utilities for working with queries.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 public class Queries {
 
     private Queries() {
     }
 
-    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
-        final Query result = composeQuery(entityClass, ids, null);
+    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids, String... paths) {
+        //noinspection ConstantConditions
+        final FieldMask fieldMask = paths != null ?
+                                    FieldMask.newBuilder()
+                                             .addAllPaths(List.from(paths))
+                                             .build() :
+                                    null;
+        final Query result = composeQuery(entityClass, ids, fieldMask);
         return result;
+    }
+
+    public static Query readAll(Class<? extends Message> entityClass, String... paths) {
+        //noinspection ConstantConditions
+        final FieldMask fieldMask = paths != null ?
+                              FieldMask.newBuilder()
+                                       .addAllPaths(List.from(paths))
+                                       .build() :
+                              null;
+        final Query result = composeQuery(entityClass, null, fieldMask);
+        return result;
+    }
+
+    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
+        //noinspection ConstantConditions
+        return readByIds(entityClass, ids, (String[]) null);
     }
 
     public static Query readAll(Class<? extends Message> entityClass) {
-        final Query result = composeQuery(entityClass, null, null);
-        return result;
+        //noinspection ConstantConditions
+        return readAll(entityClass, (String[]) null);
     }
-
 
     private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {
         final Target target = composeTarget(entityClass, ids);
@@ -88,7 +111,8 @@ public class Queries {
             return result;
         }
 
-        /* package */ static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids) {
+        /* package */
+        static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids) {
             final TypeUrl type = TypeUrl.of(entityClass);
 
             final boolean includeAll = ids == null;
@@ -109,11 +133,15 @@ public class Queries {
                                                        .setIdFilter(idFilter)
                                                        .build();
 
-            return Target.newBuilder()
-                         .setIncludeAll(includeAll)
-                         .setType(type.getTypeName())
-                         .setFilters(filters)
-                         .build();
+            final Target.Builder builder = Target.newBuilder().setType(type.getTypeName());
+            if (includeAll) {
+                builder.setIncludeAll(true);
+            } else {
+                builder.setFilters(filters);
+
+            }
+
+            return builder.build();
         }
     }
 }
