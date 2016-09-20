@@ -497,17 +497,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
         triggerMultipleUpdates(sampleCustomers, stand);
 
-        // Now we are ready to query.
-        final EntityIdFilter idFilter = idFilterForAggregate(sampleCustomers.keySet());
-
-        final Target customerTarget = Target.newBuilder()
-                                            .setFilters(EntityFilters.newBuilder()
-                                                                     .setIdFilter(idFilter))
-                                            .setType(customerType.getTypeName())
-                                            .build();
-        final Query readMultipleCustomers = Query.newBuilder()
-                                                 .setTarget(customerTarget)
-                                                 .build();
+        final Query readMultipleCustomers = Queries.readByIds(Customer.class, sampleCustomers.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);
@@ -554,7 +544,7 @@ public class StandShould {
         final ImmutableList.Builder<EntityStorageRecord> recordsBuilder = ImmutableList.builder();
         for (CustomerId customerId : sampleCustomers.keySet()) {
             final AggregateStateId stateId = AggregateStateId.of(customerId, customerType);
-            final Customer customer = Customer.getDefaultInstance();
+            final Customer customer = sampleCustomers.get(customerId);
             final Any customerState = AnyPacker.pack(customer);
             final EntityStorageRecord entityStorageRecord = EntityStorageRecord.newBuilder()
                                                                                .setState(customerState)
