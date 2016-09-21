@@ -231,7 +231,7 @@ public class StandShould {
         // So create a query for an unknown type.
         final Query readAllCustomers = Queries.readAll(Customer.class);
 
-        final MemoizeQueryResponseObserver responseObserver = spy(new MemoizeQueryResponseObserver());
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
 
         verifyObserver(responseObserver);
@@ -730,7 +730,7 @@ public class StandShould {
                                               .setTarget(customerTarget)
                                               .build();
 
-        final MemoizeQueryResponseObserver responseObserver = spy(new MemoizeQueryResponseObserver());
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(queryWithNoFilters, responseObserver);
 
         verifyObserver(responseObserver);
