@@ -67,7 +67,7 @@ ext {
     jUnitVersion = '4.12'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
-    publishPlugin = "$projectDir/gradle/plugins/publish.gradle"
+    publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ["client", "server", "values", "testutil", "users"]
@@ -87,10 +87,10 @@ subprojects {
 
         generatedSpineDir = "$generatedRootDir/main/spine"
 
-        testArtifactsScript = '../gradle/plugins/test-artifacts.gradle'
-        generateDescriptorSetScript = '../gradle/plugins/generate-descriptor-set.gradle'
-        gRpcScript = '../gradle/plugins/grpc.gradle'
-        jacocoScript = '../gradle/plugins/jacoco.gradle'
+        testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
+        generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
+        gRpcScript = "${rootDir}/scripts/grpc.gradle"
+        jacocoScript = "${rootDir}/scripts/jacoco.gradle"
     }
 
     apply plugin: 'java'
