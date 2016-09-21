@@ -1,0 +1,37 @@
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.users;
+
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "TenantProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/annotations.proto";
+import "spine/users/organization.proto";
+import "spine/users/tenant_id.proto";
+import "spine/users/user_profile.proto";
+
+// A tenant in a SaaS application.
+message Tenant {
+
+    // The identifier of the tenant.
+    TenantId id = 1;
+
+    oneof kind {
+        // The tenant is an organization.
+        OrganizationProfile organization = 2;
+
+        // The tenant is a person.
+        UserProfile person = 3;
+    }
+}

@@ -22,36 +22,29 @@ syntax = "proto3";
 package spine.users;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_generate_equals_and_hash = true;
-option java_multiple_files = true;
-option java_outer_classname = "UserProto";
+
 option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "UserProfileProto";
+option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
-import "spine/users/user_id.proto";
+import "spine/net/url.proto";
 import "spine/net/email_address.proto";
-import "spine/people/person_name.proto";
 
-// A link to the user's photo.
-message PhotoLink {
-    // The address of an image in one of the popular image formats.
-    string url = 1;
-}
+// General profile information for a user.
+//
+// This message is used for displaying user information.
+// Values of fields of this message are usually obtained from authentication providers.
+//
+message UserProfile {
 
-// General information about a human user.
-message User {
-    // An identifier of the user in the system.
-    UserId id = 1;
+    // The user's display name, if available.
+    string display_name = 1;
 
-    // A user name to be displayed on the screen.
-    people.PersonName name = 2;
+    // The email address corresponding to the user's account in the specified provider, if available.
+    net.EmailAddress email = 2;
 
-    // Email address of the user.
-    net.EmailAddress email = 3;
-
-    // A reference to the user photo.
-    PhotoLink photo = 4;
-
-    // Flag to say if this user is the administrator of the domain.
-    bool domain_admin = 5;
+    // The URL to the user's profile picture, if available.
+    net.Url photo_url = 3;
 }
