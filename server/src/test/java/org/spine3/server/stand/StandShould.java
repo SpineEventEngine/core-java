@@ -784,7 +784,6 @@ public class StandShould {
         when(projectionRepository.findAll()).thenReturn(allResults);
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
-        //noinspection deprecation
         when(projectionRepository.findAll(matchingFilter, any(FieldMask.class))).thenReturn(allResults);
     }
 
