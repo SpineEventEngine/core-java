@@ -82,18 +82,16 @@ import static com.google.common.collect.Maps.newHashMap;
                         typeUrl = TypeUrl.of(state.getTypeUrl());
                     }
 
-                    final Any processed = AnyPacker.pack(
-                            FieldMasks.applyIfValid(
-                                    fieldMask,
-                                    AnyPacker.unpack(state),
-                                    typeUrl));
+                    final Message wholeState = AnyPacker.unpack(state);
+                    final Message maskedState = FieldMasks.applyIfValid(fieldMask, wholeState, typeUrl);
+                    final Any processed = AnyPacker.pack(maskedState);
 
                     matchingRecord.setState(processed);
 
                     result.add(matchingRecord.build());
-                    continue;
+                } else {
+                    result.add(null);
                 }
-                result.add(null);
             }
         }
         return result;

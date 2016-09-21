@@ -50,8 +50,6 @@ public class FieldMasks {
      * <p>Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
-     * <p>The {@code FieldMask} must not be empty for this operation.
-     *
      * <p>n case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
@@ -97,9 +95,7 @@ public class FieldMasks {
 
     /**
      * <p>Applies the given {@code FieldMask} to a single {@link Message}.
-     *
-     * <p>The {@code FieldMask} must be valid for this operation.
-     *
+     **
      * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
