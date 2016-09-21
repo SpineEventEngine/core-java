@@ -1,0 +1,69 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.users;
+
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "OrganizationProto";
+option java_generate_equals_and_hash = true;
+
+import "spine/annotations.proto";
+import "spine/validate.proto";
+import "spine/net/url.proto";
+import "spine/net/email_address.proto";
+import "spine/net/internet_domain.proto";
+
+// General information about an organization.
+message OrganizationProfile {
+
+    // The name of the organization to be used in the UI.
+    string display_name = 1 [(required).value = true];
+
+    // A description of the organization, if available.
+    string description = 2;
+
+    // A primary Internet domain of the organization, if available.
+    //
+    // An organization can possess a number of Internet domains. This field contains a domain that
+    // identifies it among other organizations. For example, for ”Spine Event Engine”, it would be `spine3.org`.
+    //
+    net.InternetDomain primary_domain = 3;
+
+    // The URL of the organization's logo picture, if available.
+    net.Url logo_url = 4;
+
+    // The URL of the organization's site or another URL that represents the organization, if available.
+    //
+    // Unlike the `primary_domain` this field contains full URL, which may lead to a page with information
+    // about the organization. For example: `https://www.teamdev.com/contactus`
+    //
+    net.Url url = 5;
+
+    // A contact email address, if available.
+    net.EmailAddress email = 6;
+
+    // Location information, if available
+    string location = 7;
+}
+

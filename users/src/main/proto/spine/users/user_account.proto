@@ -78,7 +78,7 @@ message UserInfo {
     UserProfile profile = 4;
 }
 
-// Public details of a user account in the system.
+// Details of a user account in the system.
 message UserAccount {
 
     // The identifier of the user account in the application.
