@@ -231,8 +231,10 @@ public class StandShould {
         // So create a query for an unknown type.
         final Query readAllCustomers = Queries.readAll(Customer.class);
 
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        final MemoizeQueryResponseObserver responseObserver = spy(new MemoizeQueryResponseObserver());
         stand.execute(readAllCustomers, responseObserver);
+
+        verifyObserver(responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
 
@@ -461,9 +463,10 @@ public class StandShould {
         final Query customerQuery = Queries.readAll(Customer.class);
 
         //noinspection OverlyComplexAnonymousInnerClass
-        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -472,22 +475,20 @@ public class StandShould {
                     assertTrue(customer.getField(field).equals(sampleCustomer.getField(field)));
                 }
             }
+        };
 
-            @Override
-            public void onError(Throwable t) {
-            }
+        stand.execute(customerQuery, observer);
 
-            @Override
-            public void onCompleted() {
-            }
-        });
+        verifyObserver(observer);
     }
 
     @Test
     public void retrieve_only_selected_param_for_query() {
-        requestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
+
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -498,22 +499,16 @@ public class StandShould {
                 assertFalse(customer.hasId());
                 assertTrue(customer.getNicknamesList().isEmpty());
             }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-
-            @Override
-            public void onCompleted() {
-            }
         });
     }
 
     @Test
     public void retrieve_collection_fields_if_required() {
-        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
+
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -524,22 +519,16 @@ public class StandShould {
                 assertFalse(customer.hasName());
                 assertFalse(customer.hasId());
             }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-
-            @Override
-            public void onCompleted() {
-            }
         });
     }
 
     @Test
     public void retrieve_all_requested_fields() {
-        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new StreamObserver<QueryResponse>() {
+        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
+
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -549,14 +538,6 @@ public class StandShould {
 
                 assertFalse(customer.hasName());
                 assertTrue(customer.hasId());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-
-            @Override
-            public void onCompleted() {
             }
         });
     }
@@ -581,9 +562,10 @@ public class StandShould {
 
         final Query customerQuery = Queries.readAll(Customer.class, paths);
 
-        stand.execute(customerQuery, new StreamObserver<QueryResponse>() {
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -593,23 +575,28 @@ public class StandShould {
 
                 assertFalse(customer.hasId());
                 assertFalse(customer.hasName());
-                assertTrue(customer.getNicknamesList().isEmpty());
+                assertTrue(customer.getNicknamesList()
+                                   .isEmpty());
             }
+        };
 
-            @Override
-            public void onError(Throwable t) {
-            }
+        stand.execute(customerQuery, observer);
 
-            @Override
-            public void onCompleted() {
-            }
-        });
+        verifyObserver(observer);
     }
 
-    private static StreamObserver<QueryResponse> getDuplicateCostumerStreamObserver() {
-        return new StreamObserver<QueryResponse>() {
+    private static void verifyObserver(MemoizeQueryResponseObserver observer) {
+        assertNotNull(observer.responseHandled);
+        assertTrue(observer.isCompleted);
+        assertNull(observer.throwable);
+    }
+
+    private static MemoizeQueryResponseObserver getDuplicateCostumerStreamObserver() {
+        return new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
+                super.onNext(value);
+
                 final List<Any> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
@@ -619,14 +606,6 @@ public class StandShould {
                 assertEquals(sampleCustomer.getName(), customer.getName());
                 assertEquals(sampleCustomer.getNicknamesList(), customer.getNicknamesList());
                 assertTrue(customer.hasId());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-
-            @Override
-            public void onCompleted() {
             }
         };
     }
@@ -643,7 +622,7 @@ public class StandShould {
 
     }
 
-    private static void requestSampleCustomer(int[] fieldIndexes, StreamObserver<QueryResponse> observer) {
+    private static void requestSampleCustomer(int[] fieldIndexes, final MemoizeQueryResponseObserver observer) {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
 
         final Customer sampleCustomer = getSampleCustomer();
@@ -662,6 +641,8 @@ public class StandShould {
         final Query customerQuery = Queries.readAll(Customer.class, paths);
 
         stand.execute(customerQuery, observer);
+
+        verifyObserver(observer);
     }
 
     private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
@@ -749,8 +730,10 @@ public class StandShould {
                                               .setTarget(customerTarget)
                                               .build();
 
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        final MemoizeQueryResponseObserver responseObserver = spy(new MemoizeQueryResponseObserver());
         stand.execute(queryWithNoFilters, responseObserver);
+
+        verifyObserver(responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
         assertTrue("Query returned a non-empty response message list though the filter was not set", messageList.isEmpty());
@@ -1045,10 +1028,6 @@ public class StandShould {
 
     }
 
-
-    /**
-     * A {@link StreamObserver} storing the state of {@link Query} execution.
-     */
     private static class MemoizeStandUpdateCallback implements Stand.StandUpdateCallback {
 
         private Any newEntityState;
