@@ -127,6 +127,9 @@ subprojects {
     }
 
     protobuf {
+        // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
+        // See: https://youtrack.jetbrains.com/issue/IDEA-141744
+        //noinspection GroovyAssignabilityCheck
         plugins {
             grpc {
                 artifact = "io.grpc:protoc-gen-grpc-java:$gRpcVersion"
