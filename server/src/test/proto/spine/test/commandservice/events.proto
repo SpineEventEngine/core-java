@@ -19,23 +19,25 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.test.clientservice;
 
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
 option (type_url_prefix) = "type.spine3.org";
-option java_package = "org.spine3.client.grpc";
+option java_package="org.spine3.test.commandservice.event";
+option java_outer_classname = "CommandServiceEventsProto";
 option java_multiple_files = true;
-option java_outer_classname = "ClientServiceProto";
-option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
-import "spine/base/command.proto";
-import "spine/base/response.proto";
+import "spine/test/commandservice/project.proto";
 
+message ProjectCreated {
+    ProjectId project_id = 1;
+}
 
-// A service for sending commands from clients.
-service ClientService {
-    // Request to handle a command.
-    rpc Post(base.Command) returns (base.Response);
+message TaskAdded {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
+message ProjectStarted {
+    ProjectId project_id = 1;
 }

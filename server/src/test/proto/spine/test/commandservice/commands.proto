@@ -19,34 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice.customer;
+package spine.test.clientservice;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_generate_equals_and_hash = true;
+option java_package="org.spine3.test.commandservice.command";
+option java_outer_classname = "CommandServiceCommandsProto";
 option java_multiple_files = true;
-option java_outer_classname = "CustomerProto";
-option java_package = "org.spine3.test.clientservice.customer";
 
 import "spine/annotations.proto";
-import "spine/people/person_name.proto";
-import "spine/time/time.proto";
+import "spine/test/commandservice/project.proto";
+import "spine/base/event.proto";
 
-message CustomerId {
-    // The date the customer was registered.
-    time.LocalDate registration_date = 1;
-
-    // A consecutive number generated within the registration date.
-    int32 number = 2;
+message CreateProject {
+    ProjectId project_id = 1;
 }
 
-// A Customer is a person who is interested in our products or services.
-message Customer {
-    // The ID of the customer.
-    CustomerId id = 1;
+message AddTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
 
-    // The name of the customer.
-    people.PersonName name = 2;
+message StartProject {
+    ProjectId project_id = 1;
+}
 
-    // The list of customer's nicknames.
-    repeated people.PersonName nicknames = 3;
+message ImportEvents {
+    ProjectId project_id = 1;
+    repeated spine.base.Event event = 2;
 }

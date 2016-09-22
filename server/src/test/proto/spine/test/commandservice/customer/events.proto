@@ -19,31 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice;
+package spine.test.commandservice.customer;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.clientservice.command";
-option java_outer_classname = "ClientServiceCommandsProto";
+option java_package="org.spine3.test.clientservice.customer.event";
+option java_outer_classname = "CustomerEventsProto";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
-import "spine/test/clientservice/project.proto";
-import "spine/base/event.proto";
+import "spine/test/commandservice/customer/customer.proto";
 
-message CreateProject {
-    ProjectId project_id = 1;
-}
-
-message AddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-message StartProject {
-    ProjectId project_id = 1;
-}
-
-message ImportEvents {
-    ProjectId project_id = 1;
-    repeated spine.base.Event event = 2;
+message CustomerCreated {
+    CustomerId customer_id = 1;
+    Customer customer = 2;
 }

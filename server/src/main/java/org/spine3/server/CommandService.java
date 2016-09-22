@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
+import org.spine3.client.grpc.CommandServiceGrpc;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
@@ -34,13 +35,13 @@ import org.spine3.server.type.CommandClass;
 import java.util.Set;
 
 /**
- * The {@code ClientService} allows client applications to post commands and
+ * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
  *
  * @author Alexander Yevsyukov
  */
-public class ClientService
-        extends org.spine3.client.grpc.ClientServiceGrpc.ClientServiceImplBase {
+public class CommandService
+        extends CommandServiceGrpc.CommandServiceImplBase {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
@@ -48,7 +49,7 @@ public class ClientService
         return new Builder();
     }
 
-    protected ClientService(Builder builder) {
+    protected CommandService(Builder builder) {
         this.boundedContextMap = builder.getBoundedContextMap();
     }
 
@@ -68,7 +69,7 @@ public class ClientService
 
     private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
-        log().error("Unsupported command posted to ClientService", unsupported);
+        log().error("Unsupported command posted to CommandService", unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
@@ -96,11 +97,11 @@ public class ClientService
         }
 
         /**
-         * Builds the {@link ClientService}.
+         * Builds the {@link CommandService}.
          */
-        public ClientService build() {
+        public CommandService build() {
             this.boundedContextMap = createBoundedContextMap();
-            final ClientService result = new ClientService(this);
+            final CommandService result = new CommandService(this);
             return result;
         }
 
@@ -125,7 +126,7 @@ public class ClientService
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ClientService.class);
+        private final Logger value = LoggerFactory.getLogger(CommandService.class);
     }
 
     private static Logger log() {

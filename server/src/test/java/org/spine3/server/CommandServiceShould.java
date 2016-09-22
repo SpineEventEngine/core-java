@@ -49,9 +49,9 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ClientServiceShould {
+public class CommandServiceShould {
 
-    private ClientService service;
+    private CommandService service;
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
     private BoundedContext projectsContext;
@@ -74,7 +74,7 @@ public class ClientServiceShould {
         boundedContexts.add(customersContext);
 
         // Expose two Bounded Contexts via a Client Service.
-        final ClientService.Builder builder = ClientService.newBuilder();
+        final CommandService.Builder builder = CommandService.newBuilder();
         for (BoundedContext context : boundedContexts) {
             builder.addBoundedContext(context);
         }

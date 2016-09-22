@@ -19,30 +19,23 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice.customer;
+package spine.client;
 
+// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
+// to hide implementation details from the public API of the framework.
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.clientservice.customer.command";
-option java_outer_classname = "CustomerCommandsProto";
+option java_package = "org.spine3.client.grpc";
 option java_multiple_files = true;
+option java_outer_classname = "CommandServiceProto";
+option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
-import "spine/test/clientservice/customer/customer.proto";
+import "spine/base/command.proto";
+import "spine/base/response.proto";
 
-// A request to create a new customer record.
-message CreateCustomer {
-    // The ID of the customer.
-    // Even though we have an ID field defined in the `Customer` type, we need a separate ID field in the command
-    // so that it can be attributed to an instance of the `Customer` aggregate.
-    CustomerId customer_id = 1;
 
-    // Customer data.
-    Customer customer = 2;
-}
-
-// The command to reset CustomerId generator when a new date is started.
-// The ID generator should start a new date with the customer number equal to 1.
-message ResetCustomerCounter {
-    // This command message does not have field because it's an imperative to the system internals.
-    // The scheduling of the command will be set in `CommandContext` of the corresponding command.
+// A service for sending commands from clients.
+service CommandService {
+    // Request to handle a command.
+    rpc Post(base.Command) returns (base.Response);
 }
