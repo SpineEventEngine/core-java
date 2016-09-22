@@ -41,27 +41,76 @@ import "google/protobuf/descriptor.proto";
 import "spine/annotations.proto";
 
 extend google.protobuf.MessageOptions {
+
     // The default format string for validation error message text.
+    //
+    // This option extends message types that extend `FieldOptions`
     // The number of parameters and their types are determined by the type of field options.
+    //
     string default_message = 51001;
+
+    // The option to require at least one of the fields or a combination of fields.
+    //
+    // Unlike the `required` field option which always require corresponding field,
+    // this message option allows to require alternative fields.
+    //
+    // Field names are separated using the pipe (`|`) symbol. The combination of fields is defined
+    // using the ampersand (`&`) symbol.
+    //
+    // For example:
+    // <pre>
+    // message PersonName {
+    //    (required_field) = "given_name|honorific_prefix & family_name";
+    //
+    //    string honorific_prefix = 1;
+    //    string given_name = 2;
+    //    string middle_name = 3;
+    //    string family_name = 4;
+    //    string honorific_suffix = 5;
+    // }
+    //
+    string required_field = 51002;
+
+    // Reserve 51003 to 51099 for future extensions of message options.
 }
 
 extend google.protobuf.FieldOptions {
-    RequiredOption required = 51002;
-    DecimalMaxOption decimal_max = 51026;
-    DecimalMinOption decimal_min = 51037;
-    MaxOption max = 51006;
-    MinOption min = 51007;
-    DigitsOption digits = 51004;
-    TimeOption when = 51005;
-    PatternOption pattern = 51008;
-    ValidOption valid = 51009;
+
+    // The option to mark a field as required.
+    // Example:
+    // <pre>
+    //     string my_field = 1 [(required).value = true];
+    // </pre>
+    //
+    RequiredOption required = 51100;
+
+    // The option to define maximal decimal value.
+    DecimalMaxOption decimal_max = 51101;
+    // The option to define minimal decimal value.
+    DecimalMinOption decimal_min = 51102;
+
+    MaxOption max = 51103;
+    MinOption min = 51104;
+
+    DigitsOption digits = 51105;
+
+    TimeOption when = 51106;
+
+    PatternOption pattern = 51107;
+
+    ValidOption valid = 51108;
 }
 
-// If the field type is `message`, it must be set to a non-default instance;
-// if it is `string` or `bytes`, the value must not be an empty string or array.
+// The option to mark a field as required.
+//
+// If the field type is a `message`, it must be set to a non-default instance.
+// If it is `string` or `bytes`, the value must not be an empty string or an array.
 // Other field types are not applicable.
 // If the field is repeated, it must have at least one value set, and all its values must be valid.
+//
+// Unlike the `required` keyword used in Protobuf 2, the option does not affect the transfer layer.
+// Even if a message content violates the requirement set by the option, it would still be a valid
+// message for the Protobuf library.
 //
 // Example:
 //
@@ -88,10 +137,13 @@ message RequiredOption {
 // double value = 1 [(decimal_min).value = "10.5", (decimal_min).inclusive = true];
 //
 message DecimalMinOption {
+
     // The default error message format string.
+    //
     // The format parameters are:
-    // 1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
-    // 2) the minimum number.
+    //   1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
+    //   2) the minimum number.
+    //
     option (default_message) = "Number must be greater than %s%s.";
 
     // The string representation of the minimum field value.
@@ -110,8 +162,9 @@ message DecimalMinOption {
 // Repeated fields are supported.
 //
 // Example:
-//
-// double value = 1 [(decimal_max).value = "10.5", (decimal_max).inclusive = true];
+// <pre>
+//     double value = 1 [(decimal_max).value = "10.5", (decimal_max).inclusive = true];
+// </pre>
 //
 message DecimalMaxOption {
     // The default error message format string.
@@ -124,7 +177,9 @@ message DecimalMaxOption {
     string value = 1;
 
     // Specifies if the field can be equal to the maximum value.
+    //
     // The default value is false.
+    //
     bool inclusive = 2;
 
     // A user-defined validation error format message.
@@ -132,12 +187,14 @@ message DecimalMaxOption {
 }
 
 // The field value must be greater than or equal to the given minimum number.
+//
 // Is applicable only to numbers.
 // Repeated fields are supported.
 //
 // Example:
-//
-// double value = 1 [(min).value = "10.5"];
+// <pre>
+//     double value = 1 [(min).value = "10.5"];
+// </pre>
 //
 message MinOption {
     // The default error message format string.
@@ -152,15 +209,19 @@ message MinOption {
 }
 
 // The field value must be less than or equal to the given maximum number.
+//
 // Is applicable only to numbers.
 // Repeated fields are supported.
 //
 // Example:
-//
-// double value = 1 [(max).value = "10.5"];
+// <pre>
+//    double value = 1 [(max).value = "10.5"];
+// </pre>
 //
 message MaxOption {
+
     // The default error message format string.
+    //
     // The format parameter is the maximum number.
     option (default_message) = "Number must be less than or equal to %s.";
 
@@ -172,44 +233,58 @@ message MaxOption {
 }
 
 // The field value must be a number with the certain integral/fractional digit count.
+//
 // Is applicable only to numbers.
 // Repeated fields are supported.
 // This option is considered as not set if either `integer_max` or `fraction_max` parameter is not set (is zero).
 //
 // Example:
-//
-// double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+// <pre>
+//     double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+// </pre>
 //
 message DigitsOption {
+
     // The default error message format string.
+    //
     // The format parameters are:
-    // 1) max integral digit count;
-    // 2) max fractional digit count;
+    //   1) max integral digit count;
+    //   2) max fractional digit count;
+    //
     option (default_message) = "Number value is out of bounds, expected: <%s max digits>.<%s max digits>.";
 
     // Maximum count of integral digits of the number (inclusive).
+    //
     // Must be greater than zero.
+    //
     int32 integer_max = 1;
 
     // Maximum count of fractional digits of the number (inclusive).
+    //
     // Must be greater than or equal to zero.
+    //
     int32 fraction_max = 2;
 
     // A user-defined validation error format message.
     string msg_format = 3;
 }
 
-// The field value is a Timestamp which points to the moment in the future or the past.
-// Is applicable only to Timestamps.
+// The field value is a `Timestamp` which points to the moment in the future or the past.
+//
+// Is applicable only to `Timestamp`s.
 // Repeated fields are supported.
 //
 // Example:
-//
-// google.protobuf.Timestamp field = 1 [(when).in = FUTURE];
+// <pre>
+//     google.protobuf.Timestamp field = 1 [(when).in = FUTURE];
+// </pre>
 //
 message TimeOption {
+
     // The default error message format string.
+    //
     // The format parameter is "past" or "future" string, depending on the restriction.
+    //
     option (default_message) = "Timestamp value must be in the %s.";
 
     // Defines a restriction for the timestamp.
@@ -221,6 +296,7 @@ message TimeOption {
 
 // This enumeration defines restriction for date/time values.
 enum Time {
+
     // The default value (if the time option is not set).
     TIME_UNDEFINED = 0;
 
@@ -236,12 +312,16 @@ enum Time {
 // Repeated fields are supported.
 //
 // Example:
-//
-// string field = 1 [(pattern).regex = "^[A-Za-z0-9+]+$"];
+// <pre>
+//     string field = 1 [(pattern).regex = "^[A-Za-z0-9+]+$"];
+// </pre>
 //
 message PatternOption {
+
     // The default error message format string.
+    //
     // The format parameter is the regular expression to which the value must match.
+    //
     option (default_message) = "String must match the regular expression '%s'.";
 
     // The regular expression to match.
@@ -259,14 +339,17 @@ message PatternOption {
 // Repeated fields are supported.
 //
 // Example:
-//
-// MyMessage field = 1 [(valid).value = true];
+// <pre>
+//     MyMessage field = 1 [(valid).value = true];
+// </pre>
 //
 message ValidOption {
+
     // The default error message for the field.
     option (default_message) = "Message must have valid properties.";
 
     // If it is true, the message's fields are validated.
+    //
     // The default value is false.
     bool value = 1;
 
