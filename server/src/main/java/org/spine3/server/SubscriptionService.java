@@ -60,19 +60,39 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         return new Builder();
     }
 
-    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
     @Override
-    public void subscribe(Topic topic, final StreamObserver<SubscriptionUpdate> responseObserver) {
-        log().debug("Incoming subscription request to topic: {}", topic);
-        final Target target = topic.getTarget();
-        final BoundedContext boundedContext = selectBoundedContext(target);
+    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
+    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
+        log().debug("Creating the subscription to a topic: {}", topic);
 
         try {
-            final SubscriptionContext context = new SubscriptionContext();
+            final Target target = topic.getTarget();
+            final BoundedContext boundedContext = selectBoundedContext(target);
+            final Stand stand = boundedContext.getStand();
+
+            final Subscription subscription = stand.subscribe(target);
+
+            responseObserver.onNext(subscription);
+            responseObserver.onCompleted();
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
+            log().error("Error processing subscription request", e);
+            responseObserver.onError(e);
+            responseObserver.onCompleted();
+        }
+
+    }
+
+    @Override
+    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
+    public void activate(final Subscription subscription, final StreamObserver<SubscriptionUpdate> responseObserver) {
+        log().debug("Activating the subscription: {}", subscription);
+
+        try {
+            final BoundedContext boundedContext = selectBoundedContext(subscription);
+
             final Stand.StandUpdateCallback updateCallback = new Stand.StandUpdateCallback() {
                 @Override
                 public void onEntityStateUpdate(Any newEntityState) {
-                    final Subscription subscription = context.getSubscription();
                     Preconditions.checkNotNull(subscription);
                     final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                                         .setSubscription(subscription)
@@ -82,14 +102,10 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                     responseObserver.onNext(update);
                 }
             };
-
-
-            final Subscription subscription = boundedContext.getStand()
-                                                            .subscribe(target, updateCallback);
-            context.setSubscription(subscription);
+            boundedContext.getStand().activate(subscription, updateCallback);
 
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            log().error("Error processing subscription request", e);
+            log().error("Error activating the subscription", e);
             responseObserver.onError(e);
             responseObserver.onCompleted();
         }
@@ -178,23 +194,6 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             for (TypeUrl availableType : availableTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }
-        }
-    }
-
-    /**
-     * The context for the subscription.
-     *
-     * <p>Used as a wrapper around the subscription being created during the {@link #subscribe(Topic, StreamObserver)}.
-     */
-    private static class SubscriptionContext {
-        private Subscription subscription;
-
-        public Subscription getSubscription() {
-            return subscription;
-        }
-
-        public void setSubscription(Subscription subscription) {
-            this.subscription = subscription;
         }
     }
 

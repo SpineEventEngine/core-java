@@ -163,7 +163,9 @@ public class Stand {
         if (subscriptionRegistry.hasType(typeUrl)) {
             final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
             for (final SubscriptionRecord subscriptionRecord : allRecords) {
-                if (subscriptionRecord.matches(typeUrl, id, entityState)) {
+
+                final boolean subscriptionIsActive = subscriptionRecord.isActive();
+                if (subscriptionIsActive && subscriptionRecord.matches(typeUrl, id, entityState)) {
                     callbackExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -181,20 +183,33 @@ public class Stand {
      * <p>Once this instance of {@code Stand} receives an update of an entity with the given {@code TypeUrl},
      * all such callbacks are executed.
      *
-     * @param target   an instance {@link Target}, defining the entity and criteria,
-     *                 which changes should be propagated to the {@code callback}
-     * @param callback an instance of {@link StandUpdateCallback} executed upon entity update.
+     * @param target an instance {@link Target}, defining the entity and criteria,
+     *               which changes should be propagated to the {@code callback}
      */
     @CheckReturnValue
-    public Subscription subscribe(Target target, StandUpdateCallback callback) {
-        final Subscription subscription = subscriptionRegistry.addSubscription(target, callback);
+    public Subscription subscribe(Target target) {
+        final Subscription subscription = subscriptionRegistry.addSubscription(target);
         return subscription;
+    }
+
+    /**
+     * Activate the subscription created via {@link #subscribe(Target)}.
+     *
+     * <p>After the activation, the clients will start receiving the updates via {@code StandUpdateCallback}
+     * upon the changes in the entities, defined by the {@code Target} attribute used for this subscription.
+     *
+     * @param subscription the subscription to activate.
+     * @param callback     an instance of {@link StandUpdateCallback} executed upon entity update.
+     * @see #subscribe(Target)
+     */
+    public void activate(Subscription subscription, StandUpdateCallback callback) {
+        subscriptionRegistry.activate(subscription, callback);
     }
 
     /**
      * Cancel the {@link Subscription}.
      *
-     * <p>Typically invoked to cancel the previous {@link #subscribe(Target, StandUpdateCallback)} call.
+     * <p>Typically invoked to cancel the previous {@link #activate(Subscription, StandUpdateCallback)} call.
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
@@ -406,7 +421,7 @@ public class Stand {
     /**
      * A contract for the callbacks to be executed upon entity state change.
      *
-     * @see #subscribe(Target, StandUpdateCallback)
+     * @see #activate(Subscription, StandUpdateCallback)
      * @see #cancel(Subscription)
      */
     public interface StandUpdateCallback {
@@ -487,8 +502,15 @@ public class Stand {
         private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = new HashMap<>();
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
 
+        private synchronized void activate(Subscription subscription, StandUpdateCallback callback) {
+            if (!subscriptionToAttrs.containsKey(subscription)) {
+                throw new RuntimeException("Cannot find the subscription in the registry.");
+            }
+            final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
+            subscriptionRecord.activate(callback);
+        }
 
-        private synchronized Subscription addSubscription(Target target, StandUpdateCallback callback) {
+        private synchronized Subscription addSubscription(Target target) {
             final String subscriptionId = UUID.randomUUID()
                                               .toString();
             final String typeAsString = target.getType();
@@ -497,7 +519,7 @@ public class Stand {
                                                           .setId(subscriptionId)
                                                           .setType(typeAsString)
                                                           .build();
-            final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type, callback);
+            final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type);
 
             if (!typeToAttrs.containsKey(type)) {
                 typeToAttrs.put(type, new HashSet<SubscriptionRecord>());
@@ -541,13 +563,27 @@ public class Stand {
         private final Subscription subscription;
         private final Target target;
         private final TypeUrl type;
-        private final StandUpdateCallback callback;
+        private StandUpdateCallback callback = null;
 
-        private SubscriptionRecord(Subscription subscription, Target target, TypeUrl type, StandUpdateCallback callback) {
+        private SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
             this.subscription = subscription;
             this.target = target;
             this.type = type;
+        }
+
+        private void activate(StandUpdateCallback callback) {
             this.callback = callback;
+        }
+
+        private boolean isActive() {
+            final boolean result = this.callback != null;
+            return result;
+        }
+
+        private boolean matches(TypeUrl type, Object id, Any entityState) {
+            final boolean typeMatches = this.type.equals(type);
+            // TODO[alex.tymchenko]: use EntityFilter to match ID and state against it
+            return typeMatches;
         }
 
         @Override
@@ -565,12 +601,6 @@ public class Stand {
         @Override
         public int hashCode() {
             return Objects.hashCode(subscription);
-        }
-
-        private boolean matches(TypeUrl type, Object id, Any entityState) {
-            final boolean typeMatches = this.type.equals(type);
-            // TODO[alex.tymchenko]: use EntityFilter to match ID and state against it
-            return typeMatches;
         }
     }
 }
