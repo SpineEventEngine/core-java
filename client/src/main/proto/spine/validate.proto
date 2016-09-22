@@ -60,7 +60,7 @@ extend google.protobuf.MessageOptions {
     // For example:
     //
     // message PersonName {
-    //    (required_field) = "given_name|honorific_prefix & family_name";
+    //    option (required_field) = "given_name|honorific_prefix & family_name";
     //
     //    string honorific_prefix = 1;
     //    string given_name = 2;
@@ -116,11 +116,14 @@ extend google.protobuf.FieldOptions {
 // MyMessage field = 1 [(required).value = true];
 //
 message RequiredOption {
+
     // The default error message.
     option (default_message) = "Value must be set.";
 
     // Specifies if the field is required. Must be set to true. Otherwise, the field is not validated.
+    //
     // The default value is false.
+    //
     bool value = 1;
 
     // A user-defined validation error format message.
@@ -128,12 +131,13 @@ message RequiredOption {
 }
 
 // The field value must be greater than (or equal to, if the `inclusive` parameter is true) the given minimum number.
+//
 // Is applicable only to numbers.
 // Repeated fields are supported.
 //
 // Example:
 //
-// double value = 1 [(decimal_min).value = "10.5", (decimal_min).inclusive = true];
+//     double value = 1 [(decimal_min).value = "10.5", (decimal_min).inclusive = true];
 //
 message DecimalMinOption {
 

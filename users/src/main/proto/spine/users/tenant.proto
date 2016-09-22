@@ -31,6 +31,7 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 import "spine/users/organization.proto";
 import "spine/users/tenant_id.proto";
 import "spine/users/user_profile.proto";
@@ -41,6 +42,11 @@ message Tenant {
     // The identifier of the tenant.
     TenantId id = 1;
 
+    // An application can allow only organizational tenants, or only persons, or both.
+    // This requirement would define what a valid `Tenant` message is.
+    // That's why we don't define validation constraints in this message, and leave it to be
+    // the responsibility of the application.
+    //
     oneof kind {
         // The tenant is an organization.
         OrganizationProfile organization = 2;

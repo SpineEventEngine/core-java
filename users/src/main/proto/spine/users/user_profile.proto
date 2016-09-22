@@ -29,6 +29,7 @@ option java_outer_classname = "UserProfileProto";
 option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 import "spine/net/url.proto";
 import "spine/net/email_address.proto";
 
@@ -38,6 +39,9 @@ import "spine/net/email_address.proto";
 // Values of fields of this message are usually obtained from authentication providers.
 //
 message UserProfile {
+
+    // A user profile must have at least one of these fields defined.
+    option (required_field) = "display_name|email";
 
     // The user's display name, if available.
     string display_name = 1;

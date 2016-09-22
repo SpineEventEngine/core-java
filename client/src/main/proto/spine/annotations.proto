@@ -38,6 +38,7 @@ option java_package = "org.spine3.annotations";
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.FieldOptions {
+
     // Indicates a field which is internal to Spine, not part of the public API, and should not be used by users of the framework.
     //
     // If you plan to implement an extension of the framework, which is going to be
@@ -45,11 +46,14 @@ extend google.protobuf.FieldOptions {
     // team, as the internal APIs do not have the same stability API guarantee as public ones.
     //
     // See `SPI` option if you plan to write an extension of the framework.
+    //
     bool internal = 58000;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
+    //
     // SPI is used to enable framework extension and replaceable components (implement a new storage, etc).
     // See "Effective Java 2nd Edition", chapter 2, item 1 for more info about service provider framework pattern.
+    //
     bool SPI = 58001;
 
     // Indicates a field that can change at any time, and has no guarantee of API stability and backward-compatibility.
@@ -58,59 +62,86 @@ extend google.protobuf.FieldOptions {
     // 1. This annotation is used only on public API. Internal interfaces should not use it.
     // 2. This annotation can only be added to new API. Adding it to an existing API is considered API-breaking.
     // 3. Removing this annotation from an API gives it stable status.
+    //
     bool experimental = 58002;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future release.
+    //
     // An API bearing this annotation is exempt from any compatibility guarantees made by its containing library.
     // Note that the presence of this annotation implies nothing about the quality of the API in question,
     // only the fact that it is not "API-frozen."
     // It is generally safe for applications to depend on beta APIs, at the cost of some extra work during upgrades.
+    //
     bool beta = 58003;
 }
 
 extend google.protobuf.MessageOptions {
-    // Indicates a file which is internal to Spine, not part of the public API, and should not be used by users of the framework.
+
+    // Indicates a file which is internal to Spine, not part of the public API, and should not be used by users of
+    // the framework.
+    //
     // See more info in `annotations.proto`.
+    //
     bool internal_type = 58100;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
+    //
     // See more info in `annotations.proto`.
+    //
     bool SPI_type = 58101;
 
-    // Indicates a public API that can change at any time, and has no guarantee of API stability and backward-compatibility.
+    // Indicates a public API that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    //
     // See more info in `annotations.proto`.
+    //
     bool experimental_type = 58102;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future release.
+    //
     // See more info in `annotations.proto`.
+    //
     bool beta_type = 58103;
 }
 
 extend google.protobuf.FileOptions {
+
     // Indicates a file which should not be used by users of the framework.
+    //
     // See more info in `annotations.proto`.
+    //
     bool internal_all = 58200;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
+    //
     // See more info in `annotations.proto`.
+    //
     bool SPI_all = 58201;
 
-    // Indicates a public API that can change at any time, and has no guarantee of API stability and backward-compatibility.
+    // Indicates a public API that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    //
     // See more info in `annotations.proto`.
+    //
     bool experimental_all = 58202;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future release.
+    //
     // See more info in `annotations.proto`.
+    //
     bool beta_all = 58203;
 
     // Specifies a type URL prefix for all types within a file.
+    //
     // This type URL will be used when packing messages into `Any`.
     // See `any.proto` for more details.
+    //
     string type_url_prefix = 58204; // NOTE: this field number is used in `tools` project,
                                     // ProtoToJavaMapperPlugin (update it there on changing).
 }
 
 extend google.protobuf.ServiceOptions {
+
     // Indicates that the service is a part of Service Provider Interface (SPI).
     bool SPI_service = 58300;
 }

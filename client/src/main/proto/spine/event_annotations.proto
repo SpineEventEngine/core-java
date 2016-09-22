@@ -40,13 +40,15 @@ import "google/protobuf/descriptor.proto";
 import "spine/annotations.proto";
 
 extend google.protobuf.MessageOptions {
+
     // An instruction to associate an enrichment message with event message(s) to enrich.
+    //
     // If the event message to enrich is in another package, the event type name(s) should be qualified
     // according to Protobuf conventions.
     // If the enrichment is for multiple events, their type names should be separated with the comma.
     //
     // For example:
-    // <pre>
+    //
     // message MyEventEnrichment {
     //     option (enrichment_for) = "example.events.MyEvent";
     //     ...
@@ -57,7 +59,7 @@ extend google.protobuf.MessageOptions {
     //                               "example.events.SecondEvent";
     //     ...
     // }
-    // </pre>
+    //
     //
     // This option can be omitted if:
     // - the enrichment message is enclosed into the target event message;
@@ -68,15 +70,17 @@ extend google.protobuf.MessageOptions {
 }
 
 extend google.protobuf.FieldOptions {
+
     // An instruction to associate an enrichment message field with the field from an event message to enrich
     // (or event context field).
+    //
     // The value of the option is the name of the target event message/context field
     // which is used to set the corresponding enrichment's field.
     // The value must have event/context FQN prefix if `enrichment_for` option is omitted
     // ("example.events.MyEvent.user_id" instead of just "user_id").
     //
     // An example:
-    // <pre>
+    //
     // message MyEvent {
     //    spine.users.UserId user_id = 1;
     //    ...
@@ -90,8 +94,7 @@ extend google.protobuf.FieldOptions {
     // message MyEventEnrichment {
     //     string str = 1 [(by) = "MyEvent.user_id"];
     // }
-    // </pre>
     //
-    string by = 57125; // NOTE: this field number is used in `tools` project,
+    string by = 57125; // NOTE: this field number is used in the `tools` project,
                        // EnrichmentLookupPlugin (update it there on changing).
 }
