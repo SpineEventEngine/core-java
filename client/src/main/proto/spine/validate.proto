@@ -58,7 +58,7 @@ extend google.protobuf.MessageOptions {
     // using the ampersand (`&`) symbol.
     //
     // For example:
-    // <pre>
+    //
     // message PersonName {
     //    (required_field) = "given_name|honorific_prefix & family_name";
     //
@@ -78,14 +78,13 @@ extend google.protobuf.FieldOptions {
 
     // The option to mark a field as required.
     // Example:
-    // <pre>
     //     string my_field = 1 [(required).value = true];
-    // </pre>
     //
     RequiredOption required = 51100;
 
     // The option to define maximal decimal value.
     DecimalMaxOption decimal_max = 51101;
+
     // The option to define minimal decimal value.
     DecimalMinOption decimal_min = 51102;
 
@@ -162,15 +161,16 @@ message DecimalMinOption {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //     double value = 1 [(decimal_max).value = "10.5", (decimal_max).inclusive = true];
-// </pre>
 //
 message DecimalMaxOption {
+
     // The default error message format string.
+    //
     // The format parameters are:
-    // 1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
-    // 2) the maximum number.
+    //   1) "or equal to " string (if the `inclusive` parameter is true) or an empty string;
+    //   2) the maximum number.
+    //
     option (default_message) = "Number must be less than %s%s.";
 
     // The string representation of the maximum field value.
@@ -192,13 +192,14 @@ message DecimalMaxOption {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //     double value = 1 [(min).value = "10.5"];
-// </pre>
 //
 message MinOption {
+
     // The default error message format string.
+    //
     // The format parameter is the minimum number.
+    //
     option (default_message) = "Number must be greater than or equal to %s.";
 
     // The string representation of the minimum field value.
@@ -214,9 +215,7 @@ message MinOption {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //    double value = 1 [(max).value = "10.5"];
-// </pre>
 //
 message MaxOption {
 
@@ -239,9 +238,7 @@ message MaxOption {
 // This option is considered as not set if either `integer_max` or `fraction_max` parameter is not set (is zero).
 //
 // Example:
-// <pre>
 //     double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
-// </pre>
 //
 message DigitsOption {
 
@@ -275,9 +272,7 @@ message DigitsOption {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //     google.protobuf.Timestamp field = 1 [(when).in = FUTURE];
-// </pre>
 //
 message TimeOption {
 
@@ -312,9 +307,7 @@ enum Time {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //     string field = 1 [(pattern).regex = "^[A-Za-z0-9+]+$"];
-// </pre>
 //
 message PatternOption {
 
@@ -339,9 +332,7 @@ message PatternOption {
 // Repeated fields are supported.
 //
 // Example:
-// <pre>
 //     MyMessage field = 1 [(valid).value = true];
-// </pre>
 //
 message ValidOption {
 
