@@ -70,11 +70,18 @@ public class MessageValidator {
     public List<ConstraintViolation> validate(Message message) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         final Descriptor msgDescriptor = message.getDescriptorForType();
+
+        final AlternativeFieldValidator altFieldValidator = new AlternativeFieldValidator(message,
+                                                                                          msgDescriptor,
+                                                                                          rootFieldPath,
+                                                                                          fieldValidatorFactory);
+        result.addAll(altFieldValidator.validate());
+
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> validator = fieldValidatorFactory.create(field, value, rootFieldPath);
-            final List<ConstraintViolation> violations = validator.validate();
+            final FieldValidator<?> fieldValidator = fieldValidatorFactory.create(field, value, rootFieldPath);
+            final List<ConstraintViolation> violations = fieldValidator.validate();
             result.addAll(violations);
         }
         return result.build();
