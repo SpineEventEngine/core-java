@@ -35,7 +35,7 @@ import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.bc.event.ProjectCreated;
-import org.spine3.test.clientservice.ProjectId;
+import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
 import org.spine3.testdata.TestStandFactory;
 

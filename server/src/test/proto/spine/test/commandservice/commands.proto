@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice;
+package spine.test.commandservice;
 
 option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.commandservice.command";
