@@ -1,3 +1,22 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
 buildscript {
     repositories {
         mavenCentral()
@@ -35,7 +54,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.5.7-SNAPSHOT'
+    version = '0.5.8-SNAPSHOT'
 }
 
 ext {
@@ -48,7 +67,7 @@ ext {
     jUnitVersion = '4.12'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
-    publishPlugin = "$projectDir/gradle/plugins/publish.gradle"
+    publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
     projectsToPublish = ["client", "server", "values", "testutil", "users"]
@@ -68,10 +87,10 @@ subprojects {
 
         generatedSpineDir = "$generatedRootDir/main/spine"
 
-        testArtifactsScript = '../gradle/plugins/test-artifacts.gradle'
-        generateDescriptorSetScript = '../gradle/plugins/generate-descriptor-set.gradle'
-        gRpcScript = '../gradle/plugins/grpc.gradle'
-        jacocoScript = '../gradle/plugins/jacoco.gradle'
+        testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
+        generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
+        gRpcScript = "${rootDir}/scripts/grpc.gradle"
+        jacocoScript = "${rootDir}/scripts/jacoco.gradle"
     }
 
     apply plugin: 'java'

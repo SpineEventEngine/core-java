@@ -17,20 +17,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
+syntax = "proto3";
 
-    compile project(path: ':client')
-    compile project(path: ':values')
+package spine.users;
 
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil")
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "TenantProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/timestamp.proto";
+
+import "spine/annotations.proto";
+import "spine/users/organization.proto";
+import "spine/users/tenant_id.proto";
+import "spine/users/user_profile.proto";
+
+// A tenant in a SaaS application.
+message Tenant {
+
+    // The identifier of the tenant.
+    TenantId id = 1;
+
+    oneof kind {
+        // The tenant is an organization.
+        OrganizationProfile organization = 2;
+
+        // The tenant is a person.
+        UserProfile person = 3;
+    }
 }
-
-apply from: gRpcScript
-
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId

@@ -41,6 +41,7 @@ message Subject {
 
 // A level of access to a shared object.
 enum SharingLevel {
+
     // No access to corresponding objects.
     NONE = 0;
 

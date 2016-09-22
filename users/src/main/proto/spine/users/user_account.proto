@@ -31,27 +31,11 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
-import "spine/users/user_id.proto";
-import "spine/people/person_name.proto";
 import "spine/net/url.proto";
-import "spine/net/email_address.proto";
 import "spine/net/internet_domain.proto";
-
-// General profile information for a user.
-//
-// This message is used for displaying user information.
-//
-message UserProfile {
-
-    // The user's display name, if available.
-    string display_name = 1;
-
-    // The email address corresponding to the user's account in the specified provider, if available.
-    net.EmailAddress email = 2;
-
-    // The URL to the user's profile picture, if available.
-    net.Url photo_url = 3;
-}
+import "spine/people/person_name.proto";
+import "spine/users/user_id.proto";
+import "spine/users/user_profile.proto";
 
 // Information exposed by an identity provider such as Google Sign-In or Facebook Login.
 //
@@ -78,7 +62,7 @@ message UserInfo {
     UserProfile profile = 4;
 }
 
-// Public details of a user account in the system.
+// Details of a user account in the system.
 message UserAccount {
 
     // The identifier of the user account in the application.
