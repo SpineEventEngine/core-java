@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.Identifiers;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -59,6 +60,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -580,27 +582,43 @@ public class Stand {
             return result;
         }
 
-        private boolean matches(TypeUrl type, Object id, Any entityState) {
-            final boolean typeMatches = this.type.equals(type);
+        private boolean matches(
+                TypeUrl type,
+                Object id,
+                // entityState will be later used for more advanced filtering
+                @SuppressWarnings("UnusedParameters") Any entityState
+        ) {
+            final boolean result;
 
-            return typeMatches;
-            // TODO[alex.tymchenko]: complete the implementation.
-//            final boolean includeAll = target.getIncludeAll();
-//
-//            if(typeMatches && includeAll) {
-//                return true;
-//            }
-//
-//            final EntityIdFilter givenIdFilter = target.getFilters()
-//                                                       .getIdFilter();
-//            final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
-//                                                       .equals(givenIdFilter);
-//
-//            if (idFilterSet) {
-//
-//            }
-//
-//            return false;
+            final boolean typeMatches = this.type.equals(type);
+            if (typeMatches) {
+                final boolean includeAll = target.getIncludeAll();
+                final EntityFilters filters = target.getFilters();
+                result = includeAll || matchByFilters(id, filters);
+            } else {
+                result = false;
+            }
+
+            return result;
+        }
+
+        private static boolean matchByFilters(Object id, EntityFilters filters) {
+            final boolean result;
+            final EntityIdFilter givenIdFilter = filters
+                    .getIdFilter();
+            final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
+                                                       .equals(givenIdFilter);
+            if (idFilterSet) {
+                final Any idAsAny = Identifiers.idToAny(id);
+                final EntityId givenEntityId = EntityId.newBuilder()
+                                                       .setId(idAsAny)
+                                                       .build();
+                final List<EntityId> idsList = givenIdFilter.getIdsList();
+                result = idsList.contains(givenEntityId);
+            } else {
+                result = false;
+            }
+            return result;
         }
 
         @Override

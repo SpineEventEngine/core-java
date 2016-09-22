@@ -90,12 +90,14 @@ public class Queries {
 
         /* package */ static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids) {
             final TypeUrl type = TypeUrl.of(entityClass);
-
+            final Target.Builder builder = Target.newBuilder();
             final boolean includeAll = ids == null;
 
-            final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
+            if (includeAll) {
+                builder.setIncludeAll(true);
+            } else {
 
-            if (!includeAll) {
+                final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
                 for (Message rawId : ids) {
                     final Any packedId = AnyPacker.pack(rawId);
                     final EntityId entityId = EntityId.newBuilder()
@@ -103,17 +105,15 @@ public class Queries {
                                                       .build();
                     idFilterBuilder.addIds(entityId);
                 }
+                final EntityIdFilter idFilter = idFilterBuilder.build();
+                final EntityFilters filters = EntityFilters.newBuilder()
+                                                           .setIdFilter(idFilter)
+                                                           .build();
+                builder.setFilters(filters);
             }
-            final EntityIdFilter idFilter = idFilterBuilder.build();
-            final EntityFilters filters = EntityFilters.newBuilder()
-                                                       .setIdFilter(idFilter)
-                                                       .build();
-
-            return Target.newBuilder()
-                         .setIncludeAll(includeAll)
-                         .setType(type.getTypeName())
-                         .setFilters(filters)
-                         .build();
+            final Target result = builder.setType(type.getTypeName())
+                                         .build();
+            return result;
         }
     }
 }
