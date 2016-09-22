@@ -84,7 +84,7 @@ import java.util.Map;
      */
     private final ImmutableList.Builder<ConstraintViolation> builder = ImmutableList.builder();
 
-    AlternativeFieldValidator(Message message,
+    /* package */ AlternativeFieldValidator(Message message,
                               Descriptor descriptor,
                               FieldPath rootFieldPath,
                               FieldValidatorFactory factory) {
@@ -94,7 +94,7 @@ import java.util.Map;
         this.fieldValidatorFactory = factory;
     }
 
-    public List<? extends ConstraintViolation> validate() {
+    /* package */ List<? extends ConstraintViolation> validate() {
         final Map<FieldDescriptor, Object> options = messageDescriptor.getOptions()
                                                                       .getAllFields();
         for (FieldDescriptor optionDescriptor : options.keySet()) {
@@ -129,14 +129,10 @@ import java.util.Map;
     }
 
     private void checkOptions(Iterable<RequiredFieldOption> fieldOptions) {
-        boolean found;
         for (RequiredFieldOption option : fieldOptions) {
-            if (option.isCombination()) {
-                found = checkCombination(option.getFieldNames());
-            } else {
-                found = checkField(option.getFieldName());
-            }
-
+            boolean found = option.isCombination()
+                    ? checkCombination(option.getFieldNames())
+                    : checkField(option.getFieldName());
             if (found) {
                 return;
             }
