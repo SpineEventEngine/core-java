@@ -202,7 +202,7 @@ public class StandFunnelShould {
         if (isConcurrent) {
             try {
                 ((ExecutorService) executor).awaitTermination(Given.SEVERAL, TimeUnit.SECONDS);
-            } catch (InterruptedException ignore) {
+            } catch (InterruptedException ignored) {
             }
         }
 
