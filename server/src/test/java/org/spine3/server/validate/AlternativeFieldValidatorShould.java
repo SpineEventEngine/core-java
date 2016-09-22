@@ -24,6 +24,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
+import org.spine3.test.validate.msg.altfields.MessageWithMissingField;
 import org.spine3.test.validate.msg.altfields.PersonName;
 import org.spine3.validate.ConstraintViolation;
 
@@ -76,6 +77,17 @@ public class AlternativeFieldValidatorShould {
                                                           .setHonorificSuffix("I")
                                                           .build();
         final List<? extends ConstraintViolation> violations = validator.validate(notRequiredPopulated);
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void should_report_missing_field() {
+        final AlternativeFieldValidator testee = new AlternativeFieldValidator(MessageWithMissingField.getDescriptor(),
+                                                                               rootFieldPath);
+        final MessageWithMissingField msg = MessageWithMissingField.newBuilder()
+                                                                   .setPresent(true)
+                                                                   .build();
+        final List<? extends ConstraintViolation> violations = testee.validate(msg);
         assertFalse(violations.isEmpty());
     }
 }

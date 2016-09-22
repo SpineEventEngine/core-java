@@ -40,3 +40,10 @@ message PersonName {
     string last_name = 3;
     string honorific_suffix = 4;
 }
+
+message MessageWithMissingField {
+    option (required_field) = "name | else";
+
+    string name = 1;
+    bool present = 2;
+}
