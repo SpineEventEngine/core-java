@@ -582,8 +582,25 @@ public class Stand {
 
         private boolean matches(TypeUrl type, Object id, Any entityState) {
             final boolean typeMatches = this.type.equals(type);
-            // TODO[alex.tymchenko]: use EntityFilter to match ID and state against it
+
             return typeMatches;
+            // TODO[alex.tymchenko]: complete the implementation.
+//            final boolean includeAll = target.getIncludeAll();
+//
+//            if(typeMatches && includeAll) {
+//                return true;
+//            }
+//
+//            final EntityIdFilter givenIdFilter = target.getFilters()
+//                                                       .getIdFilter();
+//            final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
+//                                                       .equals(givenIdFilter);
+//
+//            if (idFilterSet) {
+//
+//            }
+//
+//            return false;
         }
 
         @Override
