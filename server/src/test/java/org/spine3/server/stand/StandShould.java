@@ -39,7 +39,6 @@ import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
@@ -170,7 +169,8 @@ public class StandShould {
         stand.registerTypeSupplier(standTestProjectionRepo);
 
         final Target projectProjectionTarget = Queries.Targets.allOf(Project.class);
-        final Subscription subscription = stand.subscribe(projectProjectionTarget, emptyUpdateCallback());
+        final Subscription subscription = stand.subscribe(projectProjectionTarget);
+        stand.activate(subscription, emptyUpdateCallback());
         assertNotNull(subscription);
 
         verify(executor, never()).execute(any(Runnable.class));
@@ -286,7 +286,8 @@ public class StandShould {
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        final Subscription subscription = stand.subscribe(allCustomers, memoizeCallback);
+        final Subscription subscription = stand.subscribe(allCustomers);
+        stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
         assertNull(memoizeCallback.newEntityState);
 
@@ -308,7 +309,8 @@ public class StandShould {
         final Target allProjects = Queries.Targets.allOf(Project.class);
 
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        final Subscription subscription = stand.subscribe(allProjects, memoizeCallback);
+        final Subscription subscription = stand.subscribe(allProjects);
+        stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
         assertNull(memoizeCallback.newEntityState);
 
@@ -330,7 +332,8 @@ public class StandShould {
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
-        final Subscription subscription = stand.subscribe(allCustomers, memoizeCallback);
+        final Subscription subscription = stand.subscribe(allCustomers);
+        stand.activate(subscription, memoizeCallback);
         assertNull(memoizeCallback.newEntityState);
 
         stand.cancel(subscription);
@@ -421,7 +424,8 @@ public class StandShould {
                 callbackStates.add(customerInCallback);
             }
         };
-        stand.subscribe(someCustomers, callback);
+        final Subscription subscription = stand.subscribe(someCustomers);
+        stand.activate(subscription, callback);
 
         for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
             final CustomerId customerId = sampleEntry.getKey();
@@ -435,7 +439,8 @@ public class StandShould {
 
     private static MemoizeStandUpdateCallback subscribeWithCallback(Stand stand, Target subscriptionTarget) {
         final MemoizeStandUpdateCallback callback = spy(new MemoizeStandUpdateCallback());
-        stand.subscribe(subscriptionTarget, callback);
+        final Subscription subscription = stand.subscribe(subscriptionTarget);
+        stand.activate(subscription, callback);
         assertNull(callback.newEntityState);
         return callback;
     }
@@ -788,7 +793,7 @@ public class StandShould {
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(final Set<ProjectId> projectIds) {
+    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(final Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
         // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with ALL the expected IDs.
         return new ArgumentMatcher<EntityFilters>() {
@@ -848,26 +853,6 @@ public class StandShould {
                 return everyElementPresent;
             }
         };
-    }
-
-    private static EntityIdFilter idFilterForAggregate(Collection<CustomerId> customerIds) {
-        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
-        for (CustomerId id : customerIds) {
-            idFilterBuilder
-                    .addIds(EntityId.newBuilder()
-                                    .setId(AnyPacker.pack(id)));
-        }
-        return idFilterBuilder.build();
-    }
-
-    private static EntityIdFilter idFilterForProjection(Collection<ProjectId> projectIds) {
-        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
-        for (ProjectId id : projectIds) {
-            idFilterBuilder
-                    .addIds(EntityId.newBuilder()
-                                    .setId(AnyPacker.pack(id)));
-        }
-        return idFilterBuilder.build();
     }
 
     private static void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
