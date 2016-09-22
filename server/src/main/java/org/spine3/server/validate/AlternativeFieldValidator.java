@@ -34,6 +34,7 @@ import org.spine3.validate.ConstraintViolation;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Validates that one of the fields defined by the {@code required_field} option is present.
@@ -60,9 +61,9 @@ import java.util.Map;
     private static final char AMPERSAND = '&';
 
     /**
-     * The message we validate.
+     * The pattern to remove whitespace from the option field value.
      */
-    private final Message message;
+    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * The descriptor of the message we validate.
@@ -75,91 +76,91 @@ import java.util.Map;
     private final FieldPath rootFieldPath;
 
     /**
-     * The factory to create field validators.
-     */
-    private final FieldValidatorFactory fieldValidatorFactory;
-
-    /**
      * The list builder to accumulate violations.
      */
-    private final ImmutableList.Builder<ConstraintViolation> builder = ImmutableList.builder();
+    private final ImmutableList.Builder<ConstraintViolation> violations = ImmutableList.builder();
 
-    /* package */ AlternativeFieldValidator(Message message,
-                              Descriptor descriptor,
-                              FieldPath rootFieldPath,
-                              FieldValidatorFactory factory) {
-        this.message = message;
-        this.messageDescriptor = descriptor;
+    /* package */ AlternativeFieldValidator(Descriptor messageDescriptor, FieldPath rootFieldPath) {
+        this.messageDescriptor = messageDescriptor;
         this.rootFieldPath = rootFieldPath;
-        this.fieldValidatorFactory = factory;
     }
 
-    /* package */ List<? extends ConstraintViolation> validate() {
+    /* package */ List<? extends ConstraintViolation> validate(Message message) {
         final Map<FieldDescriptor, Object> options = messageDescriptor.getOptions()
                                                                       .getAllFields();
         for (FieldDescriptor optionDescriptor : options.keySet()) {
             if (OPTION_REQUIRED_FIELD.equals(optionDescriptor.getName())) {
                 final JavaType optionType = optionDescriptor.getJavaType();
                 if (optionType == JavaType.STRING) {
-                    final String value = (String) options.get(optionDescriptor);
-                    final ImmutableList<RequiredFieldOption> fieldOptions = parse(value);
-                    checkOptions(fieldOptions);
+                    final String requiredFieldExpression = (String) options.get(optionDescriptor);
+                    final ImmutableList<RequiredFieldOption> fieldOptions = parse(requiredFieldExpression);
+                    if (!alternativeFound(message, fieldOptions)) {
+                        ConstraintViolation requiredFieldNotFound = ConstraintViolation.newBuilder()
+                                .setMsgFormat("None of the fields match the `required_field` definition: %s")
+                                .addParam(requiredFieldExpression)
+                                .build();
+                        violations.add(requiredFieldNotFound);
+                    }
                 } else {
                     log().warn("`{}` is not of string type. Found: {}", OPTION_REQUIRED_FIELD, optionType);
                 }
             }
         }
-        return builder.build();
+        return violations.build();
     }
 
     private static ImmutableList<RequiredFieldOption> parse(String optionsDefinition) {
-        final ImmutableList.Builder<RequiredFieldOption> builder = ImmutableList.builder();
-        @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern") // We value code clarity over performance here.
-        final String whiteSpaceRemoved = optionsDefinition.replaceAll("\\s+", "");
+        final ImmutableList.Builder<RequiredFieldOption> alternatives = ImmutableList.builder();
+        final String whiteSpaceRemoved = WHITESPACE.matcher(optionsDefinition)
+                                                   .replaceAll("");
         final Iterable<String> parts = Splitter.on(OPTION_SEPARATOR)
                                                .split(whiteSpaceRemoved);
         for (String part : parts) {
             if (part.indexOf(AMPERSAND) > 0) {
-                builder.add(RequiredFieldOption.ofCombination(part));
+                alternatives.add(RequiredFieldOption.ofCombination(part));
             } else {
-                builder.add(RequiredFieldOption.ofField(part));
+                alternatives.add(RequiredFieldOption.ofField(part));
             }
         }
-        return builder.build();
+        return alternatives.build();
     }
 
-    private void checkOptions(Iterable<RequiredFieldOption> fieldOptions) {
+    private boolean alternativeFound(Message message, Iterable<RequiredFieldOption> fieldOptions) {
         for (RequiredFieldOption option : fieldOptions) {
             boolean found = option.isCombination()
-                    ? checkCombination(option.getFieldNames())
-                    : checkField(option.getFieldName());
+                    ? checkCombination(message, option.getFieldNames())
+                    : checkField(message, option.getFieldName());
             if (found) {
-                return;
+                return true;
             }
         }
+        return false;
     }
 
-    private boolean checkField(String fieldName) {
+    private boolean checkField(Message message, String fieldName) {
         final FieldDescriptor field = messageDescriptor.findFieldByName(fieldName);
         if (field == null) {
             ConstraintViolation notFound = ConstraintViolation.newBuilder()
                     .setMsgFormat("Field %s not found")
                     .addParam(fieldName)
                     .build();
-            builder.add(notFound);
+            violations.add(notFound);
             return false;
         }
 
         Object fieldValue = message.getField(field);
-        final FieldValidator<?> fieldValidator = fieldValidatorFactory.create(field, fieldValue, rootFieldPath);
+        final FieldValidator<?> fieldValidator = FieldValidatorFactory.createStrict(field, fieldValue, rootFieldPath);
         final List<ConstraintViolation> violations = fieldValidator.validate();
-        builder.addAll(violations);
+
+        // Do not add violations to the results because we have options.
+        // The violation would be that none of the field or combinations is defined.
+
         return violations.isEmpty();
     }
 
-    private boolean checkCombination(ImmutableList<String> fieldNames) {
+    private boolean checkCombination(Message message, ImmutableList<String> fieldNames) {
         for (String fieldName : fieldNames) {
-            if (!checkField(fieldName)) {
+            if (!checkField(message, fieldName)) {
                 return false;
             }
         }

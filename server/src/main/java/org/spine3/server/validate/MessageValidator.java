@@ -38,8 +38,6 @@ import java.util.List;
 @Internal
 public class MessageValidator {
 
-    private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
-
     private final FieldPath rootFieldPath;
 
     /** Creates a new validator instance. */
@@ -69,21 +67,25 @@ public class MessageValidator {
      */
     public List<ConstraintViolation> validate(Message message) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
+        validateAlternativeFields(message, result);
+        validateFields(message, result);
+        return result.build();
+    }
+
+    private void validateAlternativeFields(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+        final Descriptor typeDescr = message.getDescriptorForType();
+        final AlternativeFieldValidator altFieldValidator = new AlternativeFieldValidator(typeDescr, rootFieldPath);
+        result.addAll(altFieldValidator.validate(message));
+    }
+
+    private void validateFields(Message message, ImmutableList.Builder<ConstraintViolation> result) {
         final Descriptor msgDescriptor = message.getDescriptorForType();
-
-        final AlternativeFieldValidator altFieldValidator = new AlternativeFieldValidator(message,
-                                                                                          msgDescriptor,
-                                                                                          rootFieldPath,
-                                                                                          fieldValidatorFactory);
-        result.addAll(altFieldValidator.validate());
-
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> fieldValidator = fieldValidatorFactory.create(field, value, rootFieldPath);
+            final FieldValidator<?> fieldValidator = FieldValidatorFactory.create(field, value, rootFieldPath);
             final List<ConstraintViolation> violations = fieldValidator.validate();
             result.addAll(violations);
         }
-        return result.build();
     }
 }

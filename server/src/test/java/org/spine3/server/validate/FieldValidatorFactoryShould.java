@@ -34,6 +34,7 @@ import org.spine3.test.validate.msg.RequiredMsgFieldValue;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.server.validate.FieldValidatorFactory.create;
 
 /**
  * @author Alexander Litus
@@ -43,13 +44,11 @@ public class FieldValidatorFactoryShould {
 
     private static final FieldPath FIELD_PATH = FieldPath.getDefaultInstance();
 
-    private final FieldValidatorFactory factory = FieldValidatorFactory.newInstance();
-
     @Test
     public void create_message_field_validator() {
         final FieldDescriptor field = RequiredMsgFieldValue.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, StringValue.getDefaultInstance(), FIELD_PATH);
+        final FieldValidator validator = create(field, StringValue.getDefaultInstance(), FIELD_PATH);
 
         assertTrue(validator instanceof MessageFieldValidator);
     }
@@ -58,7 +57,7 @@ public class FieldValidatorFactoryShould {
     public void create_integer_field_validator() {
         final FieldDescriptor field = Int32Value.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, 0, FIELD_PATH);
+        final FieldValidator validator = create(field, 0, FIELD_PATH);
 
         assertTrue(validator instanceof IntegerFieldValidator);
     }
@@ -67,7 +66,7 @@ public class FieldValidatorFactoryShould {
     public void create_long_field_validator() {
         final FieldDescriptor field = Int64Value.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, 0, FIELD_PATH);
+        final FieldValidator validator = create(field, 0, FIELD_PATH);
 
         assertTrue(validator instanceof LongFieldValidator);
     }
@@ -76,7 +75,7 @@ public class FieldValidatorFactoryShould {
     public void create_float_field_validator() {
         final FieldDescriptor field = FloatValue.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, 0, FIELD_PATH);
+        final FieldValidator validator = create(field, 0, FIELD_PATH);
 
         assertTrue(validator instanceof FloatFieldValidator);
     }
@@ -85,7 +84,7 @@ public class FieldValidatorFactoryShould {
     public void create_double_field_validator() {
         final FieldDescriptor field = DoubleValue.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, 0, FIELD_PATH);
+        final FieldValidator validator = create(field, 0, FIELD_PATH);
 
         assertTrue(validator instanceof DoubleFieldValidator);
     }
@@ -94,7 +93,7 @@ public class FieldValidatorFactoryShould {
     public void create_String_field_validator() {
         final FieldDescriptor field = StringValue.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, "", FIELD_PATH);
+        final FieldValidator validator = create(field, "", FIELD_PATH);
 
         assertTrue(validator instanceof StringFieldValidator);
     }
@@ -103,7 +102,7 @@ public class FieldValidatorFactoryShould {
     public void create_ByteString_field_validator() {
         final FieldDescriptor field = RequiredByteStringFieldValue.getDescriptor().getFields().get(0);
 
-        final FieldValidator validator = factory.create(field, new Object(), FIELD_PATH);
+        final FieldValidator validator = create(field, new Object(), FIELD_PATH);
 
         assertTrue(validator instanceof ByteStringFieldValidator);
     }
@@ -112,13 +111,13 @@ public class FieldValidatorFactoryShould {
     public void throw_exception_if_pass_enum_field() {
         final FieldDescriptor field = AnnotatedEnumFieldValue.getDescriptor().getFields().get(0);
 
-        factory.create(field, new Object(), FIELD_PATH);
+        create(field, new Object(), FIELD_PATH);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_pass_boolean_field() {
         final FieldDescriptor field = BoolValue.getDescriptor().getFields().get(0);
 
-        factory.create(field, new Object(), FIELD_PATH);
+        create(field, new Object(), FIELD_PATH);
     }
 }

@@ -38,24 +38,26 @@ import static java.lang.String.format;
  */
 /* package */ class FieldValidatorFactory {
 
-    /** Creates a new factory instance. */
-    /* package */ static FieldValidatorFactory newInstance() {
-        return new FieldValidatorFactory();
+    private FieldValidatorFactory() {
     }
 
     /**
      * Creates a new validator instance according to the field type and validates the field.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValue a value of the field to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValue    a value of the field to validate
      * @param rootFieldPath a path to the root field
+     * @param strict        if {@code true} validators would always assume that the field is required
      */
-    /* package */ FieldValidator<?> create(FieldDescriptor descriptor, Object fieldValue, FieldPath rootFieldPath) {
+    private static FieldValidator<?> create(FieldDescriptor descriptor,
+            Object fieldValue,
+            FieldPath rootFieldPath,
+            boolean strict) {
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
                 final ImmutableList<Message> messages = toValueList(fieldValue);
-                return new MessageFieldValidator(descriptor, messages, rootFieldPath);
+                return new MessageFieldValidator(descriptor, messages, rootFieldPath, strict);
             case INT:
                 final ImmutableList<Integer> ints = toValueList(fieldValue);
                 return new IntegerFieldValidator(descriptor, ints, rootFieldPath);
@@ -70,7 +72,7 @@ import static java.lang.String.format;
                 return new DoubleFieldValidator(descriptor, doubles, rootFieldPath);
             case STRING:
                 final ImmutableList<String> strings = toValueList(fieldValue);
-                return new StringFieldValidator(descriptor, strings, rootFieldPath);
+                return new StringFieldValidator(descriptor, strings, rootFieldPath, strict);
             case BYTE_STRING:
                 final ImmutableList<ByteString> byteStrings = toValueList(fieldValue);
                 return new ByteStringFieldValidator(descriptor, byteStrings, rootFieldPath);
@@ -79,6 +81,20 @@ import static java.lang.String.format;
             default:
                 throw fieldTypeIsNotSupported(descriptor);
         }
+    }
+
+    /* package */
+    static FieldValidator<?> create(FieldDescriptor descriptor,
+            Object fieldValue,
+            FieldPath rootFieldPath) {
+        return create(descriptor, fieldValue, rootFieldPath, false);
+    }
+
+    /* package */
+    static FieldValidator<?> createStrict(FieldDescriptor descriptor,
+            Object fieldValue,
+            FieldPath rootFieldPath) {
+        return create(descriptor, fieldValue, rootFieldPath, true);
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})

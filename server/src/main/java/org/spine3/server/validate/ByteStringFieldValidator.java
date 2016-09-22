@@ -45,7 +45,7 @@ import java.util.List;
      * @param rootFieldPath a path to the root field (if present)
      */
     /* package */ ByteStringFieldValidator(FieldDescriptor descriptor, ImmutableList<ByteString> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+        super(descriptor, fieldValues, rootFieldPath, false);
     }
 
     @Override
