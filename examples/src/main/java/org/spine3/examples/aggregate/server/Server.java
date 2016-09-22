@@ -22,7 +22,7 @@ package org.spine3.examples.aggregate.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.ClientService;
+import org.spine3.server.CommandService;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -58,9 +58,9 @@ public class Server {
                       .subscribe(eventLogger);
 
         // Create a client service with this bounded context.
-        final ClientService clientService = ClientService.newBuilder()
-                                                         .addBoundedContext(boundedContext)
-                                                         .build();
+        final CommandService clientService = CommandService.newBuilder()
+                                                           .addBoundedContext(boundedContext)
+                                                           .build();
 
         // Create a gRPC server and schedule the client service instance for deployment.
         this.grpcContainer = GrpcContainer.newBuilder()

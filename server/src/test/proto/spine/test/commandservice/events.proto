@@ -19,15 +19,15 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice;
+package spine.test.commandservice;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.clientservice.event";
-option java_outer_classname = "ClientServiceEventsProto";
+option java_package="org.spine3.test.commandservice.event";
+option java_outer_classname = "CommandServiceEventsProto";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
-import "spine/test/clientservice/project.proto";
+import "spine/test/commandservice/project.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;

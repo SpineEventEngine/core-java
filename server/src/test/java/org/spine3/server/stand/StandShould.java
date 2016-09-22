@@ -54,8 +54,8 @@ import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
-import org.spine3.test.clientservice.customer.Customer;
-import org.spine3.test.clientservice.customer.CustomerId;
+import org.spine3.test.commandservice.customer.Customer;
+import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 

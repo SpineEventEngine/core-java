@@ -30,7 +30,7 @@ import org.spine3.base.Event;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.client.CommandFactory;
-import org.spine3.client.grpc.ClientServiceGrpc;
+import org.spine3.client.grpc.CommandServiceGrpc;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
@@ -66,9 +66,9 @@ public class ClientApp {
 
     private final CommandFactory commandFactory;
     private final ManagedChannel channel;
-    private final ClientServiceGrpc.ClientServiceBlockingStub blockingClient;
+    private final CommandServiceGrpc.CommandServiceBlockingStub blockingClient;
     // TODO[alex.tymchenko]: switch to SubscriptionService instead.  
-    private final ClientServiceGrpc.ClientServiceStub nonBlockingClient;
+    private final CommandServiceGrpc.CommandServiceStub nonBlockingClient;
 
     private final StreamObserver<Event> observer = new StreamObserver<Event>() {
         @Override
@@ -98,8 +98,8 @@ public class ClientApp {
                 .forAddress(host, port)
                 .usePlaintext(true)
                 .build();
-        blockingClient = ClientServiceGrpc.newBlockingStub(channel);
-        nonBlockingClient = ClientServiceGrpc.newStub(channel);
+        blockingClient = CommandServiceGrpc.newBlockingStub(channel);
+        nonBlockingClient = CommandServiceGrpc.newStub(channel);
     }
 
     private Command createOrder(OrderId orderId) {

@@ -19,43 +19,30 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice;
+package spine.test.commandservice.customer;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.clientservice";
+option java_package="org.spine3.test.commandservice.customer.command";
+option java_outer_classname = "CustomerCommandsProto";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
+import "spine/test/commandservice/customer/customer.proto";
 
-message ProjectId {
-    string id = 1;
+// A request to create a new customer record.
+message CreateCustomer {
+    // The ID of the customer.
+    // Even though we have an ID field defined in the `Customer` type, we need a separate ID field in the command
+    // so that it can be attributed to an instance of the `Customer` aggregate.
+    CustomerId customer_id = 1;
+
+    // Customer data.
+    Customer customer = 2;
 }
 
-message Project {
-
-    ProjectId id = 1;
-
-    string name = 2;
-
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        DONE = 3;
-        CANCELLED = 4;
-    }
-
-    Status status = 4;
-}
-
-message TaskId {
-    int32 id = 1;
-}
-
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
+// The command to reset CustomerId generator when a new date is started.
+// The ID generator should start a new date with the customer number equal to 1.
+message ResetCustomerCounter {
+    // This command message does not have field because it's an imperative to the system internals.
+    // The scheduling of the command will be set in `CommandContext` of the corresponding command.
 }
