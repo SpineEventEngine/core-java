@@ -169,6 +169,12 @@ import java.util.concurrent.Executors;
                              .build();
     }
 
+    /*package*/ static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
+        return boundedContextBuilder(stand)
+                .setStandFunnelExecutor(standFunnelExecutor)
+                .build();
+    }
+
     private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
         return BoundedContext.newBuilder()
                              .setStand(stand)

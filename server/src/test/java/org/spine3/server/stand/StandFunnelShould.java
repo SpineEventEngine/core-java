@@ -21,6 +21,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
@@ -47,7 +48,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alex Tymchenko
@@ -185,9 +185,12 @@ public class StandFunnelShould {
         checkNotNull(dispatchActions);
 
         final Stand stand = mock(Stand.class);
-        final BoundedContext boundedContext = spy(Given.boundedContext(stand,
-                                                                       isConcurrent ?
-                                                                       Given.THREADS_COUNT_IN_POOL_EXECUTOR : 0));
+        final Executor executor = isConcurrent ?
+                                  Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR) :
+                                  MoreExecutors.directExecutor();
+
+        final BoundedContext boundedContext = spy(Given.boundedContext(stand, executor));
+
 
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
@@ -197,17 +200,13 @@ public class StandFunnelShould {
         verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
 
         if (isConcurrent) {
-            await(Given.AWAIT_SECONDS);
+            try {
+                ((ExecutorService) executor).awaitTermination(Given.SEVERAL, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {
+            }
         }
 
         verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class));
-    }
-
-    private static void await(int seconds) {
-        try {
-            Thread.sleep(seconds);
-        } catch (InterruptedException ignore) {
-        }
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
