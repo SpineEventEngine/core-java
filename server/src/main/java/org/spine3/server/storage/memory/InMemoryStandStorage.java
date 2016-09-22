@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -59,7 +60,12 @@ public class InMemoryStandStorage extends StandStorage {
 
     @Override
     public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type) {
-        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll();
+        return readAllByType(type, FieldMask.getDefaultInstance());
+    }
+
+    @Override
+    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
+        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll(fieldMask);
         final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
             @Override
             public boolean apply(@Nullable AggregateStateId stateId) {
@@ -88,8 +94,20 @@ public class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids, fieldMask);
+        return result;
+    }
+
+    @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllInternal() {
         final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll();
+        return result;
+    }
+
+    @Override
+    protected Map<AggregateStateId, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 
@@ -97,7 +115,7 @@ public class InMemoryStandStorage extends StandStorage {
     protected void writeInternal(AggregateStateId id, EntityStorageRecord record) {
         final TypeUrl recordType = TypeUrl.of(record.getState()
                                                     .getTypeUrl());
-        checkState(id.getStateType() == recordType, "The typeUrl of the record does not correspond to id");
+        checkState(id.getStateType().equals(recordType), "The typeUrl of the record does not correspond to id");
 
         recordStorage.write(id, record);
     }

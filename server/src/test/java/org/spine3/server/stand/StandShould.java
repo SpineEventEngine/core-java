@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
@@ -52,6 +53,7 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
+import org.spine3.server.storage.memory.InMemoryStandStorage;
 import org.spine3.test.clientservice.customer.Customer;
 import org.spine3.test.clientservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
@@ -72,6 +74,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -84,10 +88,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.stand.Given.StandTestProjection;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 //It's OK for a test.
 @SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
@@ -227,6 +233,8 @@ public class StandShould {
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
+
+        verifyObserver(responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
 
@@ -449,6 +457,199 @@ public class StandShould {
                         .build();
     }
 
+    @Test
+    public void retrieve_all_data_if_field_mask_is_not_set() {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        final Query customerQuery = Queries.readAll(Customer.class);
+
+        //noinspection OverlyComplexAnonymousInnerClass
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                for (Descriptors.FieldDescriptor field : customer.getDescriptorForType().getFields()) {
+                    assertTrue(customer.getField(field).equals(sampleCustomer.getField(field)));
+                }
+            }
+        };
+
+        stand.execute(customerQuery, observer);
+
+        verifyObserver(observer);
+    }
+
+    @Test
+    public void retrieve_only_selected_param_for_query() {
+        requestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer sampleCustomer = getSampleCustomer();
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertTrue(customer.getName()
+                                   .equals(sampleCustomer.getName()));
+                assertFalse(customer.hasId());
+                assertTrue(customer.getNicknamesList().isEmpty());
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_collection_fields_if_required() {
+        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer sampleCustomer = getSampleCustomer();
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
+
+                assertFalse(customer.hasName());
+                assertFalse(customer.hasId());
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_all_requested_fields() {
+        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer sampleCustomer = getSampleCustomer();
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
+
+                assertFalse(customer.hasName());
+                assertTrue(customer.hasId());
+            }
+        });
+    }
+
+    @Test
+    public void retrieve_whole_entity_if_nothing_is_requested() {
+        //noinspection ZeroLengthArrayAllocation
+        requestSampleCustomer(new int[] {}, getDuplicateCostumerStreamObserver());
+    }
+
+    @Test
+    public void handle_mistakes_in_query_silently() {
+        //noinspection ZeroLengthArrayAllocation
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        // FieldMask with invalid type URLs.
+        final String[] paths = {"invalid_type_url_example", Project.getDescriptor().getFields().get(2).getFullName()};
+
+        final Query customerQuery = Queries.readAll(Customer.class, paths);
+
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+
+                assertNotEquals(customer, null);
+
+                assertFalse(customer.hasId());
+                assertFalse(customer.hasName());
+                assertTrue(customer.getNicknamesList()
+                                   .isEmpty());
+            }
+        };
+
+        stand.execute(customerQuery, observer);
+
+        verifyObserver(observer);
+    }
+
+    private static void verifyObserver(MemoizeQueryResponseObserver observer) {
+        assertNotNull(observer.responseHandled);
+        assertTrue(observer.isCompleted);
+        assertNull(observer.throwable);
+    }
+
+    private static MemoizeQueryResponseObserver getDuplicateCostumerStreamObserver() {
+        return new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+
+                final List<Any> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
+
+                final Customer customer = AnyPacker.unpack(messages.get(0));
+                final Customer sampleCustomer = getSampleCustomer();
+
+                assertEquals(sampleCustomer.getName(), customer.getName());
+                assertEquals(sampleCustomer.getNicknamesList(), customer.getNicknamesList());
+                assertTrue(customer.hasId());
+            }
+        };
+    }
+
+    private static Customer getSampleCustomer() {
+        //noinspection NumericCastThatLosesPrecision
+        return Customer.newBuilder()
+                       .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
+                                                                          .getLeastSignificantBits()))
+                       .setName(PersonName.newBuilder().setGivenName("Socrates").build())
+                       .addNicknames(PersonName.newBuilder().setGivenName("Philosopher"))
+                       .addNicknames(PersonName.newBuilder().setGivenName("Wise guy"))
+                       .build();
+
+    }
+
+    private static void requestSampleCustomer(int[] fieldIndexes, final MemoizeQueryResponseObserver observer) {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+
+        final Customer sampleCustomer = getSampleCustomer();
+
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+
+        final String[] paths = new String[fieldIndexes.length];
+
+        for (int i = 0; i < fieldIndexes.length; i++) {
+            paths[i] = Customer.getDescriptor()
+                                   .getFields()
+                                   .get(fieldIndexes[i])
+                                   .getFullName();
+        }
+
+        final Query customerQuery = Queries.readAll(Customer.class, paths);
+
+        stand.execute(customerQuery, observer);
+
+        verifyObserver(observer);
+    }
+
     private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
@@ -537,6 +738,8 @@ public class StandShould {
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(queryWithNoFilters, responseObserver);
 
+        verifyObserver(responseObserver);
+
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
         assertTrue("Query returned a non-empty response message list though the filter was not set", messageList.isEmpty());
     }
@@ -573,19 +776,20 @@ public class StandShould {
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<org.spine3.server.stand.Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
+        final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId))).thenReturn(new Given.StandTestProjection(projectId));
+            when(projectionRepository.find(eq(projectId))).thenReturn(new StandTestProjection(projectId));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
-        when(projectionRepository.findBulk(matchingIds)).thenReturn(allResults);
+
+        when(projectionRepository.findBulk(matchingIds, any(FieldMask.class))).thenReturn(allResults);
 
         when(projectionRepository.findAll()).thenReturn(allResults);
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
-        when(projectionRepository.findAll(matchingFilter)).thenReturn(allResults);
+        when(projectionRepository.findAll(matchingFilter, any(FieldMask.class))).thenReturn(allResults);
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
@@ -616,9 +820,9 @@ public class StandShould {
         final Collection<Given.StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, Given.StandTestProjection>() {
             @Nullable
             @Override
-            public Given.StandTestProjection apply(@Nullable ProjectId input) {
+            public StandTestProjection apply(@Nullable ProjectId input) {
                 checkNotNull(input);
-                return new Given.StandTestProjection(input);
+                return new StandTestProjection(input);
             }
         });
         final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
@@ -724,14 +928,14 @@ public class StandShould {
     }
 
 
-    private static Stand prepareStandWithAggregateRepo(StandStorage standStorageMock) {
+    private static Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
         final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorageMock)
+                                 .setStorage(standStorage)
                                  .build();
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final org.spine3.server.Given.CustomerAggregateRepository customerAggregateRepo = new org.spine3.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         return stand;
     }
@@ -808,10 +1012,6 @@ public class StandShould {
 
     }
 
-
-    /**
-     * A {@link StreamObserver} storing the state of {@link Query} execution.
-     */
     private static class MemoizeStandUpdateCallback implements Stand.StandUpdateCallback {
 
         private Any newEntityState;

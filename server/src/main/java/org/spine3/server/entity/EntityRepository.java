@@ -27,6 +27,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
@@ -44,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +129,20 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     /**
      * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
      *
+     * <p>Same as calling <pre>{@code findBulk(id, FieldMask.getDefaultInstance());}</pre>
+     *
+     * @param ids entity IDs to search for
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
+     * @see #findBulk(Iterable, FieldMask)
+     */
+    @CheckReturnValue
+    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
+        return findBulk(ids, FieldMask.getDefaultInstance());
+    }
+
+    /**
+     * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
+     *
      * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
      * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
      *
@@ -143,26 +159,26 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param ids entity IDs to search for
+     * @param fieldMask mask to apply on entities
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
+    public ImmutableCollection<E> findBulk(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
-        final ImmutableList.Builder<E> builder = ImmutableList.builder();
+        final List<E> entities = new LinkedList<>();
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
-            final E entity = toEntity(id, record);
-            builder.add(entity);
+            final E entity = toEntity(id, record, fieldMask);
+            entities.add(entity);
         }
 
-        final ImmutableList<E> result = builder.build();
-        return result;
+        return ImmutableList.copyOf(entities);
     }
 
     @CheckReturnValue
@@ -195,10 +211,11 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters entity filters
+     * @param fieldMask mask to apply to the entities
      * @return all the entities in this repository passed the filters.
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findAll(EntityFilters filters) {
+    public ImmutableCollection<E> findAll(EntityFilters filters, FieldMask fieldMask) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
@@ -227,16 +244,23 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             }
         });
 
-        final ImmutableCollection<E> result = findBulk(domainIds);
+        final ImmutableCollection<E> result = findBulk(domainIds, fieldMask);
         return result;
     }
 
     private E toEntity(I id, EntityStorageRecord record) {
+        return toEntity(id, record, FieldMask.getDefaultInstance());
+    }
+
+    private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
         final E entity = create(id);
-        final M state = unpack(record.getState());
+        @SuppressWarnings("unchecked")
+        final M state = (M) FieldMasks.applyIfValid(fieldMask, unpack(record.getState()), getEntityStateType());
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
+
+
 
     private EntityStorageRecord toEntityRecord(E entity) {
         final M state = entity.getState();

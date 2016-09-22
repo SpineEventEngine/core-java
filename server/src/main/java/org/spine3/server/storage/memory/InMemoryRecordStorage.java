@@ -20,13 +20,23 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -54,23 +64,42 @@ import static com.google.common.collect.Maps.newHashMap;
     @SuppressWarnings("MethodWithMultipleLoops")    /* It's OK for in-memory implementation
                                                      * as it is used primarily in tests. */
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds) {
+    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
 
+        TypeUrl typeUrl = null;
+
         for (I recordId : storage.keySet()) {
             for (I givenId : givenIds) {
                 if (recordId.equals(givenId)) {
-                    final EntityStorageRecord matchingRecord = storage.get(recordId);
-                    result.add(matchingRecord);
-                    continue;
+                    final EntityStorageRecord.Builder matchingRecord = storage.get(recordId).toBuilder();
+                    final Any state = matchingRecord.getState();
+
+                    if (typeUrl == null) {
+                        typeUrl = TypeUrl.of(state.getTypeUrl());
+                    }
+
+                    final Message wholeState = AnyPacker.unpack(state);
+                    final Message maskedState = FieldMasks.applyIfValid(fieldMask, wholeState, typeUrl);
+                    final Any processed = AnyPacker.pack(maskedState);
+
+                    matchingRecord.setState(processed);
+
+                    result.add(matchingRecord.build());
+                } else {
+                    result.add(null);
                 }
-                result.add(null);
             }
         }
         return result;
+    }
+
+    @Override
+    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
+        return readBulkInternal(ids, null);
     }
 
     @Override
@@ -81,6 +110,35 @@ import static com.google.common.collect.Maps.newHashMap;
         return result;
     }
 
+    @Override
+    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+        if (fieldMask.getPathsList().isEmpty()) {
+            return readAllInternal();
+        }
+
+        final Map<I, EntityStorageRecord> storage = getStorage();
+
+        if (storage.isEmpty()) {
+            return newHashMap();
+        }
+
+        final ImmutableMap.Builder<I, EntityStorageRecord> result = ImmutableMap.builder();
+
+        final Collection<Message> records = FieldMasks.applyMask(fieldMask, Collections2.transform(storage.values(), new Function<EntityStorageRecord, Message>() {
+            @Nullable
+            @Override
+            public Message apply(@Nullable EntityStorageRecord input) {
+                return input == null ? null : AnyPacker.unpack(input.getState());
+            }
+        }), TypeUrl.of(storage.entrySet().iterator().next().getValue().getState().getTypeUrl()));
+
+        final Iterator<Message> messageIterator = records.iterator();
+        for (I key : storage.keySet()) {
+            result.put(key, storage.get(key).toBuilder().setState(AnyPacker.pack(messageIterator.next())).build());
+        }
+
+        return result.build();
+    }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
         return new InMemoryRecordStorage<>(multitenant);
