@@ -73,7 +73,7 @@ public class CommandServiceShould {
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
-        // Expose two Bounded Contexts via a Client Service.
+        // Expose two Bounded Contexts via an instance of {@code CommandService}.
         final CommandService.Builder builder = CommandService.newBuilder();
         for (BoundedContext context : boundedContexts) {
             builder.addBoundedContext(context);
