@@ -558,7 +558,7 @@ public class StandShould {
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
 
         // FieldMask with invalid type URLs.
-        final String[] paths = {"blablabla", Project.getDescriptor().getFields().get(2).getFullName()};
+        final String[] paths = {"invalid_type_url_example", Project.getDescriptor().getFields().get(2).getFullName()};
 
         final Query customerQuery = Queries.readAll(Customer.class, paths);
 
