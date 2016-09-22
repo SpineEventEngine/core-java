@@ -20,12 +20,19 @@
 
 package org.spine3.server;
 
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.spine3.client.Subscription;
+import org.spine3.client.Target;
+import org.spine3.client.Topic;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -87,6 +94,48 @@ public class SubscriptionServiceShould {
         SubscriptionService.newBuilder().build();
     }
 
+    /*
+    * Subscription tests
+    * ------------------
+    */
+
+    @Test
+    public void subscribe_to_topic() {
+        final BoundedContext boundedContext = setupBoundedContextForProjectionRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+
+        final String type = boundedContext.getStand()
+                                          .getAvailableTypes()
+                                          .iterator()
+                                          .next()
+                                          .getTypeName();
+
+        final Target target = Target.newBuilder()
+                                    .setType(type)
+                                    .build();
+
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+
+        final MemoiseStreamObserver<Subscription> observer = new MemoiseStreamObserver<>();
+
+        subscriptionService.subscribe(topic, observer);
+
+        assertNotNull(observer.streamFlowValue);
+        assertTrue(observer.streamFlowValue.isInitialized());
+        assertEquals(observer.streamFlowValue.getType(), type);
+
+
+        assertNull(observer.throwable);
+        assertTrue(observer.isCompleted);
+    }
+
+
+
     private static BoundedContext newBoundedContext(String name) {
         final Stand stand = Stand.newBuilder().setStorage(InMemoryStandStorage.newBuilder().build()).build();
 
@@ -96,5 +145,42 @@ public class SubscriptionServiceShould {
                              .setStorageFactory(InMemoryStorageFactory.getInstance())
                              .build();
 
+    }
+
+    private static BoundedContext setupBoundedContextForProjectionRepo() {
+        final Stand stand = Stand.newBuilder()
+                                 .setStorage(InMemoryStandStorage.newBuilder().build())
+                                 .build();
+
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                             .build();
+
+        stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
+
+        return boundedContext;
+    }
+
+    private static class MemoiseStreamObserver<T> implements StreamObserver<T> {
+
+        private T streamFlowValue;
+        private Throwable throwable;
+        private boolean isCompleted;
+
+        @Override
+        public void onNext(T value) {
+            this.streamFlowValue = value;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            this.throwable = t;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.isCompleted = true;
+        }
     }
 }
