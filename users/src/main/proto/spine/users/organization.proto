@@ -56,14 +56,14 @@ message OrganizationProfile {
     // The URL of the organization's site or another URL that represents the organization, if available.
     //
     // Unlike the `primary_domain` this field contains full URL, which may lead to a page with information
-    // about the organization. For example: `https://www.teamdev.com/contactus`
+    // about the organization. For example: `https://www.teamdev.com/contactus`.
     //
     net.Url url = 5;
 
     // A contact email address, if available.
     net.EmailAddress email = 6;
 
-    // Location information, if available
+    // Location information, if available.
     string location = 7;
 }
 
