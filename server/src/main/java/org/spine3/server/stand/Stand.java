@@ -85,7 +85,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class Stand {
+public class Stand implements AutoCloseable {
 
     /**
      * Persistent storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -432,9 +432,12 @@ public class Stand {
 
     }
 
-    // TODO[alex.tymchenko]: perhaps, we need to close Stand instead of doing this upon repository shutdown (see usages).
-    public void deregisterSupplierForType(TypeUrl typeUrl) {
-        typeToRepositoryMap.remove(typeUrl);
+    /**
+     * Dumps all {@link TypeUrl}-to-{@link EntityRepository} relations.
+     */
+    @Override
+    public void close() {
+        typeToRepositoryMap.clear();
     }
 
     /**
