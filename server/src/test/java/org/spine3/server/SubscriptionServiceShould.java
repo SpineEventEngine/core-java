@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.spine3.base.Response;
 import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
@@ -39,6 +40,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dmytro Dashenkov
@@ -163,18 +168,16 @@ public class SubscriptionServiceShould {
                                  .setTarget(target)
                                  .build();
 
+        // Subscribe on the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
-
         subscriptionService.subscribe(topic, subscriptionObserver);
-
         subscriptionObserver.checkFields();
-        assertTrue(subscriptionObserver.streamFlowValue.isInitialized());
-        assertEquals(subscriptionObserver.streamFlowValue.getType(), type);
 
-
+        // Activate subscription
         final MemoizeStreamObserver<SubscriptionUpdate> activationObserver = new MemoizeStreamObserver<>();
         subscriptionService.activate(subscriptionObserver.streamFlowValue, activationObserver);
 
+        // Post update to Stand directly
         final ProjectId projectId = ProjectId.newBuilder().setId("some-id").build();
         final Message projectState = Project.newBuilder().setId(projectId).build();
         boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
@@ -183,6 +186,48 @@ public class SubscriptionServiceShould {
         activationObserver.checkFields(false);
     }
 
+    @Test
+    public void cancel_subscription_on_topic() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+
+        final String type = boundedContext.getStand()
+                                          .getAvailableTypes()
+                                          .iterator()
+                                          .next()
+                                          .getTypeName();
+
+        final Target target = Target.newBuilder()
+                                    .setType(type)
+                                    .build();
+
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+
+        // Subscribe
+        final MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
+        subscriptionService.subscribe(topic, subscribeObserver);
+
+        // Activate subscription
+        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription = spy(new MemoizeStreamObserver<SubscriptionUpdate>());
+        subscriptionService.activate(subscribeObserver.streamFlowValue, activateSubscription);
+
+        // Cancel subscription
+        subscriptionService.cancel(subscribeObserver.streamFlowValue, new MemoizeStreamObserver<Response>());
+
+        // Post update to Stand
+        final ProjectId projectId = ProjectId.newBuilder().setId("some-other-id").build();
+        final Message projectState = Project.newBuilder().setId(projectId).build();
+        boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
+
+        // The update must not be handled by the observer
+        verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
+        verify(activateSubscription, never()).onCompleted();
+    }
 
     private static BoundedContext newBoundedContext(String name) {
         final Stand stand = Stand.newBuilder().setStorage(InMemoryStandStorage.newBuilder().build()).build();
