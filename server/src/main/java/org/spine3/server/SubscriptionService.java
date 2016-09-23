@@ -97,7 +97,6 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                     final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                                         .setSubscription(subscription)
                                                                         .setResponse(Responses.ok())
-                                                                        //.setUpdates(0, newEntityState)// TODO:23-09-16:dmytro.dashenkov: resolve.
                                                                         .addUpdates(newEntityState)
                                                                         .build();
                     responseObserver.onNext(update);
