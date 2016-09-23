@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
@@ -32,8 +31,6 @@ import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.storage.memory.InMemoryStandStorage;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 
@@ -49,6 +46,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Dmytro Dashenkov
@@ -62,7 +60,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_one_bounded_context() {
-        final BoundedContext singleBoundedContext = newBoundedContext("Single");
+        final BoundedContext singleBoundedContext = newBoundedContext("Single", newSimpleStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(singleBoundedContext);
@@ -77,9 +75,9 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_several_bounded_contexts() {
-        final BoundedContext firstBoundedContext = newBoundedContext("First");
-        final BoundedContext secondBoundedContext = newBoundedContext("Second");
-        final BoundedContext thirdBoundedContext = newBoundedContext("Third");
+        final BoundedContext firstBoundedContext = newBoundedContext("First", newSimpleStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Second", newSimpleStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("Third", newSimpleStand());
 
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
@@ -99,9 +97,9 @@ public class SubscriptionServiceShould {
 
     @Test
     public void be_able_to_remove_bounded_context_from_builder() {
-        final BoundedContext firstBoundedContext = newBoundedContext("Removed");
-        final BoundedContext secondBoundedContext = newBoundedContext("Also removed");
-        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay");
+        final BoundedContext firstBoundedContext = newBoundedContext("Removed", newSimpleStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Also removed", newSimpleStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newSimpleStand());
 
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
@@ -233,27 +231,10 @@ public class SubscriptionServiceShould {
         verify(activateSubscription, never()).onCompleted();
     }
 
-    private static BoundedContext newBoundedContext(String name) {
-        final Stand stand = Stand.newBuilder().setStorage(InMemoryStandStorage.newBuilder().build()).build();
-
-        return BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setName(name)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance())
-                             .build();
-
-    }
-
     private static BoundedContext setupBoundedContextForAggregateRepo() {
-        final Stand stand = Stand.newBuilder()
-                                 .setStorage(InMemoryStandStorage.newBuilder().build())
-                                 .setCallbackExecutor(MoreExecutors.directExecutor())
-                                 .build();
+        final Stand stand = Stand.newBuilder().build();
 
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStand(stand)
-                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                            .build();
+        final BoundedContext boundedContext = newBoundedContext(stand);
 
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
@@ -262,6 +243,10 @@ public class SubscriptionServiceShould {
 
     private static Target getProjectQueryTarget() {
         return Queries.Targets.allOf(Project.class);
+    }
+
+    private static Stand newSimpleStand() {
+        return Stand.newBuilder().build();
     }
 
     private static class MemoizeStreamObserver<T> implements StreamObserver<T> {
