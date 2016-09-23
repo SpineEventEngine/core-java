@@ -20,14 +20,20 @@
 
 package org.spine3.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.client.Subscription;
+import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -101,7 +107,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void subscribe_to_topic() {
-        final BoundedContext boundedContext = setupBoundedContextForProjectionRepo();
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(boundedContext)
@@ -121,7 +127,7 @@ public class SubscriptionServiceShould {
                                  .setTarget(target)
                                  .build();
 
-        final MemoiseStreamObserver<Subscription> observer = new MemoiseStreamObserver<>();
+        final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
 
         subscriptionService.subscribe(topic, observer);
 
@@ -134,6 +140,48 @@ public class SubscriptionServiceShould {
         assertTrue(observer.isCompleted);
     }
 
+    @Test
+    public void activate_subscription() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+
+        final String type = boundedContext.getStand()
+                                          .getAvailableTypes()
+                                          .iterator()
+                                          .next()
+                                          .getTypeName();
+
+        final Target target = Target.newBuilder()
+                                    .setType(type)
+                                    .setIncludeAll(true)
+                                    .build();
+
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+
+        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+
+        subscriptionService.subscribe(topic, subscriptionObserver);
+
+        subscriptionObserver.checkFields();
+        assertTrue(subscriptionObserver.streamFlowValue.isInitialized());
+        assertEquals(subscriptionObserver.streamFlowValue.getType(), type);
+
+
+        final MemoizeStreamObserver<SubscriptionUpdate> activationObserver = new MemoizeStreamObserver<>();
+        subscriptionService.activate(subscriptionObserver.streamFlowValue, activationObserver);
+
+        final ProjectId projectId = ProjectId.newBuilder().setId("some-id").build();
+        final Message projectState = Project.newBuilder().setId(projectId).build();
+        boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
+
+        // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
+        activationObserver.checkFields(false);
+    }
 
 
     private static BoundedContext newBoundedContext(String name) {
@@ -147,22 +195,23 @@ public class SubscriptionServiceShould {
 
     }
 
-    private static BoundedContext setupBoundedContextForProjectionRepo() {
+    private static BoundedContext setupBoundedContextForAggregateRepo() {
         final Stand stand = Stand.newBuilder()
                                  .setStorage(InMemoryStandStorage.newBuilder().build())
+                                 .setCallbackExecutor(MoreExecutors.directExecutor())
                                  .build();
 
         final BoundedContext boundedContext = BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance())
-                             .build();
+                                                            .setStand(stand)
+                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                            .build();
 
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;
     }
 
-    private static class MemoiseStreamObserver<T> implements StreamObserver<T> {
+    private static class MemoizeStreamObserver<T> implements StreamObserver<T> {
 
         private T streamFlowValue;
         private Throwable throwable;
@@ -182,5 +231,16 @@ public class SubscriptionServiceShould {
         public void onCompleted() {
             this.isCompleted = true;
         }
+
+        private void checkFields() {
+            checkFields(true);
+        }
+
+        private void checkFields(boolean isCompleted) {
+            assertNotNull(streamFlowValue);
+            assertNull(throwable);
+            assertEquals(this.isCompleted, isCompleted);
+        }
+
     }
 }
