@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.spine3.base.Queries;
 import org.spine3.base.Response;
 import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
@@ -36,7 +37,10 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -44,6 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
@@ -59,11 +64,15 @@ public class SubscriptionServiceShould {
     public void initialize_properly_with_one_bounded_context() {
         final BoundedContext singleBoundedContext = newBoundedContext("Single");
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(singleBoundedContext)
-                                                                           .build();
+        final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(singleBoundedContext);
 
+        final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
+
+        final List<BoundedContext> boundedContexs = builder.getBoundedContexts();
+        assertSize(1, boundedContexs);
+        assertTrue(boundedContexs.contains(singleBoundedContext));
     }
 
     @Test
@@ -73,13 +82,19 @@ public class SubscriptionServiceShould {
         final BoundedContext thirdBoundedContext = newBoundedContext("Third");
 
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+        final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(firstBoundedContext)
                                                                            .addBoundedContext(secondBoundedContext)
-                                                                           .addBoundedContext(thirdBoundedContext)
-                                                                           .build();
+                                                                           .addBoundedContext(thirdBoundedContext);
 
-        assertNotNull(subscriptionService);
+        final SubscriptionService service = builder.build();
+        assertNotNull(service);
+
+        final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+        assertSize(3, boundedContexts);
+        assertTrue(boundedContexts.contains(firstBoundedContext));
+        assertTrue(boundedContexts.contains(secondBoundedContext));
+        assertTrue(boundedContexts.contains(thirdBoundedContext));
     }
 
     @Test
@@ -89,15 +104,21 @@ public class SubscriptionServiceShould {
         final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay");
 
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+        final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(firstBoundedContext)
                                                                            .addBoundedContext(secondBoundedContext)
                                                                            .addBoundedContext(thirdBoundedContext)
                                                                            .removeBoundedContext(secondBoundedContext)
-                                                                           .removeBoundedContext(firstBoundedContext)
-                                                                           .build();
+                                                                           .removeBoundedContext(firstBoundedContext);
 
+        final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
+
+        final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+        assertSize(1, boundedContexts);
+        assertFalse(boundedContexts.contains(firstBoundedContext));
+        assertFalse(boundedContexts.contains(secondBoundedContext));
+        assertTrue(boundedContexts.contains(thirdBoundedContext));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -124,9 +145,9 @@ public class SubscriptionServiceShould {
                                           .next()
                                           .getTypeName();
 
-        final Target target = Target.newBuilder()
-                                    .setType(type)
-                                    .build();
+        final Target target = getProjectQueryTarget();
+
+        assertEquals(type, target.getType());
 
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
@@ -153,16 +174,7 @@ public class SubscriptionServiceShould {
                                                                            .addBoundedContext(boundedContext)
                                                                            .build();
 
-        final String type = boundedContext.getStand()
-                                          .getAvailableTypes()
-                                          .iterator()
-                                          .next()
-                                          .getTypeName();
-
-        final Target target = Target.newBuilder()
-                                    .setType(type)
-                                    .setIncludeAll(true)
-                                    .build();
+        final Target target = getProjectQueryTarget();
 
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
@@ -171,7 +183,7 @@ public class SubscriptionServiceShould {
         // Subscribe on the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
-        subscriptionObserver.checkFields();
+        subscriptionObserver.verifyState();
 
         // Activate subscription
         final MemoizeStreamObserver<SubscriptionUpdate> activationObserver = new MemoizeStreamObserver<>();
@@ -183,7 +195,7 @@ public class SubscriptionServiceShould {
         boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
-        activationObserver.checkFields(false);
+        activationObserver.verifyState(false);
     }
 
     @Test
@@ -194,15 +206,7 @@ public class SubscriptionServiceShould {
                                                                            .addBoundedContext(boundedContext)
                                                                            .build();
 
-        final String type = boundedContext.getStand()
-                                          .getAvailableTypes()
-                                          .iterator()
-                                          .next()
-                                          .getTypeName();
-
-        final Target target = Target.newBuilder()
-                                    .setType(type)
-                                    .build();
+        final Target target = getProjectQueryTarget();
 
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
@@ -256,6 +260,10 @@ public class SubscriptionServiceShould {
         return boundedContext;
     }
 
+    private static Target getProjectQueryTarget() {
+        return Queries.Targets.allOf(Project.class);
+    }
+
     private static class MemoizeStreamObserver<T> implements StreamObserver<T> {
 
         private T streamFlowValue;
@@ -277,11 +285,11 @@ public class SubscriptionServiceShould {
             this.isCompleted = true;
         }
 
-        private void checkFields() {
-            checkFields(true);
+        private void verifyState() {
+            verifyState(true);
         }
 
-        private void checkFields(boolean isCompleted) {
+        private void verifyState(boolean isCompleted) {
             assertNotNull(streamFlowValue);
             assertNull(throwable);
             assertEquals(this.isCompleted, isCompleted);
