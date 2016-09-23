@@ -218,12 +218,12 @@ import java.util.regex.Pattern;
             return fieldName;
         }
 
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // It is OK to suppress as we're using ImmutableList.
         /* package */ ImmutableList<String> getFieldNames() {
             if (fieldNames == null) {
                 throw new IllegalStateException("The option is not a combination, but a single field.");
             }
-            // It is OK to suppress as we're using ImmutableList.
-            //noinspection ReturnOfCollectionOrArrayField
+
             return fieldNames;
         }
     }
