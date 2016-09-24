@@ -76,16 +76,16 @@ extend google.protobuf.MessageOptions {
     // For example:
     //
     // message MyEvent {
-    //     option (enrich_with) = "EnrichmentOne,"
-    //                            "EnrichmentTwo";
+    //     option (enrichment) = "EnrichmentOne,"
+    //                           "EnrichmentTwo";
     //     ...
     // }
     //
     // Fields of the referenced enrichment types refer to the fields of the event message via `by` option.
-    // Therefore, if `enrich_with` option is used in more than event message, the fields participating
+    // Therefore, if `enrichment` option is used in more than event message, the fields participating
     // in the enrichment process must have the same names.
     //
-    string enrich_with = 57125;
+    string enrichment = 57126;
 }
 
 extend google.protobuf.FieldOptions {
