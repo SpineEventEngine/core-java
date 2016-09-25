@@ -110,6 +110,17 @@ public class Timestamps {
     }
 
     /**
+     * Obtains system time.
+     *
+     * <p>Unlike {@link #getCurrentTime()} this method <strong>always</strong> uses system time millis.
+     *
+     * @return current system time
+     */
+    public static Timestamp systemTime() {
+        return com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+    }
+
+    /**
      * The provider of the current time.
      *
      * <p>Implement this interface and pass the resulting class to
@@ -131,6 +142,13 @@ public class Timestamps {
     @VisibleForTesting
     public static void setProvider(Provider provider) {
         timeProvider.set(checkNotNull(provider));
+    }
+
+    /**
+     * Sets the default current time provider that obtains current time from system millis.
+     */
+    public static void resetProvider() {
+        timeProvider.set(new SystemTimeProvider());
     }
 
     /**
