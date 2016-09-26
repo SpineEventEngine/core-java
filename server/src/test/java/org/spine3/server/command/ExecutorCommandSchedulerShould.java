@@ -32,10 +32,10 @@ import org.spine3.base.Commands;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
@@ -51,8 +51,8 @@ public class ExecutorCommandSchedulerShould {
 
     private static final Duration DELAY = milliseconds(DELAY_MS);
 
-    // Wait a bit longer in the verifier to ensure the commmand was processed.
-    private static final int TINY_DELAY_GAP_MS = 50;
+    // Wait a bit longer in the verifier to ensure the command was processed.
+    private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private CommandScheduler scheduler;
     private CommandContext context;
@@ -76,7 +76,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(cmdPrimary);
         
         verify(scheduler, never()).post(any(Command.class));
-        verify(scheduler, after(DELAY_MS + TINY_DELAY_GAP_MS)).post(commandCaptor.capture());
+        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(commandCaptor.capture());
         final Command actualCmd = commandCaptor.getValue();
         final Command expectedCmd = Commands.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
         assertEquals(expectedCmd, actualCmd);
@@ -91,7 +91,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
 
-        verify(scheduler, after(DELAY_MS + TINY_DELAY_GAP_MS)).post(any(Command.class));
+        verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(any(Command.class));
         verify(scheduler, never()).post(extraCmd);
     }
 
