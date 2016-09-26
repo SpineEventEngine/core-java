@@ -26,8 +26,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.client.UserUtil;
 import org.spine3.server.event.enrich.EventEnricher;
+import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarted;
@@ -151,7 +151,7 @@ public class Given {
                 if (id == null) {
                     return null;
                 }
-                return UserUtil.newUserId("Project owner " + id.getId());
+                return Tests.newUserId("Project owner " + id.getId());
             }
         }
 

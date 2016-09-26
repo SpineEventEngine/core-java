@@ -1,20 +1,22 @@
-
-ext {
-    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
-    // is updated with new Message types introduced in the new version of Protobuf.
-    protobufVersion = '3.0.0'
-    protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
-    gRpcVersion = '1.0.0-pre2'
-    slf4JVersion = '1.7.21'
-    jUnitVersion = '4.12'
-
-    spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
-    publishPlugin = "$projectDir/gradle/plugins/publish.gradle"
-
-    credentialsPropertyFile = 'credentials.properties'
-    projectsToPublish = ["client", "server", "values", "testutil"]
-}
-
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
 buildscript {
     repositories {
         mavenCentral()
@@ -23,13 +25,23 @@ buildscript {
             url = 'http://maven.teamdev.com/repository/spine'
         }
     }
+
+    ext {
+        guavaVersion = '19.0'
+        protobufGradlePluginVerison = '0.8.0'
+        spineProtobufPluginVersion = '1.4.10'
+    }
+
     dependencies {
-        classpath group: 'com.google.guava', name: 'guava', version: '19.0'
-        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: '0.7.7') {
+        classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
+        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin',
+                                                 version: protobufGradlePluginVerison) {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.4.10', changing: true
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
+                                             version: spineProtobufPluginVersion,
+                                             changing: true
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -42,7 +54,23 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.5.4-SNAPSHOT'
+    version = '0.5.8-SNAPSHOT'
+}
+
+ext {
+    // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
+    // is updated with new Message types introduced in the new version of Protobuf.
+    protobufVersion = '3.0.0'
+    protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
+    gRpcVersion = '1.0.0'
+    slf4JVersion = '1.7.21'
+    jUnitVersion = '4.12'
+
+    spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
+    publishPlugin = "$rootDir/scripts/publish.gradle"
+
+    credentialsPropertyFile = 'credentials.properties'
+    projectsToPublish = ["client", "server", "values", "testutil", "users"]
 }
 
 subprojects {
@@ -59,15 +87,15 @@ subprojects {
 
         generatedSpineDir = "$generatedRootDir/main/spine"
 
-        testArtifactsPlugin = '../gradle/plugins/test-artifacts.gradle'
-        generateDescriptorSetPlugin = '../gradle/plugins/generate-descriptor-set.gradle'
-        gRpcPlugin = '../gradle/plugins/grpc.gradle'
-        jacocoPlugin = '../gradle/plugins/jacoco.gradle'
+        testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
+        generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
+        gRpcScript = "${rootDir}/scripts/grpc.gradle"
+        jacocoScript = "${rootDir}/scripts/jacoco.gradle"
     }
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
-    apply from: jacocoPlugin
+    apply from: jacocoScript
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -85,7 +113,7 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'com.google.guava', name: 'guava', version: '19.0'
+        compile group: 'com.google.guava', name: 'guava', version: guavaVersion
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         //As a Library, we provide logging facade API, not specific logger bindings.
@@ -118,6 +146,9 @@ subprojects {
     }
 
     protobuf {
+        // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
+        // See: https://youtrack.jetbrains.com/issue/IDEA-141744
+        //noinspection GroovyAssignabilityCheck
         plugins {
             grpc {
                 artifact = "io.grpc:protoc-gen-grpc-java:$gRpcVersion"

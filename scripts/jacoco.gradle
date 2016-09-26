@@ -1,0 +1,10 @@
+// Apply this script to enable JaCoCo test report.
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+check.dependsOn jacocoTestReport

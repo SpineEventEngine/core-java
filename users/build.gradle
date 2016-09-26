@@ -18,12 +18,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
+    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
+    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
 
     compile project(path: ':client')
-    compile project(path: ':values')
 
-    testCompile project(path: ":client", configuration: 'testArtifacts')
     testCompile project(path: ":testutil")
 }
 

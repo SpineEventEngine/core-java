@@ -1,0 +1,75 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.sharing;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "SharingProto";
+option java_package = "org.spine3.sharing";
+
+import "spine/annotations.proto";
+import "spine/users/user_id.proto";
+import "spine/users/group.proto";
+
+// An object can be shared with a user or a group of users.
+message Subject {
+    oneof kind {
+        users.UserId user = 1;
+        users.GroupId group = 2;
+    }
+}
+
+// A level of access to a shared object.
+enum SharingLevel {
+
+    // No access to corresponding objects.
+    NONE = 0;
+
+    // Ability to view shared objects.
+    VIEW = 1;
+
+    // Ability to comment on shared objects.
+    COMMENT = 2;
+
+    // Ability to modify shared documents.
+    EDIT = 3;
+
+    // Ability to add and remove regular users.
+    MODERATE = 4;
+
+    // Ability to add and remove administrators.
+    ADMINISTRATE = 5;
+}
+
+// Permission is a definition of access level for a user or a group.
+message Permission {
+    Subject subject = 1;
+    SharingLevel level = 2;
+}
+
+// Definition of access levels for an object to users and groups.
+//
+// If a user or a group is not added to the sharing schema, the level is [SharingLevel.NONE].
+message Sharing {
+    repeated Permission permissions = 2;
+}

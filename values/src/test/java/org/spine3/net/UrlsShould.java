@@ -37,9 +37,9 @@ public class UrlsShould {
 
     @Test
     public void convert_proper_urls() {
-        final Url url = Urls.of("http://google.com");
+        final Url url = Urls.of("http://convert-proper-url.com");
 
-        assertEquals("google.com", url.getRecord()
+        assertEquals("convert-proper-url.com", url.getRecord()
                                       .getHost());
         assertEquals(Record.Schema.HTTP, url.getRecord()
                                             .getProtocol()
@@ -48,7 +48,7 @@ public class UrlsShould {
 
     @Test
     public void fail_on_already_formed_url() {
-        final Url url = Urls.of("http://google.com");
+        final Url url = Urls.of("http://already-formed-url.com");
 
         try {
             Urls.of(url);
@@ -60,7 +60,7 @@ public class UrlsShould {
     @Test
     public void validate_raw_urls() {
         final Url url1 = Url.newBuilder()
-                            .setRaw("google.com")
+                            .setRaw("validate-raw.com")
                             .build();
         Urls.validate(url1);
     }
@@ -91,7 +91,7 @@ public class UrlsShould {
                              .build();
         final Record recordWithPasswordWithoutUser =
                 Record.newBuilder()
-                      .setHost("google.com")
+                      .setHost("some-url.com")
                       .setAuth(authWithPasswordWithoutUser)
                       .build();
 
@@ -108,7 +108,7 @@ public class UrlsShould {
 
     @Test
     public void convert_to_string_properly() {
-        final String rawUrl = "http://google.com/index";
+        final String rawUrl = "http://foo-bar.com/index";
 
         assertEquals(rawUrl, Urls.toString(Urls.of(rawUrl)));
     }

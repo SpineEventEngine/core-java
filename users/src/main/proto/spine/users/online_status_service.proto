@@ -17,20 +17,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
+syntax = "proto3";
 
-    compile project(path: ':client')
-    compile project(path: ':values')
+package spine.users;
 
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil")
+option (type_url_prefix) = "type.spine3.org";
+// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
+// to hide implementation details from the public API of the framework.
+option java_package = "org.spine3.users.grpc";
+
+option java_multiple_files = true;
+option java_outer_classname = "OnlineStatusServiceProto";
+option java_generate_equals_and_hash = true;
+
+import "spine/annotations.proto";
+import "spine/users/user_id.proto";
+import "spine/users/online_status.proto";
+
+// The request to obtain online status for one or more users.
+message OnlineStatusRequest {
+
+    // Identifiers of users for whom we need updates on online status.
+    repeated UserId user_id = 1;
+
 }
 
-apply from: gRpcScript
+// The service to obtain online status of a user.
+service OnlineStatusService {
 
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
+    // The request to obtain online statuses for one or more users.
+    rpc GetMany(OnlineStatusRequest) returns (stream OnlineStatus);
+}

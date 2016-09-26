@@ -17,20 +17,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
+syntax = "proto3";
 
-    compile project(path: ':client')
-    compile project(path: ':values')
+package spine.users;
 
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil")
+option (type_url_prefix) = "type.spine3.org";
+
+option java_package = "org.spine3.users";
+option java_multiple_files = true;
+option java_outer_classname = "UserProfileProto";
+option java_generate_equals_and_hash = true;
+
+import "spine/annotations.proto";
+import "spine/net/url.proto";
+import "spine/net/email_address.proto";
+
+// General profile information for a user.
+//
+// This message is used for displaying user information.
+// Values of fields of this message are usually obtained from authentication providers.
+//
+message UserProfile {
+
+    // The user's display name, if available.
+    string display_name = 1;
+
+    // The email address corresponding to the user's account in the specified provider, if available.
+    net.EmailAddress email = 2;
+
+    // The URL to the user's profile picture, if available.
+    net.Url photo_url = 3;
 }
-
-apply from: gRpcScript
-
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId

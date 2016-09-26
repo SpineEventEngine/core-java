@@ -1,0 +1,15 @@
+// Apply this script to use `grpc` plugin in `generateProto` tasks.
+// This is needed for gRPC services generation.
+// Also adds generated gRPC code to the source sets.
+
+protobuf {
+    generateProtoTasks {
+        all().each { final task ->
+            task.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+sourceSets.main.java.srcDirs += [generatedGrpcDir]

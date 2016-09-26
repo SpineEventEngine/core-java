@@ -2,9 +2,9 @@ language: java
 
 before_install:
   - chmod +x gradlew
-  - pip install --user codecov
 
 after_success:
-  - codecov
+  # See: https://github.com/codecov/example-java/blob/master/.travis.yml
+  - bash <(curl -s https://codecov.io/bash)
 
 script: ./gradlew check --stacktrace

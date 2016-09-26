@@ -1,0 +1,61 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.users;
+
+option (type_url_prefix) = "type.spine3.org";
+// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
+// to hide implementation details from the public API of the framework.
+option java_package = "org.spine3.users.grpc";
+
+option java_multiple_files = true;
+option java_outer_classname = "UserInfoServiceProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/field_mask.proto";
+
+import "spine/annotations.proto";
+import "spine/users/user_id.proto";
+import "spine/users/user_account.proto";
+
+// The request for obtaining multiple user accounts at once.
+message UserAccountRequest {
+
+    // Identifiers of users for whom we need account details.
+    repeated UserId user_id = 1;
+
+    // Specification of fields to be included into the returned results.
+    // If not set, all fields will be returned.
+    google.protobuf.FieldMask field_mask = 2;
+}
+
+// The service for obtaining information about user accounts.
+service UserAccountService {
+
+    // The request to obtain multiple user account details.
+    //
+    // If one of the user IDs is not found, the call will cause `NOT_FOUND` error.
+    //
+    // If the user on behalf of whom the request is made is not authorized to obtain account information
+    // for one of the user IDs, the call will cause `PERMISSION_DENIED` error.
+    //
+    rpc GetMany(UserAccountRequest) returns (stream UserAccount);
+}
