@@ -317,10 +317,10 @@ public class Stand implements AutoCloseable {
         } else {
             final EntityFilters filters = target.getFilters();
 
-            // TODO[alex.tymchenko]: do we need to check for null at all? How about, say, Python gRPC client?
-            if (filters != null && filters.getIdFilter() != null && !filters.getIdFilter()
-                                                                            .getIdsList()
-                                                                            .isEmpty()) {
+            final boolean idsAreDefined = !filters.getIdFilter()
+                                                  .getIdsList()
+                                                  .isEmpty();
+            if (idsAreDefined) {
                 final EntityIdFilter idFilter = filters.getIdFilter();
                 final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(), aggregateStateIdTransformer(typeUrl));
 
