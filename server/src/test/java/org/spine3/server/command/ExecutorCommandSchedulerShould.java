@@ -51,6 +51,9 @@ public class ExecutorCommandSchedulerShould {
 
     private static final Duration DELAY = milliseconds(DELAY_MS);
 
+    // Wait a bit longer in the verifier to ensure the commmand was processed.
+    private static final int TINY_DELAY_GAP_MS = 50;
+
     private CommandScheduler scheduler;
     private CommandContext context;
 
@@ -73,7 +76,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(cmdPrimary);
         
         verify(scheduler, never()).post(any(Command.class));
-        verify(scheduler, after(DELAY_MS)).post(commandCaptor.capture());
+        verify(scheduler, after(DELAY_MS + TINY_DELAY_GAP_MS)).post(commandCaptor.capture());
         final Command actualCmd = commandCaptor.getValue();
         final Command expectedCmd = Commands.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
         assertEquals(expectedCmd, actualCmd);
@@ -88,7 +91,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
 
-        verify(scheduler, after(DELAY_MS)).post(any(Command.class));
+        verify(scheduler, after(DELAY_MS + TINY_DELAY_GAP_MS)).post(any(Command.class));
         verify(scheduler, never()).post(extraCmd);
     }
 
