@@ -436,8 +436,9 @@ public class Stand implements AutoCloseable {
      * Dumps all {@link TypeUrl}-to-{@link EntityRepository} relations.
      */
     @Override
-    public void close() {
+    public void close() throws Exception {
         typeToRepositoryMap.clear();
+        storage.close();
     }
 
     /**
