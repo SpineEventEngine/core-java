@@ -29,9 +29,9 @@ import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.Stand;
 
 /**
- * Contract for {@link Stand} storage.
+ * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
  *
- * // TODO[alex.tymchenko]: describe
+ * <p>Used by an instance of {@link Stand} to optimize the {@code Aggregate} state fetch performance.
  *
  * @author Alex Tymchenko
  * @see Any#getTypeUrl()
