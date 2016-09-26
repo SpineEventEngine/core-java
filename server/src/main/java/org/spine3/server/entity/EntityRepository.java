@@ -121,7 +121,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     @CheckReturnValue
     @Nullable
     public E find(I id) {
-        // TODO[alex.tymchenko]: check whether using #load(id) straightaway is a good idea;
         return this.load(id);
     }
 
