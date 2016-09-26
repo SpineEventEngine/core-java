@@ -117,6 +117,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
      * <li>Closes {@link EventBus}.
      * <li>Closes {@link CommandStore}.
      * <li>Closes {@link EventStore}.
+     * <li>Closes {@link Stand}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
      *      <li>un-registered from {@link CommandBus}
@@ -132,6 +133,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         storageFactory.close();
         commandBus.close();
         eventBus.close();
+        stand.close();
 
         shutDownRepositories();
 
@@ -140,7 +142,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
 
     private void shutDownRepositories() throws Exception {
         for (Repository<?, ?> repository : repositories) {
-            stand.deregisterSupplierForType(repository.getEntityStateType());
             repository.close();
         }
         repositories.clear();
