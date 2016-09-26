@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandService;
+import org.spine3.server.SubscriptionService;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -57,15 +58,22 @@ public class Server {
         boundedContext.getEventBus()
                       .subscribe(eventLogger);
 
-        // Create a client service with this bounded context.
-        final CommandService clientService = CommandService.newBuilder()
+        // Create a command service with this bounded context,
+        final CommandService commandService = CommandService.newBuilder()
                                                            .addBoundedContext(boundedContext)
                                                            .build();
+
+        // and a subscription service for the same bounded context.
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                .addBoundedContext(boundedContext)
+                                                                .build();
+
 
         // Create a gRPC server and schedule the client service instance for deployment.
         this.grpcContainer = GrpcContainer.newBuilder()
                                           .setPort(DEFAULT_CLIENT_SERVICE_PORT)
-                                          .addService(clientService)
+                                          .addService(commandService)
+                                          .addService(subscriptionService)
                                           .build();
     }
 

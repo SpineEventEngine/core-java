@@ -26,11 +26,16 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
-import org.spine3.base.Event;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Queries;
 import org.spine3.base.Response;
 import org.spine3.client.CommandFactory;
+import org.spine3.client.Subscription;
+import org.spine3.client.SubscriptionUpdate;
+import org.spine3.client.Target;
+import org.spine3.client.Topic;
 import org.spine3.client.grpc.CommandServiceGrpc;
+import org.spine3.client.grpc.SubscriptionServiceGrpc;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
@@ -56,6 +61,7 @@ import static org.spine3.protobuf.Messages.toText;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
+@SuppressWarnings("OverlyCoupledClass")     // OK for a self-contained all-in-one example.
 public class ClientApp {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -67,39 +73,39 @@ public class ClientApp {
     private final CommandFactory commandFactory;
     private final ManagedChannel channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingClient;
-    // TODO[alex.tymchenko]: switch to SubscriptionService instead.  
-    private final CommandServiceGrpc.CommandServiceStub nonBlockingClient;
+    private final SubscriptionServiceGrpc.SubscriptionServiceStub subscriptionClient;
 
-    private final StreamObserver<Event> observer = new StreamObserver<Event>() {
+    private final StreamObserver<SubscriptionUpdate> orderUpdateObserver = new StreamObserver<SubscriptionUpdate>() {
         @Override
-        public void onNext(Event event) {
-            final String eventText = Messages.toText(event.getMessage());
-            log().info(eventText);
+        public void onNext(SubscriptionUpdate subscriptionUpdate) {
+            final String updateText = Messages.toText(subscriptionUpdate);
+            log().info(" + Order updated: {}", updateText);
         }
 
         @Override
         public void onError(Throwable throwable) {
-            log().error("Streaming error occurred", throwable);
+            log().error("Subscription update delivery error occurred", throwable);
         }
 
         @Override
         public void onCompleted() {
-            log().info("Stream completed.");
+            log().info("Subscription update delivery completed.");
         }
     };
+
 
     /** Construct the client connecting to server at {@code host:port}. */
     public ClientApp(String host, int port) {
         commandFactory = CommandFactory.newBuilder()
-                            .setActor(newUserId(Identifiers.newUuid()))
-                            .setZoneOffset(ZoneOffsets.UTC)
-                            .build();
+                                       .setActor(newUserId(Identifiers.newUuid()))
+                                       .setZoneOffset(ZoneOffsets.UTC)
+                                       .build();
         channel = ManagedChannelBuilder
                 .forAddress(host, port)
                 .usePlaintext(true)
                 .build();
         blockingClient = CommandServiceGrpc.newBlockingStub(channel);
-        nonBlockingClient = CommandServiceGrpc.newStub(channel);
+        subscriptionClient = SubscriptionServiceGrpc.newStub(channel);
     }
 
     private Command createOrder(OrderId orderId) {
@@ -112,26 +118,31 @@ public class ClientApp {
     private Command addOrderLine(OrderId orderId) {
         final int bookPriceUsd = 52;
         final Book book = Book.newBuilder()
-                .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
-                .setAuthor("Eric Evans")
-                .setTitle("Domain Driven Design.")
-                .setPrice(newMoney(bookPriceUsd, USD))
-                .build();
+                              .setBookId(BookId.newBuilder()
+                                               .setISBN("978-0321125217")
+                                               .build())
+                              .setAuthor("Eric Evans")
+                              .setTitle("Domain Driven Design.")
+                              .setPrice(newMoney(bookPriceUsd, USD))
+                              .build();
         final int quantity = 1;
         final Money totalPrice = newMoney(bookPriceUsd * quantity, USD);
         final OrderLine orderLine = OrderLine.newBuilder()
-                .setProductId(AnyPacker.pack(book.getBookId()))
-                .setQuantity(quantity)
-                .setPrice(totalPrice)
-                .build();
+                                             .setProductId(AnyPacker.pack(book.getBookId()))
+                                             .setQuantity(quantity)
+                                             .setPrice(totalPrice)
+                                             .build();
         final AddOrderLine msg = AddOrderLine.newBuilder()
                                              .setOrderId(orderId)
-                                             .setOrderLine(orderLine).build();
+                                             .setOrderLine(orderLine)
+                                             .build();
         return commandFactory.create(msg);
     }
 
     private Command payForOrder(OrderId orderId) {
-        final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
+        final BillingInfo billingInfo = BillingInfo.newBuilder()
+                                                   .setInfo("Payment info is here.")
+                                                   .build();
         final PayForOrder msg = PayForOrder.newBuilder()
                                            .setOrderId(orderId)
                                            .setBillingInfo(billingInfo)
@@ -140,14 +151,47 @@ public class ClientApp {
     }
 
 
+    private void subscribe() {
+        final Target allOrders = Queries.Targets.allOf(Order.class);
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(allOrders)
+                                 .build();
+        subscriptionClient.subscribe(topic, new StreamObserver<Subscription>() {
+
+            private Subscription latestSubscription;
+
+            @Override
+            public void onNext(Subscription subscription) {
+                this.latestSubscription = subscription;
+                final String eventText = Messages.toText(subscription);
+                log().info(eventText);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log().error("Subscription error occurred", throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                log().info("Subscription request completed.");
+                subscriptionClient.activate(latestSubscription, orderUpdateObserver);
+            }
+
+        });
+    }
+
+
     /** Sends requests to the server. */
     public static void main(String[] args) throws InterruptedException {
         final ClientApp client = new ClientApp(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT);
+        client.subscribe();
 
         final List<Command> requests = client.generateRequests();
 
         for (Command request : requests) {
-            log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
+            log().info("Sending a request: " + request.getMessage()
+                                                      .getTypeUrl() + "...");
             final Response result = client.post(request);
             log().info("Result: " + toText(result));
         }
@@ -159,7 +203,9 @@ public class ClientApp {
     private List<Command> generateRequests() {
         final List<Command> result = newLinkedList();
         for (int i = 0; i < 10; i++) {
-            final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
+            final OrderId orderId = OrderId.newBuilder()
+                                           .setValue(String.valueOf(i))
+                                           .build();
             result.add(createOrder(orderId));
             result.add(addOrderLine(orderId));
             result.add(payForOrder(orderId));
@@ -173,7 +219,8 @@ public class ClientApp {
      * @throws InterruptedException if waiting is interrupted.
      */
     private void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
+        channel.shutdown()
+               .awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
     /** Sends a request to the server. */
