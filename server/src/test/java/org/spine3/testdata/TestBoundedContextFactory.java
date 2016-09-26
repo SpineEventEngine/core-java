@@ -85,5 +85,14 @@ public class TestBoundedContextFactory {
         return builder.build();
     }
 
+    public static BoundedContext newBoundedContext(String name, Stand stand) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setName(name)
+                             .setStorageFactory(FACTORY);
+
+        return builder.build();
+    }
+
     private TestBoundedContextFactory() {}
 }

@@ -22,6 +22,7 @@
 package org.spine3.server;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -97,7 +98,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                     final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                                         .setSubscription(subscription)
                                                                         .setResponse(Responses.ok())
-                                                                        .setUpdates(0, newEntityState)
+                                                                        .addUpdates(newEntityState)
                                                                         .build();
                     responseObserver.onNext(update);
                 }
@@ -161,6 +162,12 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableMap<TypeUrl, BoundedContext> getBoundedContextMap() {
             return typeToContextMap;
+        }
+
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
+        public ImmutableList<BoundedContext> getBoundedContexts() {
+            return ImmutableList.copyOf(boundedContexts);
         }
 
         /**
