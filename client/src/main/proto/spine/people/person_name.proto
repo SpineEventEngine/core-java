@@ -28,9 +28,14 @@ option java_outer_classname = "PersonNameProto";
 option java_package = "org.spine3.people";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 
-// A full name of a person.
+// A name of a person.
 message PersonName {
+
+    // A minimum requirement to refer to a person.
+    option (required_field) = "given_name|honorific_prefix & family_name";
+
     // The honorific prefix (such as "Dr." or "Prof.") for this person.
     string honorific_prefix = 1;
 
