@@ -40,16 +40,21 @@ import "google/protobuf/descriptor.proto";
 import "spine/annotations.proto";
 
 extend google.protobuf.MessageOptions {
+
     // Specifies Protobuf type names of the events that are produced after a command is handled.
+    //
     // The type names should be separated with commas. Space characters are allowed.
     // If the events are of the same aggregate with the command, non-qualified names can be used.
     // Otherwise, please use fully qualified names.
+    //
     string events = 59000;
 
     // Specifies Protobuf type names of the failures that can be returned to the attempt to handle
     // a command if business conditions do not allow the command execution.
+    //
     // The type names should be separated with commas. Space characters are allowed.
     // If the failures are of the same aggregate with the command, non-qualified names can be used.
     // Otherwise, please use fully qualified names.
+    //
     string failures = 59001;
 }

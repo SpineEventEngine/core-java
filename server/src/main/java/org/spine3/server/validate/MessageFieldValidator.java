@@ -54,14 +54,16 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
+     * @param strict        if {@code true} the validator would assume that the field is required even
+     *                      if the corresponding field option is not present
      */
     /* package */ MessageFieldValidator(FieldDescriptor descriptor,
-                                        ImmutableList<Message> fieldValues,
-                                        FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+            ImmutableList<Message> fieldValues,
+            FieldPath rootFieldPath, boolean strict) {
+        super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validOption = getFieldOption(ValidationProto.valid);
         this.isFieldTimestamp = isTimestamp();

@@ -58,18 +58,27 @@ import static org.spine3.base.Commands.isCommandsFile;
     private final RequiredOption requiredOption;
 
     /**
+     * If set the validator would assume that the field is required even if the {@code requiredOption}
+     * is not set.
+     */
+    private final boolean strict;
+
+    /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param values values to validate
+     * @param descr    a descriptor of the field to validate
+     * @param values        values to validate
      * @param rootFieldPath a path to the root field (if present)
+     * @param strict        if {@code true} the validator would assume that the field is required event
+     *                      if corresponding field option is not present
      */
-    protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values, FieldPath rootFieldPath) {
-        this.fieldDescriptor = descriptor;
+    protected FieldValidator(FieldDescriptor descr, ImmutableList<V> values, FieldPath rootFieldPath, boolean strict) {
+        this.fieldDescriptor = descr;
         this.values = values;
         this.fieldPath = rootFieldPath.toBuilder()
                 .addFieldName(fieldDescriptor.getName())
                 .build();
+        this.strict = strict;
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
@@ -131,7 +140,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
      */
     protected void checkIfRequiredAndNotSet() {
-        if (!requiredOption.getValue()) {
+        if (!requiredOption.getValue() && !strict) {
             return;
         }
         if (values.isEmpty()) {
@@ -141,7 +150,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         for (V value : values) {
             if (isValueNotSet(value)) {
                 addViolation(newViolation(requiredOption));
-                return; // return because one error message is enough for the "required" option
+                return; // because one error message is enough for the "required" option
             }
         }
     }

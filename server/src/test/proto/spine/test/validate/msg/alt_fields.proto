@@ -19,39 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.users;
+package spine.test.validate.msg;
 
 option (type_url_prefix) = "type.spine3.org";
-
-option java_package = "org.spine3.users";
-option java_multiple_files = true;
-option java_outer_classname = "TenantProto";
 option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "ValidationTestCommandsProto";
+option java_package = "org.spine3.test.validate.msg.altfields";
 
-import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 import "spine/annotations.proto";
 import "spine/validate.proto";
-import "spine/users/organization.proto";
-import "spine/users/tenant_id.proto";
-import "spine/users/user_profile.proto";
 
-// A tenant in a SaaS application.
-message Tenant {
+message PersonName {
+    option (required_field) = "first_name | honorific_prefix & last_name";
 
-    // The identifier of the tenant.
-    TenantId id = 1;
+    string honorific_prefix = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string honorific_suffix = 4;
+}
 
-    // An application can allow only organizational tenants, or only persons, or both.
-    // This requirement would define what a valid `Tenant` message is.
-    // That's why we don't define validation constraints in this message, and leave it to be
-    // the responsibility of the application.
-    //
-    oneof kind {
-        // The tenant is an organization.
-        OrganizationProfile organization = 2;
+message MessageWithMissingField {
+    option (required_field) = "name | else";
 
-        // The tenant is a person.
-        UserProfile person = 3;
-    }
+    string name = 1;
+    bool present = 2;
 }
