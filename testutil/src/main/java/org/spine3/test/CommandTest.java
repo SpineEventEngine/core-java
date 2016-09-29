@@ -26,11 +26,11 @@ import org.spine3.base.Command;
 /**
  * An abstract base for nested tests of aggregate specifications.
  *
+ * @param <C> the type of the command message to test
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"ProtectedField" /* we want easier access from test suites */,
                    "unused", "AbstractClassNeverImplemented" /* is supposed to be used from outside */})
-
 public abstract class CommandTest<C extends Message> {
 
     protected final TestCommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
@@ -39,8 +39,14 @@ public abstract class CommandTest<C extends Message> {
 
     protected Command command;
 
+    /**
+     * Factory method to create a command message.
+     */
     protected abstract C createCommandMessage();
 
+    /**
+     * Creates a new command.
+     */
     protected void createCommand() {
         commandMessage = createCommandMessage();
         command = commandFactory.create(commandMessage);
