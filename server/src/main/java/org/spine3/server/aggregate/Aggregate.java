@@ -239,7 +239,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * which is called automatically by {@link AggregateRepository}.
      */
     @VisibleForTesting
-    @CheckReturnValue
     public final List<? extends Message> dispatchForTest(Message command, CommandContext context) {
         return dispatch(command, context);
     }
