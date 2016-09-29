@@ -31,6 +31,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
@@ -275,5 +276,22 @@ public class TimestampsShould {
         Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
 
         assertEquals(fiveMinutesAgo, Timestamps.getCurrentTime());
+    }
+
+    @Test
+    public void reset_time_provider_to_default() {
+        final Timestamp aMinuteAgo = com.google.protobuf.util.Timestamps.subtract(
+                Timestamps.systemTime(),
+                Durations.ofMinutes(1));
+
+        Timestamps.setProvider(new Tests.FrozenMadHatterParty(aMinuteAgo));
+        Timestamps.resetProvider();
+
+        assertNotEquals(aMinuteAgo, Timestamps.getCurrentTime());
+    }
+
+    @Test
+    public void obtain_system_time_millis() {
+        assertNotEquals(0, Timestamps.systemTime());
     }
 }

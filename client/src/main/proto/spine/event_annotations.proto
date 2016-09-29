@@ -67,6 +67,25 @@ extend google.protobuf.MessageOptions {
     //
     string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
                                     // EnrichmentLookupPlugin (update it there on changing).
+
+    // An instruction to enrich an event with one or more enrichments.
+    //
+    // This option is defined in event messages.
+    // If more than one enrichment should be added, their type names should be separated with the comma.
+    //
+    // For example:
+    //
+    // message MyEvent {
+    //     option (enrichment) = "EnrichmentOne,"
+    //                           "EnrichmentTwo";
+    //     ...
+    // }
+    //
+    // Fields of the referenced enrichment types refer to the fields of the event message via `by` option.
+    // Therefore, if `enrichment` option is used in more than event message, the fields participating
+    // in the enrichment process must have the same names.
+    //
+    string enrichment = 57126;
 }
 
 extend google.protobuf.FieldOptions {

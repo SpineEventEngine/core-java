@@ -21,6 +21,7 @@
 package org.spine3.test;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.users.UserId;
 
@@ -112,6 +113,13 @@ public class Tests {
         return UserId.newBuilder()
                 .setValue(value)
                 .build();
+    }
+
+    /**
+     * Generates a new UUID-based {@code UserId}.
+     */
+    public static UserId newUserUuid() {
+        return newUserId(Identifiers.newUuid());
     }
 
     /** The provider of current time, which is always the same. */

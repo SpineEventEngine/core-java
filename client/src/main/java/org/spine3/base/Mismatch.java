@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 
@@ -28,8 +27,12 @@ import javax.annotation.Nullable;
 
 import static org.spine3.protobuf.Values.pack;
 
-
-/** Factories for constructing {@link ValueMismatch} instances for different types of attributes. */
+/**
+ * Factories for constructing {@link ValueMismatch} instances for different types of attributes.
+ *
+ * @author Alexander Yevsyukov
+ * @author Andrey Lavrov
+ */
 public class Mismatch {
 
     private Mismatch() {
@@ -38,148 +41,120 @@ public class Mismatch {
     /**
      * Creates a {@link ValueMismatch} instance for a string attribute.
      *
-     * @param expected  the value expected by a command, or {@code null} if the command expects not populated field
-     * @param actual     the value found in an entity, or {@code null} if the value is not set
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command, or {@code null} if the command expects not populated field
+     * @param actual   the value found in an entity, or {@code null} if the value is not set
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(@Nullable String expected, @Nullable String actual, String requested, int version) {
+    public static ValueMismatch of(@Nullable String expected, @Nullable String actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
         if (expected != null) {
             builder.setExpected(pack(expected));
         }
-
         if (actual != null) {
             builder.setActual(pack(actual));
         }
-
-        builder.setRequested(pack(requested));
         builder.setVersion(version);
-
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a integer attribute.
      *
-     * @param expected  the value expected by a command
-     * @param actual     the value actual in an entity
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command
+     * @param actual   the value actual in an entity
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(int expected, int actual, int requested, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-        builder.setExpected(pack(expected));
-        builder.setActual(pack(actual));
-        builder.setRequested(pack(requested));
-        builder.setVersion(version);
-
+    public static ValueMismatch of(int expected, int actual, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setVersion(version);
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a long integer attribute.
      *
-     * @param expected  the value expected by a command
-     * @param actual     the value actual in an entity
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command
+     * @param actual   the value actual in an entity
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(long expected, long actual, long requested, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-        builder.setExpected(pack(expected));
-        builder.setActual(pack(actual));
-        builder.setRequested(pack(requested));
-        builder.setVersion(version);
-
+    public static ValueMismatch of(long expected, long actual, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setVersion(version);
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a float attribute.
      *
-     * @param expected  the value expected by a command
-     * @param actual     the value actual in an entity
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command
+     * @param actual   the value actual in an entity
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(float expected, float actual, float requested, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-        builder.setExpected(pack(expected));
-        builder.setActual(pack(actual));
-        builder.setRequested(pack(requested));
-        builder.setVersion(version);
-
+    public static ValueMismatch of(float expected, float actual, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setVersion(version);
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a double attribute.
      *
-     * @param expected  the value expected by a command
-     * @param actual     the value actual in an entity
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command
+     * @param actual   the value actual in an entity
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(double expected, double actual, double requested, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-        builder.setExpected(pack(expected));
-        builder.setActual(pack(actual));
-        builder.setRequested(pack(requested));
-        builder.setVersion(version);
-
+    public static ValueMismatch of(double expected, double actual, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setVersion(version);
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a boolean attribute.
      *
-     * @param expected  the value expected by a command
-     * @param actual     the value actual in an entity
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command
+     * @param actual   the value actual in an entity
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(boolean expected, boolean actual, boolean requested, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-        builder.setExpected(pack(expected));
-        builder.setActual(pack(actual));
-        builder.setRequested(pack(requested));
-        builder.setVersion(version);
-
+    public static ValueMismatch of(boolean expected, boolean actual, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setVersion(version);
         return builder.build();
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a Message attribute.
      *
-     * @param expected  the value expected by a command, or {@code null} if the command expects not populated field
-     * @param actual     the value actual in an entity, or {@code null} if the value is not set
-     * @param requested the value requested as new one in the original command
-     * @param version   the current version of the entity
+     * @param expected the value expected by a command, or {@code null} if the command expects not populated field
+     * @param actual   the value actual in an entity, or {@code null} if the value is not set
+     * @param version  the current version of the entity
      * @return info on the mismatch
      */
-    public static ValueMismatch of(@Nullable Message expected, @Nullable Message actual, Message requested, int version) {
+    public static ValueMismatch of(@Nullable Message expected, @Nullable Message actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-
         if (expected != null) {
             builder.setExpected(AnyPacker.pack(expected));
         }
-
         if (actual != null) {
             builder.setActual(AnyPacker.pack(actual));
         }
-
-        final Any requestedAny = AnyPacker.pack(requested);
-
-        builder.setRequested(requestedAny);
         builder.setVersion(version);
-
         return builder.build();
     }
 }
