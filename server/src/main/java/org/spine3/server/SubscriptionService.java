@@ -80,7 +80,6 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             responseObserver.onError(e);
             responseObserver.onCompleted();
         }
-
     }
 
     @Override
@@ -103,7 +102,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                     responseObserver.onNext(update);
                 }
             };
-            boundedContext.getStand().activate(subscription, updateCallback);
+            final Stand targetStand = boundedContext.getStand();
+            targetStand.activate(subscription, updateCallback);
 
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
@@ -141,11 +141,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         return typeToContextMap.get(type);
     }
 
-
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
         private ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
-
 
         public Builder addBoundedContext(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
@@ -158,12 +156,10 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             return this;
         }
 
-
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableMap<TypeUrl, BoundedContext> getBoundedContextMap() {
             return typeToContextMap;
         }
-
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableList<BoundedContext> getBoundedContexts() {
@@ -193,11 +189,10 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         }
 
         private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
-                BoundedContext boundedContext) {
+                                              BoundedContext boundedContext) {
 
             final ImmutableSet<TypeUrl> availableTypes = boundedContext.getStand()
                                                                        .getAvailableTypes();
-
             for (TypeUrl availableType : availableTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }
