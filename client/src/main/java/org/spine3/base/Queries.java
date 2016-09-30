@@ -133,7 +133,6 @@ public class Queries {
     private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {
         final Target target = composeTarget(entityClass, ids);
 
-
         final Query.Builder queryBuilder = Query.newBuilder()
                                                 .setTarget(target);
         if (fieldMask != null) {
@@ -200,14 +199,12 @@ public class Queries {
             final EntityFilters filters = EntityFilters.newBuilder()
                                                        .setIdFilter(idFilter)
                                                        .build();
-
             final Target.Builder builder = Target.newBuilder()
                                                  .setType(type.getTypeName());
             if (includeAll) {
                 builder.setIncludeAll(true);
             } else {
                 builder.setFilters(filters);
-
             }
 
             return builder.build();
