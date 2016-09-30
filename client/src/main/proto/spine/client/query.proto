@@ -59,6 +59,10 @@ message Query {
     reserved 3 to 6;
 }
 
+// The result of Query processing in the read-side implementation.
+//
+// Contains the actual processing results and other response attributes.
+// Used as a result of {@code QueryService#Read(Query)} gRPC method call.
 message QueryResponse {
 
     // Represents the base part of the response. I.e. whether the Query has been acked or not.
@@ -67,5 +71,6 @@ message QueryResponse {
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
+    // Entity states (each packed as Any) returned to the API user as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
 }
