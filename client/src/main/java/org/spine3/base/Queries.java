@@ -60,8 +60,8 @@ public class Queries {
      * This processing is performed according to the
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
-     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity (e.g. a {@path} does , such invalid paths
-     * are silently ignored.
+     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
+     * (e.g. a {@code path} references a missing field), such invalid paths are silently ignored.
      *
      * @param entityClass the class of a target entity
      * @param ids         the entity IDs of interest
@@ -84,8 +84,8 @@ public class Queries {
      * This processing is performed according to the
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
-     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity, such invalid paths
-     * are silently ignored.
+     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
+     * (e.g. a {@code path} references a missing field), such invalid paths are silently ignored.
      *
      * @param entityClass the class of a target entity
      * @param paths       the property paths for the {@code FieldMask} applied to each of results
