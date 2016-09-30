@@ -124,14 +124,13 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return this.load(id);
     }
 
-
     /**
-     * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
+     * Finds all the entities in this repository with IDs, contained within the passed {@code ids} values.
      *
      * <p>Same as calling <pre>{@code findBulk(id, FieldMask.getDefaultInstance());}</pre>
      *
      * @param ids entity IDs to search for
-     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
+     * @return all the entities in this repository with the IDs contained in the given {@code ids}
      * @see #findBulk(Iterable, FieldMask)
      */
     @CheckReturnValue
@@ -157,7 +156,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param ids entity IDs to search for
+     * @param ids       entity IDs to search for
      * @param fieldMask mask to apply on entities
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
@@ -198,7 +197,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
                               })
                               .toList();
-
         return entities;
     }
 
@@ -209,7 +207,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param filters entity filters
+     * @param filters   entity filters
      * @param fieldMask mask to apply to the entities
      * @return all the entities in this repository passed the filters.
      */
@@ -239,7 +237,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 @SuppressWarnings("unchecked")
                 final I id = (I) idAsMessage;
                 return id;
-
             }
         });
 
@@ -258,8 +255,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
-
-
 
     private EntityStorageRecord toEntityRecord(E entity) {
         final M state = entity.getState();
