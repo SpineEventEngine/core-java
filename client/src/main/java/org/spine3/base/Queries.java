@@ -145,16 +145,35 @@ public class Queries {
     }
 
 
+    /**
+     * Client-side utilities for working with {@link Query} and {@link org.spine3.client.Subscription} targets.
+     *
+     * @author Alex Tymchenko
+     * @author Dmytro Dashenkov
+     */
     public static class Targets {
 
         private Targets() {
         }
 
+        /**
+         * Create a {@link Target} for a subset of the entity states by specifying their IDs.
+         *
+         * @param entityClass the class of a target entity
+         * @param ids         the IDs of interest
+         * @return the instance of {@code Target} assembled according to the parameters.
+         */
         public static Target someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
             final Target result = composeTarget(entityClass, ids);
             return result;
         }
 
+        /**
+         * Create a {@link Target} for all of the specified entity states.
+         *
+         * @param entityClass the class of a target entity
+         * @return the instance of {@code Target} assembled according to the parameters.
+         */
         public static Target allOf(Class<? extends Message> entityClass) {
             final Target result = composeTarget(entityClass, null);
             return result;
