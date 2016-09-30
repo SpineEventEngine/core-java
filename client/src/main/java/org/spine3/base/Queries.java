@@ -49,6 +49,25 @@ public class Queries {
     private Queries() {
     }
 
+    /**
+     * Create a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
+     * applied to each of the results.
+     *
+     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing. The processing
+     * results will contain only the entities, which IDs are present among the {@code ids}.
+     *
+     * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query results.
+     * This processing is performed according to the
+     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     *
+     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity (e.g. a {@path} does , such invalid paths
+     * are silently ignored.
+     *
+     * @param entityClass the class of a target entity
+     * @param ids         the entity IDs of interest
+     * @param paths       the property paths for the {@code FieldMask} applied to each of results
+     * @return an instance of {@code Query} formed according to the passed parameters
+     */
     public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids, String... paths) {
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
@@ -57,18 +76,56 @@ public class Queries {
         return result;
     }
 
+    /**
+     * Create a {@link Query} to read all entity states with the {@link FieldMask}
+     * applied to each of the results.
+     *
+     * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query results.
+     * This processing is performed according to the
+     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     *
+     * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity, such invalid paths
+     * are silently ignored.
+     *
+     * @param entityClass the class of a target entity
+     * @param paths       the property paths for the {@code FieldMask} applied to each of results
+     * @return an instance of {@code Query} formed according to the passed parameters
+     */
     public static Query readAll(Class<? extends Message> entityClass, String... paths) {
         final FieldMask fieldMask = FieldMask.newBuilder()
-                                       .addAllPaths(Arrays.asList(paths))
-                                       .build();
+                                             .addAllPaths(Arrays.asList(paths))
+                                             .build();
         final Query result = composeQuery(entityClass, null, fieldMask);
         return result;
     }
 
+
+    /**
+     * Create a {@link Query} to read certain entity states by IDs.
+     *
+     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing. The processing
+     * results will contain only the entities, which IDs are present among the {@code ids}.
+     *
+     * <p>Unlike {@link Queries#readByIds(Class, Set, String...)}, the {@code Query} processing will not change
+     * the resulting entities.
+     *
+     * @param entityClass the class of a target entity
+     * @param ids         the entity IDs of interest
+     * @return an instance of {@code Query} formed according to the passed parameters
+     */
     public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
         return composeQuery(entityClass, ids, null);
     }
 
+    /**
+     * Create a {@link Query} to read all states of a certain entity.
+     *
+     * <p>Unlike {@link Queries#readAll(Class, String...)}, the {@code Query} processing will not change
+     * the resulting entities.
+     *
+     * @param entityClass the class of a target entity
+     * @return an instance of {@code Query} formed according to the passed parameters
+     */
     public static Query readAll(Class<? extends Message> entityClass) {
         return composeQuery(entityClass, null, null);
     }
@@ -125,7 +182,8 @@ public class Queries {
                                                        .setIdFilter(idFilter)
                                                        .build();
 
-            final Target.Builder builder = Target.newBuilder().setType(type.getTypeName());
+            final Target.Builder builder = Target.newBuilder()
+                                                 .setType(type.getTypeName());
             if (includeAll) {
                 builder.setIncludeAll(true);
             } else {
