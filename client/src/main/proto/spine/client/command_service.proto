@@ -36,6 +36,7 @@ import "spine/base/response.proto";
 
 // A service for sending commands from clients.
 service CommandService {
+
     // Request to handle a command.
     rpc Post(base.Command) returns (base.Response);
 }
