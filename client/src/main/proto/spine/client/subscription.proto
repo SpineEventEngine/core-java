@@ -87,5 +87,4 @@ message Subscription {
 
     // Reserved for subscription attributes.
     reserved 3 to 10;
-
 }
