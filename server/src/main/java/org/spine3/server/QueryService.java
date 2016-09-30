@@ -42,8 +42,7 @@ import java.util.Set;
  *
  * @author Alex Tymchenko
  */
-public class QueryService
-        extends QueryServiceGrpc.QueryServiceImplBase {
+public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -80,7 +79,6 @@ public class QueryService
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
         private ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
-
 
         public Builder addBoundedContext(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.

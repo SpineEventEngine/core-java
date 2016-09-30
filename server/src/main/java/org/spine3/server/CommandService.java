@@ -53,7 +53,6 @@ public class CommandService
         this.boundedContextMap = builder.getBoundedContextMap();
     }
 
-
     @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
@@ -78,7 +77,6 @@ public class CommandService
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
         private ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
-
         public Builder addBoundedContext(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
@@ -89,7 +87,6 @@ public class CommandService
             boundedContexts.remove(boundedContext);
             return this;
         }
-
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
         public ImmutableMap<CommandClass, BoundedContext> getBoundedContextMap() {
