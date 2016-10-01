@@ -41,6 +41,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -92,6 +93,20 @@ public class CommandServiceShould {
     public void post_commands_to_appropriate_bounded_context() {
         verifyPostsCommand(Given.Command.createProject(), projectsContext.getCommandBus());
         verifyPostsCommand(Given.Command.createCustomer(), customersContext.getCommandBus());
+    }
+
+    @Test
+    public void never_retrieve_removed_bounded_contexts_from_builder() {
+        final CommandService.Builder builder = CommandService.newBuilder()
+                .addBoundedContext(projectsContext)
+                .addBoundedContext(customersContext)
+                .removeBoundedContext(projectsContext);
+
+        final CommandService service = builder.build(); // Creates BoundedContext map
+        assertNotNull(service);
+
+        assertTrue(builder.getBoundedContextMap().containsValue(customersContext));
+        assertFalse(builder.getBoundedContextMap().containsValue(projectsContext));
     }
 
     private void verifyPostsCommand(Command cmd, CommandBus commandBus) {
