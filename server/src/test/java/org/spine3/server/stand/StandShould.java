@@ -60,8 +60,10 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,6 +91,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.stand.Given.StandTestProjection;
+import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
@@ -278,6 +281,14 @@ public class StandShould {
     @Test
     public void return_multiple_results_for_projection_batch_read_by_ids() {
         doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
+    }
+
+    @Test
+    public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
+        final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor().getFields();
+        doCheckReadingCustomersByIdAndFieldMask(
+                projectFields.get(0).getFullName(), // ID
+                projectFields.get(1).getFullName()); // Name
     }
 
     @Test
@@ -691,6 +702,50 @@ public class StandShould {
         }
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops")
+    private static void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+
+        final int querySize = 2;
+
+        final Set<CustomerId> ids = new HashSet<>();
+
+        for (int i = 0; i < querySize; i++) {
+            final Customer customer = getSampleCustomer().toBuilder()
+                    .setId(CustomerId.newBuilder().setNumber(i))
+                    .build();
+
+            stand.update(customer.getId(), AnyPacker.pack(customer));
+
+            ids.add(customer.getId());
+        }
+
+        final Query customerQuery = Queries.readByIds(Customer.class, ids, paths);
+
+        final FieldMask fieldMask = FieldMask.newBuilder().addAllPaths(Arrays.asList(paths)).build();
+
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
+            @Override
+            public void onNext(QueryResponse value) {
+                super.onNext(value);
+                final List<Any> messages = value.getMessagesList();
+                assertSize(ids.size(), messages);
+
+                for (Any message : messages) {
+                    final Customer customer = AnyPacker.unpack(message);
+
+                    assertNotEquals(customer, null);
+
+                    assertMatches(customer, fieldMask);
+                }
+            }
+        };
+
+        stand.execute(customerQuery, observer);
+
+        verifyObserver(observer);
+    }
+
     private static void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
         final TypeUrl customerType = TypeUrl.of(Customer.class);
@@ -769,7 +824,6 @@ public class StandShould {
         final Iterable<AggregateStateId> matchingIds = argThat(aggregateIdsIterableMatcher(stateIds));
         when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
     }
-
 
     @SuppressWarnings("ConstantConditions")
     private static void setupExpectedFindAllBehaviour(Map<ProjectId, Project> sampleProjects,
@@ -914,6 +968,23 @@ public class StandShould {
         }
     }
 
+    private static void fillRichSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {
+        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(UUID.randomUUID()
+                                                            .toString())
+                                                 .build();
+
+            final Project project = Project.newBuilder()
+                    .setId(projectId)
+                    .setName(String.valueOf(projectIndex))
+                    .setStatus(Project.Status.CREATED)
+                    .build();
+
+            sampleProjects.put(projectId, project);
+        }
+    }
+
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue("Query has not completed successfully", responseObserver.isCompleted);
         assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
@@ -981,6 +1052,19 @@ public class StandShould {
                 //do nothing
             }
         };
+    }
+
+    private static void assertMatches(Message message, FieldMask fieldMask) {
+        final List<String> paths = fieldMask.getPathsList();
+        for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
+
+            // Protobuf limitation, has no effect on the test.
+            if (field.isRepeated()) {
+                continue;
+            }
+
+            assertEquals(message.hasField(field), paths.contains(field.getFullName()));
+        }
     }
 
 
