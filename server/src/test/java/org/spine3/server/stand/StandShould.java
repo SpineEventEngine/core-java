@@ -287,7 +287,7 @@ public class StandShould {
     public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
         final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor().getFields();
         doCheckReadingCustomersByIdAndFieldMask(
-                projectFields.get(0).getFullName(), // Id
+                projectFields.get(0).getFullName(), // ID
                 projectFields.get(1).getFullName()); // Name
     }
 
@@ -704,7 +704,6 @@ public class StandShould {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private static void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
-        //noinspection ZeroLengthArrayAllocation
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
 
         final int querySize = 2;
