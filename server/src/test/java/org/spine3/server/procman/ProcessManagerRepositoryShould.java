@@ -38,6 +38,8 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.entity.AbstractEntityRepositoryShould;
+import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.GetProducerIdFromEvent;
@@ -59,6 +61,8 @@ import org.spine3.testdata.TestEventBusFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +78,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProcessManagerRepositoryShould {
+public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -205,6 +209,36 @@ public class ProcessManagerRepositoryShould {
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
     }
 
+    @Override
+    protected EntityRepository<?, TestProcessManager, ?> repository() {
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
+                TestBoundedContextFactory.newBoundedContext());
+
+        repo.initStorage(InMemoryStorageFactory.getInstance());
+
+        return repo;
+    }
+
+    @Override
+    protected TestProcessManager entity() {
+        final ProjectId id = ProjectId.newBuilder().setId("123-id").build();
+        return new TestProcessManager(id);
+    }
+
+    @Override
+    protected List<TestProcessManager> entities(int count) {
+        final List<TestProcessManager> procmans = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            final ProjectId id = ProjectId.newBuilder().setId(String.format("procman-number-%s", i)).build();
+
+            procmans.add(new TestProcessManager(id));
+        }
+
+        return procmans;
+    }
+
+
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
@@ -218,7 +252,7 @@ public class ProcessManagerRepositoryShould {
         }
     }
 
-    private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    /* package */ static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
