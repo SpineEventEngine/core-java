@@ -45,8 +45,8 @@ message QueryContext {
 
 // The main abstraction over the read-side API.
 //
-// Allows clients to form the requests to the read-side through the QueryService.
-// Query execution typically results in a QueryResponse object.
+// Allows clients to form the requests to the read-side through the `QueryService`.
+// `Query` execution typically results in a QueryResponse object.
 message Query {
 
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
@@ -59,18 +59,18 @@ message Query {
     reserved 3 to 6;
 }
 
-// The result of Query processing in the read-side implementation.
+// The result of `Query` processing.
 //
 // Contains the actual processing results and other response attributes.
 // Used as a result of {@code QueryService#Read(Query)} gRPC method call.
 message QueryResponse {
 
-    // Represents the base part of the response. I.e. whether the Query has been acked or not.
+    // Represents the base part of the response. I.e. whether the `Query` has been acked or not.
     base.Response response = 1;
 
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
-    // Entity states (each packed as Any) returned to the API user as a result of Query execution.
+    // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
 }
