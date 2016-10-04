@@ -25,11 +25,19 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.ProtocolStringList;
 import org.junit.Test;
 import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.queries.TestEntity;
+import org.spine3.test.queries.TestEntityId;
 
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +46,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings("LocalVariableNamingConvention")
+@SuppressWarnings({"LocalVariableNamingConvention", "MagicNumber"})
 public class QueriesShould {
 
     @Test
@@ -52,12 +60,11 @@ public class QueriesShould {
         final Query readAllQuery = Queries.readAll(targetEntityClass);
         assertNotNull(readAllQuery);
 
+        // `EntityFilters` must be default as this value was not set.
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllQuery);
 
         // `FieldMask` must be default as `paths` were not set.
-        final FieldMask fieldMask = readAllQuery.getFieldMask();
-        assertNotNull(fieldMask);
-        assertEquals(FieldMask.getDefaultInstance(), fieldMask);
+        checkFieldMaskEmpty(readAllQuery);
     }
 
     @Test
@@ -97,19 +104,61 @@ public class QueriesShould {
         }
     }
 
+    @Test
+    public void compose_proper_read_by_ids_query() {
+        final Class<TestEntity> targetEntityClass = TestEntity.class;
 
-    private static void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> targetEntityClass, Query readAllQuery) {
-        final Target entityTarget = readAllQuery.getTarget();
+        final Set<TestEntityId> testEntityIds = newHashSet(TestEntityId.newBuilder()
+                                                                       .setValue(1)
+                                                                       .build(),
+                                                           TestEntityId.newBuilder()
+                                                                       .setValue(7)
+                                                                       .build(),
+                                                           TestEntityId.newBuilder()
+                                                                       .setValue(15)
+                                                                       .build()
+        );
+        final Query readByIdsQuery = Queries.readByIds(targetEntityClass, testEntityIds);
+        assertNotNull(readByIdsQuery);
+
+        checkFieldMaskEmpty(readByIdsQuery);
+
+        final Target target = checkTarget(targetEntityClass, readByIdsQuery);
+        final EntityFilters filters = target.getFilters();
+        assertNotNull(filters);
+        final EntityIdFilter idFilter = filters.getIdFilter();
+        assertNotNull(idFilter);
+        final List<EntityId> actualListOfIds = idFilter.getIdsList();
+        for (TestEntityId testEntityId : testEntityIds) {
+            final EntityId expectedEntityId = EntityId.newBuilder()
+                                                      .setId(AnyPacker.pack(testEntityId))
+                                                      .build();
+            assertTrue(actualListOfIds.contains(expectedEntityId));
+        }
+    }
+
+    private static void checkFieldMaskEmpty(Query query) {
+        final FieldMask fieldMask = query.getFieldMask();
+        assertNotNull(fieldMask);
+        assertEquals(FieldMask.getDefaultInstance(), fieldMask);
+    }
+
+    private static void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> expectedTargetClass, Query query) {
+        final Target entityTarget = checkTarget(expectedTargetClass, query);
+
+        final EntityFilters filters = entityTarget.getFilters();
+        assertNotNull(filters);
+        assertEquals(EntityFilters.getDefaultInstance(), filters);
+    }
+
+    private static Target checkTarget(Class<TestEntity> targetEntityClass, Query query) {
+        final Target entityTarget = query.getTarget();
         assertNotNull(entityTarget);
 
         final String expectedTypeName = TypeUrl.of(targetEntityClass)
                                                .getTypeName();
         assertEquals(expectedTypeName, entityTarget.getType());
-
-        // `EntityFilters` must be default as this value was not set.
-        final EntityFilters filters = entityTarget.getFilters();
-        assertNotNull(filters);
-        assertEquals(EntityFilters.getDefaultInstance(), filters);
+        return entityTarget;
     }
 
 }
