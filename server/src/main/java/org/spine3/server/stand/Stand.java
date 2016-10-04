@@ -70,6 +70,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -522,8 +523,8 @@ public class Stand implements AutoCloseable {
      * <p>Responsible for {@link Subscription} object instantiation.
      */
     private static final class StandSubscriptionRegistry {
-        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = new HashMap<>();
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = new HashMap<>();
+        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
+        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
         private synchronized void activate(Subscription subscription, StandUpdateCallback callback) {
             if (!subscriptionToAttrs.containsKey(subscription)) {
