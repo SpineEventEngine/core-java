@@ -109,7 +109,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Finds all the entities in this repository with IDs, contained within the passed {@code ids} values.
+     * Loads all the entities in this repository with IDs, contained within the passed {@code ids} values.
      *
      * <p>Provides a convenience wrapper around multiple invocations of {@link #load(Object)}. Descendants may
      * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
@@ -133,7 +133,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Finds all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
+     * Loads all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
      *
      * <p>Acts in the same way as {@link #loadAll(Iterable)}, with the {@code FieldMask} applied to the results.
      *
@@ -166,6 +166,14 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return ImmutableList.copyOf(entities);
     }
 
+    /**
+     * Loads all the entities in this repository.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @return all the entities in this repository
+     * @see #loadAll(Iterable)
+     */
     @CheckReturnValue
     public ImmutableCollection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
