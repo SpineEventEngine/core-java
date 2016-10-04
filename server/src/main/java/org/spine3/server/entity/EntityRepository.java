@@ -128,14 +128,14 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findBulk(Iterable<I> ids) {
-        return findBulk(ids, FieldMask.getDefaultInstance());
+    public ImmutableCollection<E> loadAll(Iterable<I> ids) {
+        return loadAll(ids, FieldMask.getDefaultInstance());
     }
 
     /**
      * Finds all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
      *
-     * <p>Acts in the same way as {@link #findBulk(Iterable)}, with the {@code FieldMask} applied to the results.
+     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with the {@code FieldMask} applied to the results.
      *
      * <p>Field mask is applied according to
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
@@ -145,10 +145,10 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @param ids       entity IDs to search for
      * @param fieldMask mask to apply on entities
      * @return all the entities in this repository with the IDs contained in the given {@code ids}
-     * @see #findBulk(Iterable)
+     * @see #loadAll(Iterable)
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findBulk(Iterable<I> ids, FieldMask fieldMask) {
+    public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
 
@@ -230,7 +230,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             }
         });
 
-        final ImmutableCollection<E> result = findBulk(domainIds, fieldMask);
+        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
         return result;
     }
 

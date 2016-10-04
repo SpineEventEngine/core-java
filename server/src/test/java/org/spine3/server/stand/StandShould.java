@@ -838,7 +838,7 @@ public class StandShould {
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
 
-        when(projectionRepository.findBulk(matchingIds, any(FieldMask.class))).thenReturn(allResults);
+        when(projectionRepository.loadAll(matchingIds, any(FieldMask.class))).thenReturn(allResults);
 
         when(projectionRepository.findAll()).thenReturn(allResults);
 
