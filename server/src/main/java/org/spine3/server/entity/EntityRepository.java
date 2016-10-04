@@ -167,7 +167,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     @CheckReturnValue
-    public ImmutableCollection<E> findAll() {
+    public ImmutableCollection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
         final Map<I, EntityStorageRecord> recordMap = storage.readAll();
 

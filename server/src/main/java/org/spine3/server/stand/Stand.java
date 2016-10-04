@@ -382,7 +382,7 @@ public class Stand implements AutoCloseable {
         final FieldMask fieldMask = query.getFieldMask();
 
         if (target.getIncludeAll() && fieldMask.getPathsList().isEmpty()) {
-            result = repository.findAll();
+            result = repository.loadAll();
         } else {
             final EntityFilters filters = target.getFilters();
             result = repository.findAll(filters, fieldMask);

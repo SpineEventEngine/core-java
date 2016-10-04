@@ -142,7 +142,7 @@ public class QueryServiceShould {
 
     @Test
     public void return_error_if_query_failed_to_execute() {
-        when(projectDetailsRepository.findAll()).thenThrow(RuntimeException.class);
+        when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
         final Query query = Given.Query.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
