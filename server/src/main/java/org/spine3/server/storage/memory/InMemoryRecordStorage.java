@@ -88,10 +88,10 @@ import static com.google.common.collect.Maps.newHashMap;
 
                     matchingRecord.setState(processed);
 
-                    result.add(matchingRecord.build());
-                } else {
-                    result.add(null);
-                }
+                    result.add(matchingRecord.build()); }
+//                } else {
+//                    result.add(null);
+//                }
             }
         }
         return result;
@@ -99,7 +99,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        return readBulkInternal(ids, null);
+        return readBulkInternal(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
