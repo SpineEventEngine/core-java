@@ -203,6 +203,8 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      *
      * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported. All other filters are ignored.
      *
+     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed in the same way as by {@link #loadAll(Iterable)}.
+     *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters   entity filters
@@ -210,7 +212,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * @return all the entities in this repository passed the filters.
      */
     @CheckReturnValue
-    public ImmutableCollection<E> findAll(EntityFilters filters, FieldMask fieldMask) {
+    public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
