@@ -833,7 +833,7 @@ public class StandShould {
         final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.find(eq(projectId))).thenReturn(new StandTestProjection(projectId));
+            when(projectionRepository.load(eq(projectId))).thenReturn(new StandTestProjection(projectId));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));

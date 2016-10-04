@@ -109,25 +109,9 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Finds the entity with the passed ID.
-     *
-     * <p>As opposed to {@link #load(Object)}, the invocation of this method never leads to creation of a new entity.
-     *
-     * <p>NOTE: The storage must be assigned before calling this method.
-     *
-     * @param id the id of the entity to find.
-     * @return the entity or {@code null} if there's no entity with such id
-     */
-    @CheckReturnValue
-    @Nullable
-    public E find(I id) {
-        return this.load(id);
-    }
-
-    /**
      * Finds all the entities in this repository with IDs, contained within the passed {@code ids} values.
      *
-     * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
+     * <p>Provides a convenience wrapper around multiple invocations of {@link #load(Object)}. Descendants may
      * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
      *
      * <p>The result only contains those entities which IDs are contained inside the passed {@code ids}.
@@ -137,8 +121,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      *
      * <p>In case IDs contain duplicates, the result may also contain duplicates, depending on particular
      * implementation.
-     *
-     * <p>Similar to {@link #find(Object)}, the invocation of this method never leads to creation of new objects.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
