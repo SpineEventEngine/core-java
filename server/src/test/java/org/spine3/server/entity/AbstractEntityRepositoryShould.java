@@ -20,7 +20,14 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
+import org.spine3.protobuf.AnyPacker;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -102,6 +109,58 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
 
         for (E entity : found) {
             assertContains(entity, entities);
+        }
+    }
+
+
+    @SuppressWarnings({ "MethodWithMultipleLoops", "unchecked"})
+    @Test
+    public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
+        final EntityRepository<?, E, ?> repo = repository();
+
+        final int count = 10;
+        final List<E> entities = entities(count);
+
+        for (E entity : entities) {
+            repo.store(entity);
+        }
+
+        final List<EntityId> ids = new LinkedList<>();
+        for (int i = 0; i < count / 2; i++) {
+            final EntityId id = EntityId.newBuilder()
+                                        .setId(AnyPacker.pack((Message) entities.get(i).getId()))
+                                        .build();
+            ids.add(id);
+        }
+
+        final EntityIdFilter filter = EntityIdFilter.newBuilder().addAllIds(ids).build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                .setIdFilter(filter)
+                .build();
+
+        final String firstFieldName = entities.get(0).getState().getDescriptorForType().getFields().get(0).getFullName();
+
+        final FieldMask firstFieldOnly = FieldMask.newBuilder()
+                .addPaths(firstFieldName).build();
+
+        final Iterable<E> readEntities = repo.findAll(filters, firstFieldOnly);
+
+        assertSize(ids.size(), readEntities);
+
+        for (E entity : readEntities) {
+            assertMatches(entity, firstFieldOnly);
+        }
+    }
+
+
+    private void assertMatches(E entity, FieldMask fieldMask) {
+        final Message state = entity.getState();
+        final List<String> paths = fieldMask.getPathsList();
+
+        for (Descriptors.FieldDescriptor field : state.getDescriptorForType().getFields()) {
+            if (field.isRepeated()) continue;
+
+            assertEquals(state.hasField(field), paths.contains(field.getFullName()));
         }
     }
 
