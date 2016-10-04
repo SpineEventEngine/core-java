@@ -127,11 +127,23 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     /**
      * Finds all the entities in this repository with IDs, contained within the passed {@code ids} values.
      *
-     * <p>Same as calling <pre>{@code findBulk(id, FieldMask.getDefaultInstance());}</pre>
+     * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
+     * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
+     *
+     * <p>The result only contains those entities which IDs are contained inside the passed {@code ids}.
+     * The resulting collection is always returned with no {@code null} values.
+     *
+     * <p>The order of objects in the result is not guaranteed to be the same as the order of IDs passed as argument.
+     *
+     * <p>In case IDs contain duplicates, the result may also contain duplicates, depending on particular
+     * implementation.
+     *
+     * <p>Similar to {@link #find(Object)}, the invocation of this method never leads to creation of new objects.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param ids entity IDs to search for
-     * @return all the entities in this repository with the IDs contained in the given {@code ids}
-     * @see #findBulk(Iterable, FieldMask)
+     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
     public ImmutableCollection<E> findBulk(Iterable<I> ids) {
@@ -139,26 +151,19 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Finds all the entities in this repository with IDs, contained within the passed {@code Iterable}.
+     * Finds all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
      *
-     * <p>Provides a convenience wrapper around multiple invocations of {@link #find(Object)}. Descendants may
-     * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
+     * <p>Acts in the same way as {@link #findBulk(Iterable)}, with the {@code FieldMask} applied to the results.
      *
-     * <p>The order of resulting objects in the {@link Iterable} is not guaranteed to be the same as the order
-     * of IDs passed as argument.
-     *
-     * <p>The instance of {@code Iterable} is always returned with no {@code null} values.
-     *
-     * <p>In case IDs contain duplicates, the resulting {@code Iterable} may also contain duplicates, depending
-     * on particular implementation.
-     *
-     * <p>Similar to {@link #find(Object)}, the invocation of this method never leads to creation of new objects.
+     * <p>Field mask must be applied according to
+     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param ids       entity IDs to search for
      * @param fieldMask mask to apply on entities
-     * @return all the entities in this repository with the IDs matching the given {@code Iterable}
+     * @return all the entities in this repository with the IDs contained in the given {@code ids}
+     * @see #findBulk(Iterable)
      */
     @CheckReturnValue
     public ImmutableCollection<E> findBulk(Iterable<I> ids, FieldMask fieldMask) {
