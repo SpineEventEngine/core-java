@@ -68,7 +68,37 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
 
         final Collection<E> found = repo.findBulk(ids);
 
-        assertSize(count / 2, found);
+        assertSize(ids.size(), found);
+
+        for (E entity : found) {
+            assertContains(entity, entities);
+        }
+    }
+
+    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
+    @Test
+    public void handle_wrong_passed_ids() {
+        final EntityRepository<?, E, ?> repo = repository();
+
+        final int count = 10;
+        final List<E> entities = entities(count);
+
+        for (E entity : entities) {
+            repo.store(entity);
+        }
+
+        final List ids = new LinkedList<>();
+        for (int i = 0; i < count; i++) {
+            ids.add(entities.get(i).getId());
+        }
+
+        final Entity<?, ?> sideEntity = entity();
+
+        ids.add(sideEntity.getId());
+
+        final Collection<E> found = repo.findBulk(ids);
+
+        assertSize(ids.size() - 1, found); // Check we've found all existing items
 
         for (E entity : found) {
             assertContains(entity, entities);

@@ -159,6 +159,11 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
+
+            if (record == null) { // Record is nullable here since RecordStorage::findBulk returns an Iterable that may contain nulls.
+                continue;
+            }
+
             final E entity = toEntity(id, record, fieldMask);
             entities.add(entity);
         }
