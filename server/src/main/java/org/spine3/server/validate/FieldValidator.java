@@ -69,7 +69,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      * @param descr    a descriptor of the field to validate
      * @param values        values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required event
+     * @param strict        if {@code true} the validator would assume that the field is required, even
      *                      if corresponding field option is not present
      */
     protected FieldValidator(FieldDescriptor descr, ImmutableList<V> values, FieldPath rootFieldPath, boolean strict) {
@@ -133,6 +133,13 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
+     *  Returns {@code true} if the field has required attribute or validation is strict.
+     */
+    protected boolean isRequiredField() {
+        return requiredOption.getValue() || strict;
+    }
+
+    /**
      * Checks if the field is required and not set and adds violations found.
      *
      * <p>If the field is repeated, it must have at least one value set, and all its values must be valid.
@@ -140,7 +147,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
      */
     protected void checkIfRequiredAndNotSet() {
-        if (!requiredOption.getValue() && !strict) {
+        if (!isRequiredField()) {
             return;
         }
         if (values.isEmpty()) {
