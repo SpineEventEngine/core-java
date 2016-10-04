@@ -91,7 +91,6 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
             return this;
         }
 
-
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
         public ImmutableMap<TypeUrl, BoundedContext> getBoundedContextMap() {
             return typeToContextMap;
@@ -120,7 +119,7 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         }
 
         private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
-                BoundedContext boundedContext) {
+                                              BoundedContext boundedContext) {
 
             final ImmutableSet<TypeUrl> availableTypes = boundedContext.getStand()
                                                                        .getAvailableTypes();
