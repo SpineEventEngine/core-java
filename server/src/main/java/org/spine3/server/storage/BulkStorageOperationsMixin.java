@@ -42,15 +42,19 @@ import java.util.Map;
      *
      * <p>The size of {@link Iterable} returned is always the same as the size of given IDs.
      *
-     * <p>In case there is no record for a particular ID, {@code null} will be present in the result.
+     * <p>In case there is no record for a particular ID, {@code null} will be present in the result instead.
+     * In this way {@code readBulk()} callees are able to track the absenсe of a certain element by comparing
+     * the input IDs and resulting {@code Iterable}.
+     *
+     * <p>E.g. {@code readBulk( Lists.newArrayList(idPresentInStorage, idNonPresentInStorage) )} will return
+     * an {@code Iterable} with two elements, first of which is non-null and the second is null.
      *
      * @param ids record IDs of interest
      * @return the {@link Iterable} containing the records matching the given IDs
      * @throws IllegalStateException if the storage was closed before
      */
     @CheckReturnValue
-    Iterable<R>
-    readBulk(Iterable<I> ids);
+    Iterable<R> readBulk(Iterable<I> ids);
 
 
     /**
