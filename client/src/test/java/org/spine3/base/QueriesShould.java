@@ -21,19 +21,95 @@
  */
 package org.spine3.base;
 
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.ProtocolStringList;
 import org.junit.Test;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.Query;
+import org.spine3.client.Target;
+import org.spine3.protobuf.TypeUrl;
+import org.spine3.test.queries.TestEntity;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings("LocalVariableNamingConvention")
 public class QueriesShould {
 
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Queries.class));
+    }
+
+    @Test
+    public void compose_proper_read_all_query() {
+        final Class<TestEntity> targetEntityClass = TestEntity.class;
+        final Query readAllQuery = Queries.readAll(targetEntityClass);
+        assertNotNull(readAllQuery);
+
+        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllQuery);
+
+        // `FieldMask` must be default as `paths` were not set.
+        final FieldMask fieldMask = readAllQuery.getFieldMask();
+        assertNotNull(fieldMask);
+        assertEquals(FieldMask.getDefaultInstance(), fieldMask);
+    }
+
+    @Test
+    public void compose_proper_read_all_query_with_single_path() {
+        final Class<TestEntity> targetEntityClass = TestEntity.class;
+        final String firstPropertyFieldName = TestEntity.getDescriptor()
+                                                        .getFields()
+                                                        .get(1)
+                                                        .getFullName();
+        final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, firstPropertyFieldName);
+        assertNotNull(readAllWithPathFilteringQuery);
+
+        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
+
+        final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+        assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
+
+        final String firstPath = fieldMask.getPaths(0);
+        assertEquals(firstPropertyFieldName, firstPath);
+    }
+
+    @Test
+    public void compose_proper_read_all_query_with_multiple_paths() {
+        final Class<TestEntity> targetEntityClass = TestEntity.class;
+
+        final String[] paths = {"some", "random", "paths"};
+        final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, paths);
+        assertNotNull(readAllWithPathFilteringQuery);
+
+        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
+
+        final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+        assertEquals(paths.length, fieldMask.getPathsCount());
+        final ProtocolStringList pathsList = fieldMask.getPathsList();
+        for (String expectedPath : paths) {
+            assertTrue(pathsList.contains(expectedPath));
+        }
+    }
+
+
+    private static void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> targetEntityClass, Query readAllQuery) {
+        final Target entityTarget = readAllQuery.getTarget();
+        assertNotNull(entityTarget);
+
+        final String expectedTypeName = TypeUrl.of(targetEntityClass)
+                                               .getTypeName();
+        assertEquals(expectedTypeName, entityTarget.getType());
+
+        // `EntityFilters` must be default as this value was not set.
+        final EntityFilters filters = entityTarget.getFilters();
+        assertNotNull(filters);
+        assertEquals(EntityFilters.getDefaultInstance(), filters);
     }
 
 }
