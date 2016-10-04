@@ -119,8 +119,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
 
         final BoundedContext boundedContext = selectBoundedContext(subscription);
         try {
-            boundedContext.getStand()
-                          .cancel(subscription);
+            final Stand stand = boundedContext.getStand();
+            stand.cancel(subscription);
             responseObserver.onNext(Responses.ok());
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing cancel subscription request", e);
@@ -191,8 +191,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
                                               BoundedContext boundedContext) {
 
-            final ImmutableSet<TypeUrl> availableTypes = boundedContext.getStand()
-                                                                       .getAvailableTypes();
+            final Stand stand = boundedContext.getStand();
+            final ImmutableSet<TypeUrl> availableTypes = stand.getAvailableTypes();
             for (TypeUrl availableType : availableTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }
