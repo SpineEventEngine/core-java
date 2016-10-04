@@ -30,6 +30,8 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.AbstractEntityRepositoryShould;
+import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.RecordStorage;
@@ -41,6 +43,8 @@ import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -59,7 +63,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProjectionRepositoryShould {
+public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -207,8 +211,33 @@ public class ProjectionRepositoryShould {
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
+    @Override
+    protected EntityRepository<?, TestProjection, ?> repository() {
+        return repository;
+    }
+
+    @Override
+    protected TestProjection entity() {
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder().setId("single-test-projection").build());
+        return projection;
+    }
+
+    @Override
+    protected List<TestProjection> entities(int count) {
+        final List<TestProjection> projections = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final TestProjection projection = new TestProjection(
+                    ProjectId.newBuilder().setId(String.format("test-projection-%s", i)).build());
+
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
     /** The projection stub used in tests. */
-    private static class TestProjection extends Projection<ProjectId, Project> {
+    /* package */ static class TestProjection extends Projection<ProjectId, Project> {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
