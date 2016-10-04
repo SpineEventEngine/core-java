@@ -98,15 +98,17 @@ public class CommandServiceShould {
     @Test
     public void never_retrieve_removed_bounded_contexts_from_builder() {
         final CommandService.Builder builder = CommandService.newBuilder()
-                .addBoundedContext(projectsContext)
-                .addBoundedContext(customersContext)
-                .removeBoundedContext(projectsContext);
+                                                             .addBoundedContext(projectsContext)
+                                                             .addBoundedContext(customersContext)
+                                                             .removeBoundedContext(projectsContext);
 
         final CommandService service = builder.build(); // Creates BoundedContext map
         assertNotNull(service);
 
-        assertTrue(builder.getBoundedContextMap().containsValue(customersContext));
-        assertFalse(builder.getBoundedContextMap().containsValue(projectsContext));
+        assertTrue(builder.getBoundedContextMap()
+                          .containsValue(customersContext));
+        assertFalse(builder.getBoundedContextMap()
+                           .containsValue(projectsContext));
     }
 
     private void verifyPostsCommand(Command cmd, CommandBus commandBus) {
@@ -132,8 +134,8 @@ public class CommandServiceShould {
     @Test
     public void deploy_to_grpc_container() throws IOException {
         final GrpcContainer grpcContainer = GrpcContainer.newBuilder()
-                                                 .addService(service)
-                                                 .build();
+                                                         .addService(service)
+                                                         .build();
         try {
             assertTrue(grpcContainer.isScheduledForDeployment(service));
 
@@ -143,7 +145,7 @@ public class CommandServiceShould {
             grpcContainer.shutdown();
             assertFalse(grpcContainer.isLive(service));
         } finally {
-            if(!grpcContainer.isShutdown()) {
+            if (!grpcContainer.isShutdown()) {
                 grpcContainer.shutdown();
             }
         }
