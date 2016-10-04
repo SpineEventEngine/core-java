@@ -155,7 +155,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      *
      * <p>Acts in the same way as {@link #findBulk(Iterable)}, with the {@code FieldMask} applied to the results.
      *
-     * <p>Field mask must be applied according to
+     * <p>Field mask is applied according to
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
@@ -206,7 +206,10 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Find all the entities passing the given filters.
+     * Finds all the entities passing the given filters and applies the given {@link FieldMask} to the results.
+     *
+     * <p>Field mask is applied according to
+     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
      * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported. All other filters are ignored.
      *
