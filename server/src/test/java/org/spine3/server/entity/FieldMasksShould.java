@@ -35,7 +35,8 @@ public class FieldMasksShould {
         assertTrue(hasPrivateUtilityConstructor(FieldMasks.class));
     }
 
-    public void apply_mask_to_single_entity() {
+    @Test
+    public void apply_mask_to_single_message() {
 
     }
 }
