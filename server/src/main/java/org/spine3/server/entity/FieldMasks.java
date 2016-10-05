@@ -27,6 +27,7 @@ import com.google.protobuf.ProtocolStringList;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -56,8 +57,9 @@ public class FieldMasks {
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
      * @param typeUrl  Type of the {@link Message}s.
-     * @return Non-null unmodifiable {@link Collection} of {@link Message}s of the same type that the input had.
+     * @return {@link Nonnull} unmodifiable {@link Collection<M>} containing {@link Message}s with {@code FieldMask} applied.
      */
+    @Nonnull
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
     public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> messages, TypeUrl typeUrl) {
         final List<M> filtered = new LinkedList<>();

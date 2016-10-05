@@ -218,7 +218,9 @@ public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<P
 
     @Override
     protected TestProjection entity() {
-        final TestProjection projection = new TestProjection(ProjectId.newBuilder().setId("single-test-projection").build());
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
+                                                                      .setId("single-test-projection")
+                                                                      .build());
         return projection;
     }
 
@@ -228,7 +230,9 @@ public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<P
 
         for (int i = 0; i < count; i++) {
             final TestProjection projection = new TestProjection(
-                    ProjectId.newBuilder().setId(String.format("test-projection-%s", i)).build());
+                    ProjectId.newBuilder()
+                             .setId(String.format("test-projection-%s", i))
+                             .build());
 
             projections.add(projection);
         }
@@ -250,12 +254,14 @@ public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<P
             eventMessagesDelivered.put(getState().getId(), eventMessage);
         }
 
-        /* package */ static boolean processed(Message eventMessage) {
+        /* package */
+        static boolean processed(Message eventMessage) {
             final boolean result = eventMessagesDelivered.containsValue(eventMessage);
             return result;
         }
 
-        /* package */ static void clearMessageDeliveryHistory() {
+        /* package */
+        static void clearMessageDeliveryHistory() {
             eventMessagesDelivered.clear();
         }
 

@@ -54,17 +54,15 @@ public class FieldMasksShould {
     @Test
     public void apply_mask_to_single_message() {
         final FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
-
         final Project original = Given.newProject("some-string-id");
 
         final Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
         assertNotEquals(original, masked);
-
         assertMatchesMask(masked, fieldMask);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
+    @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
     @Test
     public void apply_mask_to_message_collections() {
         final FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER, Project.TASK_FIELD_NUMBER);
@@ -82,7 +80,6 @@ public class FieldMasksShould {
         assertSize(original.size(), masked);
 
         // Collection references are not the same
-        // noinspection ObjectEquality
         assertFalse(original == masked);
 
         for (Project project : masked) {
@@ -96,14 +93,13 @@ public class FieldMasksShould {
 
     @Test
     public void apply_only_non_empty_mask() {
-        // Empty mask
-        final FieldMask mask = Given.fieldMask();
+        final FieldMask emptyMask = Given.fieldMask();
 
         final Project origin = Given.newProject("read_whole_message");
         final Project clone = Project.newBuilder(origin)
                                      .build();
 
-        final Project processed = FieldMasks.applyMask(mask, origin, Given.TYPE);
+        final Project processed = FieldMasks.applyMask(emptyMask, origin, Given.TYPE);
 
         // Check object itself was returned
         assertTrue(processed == origin);
@@ -130,7 +126,6 @@ public class FieldMasksShould {
             final ProjectId projectId = ProjectId.newBuilder()
                                                  .setId(id)
                                                  .build();
-
             final Task first = Task.newBuilder()
                                    .setTaskId(TaskId.newBuilder()
                                                     .setId(1)
@@ -152,7 +147,6 @@ public class FieldMasksShould {
                                            .addTask(second)
                                            .setStatus(Project.Status.CREATED)
                                            .build();
-
             return project;
         }
 
@@ -160,12 +154,10 @@ public class FieldMasksShould {
             final FieldMask.Builder mask = FieldMask.newBuilder();
             final List<Descriptors.FieldDescriptor> allFields = Project.getDescriptor()
                                                                        .getFields();
-
             for (int i : fieldIndeces) {
                 mask.addPaths(allFields.get(i - 1)
                                        .getFullName());
             }
-
             return mask.build();
         }
     }

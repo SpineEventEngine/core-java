@@ -24,7 +24,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Assert;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.users.UserId;
 
@@ -33,6 +32,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Utilities for testing.
@@ -127,8 +127,7 @@ public class Tests {
             if (field.isRepeated()) {
                 continue;
             }
-
-            Assert.assertEquals(message.hasField(field), paths.contains(field.getFullName()));
+            assertEquals(message.hasField(field), paths.contains(field.getFullName()));
         }
     }
 

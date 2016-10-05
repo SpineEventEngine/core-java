@@ -213,9 +213,7 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
     protected EntityRepository<?, TestProcessManager, ?> repository() {
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(
                 TestBoundedContextFactory.newBoundedContext());
-
         repo.initStorage(InMemoryStorageFactory.getInstance());
-
         return repo;
     }
 
@@ -227,14 +225,13 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
 
     @Override
     protected List<TestProcessManager> entities(int count) {
-        final List<TestProcessManager> procmans = new ArrayList<>();
+        final List<TestProcessManager> procmans = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
             final ProjectId id = ProjectId.newBuilder().setId(String.format("procman-number-%s", i)).build();
 
             procmans.add(new TestProcessManager(id));
         }
-
         return procmans;
     }
 
