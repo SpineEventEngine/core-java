@@ -187,14 +187,13 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         final ImmutableCollection<E> entities =
                 FluentIterable.from(recordMap.entrySet())
                               .transform(new Function<Map.Entry<I, EntityStorageRecord>, E>() {
-
                                   @Nullable
                                   @Override
                                   public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
                                       Preconditions.checkNotNull(input);
-                                      return toEntity(input.getKey(), input.getValue());
+                                      final E result = toEntity(input.getKey(), input.getValue());
+                                      return result;
                                   }
-
                               })
                               .toList();
         return entities;
