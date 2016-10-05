@@ -67,10 +67,8 @@ public class QueriesShould {
         final Query readAllQuery = Queries.readAll(targetEntityClass);
         assertNotNull(readAllQuery);
 
-        // `EntityFilters` must be default as this value was not set.
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllQuery);
 
-        // `FieldMask` must be default as `paths` were not set.
         checkFieldMaskEmpty(readAllQuery);
     }
 
@@ -82,20 +80,11 @@ public class QueriesShould {
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
-
         verifySinglePathInQuery(expectedEntityPath, readAllWithPathFilteringQuery);
     }
 
-    private static void verifySinglePathInQuery(String expectedEntityPath, Query query) {
-        final FieldMask fieldMask = query.getFieldMask();
-        assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
-
-        final String firstPath = fieldMask.getPaths(0);
-        assertEquals(expectedEntityPath, firstPath);
-    }
-
     @Test
-    public void compose_proper_read_all_query_with_multiple_paths() {
+    public void compose_proper_read_all_query_with_multiple_random_paths() {
         final Class<TestEntity> targetEntityClass = TestEntity.class;
 
         final String[] paths = multipleRandomPaths();
@@ -103,17 +92,7 @@ public class QueriesShould {
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
-
         verifyMultiplePathsInQuery(paths, readAllWithPathFilteringQuery);
-    }
-
-    private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {
-        final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
-        assertEquals(paths.length, fieldMask.getPathsCount());
-        final ProtocolStringList pathsList = fieldMask.getPathsList();
-        for (String expectedPath : paths) {
-            assertTrue(pathsList.contains(expectedPath));
-        }
     }
 
     @Test
@@ -127,7 +106,6 @@ public class QueriesShould {
         final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsQuery);
 
         verifyIdFilter(testEntityIds, target.getFilters());
-
     }
 
     @Test
@@ -147,7 +125,7 @@ public class QueriesShould {
     }
 
     @Test
-    public void compose_proper_read_by_ids_query_with_multiple_paths() {
+    public void compose_proper_read_by_ids_query_with_multiple_random_paths() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final String[] paths = multipleRandomPaths();
         final Query readByIdsWithSinglePathQuery = Queries.readByIds(
@@ -160,6 +138,23 @@ public class QueriesShould {
 
         verifyIdFilter(testEntityIds, target.getFilters());
         verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
+    }
+
+    private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {
+        final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+        assertEquals(paths.length, fieldMask.getPathsCount());
+        final ProtocolStringList pathsList = fieldMask.getPathsList();
+        for (String expectedPath : paths) {
+            assertTrue(pathsList.contains(expectedPath));
+        }
+    }
+
+    private static void verifySinglePathInQuery(String expectedEntityPath, Query query) {
+        final FieldMask fieldMask = query.getFieldMask();
+        assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
+
+        final String firstPath = fieldMask.getPaths(0);
+        assertEquals(expectedEntityPath, firstPath);
     }
 
     private static String[] multipleRandomPaths() {
@@ -221,5 +216,4 @@ public class QueriesShould {
         assertEquals(expectedTypeName, entityTarget.getType());
         return entityTarget;
     }
-
 }
