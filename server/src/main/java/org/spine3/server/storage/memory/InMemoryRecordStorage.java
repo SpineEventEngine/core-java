@@ -72,8 +72,12 @@ import static com.google.common.collect.Maps.newHashMap;
 
         TypeUrl typeUrl = null;
 
-        for (I recordId : storage.keySet()) {
-            for (I givenId : givenIds) {
+        int resultExpectedSize = 0;
+
+        for (I givenId : givenIds) {
+            resultExpectedSize++;
+
+            for (I recordId : storage.keySet()) {
                 if (recordId.equals(givenId)) {
                     final EntityStorageRecord.Builder matchingRecord = storage.get(recordId).toBuilder();
                     final Any state = matchingRecord.getState();
@@ -89,9 +93,13 @@ import static com.google.common.collect.Maps.newHashMap;
                     matchingRecord.setState(processed);
 
                     result.add(matchingRecord.build());
-                } else {
-                    result.add(null);
                 }
+            }
+
+            // If no record was found
+            if (result.size() < resultExpectedSize) {
+                result.add(null);
+                resultExpectedSize++;
             }
         }
         return result;
@@ -99,7 +107,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        return readBulkInternal(ids, null);
+        return readBulkInternal(ids, FieldMask.getDefaultInstance());
     }
 
     @Override

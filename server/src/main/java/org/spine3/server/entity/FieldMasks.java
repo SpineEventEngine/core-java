@@ -27,6 +27,7 @@ import com.google.protobuf.ProtocolStringList;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -54,26 +55,27 @@ public class FieldMasks {
      * do not affect the execution result.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
-     * @param entities {@link Message}s to filter.
+     * @param messages {@link Message}s to filter.
      * @param typeUrl  Type of the {@link Message}s.
-     * @return Non-null unmodifiable {@link Collection} of {@link Message}s of the same type that the input had.
+     * @return messages with the {@code FieldMask} applied
      */
+    @Nonnull
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
-    public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> entities, TypeUrl typeUrl) {
+    public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> messages, TypeUrl typeUrl) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
 
         if (filter.isEmpty() || builderClass == null) {
-            return Collections.unmodifiableCollection(entities);
+            return Collections.unmodifiableCollection(messages);
         }
 
         try {
             final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
-            for (Message wholeMessage : entities) {
+            for (Message wholeMessage : messages) {
                 final B builder = builderConstructor.newInstance();
 
                 for (Descriptors.FieldDescriptor field : wholeMessage.getDescriptorForType().getFields()) {
@@ -87,7 +89,7 @@ public class FieldMasks {
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
             // If any reflection failure happens, return all the data without any mask applied.
-            return Collections.unmodifiableCollection(entities);
+            return Collections.unmodifiableCollection(messages);
         }
 
         return Collections.unmodifiableList(filtered);
@@ -100,18 +102,18 @@ public class FieldMasks {
      * do not affect the execution result.
      *
      * @param mask {@code FieldMask} instance to apply.
-     * @param entity The {@link Message} to apply given {@code FieldMask} to.
+     * @param message The {@link Message} to apply given {@code FieldMask} to.
      * @param typeUrl Type of the {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields.
      */
     @SuppressWarnings("unchecked")
-    public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
+    public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M message, TypeUrl typeUrl) {
         final ProtocolStringList filter = mask.getPathsList();
 
         final Class<B> builderClass = getBuilderForType(typeUrl);
 
         if (filter.isEmpty() || builderClass == null) {
-            return entity;
+            return message;
         }
 
         try {
@@ -120,16 +122,16 @@ public class FieldMasks {
 
             final B builder = builderConstructor.newInstance();
 
-            for (Descriptors.FieldDescriptor field : entity.getDescriptorForType().getFields()) {
+            for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
                 if (filter.contains(field.getFullName())) {
-                    builder.setField(field, entity.getField(field));
+                    builder.setField(field, message.getField(field));
                 }
             }
 
             return (M) builder.build();
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
-            return entity;
+            return message;
         }
 
 
@@ -142,17 +144,17 @@ public class FieldMasks {
      * do not affect the execution result.
      *
      * @param mask    The {@code FieldMask} to apply.
-     * @param entity  The {@link Message} to apply given mask to.
+     * @param message  The {@link Message} to apply given mask to.
      * @param typeUrl Type of given {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields
-     *          if the {@code mask} is valid, {@code entity} itself otherwise.
+     *          if the {@code mask} is valid, {@code message} itself otherwise.
      */
-    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M entity, TypeUrl typeUrl) {
+    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M message, TypeUrl typeUrl) {
         if (!mask.getPathsList().isEmpty()) {
-            return applyMask(mask, entity, typeUrl);
+            return applyMask(mask, message, typeUrl);
         }
 
-        return entity;
+        return message;
     }
 
     @Nullable
