@@ -51,7 +51,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
 
         repo.store(entity);
 
-        final Entity<?, ?> found = repo.find(entity.getId());
+        final Entity<?, ?> found = repo.load(entity.getId());
 
         assertEquals(found, entity);
     }
@@ -73,7 +73,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
             ids.add(entities.get(i).getId());
         }
 
-        final Collection<E> found = repo.findBulk(ids);
+        final Collection<E> found = repo.loadAll(ids);
 
         assertSize(ids.size(), found);
 
@@ -103,7 +103,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
 
         ids.add(sideEntity.getId());
 
-        final Collection<E> found = repo.findBulk(ids);
+        final Collection<E> found = repo.loadAll(ids);
 
         assertSize(ids.size() - 1, found); // Check we've found all existing items
 
@@ -112,8 +112,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
     }
 
-
-    @SuppressWarnings({ "MethodWithMultipleLoops", "unchecked"})
+    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
     @Test
     public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
         final EntityRepository<?, E, ?> repo = repository();
@@ -128,22 +127,31 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         final List<EntityId> ids = new LinkedList<>();
         for (int i = 0; i < count / 2; i++) {
             final EntityId id = EntityId.newBuilder()
-                                        .setId(AnyPacker.pack((Message) entities.get(i).getId()))
+                                        .setId(AnyPacker.pack((Message) entities.get(i)
+                                                                                .getId()))
                                         .build();
             ids.add(id);
         }
 
-        final EntityIdFilter filter = EntityIdFilter.newBuilder().addAllIds(ids).build();
+        final EntityIdFilter filter = EntityIdFilter.newBuilder()
+                                                    .addAllIds(ids)
+                                                    .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                .setIdFilter(filter)
-                .build();
+                                                   .setIdFilter(filter)
+                                                   .build();
 
-        final String firstFieldName = entities.get(0).getState().getDescriptorForType().getFields().get(0).getFullName();
+        final String firstFieldName = entities.get(0)
+                                              .getState()
+                                              .getDescriptorForType()
+                                              .getFields()
+                                              .get(0)
+                                              .getFullName();
 
         final FieldMask firstFieldOnly = FieldMask.newBuilder()
-                .addPaths(firstFieldName).build();
+                                                  .addPaths(firstFieldName)
+                                                  .build();
 
-        final Iterable<E> readEntities = repo.findAll(filters, firstFieldOnly);
+        final Iterable<E> readEntities = repo.find(filters, firstFieldOnly);
 
         assertSize(ids.size(), readEntities);
 
@@ -152,13 +160,15 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
     }
 
-
     private void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         final List<String> paths = fieldMask.getPathsList();
 
-        for (Descriptors.FieldDescriptor field : state.getDescriptorForType().getFields()) {
-            if (field.isRepeated()) continue;
+        for (Descriptors.FieldDescriptor field : state.getDescriptorForType()
+                                                      .getFields()) {
+            if (field.isRepeated()) {
+                continue;
+            }
 
             assertEquals(state.hasField(field), paths.contains(field.getFullName()));
         }
