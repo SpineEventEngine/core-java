@@ -22,8 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.GeneratedMessageV3;
-import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
@@ -39,7 +37,6 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 import static org.spine3.test.Verify.assertSize;
@@ -92,7 +89,8 @@ public class FieldMasksShould {
             assertMatchesMask(project, fieldMask);
 
             // Can't check repeated fields with assertMatchesMask
-            assertFalse(project.getTaskList().isEmpty());
+            assertFalse(project.getTaskList()
+                               .isEmpty());
         }
     }
 
@@ -102,7 +100,8 @@ public class FieldMasksShould {
         final FieldMask mask = Given.fieldMask();
 
         final Project origin = Given.newProject("read_whole_message");
-        final Project clone = Project.newBuilder(origin).build();
+        final Project clone = Project.newBuilder(origin)
+                                     .build();
 
         final Project processed = FieldMasks.applyMask(mask, origin, Given.TYPE);
 
@@ -129,18 +128,22 @@ public class FieldMasksShould {
 
         private static Project newProject(String id) {
             final ProjectId projectId = ProjectId.newBuilder()
-                                          .setId(id)
-                                          .build();
+                                                 .setId(id)
+                                                 .build();
 
             final Task first = Task.newBuilder()
-                    .setTaskId(TaskId.newBuilder().setId(1).build())
-                    .setTitle("First Task")
-                    .build();
+                                   .setTaskId(TaskId.newBuilder()
+                                                    .setId(1)
+                                                    .build())
+                                   .setTitle("First Task")
+                                   .build();
 
             final Task second = Task.newBuilder()
-                                   .setTaskId(TaskId.newBuilder().setId(2).build())
-                                   .setTitle("Second Task")
-                                   .build();
+                                    .setTaskId(TaskId.newBuilder()
+                                                     .setId(2)
+                                                     .build())
+                                    .setTitle("Second Task")
+                                    .build();
 
             final Project project = Project.newBuilder()
                                            .setId(projectId)
@@ -155,17 +158,15 @@ public class FieldMasksShould {
 
         private static FieldMask fieldMask(int... fieldIndeces) {
             final FieldMask.Builder mask = FieldMask.newBuilder();
-            final List<Descriptors.FieldDescriptor> allFields = Project.getDescriptor().getFields();
+            final List<Descriptors.FieldDescriptor> allFields = Project.getDescriptor()
+                                                                       .getFields();
 
             for (int i : fieldIndeces) {
-                mask.addPaths(allFields.get(i - 1).getFullName());
+                mask.addPaths(allFields.get(i - 1)
+                                       .getFullName());
             }
 
             return mask.build();
-        }
-
-        private static Message mockMessage() {
-            return mock(GeneratedMessageV3.class);
         }
     }
 }
