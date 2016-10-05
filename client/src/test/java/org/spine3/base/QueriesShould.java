@@ -46,12 +46,19 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"LocalVariableNamingConvention", "MagicNumber"})
+@SuppressWarnings({"LocalVariableNamingConvention", "MagicNumber", "MethodParameterNamingConvention"})
 public class QueriesShould {
+
+    private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Queries.class));
+    }
+
+    @Test
+    public void have_private_constructor_of_targets_class() {
+        assertTrue(hasPrivateUtilityConstructor(Queries.Targets.class));
     }
 
     @Test
@@ -70,32 +77,37 @@ public class QueriesShould {
     @Test
     public void compose_proper_read_all_query_with_single_path() {
         final Class<TestEntity> targetEntityClass = TestEntity.class;
-        final String firstPropertyFieldName = TestEntity.getDescriptor()
-                                                        .getFields()
-                                                        .get(1)
-                                                        .getFullName();
-        final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, firstPropertyFieldName);
+        final String expectedEntityPath = singleTestEntityPath();
+        final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, expectedEntityPath);
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
 
-        final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+        verifySinglePathInQuery(expectedEntityPath, readAllWithPathFilteringQuery);
+    }
+
+    private static void verifySinglePathInQuery(String expectedEntityPath, Query query) {
+        final FieldMask fieldMask = query.getFieldMask();
         assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
 
         final String firstPath = fieldMask.getPaths(0);
-        assertEquals(firstPropertyFieldName, firstPath);
+        assertEquals(expectedEntityPath, firstPath);
     }
 
     @Test
     public void compose_proper_read_all_query_with_multiple_paths() {
         final Class<TestEntity> targetEntityClass = TestEntity.class;
 
-        final String[] paths = {"some", "random", "paths"};
+        final String[] paths = multipleRandomPaths();
         final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, paths);
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
 
+        verifyMultiplePathsInQuery(paths, readAllWithPathFilteringQuery);
+    }
+
+    private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {
         final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
         assertEquals(paths.length, fieldMask.getPathsCount());
         final ProtocolStringList pathsList = fieldMask.getPathsList();
@@ -106,30 +118,79 @@ public class QueriesShould {
 
     @Test
     public void compose_proper_read_by_ids_query() {
-        final Class<TestEntity> targetEntityClass = TestEntity.class;
-
-        final Set<TestEntityId> testEntityIds = newHashSet(TestEntityId.newBuilder()
-                                                                       .setValue(1)
-                                                                       .build(),
-                                                           TestEntityId.newBuilder()
-                                                                       .setValue(7)
-                                                                       .build(),
-                                                           TestEntityId.newBuilder()
-                                                                       .setValue(15)
-                                                                       .build()
-        );
-        final Query readByIdsQuery = Queries.readByIds(targetEntityClass, testEntityIds);
+        final Set<TestEntityId> testEntityIds = multipleIds();
+        final Query readByIdsQuery = Queries.readByIds(TARGET_ENTITY_CLASS, testEntityIds);
         assertNotNull(readByIdsQuery);
 
         checkFieldMaskEmpty(readByIdsQuery);
 
-        final Target target = checkTarget(targetEntityClass, readByIdsQuery);
-        final EntityFilters filters = target.getFilters();
+        final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsQuery);
+
+        verifyIdFilter(testEntityIds, target.getFilters());
+
+    }
+
+    @Test
+    public void compose_proper_read_by_ids_query_with_single_path() {
+        final Set<TestEntityId> testEntityIds = multipleIds();
+        final String expectedPath = singleTestEntityPath();
+        final Query readByIdsWithSinglePathQuery = Queries.readByIds(
+                TARGET_ENTITY_CLASS,
+                testEntityIds,
+                expectedPath);
+        assertNotNull(readByIdsWithSinglePathQuery);
+
+        final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsWithSinglePathQuery);
+
+        verifyIdFilter(testEntityIds, target.getFilters());
+        verifySinglePathInQuery(expectedPath, readByIdsWithSinglePathQuery);
+    }
+
+    @Test
+    public void compose_proper_read_by_ids_query_with_multiple_paths() {
+        final Set<TestEntityId> testEntityIds = multipleIds();
+        final String[] paths = multipleRandomPaths();
+        final Query readByIdsWithSinglePathQuery = Queries.readByIds(
+                TARGET_ENTITY_CLASS,
+                testEntityIds,
+                paths);
+        assertNotNull(readByIdsWithSinglePathQuery);
+
+        final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsWithSinglePathQuery);
+
+        verifyIdFilter(testEntityIds, target.getFilters());
+        verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
+    }
+
+    private static String[] multipleRandomPaths() {
+        return new String[]{"some", "random", "paths"};
+    }
+
+    private static String singleTestEntityPath() {
+        return TestEntity.getDescriptor()
+                         .getFields()
+                         .get(1)
+                         .getFullName();
+    }
+
+    private static Set<TestEntityId> multipleIds() {
+        return newHashSet(TestEntityId.newBuilder()
+                                      .setValue(1)
+                                      .build(),
+                          TestEntityId.newBuilder()
+                                      .setValue(7)
+                                      .build(),
+                          TestEntityId.newBuilder()
+                                      .setValue(15)
+                                      .build());
+    }
+
+    private static void verifyIdFilter(Set<TestEntityId> expectedIds, EntityFilters filters) {
         assertNotNull(filters);
         final EntityIdFilter idFilter = filters.getIdFilter();
         assertNotNull(idFilter);
         final List<EntityId> actualListOfIds = idFilter.getIdsList();
-        for (TestEntityId testEntityId : testEntityIds) {
+        for (TestEntityId testEntityId : expectedIds) {
             final EntityId expectedEntityId = EntityId.newBuilder()
                                                       .setId(AnyPacker.pack(testEntityId))
                                                       .build();

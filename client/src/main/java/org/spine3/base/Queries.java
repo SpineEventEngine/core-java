@@ -36,7 +36,8 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Set;
 
-import static org.spine3.base.Queries.Targets.composeTarget;
+import static org.spine3.base.Queries.Targets.allOf;
+import static org.spine3.base.Queries.Targets.someOf;
 
 /**
  * Client-side utilities for working with queries.
@@ -99,7 +100,6 @@ public class Queries {
         return result;
     }
 
-
     /**
      * Create a {@link Query} to read certain entity states by IDs.
      *
@@ -131,8 +131,7 @@ public class Queries {
     }
 
     private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {
-        final Target target = composeTarget(entityClass, ids);
-
+        final Target target = ids == null ? allOf(entityClass) : someOf(entityClass, ids);
         final Query.Builder queryBuilder = Query.newBuilder()
                                                 .setTarget(target);
         if (fieldMask != null) {
@@ -142,7 +141,6 @@ public class Queries {
                 .build();
         return result;
     }
-
 
     /**
      * Client-side utilities for working with {@link Query} and {@link org.spine3.client.Subscription} targets.
