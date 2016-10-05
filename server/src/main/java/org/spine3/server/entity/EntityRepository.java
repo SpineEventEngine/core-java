@@ -186,15 +186,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
         final ImmutableCollection<E> entities =
                 FluentIterable.from(recordMap.entrySet())
-                              .transform(new Function<Map.Entry<I, EntityStorageRecord>, E>() {
-                                  @Nullable
-                                  @Override
-                                  public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
-                                      Preconditions.checkNotNull(input);
-                                      final E result = toEntity(input.getKey(), input.getValue());
-                                      return result;
-                                  }
-                              })
+                              .transform(storageRecordToEntityTransformer())
                               .toList();
         return entities;
     }
@@ -270,5 +262,17 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                                                                        .setWhenModified(whenModified)
                                                                        .setVersion(version);
         return builder.build();
+    }
+
+    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntityTransformer() {
+        return new Function<Map.Entry<I, EntityStorageRecord>, E>() {
+            @Nullable
+            @Override
+            public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
+                Preconditions.checkNotNull(input);
+                final E result = toEntity(input.getKey(), input.getValue());
+                return result;
+            }
+        };
     }
 }
