@@ -28,7 +28,7 @@ import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
-import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.commandservice.customer.Customer;
 
 import java.util.Collection;
 import java.util.LinkedList;
