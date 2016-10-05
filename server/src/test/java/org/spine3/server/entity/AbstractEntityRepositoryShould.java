@@ -69,6 +69,8 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
 
         final List ids = new LinkedList<>();
+
+        // Find some of the records (half of them in this case)
         for (int i = 0; i < count / 2; i++) {
             ids.add(entities.get(i).getId());
         }
@@ -125,6 +127,8 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
 
         final List<EntityId> ids = new LinkedList<>();
+
+        // Find some of the records (half of them in this case)
         for (int i = 0; i < count / 2; i++) {
             final EntityId id = EntityId.newBuilder()
                                         .setId(AnyPacker.pack((Message) entities.get(i)
@@ -160,7 +164,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
     }
 
-    private void assertMatches(E entity, FieldMask fieldMask) {
+    private static <E extends Entity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         final List<String> paths = fieldMask.getPathsList();
 
