@@ -160,7 +160,8 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
 
-            if (record == null) { // Record is nullable here since RecordStorage#findBulk returns an {@code Iterable} that may contain nulls.
+            if (record == null) { /*    Record is nullable here since {@code RecordStorage#findBulk}    *
+                                   *    returns an {@code Iterable} that may contain nulls.             */
                 continue;
             }
 
