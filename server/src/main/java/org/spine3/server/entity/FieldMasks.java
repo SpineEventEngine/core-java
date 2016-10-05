@@ -57,7 +57,7 @@ public class FieldMasks {
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
      * @param typeUrl  Type of the {@link Message}s.
-     * @return {@link Nonnull} unmodifiable {@link Collection<M>} containing {@link Message}s with {@code FieldMask} applied.
+     * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
     @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
