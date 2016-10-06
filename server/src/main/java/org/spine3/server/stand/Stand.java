@@ -36,6 +36,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -45,7 +46,6 @@ import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -261,15 +261,12 @@ public class Stand implements AutoCloseable {
     }
 
     private ImmutableCollection<Any> internalExecute(Query query) {
-
         final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
 
-        final Target target = query.getTarget();
+        final TypeUrl typeUrl = Queries.typeOf(query);
+        checkNotNull(typeUrl, "Target type unknown");
 
-        final String type = target.getType();
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(type);
         final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(typeUrl);
-
         if (repository != null) {
 
             // the target references an entity state

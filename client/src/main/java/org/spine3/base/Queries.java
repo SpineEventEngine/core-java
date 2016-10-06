@@ -30,6 +30,7 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -140,6 +141,22 @@ public class Queries {
         final Query result = queryBuilder
                 .build();
         return result;
+    }
+
+    /**
+     * Extract the type of {@link Target} for the given {@link Query}.
+     *
+     * <p>Returns null if the {@code Target} type is unknown to the application.
+     *
+     * @param query the query of interest.
+     * @return the type of the {@code Query#getTarget()} or null, if the type is unknown.
+     */
+    @Nullable
+    public static TypeUrl typeOf(Query query) {
+        final Target target = query.getTarget();
+        final String typeAsString = target.getType();
+        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
+        return type;
     }
 
     /**

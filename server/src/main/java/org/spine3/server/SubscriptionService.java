@@ -21,7 +21,6 @@
  */
 package org.spine3.server;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -42,6 +41,8 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.Stand;
 
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state from the server.
@@ -93,7 +94,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             final Stand.StandUpdateCallback updateCallback = new Stand.StandUpdateCallback() {
                 @Override
                 public void onEntityStateUpdate(Any newEntityState) {
-                    Preconditions.checkNotNull(subscription);
+                    checkNotNull(subscription);
                     final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                                         .setSubscription(subscription)
                                                                         .setResponse(Responses.ok())
@@ -132,13 +133,17 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     private BoundedContext selectBoundedContext(Subscription subscription) {
         final String typeAsString = subscription.getType();
         final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
-        return typeToContextMap.get(type);
+        checkNotNull(type, "Unknown type of the subscription");
+        final BoundedContext result = typeToContextMap.get(type);
+        return result;
     }
 
     private BoundedContext selectBoundedContext(Target target) {
         final String typeAsString = target.getType();
         final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
-        return typeToContextMap.get(type);
+        checkNotNull(type, "Unknown type of the target");
+        final BoundedContext result = typeToContextMap.get(type);
+        return result;
     }
 
     public static class Builder {

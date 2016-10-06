@@ -27,13 +27,15 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;
-import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
@@ -57,18 +59,15 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
     @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
-
         log().debug("Incoming query: {}", query);
-        final String typeAsString = query.getTarget()
-                                         .getType();
 
-        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
+        final TypeUrl type = Queries.typeOf(query);
+        checkNotNull(type, "Unknown type for query target");
+
         final BoundedContext boundedContext = typeToContextMap.get(type);
-
         try {
             boundedContext.getStand()
                           .execute(query, responseObserver);
-
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing query", e);
             responseObserver.onError(e);

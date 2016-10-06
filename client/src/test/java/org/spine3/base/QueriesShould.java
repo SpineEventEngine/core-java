@@ -40,6 +40,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -49,7 +50,9 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings({"LocalVariableNamingConvention", "MagicNumber", "MethodParameterNamingConvention"})
 public class QueriesShould {
 
+    // See {@code queries_should.proto} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
+    private static final String TARGET_ENTITY_TYPE_URL = "type.spine3.org/spine.test.queries.TestEntity";
 
     @Test
     public void have_private_constructor() {
@@ -138,6 +141,29 @@ public class QueriesShould {
 
         verifyIdFilter(testEntityIds, target.getFilters());
         verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
+    }
+
+    @Test
+    public void return_proper_type_for_known_target() {
+        final Target target = Queries.Targets.allOf(TARGET_ENTITY_CLASS);
+        final Query query = Query.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+        final TypeUrl type = Queries.typeOf(query);
+        assertNotNull(type);
+        assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
+    }
+
+    @Test
+    public void return_null_if_target_type_unknown() {
+        final Target target = Target.newBuilder()
+                                    .setType("Inexistent Message Type")
+                                    .build();
+        final Query query = Query.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+        final TypeUrl type = Queries.typeOf(query);
+        assertNull(type);
     }
 
     private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {
