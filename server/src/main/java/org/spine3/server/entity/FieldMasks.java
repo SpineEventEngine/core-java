@@ -48,24 +48,26 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies the given {@code FieldMask} to given collection of {@link Message}s.
+     * Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
-     * <p>n case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
+     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
-     * @param typeUrl  Type of the {@link Message}s.
+     * @param type     Type of the {@link Message}s.
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
-    public static <M extends  Message, B extends Message.Builder> Collection<M> applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, Collection<M> messages, TypeUrl typeUrl) {
+    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(
+            FieldMask mask,
+            Collection<M> messages,
+            TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
 
-        final Class<B> builderClass = getBuilderForType(typeUrl);
+        final Class<B> builderClass = getBuilderForType(type);
 
         if (filter.isEmpty() || builderClass == null) {
             return Collections.unmodifiableCollection(messages);
@@ -76,15 +78,8 @@ public class FieldMasks {
             builderConstructor.setAccessible(true);
 
             for (Message wholeMessage : messages) {
-                final B builder = builderConstructor.newInstance();
-
-                for (Descriptors.FieldDescriptor field : wholeMessage.getDescriptorForType().getFields()) {
-                    if (filter.contains(field.getFullName())) {
-                        builder.setField(field, wholeMessage.getField(field));
-                    }
-                }
-
-                filtered.add((M) builder.build());
+                final M message = messageForFilter(filter, builderConstructor, wholeMessage);
+                filtered.add(message);
             }
 
         } catch (NoSuchMethodException |
@@ -99,21 +94,19 @@ public class FieldMasks {
     }
 
     /**
-     * <p>Applies the given {@code FieldMask} to a single {@link Message}.
-     **
+     * Applies the given {@code FieldMask} to a single {@link Message}.
+     *
      * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
-     * @param mask {@code FieldMask} instance to apply.
+     * @param mask    {@code FieldMask} instance to apply.
      * @param message The {@link Message} to apply given {@code FieldMask} to.
-     * @param typeUrl Type of the {@link Message}.
+     * @param type    Type of the {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields.
      */
-    @SuppressWarnings("unchecked")
-    public static <M extends  Message, B extends Message.Builder> M applyMask(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M message, TypeUrl typeUrl) {
+    public static <M extends Message, B extends Message.Builder> M applyMask(FieldMask mask, M message, TypeUrl type) {
         final ProtocolStringList filter = mask.getPathsList();
-
-        final Class<B> builderClass = getBuilderForType(typeUrl);
+        final Class<B> builderClass = getBuilderForType(type);
 
         if (filter.isEmpty() || builderClass == null) {
             return message;
@@ -123,15 +116,8 @@ public class FieldMasks {
             final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
-            final B builder = builderConstructor.newInstance();
-
-            for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
-                if (filter.contains(field.getFullName())) {
-                    builder.setField(field, message.getField(field));
-                }
-            }
-
-            return (M) builder.build();
+            final M result = messageForFilter(filter, builderConstructor, message);
+            return result;
 
         } catch (NoSuchMethodException |
                 InvocationTargetException |
@@ -139,42 +125,62 @@ public class FieldMasks {
                 InstantiationException ignored) {
             return message;
         }
-
-
     }
 
     /**
-     * <p>Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
+     * Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
      *
      * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
      * @param mask    The {@code FieldMask} to apply.
-     * @param message  The {@link Message} to apply given mask to.
+     * @param message The {@link Message} to apply given mask to.
      * @param typeUrl Type of given {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields
-     *          if the {@code mask} is valid, {@code message} itself otherwise.
+     * if the {@code mask} is valid, {@code message} itself otherwise.
      */
-    public static <M extends  Message> M applyIfValid(@SuppressWarnings("TypeMayBeWeakened") FieldMask mask, M message, TypeUrl typeUrl) {
-        if (!mask.getPathsList().isEmpty()) {
+    public static <M extends Message> M applyIfValid(FieldMask mask, M message, TypeUrl typeUrl) {
+        if (!mask.getPathsList()
+                 .isEmpty()) {
             return applyMask(mask, message, typeUrl);
         }
 
         return message;
     }
 
+    private static <M extends Message, B extends Message.Builder> M messageForFilter(
+            ProtocolStringList filter,
+            Constructor<B> builderConstructor, Message wholeMessage)
+            throws InstantiationException,
+            IllegalAccessException,
+            InvocationTargetException {
+        final B builder = builderConstructor.newInstance();
+
+        final List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
+                                                                     .getFields();
+        for (Descriptors.FieldDescriptor field : fields) {
+            if (filter.contains(field.getFullName())) {
+                builder.setField(field, wholeMessage.getField(field));
+            }
+        }
+        @SuppressWarnings("unchecked")       // It's fine as the constructor is of {@code MessageCls.Builder} type.
+        final M result = (M) builder.build();
+        return result;
+    }
+
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
-        Class<B> builderClass;
         try {
-            //noinspection unchecked
-            builderClass = (Class<B>) Class.forName(KnownTypes.getClassName(typeUrl).value())
-                                           .getClasses()[0];
+            final String className = KnownTypes.getClassName(typeUrl)
+                                               .value();
+            final Class<?> builderClazz = Class.forName(className)
+                                               .getClasses()[0];
+            // Assuming {@code KnownTypes#getClassName(TypeUrl)} works properly.
+            @SuppressWarnings("unchecked")
+            Class<B> result = (Class<B>) builderClazz;
+            return result;
         } catch (ClassNotFoundException | ClassCastException ignored) {
-            builderClass = null;
+            return null;
         }
-
-        return builderClass;
-
     }
 }
