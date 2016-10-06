@@ -78,7 +78,8 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager> {
+public class ProcessManagerRepositoryShould
+        extends AbstractEntityRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -93,18 +94,19 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
         eventBus = spy(TestEventBusFactory.create());
         boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
 
-        boundedContext.getCommandBus().register(new CommandDispatcher() {
-            @Override
-            public Set<CommandClass> getCommandClasses() {
-                return CommandClass.setOf(AddTask.class);
-            }
+        boundedContext.getCommandBus()
+                      .register(new CommandDispatcher() {
+                          @Override
+                          public Set<CommandClass> getCommandClasses() {
+                              return CommandClass.setOf(AddTask.class);
+                          }
 
-            @Override
-            public void dispatch(Command request) throws Exception {
-                // Simply swallow the command. We need this dispatcher for allowing Process Manager
-                // under test to route the AddTask command.
-            }
-        });
+                          @Override
+                          public void dispatch(Command request) throws Exception {
+                              // Simply swallow the command. We need this dispatcher for allowing Process Manager
+                              // under test to route the AddTask command.
+                          }
+                      });
 
         repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
@@ -210,7 +212,7 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
     }
 
     @Override
-    protected EntityRepository<?, TestProcessManager, ?> repository() {
+    protected EntityRepository<ProjectId, TestProcessManager, Project> repository() {
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(
                 TestBoundedContextFactory.newBoundedContext());
         repo.initStorage(InMemoryStorageFactory.getInstance());
@@ -219,7 +221,9 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
 
     @Override
     protected TestProcessManager entity() {
-        final ProjectId id = ProjectId.newBuilder().setId("123-id").build();
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId("123-id")
+                                      .build();
         return new TestProcessManager(id);
     }
 
@@ -228,13 +232,14 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
         final List<TestProcessManager> procmans = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            final ProjectId id = ProjectId.newBuilder().setId(String.format("procman-number-%s", i)).build();
+            final ProjectId id = ProjectId.newBuilder()
+                                          .setId(String.format("procman-number-%s", i))
+                                          .build();
 
             procmans.add(new TestProcessManager(id));
         }
         return procmans;
     }
-
 
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -254,8 +259,11 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") /* A Process Manager constructor must be public by
-                convention. It is used by reflection and is part of public API of process managers. */
+        @SuppressWarnings(
+                {"PublicConstructorInNonPublicClass",           /* A Process Manager constructor must be public
+                                                                 * by convention. It is used by reflection
+                                                                 * and is part of public API of process managers. */
+                        "WeakerAccess"})
         public TestProcessManager(ProjectId id) {
             super(id);
         }
@@ -264,12 +272,13 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
             messagesDelivered.put(getState().getId(), commandOrEventMsg);
         }
 
-        /* package */ static boolean processed(Message eventMessage) {
+        private static boolean processed(Message eventMessage) {
             final boolean result = messagesDelivered.containsValue(eventMessage);
             return result;
         }
 
-        /* package */ static void clearMessageDeliveryHistory() {
+        /* package */
+        static void clearMessageDeliveryHistory() {
             messagesDelivered.clear();
         }
 
@@ -327,6 +336,8 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
             incrementState(newState);
         }
 
+        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
+                                                 can have two parameters. */
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             keep(command);
@@ -335,6 +346,8 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
             return Given.EventMessage.projectCreated(command.getProjectId());
         }
 
+        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
+                                                 can have two parameters. */
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             keep(command);
@@ -351,8 +364,8 @@ public class ProcessManagerRepositoryShould extends AbstractEntityRepositoryShou
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
 
             return newRouter().of(command, context)
-                    .add(addTask)
-                    .route();
+                              .add(addTask)
+                              .route();
         }
     }
 }

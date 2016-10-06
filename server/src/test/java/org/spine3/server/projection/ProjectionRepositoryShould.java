@@ -63,7 +63,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection> {
+public class ProjectionRepositoryShould
+        extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -212,7 +213,7 @@ public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<P
     }
 
     @Override
-    protected EntityRepository<?, TestProjection, ?> repository() {
+    protected EntityRepository<ProjectId, TestProjection, Project> repository() {
         return repository;
     }
 
@@ -288,7 +289,7 @@ public class ProjectionRepositoryShould extends AbstractEntityRepositoryShould<P
 
         /* EventContext parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
+        public void on(ProjectStarted event, @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)

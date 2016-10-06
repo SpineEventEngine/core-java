@@ -40,12 +40,11 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
+public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void find_single_entity_by_id() {
-        final EntityRepository repo = repository();
+        final EntityRepository<I, E, S> repo = repository();
 
         final E entity = entity();
 
@@ -56,10 +55,10 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         assertEquals(found, entity);
     }
 
-    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void find_multiple_entities_by_ids() {
-        final EntityRepository<?, E, ?> repo = repository();
+        final EntityRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
@@ -68,11 +67,12 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
             repo.store(entity);
         }
 
-        final List ids = new LinkedList<>();
+        final List<I> ids = new LinkedList<>();
 
         // Find some of the records (half of them in this case)
         for (int i = 0; i < count / 2; i++) {
-            ids.add(entities.get(i).getId());
+            ids.add(entities.get(i)
+                            .getId());
         }
 
         final Collection<E> found = repo.loadAll(ids);
@@ -84,10 +84,10 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
     }
 
-    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void handle_wrong_passed_ids() {
-        final EntityRepository<?, E, ?> repo = repository();
+        final EntityRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
@@ -96,12 +96,13 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
             repo.store(entity);
         }
 
-        final List ids = new LinkedList<>();
+        final List<I> ids = new LinkedList<>();
         for (int i = 0; i < count; i++) {
-            ids.add(entities.get(i).getId());
+            ids.add(entities.get(i)
+                            .getId());
         }
 
-        final Entity<?, ?> sideEntity = entity();
+        final Entity<I, S> sideEntity = entity();
 
         ids.add(sideEntity.getId());
 
@@ -114,18 +115,16 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         }
     }
 
-    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"})
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
-        final EntityRepository<?, E, ?> repo = repository();
+        final EntityRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
-
         for (E entity : entities) {
             repo.store(entity);
         }
-
         final List<EntityId> ids = new LinkedList<>();
 
         // Find some of the records (half of them in this case)
@@ -143,18 +142,15 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(filter)
                                                    .build();
-
         final String firstFieldName = entities.get(0)
                                               .getState()
                                               .getDescriptorForType()
                                               .getFields()
                                               .get(0)
                                               .getFullName();
-
         final FieldMask firstFieldOnly = FieldMask.newBuilder()
                                                   .addPaths(firstFieldName)
                                                   .build();
-
         final Iterable<E> readEntities = repo.find(filters, firstFieldOnly);
 
         assertSize(ids.size(), readEntities);
@@ -169,7 +165,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<?, ?>> {
         Tests.assertMatchesMask(state, fieldMask);
     }
 
-    protected abstract EntityRepository<?, E, ?> repository();
+    protected abstract EntityRepository<I, E, S> repository();
 
     protected abstract E entity();
 
