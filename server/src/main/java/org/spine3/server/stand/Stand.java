@@ -542,8 +542,7 @@ public class Stand implements AutoCloseable {
         }
 
         private synchronized Subscription addSubscription(Target target) {
-            final String subscriptionId = UUID.randomUUID()
-                                              .toString();
+            final String subscriptionId = Identifiers.newUuid();
             final String typeAsString = target.getType();
             final TypeUrl type = TypeUrl.of(typeAsString);
             final Subscription subscription = Subscription.newBuilder()
