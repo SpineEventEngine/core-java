@@ -87,7 +87,10 @@ public class FieldMasks {
                 filtered.add((M) builder.build());
             }
 
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+        } catch (NoSuchMethodException |
+                InvocationTargetException |
+                IllegalAccessException |
+                InstantiationException ignored) {
             // If any reflection failure happens, return all the data without any mask applied.
             return Collections.unmodifiableCollection(messages);
         }
@@ -130,7 +133,10 @@ public class FieldMasks {
 
             return (M) builder.build();
 
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+        } catch (NoSuchMethodException |
+                InvocationTargetException |
+                IllegalAccessException |
+                InstantiationException ignored) {
             return message;
         }
 
@@ -164,7 +170,7 @@ public class FieldMasks {
             //noinspection unchecked
             builderClass = (Class<B>) Class.forName(KnownTypes.getClassName(typeUrl).value())
                                            .getClasses()[0];
-        } catch (ClassNotFoundException | ClassCastException e) {
+        } catch (ClassNotFoundException | ClassCastException ignored) {
             builderClass = null;
         }
 
