@@ -100,19 +100,24 @@ public class Stand implements AutoCloseable {
      */
     private final StandSubscriptionRegistry subscriptionRegistry = new StandSubscriptionRegistry();
 
-    /** An instance of executor used to invoke callbacks */
+    /**
+     * An instance of executor used to invoke callbacks
+     */
     private final Executor callbackExecutor;
 
-    /** The mapping between {@code TypeUrl} instances and repositories providing the entities of this type */
-    private final ConcurrentMap<TypeUrl, EntityRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
+    /**
+     * The mapping between {@code TypeUrl} instances and repositories providing the entities of this type
+     */
+    private final ConcurrentMap<TypeUrl,
+            EntityRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
-     * Store the known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
+     * Stores  known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
      * instances of {@code TypeUrl}.
      *
      * <p>Once this instance of {@code Stand} receives an update as {@link Any}, the {@code Aggregate} states
-     * are persisted for further usage. While the rest of entity updates are not; they are only propagated to
-     * the registered callbacks.
+     * are persisted for further usage. The entities that are not {@code Aggregate} are not persisted,
+     * and only propagated to the registered callbacks.
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
@@ -131,8 +136,8 @@ public class Stand implements AutoCloseable {
      * <p>In case the entity update represents the new {@link org.spine3.server.aggregate.Aggregate} state,
      * store the new value for the {@code Aggregate} to each of the configured instances of {@link StandStorage}.
      *
-     * <p>Each {@code Aggregate } state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl} obtained
-     * via {@link Any#getTypeUrl()}.
+     * <p>Each {@code Aggregate } state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl}
+     * obtained via {@link Any#getTypeUrl()}.
      *
      * <p>In case {@code Stand} already contains the state for this {@code Aggregate}, the value will be replaced.
      *
@@ -145,8 +150,6 @@ public class Stand implements AutoCloseable {
      *
      * @param entityState the entity state
      */
-    @SuppressWarnings("MethodWithMultipleLoops")    /* It's fine, since the second loop is most likely
-                                                     * executed in async fashion. */
     public void update(final Object id, final Any entityState) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
@@ -163,21 +166,7 @@ public class Stand implements AutoCloseable {
             storage.write(aggregateStateId, record);
         }
 
-        if (subscriptionRegistry.hasType(typeUrl)) {
-            final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
-            for (final SubscriptionRecord subscriptionRecord : allRecords) {
-
-                final boolean subscriptionIsActive = subscriptionRecord.isActive();
-                if (subscriptionIsActive && subscriptionRecord.matches(typeUrl, id, entityState)) {
-                    callbackExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            subscriptionRecord.callback.onEntityStateUpdate(entityState);
-                        }
-                    });
-                }
-            }
-        }
+        notifyMatchingSubscriptions(id, entityState, typeUrl);
     }
 
     /**
@@ -296,55 +285,82 @@ public class Stand implements AutoCloseable {
         }
 
         final ImmutableList<Any> result = resultBuilder.build();
-
         return result;
     }
 
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // A lot of small logical conditions is checked.
     private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Query query, final TypeUrl typeUrl) {
         ImmutableCollection<EntityStorageRecord> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
         final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
                                                        .isEmpty();
-
         if (target.getIncludeAll()) {
             result = shouldApplyFieldMask ?
                      storage.readAllByType(typeUrl, fieldMask) :
                      storage.readAllByType(typeUrl);
-
         } else {
-            final EntityFilters filters = target.getFilters();
 
-            final boolean idsAreDefined = !filters.getIdFilter()
-                                                  .getIdsList()
-                                                  .isEmpty();
-            if (idsAreDefined) {
-                final EntityIdFilter idFilter = filters.getIdFilter();
-                final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(), aggregateStateIdTransformer(typeUrl));
-
-                if (stateIds.size() == 1) {
-                    // no need to trigger bulk reading.
-                    // may be more effective, as bulk reading implies additional time and performance expenses.
-                    final AggregateStateId singleId = stateIds.iterator()
-                                                              .next();
-                    final EntityStorageRecord singleResult = shouldApplyFieldMask ?
-                                                             storage.read(singleId, fieldMask) :
-                                                             storage.read(singleId);
-                    result = ImmutableList.of(singleResult);
-                } else {
-                    result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
-                }
-            } else {
-                result = ImmutableList.of();
-            }
-
+            result = doFetchWithFilters(typeUrl, target, fieldMask);
         }
 
         return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds, FieldMask fieldMask, boolean applyFieldMask) {
+    private ImmutableCollection<EntityStorageRecord> doFetchWithFilters(TypeUrl typeUrl,
+                                                                        Target target,
+                                                                        FieldMask fieldMask) {
+        ImmutableCollection<EntityStorageRecord> result;
+        final EntityFilters filters = target.getFilters();
+        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
+                                                       .isEmpty();
+        final boolean idsAreDefined = !filters.getIdFilter()
+                                              .getIdsList()
+                                              .isEmpty();
+        if (idsAreDefined) {
+            final EntityIdFilter idFilter = filters.getIdFilter();
+            final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
+                                                                                 aggregateStateIdTransformer(typeUrl));
+            if (stateIds.size() == 1) {
+                // no need to trigger bulk reading.
+                // may be more effective, as bulk reading implies additional time and performance expenses.
+                final AggregateStateId singleId = stateIds.iterator()
+                                                          .next();
+                final EntityStorageRecord singleResult = shouldApplyFieldMask ?
+                                                         storage.read(singleId, fieldMask) :
+                                                         storage.read(singleId);
+                result = ImmutableList.of(singleResult);
+            } else {
+                result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
+            }
+        } else {
+            result = ImmutableList.of();
+        }
+        return result;
+    }
+
+    private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
+        if (subscriptionRegistry.hasType(typeUrl)) {
+            final Set<SubscriptionRecord> allRecords = subscriptionRegistry.byType(typeUrl);
+
+            for (final SubscriptionRecord subscriptionRecord : allRecords) {
+
+                final boolean subscriptionIsActive = subscriptionRecord.isActive();
+                final boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
+                if (subscriptionIsActive && stateMatches) {
+                    callbackExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            subscriptionRecord.callback.onEntityStateUpdate(entityState);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds,
+                                                                    FieldMask fieldMask,
+                                                                    boolean applyFieldMask) {
         ImmutableCollection<EntityStorageRecord> result;
         final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask ?
                                                               storage.readBulk(stateIds, fieldMask) :
@@ -375,7 +391,10 @@ public class Stand implements AutoCloseable {
         };
     }
 
-    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(Query query, EntityRepository<?, ? extends Entity, ?> repository) {
+    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(
+            Query query,
+            EntityRepository<?, ? extends Entity, ?> repository) {
+
         final ImmutableCollection<? extends Entity> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
@@ -390,7 +409,8 @@ public class Stand implements AutoCloseable {
         return result;
     }
 
-    private static void feedEntitiesToBuilder(ImmutableList.Builder<Any> resultBuilder, ImmutableCollection<? extends Entity> all) {
+    private static void feedEntitiesToBuilder(ImmutableList.Builder<Any> resultBuilder,
+                                              ImmutableCollection<? extends Entity> all) {
         for (Entity record : all) {
             final Message state = record.getState();
             final Any packedState = AnyPacker.pack(state);
@@ -398,7 +418,8 @@ public class Stand implements AutoCloseable {
         }
     }
 
-    private static void feedStateRecordsToBuilder(ImmutableList.Builder<Any> resultBuilder, ImmutableCollection<EntityStorageRecord> all) {
+    private static void feedStateRecordsToBuilder(ImmutableList.Builder<Any> resultBuilder,
+                                                  ImmutableCollection<EntityStorageRecord> all) {
         for (EntityStorageRecord record : all) {
             final Any state = record.getState();
             resultBuilder.add(state);
@@ -428,7 +449,6 @@ public class Stand implements AutoCloseable {
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
         }
-
     }
 
     /**
@@ -495,12 +515,10 @@ public class Stand implements AutoCloseable {
          * @return the instance of Stand
          */
         public Stand build() {
-
             if (storage == null) {
                 storage = InMemoryStandStorage.newBuilder()
                                               .build();
             }
-
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();
             }
@@ -522,7 +540,7 @@ public class Stand implements AutoCloseable {
 
         private synchronized void activate(Subscription subscription, StandUpdateCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
-                                     "Cannot find the subscription in the registry.");
+                       "Cannot find the subscription in the registry.");
             final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
             subscriptionRecord.activate(callback);
         }
@@ -558,7 +576,6 @@ public class Stand implements AutoCloseable {
                 typeToAttrs.get(attributes.type)
                            .remove(attributes);
             }
-
             subscriptionToAttrs.remove(subscription);
         }
 
@@ -613,7 +630,6 @@ public class Stand implements AutoCloseable {
             } else {
                 result = false;
             }
-
             return result;
         }
 
