@@ -274,13 +274,12 @@ public class Stand implements AutoCloseable {
 
             // the target references an entity state
             final ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(query, repository);
-
             feedEntitiesToBuilder(resultBuilder, entities);
+
         } else if (knownAggregateTypes.contains(typeUrl)) {
 
             // the target relates to an {@code Aggregate} state
             final ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(query, typeUrl);
-
             feedStateRecordsToBuilder(resultBuilder, stateRecords);
         }
 
