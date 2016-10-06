@@ -86,28 +86,50 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void handle_wrong_passed_ids() {
+    public void find_all_entities() {
         final EntityRepository<I, E, S> repo = repository();
 
-        final int count = 10;
+        final int count = 150;
         final List<E> entities = entities(count);
 
         for (E entity : entities) {
             repo.store(entity);
         }
+        final Collection<E> found = repo.loadAll();
+        assertSize(entities.size(), found);
 
+        for (E entity : found) {
+            assertContains(entity, entities);
+        }
+    }
+
+    @Test
+    public void find_no_entities_if_empty() {
+        final EntityRepository<I, E, S> repo = repository();
+
+        final Collection<E> found = repo.loadAll();
+        assertSize(0, found);
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void handle_wrong_passed_ids() {
+        final EntityRepository<I, E, S> repo = repository();
+
+        final int count = 10;
+        final List<E> entities = entities(count);
+        for (E entity : entities) {
+            repo.store(entity);
+        }
         final List<I> ids = new LinkedList<>();
         for (int i = 0; i < count; i++) {
             ids.add(entities.get(i)
                             .getId());
         }
-
         final Entity<I, S> sideEntity = entity();
-
         ids.add(sideEntity.getId());
 
         final Collection<E> found = repo.loadAll(ids);
-
         assertSize(ids.size() - 1, found); // Check we've found all existing items
 
         for (E entity : found) {
