@@ -66,7 +66,6 @@ public class FieldMasks {
             TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
-
         final Class<B> builderClass = getBuilderForType(type);
 
         if (filter.isEmpty() || builderClass == null) {
@@ -81,7 +80,6 @@ public class FieldMasks {
                 final M message = messageForFilter(filter, builderConstructor, wholeMessage);
                 filtered.add(message);
             }
-
         } catch (NoSuchMethodException |
                 InvocationTargetException |
                 IllegalAccessException |
@@ -89,7 +87,6 @@ public class FieldMasks {
             // If any reflection failure happens, return all the data without any mask applied.
             return Collections.unmodifiableCollection(messages);
         }
-
         return Collections.unmodifiableList(filtered);
     }
 
@@ -144,7 +141,6 @@ public class FieldMasks {
                  .isEmpty()) {
             return applyMask(mask, message, typeUrl);
         }
-
         return message;
     }
 
