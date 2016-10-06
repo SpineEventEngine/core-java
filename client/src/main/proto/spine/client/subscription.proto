@@ -72,7 +72,8 @@ message SubscriptionUpdate {
 
 // The subscription object.
 //
-// Created when the client subscribes to a topic.
+// Created when the client subscribes to a topic inside the read-side implementation.
+// Generally should not be created in the client code.
 // See SubscriptionService#Subscribe(Topic).
 message Subscription {
 
