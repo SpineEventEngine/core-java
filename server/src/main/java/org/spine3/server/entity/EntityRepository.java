@@ -49,6 +49,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.validate.Validate.isDefault;
@@ -224,10 +225,10 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
                 final Class messageClass = toMessageClass(typeUrl);
 
-                if (!expectedIdClass.equals(messageClass)) {
-                    throw new IllegalArgumentException("Unexpected ID of type " + messageClass + " encountered. " +
-                                                               "Expected: " + expectedIdClass);
-                }
+                final boolean classIsSame = expectedIdClass.equals(messageClass);
+                checkState(classIsSame,
+                           "Unexpected ID of type " + messageClass + " encountered. " + "Expected: " + expectedIdClass);
+
                 final Message idAsMessage = AnyPacker.unpack(idAsAny);
 
                 // As the message class is the same as expected, the conversion is safe.
