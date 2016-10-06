@@ -59,7 +59,6 @@ import org.spine3.server.storage.memory.InMemoryStandStorage;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +69,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -99,7 +99,6 @@ public class Stand implements AutoCloseable {
      * Manages the subscriptions for this instance of {@code Stand}.
      */
     private final StandSubscriptionRegistry subscriptionRegistry = new StandSubscriptionRegistry();
-
 
     /** An instance of executor used to invoke callbacks */
     private final Executor callbackExecutor;
@@ -301,14 +300,13 @@ public class Stand implements AutoCloseable {
         return result;
     }
 
-
-
     @SuppressWarnings("MethodWithMoreThanThreeNegations") // A lot of small logical conditions is checked.
     private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Query query, final TypeUrl typeUrl) {
         ImmutableCollection<EntityStorageRecord> result;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList().isEmpty();
+        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
+                                                       .isEmpty();
 
         if (target.getIncludeAll()) {
             result = shouldApplyFieldMask ?
@@ -382,7 +380,8 @@ public class Stand implements AutoCloseable {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        if (target.getIncludeAll() && fieldMask.getPathsList().isEmpty()) {
+        if (target.getIncludeAll() && fieldMask.getPathsList()
+                                               .isEmpty()) {
             result = repository.loadAll();
         } else {
             final EntityFilters filters = target.getFilters();
@@ -405,7 +404,6 @@ public class Stand implements AutoCloseable {
             resultBuilder.add(state);
         }
     }
-
 
     /**
      * Register a supplier for the objects of a certain {@link TypeUrl} to be able
@@ -453,11 +451,9 @@ public class Stand implements AutoCloseable {
         void onEntityStateUpdate(Any newEntityState);
     }
 
-
     public static class Builder {
         private StandStorage storage;
         private Executor callbackExecutor;
-
 
         /**
          * Set an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
@@ -471,7 +467,6 @@ public class Stand implements AutoCloseable {
             this.storage = storage;
             return this;
         }
-
 
         public Executor getCallbackExecutor() {
             return callbackExecutor;
@@ -493,7 +488,6 @@ public class Stand implements AutoCloseable {
         public StandStorage getStorage() {
             return storage;
         }
-
 
         /**
          * Build an instance of {@code Stand}.
@@ -527,9 +521,8 @@ public class Stand implements AutoCloseable {
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
         private synchronized void activate(Subscription subscription, StandUpdateCallback callback) {
-            if (!subscriptionToAttrs.containsKey(subscription)) {
-                throw new RuntimeException("Cannot find the subscription in the registry.");
-            }
+            checkState(subscriptionToAttrs.containsKey(subscription),
+                                     "Cannot find the subscription in the registry.");
             final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
             subscriptionRecord.activate(callback);
         }
