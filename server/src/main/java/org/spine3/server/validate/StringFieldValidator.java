@@ -92,7 +92,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 
     @Override
     protected boolean isValueNotSet(String value) {
-        final boolean isNotSet = value.isEmpty();
-        return isNotSet;
+        final boolean result = value.isEmpty();
+        return result;
     }
 }

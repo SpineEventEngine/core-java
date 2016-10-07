@@ -136,7 +136,8 @@ import static org.spine3.base.Commands.isCommandsFile;
      *  Returns {@code true} if the field has required attribute or validation is strict.
      */
     protected boolean isRequiredField() {
-        return requiredOption.getValue() || strict;
+        final boolean result = requiredOption.getValue() || strict;
+        return result;
     }
 
     /**

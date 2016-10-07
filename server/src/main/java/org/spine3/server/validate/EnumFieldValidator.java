@@ -47,7 +47,9 @@ import java.util.List;
 
     @Override
     protected boolean isValueNotSet(Descriptors.EnumValueDescriptor value) {
-        return value.getNumber() == 0;
+        final int intValue = value.getNumber();
+        final boolean result = intValue == 0;
+        return result;
     }
 
     @Override
@@ -56,5 +58,4 @@ import java.util.List;
         final List<ConstraintViolation> violations = super.validate();
         return violations;
     }
-
 }

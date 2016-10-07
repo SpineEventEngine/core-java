@@ -101,8 +101,8 @@ import java.util.regex.Pattern;
     @Override
     protected boolean isValueNotSet(V value) {
         final int intValue = value.intValue();
-        final boolean isNotSet = intValue == 0;
-        return isNotSet;
+        final boolean result = intValue == 0;
+        return result;
     }
 
     private void validateRangeOptions(V value) {

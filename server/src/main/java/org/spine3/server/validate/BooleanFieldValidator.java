@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors;
 import org.slf4j.Logger;
@@ -36,7 +37,6 @@ import java.util.List;
  */
 /* package */ class BooleanFieldValidator extends FieldValidator<Boolean>  {
 
-
     /**
      * Creates a new validator instance.
      *
@@ -48,9 +48,13 @@ import java.util.List;
         super(descriptor, fieldValues, rootFieldPath, false);
     }
 
+    /**
+     *  Boolean field can't be determined if it set or not, because protobuf 'false' value and 'no value' are the same
+     *
+     * @return false
+     */
     @Override
     protected boolean isValueNotSet(Boolean value) {
-        // Boolean field can't be determined if it set or not, because protobuf 'false' value and 'no value' are the same
         return false;
     }
 
