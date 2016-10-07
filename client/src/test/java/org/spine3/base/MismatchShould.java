@@ -41,7 +41,6 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
  */
 public class MismatchShould {
 
-    private static final String REQUESTED = "requested";
     private static final String EXPECTED = "expected";
     private static final String ACTUAL = "ACTUAL";
     private static final int VERSION = 0;
