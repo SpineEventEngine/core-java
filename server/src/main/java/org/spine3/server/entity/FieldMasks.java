@@ -47,8 +47,6 @@ import java.util.List;
 @SuppressWarnings("UtilityClass")
 public class FieldMasks {
 
-    //private static final Logger log =
-
     private FieldMasks() {
     }
 
