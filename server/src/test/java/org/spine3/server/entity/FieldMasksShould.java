@@ -31,6 +31,7 @@ import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.commandservice.customer.Customer;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void apply_only_non_empty_mask() {
+    public void apply_only_non_empty_mask_to_single_item() {
         final FieldMask emptyMask = Given.fieldMask();
 
         final Project origin = Given.newProject("read_whole_message");
@@ -106,6 +107,35 @@ public class FieldMasksShould {
 
         // Check object was not changed
         assertTrue(processed.equals(clone));
+    }
+
+    @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
+    @Test
+    public void apply_only_non_empty_mask_to_collection() {
+        final FieldMask emptyMask = Given.fieldMask();
+
+        final Collection<Project> original = new LinkedList<>();
+        final int count = 5;
+
+        for (int i = 0; i < count; i++) {
+            final Project project = Given.newProject(String.format("test-data--%s", i));
+            original.add(project);
+        }
+
+        final Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
+
+        assertSize(original.size(), processed);
+
+        // The argument is not returned
+        assertFalse(original == processed);
+
+        // A copy of the argument is returned (Collection type may differ)
+        final Iterator<Project> processedProjects = processed.iterator();
+
+        for (Project anOriginal : original) {
+            assertTrue(processedProjects.next()
+                                        .equals(anOriginal));
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)
