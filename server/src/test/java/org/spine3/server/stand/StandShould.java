@@ -581,7 +581,7 @@ public class StandShould {
         final int count = 10;
 
         for (int i = 0; i < count; i++) {
-            // Has new id each time
+            // Has new ID each time
             final Customer customer = getSampleCustomer();
             customers.add(customer);
 
