@@ -30,6 +30,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Mismatch.getActualString;
+import static org.spine3.base.Mismatch.getExpectedString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -83,7 +85,6 @@ public class MismatchShould {
     public void return_mismatch_object_with_int32_values() {
         final int expected = 0;
         final int actual = 1;
-        final int requested = 2;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final Int32Value expectedWrapper = unpack(mismatch.getExpected());
         final Int32Value actualWrapper = unpack(mismatch.getActual());
@@ -96,7 +97,6 @@ public class MismatchShould {
     public void return_mismatch_object_with_int64_values() {
         final long expected = 0L;
         final long actual = 1L;
-        final long requested = 2L;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final Int64Value expectedWrapped = unpack(mismatch.getExpected());
         final Int64Value actualWrapped = unpack(mismatch.getActual());
@@ -109,7 +109,6 @@ public class MismatchShould {
     public void return_mismatch_object_with_float_values() {
         final float expected = 0.0F;
         final float actual = 1.0F;
-        final float requested = 2.0F;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final FloatValue expectedWrapped = unpack(mismatch.getExpected());
         final FloatValue actualWrapped = unpack(mismatch.getActual());
@@ -122,7 +121,6 @@ public class MismatchShould {
     public void return_mismatch_object_with_double_values() {
         final double expected = 0.1;
         final double actual = 0.2;
-        final double requested = 0.3;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final DoubleValue expectedWrapped = unpack(mismatch.getExpected());
         final DoubleValue actualWrapped = unpack(mismatch.getActual());
@@ -135,7 +133,6 @@ public class MismatchShould {
     public void return_mismatch_object_with_boolean_values() {
         final boolean expected = true;
         final boolean actual = false;
-        final boolean requested = true;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final BoolValue expectedWrapped = unpack(mismatch.getExpected());
         final BoolValue actualWrapped = unpack(mismatch.getActual());
@@ -170,5 +167,17 @@ public class MismatchShould {
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
+    }
+
+    @Test
+    public void return_expected_string() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
+        assertEquals(EXPECTED, getExpectedString(mismatch));
+    }
+
+    @Test
+    public void return_actual_string() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
+        assertEquals(ACTUAL, getActualString(mismatch));
     }
 }
