@@ -24,8 +24,11 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.SubscriptionService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,6 +46,8 @@ import java.util.List;
  */
 @SuppressWarnings("UtilityClass")
 public class FieldMasks {
+
+    //private static final Logger log =
 
     private FieldMasks() {
     }
@@ -131,6 +136,7 @@ public class FieldMasks {
             return (M) builder.build();
 
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+            log().warn(String.format("Constructor for type %s could not be found or called: ", builderClass.getCanonicalName()), e);
             return message;
         }
 
@@ -160,15 +166,37 @@ public class FieldMasks {
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;
+        final String className = KnownTypes.getClassName(typeUrl)
+                                           .value();
         try {
             //noinspection unchecked
-            builderClass = (Class<B>) Class.forName(KnownTypes.getClassName(typeUrl).value())
+            builderClass = (Class<B>) Class.forName(className)
                                            .getClasses()[0];
-        } catch (ClassNotFoundException | ClassCastException e) {
+        } catch (ClassNotFoundException e) {
+            final String message = String.format(
+                    "Class for name %s could not be found. Try to rebuild the project. Make sure \"known_types.properties\" exists.",
+                    className);
+            log().warn(message, e);
+            builderClass = null;
+        } catch (ClassCastException e) {
+            final String message = String.format(
+                    "Class %s Must be assignable from com.google.protobuf.Message. Try to rebuild the project. Make sure type URL is valid.",
+                    className);
+            log().warn(message, e);
             builderClass = null;
         }
 
         return builderClass;
 
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(SubscriptionService.class);
     }
 }
