@@ -85,7 +85,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return recordStorage.readBulk(ids, fieldMask);
     }
 
-
     @Override
     protected Map<I, EntityStorageRecord> readAllInternal() {
         final Map<I, EntityStorageRecord> result = recordStorage.readAll();
