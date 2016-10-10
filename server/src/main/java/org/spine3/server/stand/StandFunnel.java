@@ -99,7 +99,7 @@ public class StandFunnel {
         /**
          * Optional {@code Executor} for delivering the data to {@code Stand}.
          *
-         * <p>If not set, a default value will be set by the builder.
+         * <p>If not set, a {@link MoreExecutors#directExecutor()} value will be set by the builder.
          */
         private Executor executor;
 
@@ -129,7 +129,7 @@ public class StandFunnel {
          *
          * <p>The value must not be {@code null}.
          *
-         * <p> If this method is not used, a default value will be used.
+         * <p> If this method is not used, a {@link MoreExecutors#directExecutor()} value will be used.
          *
          * @param executor the instance of {@code Executor}.
          * @return {@code this} instance of {@code Builder}
