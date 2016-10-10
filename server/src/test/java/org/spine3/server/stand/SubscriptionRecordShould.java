@@ -21,6 +21,7 @@
 package org.spine3.server.stand;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Queries;
 import org.spine3.client.Subscription;
@@ -29,6 +30,9 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.commandservice.customer.Customer;
+
+import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -51,6 +55,40 @@ public class SubscriptionRecordShould {
         final boolean matchResult = matchingRecord.matches(Given.TYPE, redundantId, wrappedState);
 
         assertTrue(matchResult);
+    }
+
+    @Test
+    public void fail_to_match_improper_type() {
+        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
+                                                                            Given.target(),
+                                                                            Given.TYPE);
+
+        final Project entityState = Project.getDefaultInstance();
+        final Any wrappedState = AnyPacker.pack(entityState);
+        final ProjectId redundantId = ProjectId.getDefaultInstance();
+
+        final boolean matchResult = notMatchingRecord.matches(Given.OTHER_TYPE, redundantId, wrappedState);
+
+        assertFalse(matchResult);
+    }
+
+    @Test
+    public void fail_to_match_improper_target() {
+        final ProjectId nonExisitngId = ProjectId.newBuilder()
+                                                 .setId("never-existed")
+                                                 .build();
+
+        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
+                                                                            Given.target(nonExisitngId),
+                                                                            Given.TYPE);
+
+        final Project entityState = Project.getDefaultInstance();
+        final Any wrappedState = AnyPacker.pack(entityState);
+        final ProjectId redundantId = ProjectId.getDefaultInstance();
+
+        final boolean matchResult = notMatchingRecord.matches(Given.TYPE, redundantId, wrappedState);
+
+        assertFalse(matchResult);
     }
 
     @Test
@@ -81,9 +119,16 @@ public class SubscriptionRecordShould {
     private static class Given {
 
         private static final TypeUrl TYPE = TypeUrl.of(Project.class);
+        private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
         private static Target target() {
             final Target target = Queries.Targets.allOf(Project.class);
+
+            return target;
+        }
+
+        private static Target target(Message targetId) {
+            final Target target = Queries.Targets.someOf(Project.class, Collections.singleton(targetId));
 
             return target;
         }
