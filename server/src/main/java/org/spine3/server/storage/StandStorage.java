@@ -43,7 +43,6 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
         super(multitenant);
     }
 
-
     /**
      * Reads all the state records by the given type.
      *
