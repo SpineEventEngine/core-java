@@ -125,15 +125,6 @@ public class FieldMasks {
 
             final M result = messageForFilter(filter, builderConstructor, message);
             return result;
-
-            for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
-                if (filter.contains(field.getFullName())) {
-                    builder.setField(field, message.getField(field));
-                }
-            }
-
-            return (M) builder.build();
-
         } catch (NoSuchMethodException |
                 InvocationTargetException |
                 IllegalAccessException |
