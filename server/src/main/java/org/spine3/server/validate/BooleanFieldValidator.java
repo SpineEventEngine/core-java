@@ -20,7 +20,6 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ import java.util.List;
     }
 
     /**
-     *  Boolean field can't be determined if it set or not, because protobuf 'false' value and 'no value' are the same
+     * In Protobuf there is no way to tell if the value is {@code false} or was not set.
      *
      * @return false
      */
