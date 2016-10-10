@@ -61,8 +61,6 @@ import static com.google.common.collect.Maps.newHashMap;
         super(multitenant);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")    /* It's OK for in-memory implementation
-                                                     * as it is used primarily in tests. */
     @Override
     protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> storage = getStorage();
@@ -70,39 +68,30 @@ import static com.google.common.collect.Maps.newHashMap;
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
 
-        TypeUrl typeUrl = null;
-
-        int resultExpectedSize = 0;
-
         for (I givenId : givenIds) {
-            resultExpectedSize++;
-
-            for (I recordId : storage.keySet()) {
-                if (recordId.equals(givenId)) {
-                    final EntityStorageRecord.Builder matchingRecord = storage.get(recordId).toBuilder();
-                    final Any state = matchingRecord.getState();
-
-                    if (typeUrl == null) {
-                        typeUrl = TypeUrl.of(state.getTypeUrl());
-                    }
-
-                    final Message wholeState = AnyPacker.unpack(state);
-                    final Message maskedState = FieldMasks.applyIfValid(fieldMask, wholeState, typeUrl);
-                    final Any processed = AnyPacker.pack(maskedState);
-
-                    matchingRecord.setState(processed);
-
-                    result.add(matchingRecord.build());
-                }
-            }
-
-            // If no record was found
-            if (result.size() < resultExpectedSize) {
-                result.add(null);
-                resultExpectedSize++;
-            }
+            final EntityStorageRecord matchingResult = findAndApplyFieldMask(storage, givenId, fieldMask);
+            result.add(matchingResult);
         }
         return result;
+    }
+
+    private EntityStorageRecord findAndApplyFieldMask(Map<I, EntityStorageRecord> storage, I givenId, FieldMask fieldMask) {
+        EntityStorageRecord matchingResult = null;
+        for (I recordId : storage.keySet()) {
+            if (recordId.equals(givenId)) {
+                EntityStorageRecord.Builder matchingRecord = storage.get(recordId)
+                                                                    .toBuilder();
+                final Any state = matchingRecord.getState();
+                final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
+                final Message wholeState = AnyPacker.unpack(state);
+                final Message maskedState = FieldMasks.applyIfValid(fieldMask, wholeState, typeUrl);
+                final Any processed = AnyPacker.pack(maskedState);
+
+                matchingRecord.setState(processed);
+                matchingResult = matchingRecord.build();
+            }
+        }
+        return matchingResult;
     }
 
     @Override
@@ -120,7 +109,8 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
-        if (fieldMask.getPathsList().isEmpty()) {
+        if (fieldMask.getPathsList()
+                     .isEmpty()) {
             return readAllInternal();
         }
 
@@ -138,11 +128,19 @@ import static com.google.common.collect.Maps.newHashMap;
             public Message apply(@Nullable EntityStorageRecord input) {
                 return input == null ? null : AnyPacker.unpack(input.getState());
             }
-        }), TypeUrl.of(storage.entrySet().iterator().next().getValue().getState().getTypeUrl()));
+        }), TypeUrl.of(storage.entrySet()
+                              .iterator()
+                              .next()
+                              .getValue()
+                              .getState()
+                              .getTypeUrl()));
 
         final Iterator<Message> messageIterator = records.iterator();
         for (I key : storage.keySet()) {
-            result.put(key, storage.get(key).toBuilder().setState(AnyPacker.pack(messageIterator.next())).build());
+            result.put(key, storage.get(key)
+                                   .toBuilder()
+                                   .setState(AnyPacker.pack(messageIterator.next()))
+                                   .build());
         }
 
         return result.build();
