@@ -78,7 +78,6 @@ public class StandFunnel {
                 stand.update(id, entityState);
             }
         });
-
     }
 
     /**
