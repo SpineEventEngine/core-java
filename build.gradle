@@ -54,7 +54,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.5.18-SNAPSHOT'
+    version = '0.5.19-SNAPSHOT'
 }
 
 ext {
