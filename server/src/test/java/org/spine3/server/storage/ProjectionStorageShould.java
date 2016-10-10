@@ -20,17 +20,30 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
+import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectId;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.test.Tests.assertMatchesMask;
+import static org.spine3.test.Verify.assertContains;
+import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**
@@ -67,6 +80,77 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         final Timestamp time = storage.readLastHandledEventTime();
 
         assertNull(time);
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void read_all_messages() {
+        final int count = 5;
+        final List<I> ids = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(Any.getDefaultInstance())
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(1)
+                                                                  .build();
+            storage.write(id, record);
+            ids.add(id);
+        }
+
+        final Map<I, EntityStorageRecord> read = storage.readAll();
+        assertSize(ids.size(), read);
+        for (Map.Entry<I, EntityStorageRecord> record : read.entrySet()) {
+            assertContains(record.getKey(), ids);
+        }
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void read_all_messages_with_field_mask() {
+        final int count = 5;
+        final List<I> ids = new LinkedList<>();
+
+        final String projectDescriptor = Project.getDescriptor()
+                                                .getFullName();
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final FieldMask fieldMask = FieldMask.newBuilder()
+                                             .addPaths(projectDescriptor + ".id")
+                                             .addPaths(projectDescriptor + ".name")
+                                             .build();
+
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final ProjectId stateId = ProjectId.newBuilder()
+                                               .setId(id.toString())
+                                               .build();
+            final Project state = Project.newBuilder()
+                                         .setId(stateId)
+                                         .setName(String.format("project_%s", i))
+                                         .setStatus(Project.Status.CREATED)
+                                         .build();
+            final Any packedState = AnyPacker.pack(state);
+
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(packedState)
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(1)
+                                                                  .build();
+            storage.write(id, record);
+            ids.add(id);
+        }
+
+        final Map<I, EntityStorageRecord> read = storage.readAll(fieldMask);
+        assertSize(ids.size(), read);
+        for (Map.Entry<I, EntityStorageRecord> record : read.entrySet()) {
+            assertContains(record.getKey(), ids);
+
+            final Any packedState = record.getValue()
+                                          .getState();
+            final Project state = AnyPacker.unpack(packedState);
+            assertMatchesMask(state, fieldMask);
+        }
     }
 
     @Test(expected = NullPointerException.class)
