@@ -62,8 +62,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         return new Builder();
     }
 
-    @Override
     @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
+    @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         log().debug("Creating the subscription to a topic: {}", topic);
 
@@ -79,12 +79,11 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing subscription request", e);
             responseObserver.onError(e);
-            responseObserver.onCompleted();
         }
     }
 
-    @Override
     @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
+    @Override
     public void activate(final Subscription subscription, final StreamObserver<SubscriptionUpdate> responseObserver) {
         log().debug("Activating the subscription: {}", subscription);
 
@@ -105,11 +104,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             };
             final Stand targetStand = boundedContext.getStand();
             targetStand.activate(subscription, updateCallback);
-
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
             responseObserver.onError(e);
-            responseObserver.onCompleted();
         }
     }
 
@@ -123,10 +120,10 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             final Stand stand = boundedContext.getStand();
             stand.cancel(subscription);
             responseObserver.onNext(Responses.ok());
+            responseObserver.onCompleted();
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing cancel subscription request", e);
             responseObserver.onError(e);
-            responseObserver.onCompleted();
         }
     }
 
