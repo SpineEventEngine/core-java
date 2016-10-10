@@ -214,7 +214,7 @@ public class Stand implements AutoCloseable {
     /**
      * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
-     * <p>The result includes all values from {@link #getKnownAggregateTypes()} as well.
+     * <p>The result includes all values from {@link #getExposedAggregateTypes()} as well.
      *
      * @return the set of types as {@link TypeUrl} instances
      */
@@ -235,7 +235,7 @@ public class Stand implements AutoCloseable {
      * @return the set of types as {@link TypeUrl} instances
      */
     @CheckReturnValue
-    public ImmutableSet<TypeUrl> getKnownAggregateTypes() {
+    public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
         final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
         return result;
     }

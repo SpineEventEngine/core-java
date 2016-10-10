@@ -114,7 +114,7 @@ public class StandShould {
         assertNotNull(stand);
         assertTrue("Available types must be empty after the initialization.", stand.getAvailableTypes()
                                                                                    .isEmpty());
-        assertTrue("Known aggregate types must be empty after the initialization", stand.getKnownAggregateTypes()
+        assertTrue("Exposed aggregate types must be empty after the initialization", stand.getExposedAggregateTypes()
                                                                                         .isEmpty());
 
     }
@@ -131,7 +131,7 @@ public class StandShould {
         stand.registerTypeSupplier(standTestProjectionRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
 
-        final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getKnownAggregateTypes();
+        final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
         // As we registered a projection repo, known aggregate types should be still empty.
         assertTrue("For some reason an aggregate type was registered", knownAggregateTypes.isEmpty());
 
@@ -153,13 +153,13 @@ public class StandShould {
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
         checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
-        checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
         final CustomerAggregateRepository anotherCustomerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
-        checkHasExactlyOne(stand.getKnownAggregateTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
     }
 
     @Test
@@ -1073,7 +1073,7 @@ public class StandShould {
     private static void checkTypesEmpty(Stand stand) {
         assertTrue(stand.getAvailableTypes()
                         .isEmpty());
-        assertTrue(stand.getKnownAggregateTypes()
+        assertTrue(stand.getExposedAggregateTypes()
                         .isEmpty());
     }
 
