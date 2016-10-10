@@ -176,21 +176,21 @@ public class Stand implements AutoCloseable {
     /**
      * Activate the subscription created via {@link #subscribe(Target)}.
      *
-     * <p>After the activation, the clients will start receiving the updates via {@code StandUpdateCallback}
+     * <p>After the activation, the clients will start receiving the updates via {@code EntityUpdateCallback}
      * upon the changes in the entities, defined by the {@code Target} attribute used for this subscription.
      *
      * @param subscription the subscription to activate.
-     * @param callback     an instance of {@link StandUpdateCallback} executed upon entity update.
+     * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
      * @see #subscribe(Target)
      */
-    public void activate(Subscription subscription, StandUpdateCallback callback) {
+    public void activate(Subscription subscription, EntityUpdateCallback callback) {
         subscriptionRegistry.activate(subscription, callback);
     }
 
     /**
      * Cancel the {@link Subscription}.
      *
-     * <p>Typically invoked to cancel the previous {@link #activate(Subscription, StandUpdateCallback)} call.
+     * <p>Typically invoked to cancel the previous {@link #activate(Subscription, EntityUpdateCallback)} call.
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
@@ -268,7 +268,7 @@ public class Stand implements AutoCloseable {
                     callbackExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
-                            subscriptionRecord.callback.onEntityStateUpdate(entityState);
+                            subscriptionRecord.callback.onStateChanged(entityState);
                         }
                     });
                 }
@@ -313,12 +313,17 @@ public class Stand implements AutoCloseable {
     /**
      * A contract for the callbacks to be executed upon entity state change.
      *
-     * @see #activate(Subscription, StandUpdateCallback)
+     * @see #activate(Subscription, EntityUpdateCallback)
      * @see #cancel(Subscription)
      */
-    public interface StandUpdateCallback {
+    public interface EntityUpdateCallback {
 
-        void onEntityStateUpdate(Any newEntityState);
+        /**
+         * Called when a certain entity state is updated.
+         *
+         * @param newEntityState new state of the entity
+         */
+        void onStateChanged(Any newEntityState);
     }
 
     public static class Builder {
@@ -388,7 +393,7 @@ public class Stand implements AutoCloseable {
         private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
         private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
-        private synchronized void activate(Subscription subscription, StandUpdateCallback callback) {
+        private synchronized void activate(Subscription subscription, EntityUpdateCallback callback) {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
             final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
@@ -446,7 +451,7 @@ public class Stand implements AutoCloseable {
         private final Subscription subscription;
         private final Target target;
         private final TypeUrl type;
-        private StandUpdateCallback callback = null;
+        private EntityUpdateCallback callback = null;
 
         private SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
             this.subscription = subscription;
@@ -454,7 +459,7 @@ public class Stand implements AutoCloseable {
             this.type = type;
         }
 
-        private void activate(StandUpdateCallback callback) {
+        private void activate(EntityUpdateCallback callback) {
             this.callback = callback;
         }
 

@@ -296,7 +296,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
-        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allCustomers);
         stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
@@ -318,7 +318,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allProjects = Queries.Targets.allOf(Project.class);
 
-        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allProjects);
         stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
@@ -340,7 +340,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
-        final MemoizeStandUpdateCallback memoizeCallback = new MemoizeStandUpdateCallback();
+        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allCustomers);
         stand.activate(subscription, memoizeCallback);
         assertNull(memoizeCallback.newEntityState);
@@ -375,11 +375,11 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
-        final Set<MemoizeStandUpdateCallback> callbacks = newHashSet();
+        final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
         final int totalCallbacks = 100;
 
         for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            final MemoizeStandUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
+            final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
             callbacks.add(callback);
         }
 
@@ -391,9 +391,9 @@ public class StandShould {
         final Any packedState = AnyPacker.pack(customer);
         stand.update(customerId, packedState);
 
-        for (MemoizeStandUpdateCallback callback : callbacks) {
+        for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
-            verify(callback, times(1)).onEntityStateUpdate(any(Any.class));
+            verify(callback, times(1)).onStateChanged(any(Any.class));
         }
     }
 
@@ -401,7 +401,7 @@ public class StandShould {
     public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allProjects = Queries.Targets.allOf(Project.class);
-        final MemoizeStandUpdateCallback callback = subscribeWithCallback(stand, allProjects);
+        final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
                                                                                  .iterator()
@@ -411,7 +411,7 @@ public class StandShould {
         final Any packedState = AnyPacker.pack(customer);
         stand.update(customerId, packedState);
 
-        verify(callback, never()).onEntityStateUpdate(any(Any.class));
+        verify(callback, never()).onStateChanged(any(Any.class));
     }
 
     @Test
@@ -422,10 +422,10 @@ public class StandShould {
 
         final Target someCustomers = Queries.Targets.someOf(Customer.class, sampleCustomers.keySet());
         final Set<Customer> callbackStates = newHashSet();
-        final MemoizeStandUpdateCallback callback = new MemoizeStandUpdateCallback() {
+        final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
-            public void onEntityStateUpdate(Any newEntityState) {
-                super.onEntityStateUpdate(newEntityState);
+            public void onStateChanged(Any newEntityState) {
+                super.onStateChanged(newEntityState);
                 final Customer customerInCallback = AnyPacker.unpack(newEntityState);
                 callbackStates.add(customerInCallback);
             }
@@ -443,8 +443,8 @@ public class StandShould {
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
     }
 
-    private static MemoizeStandUpdateCallback subscribeWithCallback(Stand stand, Target subscriptionTarget) {
-        final MemoizeStandUpdateCallback callback = spy(new MemoizeStandUpdateCallback());
+    private static MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand, Target subscriptionTarget) {
+        final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
         final Subscription subscription = stand.subscribe(subscriptionTarget);
         stand.activate(subscription, callback);
         assertNull(callback.newEntityState);
@@ -1098,10 +1098,10 @@ public class StandShould {
         assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
     }
 
-    private static Stand.StandUpdateCallback emptyUpdateCallback() {
-        return new Stand.StandUpdateCallback() {
+    private static Stand.EntityUpdateCallback emptyUpdateCallback() {
+        return new Stand.EntityUpdateCallback() {
             @Override
-            public void onEntityStateUpdate(Any newEntityState) {
+            public void onStateChanged(Any newEntityState) {
                 //do nothing
             }
         };
@@ -1149,12 +1149,12 @@ public class StandShould {
 
     }
 
-    private static class MemoizeStandUpdateCallback implements Stand.StandUpdateCallback {
+    private static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
 
         private Any newEntityState;
 
         @Override
-        public void onEntityStateUpdate(Any newEntityState) {
+        public void onStateChanged(Any newEntityState) {
             this.newEntityState = newEntityState;
         }
     }

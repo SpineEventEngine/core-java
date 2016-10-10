@@ -90,9 +90,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         try {
             final BoundedContext boundedContext = selectBoundedContext(subscription);
 
-            final Stand.StandUpdateCallback updateCallback = new Stand.StandUpdateCallback() {
+            final Stand.EntityUpdateCallback updateCallback = new Stand.EntityUpdateCallback() {
                 @Override
-                public void onEntityStateUpdate(Any newEntityState) {
+                public void onStateChanged(Any newEntityState) {
                     checkNotNull(subscription);
                     final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
                                                                         .setSubscription(subscription)
