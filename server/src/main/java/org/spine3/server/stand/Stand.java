@@ -214,12 +214,14 @@ public class Stand implements AutoCloseable {
     /**
      * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
+     * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
+     *
      * <p>The result includes all values from {@link #getExposedAggregateTypes()} as well.
      *
      * @return the set of types as {@link TypeUrl} instances
      */
     @CheckReturnValue
-    public ImmutableSet<TypeUrl> getAvailableTypes() {
+    public ImmutableSet<TypeUrl> getExposedTypes() {
         final ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
         final Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
         resultBuilder.addAll(projectionTypes)
@@ -231,6 +233,8 @@ public class Stand implements AutoCloseable {
     /**
      * Read all {@link org.spine3.server.aggregate.Aggregate} entity types exposed for reading
      * by this instance of {@code Stand}.
+     *
+     * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose an {@code Aggregate} type.
      *
      * @return the set of types as {@link TypeUrl} instances
      */

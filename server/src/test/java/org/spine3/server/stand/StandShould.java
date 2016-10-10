@@ -105,17 +105,16 @@ public class StandShould {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
-
     @Test
     public void initialize_with_empty_builder() {
         final Stand.Builder builder = Stand.newBuilder();
         final Stand stand = builder.build();
 
         assertNotNull(stand);
-        assertTrue("Available types must be empty after the initialization.", stand.getAvailableTypes()
-                                                                                   .isEmpty());
+        assertTrue("Exposed types must be empty after the initialization.", stand.getExposedTypes()
+                                                                                 .isEmpty());
         assertTrue("Exposed aggregate types must be empty after the initialization", stand.getExposedAggregateTypes()
-                                                                                        .isEmpty());
+                                                                                          .isEmpty());
 
     }
 
@@ -129,7 +128,7 @@ public class StandShould {
 
         final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
-        checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
+        checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
 
         final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
         // As we registered a projection repo, known aggregate types should be still empty.
@@ -137,7 +136,7 @@ public class StandShould {
 
         final StandTestProjectionRepository anotherTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(anotherTestProjectionRepo);
-        checkHasExactlyOne(stand.getAvailableTypes(), Project.getDescriptor());
+        checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
     }
 
     @Test
@@ -152,13 +151,13 @@ public class StandShould {
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
-        checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
         final CustomerAggregateRepository anotherCustomerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
-        checkHasExactlyOne(stand.getAvailableTypes(), customerEntityDescriptor);
+        checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
     }
 
@@ -197,7 +196,6 @@ public class StandShould {
         final BoundedContext boundedContext = newBoundedContext(stand);
         final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
-
 
         final int numericIdValue = 17;
         final CustomerId customerId = customerIdFor(numericIdValue);
@@ -248,7 +246,6 @@ public class StandShould {
     @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
-
         final Query readCustomersById = Queries.readByIds(Customer.class, newHashSet(
                 customerIdFor(1), customerIdFor(2)
         ));
@@ -278,7 +275,6 @@ public class StandShould {
         doCheckReadingProjectsById(1);
     }
 
-
     @Test
     public void return_multiple_results_for_projection_batch_read_by_ids() {
         doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
@@ -286,10 +282,13 @@ public class StandShould {
 
     @Test
     public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
-        final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor().getFields();
+        final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
+                                                                       .getFields();
         doCheckReadingCustomersByIdAndFieldMask(
-                projectFields.get(0).getFullName(), // ID
-                projectFields.get(1).getFullName()); // Name
+                projectFields.get(0)
+                             .getFullName(), // ID
+                projectFields.get(1)
+                             .getFullName()); // Name
     }
 
     @Test
@@ -314,7 +313,6 @@ public class StandShould {
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
 
-
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
@@ -336,7 +334,6 @@ public class StandShould {
 
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
-
 
     @Test
     public void allow_cancelling_subscriptions() {
@@ -372,7 +369,6 @@ public class StandShould {
         stand.cancel(inexistentSubscription);
     }
 
-
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
@@ -387,7 +383,6 @@ public class StandShould {
             callbacks.add(callback);
         }
 
-
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
                                                                                  .iterator()
                                                                                  .next();
@@ -395,7 +390,6 @@ public class StandShould {
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
         stand.update(customerId, packedState);
-
 
         for (MemoizeStandUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
@@ -471,7 +465,8 @@ public class StandShould {
 
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
+                                                                              .build());
 
         final Customer sampleCustomer = getSampleCustomer();
 
@@ -488,8 +483,10 @@ public class StandShould {
                 assertFalse(messages.isEmpty());
 
                 final Customer customer = AnyPacker.unpack(messages.get(0));
-                for (Descriptors.FieldDescriptor field : customer.getDescriptorForType().getFields()) {
-                    assertTrue(customer.getField(field).equals(sampleCustomer.getField(field)));
+                for (Descriptors.FieldDescriptor field : customer.getDescriptorForType()
+                                                                 .getFields()) {
+                    assertTrue(customer.getField(field)
+                                       .equals(sampleCustomer.getField(field)));
                 }
             }
         };
@@ -501,7 +498,7 @@ public class StandShould {
 
     @Test
     public void retrieve_only_selected_param_for_query() {
-        requestSampleCustomer(new int[] {Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+        requestSampleCustomer(new int[]{Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
@@ -514,14 +511,15 @@ public class StandShould {
                 assertTrue(customer.getName()
                                    .equals(sampleCustomer.getName()));
                 assertFalse(customer.hasId());
-                assertTrue(customer.getNicknamesList().isEmpty());
+                assertTrue(customer.getNicknamesList()
+                                   .isEmpty());
             }
         });
     }
 
     @Test
     public void retrieve_collection_fields_if_required() {
-        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
@@ -541,7 +539,7 @@ public class StandShould {
 
     @Test
     public void retrieve_all_requested_fields() {
-        requestSampleCustomer(new int[] {Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
+        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
@@ -608,14 +606,17 @@ public class StandShould {
     @Test
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
+                                                                              .build());
 
         final Customer sampleCustomer = getSampleCustomer();
 
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
 
         // FieldMask with invalid type URLs.
-        final String[] paths = {"invalid_type_url_example", Project.getDescriptor().getFields().get(2).getFullName()};
+        final String[] paths = {"invalid_type_url_example", Project.getDescriptor()
+                                                                   .getFields()
+                                                                   .get(2).getFullName()};
 
         final Query customerQuery = Queries.readAll(Customer.class, paths);
 
@@ -670,17 +671,23 @@ public class StandShould {
     private static Customer getSampleCustomer() {
         //noinspection NumericCastThatLosesPrecision
         return Customer.newBuilder()
-                       .setId(CustomerId.newBuilder().setNumber((int) UUID.randomUUID()
-                                                                          .getLeastSignificantBits()))
-                       .setName(PersonName.newBuilder().setGivenName("Socrates").build())
-                       .addNicknames(PersonName.newBuilder().setGivenName("Philosopher"))
-                       .addNicknames(PersonName.newBuilder().setGivenName("Wise guy"))
+                       .setId(CustomerId.newBuilder()
+                                        .setNumber((int) UUID.randomUUID()
+                                                             .getLeastSignificantBits()))
+                       .setName(PersonName.newBuilder()
+                                          .setGivenName("Socrates")
+                                          .build())
+                       .addNicknames(PersonName.newBuilder()
+                                               .setGivenName("Philosopher"))
+                       .addNicknames(PersonName.newBuilder()
+                                               .setGivenName("Wise guy"))
                        .build();
 
     }
 
     private static void requestSampleCustomer(int[] fieldIndexes, final MemoizeQueryResponseObserver observer) {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
+                                                                              .build());
 
         final Customer sampleCustomer = getSampleCustomer();
 
@@ -690,9 +697,9 @@ public class StandShould {
 
         for (int i = 0; i < fieldIndexes.length; i++) {
             paths[i] = Customer.getDescriptor()
-                                   .getFields()
-                                   .get(fieldIndexes[i])
-                                   .getFullName();
+                               .getFields()
+                               .get(fieldIndexes[i])
+                               .getFullName();
         }
 
         final Query customerQuery = Queries.readAll(Customer.class, paths);
@@ -745,7 +752,8 @@ public class StandShould {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private static void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder().build());
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
+                                                                              .build());
 
         final int querySize = 2;
 
@@ -753,8 +761,9 @@ public class StandShould {
 
         for (int i = 0; i < querySize; i++) {
             final Customer customer = getSampleCustomer().toBuilder()
-                    .setId(CustomerId.newBuilder().setNumber(i))
-                    .build();
+                                                         .setId(CustomerId.newBuilder()
+                                                                          .setNumber(i))
+                                                         .build();
 
             stand.update(customer.getId(), AnyPacker.pack(customer));
 
@@ -763,7 +772,9 @@ public class StandShould {
 
         final Query customerQuery = Queries.readByIds(Customer.class, ids, paths);
 
-        final FieldMask fieldMask = FieldMask.newBuilder().addAllPaths(Arrays.asList(paths)).build();
+        final FieldMask fieldMask = FieldMask.newBuilder()
+                                             .addAllPaths(Arrays.asList(paths))
+                                             .build();
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
@@ -840,10 +851,9 @@ public class StandShould {
         assertTrue("Query returned a non-empty response message list though the filter was not set", messageList.isEmpty());
     }
 
-
     @SuppressWarnings("ConstantConditions")
     private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType,
-            StandStorage standStorageMock) {
+                                                       StandStorage standStorageMock) {
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityStorageRecord> recordsBuilder = ImmutableList.builder();
         for (CustomerId customerId : sampleCustomers.keySet()) {
@@ -868,7 +878,7 @@ public class StandShould {
 
     @SuppressWarnings("ConstantConditions")
     private static void setupExpectedFindAllBehaviour(Map<ProjectId, Project> sampleProjects,
-            StandTestProjectionRepository projectionRepository) {
+                                                      StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
         final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
@@ -967,7 +977,6 @@ public class StandShould {
 
         for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
 
-
             final int numericId = randomizer.nextInt();
             final CustomerId customerId = customerIdFor(numericId);
             final Customer customer = Customer.newBuilder()
@@ -1017,10 +1026,10 @@ public class StandShould {
                                                  .build();
 
             final Project project = Project.newBuilder()
-                    .setId(projectId)
-                    .setName(String.valueOf(projectIndex))
-                    .setStatus(Project.Status.CREATED)
-                    .build();
+                                           .setId(projectId)
+                                           .setName(String.valueOf(projectIndex))
+                                           .setStatus(Project.Status.CREATED)
+                                           .build();
 
             sampleProjects.put(projectId, project);
         }
@@ -1038,7 +1047,6 @@ public class StandShould {
         assertNotNull("Query response has null message list", messageList);
         return messageList;
     }
-
 
     private static Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
         final Stand stand = Stand.newBuilder()
@@ -1071,7 +1079,7 @@ public class StandShould {
     }
 
     private static void checkTypesEmpty(Stand stand) {
-        assertTrue(stand.getAvailableTypes()
+        assertTrue(stand.getExposedTypes()
                         .isEmpty());
         assertTrue(stand.getExposedAggregateTypes()
                         .isEmpty());
@@ -1097,7 +1105,8 @@ public class StandShould {
 
     private static void assertMatches(Message message, FieldMask fieldMask) {
         final List<String> paths = fieldMask.getPathsList();
-        for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
+        for (Descriptors.FieldDescriptor field : message.getDescriptorForType()
+                                                        .getFields()) {
 
             // Protobuf limitation, has no effect on the test.
             if (field.isRepeated()) {
@@ -1107,7 +1116,6 @@ public class StandShould {
             assertEquals(message.hasField(field), paths.contains(field.getFullName()));
         }
     }
-
 
     // ***** Inner classes used for tests. *****
 

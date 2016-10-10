@@ -120,10 +120,10 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
                                               BoundedContext boundedContext) {
 
-            final ImmutableSet<TypeUrl> availableTypes = boundedContext.getStand()
-                                                                       .getAvailableTypes();
+            final ImmutableSet<TypeUrl> exposedTypes = boundedContext.getStand()
+                                                                       .getExposedTypes();
 
-            for (TypeUrl availableType : availableTypes) {
+            for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }
         }

@@ -194,8 +194,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                                               BoundedContext boundedContext) {
 
             final Stand stand = boundedContext.getStand();
-            final ImmutableSet<TypeUrl> availableTypes = stand.getAvailableTypes();
-            for (TypeUrl availableType : availableTypes) {
+            final ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
+            for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }
         }

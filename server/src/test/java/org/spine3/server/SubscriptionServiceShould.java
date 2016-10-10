@@ -138,7 +138,7 @@ public class SubscriptionServiceShould {
                                                                            .build();
 
         final String type = boundedContext.getStand()
-                                          .getAvailableTypes()
+                                          .getExposedTypes()
                                           .iterator()
                                           .next()
                                           .getTypeName();
