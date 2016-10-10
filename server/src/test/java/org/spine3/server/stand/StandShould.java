@@ -570,9 +570,9 @@ public class StandShould {
     public void select_entity_singleton_by_id_and_apply_field_masks() {
         final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
                                                                               .build());
-        final String customerFqn = Customer.getDescriptor()
-                                           .getFullName();
-        final String[] paths = {customerFqn + ".id", customerFqn + ".name"};
+        final String customerDescriptor = Customer.getDescriptor()
+                                                  .getFullName();
+        final String[] paths = {customerDescriptor + ".id", customerDescriptor + ".name"};
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
                                              .build();
