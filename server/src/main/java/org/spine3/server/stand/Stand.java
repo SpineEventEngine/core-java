@@ -63,7 +63,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
@@ -148,6 +147,7 @@ public class Stand implements AutoCloseable {
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
+     * @param id          the entity identifier
      * @param entityState the entity state
      */
     public void update(final Object id, final Any entityState) {
