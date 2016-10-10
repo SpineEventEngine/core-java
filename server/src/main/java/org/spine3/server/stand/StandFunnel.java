@@ -23,6 +23,8 @@ package org.spine3.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import org.spine3.base.Command;
+import org.spine3.base.Event;
 
 import java.util.concurrent.Executor;
 
@@ -30,20 +32,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Delivers the latest {@link org.spine3.server.aggregate.Aggregate} states to the {@link Stand}.
+ * Delivers the latest {@link org.spine3.server.entity.Entity} states from the {@code Entity} repositories
+ * to the {@link Stand}.
  *
- * <p>Note: Unlike {@link org.spine3.server.event.EventBus} and {@link org.spine3.server.command.CommandBus}, which assume
- * many publishers and many subscribers, the funnel may have zero or more publishers (typically, instances of
- * {@link org.spine3.server.aggregate.AggregateRepository}), but the only subscriber, the instance of {@link Stand}.
+ * <p>Note: Unlike {@link org.spine3.server.event.EventBus} and {@link org.spine3.server.command.CommandBus},
+ * which assume many publishers and many subscribers, the funnel may have zero or more publishers (typically, instances
+ * of {@link org.spine3.server.aggregate.AggregateRepository} or {@link org.spine3.server.projection.ProjectionRepository}),
+ * but the only subscriber, the instance of {@code Stand}.
  *
  * <p>In scope of a single {@link org.spine3.server.BoundedContext} there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
+ * @see org.spine3.server.aggregate.AggregateRepository#dispatch(Command)
+ * @see org.spine3.server.projection.ProjectionRepository#dispatch(Event)
  */
 public class StandFunnel {
 
     /**
-     * The instance of {@link Stand} to deliver the {@link org.spine3.server.aggregate.Aggregate} state updates to.
+     * The instance of {@link Stand} to deliver the {@code Entity} state updates to.
      */
     private final Stand stand;
 
@@ -51,7 +57,6 @@ public class StandFunnel {
      * An {@link Executor} used for execution of data delivery methods.
      */
     private final Executor executor;
-
 
     private StandFunnel(Builder builder) {
         this.stand = builder.getStand();
@@ -88,7 +93,7 @@ public class StandFunnel {
     public static class Builder {
 
         /**
-         * The target {@code Stand} to deliver the {@code Aggregate} updates to.
+         * The target {@code Stand} to deliver the {@code Entity} updates to.
          */
         private Stand stand;
 
