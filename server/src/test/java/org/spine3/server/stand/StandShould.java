@@ -1022,23 +1022,6 @@ public class StandShould {
         }
     }
 
-    private static void fillRichSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {
-        for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(UUID.randomUUID()
-                                                            .toString())
-                                                 .build();
-
-            final Project project = Project.newBuilder()
-                                           .setId(projectId)
-                                           .setName(String.valueOf(projectIndex))
-                                           .setStatus(Project.Status.CREATED)
-                                           .build();
-
-            sampleProjects.put(projectId, project);
-        }
-    }
-
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue("Query has not completed successfully", responseObserver.isCompleted);
         assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
