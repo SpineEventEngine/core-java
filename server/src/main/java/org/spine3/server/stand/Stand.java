@@ -21,7 +21,6 @@
  */
 package org.spine3.server.stand;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -29,11 +28,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Responses;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
@@ -49,16 +44,10 @@ import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 import javax.annotation.CheckReturnValue;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
-
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -86,7 +75,7 @@ public class Stand implements AutoCloseable {
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
      */
-    private final StandSubscriptionRegistry subscriptionRegistry = new StandSubscriptionRegistry();
+    private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
 
     /**
      * An instance of executor used to invoke callbacks
@@ -268,7 +257,8 @@ public class Stand implements AutoCloseable {
                     callbackExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
-                            subscriptionRecord.callback.onStateChanged(entityState);
+                            subscriptionRecord.getCallback()
+                                              .onStateChanged(entityState);
                         }
                     });
                 }
@@ -383,144 +373,4 @@ public class Stand implements AutoCloseable {
         }
     }
 
-    /**
-     * Registry for subscription management.
-     *
-     * <p>Provides a quick access to the subscription records by {@link TypeUrl}.
-     * <p>Responsible for {@link Subscription} object instantiation.
-     */
-    private static final class StandSubscriptionRegistry {
-        private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
-        private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
-
-        private synchronized void activate(Subscription subscription, EntityUpdateCallback callback) {
-            checkState(subscriptionToAttrs.containsKey(subscription),
-                       "Cannot find the subscription in the registry.");
-            final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-            subscriptionRecord.activate(callback);
-        }
-
-        private synchronized Subscription addSubscription(Target target) {
-            final String subscriptionId = Identifiers.newUuid();
-            final String typeAsString = target.getType();
-            final TypeUrl type = TypeUrl.of(typeAsString);
-            final Subscription subscription = Subscription.newBuilder()
-                                                          .setId(subscriptionId)
-                                                          .setType(typeAsString)
-                                                          .build();
-            final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type);
-
-            if (!typeToAttrs.containsKey(type)) {
-                typeToAttrs.put(type, new HashSet<SubscriptionRecord>());
-            }
-            typeToAttrs.get(type)
-                       .add(attributes);
-
-            subscriptionToAttrs.put(subscription, attributes);
-            return subscription;
-        }
-
-        private synchronized void removeSubscription(Subscription subscription) {
-            if (!subscriptionToAttrs.containsKey(subscription)) {
-                return;
-            }
-            final SubscriptionRecord attributes = subscriptionToAttrs.get(subscription);
-
-            if (typeToAttrs.containsKey(attributes.type)) {
-                typeToAttrs.get(attributes.type)
-                           .remove(attributes);
-            }
-            subscriptionToAttrs.remove(subscription);
-        }
-
-        private synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
-            final Set<SubscriptionRecord> result = typeToAttrs.get(type);
-            return result;
-        }
-
-        private synchronized boolean hasType(TypeUrl type) {
-            final boolean result = typeToAttrs.containsKey(type);
-            return result;
-        }
-    }
-
-    /**
-     * Represents the attributes of a single subscription.
-     */
-    private static final class SubscriptionRecord {
-        private final Subscription subscription;
-        private final Target target;
-        private final TypeUrl type;
-        private EntityUpdateCallback callback = null;
-
-        private SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
-            this.subscription = subscription;
-            this.target = target;
-            this.type = type;
-        }
-
-        private void activate(EntityUpdateCallback callback) {
-            this.callback = callback;
-        }
-
-        private boolean isActive() {
-            final boolean result = this.callback != null;
-            return result;
-        }
-
-        private boolean matches(
-                TypeUrl type,
-                Object id,
-                // entityState will be later used for more advanced filtering
-                @SuppressWarnings("UnusedParameters") Any entityState
-        ) {
-            final boolean result;
-
-            final boolean typeMatches = this.type.equals(type);
-            if (typeMatches) {
-                final boolean includeAll = target.getIncludeAll();
-                final EntityFilters filters = target.getFilters();
-                result = includeAll || matchByFilters(id, filters);
-            } else {
-                result = false;
-            }
-            return result;
-        }
-
-        private static boolean matchByFilters(Object id, EntityFilters filters) {
-            final boolean result;
-            final EntityIdFilter givenIdFilter = filters
-                    .getIdFilter();
-            final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
-                                                       .equals(givenIdFilter);
-            if (idFilterSet) {
-                final Any idAsAny = Identifiers.idToAny(id);
-                final EntityId givenEntityId = EntityId.newBuilder()
-                                                       .setId(idAsAny)
-                                                       .build();
-                final List<EntityId> idsList = givenIdFilter.getIdsList();
-                result = idsList.contains(givenEntityId);
-            } else {
-                result = false;
-            }
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof SubscriptionRecord)) {
-                return false;
-            }
-            SubscriptionRecord that = (SubscriptionRecord) o;
-            return Objects.equal(subscription, that.subscription);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(subscription);
-        }
-    }
 }
