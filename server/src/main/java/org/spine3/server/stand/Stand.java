@@ -21,22 +21,15 @@
  */
 package org.spine3.server.stand;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -45,7 +38,6 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -57,8 +49,6 @@ import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 
@@ -255,87 +244,16 @@ public class Stand implements AutoCloseable {
      * @param responseObserver an observer to feed the query results to.
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
-        final ImmutableCollection<Any> readResult = internalExecute(query);
+        final ImmutableCollection<Any> readResult = QueryProcessor.processQuery(query,
+                                                                                storage,
+                                                                                knownAggregateTypes,
+                                                                                typeToRepositoryMap);
         final QueryResponse response = QueryResponse.newBuilder()
                                                     .addAllMessages(readResult)
                                                     .setResponse(Responses.ok())
                                                     .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-    }
-
-    private ImmutableCollection<Any> internalExecute(Query query) {
-        final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
-
-        final TypeUrl typeUrl = Queries.typeOf(query);
-        checkNotNull(typeUrl, "Target type unknown");
-
-        final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(typeUrl);
-        if (repository != null) {
-
-            // the target references an entity state
-            final ImmutableCollection<? extends Entity> entities = fetchFromEntityRepository(query, repository);
-            feedEntitiesToBuilder(resultBuilder, entities);
-
-        } else if (knownAggregateTypes.contains(typeUrl)) {
-
-            // the target relates to an {@code Aggregate} state
-            final ImmutableCollection<EntityStorageRecord> stateRecords = fetchFromStandStorage(query, typeUrl);
-            feedStateRecordsToBuilder(resultBuilder, stateRecords);
-        }
-
-        final ImmutableList<Any> result = resultBuilder.build();
-        return result;
-    }
-
-    private ImmutableCollection<EntityStorageRecord> fetchFromStandStorage(Query query, final TypeUrl typeUrl) {
-        ImmutableCollection<EntityStorageRecord> result;
-        final Target target = query.getTarget();
-        final FieldMask fieldMask = query.getFieldMask();
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
-        if (target.getIncludeAll()) {
-            result = shouldApplyFieldMask ?
-                     storage.readAllByType(typeUrl, fieldMask) :
-                     storage.readAllByType(typeUrl);
-        } else {
-
-            result = doFetchWithFilters(typeUrl, target, fieldMask);
-        }
-
-        return result;
-    }
-
-    private ImmutableCollection<EntityStorageRecord> doFetchWithFilters(TypeUrl typeUrl,
-                                                                        Target target,
-                                                                        FieldMask fieldMask) {
-        ImmutableCollection<EntityStorageRecord> result;
-        final EntityFilters filters = target.getFilters();
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
-        final boolean idsAreDefined = !filters.getIdFilter()
-                                              .getIdsList()
-                                              .isEmpty();
-        if (idsAreDefined) {
-            final EntityIdFilter idFilter = filters.getIdFilter();
-            final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
-                                                                                 aggregateStateIdTransformer(typeUrl));
-            if (stateIds.size() == 1) {
-                // no need to trigger bulk reading.
-                // may be more effective, as bulk reading implies additional time and performance expenses.
-                final AggregateStateId singleId = stateIds.iterator()
-                                                          .next();
-                final EntityStorageRecord singleResult = shouldApplyFieldMask ?
-                                                         storage.read(singleId, fieldMask) :
-                                                         storage.read(singleId);
-                result = ImmutableList.of(singleResult);
-            } else {
-                result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
-            }
-        } else {
-            result = ImmutableList.of();
-        }
-        return result;
     }
 
     private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
@@ -355,74 +273,6 @@ public class Stand implements AutoCloseable {
                     });
                 }
             }
-        }
-    }
-
-    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds,
-                                                                    FieldMask fieldMask,
-                                                                    boolean applyFieldMask) {
-        ImmutableCollection<EntityStorageRecord> result;
-        final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask ?
-                                                              storage.readBulk(stateIds, fieldMask) :
-                                                              storage.readBulk(stateIds);
-        result = FluentIterable.from(bulkReadResults)
-                               .filter(new Predicate<EntityStorageRecord>() {
-                                   @Override
-                                   public boolean apply(@Nullable EntityStorageRecord input) {
-                                       return input != null;
-                                   }
-                               })
-                               .toList();
-        return result;
-    }
-
-    private static Function<EntityId, AggregateStateId> aggregateStateIdTransformer(final TypeUrl typeUrl) {
-        return new Function<EntityId, AggregateStateId>() {
-            @Nullable
-            @Override
-            public AggregateStateId apply(@Nullable EntityId input) {
-                checkNotNull(input);
-
-                final Any rawId = input.getId();
-                final Message unpackedId = AnyPacker.unpack(rawId);
-                final AggregateStateId stateId = AggregateStateId.of(unpackedId, typeUrl);
-                return stateId;
-            }
-        };
-    }
-
-    private static ImmutableCollection<? extends Entity> fetchFromEntityRepository(
-            Query query,
-            EntityRepository<?, ? extends Entity, ?> repository) {
-
-        final ImmutableCollection<? extends Entity> result;
-        final Target target = query.getTarget();
-        final FieldMask fieldMask = query.getFieldMask();
-
-        if (target.getIncludeAll() && fieldMask.getPathsList()
-                                               .isEmpty()) {
-            result = repository.loadAll();
-        } else {
-            final EntityFilters filters = target.getFilters();
-            result = repository.find(filters, fieldMask);
-        }
-        return result;
-    }
-
-    private static void feedEntitiesToBuilder(ImmutableList.Builder<Any> resultBuilder,
-                                              ImmutableCollection<? extends Entity> all) {
-        for (Entity record : all) {
-            final Message state = record.getState();
-            final Any packedState = AnyPacker.pack(state);
-            resultBuilder.add(packedState);
-        }
-    }
-
-    private static void feedStateRecordsToBuilder(ImmutableList.Builder<Any> resultBuilder,
-                                                  ImmutableCollection<EntityStorageRecord> all) {
-        for (EntityStorageRecord record : all) {
-            final Any state = record.getState();
-            resultBuilder.add(state);
         }
     }
 
