@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -561,7 +562,47 @@ public class StandShould {
     @Test
     public void retrieve_whole_entity_if_nothing_is_requested() {
         //noinspection ZeroLengthArrayAllocation
-        requestSampleCustomer(new int[] {}, getDuplicateCostumerStreamObserver());
+        requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void select_entity_singleton_by_id_and_apply_field_masks() {
+        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
+                                                                              .build());
+        final String customerDescriptor = Customer.getDescriptor()
+                                                  .getFullName();
+        final String[] paths = {customerDescriptor + ".id", customerDescriptor + ".name"};
+        final FieldMask fieldMask = FieldMask.newBuilder()
+                                             .addAllPaths(Arrays.asList(paths))
+                                             .build();
+
+        final List<Customer> customers = new LinkedList<>();
+        final int count = 10;
+
+        for (int i = 0; i < count; i++) {
+            // Has new ID each time
+            final Customer customer = getSampleCustomer();
+            customers.add(customer);
+
+            stand.update(customer.getId(), AnyPacker.pack(customer));
+        }
+
+        final Set<CustomerId> ids = Collections.singleton(customers.get(0)
+                                                                   .getId());
+        final Query customerQuery = Queries.readByIds(Customer.class, ids, paths);
+
+        final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
+        stand.execute(customerQuery, observer);
+
+        final List<Any> read = observer.responseHandled.getMessagesList();
+        assertSize(1, read);
+
+        final Customer customer = AnyPacker.unpack(read.get(0));
+        assertMatches(customer, fieldMask);
+        assertTrue(ids.contains(customer.getId()));
+
+        verifyObserver(observer);
     }
 
     @Test

@@ -24,6 +24,8 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 
@@ -43,6 +45,13 @@ import java.util.List;
  */
 @SuppressWarnings("UtilityClass")
 public class FieldMasks {
+
+    private static final String CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN =
+            "Constructor for type %s could not be found or called: ";
+    private static final String BUILDER_CLASS_ERROR_LOGGING_PATTERN =
+            "Class for name %s could not be found. Try to rebuild the project. Make sure \"known_types.properties\" exists.";
+    private static final String TYPE_CAST_ERROR_LOGGING_PATTERN =
+            "Class %s must be assignable from com.google.protobuf.Message. Try to rebuild the project. Make sure type URL is valid.";
 
     private FieldMasks() {
     }
@@ -83,8 +92,9 @@ public class FieldMasks {
         } catch (NoSuchMethodException |
                 InvocationTargetException |
                 IllegalAccessException |
-                InstantiationException ignored) {
+                InstantiationException e) {
             // If any reflection failure happens, return all the data without any mask applied.
+            log().warn(String.format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN, builderClass.getCanonicalName()), e);
             return Collections.unmodifiableCollection(messages);
         }
         return Collections.unmodifiableList(filtered);
@@ -116,10 +126,19 @@ public class FieldMasks {
             final M result = messageForFilter(filter, builderConstructor, message);
             return result;
 
+            for (Descriptors.FieldDescriptor field : message.getDescriptorForType().getFields()) {
+                if (filter.contains(field.getFullName())) {
+                    builder.setField(field, message.getField(field));
+                }
+            }
+
+            return (M) builder.build();
+
         } catch (NoSuchMethodException |
                 InvocationTargetException |
                 IllegalAccessException |
-                InstantiationException ignored) {
+                InstantiationException e) {
+            log().warn(String.format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN, builderClass.getCanonicalName()), e);
             return message;
         }
     }
@@ -134,7 +153,7 @@ public class FieldMasks {
      * @param message The {@link Message} to apply given mask to.
      * @param typeUrl Type of given {@link Message}.
      * @return A {@link Message} of the same type as the given one with only selected fields
-     * if the {@code mask} is valid, {@code message} itself otherwise.
+     *          if the {@code mask} is valid, {@code message} itself otherwise.
      */
     public static <M extends Message> M applyIfValid(FieldMask mask, M message, TypeUrl typeUrl) {
         if (!mask.getPathsList()
@@ -166,17 +185,38 @@ public class FieldMasks {
 
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
+        Class<B> builderClass;
+        final String className = KnownTypes.getClassName(typeUrl)
+                                           .value();
         try {
-            final String className = KnownTypes.getClassName(typeUrl)
-                                               .value();
-            final Class<?> builderClazz = Class.forName(className)
-                                               .getClasses()[0];
-            // Assuming {@code KnownTypes#getClassName(TypeUrl)} works properly.
-            @SuppressWarnings("unchecked")
-            Class<B> result = (Class<B>) builderClazz;
-            return result;
-        } catch (ClassNotFoundException | ClassCastException ignored) {
-            return null;
+            //noinspection unchecked
+            builderClass = (Class<B>) Class.forName(className)
+                                           .getClasses()[0];
+        } catch (ClassNotFoundException e) {
+            final String message = String.format(
+                    BUILDER_CLASS_ERROR_LOGGING_PATTERN,
+                    className);
+            log().warn(message, e);
+            builderClass = null;
+        } catch (ClassCastException e) {
+            final String message = String.format(
+                    TYPE_CAST_ERROR_LOGGING_PATTERN,
+                    className);
+            log().warn(message, e);
+            builderClass = null;
         }
+
+        return builderClass;
+
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(FieldMasks.class);
     }
 }
