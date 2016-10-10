@@ -47,13 +47,11 @@ public class SubscriptionRecordShould {
         final SubscriptionRecord matchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                          Given.target(),
                                                                          Given.TYPE);
-
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
         final boolean matchResult = matchingRecord.matches(Given.TYPE, redundantId, wrappedState);
-
         assertTrue(matchResult);
     }
 
@@ -62,32 +60,27 @@ public class SubscriptionRecordShould {
         final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                             Given.target(),
                                                                             Given.TYPE);
-
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
         final boolean matchResult = notMatchingRecord.matches(Given.OTHER_TYPE, redundantId, wrappedState);
-
         assertFalse(matchResult);
     }
 
     @Test
     public void fail_to_match_improper_target() {
-        final ProjectId nonExisitngId = ProjectId.newBuilder()
+        final ProjectId nonExistingId = ProjectId.newBuilder()
                                                  .setId("never-existed")
                                                  .build();
-
         final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
-                                                                            Given.target(nonExisitngId),
+                                                                            Given.target(nonExistingId),
                                                                             Given.TYPE);
-
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
         final boolean matchResult = notMatchingRecord.matches(Given.TYPE, redundantId, wrappedState);
-
         assertFalse(matchResult);
     }
 
@@ -97,20 +90,16 @@ public class SubscriptionRecordShould {
         final Subscription otherSubscription = Subscription.newBuilder()
                                                            .setId("breaking-id")
                                                            .build();
-
         @SuppressWarnings("QuestionableName")
         final SubscriptionRecord one = new SubscriptionRecord(oneSubscription,
                                                               Given.target(),
                                                               Given.TYPE);
-
         final SubscriptionRecord similar = new SubscriptionRecord(otherSubscription,
                                                                   Given.target(),
                                                                   Given.TYPE);
-
         final SubscriptionRecord same = new SubscriptionRecord(oneSubscription,
                                                                Given.target(),
                                                                Given.TYPE);
-
         assertFalse(one.equals(similar));
         assertTrue(one.equals(same));
     }
@@ -123,19 +112,16 @@ public class SubscriptionRecordShould {
 
         private static Target target() {
             final Target target = Queries.Targets.allOf(Project.class);
-
             return target;
         }
 
         private static Target target(Message targetId) {
             final Target target = Queries.Targets.someOf(Project.class, Collections.singleton(targetId));
-
             return target;
         }
 
         private static Subscription subscription() {
             final Subscription subscription = Subscription.getDefaultInstance();
-
             return subscription;
         }
     }
