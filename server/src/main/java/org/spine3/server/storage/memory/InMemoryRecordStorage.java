@@ -20,8 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -34,9 +32,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -117,30 +113,24 @@ import static com.google.common.collect.Maps.newHashMap;
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         if (storage.isEmpty()) {
-            return newHashMap();
+            return ImmutableMap.of();
         }
 
         final ImmutableMap.Builder<I, EntityStorageRecord> result = ImmutableMap.builder();
 
-        final Collection<Message> records = FieldMasks.applyMask(fieldMask, Collections2.transform(storage.values(), new Function<EntityStorageRecord, Message>() {
-            @Nullable
-            @Override
-            public Message apply(@Nullable EntityStorageRecord input) {
-                return input == null ? null : AnyPacker.unpack(input.getState());
-            }
-        }), TypeUrl.of(storage.entrySet()
-                              .iterator()
-                              .next()
-                              .getValue()
-                              .getState()
-                              .getTypeUrl()));
-
-        final Iterator<Message> messageIterator = records.iterator();
-        for (I key : storage.keySet()) {
-            result.put(key, storage.get(key)
-                                   .toBuilder()
-                                   .setState(AnyPacker.pack(messageIterator.next()))
-                                   .build());
+        for (Map.Entry<I, EntityStorageRecord> storageEntry : storage.entrySet()) {
+            final I id = storageEntry.getKey();
+            final EntityStorageRecord rawRecord = storageEntry.getValue();
+            final TypeUrl type = TypeUrl.of(rawRecord.getState()
+                                                     .getTypeUrl());
+            final Any recordState = rawRecord.getState();
+            final Message stateAsMessage = AnyPacker.unpack(recordState);
+            final Message processedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+            final Any packedState = AnyPacker.pack(processedState);
+            final EntityStorageRecord resultingRecord = EntityStorageRecord.newBuilder()
+                                                                           .setState(packedState)
+                                                                           .build();
+            result.put(id, resultingRecord);
         }
 
         return result.build();
