@@ -20,11 +20,14 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Values.pack;
 
 /**
@@ -156,5 +159,36 @@ public class Mismatch {
         }
         builder.setVersion(version);
         return builder.build();
+    }
+
+
+    /**
+     * Obtains expected string from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-string values
+     */
+    public static String getExpectedString(ValueMismatch mismatch) {
+        try {
+            final StringValue result = mismatch.getExpected()
+                                               .unpack(StringValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw propagate(e);
+        }
+    }
+
+    /**
+     * Obtains actual string from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-string values
+     */
+    public static String getActualString(ValueMismatch mismatch) {
+        try {
+            final StringValue result = mismatch.getActual()
+                                               .unpack(StringValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw propagate(e);
+        }
     }
 }
