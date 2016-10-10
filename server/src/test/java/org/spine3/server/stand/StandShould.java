@@ -539,22 +539,23 @@ public class StandShould {
 
     @Test
     public void retrieve_all_requested_fields() {
-        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
-            @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
+        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1},
+                              new MemoizeQueryResponseObserver() {
+                                  @Override
+                                  public void onNext(QueryResponse value) {
+                                      super.onNext(value);
 
-                final List<Any> messages = value.getMessagesList();
-                assertFalse(messages.isEmpty());
+                                      final List<Any> messages = value.getMessagesList();
+                                      assertFalse(messages.isEmpty());
 
-                final Customer sampleCustomer = getSampleCustomer();
-                final Customer customer = AnyPacker.unpack(messages.get(0));
-                assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
+                                      final Customer sampleCustomer = getSampleCustomer();
+                                      final Customer customer = AnyPacker.unpack(messages.get(0));
+                                      assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
 
-                assertFalse(customer.hasName());
-                assertTrue(customer.hasId());
-            }
-        });
+                                      assertFalse(customer.hasName());
+                                      assertTrue(customer.hasId());
+                                  }
+                              });
     }
 
     @Test
@@ -848,7 +849,8 @@ public class StandShould {
         verifyObserver(responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list though the filter was not set", messageList.isEmpty());
+        assertTrue("Query returned a non-empty response message list " +
+                           "though the filter was not set", messageList.isEmpty());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -872,7 +874,7 @@ public class StandShould {
         final ImmutableList<AggregateStateId> stateIds = stateIdsBuilder.build();
         final ImmutableList<EntityStorageRecord> records = recordsBuilder.build();
 
-        final Iterable<AggregateStateId> matchingIds = argThat(aggregateIdsIterableMatcher(stateIds));
+        final Iterable<AggregateStateId> matchingIds = argThat(idsMatcher(stateIds));
         when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
     }
 
@@ -922,14 +924,16 @@ public class StandShould {
     }
 
     private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
-        final Collection<Given.StandTestProjection> transformed = Collections2.transform(values, new Function<ProjectId, Given.StandTestProjection>() {
-            @Nullable
-            @Override
-            public StandTestProjection apply(@Nullable ProjectId input) {
-                checkNotNull(input);
-                return new StandTestProjection(input);
-            }
-        });
+        final Collection<Given.StandTestProjection> transformed =
+                Collections2.transform(values,
+                                       new Function<ProjectId, Given.StandTestProjection>() {
+                                           @Nullable
+                                           @Override
+                                           public StandTestProjection apply(@Nullable ProjectId input) {
+                                               checkNotNull(input);
+                                               return new StandTestProjection(input);
+                                           }
+                                       });
         final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
     }
@@ -947,7 +951,7 @@ public class StandShould {
         };
     }
 
-    private static ArgumentMatcher<Iterable<AggregateStateId>> aggregateIdsIterableMatcher(final List<AggregateStateId> stateIds) {
+    private static ArgumentMatcher<Iterable<AggregateStateId>> idsMatcher(final List<AggregateStateId> stateIds) {
         return new ArgumentMatcher<Iterable<AggregateStateId>>() {
             @Override
             public boolean matches(Iterable<AggregateStateId> argument) {
