@@ -107,7 +107,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final EventId id = EventId.newBuilder().setUuid(recordToStore.getEventId()).build();
         final Event expected = toEvent(recordToStore);
 
-        storage.writeInternal(recordToStore);
+        storage.writeRecord(recordToStore);
         final Event actual = storage.read(id);
 
         assertEquals(expected, actual);
@@ -400,7 +400,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     protected void writeAll(EventStorageRecord... records) {
         for (EventStorageRecord r : records) {
-            storage.writeInternal(r);
+            storage.writeRecord(r);
         }
     }
 

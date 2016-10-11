@@ -58,7 +58,7 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(final Iterable<I> givenIds, FieldMask fieldMask) {
+    protected Iterable<EntityStorageRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
@@ -91,12 +91,12 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        return readBulkInternal(ids, FieldMask.getDefaultInstance());
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+        return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal() {
+    protected Map<I, EntityStorageRecord> readAllRecords() {
         final Map<I, EntityStorageRecord> storage = getStorage();
 
         final ImmutableMap<I, EntityStorageRecord> result = ImmutableMap.copyOf(storage);
@@ -104,10 +104,10 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         if (fieldMask.getPathsList()
                      .isEmpty()) {
-            return readAllInternal();
+            return readAllRecords();
         }
 
         final Map<I, EntityStorageRecord> storage = getStorage();
@@ -153,12 +153,12 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     @Override
-    protected EntityStorageRecord readInternal(I id) {
+    protected EntityStorageRecord readRecord(I id) {
         return getStorage().get(id);
     }
 
     @Override
-    protected void writeInternal(I id, EntityStorageRecord record) {
+    protected void writeRecord(I id, EntityStorageRecord record) {
         getStorage().put(id, record);
     }
 

@@ -49,7 +49,8 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 @SPI
 public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
-    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
+    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
+                                                             .getName();
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -79,7 +80,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                     break;
                 case KIND_NOT_SET:
                     throw new IllegalStateException("Event or snapshot missing in record: \"" +
-                            shortDebugString(record) + '\"');
+                                                            shortDebugString(record) + '\"');
             }
         }
 
@@ -97,9 +98,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      *
      * <p>NOTE: does not rewrite any events. Several events can be associated with one aggregate ID.
      *
-     * @param id the ID for the record
+     * @param id     the ID for the record
      * @param events events to store
-     * @throws IllegalStateException if the storage is closed
+     * @throws IllegalStateException    if the storage is closed
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
@@ -112,14 +113,14 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
         for (final Event event : eventList) {
             final AggregateStorageRecord record = toStorageRecord(event);
-            writeInternal(id, record);
+            writeRecord(id, record);
         }
     }
 
     /**
      * Writes an event to the storage by an aggregate ID.
      *
-     * @param id the aggregate ID
+     * @param id    the aggregate ID
      * @param event the event to write
      * @throws IllegalStateException if the storage is closed
      */
@@ -129,14 +130,14 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(event);
 
         final AggregateStorageRecord record = toStorageRecord(event);
-        writeInternal(id, record);
+        writeRecord(id, record);
     }
 
     /**
      * Writes a {@code snapshot} by an {@code aggregateId} to the storage.
      *
      * @param aggregateId an ID of an aggregate of which the snapshot is made
-     * @param snapshot the snapshot of the aggregate
+     * @param snapshot    the snapshot of the aggregate
      * @throws IllegalStateException if the storage is closed
      */
     public void write(I aggregateId, Snapshot snapshot) {
@@ -144,14 +145,15 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
 
-        final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
-                .setTimestamp(checkIsPositive(snapshot.getTimestamp(), "Snapshot timestamp"))
-                .setEventType(SNAPSHOT_TYPE_NAME)
-                .setEventId("") // No event ID for snapshots because it's not a domain event.
-                .setVersion(snapshot.getVersion())
-                .setSnapshot(snapshot)
-                .build();
-        writeInternal(aggregateId, record);
+        final AggregateStorageRecord record =
+                AggregateStorageRecord.newBuilder()
+                                      .setTimestamp(checkIsPositive(snapshot.getTimestamp(), "Snapshot timestamp"))
+                                      .setEventType(SNAPSHOT_TYPE_NAME)
+                                      .setEventId("") // No event ID for snapshots because it's not a domain event.
+                                      .setVersion(snapshot.getVersion())
+                                      .setSnapshot(snapshot)
+                                      .build();
+        writeRecord(aggregateId, record);
     }
 
     /**
@@ -168,7 +170,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * Reads a count of events which were saved to the storage after the last snapshot was created,
      * or a count of all events if there were no snapshots yet.
      *
-     * @param id an ID of an aggregate
+     * @param id         an ID of an aggregate
      * @param eventCount an even count after the last snapshot
      * @throws IllegalStateException if the storage is closed
      */
@@ -190,11 +192,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "Event time");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setEvent(event)
-                .setTimestamp(timestamp)
-                .setEventId(eventIdStr)
-                .setEventType(eventType)
-                .setVersion(context.getVersion());
+                                                                             .setEvent(event)
+                                                                             .setTimestamp(timestamp)
+                                                                             .setEventId(eventIdStr)
+                                                                             .setEventType(eventType)
+                                                                             .setVersion(context.getVersion());
         return builder.build();
     }
 
@@ -203,10 +205,10 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     /**
      * Writes the passed record into the storage.
      *
-     * @param id the aggregate ID
+     * @param id     the aggregate ID
      * @param record the record to write
      */
-    protected abstract void writeInternal(I id, AggregateStorageRecord record);
+    protected abstract void writeRecord(I id, AggregateStorageRecord record);
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.

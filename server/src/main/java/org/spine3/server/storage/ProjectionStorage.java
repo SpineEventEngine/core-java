@@ -44,7 +44,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     @Nullable
     @Override
-    protected EntityStorageRecord readInternal(I id) {
+    protected EntityStorageRecord readRecord(I id) {
         final RecordStorage<I> storage = getRecordStorage();
         final EntityStorageRecord record = storage.read(id);
         return record;
@@ -52,7 +52,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
 
     @Override
-    protected void writeInternal(I id, EntityStorageRecord record) {
+    protected void writeRecord(I id, EntityStorageRecord record) {
         final RecordStorage<I> storage = getRecordStorage();
         storage.write(id, record);
     }

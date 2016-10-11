@@ -75,24 +75,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids);
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask) {
-        return recordStorage.readBulk(ids, fieldMask);
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+        return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal() {
+    protected Map<I, EntityStorageRecord> readAllRecords() {
         final Map<I, EntityStorageRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         final Map<I, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }

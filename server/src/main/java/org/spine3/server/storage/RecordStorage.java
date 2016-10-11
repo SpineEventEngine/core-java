@@ -58,7 +58,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         checkNotClosed();
         checkNotNull(id);
 
-        final EntityStorageRecord record = readInternal(checkNotNull(id));
+        final EntityStorageRecord record = readRecord(checkNotNull(id));
         if (record == null) {
             return EntityStorageRecord.getDefaultInstance();
         }
@@ -97,18 +97,18 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         checkArgument(record.hasState(), "Record does not have state field.");
         checkNotClosed();
 
-        writeInternal(id, record);
+        writeRecord(id, record);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids) {
+    public Iterable<EntityStorageRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
         checkNotNull(ids);
 
-        return readBulkInternal(ids);
+        return readMultipleRecords(ids);
     }
 
     /**
@@ -118,11 +118,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @param fieldMask the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
-    public Iterable<EntityStorageRecord> readBulk(Iterable<I> ids, FieldMask fieldMask) {
+    public Iterable<EntityStorageRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
 
-        return readBulkInternal(ids, fieldMask);
+        return readMultipleRecords(ids, fieldMask);
     }
 
     /**
@@ -132,7 +132,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     public Map<I, EntityStorageRecord> readAll() {
         checkNotClosed();
 
-        return readAllInternal();
+        return readAllRecords();
     }
 
     /**
@@ -144,7 +144,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     public Map<I, EntityStorageRecord> readAll(FieldMask fieldMask) {
         checkNotClosed();
 
-        return readAllInternal(fieldMask);
+        return readAllRecords(fieldMask);
     }
 
     //
@@ -158,19 +158,19 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @return a record instance or {@code null} if there is no record with this ID
      */
     @Nullable
-    protected abstract EntityStorageRecord readInternal(I id);
+    protected abstract EntityStorageRecord readRecord(I id);
 
-    /** @see BulkStorageOperationsMixin#readBulk(java.lang.Iterable) */
-    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids);
+    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
+    protected abstract Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids);
 
-    /** @see BulkStorageOperationsMixin#readBulk(java.lang.Iterable) */
-    protected abstract Iterable<EntityStorageRecord> readBulkInternal(Iterable<I> ids, FieldMask fieldMask);
-
-    /** @see BulkStorageOperationsMixin#readAll() */
-    protected abstract Map<I, EntityStorageRecord> readAllInternal();
+    /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
+    protected abstract Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
-    protected abstract Map<I, EntityStorageRecord> readAllInternal(FieldMask fieldMask);
+    protected abstract Map<I, EntityStorageRecord> readAllRecords();
+
+    /** @see BulkStorageOperationsMixin#readAll() */
+    protected abstract Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask);
 
     /**
      * Writes a record into the storage.
@@ -180,6 +180,5 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @param id     an ID of the record
      * @param record a record to store
      */
-    protected abstract void writeInternal(I id, EntityStorageRecord record);
-
+    protected abstract void writeRecord(I id, EntityStorageRecord record);
 }

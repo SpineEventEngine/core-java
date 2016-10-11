@@ -81,37 +81,37 @@ public class InMemoryStandStorage extends StandStorage {
 
     @Nullable
     @Override
-    protected EntityStorageRecord readInternal(AggregateStateId id) {
+    protected EntityStorageRecord readRecord(AggregateStateId id) {
         final EntityStorageRecord result = recordStorage.read(id);
         return result;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<AggregateStateId> ids) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids);
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readBulkInternal(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readBulk(ids, fieldMask);
+    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids, fieldMask);
         return result;
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllInternal() {
+    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords() {
         final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllInternal(FieldMask fieldMask) {
+    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
         final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 
     @Override
-    protected void writeInternal(AggregateStateId id, EntityStorageRecord record) {
+    protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
         final TypeUrl recordType = TypeUrl.of(record.getState()
                                                     .getTypeUrl());
         checkState(id.getStateType().equals(recordType), "The typeUrl of the record does not correspond to id");

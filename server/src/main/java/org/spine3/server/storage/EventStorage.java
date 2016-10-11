@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -80,7 +81,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotNull(event);
 
         final EventStorageRecord record = toEventStorageRecord(id, event);
-        writeInternal(record);
+        writeRecord(record);
     }
 
     @Override
@@ -88,7 +89,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotClosed();
         checkNotNull(id);
 
-        final EventStorageRecord record = readInternal(id);
+        final EventStorageRecord record = readRecord(id);
         if (record == null) {
             return Event.getDefaultInstance();
         }
@@ -109,7 +110,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      *
      * @param record the record to write
      */
-    protected abstract void writeInternal(EventStorageRecord record);
+    protected abstract void writeRecord(EventStorageRecord record);
 
     /**
      * Reads storage format record.
@@ -118,7 +119,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * @return the record instance of null if there's not record with such ID
      */
     @Nullable
-    protected abstract EventStorageRecord readInternal(EventId eventId);
+    protected abstract EventStorageRecord readRecord(EventId eventId);
 
     /** Converts EventStorageRecord to Event. */
     protected static Event toEvent(EventStorageRecord record) {

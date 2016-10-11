@@ -134,8 +134,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
                                                                     boolean applyFieldMask) {
         ImmutableCollection<EntityStorageRecord> result;
         final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask ?
-                                                              standStorage.readBulk(stateIds, fieldMask) :
-                                                              standStorage.readBulk(stateIds);
+                                                              standStorage.readMultiple(stateIds, fieldMask) :
+                                                              standStorage.readMultiple(stateIds);
         result = FluentIterable.from(bulkReadResults)
                                .filter(new Predicate<EntityStorageRecord>() {
                                    @Override

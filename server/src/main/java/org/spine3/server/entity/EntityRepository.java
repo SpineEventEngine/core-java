@@ -151,7 +151,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     @CheckReturnValue
     public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
-        final Iterable<EntityStorageRecord> entityStorageRecords = storage.readBulk(ids);
+        final Iterable<EntityStorageRecord> entityStorageRecords = storage.readMultiple(ids);
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();

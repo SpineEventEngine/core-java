@@ -834,7 +834,7 @@ public class StandShould {
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(nonEmptyList);
         when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(someRecord);
         when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityStorageRecord>newHashMap());
-        when(standStorageMock.readBulk(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
+        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
@@ -874,7 +874,7 @@ public class StandShould {
         final ImmutableList<EntityStorageRecord> records = recordsBuilder.build();
 
         final Iterable<AggregateStateId> matchingIds = argThat(idsMatcher(stateIds));
-        when(standStorageMock.readBulk(matchingIds)).thenReturn(records);
+        when(standStorageMock.readMultiple(matchingIds)).thenReturn(records);
     }
 
     @SuppressWarnings("ConstantConditions")
