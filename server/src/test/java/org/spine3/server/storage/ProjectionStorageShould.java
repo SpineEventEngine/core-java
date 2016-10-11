@@ -43,6 +43,7 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
+import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
@@ -151,6 +152,22 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
             final Project state = AnyPacker.unpack(packedState);
             assertMatchesMask(state, fieldMask);
         }
+    }
+
+    @Test
+    public void retrieve_empty_map_if_store_is_empty() {
+        final Map<I, EntityStorageRecord> noMask = storage.readAll();
+
+        final FieldMask nonEmptyMask = FieldMask.newBuilder()
+                                                .addPaths("invalid_path")
+                                                .build();
+        final Map<I, EntityStorageRecord> masked = storage.readAll(nonEmptyMask);
+
+        assertEmpty(noMask);
+        assertEmpty(masked);
+
+        // Same type
+        assertEquals(noMask, masked);
     }
 
     @Test(expected = NullPointerException.class)
