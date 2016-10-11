@@ -1,5 +1,4 @@
 /*
- *
  * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
