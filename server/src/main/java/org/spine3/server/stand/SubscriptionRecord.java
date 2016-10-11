@@ -31,6 +31,7 @@ import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.TypeUrl;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -43,6 +44,14 @@ import java.util.List;
     private final Subscription subscription;
     private final Target target;
     private final TypeUrl type;
+
+    /**
+     * The {@code callback} is null after the creation and until the subscription is activated.
+     *
+     * @see SubscriptionRegistry#addSubscription(Target)
+     * @see SubscriptionRegistry#activate(Subscription, Stand.EntityUpdateCallback)
+     */
+    @Nullable
     private Stand.EntityUpdateCallback callback = null;
 
     /* package */ SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
@@ -76,12 +85,10 @@ import java.util.List;
      * @param entityState the entity state to match
      * @return {@code true} if this record matches all the given parameters, {@code false} otherwise.
      */
-    /* package */  boolean matches(
-            TypeUrl type,
-            Object id,
-            // entityState will be later used for more advanced filtering
-            @SuppressWarnings("UnusedParameters") Any entityState
-    ) {
+    /* package */  boolean matches(TypeUrl type,
+                                   Object id,
+                                   // entityState will be later used for more advanced filtering
+                                   @SuppressWarnings("UnusedParameters") Any entityState) {
         final boolean result;
 
         final boolean typeMatches = this.type.equals(type);
