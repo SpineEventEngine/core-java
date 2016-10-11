@@ -32,6 +32,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.Task;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,6 +41,7 @@ import java.util.Map;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
@@ -168,6 +170,120 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
 
         // Same type
         assertEquals(noMask, masked);
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void perform_read_bulk_operations() {
+        final int count = 10;
+        final List<I> ids = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(id.toString())
+                                                 .build();
+            final Project state = Project.newBuilder()
+                                         .setId(projectId)
+                                         .build();
+
+            final Any packedState = AnyPacker.pack(state);
+
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(packedState)
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(1)
+                                                                  .build();
+            storage.write(id, record);
+
+            // Request a subset of records
+            if (i % 2 == 0) {
+                ids.add(id);
+            }
+        }
+
+        final Iterable<EntityStorageRecord> read = storage.readBulk(ids);
+        assertSize(ids.size(), read);
+
+        // Check data consistency
+        for (EntityStorageRecord record : read) {
+            final Any packedState = record.getState();
+            final Project state = AnyPacker.unpack(packedState);
+            final ProjectId id = state.getId();
+            final String stringIdRepr = id.getId();
+
+            boolean isIdPresent = false;
+            for (I genericId : ids) {
+                isIdPresent = genericId.toString()
+                                       .equals(stringIdRepr);
+                if (isIdPresent) {
+                    break;
+                }
+            }
+            assertTrue(isIdPresent);
+        }
+    }
+
+    @Test
+    public void perform_bulk_read_with_field_mask_operation() {
+        final int count = 10;
+        final List<I> ids = new LinkedList<>();
+
+        final String projectDescriptor = Project.getDescriptor()
+                                                .getFullName();
+        final FieldMask fieldMask = FieldMask.newBuilder()
+                                             .addPaths(projectDescriptor + ".id")
+                                             .addPaths(projectDescriptor + ".status")
+                                             .build();
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(id.toString())
+                                                 .build();
+            final Project state = Project.newBuilder()
+                                         .setId(projectId)
+                                         .setName(String.format("project-number-%s", i))
+                                         .setStatus(Project.Status.CREATED)
+                                         .addTask(Task.getDefaultInstance())
+                                         .build();
+
+            final Any packedState = AnyPacker.pack(state);
+
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(packedState)
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(1)
+                                                                  .build();
+            storage.write(id, record);
+
+            // Request a subset of records
+            if (i % 2 == 0) {
+                ids.add(id);
+            }
+        }
+
+        final Iterable<EntityStorageRecord> read = storage.readBulk(ids, fieldMask);
+        assertSize(ids.size(), read);
+
+        // Check data consistency
+        for (EntityStorageRecord record : read) {
+            final Any packedState = record.getState();
+            final Project state = AnyPacker.unpack(packedState);
+            final ProjectId id = state.getId();
+            final String stringIdRepr = id.getId();
+
+            boolean isIdPresent = false;
+            for (I genericId : ids) {
+                isIdPresent = genericId.toString()
+                                       .equals(stringIdRepr);
+                if (isIdPresent) {
+                    break;
+                }
+            }
+            assertTrue(isIdPresent);
+
+            assertMatchesMask(state, fieldMask);
+        }
     }
 
     @Test(expected = NullPointerException.class)
