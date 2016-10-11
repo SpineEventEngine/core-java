@@ -65,14 +65,14 @@ import java.util.List;
      *
      * @param callback the callback to attach
      */
-    /* package */  void activate(Stand.EntityUpdateCallback callback) {
+    /* package */ void activate(Stand.EntityUpdateCallback callback) {
         this.callback = callback;
     }
 
     /**
      * Checks whether this record has a callback attached.
      */
-    /* package */  boolean isActive() {
+    /* package */ boolean isActive() {
         final boolean result = this.callback != null;
         return result;
     }
@@ -85,10 +85,10 @@ import java.util.List;
      * @param entityState the entity state to match
      * @return {@code true} if this record matches all the given parameters, {@code false} otherwise.
      */
-    /* package */  boolean matches(TypeUrl type,
-                                   Object id,
-                                   // entityState will be later used for more advanced filtering
-                                   @SuppressWarnings("UnusedParameters") Any entityState) {
+    /* package */ boolean matches(TypeUrl type,
+                                  Object id,
+                                  // entityState will be later used for more advanced filtering
+                                  @SuppressWarnings("UnusedParameters") Any entityState) {
         final boolean result;
 
         final boolean typeMatches = this.type.equals(type);
@@ -120,11 +120,11 @@ import java.util.List;
         return result;
     }
 
-    /* package */  TypeUrl getType() {
+    /* package */ TypeUrl getType() {
         return type;
     }
 
-    /* package */  Stand.EntityUpdateCallback getCallback() {
+    /* package */ Stand.EntityUpdateCallback getCallback() {
         return callback;
     }
 
