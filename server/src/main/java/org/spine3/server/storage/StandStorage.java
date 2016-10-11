@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
+import org.spine3.SPI;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.Stand;
@@ -36,6 +37,7 @@ import org.spine3.server.stand.Stand;
  * @see Any#getTypeUrl()
  * @see Stand
  */
+@SPI
 public abstract class StandStorage extends RecordStorage<AggregateStateId> {
 
     protected StandStorage(boolean multitenant) {

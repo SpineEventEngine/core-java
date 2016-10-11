@@ -20,7 +20,6 @@
  */
 package org.spine3.server.stand;
 
-import org.spine3.Internal;
 import org.spine3.base.Identifiers;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
@@ -42,7 +41,6 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alex Tymchenko
  */
-@Internal
 /* package */ final class SubscriptionRegistry {
     private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
     private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();

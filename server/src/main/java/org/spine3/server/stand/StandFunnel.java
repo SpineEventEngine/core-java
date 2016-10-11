@@ -22,6 +22,7 @@ package org.spine3.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 
@@ -45,6 +46,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @see org.spine3.server.aggregate.AggregateRepository#dispatch(Command)
  * @see org.spine3.server.projection.ProjectionRepository#dispatch(Event)
  */
+@Internal
 public class StandFunnel {
 
     /**

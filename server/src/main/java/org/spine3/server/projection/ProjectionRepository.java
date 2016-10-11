@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -234,6 +235,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      *
      * @param event the event to dispatch
      */
+    @Internal
     /* package */ void internalDispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();

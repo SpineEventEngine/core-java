@@ -22,7 +22,6 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import org.spine3.Internal;
 import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -39,7 +38,6 @@ import java.util.List;
  *
  * @see SubscriptionRegistry
  */
-@Internal
 /* package */ final class SubscriptionRecord {
     private final Subscription subscription;
     private final Target target;
