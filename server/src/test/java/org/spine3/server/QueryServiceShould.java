@@ -185,7 +185,6 @@ public class QueryServiceShould {
         public void on(ProjectCreated event, EventContext context) {
             // Do nothing.
         }
-
     }
 
     private static class TestQueryResponseObserver implements StreamObserver<QueryResponse> {
