@@ -106,7 +106,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")
-        final FieldMask fieldMask = fields(projectDescriptor + ".id", projectDescriptor + ".name");
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
 
         final Map<I, EntityStorageRecord> read = storage.readAll(fieldMask);
         assertSize(ids.size(), read);
@@ -159,7 +159,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        final FieldMask fieldMask = fields(projectDescriptor + ".id", projectDescriptor + ".status");
+        final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
 
         final Iterable<EntityStorageRecord> read = storage.readBulk(ids, fieldMask);
         assertSize(ids.size(), read);
@@ -204,7 +204,6 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
                                                                   .build();
             storage.write(id, record);
             ids.add(id);
-
         }
 
         return ids;
@@ -237,7 +236,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         return state;
     }
 
-    private static FieldMask fields(String... paths) {
+    private static FieldMask maskForPaths(String... paths) {
         final FieldMask mask = FieldMask.newBuilder()
                                         .addAllPaths(Arrays.asList(paths))
                                         .build();
