@@ -569,6 +569,7 @@ public class StandShould {
                                                                               .build());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
+        @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
         final String[] paths = {customerDescriptor + ".id", customerDescriptor + ".name"};
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))

@@ -105,7 +105,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        @SuppressWarnings("DuplicateStringLiteralInspection")
+        @SuppressWarnings("DuplicateStringLiteralInspection")       // clashes with non-related tests.
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
 
         final Map<I, EntityStorageRecord> read = storage.readAll(fieldMask);
