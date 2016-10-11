@@ -37,7 +37,11 @@ public abstract class RecordStorageShould {
     public void retrieve_empty_map_if_storage_is_empty() {
         final RecordStorage<String> storage = createStorage();
 
-        final Map empty = storage.readAll(FieldMask.getDefaultInstance());
+        final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
+                                                     .addPaths("invalid-path")
+                                                     .build();
+
+        final Map empty = storage.readAll(nonEmptyFieldMask);
         assertNotNull(empty);
         assertEmpty(empty);
     }
