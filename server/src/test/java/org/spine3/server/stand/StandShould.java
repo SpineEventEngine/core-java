@@ -674,12 +674,12 @@ public class StandShould {
                                         .setNumber((int) UUID.randomUUID()
                                                              .getLeastSignificantBits()))
                        .setName(PersonName.newBuilder()
-                                          .setGivenName("Socrates")
+                                          .setGivenName("John")
                                           .build())
                        .addNicknames(PersonName.newBuilder()
-                                               .setGivenName("Philosopher"))
+                                               .setGivenName("Johnny"))
                        .addNicknames(PersonName.newBuilder()
-                                               .setGivenName("Wise guy"))
+                                               .setGivenName("Big Guy"))
                        .build();
 
     }
