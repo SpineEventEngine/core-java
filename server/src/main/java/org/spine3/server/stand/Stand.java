@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
@@ -48,6 +49,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
@@ -97,6 +100,11 @@ public class Stand implements AutoCloseable {
      * and only propagated to the registered callbacks.
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
+
+    /**
+     * Used to return an empty result collection for {@link Query}.
+     */
+    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
@@ -233,10 +241,12 @@ public class Stand implements AutoCloseable {
      * @param responseObserver an observer to feed the query results to.
      */
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
-        final ImmutableCollection<Any> readResult = QueryProcessor.processQuery(query,
-                                                                                storage,
-                                                                                knownAggregateTypes,
-                                                                                typeToRepositoryMap);
+
+        final TypeUrl type = Queries.typeOf(query);
+        checkNotNull(type, "Query target type unknown");
+        final QueryProcessor queryProcessor = processorFor(type);
+
+        final ImmutableCollection<Any> readResult = queryProcessor.process(query);
         final QueryResponse response = QueryResponse.newBuilder()
                                                     .addAllMessages(readResult)
                                                     .setResponse(Responses.ok())
@@ -314,6 +324,37 @@ public class Stand implements AutoCloseable {
          * @param newEntityState new state of the entity
          */
         void onStateChanged(Any newEntityState);
+    }
+
+    /**
+     * Factory method which determines a proper {@link QueryProcessor} implementation depending on {@link TypeUrl}
+     * of the incoming {@link Query#getTarget()}.
+     *
+     * <p>As {@code Stand} accumulates the read-side updates from various repositories, the {@code Query} processing
+     * varies a lot. The target type of the incoming {@code Query} tells the {@code Stand} about the essence of the
+     * object queried. Thus making it possible to pick a proper strategy for data fetch.
+     *
+     * @param type the target type of the {@code Query}
+     * @return suitable implementation of {@code QueryProcessor}
+     */
+    private QueryProcessor processorFor(TypeUrl type) {
+        final QueryProcessor result;
+
+        final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(type);
+        if (repository != null) {
+
+            // The query target is an {@code Entity}.
+            result = new EntityQueryProcessor(repository);
+        } else if (getExposedAggregateTypes().contains(type)) {
+
+            // The query target is an {@code Aggregate} state.
+            result = new AggregateQueryProcessor(storage, type);
+        } else {
+
+            // This type points to an objects, that are not exposed via the current instance of {@code Stand}.
+            result = NOOP_PROCESSOR;
+        }
+        return result;
     }
 
     public static class Builder {

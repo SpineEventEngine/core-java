@@ -21,19 +21,21 @@
  */
 package org.spine3.server.stand;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
+import org.spine3.client.Query;
 
 /**
+ * An {@link QueryProcessor} implementation that always returns empty result.
+ *
+ * <p>Used to define a processing result for {@link Query} which does not hit any of exposed state objects.
+ *
  * @author Alex Tymchenko
  */
-public class QueryProcessorShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(QueryProcessor.class));
+/* package */ class NoopQueryProcessor implements QueryProcessor {
+    @Override
+    public ImmutableCollection<Any> process(Query query) {
+        return ImmutableList.of();
     }
-
 }
