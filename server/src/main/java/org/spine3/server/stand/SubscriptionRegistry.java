@@ -37,7 +37,10 @@ import static com.google.common.collect.Maps.newHashMap;
  * Registry for subscription management.
  *
  * <p>Provides a quick access to the subscription records by {@link TypeUrl}.
+ *
  * <p>Responsible for {@link Subscription} object instantiation.
+ *
+ * @author Alex Tymchenko
  */
 @Internal
 /* package */ final class SubscriptionRegistry {
