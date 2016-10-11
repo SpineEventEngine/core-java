@@ -164,6 +164,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @return an even count after the last snapshot
      * @throws IllegalStateException if the storage is closed
      */
+    // TODO[alex.tymchenko]: make it `protected` after this Storage is moved to `aggregate` package.
     public abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
@@ -174,6 +175,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param eventCount an even count after the last snapshot
      * @throws IllegalStateException if the storage is closed
      */
+    // TODO[alex.tymchenko]: make it `protected` after this Storage is moved to `aggregate` package.
     public abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
