@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -151,7 +150,6 @@ public class CommandServiceShould {
         }
 
     }
-
 
     /*
      * Stub repositories and aggregates
