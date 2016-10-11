@@ -63,7 +63,7 @@ public class SubscriptionServiceShould {
         final BoundedContext singleBoundedContext = newBoundedContext("Single", newSimpleStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(singleBoundedContext);
+                                                                       .addBoundedContext(singleBoundedContext);
 
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
@@ -79,12 +79,10 @@ public class SubscriptionServiceShould {
         final BoundedContext secondBoundedContext = newBoundedContext("Second", newSimpleStand());
         final BoundedContext thirdBoundedContext = newBoundedContext("Third", newSimpleStand());
 
-
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(firstBoundedContext)
-                                                                           .addBoundedContext(secondBoundedContext)
-                                                                           .addBoundedContext(thirdBoundedContext);
-
+                                                                       .addBoundedContext(firstBoundedContext)
+                                                                       .addBoundedContext(secondBoundedContext)
+                                                                       .addBoundedContext(thirdBoundedContext);
         final SubscriptionService service = builder.build();
         assertNotNull(service);
 
@@ -101,14 +99,12 @@ public class SubscriptionServiceShould {
         final BoundedContext secondBoundedContext = newBoundedContext("Also removed", newSimpleStand());
         final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newSimpleStand());
 
-
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(firstBoundedContext)
-                                                                           .addBoundedContext(secondBoundedContext)
-                                                                           .addBoundedContext(thirdBoundedContext)
-                                                                           .removeBoundedContext(secondBoundedContext)
-                                                                           .removeBoundedContext(firstBoundedContext);
-
+                                                                       .addBoundedContext(firstBoundedContext)
+                                                                       .addBoundedContext(secondBoundedContext)
+                                                                       .addBoundedContext(thirdBoundedContext)
+                                                                       .removeBoundedContext(secondBoundedContext)
+                                                                       .removeBoundedContext(firstBoundedContext);
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
@@ -121,7 +117,8 @@ public class SubscriptionServiceShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_initialize_from_empty_builder() {
-        SubscriptionService.newBuilder().build();
+        SubscriptionService.newBuilder()
+                           .build();
     }
 
     /*
@@ -136,13 +133,11 @@ public class SubscriptionServiceShould {
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(boundedContext)
                                                                            .build();
-
         final String type = boundedContext.getStand()
                                           .getExposedTypes()
                                           .iterator()
                                           .next()
                                           .getTypeName();
-
         final Target target = getProjectQueryTarget();
 
         assertEquals(type, target.getType());
@@ -159,7 +154,6 @@ public class SubscriptionServiceShould {
         assertTrue(observer.streamFlowValue.isInitialized());
         assertEquals(observer.streamFlowValue.getType(), type);
 
-
         assertNull(observer.throwable);
         assertTrue(observer.isCompleted);
     }
@@ -171,7 +165,6 @@ public class SubscriptionServiceShould {
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .addBoundedContext(boundedContext)
                                                                            .build();
-
         final Target target = getProjectQueryTarget();
 
         final Topic topic = Topic.newBuilder()
@@ -188,9 +181,14 @@ public class SubscriptionServiceShould {
         subscriptionService.activate(subscriptionObserver.streamFlowValue, activationObserver);
 
         // Post update to Stand directly
-        final ProjectId projectId = ProjectId.newBuilder().setId("some-id").build();
-        final Message projectState = Project.newBuilder().setId(projectId).build();
-        boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId("some-id")
+                                             .build();
+        final Message projectState = Project.newBuilder()
+                                            .setId(projectId)
+                                            .build();
+        boundedContext.getStand()
+                      .update(projectId, AnyPacker.pack(projectState));
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
@@ -222,9 +220,14 @@ public class SubscriptionServiceShould {
         subscriptionService.cancel(subscribeObserver.streamFlowValue, new MemoizeStreamObserver<Response>());
 
         // Post update to Stand
-        final ProjectId projectId = ProjectId.newBuilder().setId("some-other-id").build();
-        final Message projectState = Project.newBuilder().setId(projectId).build();
-        boundedContext.getStand().update(projectId, AnyPacker.pack(projectState));
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId("some-other-id")
+                                             .build();
+        final Message projectState = Project.newBuilder()
+                                            .setId(projectId)
+                                            .build();
+        boundedContext.getStand()
+                      .update(projectId, AnyPacker.pack(projectState));
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -232,7 +235,8 @@ public class SubscriptionServiceShould {
     }
 
     private static BoundedContext setupBoundedContextForAggregateRepo() {
-        final Stand stand = Stand.newBuilder().build();
+        final Stand stand = Stand.newBuilder()
+                                 .build();
 
         final BoundedContext boundedContext = newBoundedContext(stand);
 
@@ -246,7 +250,8 @@ public class SubscriptionServiceShould {
     }
 
     private static Stand newSimpleStand() {
-        return Stand.newBuilder().build();
+        return Stand.newBuilder()
+                    .build();
     }
 
     private static class MemoizeStreamObserver<T> implements StreamObserver<T> {
@@ -279,6 +284,5 @@ public class SubscriptionServiceShould {
             assertNull(throwable);
             assertEquals(this.isCompleted, isCompleted);
         }
-
     }
 }
