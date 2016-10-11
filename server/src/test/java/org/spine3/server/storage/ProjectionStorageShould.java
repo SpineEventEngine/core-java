@@ -34,6 +34,7 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.Task;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -88,19 +89,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_all_messages() {
-        final int count = 5;
-        final List<I> ids = new LinkedList<>();
-
-        for (int i = 0; i < count; i++) {
-            final I id = newId();
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(Any.getDefaultInstance())
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
-            storage.write(id, record);
-            ids.add(id);
-        }
+        final List<I> ids = fillStorage(5);
 
         final Map<I, EntityStorageRecord> read = storage.readAll();
         assertSize(ids.size(), read);
@@ -112,37 +101,12 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_all_messages_with_field_mask() {
-        final int count = 5;
-        final List<I> ids = new LinkedList<>();
+        final List<I> ids = fillStorage(5);
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")
-        final FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addPaths(projectDescriptor + ".id")
-                                             .addPaths(projectDescriptor + ".name")
-                                             .build();
-
-        for (int i = 0; i < count; i++) {
-            final I id = newId();
-            final ProjectId stateId = ProjectId.newBuilder()
-                                               .setId(id.toString())
-                                               .build();
-            final Project state = Project.newBuilder()
-                                         .setId(stateId)
-                                         .setName(String.format("project_%s", i))
-                                         .setStatus(Project.Status.CREATED)
-                                         .build();
-            final Any packedState = AnyPacker.pack(state);
-
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(packedState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
-            storage.write(id, record);
-            ids.add(id);
-        }
+        final FieldMask fieldMask = fields(projectDescriptor + ".id", projectDescriptor + ".name");
 
         final Map<I, EntityStorageRecord> read = storage.readAll(fieldMask);
         assertSize(ids.size(), read);
@@ -157,132 +121,52 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     }
 
     @Test
-    public void retrieve_empty_map_if_store_is_empty() {
-        final Map<I, EntityStorageRecord> noMask = storage.readAll();
+    public void retrieve_empty_map_if_storage_is_empty() {
+        final Map<I, EntityStorageRecord> noMaskEntiries = storage.readAll();
 
         final FieldMask nonEmptyMask = FieldMask.newBuilder()
                                                 .addPaths("invalid_path")
                                                 .build();
-        final Map<I, EntityStorageRecord> masked = storage.readAll(nonEmptyMask);
+        final Map<I, EntityStorageRecord> maskedEntries = storage.readAll(nonEmptyMask);
 
-        assertEmpty(noMask);
-        assertEmpty(masked);
+        assertEmpty(noMaskEntiries);
+        assertEmpty(maskedEntries);
 
         // Same type
-        assertEquals(noMask, masked);
+        assertEquals(noMaskEntiries, maskedEntries);
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
     @Test
     public void perform_read_bulk_operations() {
-        final int count = 10;
-        final List<I> ids = new LinkedList<>();
-
-        for (int i = 0; i < count; i++) {
-            final I id = newId();
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(id.toString())
-                                                 .build();
-            final Project state = Project.newBuilder()
-                                         .setId(projectId)
-                                         .build();
-
-            final Any packedState = AnyPacker.pack(state);
-
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(packedState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
-            storage.write(id, record);
-
-            // Request a subset of records
-            if (i % 2 == 0) {
-                ids.add(id);
-            }
-        }
+        // Get a subset of IDs
+        final List<I> ids = fillStorage(10).subList(0, 5);
 
         final Iterable<EntityStorageRecord> read = storage.readBulk(ids);
         assertSize(ids.size(), read);
 
         // Check data consistency
         for (EntityStorageRecord record : read) {
-            final Any packedState = record.getState();
-            final Project state = AnyPacker.unpack(packedState);
-            final ProjectId id = state.getId();
-            final String stringIdRepr = id.getId();
-
-            boolean isIdPresent = false;
-            for (I genericId : ids) {
-                isIdPresent = genericId.toString()
-                                       .equals(stringIdRepr);
-                if (isIdPresent) {
-                    break;
-                }
-            }
-            assertTrue(isIdPresent);
+            checkProjectIdIsInList(record, ids);
         }
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
     @Test
     public void perform_bulk_read_with_field_mask_operation() {
-        final int count = 10;
-        final List<I> ids = new LinkedList<>();
+        // Get a subset of IDs
+        final List<I> ids = fillStorage(10).subList(0, 5);
 
         final String projectDescriptor = Project.getDescriptor()
                                                 .getFullName();
-        final FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addPaths(projectDescriptor + ".id")
-                                             .addPaths(projectDescriptor + ".status")
-                                             .build();
-        for (int i = 0; i < count; i++) {
-            final I id = newId();
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(id.toString())
-                                                 .build();
-            final Project state = Project.newBuilder()
-                                         .setId(projectId)
-                                         .setName(String.format("project-number-%s", i))
-                                         .setStatus(Project.Status.CREATED)
-                                         .addTask(Task.getDefaultInstance())
-                                         .build();
-
-            final Any packedState = AnyPacker.pack(state);
-
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(packedState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
-            storage.write(id, record);
-
-            // Request a subset of records
-            if (i % 2 == 0) {
-                ids.add(id);
-            }
-        }
+        final FieldMask fieldMask = fields(projectDescriptor + ".id", projectDescriptor + ".status");
 
         final Iterable<EntityStorageRecord> read = storage.readBulk(ids, fieldMask);
         assertSize(ids.size(), read);
 
         // Check data consistency
         for (EntityStorageRecord record : read) {
-            final Any packedState = record.getState();
-            final Project state = AnyPacker.unpack(packedState);
-            final ProjectId id = state.getId();
-            final String stringIdRepr = id.getId();
-
-            boolean isIdPresent = false;
-            for (I genericId : ids) {
-                isIdPresent = genericId.toString()
-                                       .equals(stringIdRepr);
-                if (isIdPresent) {
-                    break;
-                }
-            }
-            assertTrue(isIdPresent);
-
+            final Project state = checkProjectIdIsInList(record, ids);
             assertMatchesMask(state, fieldMask);
         }
     }
@@ -305,11 +189,74 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         writeAndReadLastEventTimeTest(time2);
     }
 
+    private List<I> fillStorage(int count) {
+        final List<I> ids = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final Project state = Given.project(id.toString(), String.format("project-%d", i));
+            final Any packedState = AnyPacker.pack(state);
+
+            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                                  .setState(packedState)
+                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(1)
+                                                                  .build();
+            storage.write(id, record);
+            ids.add(id);
+
+        }
+
+        return ids;
+    }
+
     private void writeAndReadLastEventTimeTest(Timestamp expected) {
         storage.writeLastHandledEventTime(expected);
 
         final Timestamp actual = storage.readLastHandledEventTime();
 
         assertEquals(expected, actual);
+    }
+
+    private static <I> Project checkProjectIdIsInList(EntityStorageRecord project, List<I> ids) {
+        final Any packedState = project.getState();
+        final Project state = AnyPacker.unpack(packedState);
+        final ProjectId id = state.getId();
+        final String stringIdRepr = id.getId();
+
+        boolean isIdPresent = false;
+        for (I genericId : ids) {
+            isIdPresent = genericId.toString()
+                                   .equals(stringIdRepr);
+            if (isIdPresent) {
+                break;
+            }
+        }
+        assertTrue(isIdPresent);
+
+        return state;
+    }
+
+    private static FieldMask fields(String... paths) {
+        final FieldMask mask = FieldMask.newBuilder()
+                                        .addAllPaths(Arrays.asList(paths))
+                                        .build();
+        return mask;
+    }
+
+    private static class Given {
+
+        private static Project project(String id, String name) {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(id)
+                                                 .build();
+            final Project project = Project.newBuilder()
+                                           .setId(projectId)
+                                           .setName(name)
+                                           .setStatus(Project.Status.CREATED)
+                                           .addTask(Task.getDefaultInstance())
+                                           .build();
+            return project;
+        }
     }
 }
