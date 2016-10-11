@@ -50,7 +50,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
-
 /**
  * @author Alex Tymchenko
  */
@@ -77,20 +76,17 @@ public class QueryServiceShould {
 
         boundedContexts.add(projectsContext);
 
-
         // Create Customers Bounded Context with one repository.
         customersContext = newBoundedContext(spy(TestStandFactory.create()));
         final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
-
         final QueryService.Builder builder = QueryService.newBuilder();
 
         for (BoundedContext context : boundedContexts) {
             builder.addBoundedContext(context);
         }
-
 
         service = spy(builder.build());
     }
@@ -138,7 +134,6 @@ public class QueryServiceShould {
                     .build();
     }
 
-
     @Test
     public void return_error_if_query_failed_to_execute() {
         when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
@@ -146,7 +141,6 @@ public class QueryServiceShould {
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }
-
 
     private static void checkOkResponse(TestQueryResponseObserver responseObserver) {
         final QueryResponse responseHandled = responseObserver.getResponseHandled();
@@ -162,7 +156,6 @@ public class QueryServiceShould {
         assertTrue(responseObserver.isCompleted());
         assertNotNull(responseObserver.getThrowable());
     }
-
 
     /*
      * Stub repositories and projections
