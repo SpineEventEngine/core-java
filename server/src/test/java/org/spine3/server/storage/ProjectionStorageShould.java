@@ -172,7 +172,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         assertEquals(noMask, masked);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
+    @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
     @Test
     public void perform_read_bulk_operations() {
         final int count = 10;
@@ -224,6 +224,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         }
     }
 
+    @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
     @Test
     public void perform_bulk_read_with_field_mask_operation() {
         final int count = 10;
