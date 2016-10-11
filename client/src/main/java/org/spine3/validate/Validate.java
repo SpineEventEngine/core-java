@@ -38,11 +38,12 @@ import static org.spine3.base.Identifiers.idToString;
 /**
  * This class provides general validation routines.
  *
- * @author Alexanxer Yevsyukov
+ * @author Alexander Yevsyukov
  */
 public class Validate {
 
-    private Validate() {}
+    private Validate() {
+    }
 
     /**
      * Verifies if the passed message object is its default state and is not {@code null}.
@@ -52,7 +53,8 @@ public class Validate {
      */
     public static boolean isDefault(Message object) {
         checkNotNull(object);
-        final boolean result = object.getDefaultInstanceForType().equals(object);
+        final boolean result = object.getDefaultInstanceForType()
+                                     .equals(object);
         return result;
     }
 
@@ -71,7 +73,7 @@ public class Validate {
     /**
      * Ensures that the passed object is not in its default state and is not {@code null}.
      *
-     * @param object the {@code Message} instance to check
+     * @param object       the {@code Message} instance to check
      * @param errorMessage the message for the exception to be thrown;
      *                     will be converted to a string using {@link String#valueOf(Object)}
      * @throws IllegalStateException if the object is in its default state
@@ -85,13 +87,15 @@ public class Validate {
     /**
      * Ensures that the passed object is not in its default state and is not {@code null}.
      *
-     * @param object the {@code Message} instance to check
+     * @param object               the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
-     * @param errorMessageArgs the arguments to be substituted into the message template
+     * @param errorMessageArgs     the arguments to be substituted into the message template
      * @throws IllegalStateException if the object is in its default state
      */
     @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkNotDefault(M object, String errorMessageTemplate, Object... errorMessageArgs) {
+    public static <M extends Message> M checkNotDefault(M object,
+                                                        String errorMessageTemplate,
+                                                        Object... errorMessageArgs) {
         checkNotNull(object);
         checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
@@ -105,14 +109,15 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object).getTypeName());
+        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object)
+                                                                                  .getTypeName());
         return object;
     }
 
     /**
      * Ensures that the passed object is in its default state and is not {@code null}.
      *
-     * @param object the {@code Message} instance to check
+     * @param object       the {@code Message} instance to check
      * @param errorMessage the message for the exception to be thrown;
      *                     will be converted to a string using {@link String#valueOf(Object)}
      * @throws IllegalStateException if the object is not in its default state
@@ -126,13 +131,15 @@ public class Validate {
     /**
      * Ensures that the passed object is in its default state and is not {@code null}.
      *
-     * @param object the {@code Message} instance to check
+     * @param object               the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
-     * @param errorMessageArgs the arguments to be substituted into the message template
+     * @param errorMessageArgs     the arguments to be substituted into the message template
      * @throws IllegalStateException if the object is not in its default state
      */
     @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkDefault(M object, String errorMessageTemplate, Object... errorMessageArgs) {
+    public static <M extends Message> M checkDefault(M object,
+                                                     String errorMessageTemplate,
+                                                     Object... errorMessageArgs) {
         checkNotNull(object);
         checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
@@ -146,7 +153,8 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object).getTypeName());
+        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object)
+                                                                                   .getTypeName());
         return object;
     }
 
@@ -161,7 +169,8 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim()
+                                   .length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 
@@ -228,7 +237,7 @@ public class Validate {
     /**
      * Returns a formatted string using the specified format string and parameters from the violation.
      *
-     * @param format a format string
+     * @param format    a format string
      * @param violation violation which contains arguments referenced by the format specifiers in the format string
      * @return a formatted string
      * @see String#format(String, Object...)

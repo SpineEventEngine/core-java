@@ -30,6 +30,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Mismatch.getActualString;
+import static org.spine3.base.Mismatch.getExpectedString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -39,7 +41,6 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
  */
 public class MismatchShould {
 
-    private static final String REQUESTED = "requested";
     private static final String EXPECTED = "expected";
     private static final String ACTUAL = "ACTUAL";
     private static final int VERSION = 0;
@@ -53,7 +54,7 @@ public class MismatchShould {
 
     @Test
     public void set_default_expected_value_if_it_was_passed_as_null() {
-        final ValueMismatch mismatch = Mismatch.of(null, ACTUAL, REQUESTED, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(null, ACTUAL, VERSION);
         final String expected = mismatch.getExpected()
                                         .toString();
 
@@ -62,7 +63,7 @@ public class MismatchShould {
 
     @Test
     public void set_default_actual_value_if_it_was_passed_as_null() {
-        final ValueMismatch mismatch = Mismatch.of(EXPECTED, null, REQUESTED, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(EXPECTED, null, VERSION);
         final String actual = mismatch.getActual()
                                       .toString();
 
@@ -71,94 +72,77 @@ public class MismatchShould {
 
     @Test
     public void return_mismatch_object_with_string_values() {
-        final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, REQUESTED, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, VERSION);
         final StringValue expected = unpack(mismatch.getExpected());
         final StringValue actual = unpack(mismatch.getActual());
-        final StringValue requested = unpack(mismatch.getRequested());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
-        assertEquals(REQUESTED, requested.getValue());
     }
 
     @Test
     public void return_mismatch_object_with_int32_values() {
         final int expected = 0;
         final int actual = 1;
-        final int requested = 2;
-        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final Int32Value expectedWrapper = unpack(mismatch.getExpected());
         final Int32Value actualWrapper = unpack(mismatch.getActual());
-        final Int32Value requestedWrapper = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapper.getValue());
         assertEquals(actual, actualWrapper.getValue());
-        assertEquals(requested, requestedWrapper.getValue());
     }
 
     @Test
     public void return_mismatch_object_with_int64_values() {
         final long expected = 0L;
         final long actual = 1L;
-        final long requested = 2L;
-        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final Int64Value expectedWrapped = unpack(mismatch.getExpected());
         final Int64Value actualWrapped = unpack(mismatch.getActual());
-        final Int64Value requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
-        assertEquals(requested, requestedWrapped.getValue());
     }
 
     @Test
     public void return_mismatch_object_with_float_values() {
         final float expected = 0.0F;
         final float actual = 1.0F;
-        final float requested = 2.0F;
-        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final FloatValue expectedWrapped = unpack(mismatch.getExpected());
         final FloatValue actualWrapped = unpack(mismatch.getActual());
-        final FloatValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
-        assertEquals(requested, requestedWrapped.getValue(), DELTA);
     }
 
     @Test
     public void return_mismatch_object_with_double_values() {
         final double expected = 0.1;
         final double actual = 0.2;
-        final double requested = 0.3;
-        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final DoubleValue expectedWrapped = unpack(mismatch.getExpected());
         final DoubleValue actualWrapped = unpack(mismatch.getActual());
-        final DoubleValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
-        assertEquals(requested, requestedWrapped.getValue(), DELTA);
     }
 
     @Test
     public void return_mismatch_object_with_boolean_values() {
         final boolean expected = true;
         final boolean actual = false;
-        final boolean requested = true;
-        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
         final BoolValue expectedWrapped = unpack(mismatch.getExpected());
         final BoolValue actualWrapped = unpack(mismatch.getActual());
-        final BoolValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
-        assertEquals(requested, requestedWrapped.getValue());
     }
 
     @Test
     public void set_default_expected_value_if_it_was_passed_as_null_message_overload() {
-        final ValueMismatch mismatch = Mismatch.of(null, newStringValue(ACTUAL), newStringValue(REQUESTED), VERSION);
+        final ValueMismatch mismatch = Mismatch.of(null, newStringValue(ACTUAL), VERSION);
         final String expected = mismatch.getExpected()
                                         .toString();
 
@@ -167,7 +151,7 @@ public class MismatchShould {
 
     @Test
     public void set_default_actual_value_if_it_was_passed_as_null_message_overload() {
-        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), null, newStringValue(REQUESTED), VERSION);
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), null, VERSION);
         final String actual = mismatch.getActual()
                                       .toString();
 
@@ -176,13 +160,23 @@ public class MismatchShould {
 
     @Test
     public void return_mismatch_object_with_message_values() {
-        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(REQUESTED), VERSION);
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
         final StringValue expected = unpack(mismatch.getExpected());
         final StringValue actual = unpack(mismatch.getActual());
-        final StringValue requested = unpack(mismatch.getRequested());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
-        assertEquals(REQUESTED, requested.getValue());
+    }
+
+    @Test
+    public void return_expected_string() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
+        assertEquals(EXPECTED, getExpectedString(mismatch));
+    }
+
+    @Test
+    public void return_actual_string() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
+        assertEquals(ACTUAL, getActualString(mismatch));
     }
 }

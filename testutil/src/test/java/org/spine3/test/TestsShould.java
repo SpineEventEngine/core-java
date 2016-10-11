@@ -84,6 +84,11 @@ public class TestsShould {
         assertEquals(expected, userId);
     }
 
+    @Test
+    public void create_new_UUID_based_UserId() {
+        assertFalse(Tests.newUserUuid().getValue().isEmpty());
+    }
+
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_UseId_value() {
         newUserId(Tests.<String>nullRef());

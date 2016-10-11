@@ -67,7 +67,7 @@ import java.util.regex.Pattern;
      * @param rootFieldPath a path to the root field (if present)
      */
     protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+        super(descriptor, fieldValues, rootFieldPath, false);
         this.minDecimalOpt = getFieldOption(ValidationProto.decimalMin);
         this.isMinDecimalInclusive = minDecimalOpt.getInclusive();
         this.maxDecimalOpt = getFieldOption(ValidationProto.decimalMax);
@@ -83,7 +83,9 @@ import java.util.regex.Pattern;
     /** Returns an absolute value of the number. */
     protected abstract V getAbs(V number);
 
-    /** Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}. */
+    /**
+     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
+     */
     protected abstract Any wrap(V value);
 
     @Override
