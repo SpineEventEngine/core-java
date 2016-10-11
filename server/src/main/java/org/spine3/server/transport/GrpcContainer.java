@@ -54,7 +54,6 @@ public class GrpcContainer {
     @Nullable
     private io.grpc.Server grpcServer;
 
-
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -63,7 +62,6 @@ public class GrpcContainer {
         this.port = builder.getPort();
         this.services = builder.getServices();
     }
-
 
     /**
      * Starts the service.
@@ -75,7 +73,6 @@ public class GrpcContainer {
         grpcServer = createGrpcServer();
         grpcServer.start();
     }
-
 
     /**
      * Returns {@code true} if the server is shut down or was not started at all, {@code false} otherwise.
@@ -94,7 +91,6 @@ public class GrpcContainer {
         grpcServer = null;
     }
 
-
     /** Waits for the service to become terminated. */
     public void awaitTermination() {
         checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
@@ -104,7 +100,6 @@ public class GrpcContainer {
             throw propagate(e);
         }
     }
-
 
     /**
      * Check if the given gRPC service is scheduled for the deployment in this container.
@@ -119,7 +114,6 @@ public class GrpcContainer {
         final String nameOfInterest = service.bindService()
                                              .getServiceDescriptor()
                                              .getName();
-
         boolean serviceIsPresent = false;
         for (ServerServiceDefinition serverServiceDefinition : services) {
             final String scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
@@ -140,7 +134,10 @@ public class GrpcContainer {
      * @return {@code true}, if the service is available for interaction within this container; {@code false} otherwise
      */
     public boolean isLive(BindableService service) {
-        return !isShutdown() && isScheduledForDeployment(service);
+        final boolean inShutdownState = isShutdown();
+        final boolean scheduledForDeployment = isScheduledForDeployment(service);
+        final boolean result = !inShutdownState && scheduledForDeployment;
+        return result;
     }
 
     /**
@@ -180,7 +177,6 @@ public class GrpcContainer {
         return builder.build();
     }
 
-
     public static class Builder {
 
         private int port = ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
@@ -212,8 +208,5 @@ public class GrpcContainer {
         public GrpcContainer build() {
             return new GrpcContainer(this);
         }
-
     }
-
-
 }
