@@ -142,7 +142,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         // Get a subset of IDs
         final List<I> ids = fillStorage(10).subList(0, 5);
 
-        final Iterable<EntityStorageRecord> read = storage.readBulk(ids);
+        final Iterable<EntityStorageRecord> read = storage.readMultiple(ids);
         assertSize(ids.size(), read);
 
         // Check data consistency
@@ -161,7 +161,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
                                                 .getFullName();
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
 
-        final Iterable<EntityStorageRecord> read = storage.readBulk(ids, fieldMask);
+        final Iterable<EntityStorageRecord> read = storage.readMultiple(ids, fieldMask);
         assertSize(ids.size(), read);
 
         // Check data consistency
@@ -217,6 +217,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
         assertEquals(expected, actual);
     }
 
+    @SuppressWarnings("BreakStatement")
     private static <I> Project checkProjectIdIsInList(EntityStorageRecord project, List<I> ids) {
         final Any packedState = project.getState();
         final Project state = AnyPacker.unpack(packedState);
