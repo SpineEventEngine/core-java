@@ -18,33 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.storage.memory;
 
-import com.google.protobuf.FieldMask;
-import org.junit.Test;
-
-import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
-import static org.spine3.test.Verify.assertEmpty;
+import org.spine3.server.storage.StandStorage;
+import org.spine3.server.storage.StandStorageShould;
 
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould {
+public class InMemoryStandStorageShould extends StandStorageShould {
 
-    @Test
-    public void retrieve_empty_map_if_storage_is_empty() {
-        final RecordStorage<String> storage = createStorage();
-
-        final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
-                                                     .addPaths("invalid-path")
-                                                     .build();
-
-        final Map empty = storage.readAll(nonEmptyFieldMask);
-        assertNotNull(empty);
-        assertEmpty(empty);
+    @Override
+    protected StandStorage createStorage() {
+        return InMemoryStandStorage.newBuilder()
+                                   .setMultitenant(false)
+                                   .build();
     }
-
-    protected abstract <T> RecordStorage<T> createStorage();
 }
