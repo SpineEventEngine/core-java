@@ -50,34 +50,45 @@ public abstract class StandStorageShould {
 
     protected abstract StandStorage createStorage();
 
+    protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER = new Supplier<AggregateStateId<ProjectId>>() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public AggregateStateId<ProjectId> get() {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(UUID.randomUUID()
+                                                            .toString())
+                                                 .build();
+            return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
+        }
+    };
+
     @Test
     public void retrieve_all_records() {
         final StandStorage storage = createStorage();
-        final List<AggregateStateId<ProjectId>> ids = fill(storage, 10, new Supplier<AggregateStateId<ProjectId>>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public AggregateStateId<ProjectId> get() {
-                final ProjectId projectId = ProjectId.newBuilder()
-                                                     .setId(UUID.randomUUID()
-                                                                .toString())
-                                                     .build();
-                return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
-            }
-        });
+        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Map<AggregateStateId, EntityStorageRecord> allRecords = storage.readAll();
-
         checkIds(ids, allRecords.values());
     }
 
-    protected static List<AggregateStateId<ProjectId>> fill(StandStorage storage,
-                                                            int count,
-                                                            Supplier<AggregateStateId<ProjectId>> idSupplier) {
-        final List<AggregateStateId<ProjectId>> ids = new LinkedList<>();
+    @Test
+    public void retrieve_records_by_ids() {
+        final StandStorage storage = createStorage();
+        // Use a subset of IDs
+        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
+
+        final Collection<EntityStorageRecord> records = (Collection<EntityStorageRecord>) storage.readMultiple(ids);
+        checkIds(ids, records);
+    }
+
+    protected static List<AggregateStateId> fill(StandStorage storage,
+                                                 int count,
+                                                 Supplier<AggregateStateId<ProjectId>> idSupplier) {
+        final List<AggregateStateId> ids = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final AggregateStateId<ProjectId> genericId = idSupplier.get();
-            final ProjectId id = genericId.getAggregateId();
+            final AggregateStateId genericId = idSupplier.get();
+            final ProjectId id = (ProjectId) genericId.getAggregateId();
             final Project project = Project.newBuilder()
                                            .setId(id)
                                            .setStatus(Project.Status.CREATED)
@@ -96,17 +107,17 @@ public abstract class StandStorageShould {
         return ids;
     }
 
-    protected void checkIds(List<AggregateStateId<ProjectId>> ids, Collection<EntityStorageRecord> records) {
+    protected void checkIds(List<AggregateStateId> ids, Collection<EntityStorageRecord> records) {
         assertSize(ids.size(), records);
 
-        final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId<ProjectId>, ProjectId>() {
+        final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
             @Nullable
             @Override
-            public ProjectId apply(@Nullable AggregateStateId<ProjectId> input) {
+            public ProjectId apply(@Nullable AggregateStateId input) {
                 if (input == null) {
                     return null;
                 }
-                return input.getAggregateId();
+                return (ProjectId) input.getAggregateId();
             }
         });
 
