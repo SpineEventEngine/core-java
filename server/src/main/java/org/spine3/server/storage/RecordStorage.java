@@ -81,7 +81,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
         final TypeUrl type = TypeUrl.of(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
 
-        final Message maskedState = FieldMasks.applyIfValid(fieldMask, stateAsMessage, type);
+        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
 
         final Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);

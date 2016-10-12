@@ -65,14 +65,13 @@ public class FieldMasks {
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
-     * @param type     Type of the {@link Message}s.
+     * @param type     type of the {@link Message}s.
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(
-            FieldMask mask,
-            Collection<M> messages,
-            TypeUrl type) {
+    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(FieldMask mask,
+                                                                                         Collection<M> messages,
+                                                                                         TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
@@ -101,17 +100,26 @@ public class FieldMasks {
     }
 
     /**
-     * Applies the given {@code FieldMask} to a single {@link Message}.
+     * Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
      *
      * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
      * do not affect the execution result.
      *
-     * @param mask    {@code FieldMask} instance to apply.
-     * @param message The {@link Message} to apply given {@code FieldMask} to.
-     * @param type    Type of the {@link Message}.
-     * @return A {@link Message} of the same type as the given one with only selected fields.
+     * @param mask    the {@code FieldMask} to apply.
+     * @param message the {@link Message} to apply given mask to.
+     * @param typeUrl type of given {@link Message}.
+     * @return the message of the same type as the given one with only selected fields if the {@code mask} is valid,
+     * original message otherwise.
      */
-    public static <M extends Message, B extends Message.Builder> M applyMask(FieldMask mask, M message, TypeUrl type) {
+    public static <M extends Message> M applyMask(FieldMask mask, M message, TypeUrl typeUrl) {
+        if (!mask.getPathsList()
+                 .isEmpty()) {
+            return doApply(mask, message, typeUrl);
+        }
+        return message;
+    }
+
+    private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask, M message, TypeUrl type) {
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
 
@@ -134,26 +142,6 @@ public class FieldMasks {
         }
     }
 
-    /**
-     * Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
-     *
-     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
-     * do not affect the execution result.
-     *
-     * @param mask    The {@code FieldMask} to apply.
-     * @param message The {@link Message} to apply given mask to.
-     * @param typeUrl Type of given {@link Message}.
-     * @return A {@link Message} of the same type as the given one with only selected fields
-     *          if the {@code mask} is valid, {@code message} itself otherwise.
-     */
-    public static <M extends Message> M applyIfValid(FieldMask mask, M message, TypeUrl typeUrl) {
-        if (!mask.getPathsList()
-                 .isEmpty()) {
-            return applyMask(mask, message, typeUrl);
-        }
-        return message;
-    }
-
     private static <M extends Message, B extends Message.Builder> M messageForFilter(
             ProtocolStringList filter,
             Constructor<B> builderConstructor, Message wholeMessage)
@@ -174,13 +162,13 @@ public class FieldMasks {
         return result;
     }
 
+    @SuppressWarnings("unchecked")      // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;
         final String className = KnownTypes.getClassName(typeUrl)
                                            .value();
         try {
-            //noinspection unchecked
             builderClass = (Class<B>) Class.forName(className)
                                            .getClasses()[0];
         } catch (ClassNotFoundException e) {

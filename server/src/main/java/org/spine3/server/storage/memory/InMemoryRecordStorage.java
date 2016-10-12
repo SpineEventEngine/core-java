@@ -71,7 +71,9 @@ import static com.google.common.collect.Maps.newHashMap;
         return result;
     }
 
-    private EntityStorageRecord findAndApplyFieldMask(Map<I, EntityStorageRecord> storage, I givenId, FieldMask fieldMask) {
+    private EntityStorageRecord findAndApplyFieldMask(Map<I, EntityStorageRecord> storage,
+                                                      I givenId,
+                                                      FieldMask fieldMask) {
         EntityStorageRecord matchingResult = null;
         for (I recordId : storage.keySet()) {
             if (recordId.equals(givenId)) {
@@ -80,7 +82,7 @@ import static com.google.common.collect.Maps.newHashMap;
                 final Any state = matchingRecord.getState();
                 final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
                 final Message wholeState = AnyPacker.unpack(state);
-                final Message maskedState = FieldMasks.applyIfValid(fieldMask, wholeState, typeUrl);
+                final Message maskedState = FieldMasks.applyMask(fieldMask, wholeState, typeUrl);
                 final Any processed = AnyPacker.pack(maskedState);
 
                 matchingRecord.setState(processed);

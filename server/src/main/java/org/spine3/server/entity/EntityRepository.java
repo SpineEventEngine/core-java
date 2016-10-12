@@ -249,7 +249,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
         final E entity = create(id);
         @SuppressWarnings("unchecked")
-        final M state = (M) FieldMasks.applyIfValid(fieldMask, unpack(record.getState()), getEntityStateType());
+        final M state = (M) FieldMasks.applyMask(fieldMask, unpack(record.getState()), getEntityStateType());
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
