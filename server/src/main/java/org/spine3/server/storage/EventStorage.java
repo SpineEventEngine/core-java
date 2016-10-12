@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -48,7 +47,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkValid;
 
@@ -155,7 +154,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
-        final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "event time");
+        final Timestamp timestamp = checkPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(timestamp)
                 .setEventType(eventType)
@@ -235,13 +234,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
-            this.eventTypeUrl = eventType.isEmpty() ?
-                                null :
-                                TypeUrl.of(eventType);
+            this.eventTypeUrl = eventType.isEmpty()
+                                ? null
+                                : TypeUrl.of(eventType);
             final List<Any> aggregateIdList = filter.getAggregateIdList();
-            this.aggregateIds = aggregateIdList.isEmpty() ?
-                                null :
-                                aggregateIdList;
+            this.aggregateIds = aggregateIdList.isEmpty()
+                                ? null
+                                : aggregateIdList;
         }
 
         @Override

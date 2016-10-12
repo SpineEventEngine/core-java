@@ -127,9 +127,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 
     private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg) {
         final boolean isContextField = srcField.getContainingType().equals(EventContext.getDescriptor());
-        final Object result = isContextField ?
-                getContext().getField(srcField) :
-                eventMsg.getField(srcField);
+        final Object result = isContextField
+                              ? getContext().getField(srcField)
+                              : eventMsg.getField(srcField);
         return result;
     }
 }

@@ -198,7 +198,6 @@ public class FieldMasks {
         }
 
         return builderClass;
-
     }
 
     private static Logger log() {

@@ -37,7 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -144,10 +144,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
+        final Timestamp timestamp = checkPositive(snapshot.getTimestamp(), "Snapshot timestamp");
 
         final AggregateStorageRecord record =
                 AggregateStorageRecord.newBuilder()
-                                      .setTimestamp(checkIsPositive(snapshot.getTimestamp(), "Snapshot timestamp"))
+                                      .setTimestamp(timestamp)
                                       .setEventType(SNAPSHOT_TYPE_NAME)
                                       .setEventId("") // No event ID for snapshots because it's not a domain event.
                                       .setVersion(snapshot.getVersion())
@@ -191,7 +192,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         final String eventType = ofEnclosed(eventMsg).getTypeName();
         checkNotEmptyOrBlank(eventType, "Event type");
 
-        final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "Event time");
+        final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                                                                              .setEvent(event)
