@@ -144,10 +144,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
+        final Timestamp timestamp = checkIsPositive(snapshot.getTimestamp(), "Snapshot timestamp");
 
         final AggregateStorageRecord record =
                 AggregateStorageRecord.newBuilder()
-                                      .setTimestamp(checkIsPositive(snapshot.getTimestamp(), "Snapshot timestamp"))
+                                      .setTimestamp(timestamp)
                                       .setEventType(SNAPSHOT_TYPE_NAME)
                                       .setEventId("") // No event ID for snapshots because it's not a domain event.
                                       .setVersion(snapshot.getVersion())
