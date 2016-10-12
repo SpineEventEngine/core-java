@@ -113,7 +113,6 @@ public class StandShould {
                                                                                  .isEmpty());
         assertTrue("Exposed aggregate types must be empty after the initialization", stand.getExposedAggregateTypes()
                                                                                           .isEmpty());
-
     }
 
     @Test
