@@ -35,7 +35,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkValid;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -121,7 +121,7 @@ public class CommandValidator {
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
         checkValid(context.getCommandId());
-        checkIsPositive(context.getTimestamp(), "Command time");
+        checkPositive(context.getTimestamp(), "Command time");
         final Message commandMessage = Commands.getMessage(command);
         final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
         if (targetId.isPresent()) { // else - consider the command is not for an entity

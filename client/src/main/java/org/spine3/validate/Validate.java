@@ -187,7 +187,7 @@ public class Validate {
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
-    public static Timestamp checkIsPositive(Timestamp timestamp, String nameToLog) {
+    public static Timestamp checkPositive(Timestamp timestamp, String nameToLog) {
         checkNotNull(timestamp, nameToLog + " is null.");
         checkArgument(timestamp.getSeconds() > 0, nameToLog + " must have a positive number of seconds.");
         checkArgument(timestamp.getNanos() >= 0, nameToLog + " must not have a negative number of nanoseconds.");

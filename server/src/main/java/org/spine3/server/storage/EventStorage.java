@@ -47,7 +47,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkValid;
 
@@ -154,7 +154,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
-        final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "event time");
+        final Timestamp timestamp = checkPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(timestamp)
                 .setEventType(eventType)
