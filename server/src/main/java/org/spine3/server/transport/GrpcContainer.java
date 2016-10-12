@@ -150,7 +150,7 @@ public class GrpcContainer {
      */
     public void addShutdownHook() {
         Runtime.getRuntime()
-               .addShutdownHook(new Thread(getShutdownOperation()));
+               .addShutdownHook(new Thread(getOnShutdownCallback()));
     }
 
     @VisibleForTesting
@@ -164,7 +164,7 @@ public class GrpcContainer {
     }
 
     @VisibleForTesting
-    /* package */ Runnable getShutdownOperation() {
+    /* package */ Runnable getOnShutdownCallback() {
         return new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")

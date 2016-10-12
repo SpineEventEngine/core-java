@@ -79,7 +79,7 @@ public class GrpcContainerShould {
 
     @SuppressWarnings("MagicNumber")
     @Test
-    public void add_and_remove_parameters_form_builder() {
+    public void add_and_remove_parameters_from_builder() {
         final GrpcContainer.Builder builder = GrpcContainer.newBuilder()
                                                            .setPort(8080)
                                                            .setPort(60);
@@ -110,7 +110,7 @@ public class GrpcContainerShould {
     }
 
     @Test
-    public void add_shutdown_hook_to_runtime() throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
         // private static Runtime currentRuntime
         final Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
@@ -125,7 +125,7 @@ public class GrpcContainerShould {
         verify(runtimeSpy).addShutdownHook(any(Thread.class));
 
         container.start();
-        container.getShutdownOperation()
+        container.getOnShutdownCallback()
                  .run();
         verify(container).shutdown();
     }
