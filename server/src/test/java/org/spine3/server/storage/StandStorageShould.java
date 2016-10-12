@@ -25,6 +25,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import org.junit.Test;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
@@ -38,7 +39,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -50,13 +50,13 @@ public abstract class StandStorageShould {
 
     protected abstract StandStorage createStorage();
 
-    protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER = new Supplier<AggregateStateId<ProjectId>>() {
+    protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
+            = new Supplier<AggregateStateId<ProjectId>>() {
         @SuppressWarnings("unchecked")
         @Override
         public AggregateStateId<ProjectId> get() {
             final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(UUID.randomUUID()
-                                                            .toString())
+                                                 .setId(Identifiers.newUuid())
                                                  .build();
             return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
         }
