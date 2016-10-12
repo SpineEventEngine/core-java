@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
@@ -159,6 +160,22 @@ public class SubscriptionServiceShould {
     }
 
     @Test
+    public void handle_subscription_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+        // Causes NPE
+        subscriptionService.subscribe(null, observer);
+        assertNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(NullPointerException.class, observer.throwable);
+    }
+
+    @Test
     public void activate_subscription() {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
@@ -170,7 +187,6 @@ public class SubscriptionServiceShould {
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
                                  .build();
-
         // Subscribe on the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
@@ -192,6 +208,22 @@ public class SubscriptionServiceShould {
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
+    }
+
+    @Test
+    public void handle_activation_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
+        // Causes NPE
+        subscriptionService.activate(null, observer);
+        assertNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(NullPointerException.class, observer.throwable);
     }
 
     @Test
@@ -232,6 +264,36 @@ public class SubscriptionServiceShould {
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
         verify(activateSubscription, never()).onCompleted();
+    }
+
+    @Test
+    public void handle_cancellation_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final Target target = getProjectQueryTarget();
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        subscriptionService.subscribe(topic, subscriptionObserver);
+
+        final String failureMessage = "Execution breaking exception";
+        final MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
+            @Override
+            public void onNext(Response value) {
+                super.onNext(value);
+                throw new RuntimeException(failureMessage);
+            }
+        };
+        subscriptionService.cancel(subscriptionObserver.streamFlowValue, observer);
+        assertNotNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(RuntimeException.class, observer.throwable);
+        assertEquals(observer.throwable.getMessage(), failureMessage);
     }
 
     private static BoundedContext setupBoundedContextForAggregateRepo() {
