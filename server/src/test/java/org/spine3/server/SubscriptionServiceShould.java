@@ -187,8 +187,8 @@ public class SubscriptionServiceShould {
         final Message projectState = Project.newBuilder()
                                             .setId(projectId)
                                             .build();
-        boundedContext.getStand()
-                      .update(projectId, AnyPacker.pack(projectState));
+        boundedContext.getStandFunnel()
+                      .post(projectId, AnyPacker.pack(projectState));
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
@@ -226,8 +226,8 @@ public class SubscriptionServiceShould {
         final Message projectState = Project.newBuilder()
                                             .setId(projectId)
                                             .build();
-        boundedContext.getStand()
-                      .update(projectId, AnyPacker.pack(projectState));
+        boundedContext.getStandFunnel()
+                      .post(projectId, AnyPacker.pack(projectState));
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
