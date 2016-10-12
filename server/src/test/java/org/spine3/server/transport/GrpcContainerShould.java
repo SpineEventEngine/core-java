@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -105,6 +107,27 @@ public class GrpcContainerShould {
 
         final GrpcContainer container = builder.build();
         assertNotNull(container);
+    }
+
+    @Test
+    public void add_shutdown_hook_to_runtime() throws NoSuchFieldException, IllegalAccessException, IOException {
+        final Class<Runtime> runtimeClass = Runtime.class;
+        // private static Runtime currentRuntime
+        final Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
+        currentRuntimeValue.setAccessible(true);
+        final Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
+        currentRuntimeValue.set(null, runtimeSpy);
+
+        final GrpcContainer container = spy(GrpcContainer.newBuilder()
+                                                         .setPort(8080)
+                                                         .build());
+        container.addShutdownHook();
+        verify(runtimeSpy).addShutdownHook(any(Thread.class));
+
+        container.start();
+        container.getShutdownOperation()
+                 .run();
+        verify(container).shutdown();
     }
 
     @Test

@@ -150,24 +150,7 @@ public class GrpcContainer {
      */
     public void addShutdownHook() {
         Runtime.getRuntime()
-               .addShutdownHook(new Thread(new Runnable() {
-                   // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-                   @SuppressWarnings("UseOfSystemOutOrSystemErr")
-                   @Override
-                   public void run() {
-                       final String serverClass = GrpcContainer.this.getClass()
-                                                                    .getName();
-                       try {
-                           if (!isShutdown()) {
-                               System.err.println("Shutting down " + serverClass + " since JVM is shutting down...");
-                               shutdown();
-                               System.err.println(serverClass + " shut down.");
-                           }
-                       } catch (RuntimeException e) {
-                           e.printStackTrace(System.err);
-                       }
-                   }
-               }));
+               .addShutdownHook(new Thread(getShutdownOperation()));
     }
 
     @VisibleForTesting
@@ -180,6 +163,27 @@ public class GrpcContainer {
         return builder.build();
     }
 
+    @VisibleForTesting
+    /* package */ Runnable getShutdownOperation() {
+        return new Runnable() {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+            @SuppressWarnings("UseOfSystemOutOrSystemErr")
+            @Override
+            public void run() {
+                final String serverClass = GrpcContainer.this.getClass()
+                                                             .getName();
+                try {
+                    if (!isShutdown()) {
+                        System.err.println("Shutting down " + serverClass + " since JVM is shutting down...");
+                        shutdown();
+                        System.err.println(serverClass + " shut down.");
+                    }
+                } catch (RuntimeException e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+        };
+    }
 
     public static class Builder {
 
