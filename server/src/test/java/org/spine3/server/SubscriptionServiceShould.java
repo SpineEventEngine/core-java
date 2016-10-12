@@ -212,6 +212,22 @@ public class SubscriptionServiceShould {
     }
 
     @Test
+    public void handle_activation_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
+        // Causes NPE
+        subscriptionService.activate(null, observer);
+        assertNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(NullPointerException.class, observer.throwable);
+    }
+
+    @Test
     public void cancel_subscription_on_topic() {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
