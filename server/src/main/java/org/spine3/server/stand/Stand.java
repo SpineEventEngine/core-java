@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -134,7 +135,8 @@ public class Stand implements AutoCloseable {
      * @param id          the entity identifier
      * @param entityState the entity state
      */
-    public void update(final Object id, final Any entityState) {
+    @VisibleForTesting      // Used in the integration tests from other packages to trigger the entity updates.
+    public void update(Object id, Any entityState) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
