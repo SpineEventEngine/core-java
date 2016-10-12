@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
@@ -156,6 +157,22 @@ public class SubscriptionServiceShould {
 
         assertNull(observer.throwable);
         assertTrue(observer.isCompleted);
+    }
+
+    @Test
+    public void handle_subscription_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+        // Causes NPE
+        subscriptionService.subscribe(null, observer);
+        assertNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(NullPointerException.class, observer.throwable);
     }
 
     @Test
