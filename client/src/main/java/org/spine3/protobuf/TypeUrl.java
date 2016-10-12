@@ -122,9 +122,9 @@ public final class TypeUrl extends StringTypeValue {
     @Internal
     public static TypeUrl of(String typeUrlOrName) {
         checkNotEmptyOrBlank(typeUrlOrName, "type URL or name");
-        final TypeUrl typeUrl = isTypeUrl(typeUrlOrName) ?
-                                ofTypeUrl(typeUrlOrName) :
-                                ofTypeName(typeUrlOrName);
+        final TypeUrl typeUrl = isTypeUrl(typeUrlOrName)
+                                ? ofTypeUrl(typeUrlOrName)
+                                : ofTypeName(typeUrlOrName);
         return typeUrl;
     }
 

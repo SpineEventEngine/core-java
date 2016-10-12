@@ -113,9 +113,9 @@ import static java.lang.String.format;
      * if the field name contains {@link ReferenceValidator#CONTEXT_REFERENCE}.
      */
     private Descriptor getSrcMessage(String fieldName) {
-        final Descriptor msg = fieldName.contains(CONTEXT_REFERENCE) ?
-                EventContext.getDescriptor() :
-                eventDescriptor;
+        final Descriptor msg = fieldName.contains(CONTEXT_REFERENCE)
+                               ? EventContext.getDescriptor()
+                               : eventDescriptor;
         return msg;
     }
 

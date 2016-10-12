@@ -143,9 +143,9 @@ public abstract class Entity<I, S extends Message> {
      */
     @CheckReturnValue
     public S getState() {
-        final S result = state == null ?
-                         getDefaultState() :
-                         state;
+        final S result = state == null
+                         ? getDefaultState()
+                         : state;
         return result;
     }
 
@@ -246,9 +246,9 @@ public abstract class Entity<I, S extends Message> {
     @CheckReturnValue
     @Nonnull
     public Timestamp whenModified() {
-        final Timestamp result = whenModified == null ?
-                                 Timestamp.getDefaultInstance() :
-                                 whenModified;
+        final Timestamp result = whenModified == null
+                                 ? Timestamp.getDefaultInstance()
+                                 : whenModified;
         return result;
     }
 

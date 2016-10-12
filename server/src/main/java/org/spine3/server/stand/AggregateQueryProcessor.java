@@ -82,9 +82,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
         final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
                                                        .isEmpty();
         if (target.getIncludeAll()) {
-            stateRecords = shouldApplyFieldMask ?
-                           standStorage.readAllByType(type, fieldMask) :
-                           standStorage.readAllByType(type);
+            stateRecords = shouldApplyFieldMask
+                           ? standStorage.readAllByType(type, fieldMask)
+                           : standStorage.readAllByType(type);
         } else {
             stateRecords = doFetchWithFilters(target, fieldMask);
         }
@@ -115,9 +115,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
                 // may be more effective, as bulk reading implies additional time and performance expenses.
                 final AggregateStateId singleId = stateIds.iterator()
                                                           .next();
-                final EntityStorageRecord singleResult = shouldApplyFieldMask ?
-                                                         standStorage.read(singleId, fieldMask) :
-                                                         standStorage.read(singleId);
+                final EntityStorageRecord singleResult = shouldApplyFieldMask
+                                                         ? standStorage.read(singleId, fieldMask)
+                                                         : standStorage.read(singleId);
                 result = ImmutableList.of(singleResult);
             } else {
                 result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
@@ -132,9 +132,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
                                                                     FieldMask fieldMask,
                                                                     boolean applyFieldMask) {
         ImmutableCollection<EntityStorageRecord> result;
-        final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask ?
-                                                              standStorage.readMultiple(stateIds, fieldMask) :
-                                                              standStorage.readMultiple(stateIds);
+        final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask
+                                                              ? standStorage.readMultiple(stateIds, fieldMask)
+                                                              : standStorage.readMultiple(stateIds);
         result = FluentIterable.from(bulkReadResults)
                                .filter(new Predicate<EntityStorageRecord>() {
                                    @Override

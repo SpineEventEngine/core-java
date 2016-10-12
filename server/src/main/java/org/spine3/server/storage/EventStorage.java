@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -235,13 +234,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
-            this.eventTypeUrl = eventType.isEmpty() ?
-                                null :
-                                TypeUrl.of(eventType);
+            this.eventTypeUrl = eventType.isEmpty()
+                                ? null
+                                : TypeUrl.of(eventType);
             final List<Any> aggregateIdList = filter.getAggregateIdList();
-            this.aggregateIds = aggregateIdList.isEmpty() ?
-                                null :
-                                aggregateIdList;
+            this.aggregateIds = aggregateIdList.isEmpty()
+                                ? null
+                                : aggregateIdList;
         }
 
         @Override
