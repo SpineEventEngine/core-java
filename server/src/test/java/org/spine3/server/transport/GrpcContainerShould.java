@@ -19,20 +19,31 @@
  */
 package org.spine3.server.transport;
 
+import io.grpc.BindableService;
 import io.grpc.Server;
+import io.grpc.ServerServiceDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Alex Tymchenko
@@ -41,14 +52,14 @@ public class GrpcContainerShould {
     private Server server;
     private GrpcContainer grpcContainer;
 
-
     @Before
     public void setUp() {
         final GrpcContainer.Builder builder = GrpcContainer.newBuilder();
         grpcContainer = spy(builder.build());
 
         server = mock(Server.class);
-        doReturn(server).when(grpcContainer).createGrpcServer();
+        doReturn(server).when(grpcContainer)
+                        .createGrpcServer();
     }
 
     @After
@@ -63,6 +74,60 @@ public class GrpcContainerShould {
         grpcContainer.start();
 
         verify(server).start();
+    }
+
+    @SuppressWarnings("MagicNumber")
+    @Test
+    public void add_and_remove_parameters_from_builder() {
+        final GrpcContainer.Builder builder = GrpcContainer.newBuilder()
+                                                           .setPort(8080)
+                                                           .setPort(60);
+        assertEquals(60, builder.getPort());
+
+        int count = 3;
+        final List<ServerServiceDefinition> definitions = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++) {
+            final BindableService mockService = mock(BindableService.class);
+            final ServerServiceDefinition mockDefinition = ServerServiceDefinition
+                    .builder(String.format("service-%s", i))
+                    .build();
+            when(mockService.bindService()).thenReturn(mockDefinition);
+            definitions.add(mockDefinition);
+
+            builder.addService(mockService);
+        }
+
+        count--;
+        builder.removeService(definitions.get(count));
+
+        final Set<ServerServiceDefinition> serviceSet = builder.getServices();
+        assertSize(count, serviceSet);
+
+        final GrpcContainer container = builder.build();
+        assertNotNull(container);
+    }
+
+    @Test
+    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
+        final Class<Runtime> runtimeClass = Runtime.class;
+        // Field signature: private static Runtime currentRuntime
+        // Origin class: {@code java.lang.Runtime}.
+        final Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
+        currentRuntimeValue.setAccessible(true);
+        final Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
+        currentRuntimeValue.set(null, runtimeSpy);
+
+        final GrpcContainer container = spy(GrpcContainer.newBuilder()
+                                                         .setPort(8080)
+                                                         .build());
+        container.addShutdownHook();
+        verify(runtimeSpy).addShutdownHook(any(Thread.class));
+
+        container.start();
+        container.getOnShutdownCallback()
+                 .run();
+        verify(container).shutdown();
     }
 
     @Test
