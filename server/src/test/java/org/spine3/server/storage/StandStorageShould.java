@@ -20,7 +20,9 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
@@ -31,6 +33,7 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.Task;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,12 +99,23 @@ public abstract class StandStorageShould {
     protected void checkIds(List<AggregateStateId<ProjectId>> ids, Collection<EntityStorageRecord> records) {
         assertSize(ids.size(), records);
 
+        final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId<ProjectId>, ProjectId>() {
+            @Nullable
+            @Override
+            public ProjectId apply(@Nullable AggregateStateId<ProjectId> input) {
+                if (input == null) {
+                    return null;
+                }
+                return input.getAggregateId();
+            }
+        });
+
         for (EntityStorageRecord record : records) {
             final Any packedState = record.getState();
             final Project state = AnyPacker.unpack(packedState);
             final ProjectId id = state.getId();
 
-            assertContains(id, ids);
+            assertContains(id, projectIds);
         }
     }
 
