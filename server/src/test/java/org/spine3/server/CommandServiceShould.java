@@ -148,7 +148,6 @@ public class CommandServiceShould {
                 grpcContainer.shutdown();
             }
         }
-
     }
 
     /*
