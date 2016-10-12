@@ -123,7 +123,7 @@ public class FieldMasks {
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
 
-        if (filter.isEmpty() || builderClass == null) {
+        if (builderClass == null) {
             return message;
         }
 
