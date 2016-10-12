@@ -40,6 +40,7 @@ import org.spine3.testdata.TestStandFactory;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -152,7 +153,7 @@ public class QueryServiceShould {
     private static void checkFailureResponse(TestQueryResponseObserver responseObserver) {
         final QueryResponse responseHandled = responseObserver.getResponseHandled();
         assertNull(responseHandled);
-        assertTrue(responseObserver.isCompleted());
+        assertFalse(responseObserver.isCompleted());
         assertNotNull(responseObserver.getThrowable());
     }
 

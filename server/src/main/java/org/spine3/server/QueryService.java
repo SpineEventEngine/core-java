@@ -69,7 +69,6 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing query", e);
             responseObserver.onError(e);
-            responseObserver.onCompleted();
         }
     }
 
