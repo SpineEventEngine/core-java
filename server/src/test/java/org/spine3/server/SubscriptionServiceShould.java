@@ -187,7 +187,6 @@ public class SubscriptionServiceShould {
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
                                  .build();
-
         // Subscribe on the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
@@ -265,6 +264,36 @@ public class SubscriptionServiceShould {
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
         verify(activateSubscription, never()).onCompleted();
+    }
+
+    @Test
+    public void handle_cancellation_process_exceptions_and_call_observer_error_callback() {
+        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+
+        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                           .addBoundedContext(boundedContext)
+                                                                           .build();
+        final Target target = getProjectQueryTarget();
+        final Topic topic = Topic.newBuilder()
+                                 .setTarget(target)
+                                 .build();
+        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        subscriptionService.subscribe(topic, subscriptionObserver);
+
+        final String failureMessage = "Execution breaking exception";
+        final MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
+            @Override
+            public void onNext(Response value) {
+                super.onNext(value);
+                throw new RuntimeException(failureMessage);
+            }
+        };
+        subscriptionService.cancel(subscriptionObserver.streamFlowValue, observer);
+        assertNotNull(observer.streamFlowValue);
+        assertFalse(observer.isCompleted);
+        assertNotNull(observer.throwable);
+        assertInstanceOf(RuntimeException.class, observer.throwable);
+        assertEquals(observer.throwable.getMessage(), failureMessage);
     }
 
     private static BoundedContext setupBoundedContextForAggregateRepo() {
