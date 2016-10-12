@@ -51,6 +51,14 @@ message RepeatedRequiredMsgFieldValue {
     repeated google.protobuf.StringValue value = 1 [(required).value = true];
 }
 
+message RequiredEnumFieldValue {
+    Time value = 1 [(required).value = true];
+}
+
+message RequiredBooleanFieldValue {
+    bool value = 1 [(required).value = true];
+}
+
 
 // Messages for "decimal_min", "decimal_max" options tests.
 
@@ -119,15 +127,4 @@ message EnclosedMessageFieldValue {
 
 message EnclosedMessageWithoutAnnotationFieldValue {
     RequiredStringFieldValue outer_msg_field = 1;
-}
-
-
-// Messages for exceptional conditions tests.
-
-message AnnotatedEnumFieldValue {
-    Time value = 1 [(required).value = true];
-}
-
-message AnnotatedBooleanFieldValue {
-    bool value = 1 [(required).value = true];
 }

@@ -30,33 +30,9 @@ import org.junit.Test;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Values;
-import org.spine3.test.validate.msg.AnnotatedBooleanFieldValue;
-import org.spine3.test.validate.msg.AnnotatedEnumFieldValue;
-import org.spine3.test.validate.msg.DecimalMaxIncNumberFieldValue;
-import org.spine3.test.validate.msg.DecimalMaxNotIncNumberFieldValue;
-import org.spine3.test.validate.msg.DecimalMinIncNumberFieldValue;
-import org.spine3.test.validate.msg.DecimalMinNotIncNumberFieldValue;
-import org.spine3.test.validate.msg.DigitsCountNumberFieldValue;
-import org.spine3.test.validate.msg.EnclosedMessageFieldValue;
-import org.spine3.test.validate.msg.EnclosedMessageWithoutAnnotationFieldValue;
-import org.spine3.test.validate.msg.EntityIdByteStringFieldValue;
-import org.spine3.test.validate.msg.EntityIdDoubleFieldValue;
-import org.spine3.test.validate.msg.EntityIdIntFieldValue;
-import org.spine3.test.validate.msg.EntityIdLongFieldValue;
-import org.spine3.test.validate.msg.EntityIdMsgFieldValue;
-import org.spine3.test.validate.msg.EntityIdRepeatedFieldValue;
-import org.spine3.test.validate.msg.EntityIdStringFieldValue;
-import org.spine3.test.validate.msg.MaxNumberFieldValue;
-import org.spine3.test.validate.msg.MinNumberFieldValue;
-import org.spine3.test.validate.msg.PatternStringFieldValue;
-import org.spine3.test.validate.msg.RepeatedRequiredMsgFieldValue;
-import org.spine3.test.validate.msg.RequiredByteStringFieldValue;
-import org.spine3.test.validate.msg.RequiredMsgFieldValue;
-import org.spine3.test.validate.msg.RequiredStringFieldValue;
-import org.spine3.test.validate.msg.TimeInFutureFieldValue;
-import org.spine3.test.validate.msg.TimeInPastFieldValue;
-import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
+import org.spine3.test.validate.msg.*;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.internal.Time;
 
 import java.util.List;
 
@@ -149,6 +125,29 @@ public class MessageValidatorShould {
         validate(invalidMsg);
         assertIsValid(false);
     }
+
+    @Test
+    public void find_out_that_required_Enum_field_is_NOT_set() {
+        final RequiredEnumFieldValue invalidMsg = RequiredEnumFieldValue.getDefaultInstance();
+        validate(invalidMsg);
+        assertIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_required_Enum_field_is_set() {
+        final RequiredEnumFieldValue invalidMsg = RequiredEnumFieldValue.newBuilder()
+                .setValue(Time.FUTURE)
+                .build();
+        validate(invalidMsg);
+        assertIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_required_NOT_set_Boolean_field_pass_validation() {
+        validate(RequiredBooleanFieldValue.getDefaultInstance());
+        assertIsValid(true);
+    }
+
 
     @Test
     public void find_out_that_repeated_required_field_has_valid_values() {
@@ -662,20 +661,6 @@ public class MessageValidatorShould {
         assertEquals(NO_VALUE_MSG, violation.getMsgFormat());
         assertFieldPathIs(violation, VALUE);
         assertTrue(violation.getViolationList().isEmpty());
-    }
-
-    /*
-     * Exceptional conditions tests.
-     */
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_annotate_field_of_enum_type() {
-        validate(AnnotatedEnumFieldValue.getDefaultInstance());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_annotate_field_of_boolean_type() {
-        validate(AnnotatedBooleanFieldValue.getDefaultInstance());
     }
 
     /*

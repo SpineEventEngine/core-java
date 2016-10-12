@@ -21,21 +21,20 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
 /**
- * Validates fields of type {@link ByteString}.
+ * Validates fields of type {@link Boolean}.
  *
- * @author Alexander Litus
+ * @author Dmitry Kashcheiev
  */
-/* package */ class ByteStringFieldValidator extends FieldValidator<ByteString> {
-
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a ByteString.";
+/* package */ class BooleanFieldValidator extends FieldValidator<Boolean>  {
 
     /**
      * Creates a new validator instance.
@@ -44,30 +43,35 @@ import java.util.List;
      * @param fieldValues values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ ByteStringFieldValidator(FieldDescriptor descriptor, ImmutableList<ByteString> fieldValues, FieldPath rootFieldPath) {
+    /*package*/ BooleanFieldValidator(Descriptors.FieldDescriptor descriptor, ImmutableList<Boolean> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
+    }
+
+    /**
+     * In Protobuf there is no way to tell if the value is {@code false} or was not set.
+     *
+     * @return false
+     */
+    @Override
+    protected boolean isValueNotSet(Boolean value) {
+        return false;
     }
 
     @Override
     protected List<ConstraintViolation> validate() {
-        checkIfRequiredAndNotSet();
-        final List<ConstraintViolation> violations = super.validate();
-        return violations;
+        if (isRequiredField()) {
+            log().warn("'required' option not allowed for boolean field");
+        }
+        return super.validate();
     }
 
-    @Override
-    @SuppressWarnings("RefusedBequest")
-    protected void validateEntityId() {
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(INVALID_ID_TYPE_MSG)
-                .setFieldPath(getFieldPath())
-                .build();
-        addViolation(violation);
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(BooleanFieldValidator.class);
     }
 
-    @Override
-    protected boolean isValueNotSet(ByteString value) {
-        final boolean result = value.isEmpty();
-        return result;
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

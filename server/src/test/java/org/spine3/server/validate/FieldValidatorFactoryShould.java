@@ -28,8 +28,8 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.test.validate.msg.AnnotatedEnumFieldValue;
 import org.spine3.test.validate.msg.RequiredByteStringFieldValue;
+import org.spine3.test.validate.msg.RequiredEnumFieldValue;
 import org.spine3.test.validate.msg.RequiredMsgFieldValue;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
@@ -107,17 +107,21 @@ public class FieldValidatorFactoryShould {
         assertTrue(validator instanceof ByteStringFieldValidator);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_pass_enum_field() {
-        final FieldDescriptor field = AnnotatedEnumFieldValue.getDescriptor().getFields().get(0);
+    @Test
+    public void create_Enum_field_validator() {
+        final FieldDescriptor field = RequiredEnumFieldValue.getDescriptor().getFields().get(0);
 
-        create(field, new Object(), FIELD_PATH);
+        final FieldValidator validator = create(field, new Object(), FIELD_PATH);
+
+        assertTrue(validator instanceof EnumFieldValidator);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_pass_boolean_field() {
+    @Test
+    public void create_Boolean_field_validator() {
         final FieldDescriptor field = BoolValue.getDescriptor().getFields().get(0);
 
-        create(field, new Object(), FIELD_PATH);
+        final FieldValidator validator = create(field, new Object(), FIELD_PATH);
+
+        assertTrue(validator instanceof BooleanFieldValidator);
     }
 }

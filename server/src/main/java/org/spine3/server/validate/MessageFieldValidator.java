@@ -84,8 +84,8 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 
     @Override
     protected boolean isValueNotSet(Message value) {
-        final boolean isNotSet = isDefault(value);
-        return isNotSet;
+        final boolean result = isDefault(value);
+        return result;
     }
 
     private void validateFieldsOfMessageIfNeeded() {
