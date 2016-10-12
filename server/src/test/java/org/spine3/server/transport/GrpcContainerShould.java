@@ -112,7 +112,8 @@ public class GrpcContainerShould {
     @Test
     public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
-        // private static Runtime currentRuntime
+        // Field signature: private static Runtime currentRuntime
+        // Origin class: {@code java.lang.Runtime}.
         final Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
         currentRuntimeValue.setAccessible(true);
         final Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
