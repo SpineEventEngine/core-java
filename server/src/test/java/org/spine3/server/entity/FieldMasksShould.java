@@ -139,7 +139,7 @@ public class FieldMasksShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void fail_to_mask_message_if_passed_type_dees_not_match() {
+    public void fail_to_mask_message_if_passed_type_does_not_match() {
         final FieldMask mask = Given.fieldMask(Project.ID_FIELD_NUMBER);
 
         final Project origin = Given.newProject("some-string");
