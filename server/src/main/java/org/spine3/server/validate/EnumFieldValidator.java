@@ -21,21 +21,18 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
 /**
- * Validates fields of type {@link ByteString}.
+ * Validates fields of type {@link Descriptors.EnumValueDescriptor}.
  *
- * @author Alexander Litus
+ * @author Dmitry Kashcheiev
  */
-/* package */ class ByteStringFieldValidator extends FieldValidator<ByteString> {
-
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a ByteString.";
+/* package */ class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor>  {
 
     /**
      * Creates a new validator instance.
@@ -44,8 +41,15 @@ import java.util.List;
      * @param fieldValues values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ ByteStringFieldValidator(FieldDescriptor descriptor, ImmutableList<ByteString> fieldValues, FieldPath rootFieldPath) {
+    /*package*/ EnumFieldValidator(Descriptors.FieldDescriptor descriptor, ImmutableList<Descriptors.EnumValueDescriptor> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
+    }
+
+    @Override
+    protected boolean isValueNotSet(Descriptors.EnumValueDescriptor value) {
+        final int intValue = value.getNumber();
+        final boolean result = intValue == 0;
+        return result;
     }
 
     @Override
@@ -53,21 +57,5 @@ import java.util.List;
         checkIfRequiredAndNotSet();
         final List<ConstraintViolation> violations = super.validate();
         return violations;
-    }
-
-    @Override
-    @SuppressWarnings("RefusedBequest")
-    protected void validateEntityId() {
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(INVALID_ID_TYPE_MSG)
-                .setFieldPath(getFieldPath())
-                .build();
-        addViolation(violation);
-    }
-
-    @Override
-    protected boolean isValueNotSet(ByteString value) {
-        final boolean result = value.isEmpty();
-        return result;
     }
 }
