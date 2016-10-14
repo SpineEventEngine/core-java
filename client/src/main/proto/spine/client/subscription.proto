@@ -1,0 +1,91 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.client;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "SubscriptionProto";
+option java_package = "org.spine3.client";
+
+
+import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
+
+import "spine/annotations.proto";
+import "spine/base/response.proto";
+import "spine/client/entities.proto";
+
+// An object defining a unit of subscription.
+//
+// Defines the target (entities and criteria) of subscription.
+message Topic {
+
+    // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
+    Target target = 1;
+
+    // Field mask to be applied to the entity updates applicable to this topic.
+    //
+    // Applied to each of the entity state messages before returning in scope of SubscriptionUpdate.
+    google.protobuf.FieldMask field_mask = 2;
+
+    // Reserved for utility fields.
+    reserved 3 to 6;
+}
+
+// Wrapped collection of read-side entity updates on a topic with the specific subscription ID.
+message SubscriptionUpdate {
+
+    // The subscription in which scope this update is propagated.
+    Subscription subscription = 1;
+
+    // Represents the base part of the response. I.e. whether the Topic subscription requires has been acked or not.
+    base.Response response = 2;
+
+    // Reserved for more subscription update attributes.
+    reserved 3 to 9;
+
+    // Entity updates packed as Any.
+    //
+    // Each of the update messages is affected by the field mask set for the current subscription.
+    repeated google.protobuf.Any updates = 10;
+}
+
+// The subscription object.
+//
+// Created when the client subscribes to a topic inside the read-side implementation.
+// Generally should not be created in the client code.
+// See SubscriptionService#Subscribe(Topic).
+message Subscription {
+
+    // Unique identifier of the subscription.
+    //
+    // Typically built using Java's UUID.toString() functionality.
+    // Must be unique in scope of a bounded context.
+    string id = 1;
+
+    // Represents TypeUrl of the target entity for this subscription.
+    string type = 2;
+
+    // Reserved for subscription attributes.
+    reserved 3 to 10;
+}

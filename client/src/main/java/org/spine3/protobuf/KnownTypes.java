@@ -63,6 +63,7 @@ import org.spine3.Internal;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -105,8 +106,8 @@ public class KnownTypes {
      */
     private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(knownTypes);
 
-
-    private KnownTypes() {}
+    private KnownTypes() {
+    }
 
     /** Retrieves Protobuf type URLs known to the application. */
     public static ImmutableSet<TypeUrl> getTypeUrls() {
@@ -145,7 +146,8 @@ public class KnownTypes {
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
     public static TypeUrl getTypeUrl(ClassName className) {
-        final TypeUrl result = knownTypes.inverse().get(className);
+        final TypeUrl result = knownTypes.inverse()
+                                         .get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type URL found for the Java class " + className);
         }
@@ -153,6 +155,7 @@ public class KnownTypes {
     }
 
     /** Returns a Protobuf type URL by Protobuf type name. */
+    @Nullable
     public static TypeUrl getTypeUrl(String typeName) {
         final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
         return typeUrl;
@@ -203,7 +206,8 @@ public class KnownTypes {
          * <p>This method needs to be updated with introduction of new Google Protobuf types
          * after they are used in the framework.
          */
-        @SuppressWarnings("OverlyLongMethod") // OK as there are many types in Protobuf and we want to keep this code in one place.
+        @SuppressWarnings("OverlyLongMethod")
+        // OK as there are many types in Protobuf and we want to keep this code in one place.
         private Builder addStandardProtobufTypes() {
             // Types from `any.proto`.
             put(Any.class);
@@ -217,14 +221,14 @@ public class KnownTypes {
             put(DescriptorProtos.FileDescriptorSet.class);
             put(DescriptorProtos.FileDescriptorProto.class);
             put(DescriptorProtos.DescriptorProto.class);
-                // Inner types of `DescriptorProto`
-                put(DescriptorProtos.DescriptorProto.ExtensionRange.class);
-                put(DescriptorProtos.DescriptorProto.ReservedRange.class);
+            // Inner types of `DescriptorProto`
+            put(DescriptorProtos.DescriptorProto.ExtensionRange.class);
+            put(DescriptorProtos.DescriptorProto.ReservedRange.class);
 
             put(DescriptorProtos.FieldDescriptorProto.class);
-                putEnum(DescriptorProtos.FieldDescriptorProto.Type.getDescriptor(),
-                        DescriptorProtos.FieldDescriptorProto.Type.class);
-                putEnum(DescriptorProtos.FieldDescriptorProto.Label.getDescriptor(),
+            putEnum(DescriptorProtos.FieldDescriptorProto.Type.getDescriptor(),
+                    DescriptorProtos.FieldDescriptorProto.Type.class);
+            putEnum(DescriptorProtos.FieldDescriptorProto.Label.getDescriptor(),
                     DescriptorProtos.FieldDescriptorProto.Label.class);
 
             put(DescriptorProtos.OneofDescriptorProto.class);
@@ -237,21 +241,21 @@ public class KnownTypes {
                     DescriptorProtos.FileOptions.OptimizeMode.class);
             put(DescriptorProtos.MessageOptions.class);
             put(DescriptorProtos.FieldOptions.class);
-                putEnum(DescriptorProtos.FieldOptions.CType.getDescriptor(),
-                        DescriptorProtos.FieldOptions.CType.class);
-                putEnum(DescriptorProtos.FieldOptions.JSType.getDescriptor(),
-                        DescriptorProtos.FieldOptions.JSType.class);
+            putEnum(DescriptorProtos.FieldOptions.CType.getDescriptor(),
+                    DescriptorProtos.FieldOptions.CType.class);
+            putEnum(DescriptorProtos.FieldOptions.JSType.getDescriptor(),
+                    DescriptorProtos.FieldOptions.JSType.class);
             put(DescriptorProtos.EnumOptions.class);
             put(DescriptorProtos.EnumValueOptions.class);
             put(DescriptorProtos.ServiceOptions.class);
             put(DescriptorProtos.MethodOptions.class);
             put(DescriptorProtos.UninterpretedOption.class);
             put(DescriptorProtos.SourceCodeInfo.class);
-                // Inner types of `SourceCodeInfo`.
-                put(DescriptorProtos.SourceCodeInfo.Location.class);
+            // Inner types of `SourceCodeInfo`.
+            put(DescriptorProtos.SourceCodeInfo.Location.class);
             put(DescriptorProtos.GeneratedCodeInfo.class);
-                // Inner types of `GeneratedCodeInfo`.
-                put(DescriptorProtos.GeneratedCodeInfo.Annotation.class);
+            // Inner types of `GeneratedCodeInfo`.
+            put(DescriptorProtos.GeneratedCodeInfo.Annotation.class);
 
             // Types from `duration.proto`.
             put(Duration.class);
@@ -277,8 +281,8 @@ public class KnownTypes {
             // Types from `type.proto`.
             put(Type.class);
             put(Field.class);
-                putEnum(Field.Kind.getDescriptor(), Field.Kind.class);
-                putEnum(Field.Cardinality.getDescriptor(), Field.Cardinality.class);
+            putEnum(Field.Kind.getDescriptor(), Field.Kind.class);
+            putEnum(Field.Cardinality.getDescriptor(), Field.Cardinality.class);
             put(com.google.protobuf.Enum.class);
             put(EnumValue.class);
             put(Option.class);
@@ -313,8 +317,8 @@ public class KnownTypes {
         private void put(TypeUrl typeUrl, ClassName className) {
             if (resultMap.containsKey(typeUrl)) {
                 log().warn("Duplicate key in the {} map: {}. " +
-                "It may be caused by the `task.descriptorSetOptions.includeImports` option " +
-                "set to `true` in the `build.gradle`.", KnownTypes.class.getName(), typeUrl);
+                                   "It may be caused by the `task.descriptorSetOptions.includeImports` option " +
+                                   "set to `true` in the `build.gradle`.", KnownTypes.class.getName(), typeUrl);
                 return;
             }
             resultMap.put(typeUrl, className);

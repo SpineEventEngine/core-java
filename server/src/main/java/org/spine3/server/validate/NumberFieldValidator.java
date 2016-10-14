@@ -131,9 +131,9 @@ import java.util.regex.Pattern;
         }
         final V min = toNumber(minAsString);
         final int comparisonResult = value.compareTo(min);
-        final boolean fits = isMinDecimalInclusive ?
-                             comparisonResult >= 0 :
-                             comparisonResult > 0;
+        final boolean fits = isMinDecimalInclusive
+                             ? comparisonResult >= 0
+                             : comparisonResult > 0;
         final boolean notFit = !fits;
         return notFit;
     }
@@ -144,9 +144,9 @@ import java.util.regex.Pattern;
             return false;
         }
         final V max = toNumber(maxAsString);
-        final boolean fits = isMaxDecimalInclusive ?
-                             value.compareTo(max) <= 0 :
-                             value.compareTo(max) < 0;
+        final boolean fits = isMaxDecimalInclusive
+                             ? value.compareTo(max) <= 0
+                             : value.compareTo(max) < 0;
         final boolean notFit = !fits;
         return notFit;
     }

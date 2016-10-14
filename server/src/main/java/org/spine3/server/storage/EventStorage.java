@@ -47,7 +47,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkIsPositive;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkValid;
 
@@ -80,7 +80,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotNull(event);
 
         final EventStorageRecord record = toEventStorageRecord(id, event);
-        writeInternal(record);
+        writeRecord(record);
     }
 
     @Override
@@ -88,7 +88,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotClosed();
         checkNotNull(id);
 
-        final EventStorageRecord record = readInternal(id);
+        final EventStorageRecord record = readRecord(id);
         if (record == null) {
             return Event.getDefaultInstance();
         }
@@ -109,7 +109,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      *
      * @param record the record to write
      */
-    protected abstract void writeInternal(EventStorageRecord record);
+    protected abstract void writeRecord(EventStorageRecord record);
 
     /**
      * Reads storage format record.
@@ -118,7 +118,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * @return the record instance of null if there's not record with such ID
      */
     @Nullable
-    protected abstract EventStorageRecord readInternal(EventId eventId);
+    protected abstract EventStorageRecord readRecord(EventId eventId);
 
     /** Converts EventStorageRecord to Event. */
     protected static Event toEvent(EventStorageRecord record) {
@@ -154,7 +154,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
-        final Timestamp timestamp = checkIsPositive(context.getTimestamp(), "event time");
+        final Timestamp timestamp = checkPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(timestamp)
                 .setEventType(eventType)
@@ -234,13 +234,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
-            this.eventTypeUrl = eventType.isEmpty() ?
-                                null :
-                                TypeUrl.of(eventType);
+            this.eventTypeUrl = eventType.isEmpty()
+                                ? null
+                                : TypeUrl.of(eventType);
             final List<Any> aggregateIdList = filter.getAggregateIdList();
-            this.aggregateIds = aggregateIdList.isEmpty() ?
-                                null :
-                                aggregateIdList;
+            this.aggregateIds = aggregateIdList.isEmpty()
+                                ? null
+                                : aggregateIdList;
         }
 
         @Override

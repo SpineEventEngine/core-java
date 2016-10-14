@@ -43,6 +43,9 @@ import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import org.spine3.server.stand.Stand;
+import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.validate.Validate;
 
@@ -64,7 +67,7 @@ import static org.spine3.util.Logging.closed;
  * @author Mikhail Melnik
  */
 public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-                            implements AutoCloseable {
+        implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
     public static final String DEFAULT_NAME = "Main";
@@ -80,6 +83,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     private final StorageFactory storageFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
+    private final Stand stand;
+    private final StandFunnel standFunnel;
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
@@ -89,6 +94,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         this.storageFactory = builder.storageFactory;
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
+        this.stand = builder.stand;
+        this.standFunnel = builder.standFunnel;
     }
 
     /**
@@ -110,6 +117,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
      * <li>Closes {@link EventBus}.
      * <li>Closes {@link CommandStore}.
      * <li>Closes {@link EventStore}.
+     * <li>Closes {@link Stand}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
      *      <li>un-registered from {@link CommandBus}
@@ -125,6 +133,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         storageFactory.close();
         commandBus.close();
         eventBus.close();
+        stand.close();
 
         shutDownRepositories();
 
@@ -183,6 +192,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         if (repository instanceof EventDispatcher) {
             eventBus.register((EventDispatcher) repository);
         }
+        stand.registerTypeSupplier(repository);
     }
 
     private void checkStorageAssigned(Repository repository) {
@@ -207,10 +217,10 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         final IntegrationEventContext sourceContext = integrationEvent.getContext();
         final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
         final EventContext context = EventContext.newBuilder()
-                .setEventId(sourceContext.getEventId())
-                .setTimestamp(sourceContext.getTimestamp())
-                .setProducerId(AnyPacker.pack(producerId))
-                .build();
+                                                 .setEventId(sourceContext.getEventId())
+                                                 .setTimestamp(sourceContext.getTimestamp())
+                                                 .setProducerId(AnyPacker.pack(producerId))
+                                                 .build();
         final Event result = Events.createEvent(integrationEvent.getMessage(), context);
         return result;
     }
@@ -225,6 +235,18 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     @CheckReturnValue
     public EventBus getEventBus() {
         return this.eventBus;
+    }
+
+    /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public StandFunnel getStandFunnel() {
+        return this.standFunnel;
+    }
+
+    /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public Stand getStand() {
+        return stand;
     }
 
     /**
@@ -244,6 +266,9 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private EventBus eventBus;
         private boolean multitenant;
         private EventEnricher eventEnricher;
+        private Stand stand;
+        private StandFunnel standFunnel;
+        private Executor standFunnelExecutor;
 
         /**
          * Sets the name for a new bounded context.
@@ -371,6 +396,26 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return eventEnricher;
         }
 
+        public Builder setStand(Stand stand) {
+            this.stand = checkNotNull(stand);
+            return this;
+        }
+
+        @Nullable
+        public Stand getStand() {
+            return stand;
+        }
+
+        @Nullable
+        public Executor getStandFunnelExecutor() {
+            return standFunnelExecutor;
+        }
+
+        public Builder setStandFunnelExecutor(Executor standFunnelExecutor) {
+            this.standFunnelExecutor = standFunnelExecutor;
+            return this;
+        }
+
         public BoundedContext build() {
             checkNotNull(storageFactory, "storageFactory must be set");
 
@@ -388,12 +433,33 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
                 eventBus = createEventBus();
             }
 
+            if (stand == null) {
+                stand = createStand(storageFactory);
+            }
+
+            standFunnel = createStandFunnel(standFunnelExecutor);
+
             commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 
             log().info(result.nameForLogging() + " created.");
             return result;
+        }
+
+        private StandFunnel createStandFunnel(@Nullable Executor standFunnelExecutor) {
+            StandFunnel standFunnel;
+            if (standFunnelExecutor == null) {
+                standFunnel = StandFunnel.newBuilder()
+                                         .setStand(stand)
+                                         .build();
+            } else {
+                standFunnel = StandFunnel.newBuilder()
+                                         .setExecutor(standFunnelExecutor)
+                                         .setStand(stand)
+                                         .build();
+            }
+            return standFunnel;
         }
 
         private CommandStore createCommandStore() {
@@ -430,6 +496,14 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
                                             .setEventStore(eventStore)
                                             .setEnricher(eventEnricher)
                                             .build();
+            return result;
+        }
+
+        private static Stand createStand(StorageFactory storageFactory) {
+            final StandStorage standStorage = storageFactory.createStandStorage();
+            final Stand result = Stand.newBuilder()
+                                      .setStorage(standStorage)
+                                      .build();
             return result;
         }
     }

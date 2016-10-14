@@ -75,7 +75,7 @@ public abstract class Entity<I, S extends Message> {
     private static final int ID_CLASS_GENERIC_INDEX = 0;
 
     /** The index of the declaration of the generic parameter type {@code S} in this class. */
-    private static final int STATE_CLASS_GENERIC_INDEX = 1;
+    protected static final int STATE_CLASS_GENERIC_INDEX = 1;
 
     /** Supported ID types except {@link Message}s. */
     private static final ImmutableSet<Class<?>> SUPPORTED_SIMPLE_ID_TYPES = ImmutableSet.<Class<?>>builder()
@@ -143,9 +143,9 @@ public abstract class Entity<I, S extends Message> {
      */
     @CheckReturnValue
     public S getState() {
-        final S result = state == null ?
-                         getDefaultState() :
-                         state;
+        final S result = state == null
+                         ? getDefaultState()
+                         : state;
         return result;
     }
 
@@ -246,9 +246,9 @@ public abstract class Entity<I, S extends Message> {
     @CheckReturnValue
     @Nonnull
     public Timestamp whenModified() {
-        final Timestamp result = whenModified == null ?
-                                 Timestamp.getDefaultInstance() :
-                                 whenModified;
+        final Timestamp result = whenModified == null
+                                 ? Timestamp.getDefaultInstance()
+                                 : whenModified;
         return result;
     }
 

@@ -1,0 +1,85 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.client;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "EntitiesProto";
+option java_package = "org.spine3.client";
+
+import "google/protobuf/any.proto";
+
+import "spine/annotations.proto";
+
+// Represents an ID of an entity.
+//
+// Acts as an read-side API identifier for Projection state, Aggregate state and other entities.
+message EntityId {
+
+    // An ID of an entity.
+    google.protobuf.Any id = 1;
+}
+
+// Defines the entity type and filters.
+//
+// Use Target to specify and narrow down the source for Topic and Query by an entity type and various criteria.
+message Target {
+
+    // Represents TypeUrl for the entity of interest.
+    string type = 1;
+
+    // Modifies the entity collection of a specified type.
+    // Allows either to narrow it down by filtering out the entity objects or include all entity instances
+    // into the target.
+    oneof criterion {
+
+        // The instruction to include all objects of a given type.
+        bool include_all = 2;
+
+        // Filter the objects of a given type by certain criteria.
+        EntityFilters filters = 3;
+    }
+}
+
+// Set of filters used to modify the entity collection.
+//
+// To be used in scope of read-side API for specifying the target of query and subscription operations.
+message EntityFilters {
+
+    // Match entities by IDs.
+    EntityIdFilter id_filter = 1;
+
+    // Reserved for more filter types
+    reserved 2 to 40;
+}
+
+// Allows to add an ID filter for the read operations.
+//
+// Used to modify the collection of interest by filtering out the objects with identifiers not included into the filter.
+// SQL equivalent is "... where entity.id IN (...)".
+message EntityIdFilter {
+
+    // The collection of entity IDs.
+    repeated EntityId ids = 1;
+}
+

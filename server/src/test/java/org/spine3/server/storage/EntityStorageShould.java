@@ -39,7 +39,7 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
 public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
 
     @Override
-    protected abstract EntityStorage<I> getStorage();
+    protected abstract RecordStorage<I> getStorage();
 
     /**
      * Used to get a storage in tests with different ID types.
@@ -49,7 +49,7 @@ public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, En
      * @param <Id> the type of Entity IDs
      * @return an empty storage instance
      */
-    protected abstract <Id> EntityStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass);
+    protected abstract <Id> RecordStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass);
 
     @Override
     protected EntityStorageRecord newStorageRecord() {
@@ -58,33 +58,33 @@ public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, En
 
     @Test
     public void write_and_read_record_by_Message_id() {
-        final EntityStorage<ProjectId> storage = getStorage(TestEntityWithIdMessage.class);
+        final RecordStorage<ProjectId> storage = getStorage(TestEntityWithIdMessage.class);
         final ProjectId id = Given.AggregateId.newProjectId(newUuid());
         writeAndReadRecordTest(id, storage);
     }
 
     @Test
     public void write_and_read_record_by_String_id() {
-        final EntityStorage<String> storage = getStorage(TestEntityWithIdString.class);
+        final RecordStorage<String> storage = getStorage(TestEntityWithIdString.class);
         final String id = newUuid();
         writeAndReadRecordTest(id, storage);
     }
 
     @Test
     public void write_and_read_record_by_Long_id() {
-        final EntityStorage<Long> storage = getStorage(TestEntityWithIdLong.class);
+        final RecordStorage<Long> storage = getStorage(TestEntityWithIdLong.class);
         final long id = 10L;
         writeAndReadRecordTest(id, storage);
     }
 
     @Test
     public void write_and_read_record_by_Integer_id() {
-        final EntityStorage<Integer> storage = getStorage(TestEntityWithIdInteger.class);
+        final RecordStorage<Integer> storage = getStorage(TestEntityWithIdInteger.class);
         final int id = 10;
         writeAndReadRecordTest(id, storage);
     }
 
-    protected <Id> void writeAndReadRecordTest(Id id, EntityStorage<Id> storage) {
+    protected <Id> void writeAndReadRecordTest(Id id, RecordStorage<Id> storage) {
         final EntityStorageRecord expected = newStorageRecord();
         storage.write(id, expected);
 

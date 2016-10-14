@@ -30,9 +30,11 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.AbstractEntityRepositoryShould;
+import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.projection.Project;
@@ -41,6 +43,8 @@ import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -59,7 +63,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProjectionRepositoryShould {
+public class ProjectionRepositoryShould
+        extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -145,8 +150,8 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_entity_storage() {
-        final EntityStorage<ProjectId> entityStorage = repository.entityStorage();
-        assertNotNull(entityStorage);
+        final RecordStorage<ProjectId> recordStorage = repository.recordStorage();
+        assertNotNull(recordStorage);
     }
 
     @Test
@@ -207,8 +212,37 @@ public class ProjectionRepositoryShould {
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
+    @Override
+    protected EntityRepository<ProjectId, TestProjection, Project> repository() {
+        return repository;
+    }
+
+    @Override
+    protected TestProjection entity() {
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
+                                                                      .setId("single-test-projection")
+                                                                      .build());
+        return projection;
+    }
+
+    @Override
+    protected List<TestProjection> entities(int count) {
+        final List<TestProjection> projections = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final TestProjection projection = new TestProjection(
+                    ProjectId.newBuilder()
+                             .setId(String.format("test-projection-%s", i))
+                             .build());
+
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
     /** The projection stub used in tests. */
-    private static class TestProjection extends Projection<ProjectId, Project> {
+    /* package */ static class TestProjection extends Projection<ProjectId, Project> {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
@@ -221,12 +255,14 @@ public class ProjectionRepositoryShould {
             eventMessagesDelivered.put(getState().getId(), eventMessage);
         }
 
-        /* package */ static boolean processed(Message eventMessage) {
+        /* package */
+        static boolean processed(Message eventMessage) {
             final boolean result = eventMessagesDelivered.containsValue(eventMessage);
             return result;
         }
 
-        /* package */ static void clearMessageDeliveryHistory() {
+        /* package */
+        static void clearMessageDeliveryHistory() {
             eventMessagesDelivered.clear();
         }
 
@@ -253,7 +289,7 @@ public class ProjectionRepositoryShould {
 
         /* EventContext parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
+        public void on(ProjectStarted event, @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)

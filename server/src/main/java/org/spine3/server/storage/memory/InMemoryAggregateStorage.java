@@ -60,7 +60,7 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     @Override
-    protected void writeInternal(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregateStorageRecord record) {
         recordMap.put(id, record);
     }
 

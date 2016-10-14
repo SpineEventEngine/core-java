@@ -47,6 +47,7 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
@@ -68,6 +69,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -192,6 +194,17 @@ public class BoundedContextShould {
         final Repository spy = spy(repository);
         boundedContext.register(repository);
         verify(spy, never()).initStorage(any(StorageFactory.class));
+    }
+
+    @Test
+    public void propagate_registered_repositories_to_stand() {
+        final Stand stand = spy(mock(Stand.class));
+        final BoundedContext boundedContext = newBoundedContext(stand);
+        verify(stand, never()).registerTypeSupplier(any(Repository.class));
+
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
+        verify(stand).registerTypeSupplier(eq(repository));
     }
 
     /** Returns {@link Mockito#any()} matcher for response observer. */

@@ -159,7 +159,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void write_and_read_one_record() {
         final AggregateStorageRecord expected = Given.AggregateStorageRecord.create(getCurrentTime());
 
-        storage.writeInternal(id, expected);
+        storage.writeRecord(id, expected);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
         assertTrue(iterator.hasNext());
@@ -205,7 +205,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        storage.writeInternal(id, Given.AggregateStorageRecord.create(time1));
+        storage.writeRecord(id, Given.AggregateStorageRecord.create(time1));
         storage.write(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
@@ -284,7 +284,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     protected void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
         for (AggregateStorageRecord record : records) {
-            storage.writeInternal(id, record);
+            storage.writeRecord(id, record);
         }
     }
 
