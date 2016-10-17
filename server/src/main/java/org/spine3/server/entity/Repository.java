@@ -20,16 +20,20 @@
 
 package org.spine3.server.entity;
 
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static java.lang.reflect.Modifier.isPrivate;
@@ -40,7 +44,6 @@ import static java.lang.reflect.Modifier.isPublic;
  *
  * @param <I> the type of IDs of entities managed by the repository
  * @param <E> the entity type
- *
  * @author Alexander Yevsyukov
  */
 public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
@@ -61,6 +64,20 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
     /** The data storage for this repository. */
     private Storage storage;
+
+    /**
+     * Cached value for the entity state type.
+     *
+     * <p>Used to optimise heavy {@link #getEntityStateType()} calls.
+     **/
+    private volatile TypeUrl entityStateType;
+
+    /**
+     * Cached value for the entity class.
+     *
+     * <p>Used to optimize heavy {@link #getEntityClass()} calls.
+     **/
+    private volatile Class<E> entityClass;
 
     /**
      * Creates the repository in the passed {@link BoundedContext}.
@@ -112,7 +129,24 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /** Returns the class of entities managed by this repository. */
     @CheckReturnValue
     protected Class<E> getEntityClass() {
-        return Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+        if (entityClass == null) {
+            entityClass = Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+        }
+        checkNotNull(entityClass);
+        return entityClass;
+    }
+
+    /** Returns the {@link TypeUrl} for the state objects wrapped by entities managed by this repository */
+    @CheckReturnValue
+    public TypeUrl getEntityStateType() {
+        if (entityStateType == null) {
+            final Class<E> entityClass = getEntityClass();
+            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass, Entity.STATE_CLASS_GENERIC_INDEX);
+            final ClassName stateClassName = ClassName.of(stateClass);
+            entityStateType = KnownTypes.getTypeUrl(stateClassName);
+        }
+        checkNotNull(entityStateType);
+        return entityStateType;
     }
 
     /**
@@ -135,7 +169,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Stores the passed object.
      *
-     * <p>The storage must be assigned before calling this method.
+     * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param obj an instance to store
      */
@@ -144,7 +178,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Loads the entity with the passed ID.
      *
-     * <p>The storage must be assigned before calling this method.
+     * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param id the id of the entity to load
      * @return the entity or {@code null} if there's no entity with such id

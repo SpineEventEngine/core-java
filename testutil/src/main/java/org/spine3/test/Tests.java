@@ -20,6 +20,9 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
@@ -27,8 +30,10 @@ import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Utilities for testing.
@@ -120,6 +125,18 @@ public class Tests {
      */
     public static UserId newUserUuid() {
         return newUserId(Identifiers.newUuid());
+    }
+
+    public static void assertMatchesMask(Message message, FieldMask fieldMask) {
+        final List<String> paths = fieldMask.getPathsList();
+
+        for (Descriptors.FieldDescriptor field : message.getDescriptorForType()
+                                                      .getFields()) {
+            if (field.isRepeated()) {
+                continue;
+            }
+            assertEquals(message.hasField(field), paths.contains(field.getFullName()));
+        }
     }
 
     /** The provider of current time, which is always the same. */

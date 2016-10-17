@@ -203,9 +203,9 @@ public class Timestamps {
             return 1;
         }
         int result = Long.compare(t1.getSeconds(), t2.getSeconds());
-        result = (result == 0) ?
-                 Integer.compare(t1.getNanos(), t2.getNanos()) :
-                 result;
+        result = (result == 0)
+                 ? Integer.compare(t1.getNanos(), t2.getNanos())
+                 : result;
         return result;
     }
 

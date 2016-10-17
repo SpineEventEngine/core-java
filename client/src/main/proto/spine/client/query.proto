@@ -27,11 +27,50 @@ option java_multiple_files = true;
 option java_outer_classname = "QueryProto";
 option java_package = "org.spine3.client";
 
+
+import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
+
 import "spine/annotations.proto";
 import "spine/ui/language.proto";
+import "spine/base/response.proto";
+import "spine/client/entities.proto";
+
 
 message QueryContext {
 
     ui.Language language = 1;
     //TODO:2015-12-16:alexander.yevsyukov: Finish
+}
+
+// The main abstraction over the read-side API.
+//
+// Allows clients to form the requests to the read-side through the `QueryService`.
+// `Query` execution typically results in a QueryResponse object.
+message Query {
+
+    // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
+    Target target = 1;
+
+    // Field mask to be applied to the items of the query result.
+    google.protobuf.FieldMask field_mask = 2;
+
+    // Reserved for utility fields like query creation date, required response timeframe etc.
+    reserved 3 to 6;
+}
+
+// The result of `Query` processing.
+//
+// Contains the actual processing results and other response attributes.
+// Used as a result of {@code QueryService#Read(Query)} gRPC method call.
+message QueryResponse {
+
+    // Represents the base part of the response. I.e. whether the `Query` has been acked or not.
+    base.Response response = 1;
+
+    // Reserved for more query response attributes, e.g. to describe paginated response etc.
+    reserved 2 to 4;
+
+    // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
+    repeated google.protobuf.Any messages = 5;
 }

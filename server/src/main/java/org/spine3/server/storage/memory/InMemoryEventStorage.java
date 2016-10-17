@@ -82,7 +82,7 @@ import static com.google.common.collect.Iterators.filter;
     }
 
     @Override
-    protected void writeInternal(EventStorageRecord record) {
+    protected void writeRecord(EventStorageRecord record) {
         checkNotNull(record);
         final String eventId = record.getEventId();
         checkState(!eventId.isEmpty(), "eventId cannot be empty");
@@ -92,7 +92,7 @@ import static com.google.common.collect.Iterators.filter;
 
     @Nullable
     @Override
-    protected EventStorageRecord readInternal(EventId eventId) {
+    protected EventStorageRecord readRecord(EventId eventId) {
         final EventStorageRecord result = index.get(eventId.getUuid());
         return result;
     }

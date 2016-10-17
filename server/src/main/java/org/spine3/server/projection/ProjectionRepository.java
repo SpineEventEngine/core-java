@@ -21,21 +21,25 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -82,10 +86,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     private Status status = Status.CREATED;
 
     /** An underlying entity storage used to store projections. */
-    private EntityStorage<I> entityStorage;
+    private RecordStorage<I> recordStorage;
+
+    /** An instance of {@link StandFunnel} to be informed about state updates */
+    private final StandFunnel standFunnel;
 
     protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
+        this.standFunnel = boundedContext.getStandFunnel();
     }
 
     protected Status getStatus() {
@@ -106,7 +114,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
-        this.entityStorage = projectionStorage.getEntityStorage();
+        this.recordStorage = projectionStorage.getRecordStorage();
         return projectionStorage;
     }
 
@@ -133,8 +141,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Override
     @Nonnull
     @SuppressWarnings("RefusedBequest")
-    protected EntityStorage<I> entityStorage() {
-        return checkStorage(entityStorage);
+    protected RecordStorage<I> recordStorage() {
+        return checkStorage(recordStorage);
     }
 
     /**
@@ -223,8 +231,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /**
      * Dispatches event to a projection without checking the status of the repository.
      *
+     * <p>Also posts an update to the {@code StandFunnel} instance for this repository.
+     *
      * @param event the event to dispatch
      */
+    @Internal
     /* package */ void internalDispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
@@ -232,6 +243,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final P projection = load(id);
         projection.handle(eventMessage, context);
         store(projection);
+        final M state = projection.getState();
+        final Any packedState = AnyPacker.pack(state);
+        standFunnel.post(id, packedState);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);

@@ -268,7 +268,7 @@ public class EventEnricher {
          * @see EnrichmentFunction
          */
         @VisibleForTesting
-        /* package */  static class SameTransition implements Predicate<EnrichmentFunction> {
+        /* package */ static class SameTransition implements Predicate<EnrichmentFunction> {
 
             private final EnrichmentFunction function;
 

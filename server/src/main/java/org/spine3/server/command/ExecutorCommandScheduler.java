@@ -20,12 +20,13 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Duration;
 import org.spine3.base.Command;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.spine3.base.CommandContext.Schedule;
 
 /**
@@ -40,24 +41,37 @@ import static org.spine3.base.CommandContext.Schedule;
 public class ExecutorCommandScheduler extends CommandScheduler {
 
     private static final int MIN_THREAD_POOL_SIZE = 5;
+    private static final int NANOS_IN_MILLISECOND = 1_000_000;
+    private static final int MILLIS_IN_SECOND = 1_000;
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
 
     @Override
     protected void doSchedule(final Command command) {
-        final long delaySec = getDelaySeconds(command);
+        final long delaySec = getDelayMilliseconds(command);
         executorService.schedule(new Runnable() {
             @Override
             public void run() {
                 post(command);
             }
-        }, delaySec, SECONDS);
+        }, delaySec, MILLISECONDS);
     }
 
-    private static long getDelaySeconds(Command command) {
+    private static long getDelayMilliseconds(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        final long delaySec = schedule.getDelay().getSeconds();
-        return delaySec;
+        final Duration delay = schedule.getDelay();
+        final long delaySec = delay.getSeconds();
+        final long delayMillisFraction = delay.getNanos() / NANOS_IN_MILLISECOND;
+
+        /**
+         * Maximum value of {@link Duration#getSeconds()} is
+         * <a href="https://github.com/google/protobuf/blob/master/src/google/protobuf/duration.proto"+315,576,000,000.</a>.
+         *
+         * {@link Long.MAX_VALUE} is +9,223,372,036,854,775,807. That's why it is safe to multiply
+         * {@code delaySec * MILLIS_IN_SECOND}.
+         */
+        final long absoluteMillis = delaySec * MILLIS_IN_SECOND + delayMillisFraction;
+        return absoluteMillis;
     }
 
     @Override

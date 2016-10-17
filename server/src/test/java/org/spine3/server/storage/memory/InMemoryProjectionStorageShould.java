@@ -32,8 +32,8 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould<Str
 
     @Override
     protected ProjectionStorage<String> getStorage() {
-        final InMemoryEntityStorage<String> entityStorage = InMemoryEntityStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(entityStorage, false);
+        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
+        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage, false);
         return storage;
     }
 

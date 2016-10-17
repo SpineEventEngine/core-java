@@ -81,34 +81,34 @@ public class ValidateShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_timestamp_seconds_value_is_zero() {
-        Validate.checkIsPositive(Timestamp.newBuilder()
-                                          .setSeconds(0)
-                                          .setNanos(5)
-                                          .build(), "");
+        Validate.checkPositive(Timestamp.newBuilder()
+                                        .setSeconds(0)
+                                        .setNanos(5)
+                                        .build(), "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_timestamp_seconds_value_is_negative() {
-        Validate.checkIsPositive(Timestamp.newBuilder()
-                                          .setSeconds(-5)
-                                          .setNanos(5)
-                                          .build(), "");
+        Validate.checkPositive(Timestamp.newBuilder()
+                                        .setSeconds(-5)
+                                        .setNanos(5)
+                                        .build(), "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_timestamp_nanos_value_is_negative() {
-        Validate.checkIsPositive(Timestamp.newBuilder()
-                                          .setSeconds(5)
-                                          .setNanos(-5)
-                                          .build(), "");
+        Validate.checkPositive(Timestamp.newBuilder()
+                                        .setSeconds(5)
+                                        .setNanos(-5)
+                                        .build(), "");
     }
 
     @Test
     public void do_not_throw_exception_if_timestamp_seconds_and_nanos_are_positive() {
-        Validate.checkIsPositive(Timestamp.newBuilder()
-                                          .setSeconds(5)
-                                          .setNanos(5)
-                                          .build(), "");
+        Validate.checkPositive(Timestamp.newBuilder()
+                                        .setSeconds(5)
+                                        .setNanos(5)
+                                        .build(), "");
     }
 
     @Test(expected = NullPointerException.class)

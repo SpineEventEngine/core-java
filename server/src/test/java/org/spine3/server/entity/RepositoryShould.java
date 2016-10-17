@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -195,7 +195,7 @@ public class RepositoryShould {
 
         @Override
         protected Storage createStorage(StorageFactory factory) {
-            return factory.createEntityStorage(getEntityClass());
+            return factory.createRecordStorage(getEntityClass());
         }
     }
 
@@ -227,7 +227,7 @@ public class RepositoryShould {
     public void close_storage_on_close() throws Exception {
         repository.initStorage(storageFactory);
 
-        final EntityStorage<?> storage = (EntityStorage<?>) repository.getStorage();
+        final RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
         repository.close();
 
         //noinspection ConstantConditions

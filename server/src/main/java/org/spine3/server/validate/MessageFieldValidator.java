@@ -84,8 +84,8 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 
     @Override
     protected boolean isValueNotSet(Message value) {
-        final boolean isNotSet = isDefault(value);
-        return isNotSet;
+        final boolean result = isDefault(value);
+        return result;
     }
 
     private void validateFieldsOfMessageIfNeeded() {
@@ -132,9 +132,9 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
      * @return {@code true} if the time is valid according to {@code whenExpected} parameter, {@code false} otherwise
      */
     private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
-        final boolean isValid = (whenExpected == FUTURE) ?
-                                isLaterThan(timeToCheck, /*than*/ now) :
-                                isLaterThan(now, /*than*/ timeToCheck);
+        final boolean isValid = (whenExpected == FUTURE)
+                                ? isLaterThan(timeToCheck, /*than*/ now)
+                                : isLaterThan(now, /*than*/ timeToCheck);
         final boolean isInvalid = !isValid;
         return isInvalid;
     }

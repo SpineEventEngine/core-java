@@ -67,7 +67,7 @@ import java.util.List;
 
     @Override
     protected boolean isValueNotSet(ByteString value) {
-        final boolean isNotSet = value.isEmpty();
-        return isNotSet;
+        final boolean result = value.isEmpty();
+        return result;
     }
 }

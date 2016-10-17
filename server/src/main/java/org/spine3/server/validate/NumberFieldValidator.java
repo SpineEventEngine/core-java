@@ -101,8 +101,8 @@ import java.util.regex.Pattern;
     @Override
     protected boolean isValueNotSet(V value) {
         final int intValue = value.intValue();
-        final boolean isNotSet = intValue == 0;
-        return isNotSet;
+        final boolean result = intValue == 0;
+        return result;
     }
 
     private void validateRangeOptions(V value) {
@@ -131,9 +131,9 @@ import java.util.regex.Pattern;
         }
         final V min = toNumber(minAsString);
         final int comparisonResult = value.compareTo(min);
-        final boolean fits = isMinDecimalInclusive ?
-                             comparisonResult >= 0 :
-                             comparisonResult > 0;
+        final boolean fits = isMinDecimalInclusive
+                             ? comparisonResult >= 0
+                             : comparisonResult > 0;
         final boolean notFit = !fits;
         return notFit;
     }
@@ -144,9 +144,9 @@ import java.util.regex.Pattern;
             return false;
         }
         final V max = toNumber(maxAsString);
-        final boolean fits = isMaxDecimalInclusive ?
-                             value.compareTo(max) <= 0 :
-                             value.compareTo(max) < 0;
+        final boolean fits = isMaxDecimalInclusive
+                             ? value.compareTo(max) <= 0
+                             : value.compareTo(max) < 0;
         final boolean notFit = !fits;
         return notFit;
     }
