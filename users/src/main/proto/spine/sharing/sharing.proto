@@ -31,15 +31,22 @@ import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/users/group.proto";
 
-// An object can be shared with a user or a group of users.
+// An object can be shared with a user, a group of users, or all people in an organization.
 message Subject {
     oneof kind {
+
+        // A user with the ID can access.
         users.UserId user = 1;
+
+        // A user belonging to the group with the ID can access.
         users.GroupId group = 2;
+
+        // All organization members can access.
+        bool organization = 3;
     }
 }
 
-// A level of access to a shared object.
+// Access level to a shared object.
 enum SharingLevel {
 
     // No access to corresponding objects.
@@ -71,5 +78,5 @@ message Permission {
 //
 // If a user or a group is not added to the sharing schema, the level is [SharingLevel.NONE].
 message Sharing {
-    repeated Permission permissions = 2;
+    repeated Permission permissions = 1;
 }
