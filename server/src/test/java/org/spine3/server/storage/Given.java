@@ -29,6 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.storage.ProjectId;
@@ -238,8 +239,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         public static org.spine3.server.storage.AggregateStorageRecord create(Timestamp timestamp) {
-            final org.spine3.server.storage.AggregateStorageRecord.Builder builder = org.spine3.server.storage.AggregateStorageRecord.newBuilder()
-                                                                                                                                     .setTimestamp(timestamp);
+            final org.spine3.server.storage.AggregateStorageRecord.Builder builder
+                    = org.spine3.server.storage.AggregateStorageRecord.newBuilder()
+                                                                      .setEventId(Identifiers.newUuid())
+                                                                      .setTimestamp(timestamp);
             return builder.build();
         }
 
