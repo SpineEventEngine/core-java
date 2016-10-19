@@ -94,7 +94,7 @@ message IndirectPermission {
     AccessLevel level = 2;
 }
 
-// Access level for one subject.
+// Access level for a single subject.
 //
 // It is assumed that a permission opens an object via `Visibility.LINK`.
 //
@@ -117,9 +117,9 @@ message Permissions {
 // An object can be shared to a wide audience (such as organization or all users of the system),
 // or only to specific people.
 //
-// If a subject is not added to a sharing schema, the level is `AccessLevel.NONE`.
+// If a subject is not added to sharing settings of an object, the level is `AccessLevel.NONE`.
 //
-message SharingSchema {
+message SharingSettings {
     oneof audience {
         // All users of the system can access.
         IndirectPermission public = 1;
