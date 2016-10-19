@@ -68,10 +68,13 @@ projectsToPublish.each {
             }
         }
 
+        // As per https://discuss.gradle.org/t/maven-publish-specify-a-repo-as-being-a-snapshot-repo/374/2
+        final String repositorySuffix = currentProject.version.endsWith('-SNAPSHOT') ? '-snapshots' : ''
+
         publishing {
             repositories {
                 maven {
-                    url = 'http://maven.teamdev.com/repository/spine'
+                    url = "http://maven.teamdev.com/repository/spine${repositorySuffix}"
                     credentials {
                         username = "${repositoryUserName}"
                         password = "${repositoryUserPassword}"
