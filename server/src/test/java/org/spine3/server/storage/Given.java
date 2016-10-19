@@ -239,9 +239,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         public static org.spine3.server.storage.AggregateStorageRecord create(Timestamp timestamp) {
-            final org.spine3.server.storage.AggregateStorageRecord.Builder builder = org.spine3.server.storage.AggregateStorageRecord.newBuilder()
-                                                                                                                                     .setEventId(Identifiers.newUuid())
-                                                                                                                                     .setTimestamp(timestamp);
+            final org.spine3.server.storage.AggregateStorageRecord.Builder builder
+                    = org.spine3.server.storage.AggregateStorageRecord.newBuilder()
+                                                                      .setEventId(Identifiers.newUuid())
+                                                                      .setTimestamp(timestamp);
             return builder.build();
         }
 
