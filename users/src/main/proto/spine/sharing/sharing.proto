@@ -117,17 +117,30 @@ message Permissions {
 // An object can be shared to a wide audience (such as organization or all users of the system),
 // or only to specific people.
 //
+// The object can have own sharing settings or take it from an object into which it is enclosed (parent object).
+//
 // If a subject is not added to sharing settings of an object, the level is `AccessLevel.NONE`.
 //
 message SharingSettings {
-    oneof audience {
-        // All users of the system can access.
-        IndirectPermission public = 1;
 
-        // All organization members can access.
-        IndirectPermission organization = 2;
+    oneof mode {
+        // The sharing settings of from the parent object.
+        bool take_from_parent = 1;
 
-        // Only specific people can access.
-        Permissions specific_people = 3;
+        // The object has own sharing settings.
+        Settings settings = 2;
+    }
+
+    message Settings {
+        oneof audience {
+            // All users of the system can access.
+            IndirectPermission public = 1;
+
+            // All organization members can access.
+            IndirectPermission organization = 2;
+
+            // Only specific people can access.
+            Permissions specific_people = 3;
+        }
     }
 }
