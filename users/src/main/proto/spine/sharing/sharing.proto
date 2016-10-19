@@ -31,7 +31,10 @@ import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/users/group.proto";
 
-// An object can be shared with a user, a group of users, or all people in an organization.
+// Definition of specific people who can access a shared object.
+//
+// An object can be shared with a user or a group of users.
+//
 message Subject {
     oneof kind {
 
@@ -40,43 +43,91 @@ message Subject {
 
         // A user belonging to the group with the ID can access.
         users.GroupId group = 2;
-
-        // All organization members can access.
-        bool organization = 3;
     }
 }
 
 // Access level to a shared object.
-enum SharingLevel {
+enum AccessLevel {
 
-    // No access to corresponding objects.
+    // No access to the object.
     NONE = 0;
 
-    // Ability to view shared objects.
-    VIEW = 1;
+    // Ability to view the object.
+    VIEWER = 1;
 
-    // Ability to comment on shared objects.
-    COMMENT = 2;
+    // Ability to comment on the object.
+    COMMENTATOR = 2;
 
-    // Ability to modify shared documents.
-    EDIT = 3;
+    // Ability to modify the object.
+    EDITOR = 3;
 
-    // Ability to add and remove regular users.
-    MODERATE = 4;
+    // Ability to grant, modify, and deny access to the object for regular users.
+    MODERATOR = 4;
 
-    // Ability to add and remove administrators.
-    ADMINISTRATE = 5;
+    // Ability to grant, modify, and deny access to the object for administrators of the object.
+    ADMINISTRATOR = 5;
+
+    // Ability to perform all operations on the object.
+    OWNER = 6;
 }
 
-// Permission is a definition of access level for a user or a group.
-message Permission {
-    Subject subject = 1;
-    SharingLevel level = 2;
+// Visibility of a shared object.
+enum Visibility {
+
+    // The object is not visible.
+    INVISIBLE = 0;
+
+    // The object is visible via its link and is not available in search results.
+    LINK = 1;
+
+    // The object is available in search results.
+    SEARCH = 2;
 }
 
-// Definition of access levels for an object to users and groups.
+// A definition of access level for an organization or any user of the system.
+message IndirectPermission {
+
+    // A level of visibility.
+    Visibility visibility = 1;
+
+    // A level of access.
+    AccessLevel level = 2;
+}
+
+// Access level for one subject.
 //
-// If a user or a group is not added to the sharing schema, the level is [SharingLevel.NONE].
-message Sharing {
-    repeated Permission permissions = 1;
+// It is assumed that a permission opens an object via `Visibility.LINK`.
+//
+message Permission {
+
+    // Who can access the object.
+    Subject subject = 1;
+
+    // A level of access.
+    AccessLevel level = 2;
+}
+
+// Access levels for multiple subjects.
+message Permissions {
+    repeated Permission permission = 1;
+}
+
+// Definition of sharing of an object.
+//
+// An object can be shared to a wide audience (such as organization or all users of the system),
+// or only to specific people.
+//
+// If a subject is not added to a sharing schema, the level is `AccessLevel.NONE`.
+//
+message SharingSchema {
+    oneof audience {
+        // All users of the system can access.
+        IndirectPermission public = 1;
+
+        // All organization members can access.
+        IndirectPermission organization = 2;
+
+        // Only specific people can access.
+        Permissions specific_people = 3;
+    }
 }
