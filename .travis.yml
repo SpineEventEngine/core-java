@@ -6,5 +6,7 @@ before_install:
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
+  - chmod ./scripts/publish-artifacts.sh
+  - ./scripts/publish-artifacts.sh
 
 script: ./gradlew check --stacktrace
