@@ -51,3 +51,6 @@ gradlew.bat
 
 *.scpt binary
 *.scssc binary
+
+# Encoded files
+*.enc binary
