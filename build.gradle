@@ -38,12 +38,12 @@ buildscript {
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
         classpath(group: 'com.google.protobuf', name: 'protobuf-gradle-plugin',
-                version: protobufGradlePluginVerison) {
+                                                version: protobufGradlePluginVerison) {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                version: spineProtobufPluginVersion
+                                             version: spineProtobufPluginVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
