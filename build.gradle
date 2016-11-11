@@ -37,14 +37,15 @@ buildscript {
 
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
-        classpath (group: 'com.google.protobuf', name:'protobuf-gradle-plugin',
-                                                 version: protobufGradlePluginVerison) {
+        classpath(group: 'com.google.protobuf', name: 'protobuf-gradle-plugin',
+                                                version: protobufGradlePluginVerison) {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                                             version: spineProtobufPluginVersion,
-                                             changing: true
+                                             version: spineProtobufPluginVersion
+                                            //, changing: true // Uncomment this if you want the dependency to be
+                                            // fetched on each build, but offline builds will not be available then.
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
