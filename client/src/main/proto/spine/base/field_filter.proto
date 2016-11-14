@@ -34,8 +34,11 @@ import "spine/annotations.proto";
 
 // `FieldFilter` specifies accepted values for a field.
 message FieldFilter {
-    // The field specification.
-    google.protobuf.FieldMask field = 1;
+
+    // A symbolic field path.
+    //
+    // Contract is similar to google.protobuf.FieldMask.paths.
+    string field_path = 1;
 
     // Values accepted by the filter.
     repeated google.protobuf.Any value = 2;
