@@ -24,15 +24,16 @@ import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
-import org.spine3.test.projection.Project;
-import org.spine3.test.projection.ProjectId;
-import org.spine3.test.projection.Task;
+import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.Task;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -46,9 +47,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould {
-
-    protected abstract StandStorage createStorage();
+public abstract class StandStorageShould extends RecordStorageShould { //AbstractStorageShould<AggregateStateId, EntityStorageRecord> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -64,7 +63,7 @@ public abstract class StandStorageShould {
 
     @Test
     public void retrieve_all_records() {
-        final StandStorage storage = createStorage();
+        final StandStorage storage = (StandStorage) getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Map<AggregateStateId, EntityStorageRecord> allRecords = storage.readAll();
@@ -73,12 +72,24 @@ public abstract class StandStorageShould {
 
     @Test
     public void retrieve_records_by_ids() {
-        final StandStorage storage = createStorage();
+        final StandStorage storage = (StandStorage) getStorage();
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
         final Collection<EntityStorageRecord> records = (Collection<EntityStorageRecord>) storage.readMultiple(ids);
         checkIds(ids, records);
+    }
+
+    @Override
+    protected AggregateStateId newId() {
+        return DEFAULT_ID_SUPPLIER.get();
+    }
+
+    @Override
+    protected EntityStorageRecord newStorageRecord() {
+        final Project defaultProject = Project.getDefaultInstance();
+        final EntityStorageRecord record = newRecord(defaultProject);
+        return record;
     }
 
     protected static List<AggregateStateId> fill(StandStorage storage,
@@ -95,16 +106,21 @@ public abstract class StandStorageShould {
                                            .setName(String.format("test-project-%s", i))
                                            .addTask(Task.getDefaultInstance())
                                            .build();
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(AnyPacker.pack(project))
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
+            final EntityStorageRecord record = newRecord(project);
             storage.write(genericId, record);
             ids.add(genericId);
         }
 
         return ids;
+    }
+
+    private static EntityStorageRecord newRecord(Message state) {
+        final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                              .setState(AnyPacker.pack(state))
+                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setVersion(1)
+                                                              .build();
+        return record;
     }
 
     protected void checkIds(List<AggregateStateId> ids, Collection<EntityStorageRecord> records) {
