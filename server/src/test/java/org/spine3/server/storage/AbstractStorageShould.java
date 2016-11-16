@@ -63,7 +63,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract AbstractStorage<I, R> getStorage();
+    protected abstract <S extends AbstractStorage<I, R>> S getStorage();
 
     /** Creates a new storage record. */
     protected abstract R newStorageRecord();

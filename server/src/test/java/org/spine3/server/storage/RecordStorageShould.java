@@ -62,4 +62,10 @@ public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, En
         assertNotNull(empty);
         assertEmpty(empty);
     }
+
+    @Test
+    public void read_multiple_records_with_field_mask() {
+        final RecordStorage<I> storage = getStorage();
+        // TODO:16-11-16:dmytro.dashenkov: Complete tests of record storage and stand storage.
+    }
 }
