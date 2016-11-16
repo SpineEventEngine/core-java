@@ -20,16 +20,34 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.RecordStorage;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import org.spine3.base.Identifiers;
+import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.storage.ProjectId;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class InMemoryRecordStorageShould extends RecordStorageShould {
+public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId> {
 
     @Override
-    protected <T> RecordStorage<T> createStorage() {
+    protected AbstractStorage<ProjectId, EntityStorageRecord> getStorage() {
         return InMemoryRecordStorage.newInstance(false);
+    }
+
+    @Override
+    protected ProjectId newId() {
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId(Identifiers.newUuid())
+                                      .build();
+        return id;
+    }
+
+    @Override
+    protected Message emptyState() {
+        return Any.getDefaultInstance();
     }
 }

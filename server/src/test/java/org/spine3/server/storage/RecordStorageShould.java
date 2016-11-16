@@ -20,8 +20,12 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
 
 import java.util.Map;
 
@@ -31,11 +35,24 @@ import static org.spine3.test.Verify.assertEmpty;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould {
+public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+
+    protected abstract Message emptyState();
+
+    @Override
+    protected EntityStorageRecord newStorageRecord() {
+        final Any state = AnyPacker.pack(emptyState());
+        final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                              .setState(state)
+                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setVersion(0)
+                                                              .build();
+        return record;
+    }
 
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final RecordStorage<String> storage = createStorage();
+        final RecordStorage storage = (RecordStorage) getStorage();
 
         final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                      .addPaths("invalid-path")
@@ -45,6 +62,4 @@ public abstract class RecordStorageShould {
         assertNotNull(empty);
         assertEmpty(empty);
     }
-
-    protected abstract <T> RecordStorage<T> createStorage();
 }

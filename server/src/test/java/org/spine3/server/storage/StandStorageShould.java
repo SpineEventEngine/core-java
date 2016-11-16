@@ -47,7 +47,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould extends RecordStorageShould { //AbstractStorageShould<AggregateStateId, EntityStorageRecord> {
+public abstract class StandStorageShould extends RecordStorageShould {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -60,6 +60,11 @@ public abstract class StandStorageShould extends RecordStorageShould { //Abstrac
             return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
         }
     };
+
+    @Override
+    protected Message emptyState() {
+        return Project.getDefaultInstance();
+    }
 
     @Test
     public void retrieve_all_records() {
