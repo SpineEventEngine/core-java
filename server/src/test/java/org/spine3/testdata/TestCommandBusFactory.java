@@ -46,7 +46,9 @@ public class TestCommandBusFactory {
     /** Creates a new command bus with the given storage factory. */
     public static CommandBus create(StorageFactory storageFactory) {
         final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-        final CommandBus commandBus = CommandBus.newInstance(store);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(store)
+                                                .build();
         return commandBus;
     }
 }

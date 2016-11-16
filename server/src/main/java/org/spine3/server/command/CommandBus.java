@@ -103,35 +103,50 @@ public class CommandBus implements AutoCloseable {
     private boolean isMultitenant;
 
     /**
-     * Creates a new instance.
+     * Determines whether the manual thread spawning is allowed within current runtime environment.
      *
-     * @param commandStore a store to save commands
-     * @return a new instance
+     * <p>If set to {@code true}, {@code CommandBus} will be running some of internal processing in parallel
+     * to improve performance.
      */
-    public static CommandBus newInstance(CommandStore commandStore) {
-        final CommandScheduler scheduler = createCommandScheduler();
-        final ProblemLog log = new ProblemLog();
-        final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
-        commandBus.rescheduleCommandsInParallel();
-        return commandBus;
+    private final boolean isThreadSpawnAllowed;
+
+    /**
+     * Creates new instance according to the passed {@link Builder}.
+     */
+    private CommandBus(Builder builder) {
+        this(builder.getCommandStore(),
+             builder.getCommandScheduler(),
+             new ProblemLog(),
+             builder.isThreadSpawnAllowed());
+        rescheduleCommands();
+    }
+
+    /**
+     * Creates a new {@link Builder} for the {@code CommandBus}.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
      * Creates a new instance.
      *
-     * @param commandStore a store to save commands
-     * @param scheduler a command scheduler
-     * @param problemLog a problem logger
+     * @param commandStore       a store to save commands
+     * @param scheduler          a command scheduler
+     * @param problemLog         a problem logger
+     * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
     @VisibleForTesting
     /* package */ CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
-                             ProblemLog problemLog) {
+                             ProblemLog problemLog,
+                             boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
         this.rescheduler = new CommandRescheduler();
+        this.isThreadSpawnAllowed = threadSpawnAllowed;
     }
 
     /**
@@ -268,14 +283,19 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onCompleted();
     }
 
-    private void rescheduleCommandsInParallel() {
-        final Thread thread = new Thread(new Runnable() {
+    private void rescheduleCommands() {
+        final Runnable reschedulingAction = new Runnable() {
             @Override
             public void run() {
                 rescheduler.rescheduleCommands();
             }
-        });
-        thread.start();
+        };
+        if(isThreadSpawnAllowed) {
+            final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
+            thread.start();
+        } else {
+            reschedulingAction.run();
+        }
     }
 
     /**
@@ -314,6 +334,11 @@ public class CommandBus implements AutoCloseable {
     @VisibleForTesting
     /* package */ CommandRescheduler getRescheduler() {
         return rescheduler;
+    }
+
+    @VisibleForTesting
+    /* package */ CommandScheduler getScheduler() {
+        return scheduler;
     }
 
     private void dispatch(Command command) {
@@ -368,17 +393,6 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
-    private static CommandScheduler createCommandScheduler() {
-        if (Environment.getInstance().isAppEngine()) {
-            log().error("CommandScheduler for AppEngine is not implemented yet.");
-            // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
-            // Return this one for now.
-            return new ExecutorCommandScheduler();
-        } else {
-            return new ExecutorCommandScheduler();
-        }
-    }
-
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
@@ -421,6 +435,85 @@ public class CommandBus implements AutoCloseable {
             final CommandId id = getId(command);
             problemLog.errorExpiredCommand(msg, id);
             commandStatusService.setToError(id, commandExpiredError(msg));
+        }
+    }
+
+    /**
+     * The {@code Builder} for {@code CommandBus}.
+     */
+    public static class Builder {
+
+        private CommandStore commandStore;
+
+        /**
+         * Optional field for the {@code CommandBus}.
+         *
+         * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
+         */
+        private CommandScheduler commandScheduler;
+
+        /**
+         * If set to {@code true}, the {@code CommandBus} will be creating instances of {@link Thread} for operation.
+         *
+         * <p>However, some runtime environments, such as Google AppEngine Standard, do not allow manual thread
+         * spawning. In this case, this flag should be set to {@code false}.
+         *
+         * <p>The default value of this flag is set upon the best guess, based on current {@link Environment}.
+         */
+        private boolean threadSpawnAllowed = detectThreadsAllowed();
+
+        /**
+         * Checks whether the manual {@link Thread} spawning is allowed withing the current runtime environment.
+         */
+        private static boolean detectThreadsAllowed() {
+            final boolean appEngine = Environment.getInstance()
+                                                 .isAppEngine();
+            return !appEngine;
+        }
+
+        public CommandStore getCommandStore() {
+            return commandStore;
+        }
+
+        public CommandScheduler getCommandScheduler() {
+            return commandScheduler;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            checkNotNull(commandStore);
+            this.commandStore = commandStore;
+            return this;
+        }
+
+        public Builder setCommandScheduler(CommandScheduler commandScheduler) {
+            checkNotNull(commandScheduler);
+            this.commandScheduler = commandScheduler;
+            return this;
+        }
+
+        public boolean isThreadSpawnAllowed() {
+            return threadSpawnAllowed;
+        }
+
+        public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
+            this.threadSpawnAllowed = threadSpawnAllowed;
+            return this;
+        }
+
+        private Builder() {}
+
+        /**
+         * Builds an instance of {@link CommandBus}.
+         */
+        public CommandBus build() {
+            checkNotNull(commandStore, "CommandStore must be set");
+
+            if(commandScheduler == null) {
+                commandScheduler = new ExecutorCommandScheduler();
+            }
+
+            final CommandBus commandBus = new CommandBus(this);
+            return commandBus;
         }
     }
 
