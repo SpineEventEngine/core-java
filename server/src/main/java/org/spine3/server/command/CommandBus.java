@@ -502,8 +502,10 @@ public class CommandBus implements AutoCloseable {
 
         private Builder() {}
 
+        /**
+         * Builds an instance of {@link CommandBus}.
+         */
         public CommandBus build() {
-
             checkNotNull(commandStore, "CommandStore must be set");
 
             if(commandScheduler == null) {
