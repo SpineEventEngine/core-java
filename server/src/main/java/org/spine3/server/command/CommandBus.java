@@ -46,9 +46,9 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
+import org.spine3.util.Environment;
 import org.spine3.validate.ConstraintViolation;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
@@ -103,11 +103,22 @@ public class CommandBus implements AutoCloseable {
     private boolean isMultitenant;
 
     /**
+     * Determines whether the manual thread spawning is allowed within current runtime environment.
+     *
+     * <p>If set to {@code true}, {@code CommandBus} will be running some of internal processing in parallel
+     * to improve performance.
+     */
+    private final boolean isThreadSpawnAllowed;
+
+    /**
      * Creates new instance according to the passed {@link Builder}.
      */
     private CommandBus(Builder builder) {
-        this(builder.getCommandStore(), builder.getCommandScheduler(), new ProblemLog());
-        rescheduleCommandsInParallel();
+        this(builder.getCommandStore(),
+             builder.getCommandScheduler(),
+             new ProblemLog(),
+             builder.isThreadSpawnAllowed());
+        rescheduleCommands();
     }
 
     /**
@@ -120,19 +131,22 @@ public class CommandBus implements AutoCloseable {
     /**
      * Creates a new instance.
      *
-     * @param commandStore a store to save commands
-     * @param scheduler a command scheduler
-     * @param problemLog a problem logger
+     * @param commandStore       a store to save commands
+     * @param scheduler          a command scheduler
+     * @param problemLog         a problem logger
+     * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
     @VisibleForTesting
     /* package */ CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
-                             ProblemLog problemLog) {
+                             ProblemLog problemLog,
+                             boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
         this.rescheduler = new CommandRescheduler();
+        this.isThreadSpawnAllowed = threadSpawnAllowed;
     }
 
     /**
@@ -269,14 +283,19 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onCompleted();
     }
 
-    private void rescheduleCommandsInParallel() {
-        final Thread thread = new Thread(new Runnable() {
+    private void rescheduleCommands() {
+        final Runnable reschedulingAction = new Runnable() {
             @Override
             public void run() {
                 rescheduler.rescheduleCommands();
             }
-        });
-        thread.start();
+        };
+        if(isThreadSpawnAllowed) {
+            final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
+            thread.start();
+        } else {
+            reschedulingAction.run();
+        }
     }
 
     /**
@@ -433,6 +452,25 @@ public class CommandBus implements AutoCloseable {
          */
         private CommandScheduler commandScheduler;
 
+        /**
+         * If set to {@code true}, the {@code CommandBus} will be creating instances of {@link Thread} for operation.
+         *
+         * <p>However, some runtime environments, such as Google AppEngine Standard, do not allow manual thread
+         * spawning. In this case, this flag should be set to {@code false}.
+         *
+         * <p>The default value of this flag is set upon the best guess, based on current {@link Environment}.
+         */
+        private boolean threadSpawnAllowed = detectThreadsAllowed();
+
+        /**
+         * Checks whether the manual {@link Thread} spawning is allowed withing the current runtime environment.
+         */
+        private static boolean detectThreadsAllowed() {
+            final boolean appEngine = Environment.getInstance()
+                                                 .isAppEngine();
+            return !appEngine;
+        }
+
         public CommandStore getCommandStore() {
             return commandStore;
         }
@@ -450,6 +488,15 @@ public class CommandBus implements AutoCloseable {
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
+            return this;
+        }
+
+        public boolean isThreadSpawnAllowed() {
+            return threadSpawnAllowed;
+        }
+
+        public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
+            this.threadSpawnAllowed = threadSpawnAllowed;
             return this;
         }
 
