@@ -433,12 +433,10 @@ public class CommandBus implements AutoCloseable {
          */
         private CommandScheduler commandScheduler;
 
-        @Nullable
         public CommandStore getCommandStore() {
             return commandStore;
         }
 
-        @Nullable
         public CommandScheduler getCommandScheduler() {
             return commandScheduler;
         }
