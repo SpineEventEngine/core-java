@@ -46,9 +46,9 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
-import org.spine3.util.Environment;
 import org.spine3.validate.ConstraintViolation;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
@@ -103,17 +103,18 @@ public class CommandBus implements AutoCloseable {
     private boolean isMultitenant;
 
     /**
-     * Creates a new instance.
-     *
-     * @param commandStore a store to save commands
-     * @return a new instance
+     * Creates new instance according to the passed {@link Builder}.
      */
-    public static CommandBus newInstance(CommandStore commandStore) {
-        final CommandScheduler scheduler = createCommandScheduler();
-        final ProblemLog log = new ProblemLog();
-        final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
-        commandBus.rescheduleCommandsInParallel();
-        return commandBus;
+    private CommandBus(Builder builder) {
+        this(builder.getCommandStore(), builder.getCommandScheduler(), new ProblemLog());
+        rescheduleCommandsInParallel();
+    }
+
+    /**
+     * Creates a new {@link Builder} for the {@code CommandBus}.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -316,6 +317,11 @@ public class CommandBus implements AutoCloseable {
         return rescheduler;
     }
 
+    @VisibleForTesting
+    /* package */ CommandScheduler getScheduler() {
+        return scheduler;
+    }
+
     private void dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
@@ -368,17 +374,6 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
-    private static CommandScheduler createCommandScheduler() {
-        if (Environment.getInstance().isAppEngine()) {
-            log().error("CommandScheduler for AppEngine is not implemented yet.");
-            // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
-            // Return this one for now.
-            return new ExecutorCommandScheduler();
-        } else {
-            return new ExecutorCommandScheduler();
-        }
-    }
-
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
@@ -421,6 +416,57 @@ public class CommandBus implements AutoCloseable {
             final CommandId id = getId(command);
             problemLog.errorExpiredCommand(msg, id);
             commandStatusService.setToError(id, commandExpiredError(msg));
+        }
+    }
+
+    /**
+     * The {@code Builder} for {@code CommandBus}.
+     */
+    public static class Builder {
+
+        private CommandStore commandStore;
+
+        /**
+         * Optional field for the {@code CommandBus}.
+         *
+         * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
+         */
+        private CommandScheduler commandScheduler;
+
+        @Nullable
+        public CommandStore getCommandStore() {
+            return commandStore;
+        }
+
+        @Nullable
+        public CommandScheduler getCommandScheduler() {
+            return commandScheduler;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            checkNotNull(commandStore);
+            this.commandStore = commandStore;
+            return this;
+        }
+
+        public Builder setCommandScheduler(CommandScheduler commandScheduler) {
+            checkNotNull(commandScheduler);
+            this.commandScheduler = commandScheduler;
+            return this;
+        }
+
+        private Builder() {}
+
+        public CommandBus build() {
+
+            checkNotNull(commandStore, "CommandStore must be set");
+
+            if(commandScheduler == null) {
+                commandScheduler = new ExecutorCommandScheduler();
+            }
+
+            final CommandBus commandBus = new CommandBus(this);
+            return commandBus;
         }
     }
 

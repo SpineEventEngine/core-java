@@ -72,6 +72,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -127,14 +128,37 @@ public class CommandBusShould {
      *********************/
 
     @Test(expected = NullPointerException.class)
-    public void not_accept_null_CommandStore_on_construction() {
-        CommandBus.newInstance(Tests.<CommandStore>nullRef());
+    public void not_accept_null_CommandStore_in_builder() {
+        CommandBus.newBuilder()
+                  .setCommandStore(Tests.<CommandStore>nullRef());
     }
+
+    @Test(expected = NullPointerException.class)
+    public void not_allow_to_omit_setting_CommandStore_in_builder() {
+        CommandBus.newBuilder()
+                  .build();
+    }
+
 
     @Test
     public void create_new_instance() {
-        final CommandBus commandBus = CommandBus.newInstance(commandStore);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .build();
         assertNotNull(commandBus);
+    }
+
+    @Test
+    public void allow_to_specify_command_scheduler_via_builder() {
+        final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setCommandScheduler(expectedScheduler)
+                                                .build();
+        assertNotNull(commandBus);
+
+        final CommandScheduler actualScheduler = commandBus.getScheduler();
+        assertEquals(expectedScheduler, actualScheduler);
     }
 
     /*

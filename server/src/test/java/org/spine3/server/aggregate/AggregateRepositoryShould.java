@@ -96,7 +96,9 @@ public class AggregateRepositoryShould {
         eventBus = mock(EventBus.class);
         commandStore = mock(CommandStore.class);
         doReturn(emptyIterator()).when(commandStore).iterator(any(CommandStatus.class)); // to avoid NPE
-        final CommandBus commandBus = CommandBus.newInstance(commandStore);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
         repository = new TestAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
