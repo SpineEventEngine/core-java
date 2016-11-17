@@ -57,13 +57,12 @@ public class FieldMasks {
     }
 
     /**
-     * Creates new instance of {@code FieldMask} from given type {@link Descriptors.Descriptor descriptor} and
-     * protobuf field numbers.
+     * Creates a new instance of {@code FieldMask} basing on the target type {@link Descriptors.Descriptor descriptor}
+     * and field tags defined in the Protobuf message.
      *
      * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to create a mask for.
-     * @param fieldNumbers   numbers of fields to include in the mask as they are defined in a corresponding
-     *                       {@code .proto} file.
-     * @return new {@code FieldMask} of given type for mentioned fields.
+     * @param fieldNumbers   field tags to include into the mask.
+     * @return an instance of {@code FieldMask} for the target type with the fields specified.
      */
     public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldNumbers) {
         if (fieldNumbers.length == 0) {
