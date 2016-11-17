@@ -36,27 +36,27 @@ import "spine/validate.proto";
 // Messages for "required" option tests.
 
 message RequiredMsgFieldValue {
-    google.protobuf.StringValue value = 1 [(required).value = true];
+    google.protobuf.StringValue value = 1 [(required) = true];
 }
 
 message RequiredStringFieldValue {
-    string value = 1 [(required).value = true];
+    string value = 1 [(required) = true];
 }
 
 message RequiredByteStringFieldValue {
-    bytes value = 1 [(required).value = true];
+    bytes value = 1 [(required) = true];
 }
 
 message RepeatedRequiredMsgFieldValue {
-    repeated google.protobuf.StringValue value = 1 [(required).value = true];
+    repeated google.protobuf.StringValue value = 1 [(required) = true];
 }
 
 message RequiredEnumFieldValue {
-    Time value = 1 [(required).value = true];
+    Time value = 1 [(required) = true];
 }
 
 message RequiredBooleanFieldValue {
-    bool value = 1 [(required).value = true];
+    bool value = 1 [(required) = true];
 }
 
 

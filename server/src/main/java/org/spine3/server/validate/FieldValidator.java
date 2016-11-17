@@ -29,7 +29,7 @@ import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.internal.RequiredOption;
+import org.spine3.validate.internal.IfMissingOption;
 import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
@@ -55,11 +55,11 @@ import static org.spine3.base.Commands.isCommandsFile;
 
     private final boolean isCommandsFile;
     private final boolean isFirstField;
-    private final RequiredOption requiredOption;
+    private final boolean required;
+    private final IfMissingOption ifMissingOption;
 
     /**
-     * If set the validator would assume that the field is required even if the {@code requiredOption}
-     * is not set.
+     * If set the validator would assume that the field is required even if the {@code required} option is not set.
      */
     private final boolean strict;
 
@@ -82,7 +82,8 @@ import static org.spine3.base.Commands.isCommandsFile;
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
-        this.requiredOption = getFieldOption(ValidationProto.required);
+        this.required = getFieldOption(ValidationProto.required);
+        this.ifMissingOption = getFieldOption(ValidationProto.ifMissing);
     }
 
     /**
@@ -128,7 +129,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         }
         final V value = getValues().get(0);
         if (isValueNotSet(value)) {
-            addViolation(newViolation(requiredOption));
+            addViolation(newViolation(ifMissingOption));
         }
     }
 
@@ -136,7 +137,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      *  Returns {@code true} if the field has required attribute or validation is strict.
      */
     protected boolean isRequiredField() {
-        final boolean result = requiredOption.getValue() || strict;
+        final boolean result = required || strict;
         return result;
     }
 
@@ -152,12 +153,12 @@ import static org.spine3.base.Commands.isCommandsFile;
             return;
         }
         if (values.isEmpty()) {
-            addViolation(newViolation(requiredOption));
+            addViolation(newViolation(ifMissingOption));
             return;
         }
         for (V value : values) {
             if (isValueNotSet(value)) {
-                addViolation(newViolation(requiredOption));
+                addViolation(newViolation(ifMissingOption));
                 return; // because one error message is enough for the "required" option
             }
         }
@@ -178,7 +179,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         violations.add(violation);
     }
 
-    private ConstraintViolation newViolation(RequiredOption option) {
+    private ConstraintViolation newViolation(IfMissingOption option) {
         final String msg = getErrorMsgFormat(option, option.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
