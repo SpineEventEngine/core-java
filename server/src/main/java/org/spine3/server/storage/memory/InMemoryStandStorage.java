@@ -113,11 +113,14 @@ public class InMemoryStandStorage extends StandStorage {
     protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
         final TypeUrl recordType = TypeUrl.of(record.getState()
                                                     .getTypeUrl());
-        checkState(id.getStateType().equals(recordType), "The typeUrl of the record does not correspond to id");
+        final TypeUrl recordTypeFromId = id.getStateType();
+        checkState(
+                recordTypeFromId.equals(recordType),
+                String.format("The typeUrl of the record (%s) does not correspond to id (for type %s)",
+                              recordType, recordTypeFromId));
 
         recordStorage.write(id, record);
     }
-
 
     public static class Builder {
 
