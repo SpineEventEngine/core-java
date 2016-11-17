@@ -22,7 +22,7 @@ syntax = "proto3";
 // We do not define a package for this file to allow shorter options for user-defined types.
 // This would allow to write:
 //
-//     [(required).value = true];
+//     [(required) = true];
 //
 // instead of:
 //
@@ -77,59 +77,60 @@ extend google.protobuf.MessageOptions {
 extend google.protobuf.FieldOptions {
 
     // The option to mark a field as required.
-    // Example:
-    //     string my_field = 1 [(required).value = true];
     //
-    RequiredOption required = 51100;
+    // If the field type is a `message`, it must be set to a non-default instance.
+    // If it is `string` or `bytes`, the value must not be an empty string or an array.
+    // Other field types are not applicable.
+    // If the field is repeated, it must have at least one value set, and all its values must be valid.
+    //
+    // Unlike the `required` keyword used in Protobuf 2, the option does not affect the transfer layer.
+    // Even if a message content violates the requirement set by the option, it would still be a valid
+    // message for the Protobuf library.
+    //
+    // Example:
+    //
+    // MyMessage field = 1 [(required) = true];
+    //
+    bool required = 51100;
+
+    IfMissingOption if_missing = 51101;
 
     // The option to define maximal decimal value.
-    DecimalMaxOption decimal_max = 51101;
+    DecimalMaxOption decimal_max = 51102;
 
     // The option to define minimal decimal value.
-    DecimalMinOption decimal_min = 51102;
+    DecimalMinOption decimal_min = 51103;
 
-    MaxOption max = 51103;
-    MinOption min = 51104;
+    MaxOption max = 51104;
+    MinOption min = 51105;
 
-    DigitsOption digits = 51105;
+    DigitsOption digits = 51106;
 
-    TimeOption when = 51106;
+    TimeOption when = 51107;
 
-    PatternOption pattern = 51107;
+    PatternOption pattern = 51108;
 
-    ValidOption valid = 51108;
+    ValidOption valid = 51109;
 
-    GoesOption goes = 51109;
+    GoesOption goes = 51110;
 }
 
-// The option to mark a field as required.
+// Defines the error handling for `required` field with no value set.
 //
-// If the field type is a `message`, it must be set to a non-default instance.
-// If it is `string` or `bytes`, the value must not be an empty string or an array.
-// Other field types are not applicable.
-// If the field is repeated, it must have at least one value set, and all its values must be valid.
-//
-// Unlike the `required` keyword used in Protobuf 2, the option does not affect the transfer layer.
-// Even if a message content violates the requirement set by the option, it would still be a valid
-// message for the Protobuf library.
+// Applies only to the fields marked as `required`.
+// Validation error message is composed according to the rules defined by this option.
 //
 // Example:
 //
-// MyMessage field = 1 [(required).value = true];
+// MyMessage field = 1 [(required) = true, (if_missing).msg_format = "The field value is required."];
 //
-message RequiredOption {
+message IfMissingOption {
 
     // The default error message.
     option (default_message) = "Value must be set.";
 
-    // Specifies if the field is required. Must be set to true. Otherwise, the field is not validated.
-    //
-    // The default value is false.
-    //
-    bool value = 1;
-
     // A user-defined validation error format message.
-    string msg_format = 2;
+    string msg_format = 1;
 }
 
 // The field value must be greater than (or equal to, if the `inclusive` parameter is true) the given minimum number.
