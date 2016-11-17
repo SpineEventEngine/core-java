@@ -27,6 +27,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.IfMissingOption;
@@ -105,6 +107,10 @@ import static org.spine3.base.Commands.isCommandsFile;
      * <p>Use {@link #addViolation(ConstraintViolation)} method in custom implementations.
      */
     protected List<ConstraintViolation> validate() {
+        if (!isRequiredField() && hasCustomMissingMessage()) {
+            log().warn("'if_missing' option is set without '(required) = true'");
+        }
+
         if (isRequiredEntityIdField()) {
             validateEntityId();
         }
@@ -138,6 +144,14 @@ import static org.spine3.base.Commands.isCommandsFile;
      */
     protected boolean isRequiredField() {
         final boolean result = required || strict;
+        return result;
+    }
+
+    /**
+     *  Returns {@code true} in case `if_missing` option is set with a non-default error message.
+     */
+    private boolean hasCustomMissingMessage() {
+        final boolean result = !ifMissingOption.equals(IfMissingOption.getDefaultInstance());
         return result;
     }
 
@@ -223,5 +237,15 @@ import static org.spine3.base.Commands.isCommandsFile;
     /** Returns a path to the current field. */
     protected FieldPath getFieldPath() {
         return fieldPath;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(FieldValidator.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }
