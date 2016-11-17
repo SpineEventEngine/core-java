@@ -20,19 +20,21 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.Task;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId> {
 
+    @SuppressWarnings("unchecked")
     @Override
     protected AbstractStorage<ProjectId, EntityStorageRecord> getStorage() {
         return InMemoryRecordStorage.newInstance(false);
@@ -47,7 +49,13 @@ public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId> 
     }
 
     @Override
-    protected Message emptyState() {
-        return Any.getDefaultInstance();
+    protected Message newState(ProjectId id) {
+        final Project project = Project.newBuilder()
+                                       .setId(id)
+                                       .setStatus(Project.Status.CREATED)
+                                       .setName(String.format("record-storage-test-%s", id.getId()))
+                                       .addTask(Task.getDefaultInstance())
+                                       .build();
+        return project;
     }
 }

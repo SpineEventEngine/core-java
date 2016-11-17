@@ -47,7 +47,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould extends RecordStorageShould {
+public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -62,13 +62,19 @@ public abstract class StandStorageShould extends RecordStorageShould {
     };
 
     @Override
-    protected Message emptyState() {
-        return Project.getDefaultInstance();
+    protected Message newState(AggregateStateId id) {
+        final Project project = Project.newBuilder()
+                                       .setId((ProjectId) id.getAggregateId())
+                                       .setStatus(Project.Status.CREATED)
+                                       .setName(String.format("test-project-%s", id.toString()))
+                                       .addTask(Task.getDefaultInstance())
+                                       .build();
+        return project;
     }
 
     @Test
     public void retrieve_all_records() {
-        final StandStorage storage = (StandStorage) getStorage();
+        final StandStorage storage = getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Map<AggregateStateId, EntityStorageRecord> allRecords = storage.readAll();
@@ -77,7 +83,7 @@ public abstract class StandStorageShould extends RecordStorageShould {
 
     @Test
     public void retrieve_records_by_ids() {
-        final StandStorage storage = (StandStorage) getStorage();
+        final StandStorage storage = getStorage();
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
@@ -90,27 +96,14 @@ public abstract class StandStorageShould extends RecordStorageShould {
         return DEFAULT_ID_SUPPLIER.get();
     }
 
-    @Override
-    protected EntityStorageRecord newStorageRecord() {
-        final Project defaultProject = Project.getDefaultInstance();
-        final EntityStorageRecord record = newRecord(defaultProject);
-        return record;
-    }
-
-    protected static List<AggregateStateId> fill(StandStorage storage,
+    protected List<AggregateStateId> fill(StandStorage storage,
                                                  int count,
                                                  Supplier<AggregateStateId<ProjectId>> idSupplier) {
         final List<AggregateStateId> ids = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
             final AggregateStateId genericId = idSupplier.get();
-            final ProjectId id = (ProjectId) genericId.getAggregateId();
-            final Project project = Project.newBuilder()
-                                           .setId(id)
-                                           .setStatus(Project.Status.CREATED)
-                                           .setName(String.format("test-project-%s", i))
-                                           .addTask(Task.getDefaultInstance())
-                                           .build();
+            final Project project = (Project) newState(genericId);
             final EntityStorageRecord record = newRecord(project);
             storage.write(genericId, record);
             ids.add(genericId);
