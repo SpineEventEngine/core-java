@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
@@ -164,15 +165,10 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(filter)
                                                    .build();
-        final String firstFieldName = entities.get(0)
-                                              .getState()
-                                              .getDescriptorForType()
-                                              .getFields()
-                                              .get(0)
-                                              .getFullName();
-        final FieldMask firstFieldOnly = FieldMask.newBuilder()
-                                                  .addPaths(firstFieldName)
-                                                  .build();
+        final Descriptors.Descriptor entityDescriptor = entities.get(0)
+                                               .getState()
+                                               .getDescriptorForType();
+        final FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
         final Iterable<E> readEntities = repo.find(filters, firstFieldOnly);
 
         assertSize(ids.size(), readEntities);

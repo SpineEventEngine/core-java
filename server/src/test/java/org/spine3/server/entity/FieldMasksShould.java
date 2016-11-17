@@ -177,6 +177,8 @@ public class FieldMasksShould {
         private static final TypeUrl TYPE = TypeUrl.of(Project.class);
         private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
+        private static final Descriptors.Descriptor TYPE_DESCRIPTOR = Project.getDescriptor();
+
         private static Project newProject(String id) {
             final ProjectId projectId = ProjectId.newBuilder()
                                                  .setId(id)
@@ -206,14 +208,7 @@ public class FieldMasksShould {
         }
 
         private static FieldMask fieldMask(int... fieldIndeces) {
-            final FieldMask.Builder mask = FieldMask.newBuilder();
-            final List<Descriptors.FieldDescriptor> allFields = Project.getDescriptor()
-                                                                       .getFields();
-            for (int i : fieldIndeces) {
-                mask.addPaths(allFields.get(i - 1)
-                                       .getFullName());
-            }
-            return mask.build();
+            return FieldMasks.maskOf(TYPE_DESCRIPTOR, fieldIndeces);
         }
     }
 }
