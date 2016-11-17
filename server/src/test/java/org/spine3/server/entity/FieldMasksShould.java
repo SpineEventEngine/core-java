@@ -54,7 +54,7 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void create_masks_for_given_field_numbers() {
+    public void create_masks_for_given_field_tags() {
         final Descriptors.Descriptor descriptor = Project.getDescriptor();
         final int[] fieldNumbers = {1, 2, 3};
         @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -71,7 +71,7 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void retrieve_default_field_mask_if_no_field_numbers_requested() {
+    public void retrieve_default_field_mask_if_no_field_tags_requested() {
         final Descriptors.Descriptor descriptor = Project.getDescriptor();
         final FieldMask mask = FieldMasks.maskOf(descriptor);
         assertEquals(FieldMask.getDefaultInstance(), mask);

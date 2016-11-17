@@ -61,16 +61,16 @@ public class FieldMasks {
      * and field tags defined in the Protobuf message.
      *
      * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to create a mask for.
-     * @param fieldNumbers   field tags to include into the mask.
+     * @param fieldTags      field tags to include into the mask.
      * @return an instance of {@code FieldMask} for the target type with the fields specified.
      */
-    public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldNumbers) {
-        if (fieldNumbers.length == 0) {
+    public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldTags) {
+        if (fieldTags.length == 0) {
             return FieldMask.getDefaultInstance();
         }
 
         final FieldMask.Builder result = FieldMask.newBuilder();
-        for (int fieldNumber : fieldNumbers) {
+        for (int fieldNumber : fieldTags) {
             final Descriptors.FieldDescriptor field = typeDescriptor.findFieldByNumber(fieldNumber);
             final String fieldPath = field.getFullName();
             result.addPaths(fieldPath);
