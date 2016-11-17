@@ -45,9 +45,10 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class InMemoryStandStorage extends StandStorage {
 
-    private final InMemoryRecordStorage<AggregateStateId> recordStorage;
     private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN
             = "The typeUrl of the record (%s) does not correspond to id (for type %s)";
+
+    private final InMemoryRecordStorage<AggregateStateId> recordStorage;
 
     private InMemoryStandStorage(Builder builder) {
         super(builder.isMultitenant());
@@ -118,8 +119,7 @@ public class InMemoryStandStorage extends StandStorage {
         final TypeUrl recordTypeFromId = id.getStateType();
         checkState(
                 recordTypeFromId.equals(recordType),
-                String.format(TYPE_URL_MISMATCH_MESSAGE_PATTERN,
-                              recordType, recordTypeFromId));
+                String.format(TYPE_URL_MISMATCH_MESSAGE_PATTERN, recordType, recordTypeFromId));
 
         recordStorage.write(id, record);
     }

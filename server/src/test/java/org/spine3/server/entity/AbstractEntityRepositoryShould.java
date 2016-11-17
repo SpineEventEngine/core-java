@@ -166,8 +166,8 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
                                                    .setIdFilter(filter)
                                                    .build();
         final Descriptors.Descriptor entityDescriptor = entities.get(0)
-                                               .getState()
-                                               .getDescriptorForType();
+                                                                .getState()
+                                                                .getDescriptorForType();
         final FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
         final Iterable<E> readEntities = repo.find(filters, firstFieldOnly);
 
