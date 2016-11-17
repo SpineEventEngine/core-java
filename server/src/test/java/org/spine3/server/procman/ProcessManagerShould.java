@@ -78,7 +78,9 @@ public class ProcessManagerShould {
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
-        commandBus = spy(CommandBus.newInstance(commandStore));
+        commandBus = spy(CommandBus.newBuilder()
+                                   .setCommandStore(commandStore)
+                                   .build());
         processManager = new TestProcessManager(ID);
     }
 

@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -67,11 +68,13 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -106,7 +109,7 @@ public class CommandBusShould {
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new ProblemLog());
-        commandBus = new CommandBus(commandStore, scheduler, log);
+        commandBus = new CommandBus(commandStore, scheduler, log, true);
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -127,14 +130,37 @@ public class CommandBusShould {
      *********************/
 
     @Test(expected = NullPointerException.class)
-    public void not_accept_null_CommandStore_on_construction() {
-        CommandBus.newInstance(Tests.<CommandStore>nullRef());
+    public void not_accept_null_CommandStore_in_builder() {
+        CommandBus.newBuilder()
+                  .setCommandStore(Tests.<CommandStore>nullRef());
     }
+
+    @Test(expected = NullPointerException.class)
+    public void not_allow_to_omit_setting_CommandStore_in_builder() {
+        CommandBus.newBuilder()
+                  .build();
+    }
+
 
     @Test
     public void create_new_instance() {
-        final CommandBus commandBus = CommandBus.newInstance(commandStore);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .build();
         assertNotNull(commandBus);
+    }
+
+    @Test
+    public void allow_to_specify_command_scheduler_via_builder() {
+        final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setCommandScheduler(expectedScheduler)
+                                                .build();
+        assertNotNull(commandBus);
+
+        final CommandScheduler actualScheduler = commandBus.getScheduler();
+        assertEquals(expectedScheduler, actualScheduler);
     }
 
     /*
@@ -531,6 +557,80 @@ public class CommandBusShould {
             final long actualDelay = getDelaySeconds(cmd);
             assertSecondsEqual(newDelayExpected.getSeconds(), actualDelay, /*maxDiffSec=*/1);
         }
+    }
+
+    @Test
+    public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
+        final String mainThreadName = Thread.currentThread().getName();
+        final StringBuilder threadNameUponScheduling = new StringBuilder(0);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        singleCommandForRescheduling();
+
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setCommandScheduler(scheduler)
+                                                .setThreadSpawnAllowed(true)
+                                                .build();
+        assertNotNull(commandBus);
+
+        // Sleep to ensure the commands have been rescheduled in parallel.
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Throwables.propagate(e);
+        }
+
+        // Ensure the scheduler has been called for a single command,
+        final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+        verify(scheduler, times(1)).schedule(commandCaptor.capture());
+
+        // and the call has been made for a thread, different than main thread.
+        final String actualThreadName = threadNameUponScheduling.toString();
+        assertNotNull(actualThreadName);
+        assertNotEquals(mainThreadName, actualThreadName);
+    }
+
+    @Test
+    public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
+        final String mainThreadName = Thread.currentThread().getName();
+        final StringBuilder threadNameUponScheduling = new StringBuilder(0);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        singleCommandForRescheduling();
+
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setCommandScheduler(scheduler)
+                                                .setThreadSpawnAllowed(false)
+                                                .build();
+        assertNotNull(commandBus);
+
+        // Ensure the scheduler has been called for a single command,
+        final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+        verify(scheduler, times(1)).schedule(commandCaptor.capture());
+
+        // and the call has been made for a thread, different than main thread.
+        final String actualThreadName = threadNameUponScheduling.toString();
+        assertNotNull(actualThreadName);
+        assertEquals(mainThreadName, actualThreadName);
+    }
+
+    private void singleCommandForRescheduling() {
+        final Timestamp schedulingTime = minutesAgo(3);
+        final Duration delayPrimary = Durations.ofMinutes(5);
+        final Command cmdWithSchedule = setSchedule(Given.Command.createProject(), delayPrimary, schedulingTime);
+        commandStore.store(cmdWithSchedule, SCHEDULED);
+    }
+
+    // The method is not {@code static} to allow Mockito spy on anonymous class.
+    @SuppressWarnings({"MethodParameterNamingConvention", "MethodMayBeStatic"})
+    private CommandScheduler threadAwareScheduler(final StringBuilder threadNameDestination) {
+        return spy(new ExecutorCommandScheduler() {
+                @Override
+                public void schedule(Command command) {
+                    super.schedule(command);
+                    threadNameDestination.append(Thread.currentThread().getName());
+                }
+            });
     }
 
     @Test

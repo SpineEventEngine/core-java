@@ -484,7 +484,9 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             if (commandStore == null) {
                 this.commandStore = createCommandStore();
             }
-            final CommandBus commandBus = CommandBus.newInstance(commandStore);
+            final CommandBus commandBus = CommandBus.newBuilder()
+                                                    .setCommandStore(commandStore)
+                                                    .build();
             return commandBus;
         }
 
