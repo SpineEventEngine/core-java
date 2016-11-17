@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,6 +51,30 @@ public class FieldMasksShould {
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(FieldMasks.class));
+    }
+
+    @Test
+    public void create_masks_for_given_filed_numbers() {
+        final Descriptors.Descriptor descriptor = Project.getDescriptor();
+        final int[] fieldNumbers = {1, 2, 3};
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final String[] fieldNames = {"id", "name", "task"};
+        final FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
+
+        final List<String> paths = mask.getPathsList();
+        assertSize(fieldNumbers.length, paths);
+
+        for (int i = 0; i < paths.size(); i++) {
+            final String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
+            assertEquals(expectedPath, paths.get(i));
+        }
+    }
+
+    @Test
+    public void retrieve_default_field_mask_if_no_field_numbers_requested() {
+        final Descriptors.Descriptor descriptor = Project.getDescriptor();
+        final FieldMask mask = FieldMasks.maskOf(descriptor);
+        assertEquals(FieldMask.getDefaultInstance(), mask);
     }
 
     @Test

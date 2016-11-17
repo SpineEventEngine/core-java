@@ -56,7 +56,15 @@ public class FieldMasks {
     private FieldMasks() {
     }
 
-    // TODO:17-11-16:dmytro.dashenkov: Javadoc.
+    /**
+     * Creates new instance of {@code FieldMask} from given type {@link Descriptors.Descriptor descriptor} and
+     * protobuf field numbers.
+     *
+     * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to create a mask for.
+     * @param fieldNumbers   numbers of fields to include in the mask as they are defined in a corresponding
+     *                       {@code .proto} file.
+     * @return new {@code FieldMask} of given type for mentioned fields.
+     */
     public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldNumbers) {
         if (fieldNumbers.length == 0) {
             return FieldMask.getDefaultInstance();
