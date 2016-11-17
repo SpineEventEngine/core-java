@@ -21,6 +21,7 @@
 package org.spine3.server.validate;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
@@ -30,9 +31,41 @@ import org.junit.Test;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Values;
-import org.spine3.test.validate.msg.*;
+import org.spine3.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
+import org.spine3.test.validate.msg.CustomMessageRequiredEnumFieldValue;
+import org.spine3.test.validate.msg.CustomMessageRequiredMsgFieldValue;
+import org.spine3.test.validate.msg.CustomMessageRequiredRepeatedMsgFieldValue;
+import org.spine3.test.validate.msg.CustomMessageRequiredStringFieldValue;
+import org.spine3.test.validate.msg.CustomMessageWithNoRequiredOption;
+import org.spine3.test.validate.msg.DecimalMaxIncNumberFieldValue;
+import org.spine3.test.validate.msg.DecimalMaxNotIncNumberFieldValue;
+import org.spine3.test.validate.msg.DecimalMinIncNumberFieldValue;
+import org.spine3.test.validate.msg.DecimalMinNotIncNumberFieldValue;
+import org.spine3.test.validate.msg.DigitsCountNumberFieldValue;
+import org.spine3.test.validate.msg.EnclosedMessageFieldValue;
+import org.spine3.test.validate.msg.EnclosedMessageWithoutAnnotationFieldValue;
+import org.spine3.test.validate.msg.EntityIdByteStringFieldValue;
+import org.spine3.test.validate.msg.EntityIdDoubleFieldValue;
+import org.spine3.test.validate.msg.EntityIdIntFieldValue;
+import org.spine3.test.validate.msg.EntityIdLongFieldValue;
+import org.spine3.test.validate.msg.EntityIdMsgFieldValue;
+import org.spine3.test.validate.msg.EntityIdRepeatedFieldValue;
+import org.spine3.test.validate.msg.EntityIdStringFieldValue;
+import org.spine3.test.validate.msg.MaxNumberFieldValue;
+import org.spine3.test.validate.msg.MinNumberFieldValue;
+import org.spine3.test.validate.msg.PatternStringFieldValue;
+import org.spine3.test.validate.msg.RepeatedRequiredMsgFieldValue;
+import org.spine3.test.validate.msg.RequiredBooleanFieldValue;
+import org.spine3.test.validate.msg.RequiredByteStringFieldValue;
+import org.spine3.test.validate.msg.RequiredEnumFieldValue;
+import org.spine3.test.validate.msg.RequiredMsgFieldValue;
+import org.spine3.test.validate.msg.RequiredStringFieldValue;
+import org.spine3.test.validate.msg.TimeInFutureFieldValue;
+import org.spine3.test.validate.msg.TimeInPastFieldValue;
+import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.Time;
+import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
@@ -193,6 +226,89 @@ public class MessageValidatorShould {
         assertFieldPathIs(violation, VALUE);
         assertTrue(violation.getViolationList()
                             .isEmpty());
+    }
+
+    @Test
+    public void propagate_proper_error_message_if_custom_message_set_and_required_Message_field_is_NOT_set() {
+        final CustomMessageRequiredMsgFieldValue invalidMsg = CustomMessageRequiredMsgFieldValue.getDefaultInstance();
+        final String expectedMessage = getCustomErrorMessage(CustomMessageRequiredMsgFieldValue.getDescriptor());
+
+        validate(invalidMsg);
+        assertIsValid(false);
+
+        checkErrorMessage(expectedMessage);
+    }
+
+    @Test
+    public void propagate_proper_error_message_if_custom_message_set_and_required_String_field_is_NOT_set() {
+        final CustomMessageRequiredStringFieldValue invalidMsg =
+                CustomMessageRequiredStringFieldValue.getDefaultInstance();
+        final String expectedMessage = getCustomErrorMessage(CustomMessageRequiredStringFieldValue.getDescriptor());
+
+        validate(invalidMsg);
+        assertIsValid(false);
+
+        checkErrorMessage(expectedMessage);
+    }
+
+    @Test
+    public void propagate_proper_error_message_if_custom_message_set_and_required_ByteString_field_is_NOT_set() {
+        final CustomMessageRequiredByteStringFieldValue invalidMsg =
+                CustomMessageRequiredByteStringFieldValue.getDefaultInstance();
+        final String expectedMessage = getCustomErrorMessage(CustomMessageRequiredByteStringFieldValue.getDescriptor());
+
+        validate(invalidMsg);
+        assertIsValid(false);
+
+        checkErrorMessage(expectedMessage);
+    }
+
+    @Test
+    public void propagate_proper_error_message_if_custom_message_set_and_required_RepeatedMsg_field_is_NOT_set() {
+        final CustomMessageRequiredRepeatedMsgFieldValue invalidMsg =
+                CustomMessageRequiredRepeatedMsgFieldValue.getDefaultInstance();
+        final String expectedMessage = getCustomErrorMessage(CustomMessageRequiredRepeatedMsgFieldValue.getDescriptor());
+
+        validate(invalidMsg);
+        assertIsValid(false);
+
+        checkErrorMessage(expectedMessage);
+    }
+
+    @Test
+    public void propagate_proper_error_message_if_custom_message_set_and_required_Enum_field_is_NOT_set() {
+        final CustomMessageRequiredEnumFieldValue invalidMsg =
+                CustomMessageRequiredEnumFieldValue.getDefaultInstance();
+        final String expectedMessage = getCustomErrorMessage(CustomMessageRequiredEnumFieldValue.getDescriptor());
+
+        validate(invalidMsg);
+        assertIsValid(false);
+
+        checkErrorMessage(expectedMessage);
+    }
+
+    @Test
+    public void ignore_if_missing_option_if_field_not_marked_required() {
+        final CustomMessageWithNoRequiredOption invalidMsg =
+                CustomMessageWithNoRequiredOption.getDefaultInstance();
+
+        validate(invalidMsg);
+        assertIsValid(true);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    private void checkErrorMessage(String expectedMessage) {
+        final ConstraintViolation constraintViolation = firstViolation();
+        assertEquals(expectedMessage, constraintViolation.getMsgFormat());
+    }
+
+    private static String getCustomErrorMessage(Descriptors.Descriptor descriptor) {
+        final Descriptors.FieldDescriptor firstFieldDescriptor = descriptor.getFields()
+                                                                           .get(0);
+        return firstFieldDescriptor.getOptions()
+                                   .getExtension(ValidationProto.ifMissing)
+                                   .getMsgFormat();
     }
 
     /*
