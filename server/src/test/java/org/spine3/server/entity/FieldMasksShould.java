@@ -54,7 +54,7 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void create_masks_for_given_filed_numbers() {
+    public void create_masks_for_given_field_numbers() {
         final Descriptors.Descriptor descriptor = Project.getDescriptor();
         final int[] fieldNumbers = {1, 2, 3};
         @SuppressWarnings("DuplicateStringLiteralInspection")
