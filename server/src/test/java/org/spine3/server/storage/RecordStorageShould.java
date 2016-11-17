@@ -20,22 +20,50 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.server.entity.FieldMasks;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould {
+public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+
+    protected abstract Message newState(I id);
+
+    @Override
+    protected EntityStorageRecord newStorageRecord() {
+        return newStorageRecord(newState(newId()));
+    }
+
+    private static EntityStorageRecord newStorageRecord(Message state) {
+        final Any wrappedState = AnyPacker.pack(state);
+        final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                              .setState(wrappedState)
+                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setVersion(0)
+                                                              .build();
+        return record;
+    }
 
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final RecordStorage<String> storage = createStorage();
+        final RecordStorage storage = (RecordStorage) getStorage();
 
         final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                      .addPaths("invalid-path")
@@ -46,5 +74,36 @@ public abstract class RecordStorageShould {
         assertEmpty(empty);
     }
 
-    protected abstract <T> RecordStorage<T> createStorage();
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void read_multiple_records_with_field_mask() {
+        final RecordStorage<I> storage = getStorage();
+        final int count = 10;
+        final List<I> ids = new LinkedList<>();
+        Descriptors.Descriptor typeDescriptor = null;
+
+        for (int i = 0; i < count; i++) {
+            final I id = newId();
+            final Message state = newState(id);
+            final EntityStorageRecord record = newStorageRecord(state);
+            storage.write(id, record);
+            ids.add(id);
+
+            if (typeDescriptor == null) {
+                typeDescriptor = state.getDescriptorForType();
+            }
+        }
+
+        final int bulkCount = count / 2;
+        final FieldMask fieldMask = FieldMasks.maskOf(typeDescriptor, 2);
+        final Iterable<EntityStorageRecord> readRecords = storage.readMultiple(
+                ids.subList(0, bulkCount),
+                fieldMask);
+        final List<EntityStorageRecord> readList = Lists.newLinkedList(readRecords);
+        assertSize(bulkCount, readList);
+        for (EntityStorageRecord record : readRecords) {
+            final Message state = AnyPacker.unpack(record.getState());
+            assertMatchesMask(state, fieldMask);
+        }
+    }
 }

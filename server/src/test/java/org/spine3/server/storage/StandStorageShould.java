@@ -23,32 +23,38 @@ package org.spine3.server.storage;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.stand.AggregateStateId;
-import org.spine3.test.projection.Project;
-import org.spine3.test.projection.ProjectId;
-import org.spine3.test.projection.Task;
+import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.Task;
+import org.spine3.test.storage.TaskId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould {
-
-    protected abstract StandStorage createStorage();
+public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -62,9 +68,20 @@ public abstract class StandStorageShould {
         }
     };
 
+    @Override
+    protected Message newState(AggregateStateId id) {
+        final Project project = Project.newBuilder()
+                                       .setId((ProjectId) id.getAggregateId())
+                                       .setStatus(Project.Status.CREATED)
+                                       .setName(String.format("test-project-%s", id.toString()))
+                                       .addTask(Task.getDefaultInstance())
+                                       .build();
+        return project;
+    }
+
     @Test
     public void retrieve_all_records() {
-        final StandStorage storage = createStorage();
+        final StandStorage storage = getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Map<AggregateStateId, EntityStorageRecord> allRecords = storage.readAll();
@@ -73,7 +90,7 @@ public abstract class StandStorageShould {
 
     @Test
     public void retrieve_records_by_ids() {
-        final StandStorage storage = createStorage();
+        final StandStorage storage = getStorage();
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
@@ -81,30 +98,87 @@ public abstract class StandStorageShould {
         checkIds(ids, records);
     }
 
-    protected static List<AggregateStateId> fill(StandStorage storage,
-                                                 int count,
-                                                 Supplier<AggregateStateId<ProjectId>> idSupplier) {
+    @Test
+    public void read_all_records_of_given_type() {
+        checkByTypeRead(FieldMask.getDefaultInstance());
+    }
+
+    @Test
+    public void read_all_records_of_given_type_with_field_mask() {
+        final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
+        checkByTypeRead(mask);
+    }
+
+    private void checkByTypeRead(FieldMask fieldMask) {
+        final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
+        final StandStorage storage = getStorage();
+        final TypeUrl type = TypeUrl.of(Project.getDescriptor());
+
+        final int projectsCount = 4;
+        final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
+
+        final int tasksCount = 5;
+        for (int i = 0; i < tasksCount; i++) {
+            final TaskId genericId = TaskId.newBuilder()
+                                           .setId(i)
+                                           .build();
+            final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.of(Task.getDescriptor()));
+            final Task task = Task.newBuilder()
+                                  .setTaskId(genericId)
+                                  .setTitle("Test task")
+                                  .setDescription("With description")
+                                  .build();
+            final EntityStorageRecord record = newRecord(task);
+            storage.write(id, record);
+        }
+
+        final ImmutableCollection<EntityStorageRecord> readRecords
+                = withFieldMask
+                  ? storage.readAllByType(TypeUrl.of(Project.getDescriptor()), fieldMask)
+                  : storage.readAllByType(TypeUrl.of(Project.getDescriptor()));
+        final Set<EntityStorageRecord> readDistinct = Sets.newHashSet(readRecords);
+        assertSize(projectsCount, readDistinct);
+
+        for (EntityStorageRecord record : readDistinct) {
+            final Any state = record.getState();
+            final Project project = AnyPacker.unpack(state);
+            final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
+            assertContains(restored, projectIds);
+
+            if (withFieldMask) {
+                assertMatchesMask(project, fieldMask);
+            }
+        }
+    }
+
+    @Override
+    protected AggregateStateId newId() {
+        return DEFAULT_ID_SUPPLIER.get();
+    }
+
+    protected List<AggregateStateId> fill(StandStorage storage,
+                                          int count,
+                                          Supplier<AggregateStateId<ProjectId>> idSupplier) {
         final List<AggregateStateId> ids = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
             final AggregateStateId genericId = idSupplier.get();
-            final ProjectId id = (ProjectId) genericId.getAggregateId();
-            final Project project = Project.newBuilder()
-                                           .setId(id)
-                                           .setStatus(Project.Status.CREATED)
-                                           .setName(String.format("test-project-%s", i))
-                                           .addTask(Task.getDefaultInstance())
-                                           .build();
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(AnyPacker.pack(project))
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
+            final Message state = newState(genericId);
+            final EntityStorageRecord record = newRecord(state);
             storage.write(genericId, record);
             ids.add(genericId);
         }
 
         return ids;
+    }
+
+    private static EntityStorageRecord newRecord(Message state) {
+        final EntityStorageRecord record = EntityStorageRecord.newBuilder()
+                                                              .setState(AnyPacker.pack(state))
+                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setVersion(1)
+                                                              .build();
+        return record;
     }
 
     protected void checkIds(List<AggregateStateId> ids, Collection<EntityStorageRecord> records) {

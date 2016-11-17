@@ -20,7 +20,9 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.StandStorage;
+import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorageShould;
 
 /**
@@ -29,7 +31,7 @@ import org.spine3.server.storage.StandStorageShould;
 public class InMemoryStandStorageShould extends StandStorageShould {
 
     @Override
-    protected StandStorage createStorage() {
+    protected AbstractStorage<AggregateStateId, EntityStorageRecord> getStorage() {
         return InMemoryStandStorage.newBuilder()
                                    .setMultitenant(false)
                                    .build();
