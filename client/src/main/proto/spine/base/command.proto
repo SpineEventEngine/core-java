@@ -60,26 +60,26 @@ message CommandId {
 message Command {
 
     // The message of the command wrapped into `Any`.
-    google.protobuf.Any message = 1 [(required).value = true];
+    google.protobuf.Any message = 1 [(required) = true];
 
     // Service information about the environment in which the command was created.
-    CommandContext context = 2 [(required).value = true];
+    CommandContext context = 2 [(required) = true];
 }
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
 
     // The id of the command.
-    CommandId command_id = 1 [(required).value = true];
+    CommandId command_id = 1 [(required) = true];
 
     // The user who created the command.
-    users.UserId actor = 2 [(required).value = true];
+    users.UserId actor = 2 [(required) = true];
 
     // The time when the command was created.
-    google.protobuf.Timestamp timestamp = 3 [(required).value = true];
+    google.protobuf.Timestamp timestamp = 3 [(required) = true];
 
     // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 4 [(required).value = true];
+    time.ZoneOffset zone_offset = 4 [(required) = true];
 
     // The ID of a tenant in a multitenant application.
     //

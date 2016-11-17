@@ -38,7 +38,7 @@ import "spine/net/internet_domain.proto";
 message OrganizationProfile {
 
     // The name of the organization to be used in the UI.
-    string display_name = 1 [(required).value = true];
+    string display_name = 1 [(required) = true];
 
     // A description of the organization, if available.
     string description = 2;

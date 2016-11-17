@@ -33,7 +33,7 @@ import org.spine3.client.CommandFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
-import org.spine3.validate.internal.RequiredOption;
+import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -111,7 +111,7 @@ public class TypeUrlShould {
     @Test
     public void return_simple_name_if_no_package() {
         // A msg type without Protobuf package
-        final String name = RequiredOption.class.getSimpleName();
+        final String name = IfMissingOption.class.getSimpleName();
         final TypeUrl typeUrl = TypeUrl.of(name);
 
         final String actual = typeUrl.getSimpleName();
