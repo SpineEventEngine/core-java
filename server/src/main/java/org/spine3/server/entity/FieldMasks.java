@@ -39,7 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A utility class for {@code FieldMask} processing against instances of {@link Message}.
+ * A utility class for creating instances of {@code FieldMask} and processing them against instances of {@link Message}.
  *
  * @author Dmytro Dashenkov
  */
@@ -54,6 +54,22 @@ public class FieldMasks {
             "Class %s must be assignable from com.google.protobuf.Message. Try to rebuild the project. Make sure type URL is valid.";
 
     private FieldMasks() {
+    }
+
+    // TODO:17-11-16:dmytro.dashenkov: Javadoc.
+    public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldNumbers) {
+        if (fieldNumbers.length == 0) {
+            return FieldMask.getDefaultInstance();
+        }
+
+        final FieldMask.Builder result = FieldMask.newBuilder();
+        for (int fieldNumber : fieldNumbers) {
+            final Descriptors.FieldDescriptor field = typeDescriptor.findFieldByNumber(fieldNumber);
+            final String fieldPath = field.getFullName();
+            result.addPaths(fieldPath);
+        }
+
+        return result.build();
     }
 
     /**
