@@ -161,8 +161,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nonnull
     @Override
     public A load(I id) throws IllegalStateException {
-        final AggregateStorage<I> aggregateStorage = aggregateStorage();
-        final AggregateEvents aggregateEvents = aggregateStorage.read(id);
+        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
         final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
         final List<Event> events = aggregateEvents.getEventList();
