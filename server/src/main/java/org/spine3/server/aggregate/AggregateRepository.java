@@ -21,6 +21,8 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
@@ -159,7 +161,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nonnull
     @Override
     public A load(I id) throws IllegalStateException {
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
+        final AggregateStorage<I> aggregateStorage = aggregateStorage();
+        final AggregateEvents aggregateEvents = aggregateStorage.read(id);
         final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
         final List<Event> events = aggregateEvents.getEventList();
@@ -213,22 +216,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final CommandContext context = request.getContext();
         final CommandId commandId = context.getCommandId();
         final I aggregateId = getAggregateId(command);
-        final A aggregate = load(aggregateId);
-        try {
-            aggregate.dispatch(command, context);
-        } catch (RuntimeException e) {
-            final Throwable cause = e.getCause();
-            //noinspection ChainOfInstanceofChecks
-            if (cause instanceof Exception) {
-                final Exception exception = (Exception) cause;
-                commandStatusService.setToError(commandId, exception);
-            } else if (cause instanceof FailureThrowable){
-                final FailureThrowable failure = (FailureThrowable) cause;
-                commandStatusService.setToFailure(commandId, failure);
-            } else {
-                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-            }
-        }
+        A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
+
         final List<Event> events = aggregate.getUncommittedEvents();
         //noinspection OverlyBroadCatchBlock
         try {
@@ -243,6 +232,55 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         commandStatusService.setOk(commandId);
     }
 
+    private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
+        final AggregateStorage<I> aggregateStorage = aggregateStorage();
+        A aggregate;
+
+        /**
+         * During the command dispatching and event applying, the original list of events may have been changed by
+         * other actors in the system.
+         *
+         * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous concurrent actor changes,
+         * the event count from the last snapshot should remain the same during the {@link AggregateRepository#load(Object)}
+         * and {@link Aggregate#dispatch(Message, CommandContext)}.
+         *
+         * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command} dispatching is repeated
+         * from scratch.
+         */
+        Integer eventCountBeforeSave = null;
+        int eventCountBeforeDispatch;
+        do {
+            if (eventCountBeforeSave != null) {
+                log().warn("New events detected during the dispatch of the command {} " +
+                                   "Possible concurrent modification of {} {}" +
+                                   "Repeating the command dispatching.",
+                           command, getAggregateClass(), aggregateId);
+            }
+            eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+            aggregate = load(aggregateId);
+            try {
+                aggregate.dispatch(command, context);
+            } catch (RuntimeException e) {
+                final Throwable cause = e.getCause();
+                //noinspection ChainOfInstanceofChecks
+                if (cause instanceof Exception) {
+                    final Exception exception = (Exception) cause;
+                    commandStatusService.setToError(commandId, exception);
+                } else if (cause instanceof FailureThrowable) {
+                    final FailureThrowable failure = (FailureThrowable) cause;
+                    commandStatusService.setToFailure(commandId, failure);
+                } else {
+                    commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
+                }
+            }
+
+            eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+        } while (eventCountBeforeDispatch != eventCountBeforeSave);
+
+        checkNotNull(aggregate);
+        return aggregate;
+    }
+
     /** Posts passed events to {@link EventBus}. */
     private void postEvents(Iterable<Event> events) {
         for (Event event : events) {
@@ -253,5 +291,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private I getAggregateId(Message command) {
         final I id = getIdFunction.getId(command, CommandContext.getDefaultInstance());
         return id;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(AggregateRepository.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }
