@@ -35,20 +35,22 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkValid;
 
 /**
@@ -156,12 +158,12 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(producerId, "producer ID");
         final Timestamp timestamp = checkPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                .setTimestamp(timestamp)
-                .setEventType(eventType)
-                .setProducerId(producerId)
-                .setEventId(eventIdString)
-                .setMessage(message)
-                .setContext(context);
+                                                                     .setTimestamp(timestamp)
+                                                                     .setEventType(eventType)
+                                                                     .setProducerId(producerId)
+                                                                     .setEventId(eventIdString)
+                                                                     .setMessage(message)
+                                                                     .setContext(context);
         return builder.build();
     }
 
@@ -186,7 +188,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 this.timePredicate = new Events.IsAfter(after);
             } else if (!afterSpecified && beforeSpecified) {
                 this.timePredicate = new Events.IsBefore(before);
-            } else if (afterSpecified /* && beforeSpecified is true here too */){
+            } else if (afterSpecified /* && beforeSpecified is true here too */) {
                 this.timePredicate = new Events.IsBetween(after, before);
             } else { // No timestamps specified.
                 this.timePredicate = Predicates.alwaysTrue();
@@ -232,6 +234,9 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         @Nullable
         private final List<Any> aggregateIds;
 
+        private final Collection<FieldFilter> eventFieldFilters;
+        private final Collection<FieldFilter> contextFieldFilters;
+
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
             this.eventTypeUrl = eventType.isEmpty()
@@ -241,6 +246,14 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             this.aggregateIds = aggregateIdList.isEmpty()
                                 ? null
                                 : aggregateIdList;
+            final Collection<FieldFilter> eventFilters = filter.getEventFieldFilterList();
+            this.eventFieldFilters = eventFilters.isEmpty()
+                                     ? null
+                                     : eventFilters;
+            final Collection<FieldFilter> contextFilters = filter.getContextFieldFilterList();
+            this.contextFieldFilters = contextFilters.isEmpty()
+                                     ? null
+                                     : contextFilters;
         }
 
         @Override
@@ -255,11 +268,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
             final EventContext context = event.getContext();
             final Any aggregateId = context.getProducerId();
-            if (aggregateIds != null) {
-                final boolean matches = aggregateIds.contains(aggregateId);
-                return matches;
-            }
-            return true;
+            return !(aggregateIds != null && !aggregateIds.contains(aggregateId));
         }
     }
 }
