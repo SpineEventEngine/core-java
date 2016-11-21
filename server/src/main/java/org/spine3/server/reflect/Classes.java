@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import static com.google.common.base.Throwables.propagate;
+
 /**
  * Utilities for working with classes.
  *
@@ -81,6 +83,28 @@ public class Classes {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Finds a getter method in given class or it's superclasses.
+     *
+     * <p>The method must match {@code getFieldName} notation, have no argument to be found.
+     *
+     * @param clazz     class containing the getter method
+     * @param fieldName field to find a getter for
+     * @return {@link Method} instance reflecting the getter method
+     * @throws RuntimeException upon reflective failure
+     */
+    public static Method getGetterForField(Class<?> clazz, String fieldName) {
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                        .toUpperCase() + fieldName.substring(1);
+        try {
+            final Method fieldGetter = clazz.getMethod(fieldGetterName);
+            return fieldGetter;
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+            throw propagate(e);
+        }
     }
 
     private Classes() {}
