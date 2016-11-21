@@ -24,10 +24,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnknownTypeException;
+import org.spine3.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Messages.toMessageClass;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utilities for working with {@link Any}.
@@ -71,7 +72,7 @@ public class AnyPacker {
             final T result = any.unpack(messageClass);
             return result;
         } catch (InvalidProtocolBufferException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 }

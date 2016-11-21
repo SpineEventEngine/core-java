@@ -29,6 +29,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.UserId;
+import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -38,8 +39,8 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Timestamps.isBetween;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -295,7 +296,7 @@ public class Events {
             result = any.unpack(clazz);
             return result;
         } catch (InvalidProtocolBufferException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 }

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
+import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -36,7 +37,7 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import static com.google.common.base.Throwables.propagate;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * A utility class working with I/O: streams, resources, etc.
@@ -110,7 +111,7 @@ public class IoUtil {
      * <p>Logs each {@link IOException} if it occurs.
      */
     public static void close(Closeable... closeables) {
-        close(FluentIterable.of(closeables));
+        close(FluentIterable.from(closeables));
     }
 
     /**
@@ -139,7 +140,7 @@ public class IoUtil {
      * <p>Logs each {@link Exception} if it occurs.
      */
     public static void closeAll(AutoCloseable... closeables) {
-        closeAll(FluentIterable.of(closeables));
+        closeAll(FluentIterable.from(closeables));
     }
 
     /**
@@ -186,7 +187,7 @@ public class IoUtil {
         try {
             flush(flushables);
         } catch (IOException e) {
-            propagate(e);
+            throw wrapped(e);
         }
     }
 

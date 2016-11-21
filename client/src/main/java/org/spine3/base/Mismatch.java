@@ -27,8 +27,8 @@ import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Values.pack;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Factories for constructing {@link ValueMismatch} instances for different types of attributes.
@@ -173,7 +173,7 @@ public class Mismatch {
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 
@@ -188,7 +188,7 @@ public class Mismatch {
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 }

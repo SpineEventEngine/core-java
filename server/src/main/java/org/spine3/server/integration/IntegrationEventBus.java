@@ -107,7 +107,7 @@ public class IntegrationEventBus {
      */
     @SafeVarargs
     public final void subscribe(IntegrationEventSubscriberImplBase subscriber, Class<? extends Message>... eventClasses) {
-        subscribe(subscriber, FluentIterable.of(eventClasses));
+        subscribe(subscriber, FluentIterable.from(eventClasses));
     }
 
     private static class DefaultResponseObserver implements StreamObserver<Response> {

@@ -30,7 +30,7 @@ buildscript {
     }
 
     ext {
-        guavaVersion = '19.0'
+        guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         spineProtobufPluginVersion = '1.4.10'
     }
@@ -58,7 +58,7 @@ allprojects {
     apply plugin: 'idea'
 
     group = 'org.spine3'
-    version = '0.6.3-SNAPSHOT'
+    version = '0.6.4-SNAPSHOT'
 }
 
 ext {

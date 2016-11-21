@@ -47,7 +47,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,6 +59,7 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * @author Alexander Litus
@@ -208,7 +208,7 @@ public class CommandHandlerShould {
             try {
                 super.handle(commandMessage, context);
             } catch (InvocationTargetException e) {
-                throw propagate(e);
+                throw wrapped(e);
             }
         }
 
