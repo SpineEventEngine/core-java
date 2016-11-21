@@ -314,11 +314,14 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
             final Collection<Any> expectedAnys = filter.getValueList();
             final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
-            final Message actualValue;
+            Message actualValue;
 
             try {
                 final Method getter = Classes.getGetterForField(object.getClass(), fieldName);
                 actualValue = (Message) getter.invoke(object);
+                if (actualValue instanceof Any) {
+                    actualValue = AnyPacker.unpack((Any) actualValue);
+                }
             } catch  (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
                 // Wrong message class -> not matches the predicate
                 return false;

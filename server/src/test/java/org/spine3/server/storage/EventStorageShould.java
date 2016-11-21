@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
@@ -92,6 +93,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         close(storage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected abstract EventStorage getStorage();
 
@@ -223,6 +225,54 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final ProjectCreated singleMessage = Events.getMessage(first);
         assertEquals(uid, singleMessage.getProjectId());
         assertEquals(projectCreated, singleMessage);
+    }
+
+    @Test
+    public void filter_events_by_context_fields() {
+        givenSequentialRecords();
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(Identifiers.newUuid())
+                                             .build();
+        final ProjectCreated projectCreated = ProjectCreated.newBuilder()
+                                                            .setProjectId(projectId)
+                                                            .build();
+        final Any eventAny = AnyPacker.pack(projectCreated);
+        final Message producerId = ProjectId.newBuilder()
+                                            .setId(Identifiers.newUuid())
+                                            .build();
+        final Any eventProducerId = AnyPacker.pack(producerId);
+        final EventContext context = EventContext.newBuilder()
+                                                 .setProducerId(eventProducerId)
+                                                 .build();
+        final EventStorageRecord record = EventStorageRecord.newBuilder()
+                                                            .setMessage(eventAny)
+                                                            .setContext(context)
+                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .setEventId(Identifiers.newUuid())
+                                                            .build();
+        storage.writeRecord(record);
+
+        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
+                                                          .setFieldPath(
+                                                                  EventContext.class.getCanonicalName() + ".producerId")
+                                                          .addValue(eventProducerId)
+                                                          .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addContextFieldFilter(contextFieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                                                             .addFilter(eventFilter)
+                                                             .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+
+        assertTrue(read.hasNext());
+        final Event singleEvent = read.next();
+        assertFalse(read.hasNext());
+
+        final Message eventMessage = Events.getMessage(singleEvent);
+        assertEquals(projectCreated, eventMessage);
+        final EventContext eventContext = singleEvent.getContext();
+        assertEquals(context, eventContext);
     }
 
     @Test
