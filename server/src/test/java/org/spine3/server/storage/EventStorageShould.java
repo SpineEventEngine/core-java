@@ -28,10 +28,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.test.storage.ProjectId;
@@ -168,11 +172,26 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void filter_events_by_event_message_fields() {
         givenSequentialRecords();
-        final Any projectCreatedAny = Given.EventMessage.projectCreatedAny();
-        final ProjectCreated projectCreated = AnyPacker.unpack(projectCreatedAny);
-        final ProjectId projectId = projectCreated.getProjectId();
-        final Any projectIdPacked = AnyPacker.pack(projectId);
+        final ProjectId uid = ProjectId.newBuilder()
+                                       .setId(Identifiers.newUuid())
+                                       .build();
+        final ProjectCreated projectCreated = Given.EventMessage.projectCreated(uid);
+        final Any projectCreatedAny = AnyPacker.pack(projectCreated);
+        final EventId eventId = EventId.newBuilder()
+                                       .setUuid(Identifiers.newUuid())
+                                       .build();
+        final EventStorageRecord record = EventStorageRecord.newBuilder()
+                                                            .setContext(EventContext.getDefaultInstance())
+                                                            .setEventId(eventId.getUuid())
+                                                            .setEventType(TypeUrl.of(ProjectCreated.class)
+                                                                                 .value())
+                                                            .setMessage(projectCreatedAny)
+                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .build();
+        // Uses protected method to avoid vast mocking
+        storage.writeRecord(record);
 
+        final Any projectIdPacked = AnyPacker.pack(uid);
         final FieldFilter fieldFilter = FieldFilter.newBuilder()
                                                    .setFieldPath(projectCreated.getClass()
                                                                                .getCanonicalName() + ".projectId")
@@ -185,13 +204,16 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
                 .addFilter(eventFilter)
                 .build();
         final Iterator<Event> read = storage.iterator(streamQuery);
+
         assertNotNull(read);
         assertTrue(read.hasNext());
-        final Event singleEvent = read.next();
-        assertFalse(read.hasNext()); // Only one event
-        final ProjectCreated message = Events.getMessage(singleEvent);
-        assertEquals(projectId, message.getProjectId());
-     }
+        final Event first = read.next();
+        assertFalse(read.hasNext());
+
+        final ProjectCreated singleMessage = Events.getMessage(first);
+        assertEquals(uid, singleMessage.getProjectId());
+        assertEquals(projectCreated, singleMessage);
+    }
 
     @Test
     public void convert_record_list_to_events() {

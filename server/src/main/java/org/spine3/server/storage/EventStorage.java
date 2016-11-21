@@ -309,7 +309,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 Message object,
                 @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
             final String fieldPath = filter.getFieldPath();
-            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
 
             final Collection<Any> expectedAnys = filter.getValueList();
