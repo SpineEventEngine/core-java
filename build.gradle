@@ -30,7 +30,7 @@ buildscript {
     }
 
     ext {
-        guavaVersion = '19.0'
+        guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         spineProtobufPluginVersion = '1.4.10'
     }

@@ -109,7 +109,7 @@ public class EventEnrichmentsMapShould {
                                                                        .get(TypeUrl.of(enrichmentClass)
                                                                                     .getTypeName());
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
-        for (Class<? extends Message> expectedClass : FluentIterable.of(eventClassesExpected)) {
+        for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
             final String expectedTypeName = TypeUrl.of(expectedClass).getTypeName();
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }

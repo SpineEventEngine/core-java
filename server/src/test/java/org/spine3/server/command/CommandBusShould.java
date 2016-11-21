@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -90,6 +89,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.util.Exceptions.wrapped;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {
@@ -577,7 +577,7 @@ public class CommandBusShould {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            Throwables.propagate(e);
+            throw wrapped(e);
         }
 
         // Ensure the scheduler has been called for a single command,

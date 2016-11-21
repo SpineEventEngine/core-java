@@ -35,9 +35,9 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract base class for repositories.
@@ -106,13 +106,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         if (!isPublic(modifiers)) {
             final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
             final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
-            throw propagate(new IllegalAccessException(message));
+            throw wrapped(new IllegalAccessException(message));
         }
     }
 
     private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
         final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return propagate(new NoSuchMethodException(message));
+        return new RuntimeException(new NoSuchMethodException(message));
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -162,7 +162,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             result.setDefault();
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 

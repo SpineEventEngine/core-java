@@ -27,6 +27,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.reflect.Classes;
+import org.spine3.util.Exceptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -35,10 +36,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * A server-side object with an identity.
@@ -132,7 +133,7 @@ public abstract class Entity<I, S extends Message> {
             final S state = constructor.newInstance();
             return state;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 

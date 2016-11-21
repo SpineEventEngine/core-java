@@ -30,8 +30,8 @@ import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -73,7 +73,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
         try {
             method.invoke(this, event, ctx);
         } catch (InvocationTargetException e) {
-            propagate(e);
+            throw wrapped(e);
         }
     }
 

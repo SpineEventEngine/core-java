@@ -30,8 +30,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract base for classes working with message fields.
@@ -88,7 +88,7 @@ public abstract class MessageField {
             final Object result = method.invoke(message);
             return result;
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class MessageField {
                 method.setAccessible(true);
                 accessors.put(messageClass, method);
             } catch (NoSuchMethodException e) {
-                throw propagate(e);
+                throw wrapped(e);
             }
         }
 

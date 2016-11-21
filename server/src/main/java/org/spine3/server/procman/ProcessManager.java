@@ -47,6 +47,7 @@ import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
+import org.spine3.util.Exceptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -57,9 +58,9 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -331,7 +332,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
                 try {
                     finishFuture.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    propagate(e);
+                    throw wrapped(e);
                 }
                 result.addProduced(command);
             }
