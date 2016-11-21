@@ -20,18 +20,17 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
-import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract storage tests.
@@ -73,15 +72,13 @@ public abstract class AbstractStorageShould<I, R extends Message> {
 
     /**
      * Closes the storage and propagates an exception if any occurs.
-     *
-     * @see Throwables#propagate(Throwable)
      */
     protected void close(AbstractStorage storage) {
         if (storage.isOpen()) {
             try {
                 storage.close();
             } catch (Exception e) {
-                throw propagate(e);
+                throw wrapped(e);
             }
         }
     }

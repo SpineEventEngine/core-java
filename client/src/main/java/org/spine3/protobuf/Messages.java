@@ -29,15 +29,16 @@ import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
+import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.GenericDescriptor;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -99,7 +100,7 @@ public class Messages {
         try {
             result = JsonPrinter.instance().print(message);
         } catch (InvalidProtocolBufferException e) {
-            propagate(e);
+            throw wrapped(e);
         }
         checkState(result != null);
         return result;

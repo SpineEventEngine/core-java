@@ -80,9 +80,6 @@ public class Exceptions {
     /**
      * Sets a throwable as the cause of a {@link RuntimeException} and throws it.
      *
-     * <p>Can be used instead of {@link Throwables#propagate(Throwable)} if it is needed to wrap the param anyway.
-     * Google's implementation throws {@link RuntimeException} and {@link Error} as-is.
-     *
      * @param throwable to wrap
      * @return always throws an exception, the return type is for convenience
      */
@@ -93,13 +90,10 @@ public class Exceptions {
     /**
      * Sets a throwable's cause as the cause of a {@link RuntimeException} and throws it.
      *
-     * <p>Can be used instead of {@link Throwables#propagate(Throwable)} if it is needed to wrap the param anyway.
-     * Google's implementation throws {@link RuntimeException} and {@link Error} as-is.
-     *
      * @param throwable to wrap
      * @return always throws an exception, the return type is for convenience
      */
     public static RuntimeException wrappedCause(Throwable throwable) {
-        throw new RuntimeException(throwable.getCause());
+        throw wrapped(throwable.getCause());
     }
 }

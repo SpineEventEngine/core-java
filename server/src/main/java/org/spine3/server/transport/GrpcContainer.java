@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.propagate;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Wrapping container for gRPC server.
@@ -97,7 +97,7 @@ public class GrpcContainer {
         try {
             grpcServer.awaitTermination();
         } catch (InterruptedException e) {
-            throw propagate(e);
+            throw wrapped(e);
         }
     }
 

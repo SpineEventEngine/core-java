@@ -85,7 +85,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             final Set<String> enrichmentTypes = props.stringPropertyNames();
             for (String enrichmentType : enrichmentTypes) {
                 final String eventTypesStr = props.getProperty(enrichmentType);
-                final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
+                final Iterable<String> eventTypes = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
                 put(enrichmentType, eventTypes);
             }
         }
