@@ -208,6 +208,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param request the request to dispatch
      * @throws IllegalStateException if storage for the repository was not initialized
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")      // the exception handling is the same for all exception types.
     @Override
     @CheckReturnValue
     public void dispatch(Command request) throws IllegalStateException {
@@ -218,7 +219,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
 
         final List<Event> events = aggregate.getUncommittedEvents();
-        //noinspection OverlyBroadCatchBlock
         try {
             store(aggregate);
             final Message state = aggregate.getState();
@@ -231,6 +231,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         commandStatusService.setOk(commandId);
     }
 
+    @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
         final AggregateStorage<I> aggregateStorage = aggregateStorage();
         A aggregate;
@@ -261,7 +262,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 aggregate.dispatch(command, context);
             } catch (RuntimeException e) {
                 final Throwable cause = e.getCause();
-                //noinspection ChainOfInstanceofChecks
                 if (cause instanceof Exception) {
                     final Exception exception = (Exception) cause;
                     commandStatusService.setToError(commandId, exception);
