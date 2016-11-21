@@ -268,6 +268,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             this.contextFieldFilters = filter.getContextFieldFilterList();
         }
 
+        @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
         public boolean apply(@Nullable Event event) {
             if (event == null) {
