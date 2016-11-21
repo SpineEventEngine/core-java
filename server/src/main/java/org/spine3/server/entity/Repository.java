@@ -112,7 +112,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
     private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
         final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return new RuntimeException(new NoSuchMethodException(message));
+        return wrapped(new NoSuchMethodException(message));
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
