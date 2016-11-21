@@ -43,8 +43,10 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.reflect.Classes;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
@@ -310,18 +312,15 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             final String fieldPath = filter.getFieldPath();
             final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
             checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
-            final String fieldGetterName = "get" + fieldName.substring(0, 1)
-                                                            .toUpperCase() + fieldName.substring(1);
 
             final Collection<Any> expectedAnys = filter.getValueList();
             final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
             final Message actualValue;
 
             try {
-                final Class<?> messageClass = object.getClass();
-                final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
-                actualValue = (Message) fieldGetter.invoke(object);
-            } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+                final Method getter = Classes.getGetterForField(object.getClass(), fieldName);
+                actualValue = (Message) getter.invoke(object);
+            } catch  (IllegalAccessException | InvocationTargetException e) {
                 throw propagate(e);
             }
 
