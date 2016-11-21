@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -36,17 +38,21 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
@@ -237,6 +243,18 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         private final Collection<FieldFilter> eventFieldFilters;
         private final Collection<FieldFilter> contextFieldFilters;
 
+        private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
+            @Nullable
+            @Override
+            public Message apply(@Nullable Any input) {
+                if (input == null) {
+                    return null;
+                }
+
+                return AnyPacker.unpack(input);
+            }
+        };
+
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
             this.eventTypeUrl = eventType.isEmpty()
@@ -246,14 +264,8 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             this.aggregateIds = aggregateIdList.isEmpty()
                                 ? null
                                 : aggregateIdList;
-            final Collection<FieldFilter> eventFilters = filter.getEventFieldFilterList();
-            this.eventFieldFilters = eventFilters.isEmpty()
-                                     ? null
-                                     : eventFilters;
-            final Collection<FieldFilter> contextFilters = filter.getContextFieldFilterList();
-            this.contextFieldFilters = contextFilters.isEmpty()
-                                     ? null
-                                     : contextFilters;
+            this.eventFieldFilters = filter.getEventFieldFilterList();
+            this.contextFieldFilters = filter.getContextFieldFilterList();
         }
 
         @Override
@@ -268,7 +280,52 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
             final EventContext context = event.getContext();
             final Any aggregateId = context.getProducerId();
-            return !(aggregateIds != null && !aggregateIds.contains(aggregateId));
+            if (aggregateIds != null && !aggregateIds.contains(aggregateId)) {
+                return false;
+            }
+
+            // Check event fields
+            for (FieldFilter filter : eventFieldFilters) {
+                final boolean matchesFilter = checkFields(message, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
+
+            // Check context fields
+            for (FieldFilter filter : contextFieldFilters) {
+                final boolean matchesFilter = checkFields(context, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static boolean checkFields(
+                Message object,
+                @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
+            final String fieldPath = filter.getFieldPath();
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.'));
+            checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
+            final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                            .toUpperCase() + fieldName.substring(1);
+
+            final Collection<Any> expectedAnys = filter.getValueList();
+            final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
+            final Message actualValue;
+
+            try {
+                final Class<?> messageClass = object.getClass();
+                final Method fieldGetter = messageClass.getDeclaredMethod(fieldGetterName);
+                actualValue = (Message) fieldGetter.invoke(object);
+            } catch (@SuppressWarnings("OverlyBroadCatchBlock") ReflectiveOperationException e) {
+                throw propagate(e);
+            }
+
+            final boolean result = expectedValues.contains(actualValue);
+            return result;
         }
     }
 }
