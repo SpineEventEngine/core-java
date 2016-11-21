@@ -29,8 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.FieldFilter;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.event.ProjectCreated;
 
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +44,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
@@ -157,6 +164,34 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
         assertEquals(expected, newArrayList(actual));
     }
+
+    @Test
+    public void filter_events_by_event_message_fields() {
+        givenSequentialRecords();
+        final Any projectCreatedAny = Given.EventMessage.projectCreatedAny();
+        final ProjectCreated projectCreated = AnyPacker.unpack(projectCreatedAny);
+        final ProjectId projectId = projectCreated.getProjectId();
+        final Any projectIdPacked = AnyPacker.pack(projectId);
+
+        final FieldFilter fieldFilter = FieldFilter.newBuilder()
+                                                   .setFieldPath(projectCreated.getClass()
+                                                                               .getCanonicalName() + ".projectId")
+                                                   .addValue(projectIdPacked)
+                                                   .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addEventFieldFilter(fieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                .addFilter(eventFilter)
+                .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+        assertNotNull(read);
+        assertTrue(read.hasNext());
+        final Event singleEvent = read.next();
+        assertFalse(read.hasNext()); // Only one event
+        final ProjectCreated message = Events.getMessage(singleEvent);
+        assertEquals(projectId, message.getProjectId());
+     }
 
     @Test
     public void convert_record_list_to_events() {

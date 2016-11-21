@@ -54,7 +54,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
@@ -320,8 +319,9 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             try {
                 final Method getter = Classes.getGetterForField(object.getClass(), fieldName);
                 actualValue = (Message) getter.invoke(object);
-            } catch  (IllegalAccessException | InvocationTargetException e) {
-                throw propagate(e);
+            } catch  (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+                // Wrong message class -> not matches the predicate
+                return false;
             }
 
             final boolean result = expectedValues.contains(actualValue);
