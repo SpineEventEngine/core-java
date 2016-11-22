@@ -40,6 +40,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -68,6 +69,7 @@ import static org.mockito.Mockito.intThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Events.getMessage;
@@ -290,6 +292,32 @@ public class AggregateRepositoryShould {
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
+
+    @Test
+    public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
+        @SuppressWarnings("unchecked")
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        final ProjectId projectId = Given.AggregateId.newProjectId();
+        final Command cmd = Given.Command.createProject(projectId);
+
+        // Change reported event count upon the second invocation and trigger re-dispatch.
+        doReturn(0, 1).when(storage)
+                      .readEventCountAfterLastSnapshot(projectId);
+        doReturn(AggregateEvents.getDefaultInstance()).when(storage)
+                                                      .read(projectId);
+        doReturn(storage).when(repositorySpy)
+                         .aggregateStorage();
+
+        repositorySpy.dispatch(cmd);
+
+        // Load should be executed twice due to repeated dispatching.
+        verify(repositorySpy, times(2)).load(projectId);
+
+        // Reading event count is executed 2 times per dispatch (so 2 * 2) plus once upon storing the state.
+        verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
+    }
+
+
 
     /*
      * Utility methods.
