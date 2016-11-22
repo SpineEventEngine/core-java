@@ -278,7 +278,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
-        checkNotNull(aggregate);
         return aggregate;
     }
 
