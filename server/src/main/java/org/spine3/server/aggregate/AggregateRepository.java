@@ -248,13 +248,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
          * from scratch.
          */
         Integer eventCountBeforeSave = null;
-        int eventCountBeforeDispatch;
+        int eventCountBeforeDispatch = 0;
         do {
             if (eventCountBeforeSave != null) {
-                log().warn("New events detected during the dispatch of the command {} " +
-                                   "Possible concurrent modification of {} {}" +
-                                   "Repeating the command dispatching.",
-                           command, getAggregateClass(), aggregateId);
+                final int newEventCount = eventCountBeforeSave - eventCountBeforeDispatch;
+                log().warn("Detected the concurrent modification of {} {}" +
+                                   "New events detected while dispatching the command {} " +
+                                   "The number of new events is {}. " +
+                                   "Restarting the command dispatching.",
+                            getAggregateClass(), aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
             aggregate = load(aggregateId);
