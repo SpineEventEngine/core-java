@@ -323,7 +323,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                     actualValue = AnyPacker.unpack((Any) actualValue);
                 }
             } catch  (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-                // Wrong message class -> not matches the predicate
+                // Wrong Message class -> does not satisfy the criteria
                 return false;
             }
 
