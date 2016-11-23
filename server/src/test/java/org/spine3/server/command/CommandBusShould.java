@@ -36,17 +36,24 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
+import org.spine3.base.EventContext;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.Durations;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.GetProducerIdFromEvent;
+import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.procman.ProcessManagerRepositoryShould;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.server.type.EventClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
@@ -56,14 +63,18 @@ import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.test.command.event.ProjectStarted;
 import org.spine3.test.command.event.TaskAdded;
+import org.spine3.test.procman.Project;
+import org.spine3.test.procman.ProjectId;
 import org.spine3.testdata.TestEventBusFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -209,6 +220,12 @@ public class CommandBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
+    }
+
+    @Test
+    public void accept_empty_process_manager_repository_dispatcher() {
+        final ProcessManagerRepoDispatcher pmRepo = new ProcessManagerRepoDispatcher(mock(BoundedContext.class));
+        commandBus.register(pmRepo);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -719,6 +736,26 @@ public class CommandBusShould {
 
         @Override
         public void dispatch(Command request) throws Exception {
+        }
+    }
+
+    private static class ProcessManagerRepoDispatcher
+            extends ProcessManagerRepository<ProjectId, ProcessManagerRepositoryShould.TestProcessManager, Project> {
+
+        protected ProcessManagerRepoDispatcher(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
+        // Always return an empty set of command classes forwarded by this repository.
+        @SuppressWarnings("RefusedBequest")
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return newHashSet();
+        }
+
+        @Override
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
+            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 

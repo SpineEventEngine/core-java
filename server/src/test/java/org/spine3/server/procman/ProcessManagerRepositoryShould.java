@@ -254,7 +254,9 @@ public class ProcessManagerRepositoryShould
         }
     }
 
-    /* package */ static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    // Marked as {@code public} to reuse for {@code CommandBus} dispatcher registration tests as well
+    // with no code duplication.
+    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
