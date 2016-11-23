@@ -192,8 +192,12 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final EventId eventId = EventId.newBuilder()
                                        .setUuid(Identifiers.newUuid())
                                        .build();
+        final Any eventProducerId = AnyPacker.pack(uid);
+        final EventContext context = EventContext.newBuilder()
+                                                 .setProducerId(eventProducerId)
+                                                 .build();
         final EventStorageRecord record = EventStorageRecord.newBuilder()
-                                                            .setContext(EventContext.getDefaultInstance())
+                                                            .setContext(context)
                                                             .setEventId(eventId.getUuid())
                                                             .setEventType(TypeUrl.of(ProjectCreated.class)
                                                                                  .value())
