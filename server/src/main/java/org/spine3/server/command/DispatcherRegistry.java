@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.type.CommandClass;
@@ -63,6 +64,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * Ensures that the dispatcher forwards at least one command.
      *
+     * <p>Note that {@link org.spine3.server.procman.ProcessManager} is allowed to have no commands handled,
+     * since its business flow may be designed to handle events only.
+     *
      * <p>We pass the {@code dispatcher} and the set as arguments instead of getting the set
      * from the dispatcher because this operation is expensive and
      *
@@ -70,8 +74,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @throws NullPointerException if the dispatcher returns null set
      */
     private static void checkNotEmpty(CommandDispatcher dispatcher, Set<CommandClass> commandClasses) {
-        checkArgument(!commandClasses.isEmpty(),
-                "No command classes are forwarded by this dispatcher: %s", dispatcher);
+
+        /**
+         * Instances of {@link ProcessManagerRepository} are excluded from the check,
+         * as long as {@link org.spine3.server.procman.ProcessManager}s may have no commands handled.
+         */
+        final boolean criterionSatisfied = !commandClasses.isEmpty()
+                || (dispatcher instanceof ProcessManagerRepository);
+
+        checkArgument(criterionSatisfied,
+                      "No command classes are forwarded by this dispatcher: %s", dispatcher);
     }
 
     /**
