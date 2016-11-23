@@ -23,14 +23,24 @@ package org.spine3.server.storage;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.FieldFilter;
+import org.spine3.base.Identifiers;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.event.ProjectCreated;
 
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +49,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
@@ -81,6 +93,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         close(storage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected abstract EventStorage getStorage();
 
@@ -104,7 +117,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void writeInternal_and_read_one_event() {
         final EventStorageRecord recordToStore = Given.EventStorageRecord.projectCreated();
-        final EventId id = EventId.newBuilder().setUuid(recordToStore.getEventId()).build();
+        final EventId id = EventId.newBuilder()
+                                  .setUuid(recordToStore.getEventId())
+                                  .build();
         final Event expected = toEvent(recordToStore);
 
         storage.writeRecord(recordToStore);
@@ -135,8 +150,12 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     public void filter_events_by_type() {
         givenSequentialRecords();
         final String typeName = record1.getEventType();
-        final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
+        final EventFilter filter = EventFilter.newBuilder()
+                                              .setEventType(typeName)
+                                              .build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .addFilter(filter)
+                                                       .build();
         final List<Event> expected = toEventList(record1);
 
         final Iterator<Event> iterator = storage.iterator(query);
@@ -149,13 +168,129 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
         final Any id = idToAny(Given.AggregateId.newProjectId(record1.getProducerId()));
-        final EventFilter filter = EventFilter.newBuilder().addAggregateId(id).build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
+        final EventFilter filter = EventFilter.newBuilder()
+                                              .addAggregateId(id)
+                                              .build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .addFilter(filter)
+                                                       .build();
         final List<Event> expected = toEventList(record1);
 
         final Iterator<Event> actual = storage.iterator(query);
 
         assertEquals(expected, newArrayList(actual));
+    }
+
+    @Test
+    public void filter_events_by_event_message_fields() {
+        givenSequentialRecords();
+        final ProjectId uid = ProjectId.newBuilder()
+                                       .setId(Identifiers.newUuid())
+                                       .build();
+        final ProjectCreated projectCreated = Given.EventMessage.projectCreated(uid);
+        final Any projectCreatedAny = AnyPacker.pack(projectCreated);
+        final EventId eventId = EventId.newBuilder()
+                                       .setUuid(Identifiers.newUuid())
+                                       .build();
+        final EventStorageRecord record = EventStorageRecord.newBuilder()
+                                                            .setContext(EventContext.getDefaultInstance())
+                                                            .setEventId(eventId.getUuid())
+                                                            .setEventType(TypeUrl.of(ProjectCreated.class)
+                                                                                 .value())
+                                                            .setMessage(projectCreatedAny)
+                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .build();
+        // Uses protected method to avoid vast mocking
+        storage.writeRecord(record);
+
+        final Any projectIdPacked = AnyPacker.pack(uid);
+        final FieldFilter fieldFilter = FieldFilter.newBuilder()
+                                                   .setFieldPath(projectCreated.getClass()
+                                                                               .getCanonicalName() + ".projectId")
+                                                   .addValue(projectIdPacked)
+                                                   .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addEventFieldFilter(fieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                                                             .addFilter(eventFilter)
+                                                             .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+
+        assertNotNull(read);
+        assertTrue(read.hasNext());
+        final Event first = read.next();
+        assertFalse(read.hasNext());
+
+        final ProjectCreated singleMessage = Events.getMessage(first);
+        assertEquals(uid, singleMessage.getProjectId());
+        assertEquals(projectCreated, singleMessage);
+    }
+
+    @Test
+    public void filter_events_by_context_fields() {
+        givenSequentialRecords();
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(Identifiers.newUuid())
+                                             .build();
+        final ProjectCreated projectCreated = ProjectCreated.newBuilder()
+                                                            .setProjectId(projectId)
+                                                            .build();
+        final Any eventAny = AnyPacker.pack(projectCreated);
+        final Message producerId = ProjectId.newBuilder()
+                                            .setId(Identifiers.newUuid())
+                                            .build();
+        final Any eventProducerId = AnyPacker.pack(producerId);
+        final EventContext context = EventContext.newBuilder()
+                                                 .setProducerId(eventProducerId)
+                                                 .build();
+        final EventStorageRecord record = EventStorageRecord.newBuilder()
+                                                            .setMessage(eventAny)
+                                                            .setContext(context)
+                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .setEventId(Identifiers.newUuid())
+                                                            .build();
+        storage.writeRecord(record);
+
+        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
+                                                          .setFieldPath(
+                                                                  EventContext.class.getCanonicalName() + ".producerId")
+                                                          .addValue(eventProducerId)
+                                                          .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addContextFieldFilter(contextFieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                                                             .addFilter(eventFilter)
+                                                             .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+
+        assertTrue(read.hasNext());
+        final Event singleEvent = read.next();
+        assertFalse(read.hasNext());
+
+        final Message eventMessage = Events.getMessage(singleEvent);
+        assertEquals(projectCreated, eventMessage);
+        final EventContext eventContext = singleEvent.getContext();
+        assertEquals(context, eventContext);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_filter_events_by_empty_field_name() {
+        givenSequentialRecords();
+        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
+                                                          .setFieldPath(
+                                                                  EventContext.class.getCanonicalName() + '.') // empty field name
+                                                          .addValue(Any.getDefaultInstance())
+                                                          .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addContextFieldFilter(contextFieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                                                             .addFilter(eventFilter)
+                                                             .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+        read.next(); // Invoke all lazy operations
     }
 
     @Test
@@ -236,7 +371,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     private void assertThereAreEventsAfterTime() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .setAfter(time1)
+                                                       .build();
         final List<Event> expected = toEventList(record2, record3);
 
         final Iterator<Event> iterator = storage.iterator(query);
@@ -246,7 +383,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     private void assertNoEventsAfterTime() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .setAfter(time1)
+                                                       .build();
         final Iterator<Event> iterator = storage.iterator(query);
         assertFalse(iterator.hasNext());
     }
@@ -310,7 +449,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     private void assertThereAreEventsBeforeTime() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder().setBefore(time1).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .setBefore(time1)
+                                                       .build();
         final List<Event> expected = toEventList(record3, record2);
 
         final Iterator<Event> iterator = storage.iterator(query);
@@ -320,7 +461,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     private void assertNoEventsBeforeTime() {
-        final EventStreamQuery query = EventStreamQuery.newBuilder().setBefore(time1).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .setBefore(time1)
+                                                       .build();
         final Iterator<Event> iterator = storage.iterator(query);
         assertFalse(iterator.hasNext());
     }
@@ -333,9 +476,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     public void find_events_which_happened_between_two_points_in_time() {
         givenSequentialRecords();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .setAfter(time1)
-                .setBefore(time3)
-                .build();
+                                                       .setAfter(time1)
+                                                       .setBefore(time3)
+                                                       .build();
         final List<Event> expected = toEventList(record2);
 
         final Iterator<Event> actual = storage.iterator(query);
@@ -347,10 +490,10 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     public void find_event_by_type_and_aggregate_id_and_time() {
         givenSequentialRecords();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .addFilter(newEventFilterFor(record2))
-                .setAfter(time1)
-                .setBefore(time3)
-                .build();
+                                                       .addFilter(newEventFilterFor(record2))
+                                                       .setAfter(time1)
+                                                       .setBefore(time3)
+                                                       .build();
         final List<Event> expected = toEventList(record2);
 
         final Iterator<Event> actual = storage.iterator(query);
@@ -387,8 +530,13 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
-        final Duration delta = Duration.newBuilder().setSeconds(deltaSeconds).setNanos(deltaNanos).build();
-        time1 = getCurrentTime().toBuilder().setNanos(POSITIVE_DELTA * 10).build(); // to be sure that nanos are bigger than delta
+        final Duration delta = Duration.newBuilder()
+                                       .setSeconds(deltaSeconds)
+                                       .setNanos(deltaNanos)
+                                       .build();
+        time1 = getCurrentTime().toBuilder()
+                                .setNanos(POSITIVE_DELTA * 10)
+                                .build(); // to be sure that nanos are bigger than delta
         record1 = Given.EventStorageRecord.projectCreated(time1);
         time2 = add(time1, delta);
         record2 = Given.EventStorageRecord.taskAdded(time2);

@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -35,20 +37,27 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.FieldFilter;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.reflect.Classes;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkValid;
 
 /**
@@ -156,12 +165,12 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(producerId, "producer ID");
         final Timestamp timestamp = checkPositive(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                .setTimestamp(timestamp)
-                .setEventType(eventType)
-                .setProducerId(producerId)
-                .setEventId(eventIdString)
-                .setMessage(message)
-                .setContext(context);
+                                                                     .setTimestamp(timestamp)
+                                                                     .setEventType(eventType)
+                                                                     .setProducerId(producerId)
+                                                                     .setEventId(eventIdString)
+                                                                     .setMessage(message)
+                                                                     .setContext(context);
         return builder.build();
     }
 
@@ -186,7 +195,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 this.timePredicate = new Events.IsAfter(after);
             } else if (!afterSpecified && beforeSpecified) {
                 this.timePredicate = new Events.IsBefore(before);
-            } else if (afterSpecified /* && beforeSpecified is true here too */){
+            } else if (afterSpecified /* && beforeSpecified is true here too */) {
                 this.timePredicate = new Events.IsBetween(after, before);
             } else { // No timestamps specified.
                 this.timePredicate = Predicates.alwaysTrue();
@@ -232,6 +241,21 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         @Nullable
         private final List<Any> aggregateIds;
 
+        private final Collection<FieldFilter> eventFieldFilters;
+        private final Collection<FieldFilter> contextFieldFilters;
+
+        private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
+            @Nullable
+            @Override
+            public Message apply(@Nullable Any input) {
+                if (input == null) {
+                    return null;
+                }
+
+                return AnyPacker.unpack(input);
+            }
+        };
+
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
             this.eventTypeUrl = eventType.isEmpty()
@@ -241,8 +265,11 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             this.aggregateIds = aggregateIdList.isEmpty()
                                 ? null
                                 : aggregateIdList;
+            this.eventFieldFilters = filter.getEventFieldFilterList();
+            this.contextFieldFilters = filter.getContextFieldFilterList();
         }
 
+        @SuppressWarnings("MethodWithMoreThanThreeNegations")
         @Override
         public boolean apply(@Nullable Event event) {
             if (event == null) {
@@ -255,11 +282,53 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
             final EventContext context = event.getContext();
             final Any aggregateId = context.getProducerId();
-            if (aggregateIds != null) {
-                final boolean matches = aggregateIds.contains(aggregateId);
-                return matches;
+            if (aggregateIds != null && !aggregateIds.contains(aggregateId)) {
+                return false;
             }
+
+            // Check event fields
+            for (FieldFilter filter : eventFieldFilters) {
+                final boolean matchesFilter = checkFields(message, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
+
+            // Check context fields
+            for (FieldFilter filter : contextFieldFilters) {
+                final boolean matchesFilter = checkFields(context, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
+
             return true;
+        }
+
+        private static boolean checkFields(
+                Message object,
+                @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
+            final String fieldPath = filter.getFieldPath();
+            final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
+            checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
+
+            final Collection<Any> expectedAnys = filter.getValueList();
+            final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
+            Message actualValue;
+
+            try {
+                final Method getter = Classes.getGetterForField(object.getClass(), fieldName);
+                actualValue = (Message) getter.invoke(object);
+                if (actualValue instanceof Any) {
+                    actualValue = AnyPacker.unpack((Any) actualValue);
+                }
+            } catch  (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+                // Wrong Message class -> does not satisfy the criteria
+                return false;
+            }
+
+            final boolean result = expectedValues.contains(actualValue);
+            return result;
         }
     }
 }

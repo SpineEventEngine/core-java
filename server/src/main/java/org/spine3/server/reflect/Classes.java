@@ -83,5 +83,23 @@ public class Classes {
         return builder.build();
     }
 
+    /**
+     * Finds a getter method in given class or it's superclasses.
+     *
+     * <p>The method must match {@code getFieldName} notation, have no argument to be found.
+     *
+     * @param clazz     class containing the getter method
+     * @param fieldName field to find a getter for
+     * @return {@link Method} instance reflecting the getter method
+     * @throws RuntimeException upon reflective failure
+     */
+    public static Method getGetterForField(Class<?> clazz, String fieldName) throws NoSuchMethodException {
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                        .toUpperCase() + fieldName.substring(1);
+        final Method fieldGetter = clazz.getMethod(fieldGetterName);
+        return fieldGetter;
+    }
+
     private Classes() {}
 }
