@@ -275,6 +275,24 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertEquals(context, eventContext);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_filter_events_by_empty_field_name() {
+        givenSequentialRecords();
+        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
+                                                          .setFieldPath(
+                                                                  EventContext.class.getCanonicalName() + '.') // empty field name
+                                                          .addValue(Any.getDefaultInstance())
+                                                          .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addContextFieldFilter(contextFieldFilter)
+                                                   .build();
+        final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
+                                                             .addFilter(eventFilter)
+                                                             .build();
+        final Iterator<Event> read = storage.iterator(streamQuery);
+        read.next(); // Invoke all lazy operations
+    }
+
     @Test
     public void convert_record_list_to_events() {
         givenSequentialRecords();
