@@ -67,7 +67,7 @@ allprojects {
 ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    protobufVersion = '3.0.0'
+    protobufVersion = '3.1.0'
     protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
     gRpcVersion = '1.0.2'
     slf4JVersion = '1.7.21'

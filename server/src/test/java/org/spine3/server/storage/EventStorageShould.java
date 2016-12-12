@@ -35,6 +35,7 @@ import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
@@ -533,11 +534,39 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
     }
 
+    private static Duration createDelta(long deltaSeconds, int deltaNanos) {
+        if (deltaNanos == 0) {
+            return Duration.newBuilder()
+                           .setSeconds(deltaSeconds)
+                           .build();
+        }
+
+        if (deltaSeconds == 0) {
+            return Duration.newBuilder()
+                           .setNanos(deltaNanos)
+                           .build();
+        }
+
+        // If deltaNanos is negative, subtract its value from seconds.
+        if (deltaSeconds > 0 && deltaNanos < 0) {
+            return Durations.subtract(Duration.newBuilder().setSeconds(deltaSeconds).build(),
+                                      Duration.newBuilder().setNanos(deltaNanos).build());
+        }
+
+        if (deltaSeconds < 0 && deltaNanos > 0) {
+            return Durations.add(Duration.newBuilder().setSeconds(deltaSeconds).build(),
+                                 Duration.newBuilder().setNanos(deltaNanos).build());
+        }
+
+        // The params have the same sign, just create a duration instance using them.
+        return Duration.newBuilder()
+                       .setSeconds(deltaSeconds)
+                       .setNanos(deltaNanos)
+                       .build();
+    }
+
     private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
-        final Duration delta = Duration.newBuilder()
-                                       .setSeconds(deltaSeconds)
-                                       .setNanos(deltaNanos)
-                                       .build();
+        final Duration delta = createDelta(deltaSeconds, deltaNanos);
         time1 = getCurrentTime().toBuilder()
                                 .setNanos(POSITIVE_DELTA * 10)
                                 .build(); // to be sure that nanos are bigger than delta
