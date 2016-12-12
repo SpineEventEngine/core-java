@@ -54,6 +54,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Durations.nanos;
+import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
@@ -536,29 +538,24 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     private static Duration createDelta(long deltaSeconds, int deltaNanos) {
         if (deltaNanos == 0) {
-            return Duration.newBuilder()
-                           .setSeconds(deltaSeconds)
-                           .build();
+            return seconds(deltaSeconds);
         }
 
         if (deltaSeconds == 0) {
-            return Duration.newBuilder()
-                           .setNanos(deltaNanos)
-                           .build();
+            return nanos(deltaNanos);
         }
 
         // If deltaNanos is negative, subtract its value from seconds.
         if (deltaSeconds > 0 && deltaNanos < 0) {
-            return Durations.subtract(Duration.newBuilder().setSeconds(deltaSeconds).build(),
-                                      Duration.newBuilder().setNanos(deltaNanos).build());
+            return Durations.subtract(seconds(deltaSeconds), nanos(deltaNanos));
         }
 
+        // If deltaSeconds is negative and nanos are positive, add nanos.
         if (deltaSeconds < 0 && deltaNanos > 0) {
-            return Durations.add(Duration.newBuilder().setSeconds(deltaSeconds).build(),
-                                 Duration.newBuilder().setNanos(deltaNanos).build());
+            return Durations.add(seconds(deltaSeconds), nanos(deltaNanos));
         }
 
-        // The params have the same sign, just create a duration instance using them.
+        // The params have the same sign, just create a Duration instance using them.
         return Duration.newBuilder()
                        .setSeconds(deltaSeconds)
                        .setNanos(deltaNanos)
