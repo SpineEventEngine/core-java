@@ -24,47 +24,31 @@ package spine.base;
 option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ErrorProto";
+option java_outer_classname = "ChangeProto";
 option java_package = "org.spine3.base";
 
-import "google/protobuf/struct.proto";
-
 import "spine/annotations.proto";
-import "spine/validate/constraint_violation.proto";
+import "spine/validate.proto";
 
-// Information on a technical error occurred in the system.
+// Information about a change in a string field.
 //
-// See `spine.base.BusinessFailure` for definition of business failure type.
+// Messages of this type can be use as a request to change a value (e.g. as a field of a command),
+// or as information on a change made (e.g. as a part of an event).
 //
-message Error {
+message StringChange {
 
-    // The type of the error.
+    // The value of the field that's changing.
     //
-    // It can be an exception from Java, C# (or another language) or a Proto enum name.
+    // This field is blank if the target field is blank too.
     //
-    string type = 1;
+    string previous_value = 1;
 
-    // An integer code resulting from a native code call, or a number from a Proto enum value.
-    int32 code = 2;
-
-    // An error indicating that a message did not pass validation.
-    ValidationError validation_error = 3;
-
-    reserved 4 to 9;
-
-    // A developer-readable diagnostics message on the error.
-    string message = 10;
-
-    // Additional information on the error.
-    map<string, google.protobuf.Value> attributes = 11;
-
-    // A stacktrace of an exception (if available).
-    string stacktrace = 12;
-}
-
-// An error indicating that a message did not pass validation.
-message ValidationError {
-
-    // Validation constraint violations found by validator.
-    repeated validate.ConstraintViolation constraint_violation = 1;
+    // The new value of the field.
+    //
+    // This field must be populated. If you want to clear a field, use a special command.
+    // We encourage separate commands for removal to make event handlers more straightforward.
+    // Usually removal of a value and changing a value should have different consequences.
+    // Hence separate handles.
+    //
+    string new_value = 2 [(required) = true];
 }
