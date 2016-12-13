@@ -22,6 +22,9 @@ package org.spine3.base;
 
 import org.junit.Test;
 
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -42,5 +45,27 @@ public class ChangesShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_newValue() {
         Changes.of("do_not_accept_null_newValue", null);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_values() {
+        final String value = "do_not_accept_equal_values";
+        Changes.of(value, value);
+    }
+
+    private static String randomUuid() {
+        return UUID.randomUUID().toString();
+    }
+
+    @Test
+    public void generate_string_value_change() {
+        final String previousValue = randomUuid();
+        final String newValue = randomUuid();
+
+        final StringChange result = Changes.of(previousValue, newValue);
+
+        assertEquals(previousValue, result.getPreviousValue());
+        assertEquals(newValue, result.getNewValue());
     }
 }
