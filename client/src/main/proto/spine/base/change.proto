@@ -30,11 +30,15 @@ option java_package = "org.spine3.base";
 import "spine/annotations.proto";
 import "spine/validate.proto";
 
-// Information about a change in a string field.
 //
-// Messages of this type can be use as a request to change a value (e.g. as a field of a command),
-// or as information on a change made (e.g. as a part of an event).
+// This file provides messages that define changes of fields in other messages.
+// The `Change` messages can be use as a request to change a value (e.g. as a field of a command),
+// or as information on the change made (e.g. as a part of an event).
 //
+// For all types the following rule apply: `new_value` field must not be equal to `previous_value`.
+//
+
+// Definition of a change in a string field.
 message StringChange {
 
     // The value of the field that's changing.
@@ -50,7 +54,15 @@ message StringChange {
     // Usually removal of a value and changing a value should have different consequences.
     // Hence separate handles.
     //
-    // The value of this field must not be equal to the `previous_value` value.
-    //
     string new_value = 2 [(required) = true];
+}
+
+// Definition of a change in a `double` field.
+message DoubleChange {
+
+    // The value of the field that's changing.
+    double previous_value = 1;
+
+    // The new value of the field.
+    double new_value = 2;
 }

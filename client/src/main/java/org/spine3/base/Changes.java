@@ -30,16 +30,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Changes {
 
+    private static final String PREVIOUS_VALUE = "previousValue";
+    private static final String NEW_VALUE = "newValue";
+    private static final String ERR_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
+
     private Changes() {}
 
+    /**
+     * Creates {@link StringChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
     public static StringChange of(String previousValue, String newValue) {
-        checkNotNull(previousValue, "previousValue");
-        checkNotNull(newValue, "newValue");
-
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
         checkArgument(!newValue.isEmpty(), "newValue cannot be empty");
-        checkArgument(!newValue.equals(previousValue), "newValue cannot be equal to previousValue");
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final StringChange result = StringChange.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link StringChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static DoubleChange of(double previousValue, double newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(Double.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final DoubleChange result = DoubleChange.newBuilder()
                                                 .setPreviousValue(previousValue)
                                                 .setNewValue(newValue)
                                                 .build();

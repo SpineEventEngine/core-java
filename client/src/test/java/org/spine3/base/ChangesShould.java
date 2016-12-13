@@ -28,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
+@SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
+                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */})
 public class ChangesShould {
 
     @Test
@@ -35,21 +37,18 @@ public class ChangesShould {
         assertTrue(hasPrivateUtilityConstructor(Changes.class));
     }
 
-    @SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_previousValue() {
         Changes.of(null, "do_not_accept_null_previousValue");
     }
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_newValue() {
         Changes.of("do_not_accept_null_newValue", null);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_values() {
+    public void do_not_accept_equal_string_values() {
         final String value = "do_not_accept_equal_values";
         Changes.of(value, value);
     }
@@ -59,7 +58,7 @@ public class ChangesShould {
     }
 
     @Test
-    public void generate_string_value_change() {
+    public void create_string_value_change() {
         final String previousValue = randomUuid();
         final String newValue = randomUuid();
 
@@ -67,5 +66,22 @@ public class ChangesShould {
 
         assertEquals(previousValue, result.getPreviousValue());
         assertEquals(newValue, result.getNewValue());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_double_values() {
+        final double value = 1961.0412;
+        Changes.of(value, value);
+    }
+
+    @Test
+    public void create_double_value_change() {
+        final double s1 = 1957.1004;
+        final double s2 = 1957.1103;
+
+        final DoubleChange result = Changes.of(s1, s2);
+
+        assertTrue(Double.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Double.compare(s2, result.getNewValue()) == 0);
     }
 }
