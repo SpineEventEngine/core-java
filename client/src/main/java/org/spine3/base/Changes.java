@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.Timestamp;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -55,7 +57,7 @@ public class Changes {
     }
 
     /**
-     * Creates {@link StringChange} object for the passed previous and new field values.
+     * Creates {@link DoubleChange} object for the passed previous and new field values.
      *
      * <p>Passed values cannot be equal.
      */
@@ -68,6 +70,23 @@ public class Changes {
                                                 .setPreviousValue(previousValue)
                                                 .setNewValue(newValue)
                                                 .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link TimestampChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static TimestampChange of(Timestamp previousValue, Timestamp newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+
+        final TimestampChange result = TimestampChange.newBuilder()
+                                                      .setPreviousValue(previousValue)
+                                                      .setNewValue(newValue)
+                                                      .build();
         return result;
     }
 }

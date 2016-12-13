@@ -20,7 +20,9 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
 
 import java.util.UUID;
 
@@ -83,5 +85,32 @@ public class ChangesShould {
 
         assertTrue(Double.compare(s1, result.getPreviousValue()) == 0);
         assertTrue(Double.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_Timestamp_previousValue() {
+        Changes.of(null, Timestamps.getCurrentTime());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_Timestamp_newValue() {
+        Changes.of(Timestamps.getCurrentTime(), null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_Timestamp_values() {
+        final Timestamp now = Timestamps.getCurrentTime();
+        Changes.of(now, now);
+    }
+
+    @Test
+    public void create_TimestampChange_instance() {
+        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
+        final Timestamp now = Timestamps.getCurrentTime();
+
+        final TimestampChange result = Changes.of(fiveMinutesAgo, now);
+
+        assertEquals(fiveMinutesAgo, result.getPreviousValue());
+        assertEquals(now, result.getNewValue());
     }
 }

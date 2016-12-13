@@ -27,6 +27,8 @@ option java_multiple_files = true;
 option java_outer_classname = "ChangeProto";
 option java_package = "org.spine3.base";
 
+import "google/protobuf/timestamp.proto";
+
 import "spine/annotations.proto";
 import "spine/validate.proto";
 
@@ -65,4 +67,16 @@ message DoubleChange {
 
     // The new value of the field.
     double new_value = 2;
+}
+
+//TODO:2016-12-13:alexander.yevsyukov: Add types from https://developers.google.com/protocol-buffers/docs/proto3#scalar
+
+// Definition of a change in a `Timestamp` field.
+message TimestampChange {
+
+    // The value of the field that's changing.
+    google.protobuf.Timestamp previous_value = 1;
+
+    // The new value of the field.
+    google.protobuf.Timestamp new_value = 2;
 }
