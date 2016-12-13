@@ -50,5 +50,7 @@ message StringChange {
     // Usually removal of a value and changing a value should have different consequences.
     // Hence separate handles.
     //
+    // The value of this field must not be equal to the `previous_value` value.
+    //
     string new_value = 2 [(required) = true];
 }
