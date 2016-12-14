@@ -113,4 +113,16 @@ public class ChangesShould {
         assertEquals(fiveMinutesAgo, result.getPreviousValue());
         assertEquals(now, result.getNewValue());
     }
+
+    @Test
+    public void create_float_value_change() {
+        //TODO:2016-12-14:alexander.yevsyukov: Set other values and rename fields.
+        final float s1 = 1957.1004f;
+        final float s2 = 1957.1103f;
+
+        final FloatChange result = Changes.of(s1, s2);
+
+        assertTrue(Float.compare(s1, result.getPreviousValue()) == 0);
+        assertTrue(Float.compare(s2, result.getNewValue()) == 0);
+    }
 }

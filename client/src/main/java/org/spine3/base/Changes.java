@@ -57,23 +57,6 @@ public class Changes {
     }
 
     /**
-     * Creates {@link DoubleChange} object for the passed previous and new field values.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static DoubleChange of(double previousValue, double newValue) {
-        checkNotNull(previousValue, PREVIOUS_VALUE);
-        checkNotNull(newValue, NEW_VALUE);
-        checkArgument(Double.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
-
-        final DoubleChange result = DoubleChange.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
-        return result;
-    }
-
-    /**
      * Creates {@link TimestampChange} object for the passed previous and new field values.
      *
      * <p>Passed values cannot be equal.
@@ -87,6 +70,36 @@ public class Changes {
                                                       .setPreviousValue(previousValue)
                                                       .setNewValue(newValue)
                                                       .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link DoubleChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static DoubleChange of(double previousValue, double newValue) {
+        checkArgument(Double.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final DoubleChange result = DoubleChange.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link FloatChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static FloatChange of(float previousValue, float newValue) {
+        checkArgument(Float.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final FloatChange result = FloatChange.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
         return result;
     }
 }
