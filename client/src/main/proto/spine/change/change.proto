@@ -19,13 +19,13 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.change;
 
 option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ChangeProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.change";
 
 import "google/protobuf/timestamp.proto";
 

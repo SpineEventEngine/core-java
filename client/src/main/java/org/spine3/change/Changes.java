@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.change;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
