@@ -85,7 +85,17 @@ extend google.protobuf.MessageOptions {
     // Therefore, if `enrichment` option is used in more than event message, the fields participating
     // in the enrichment process must have the same names.
     //
-    string enrichment = 57126;
+    // In the enrichment message a wildcard `by` option syntax may be used to reference more than a single
+    // target events to enrich.
+    //
+    // For example:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     string str = 1 [(by) = "*.user_id"];
+    // }
+    //
+    string enrichment = 57126; // NOTE: this field number is used in the `tools` project,
+                               // EnrichmentLookupPlugin (update it there on changing).
 }
 
 extend google.protobuf.FieldOptions {
@@ -112,6 +122,28 @@ extend google.protobuf.FieldOptions {
     //
     // message MyEventEnrichment {
     //     string str = 1 [(by) = "MyEvent.user_id"];
+    // }
+    //
+    // If a single enrichment message is used to enrich several events, a wildcard syntax may be used.
+    //
+    // An example:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     string str = 1 [(by) = "*.user_id"];
+    // }
+    //
+    // message EventOne {
+    //
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1;
+    // }
+    //
+    // message EventTwo {
+    //
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1;
     // }
     //
     string by = 57125; // NOTE: this field number is used in the `tools` project,

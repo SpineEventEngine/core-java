@@ -87,3 +87,19 @@ message EnrichmentByContextFields {
 
     string by_event_field = 7 [(by) = "project_id"];
 }
+
+message ProjectCompleted {
+    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
+
+    ProjectId project_id = 1;
+}
+
+message ProjectStarred {
+    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
+
+    ProjectId project_id = 1;
+}
+
+message SeparateEnrichmentForMultipleProjectEvents {
+    string project_name = 1 [(by) = "*.project_id"];
+}
