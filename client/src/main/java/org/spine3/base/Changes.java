@@ -21,6 +21,8 @@
 package org.spine3.base;
 
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.UInt32Value;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,7 +38,8 @@ public class Changes {
     private static final String NEW_VALUE = "newValue";
     private static final String ERR_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
 
-    private Changes() {}
+    private Changes() {
+    }
 
     /**
      * Creates {@link StringChange} object for the passed previous and new field values.
@@ -100,6 +103,189 @@ public class Changes {
                                               .setPreviousValue(previousValue)
                                               .setNewValue(newValue)
                                               .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Int32Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Int32Change ofInt32(int previousValue, int newValue) {
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Int32Change result = Int32Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Int64Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Int64Change ofInt64(long previousValue, long newValue) {
+        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Int64Change result = Int64Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link UInt32Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static UInt32Change ofUInt32(int previousValue, int newValue) {
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final UInt32Change result = UInt32Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link UInt64Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static UInt64Change ofUInt64(long previousValue, long newValue) {
+        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final UInt64Change result = UInt64Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link SInt32Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static SInt32Change ofSInt32(int previousValue, int newValue) {
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final SInt32Change result = SInt32Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link SInt64Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static SInt64Change ofSInt64(long previousValue, long newValue) {
+        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final SInt64Change result = SInt64Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Fixed32Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Fixed32Change ofFixed32(int previousValue, int newValue) {
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Fixed32Change result = Fixed32Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Fixed64Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Fixed64Change ofFixed64(long previousValue, long newValue) {
+        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Fixed64Change result = Fixed64Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Sfixed32Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Sfixed32Change ofSfixed32(int previousValue, int newValue) {
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Sfixed32Change result = Sfixed32Change.newBuilder()
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link Sfixed64Change} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static Sfixed64Change ofSfixed64(long previousValue, long newValue) {
+        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final Sfixed64Change result = Sfixed64Change.newBuilder()
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link BytesChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static BytesChange of(ByteString previousValue, ByteString newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.isEmpty(), "newValue cannot be empty");
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+
+        final BytesChange result = BytesChange.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link BooleanChange} object for the passed previous and new field values.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static BooleanChange of(boolean previousValue, boolean newValue) {
+        checkArgument(Boolean.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+
+        final BooleanChange result = BooleanChange.newBuilder()
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 }

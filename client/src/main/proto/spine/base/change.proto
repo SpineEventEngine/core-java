@@ -79,8 +79,6 @@ message DoubleChange {
     double new_value = 2;
 }
 
-//TODO:2016-12-13:alexander.yevsyukov: Add types from https://developers.google.com/protocol-buffers/docs/proto3#scalar
-
 // Definition of a change in a `float` field.
 message FloatChange {
 
@@ -89,4 +87,124 @@ message FloatChange {
 
     // The new value of the field.
     float new_value = 2;
+}
+
+// Definition of a change in a `int32` field.
+message Int32Change {
+
+    // The value of the field that's changing.
+    int32 previous_value = 1;
+
+    // The new value of the field.
+    int32 new_value = 2;
+}
+
+// Definition of a change in a `int64` field.
+message Int64Change {
+
+    // The value of the field that's changing.
+    int64 previous_value = 1;
+
+    // The new value of the field.
+    int64 new_value = 2;
+}
+
+// Definition of a change in a `uint32` field.
+message UInt32Change {
+
+    // The value of the field that's changing.
+    uint32 previous_value = 1;
+
+    // The new value of the field.
+    uint32 new_value = 2;
+}
+
+// Definition of a change in a `uint64` field.
+message UInt64Change {
+
+    // The value of the field that's changing.
+    uint64 previous_value = 1;
+
+    // The new value of the field.
+    uint64 new_value = 2;
+}
+
+// Definition of a change in a `sint32` field.
+message SInt32Change {
+
+    // The value of the field that's changing.
+    sint32 previous_value = 1;
+
+    // The new value of the field.
+    sint32 new_value = 2;
+}
+
+// Definition of a change in a `sint64` field.
+message SInt64Change {
+
+    // The value of the field that's changing.
+    sint64 previous_value = 1;
+
+    // The new value of the field.
+    sint64 new_value = 2;
+}
+
+// Definition of a change in a `fixed32` field.
+message Fixed32Change {
+
+    // The value of the field that's changing.
+    fixed32 previous_value = 1;
+
+    // The new value of the field.
+    fixed32 new_value = 2;
+}
+
+// Definition of a change in a `fixed64` field.
+message Fixed64Change {
+
+    // The value of the field that's changing.
+    fixed64 previous_value = 1;
+
+    // The new value of the field.
+    fixed64 new_value = 2;
+}
+
+// Definition of a change in a `sfixed32` field.
+message Sfixed32Change {
+
+    // The value of the field that's changing.
+    sfixed32 previous_value = 1;
+
+    // The new value of the field.
+    sfixed32 new_value = 2;
+}
+
+// Definition of a change in a `sfixed64` field.
+message Sfixed64Change {
+
+    // The value of the field that's changing.
+    sfixed64 previous_value = 1;
+
+    // The new value of the field.
+    sfixed64 new_value = 2;
+}
+
+// Definition of a change in a `bool` field.
+message BooleanChange {
+
+    // The value of the field that's changing.
+    bool previous_value = 1;
+
+    // The new value of the field.
+    bool new_value = 2 [(required) = true];
+}
+
+// Definition of a change in a `bytes` field.
+message BytesChange {
+
+    // The value of the field that's changing.
+    bytes previous_value = 1;
+
+    // The new value of the field.
+    bytes new_value = 2 [(required) = true];
 }
