@@ -43,6 +43,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static java.util.Collections.synchronizedMap;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
@@ -256,12 +257,14 @@ public class Identifiers {
     /** The registry of converters of ID types to string representations. */
     public static class ConverterRegistry {
 
-        private final Map<Class<?>, Function<?, String>> entries = newHashMap(
-                ImmutableMap.<Class<?>, Function<?, String>>builder()
-                        .put(Timestamp.class, new TimestampToStringConverter())
-                        .put(EventId.class, new EventIdToStringConverter())
-                        .put(CommandId.class, new CommandIdToStringConverter())
-                        .build()
+        private final Map<Class<?>, Function<?, String>> entries = synchronizedMap(
+                newHashMap(
+                        ImmutableMap.<Class<?>, Function<?, String>>builder()
+                                .put(Timestamp.class, new TimestampToStringConverter())
+                                .put(EventId.class, new EventIdToStringConverter())
+                                .put(CommandId.class, new CommandIdToStringConverter())
+                                .build()
+                )
         );
 
         private ConverterRegistry() {
@@ -291,7 +294,7 @@ public class Identifiers {
             }
         }
 
-        public <I> boolean containsConverter(I id) {
+        public synchronized  <I> boolean containsConverter(I id) {
             final Class<?> idClass = id.getClass();
             final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
             return contains;
