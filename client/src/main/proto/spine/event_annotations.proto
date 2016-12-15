@@ -91,7 +91,7 @@ extend google.protobuf.MessageOptions {
     // For example:
     //
     // message EnrichmentForSeveralEvents {
-    //     string str = 1 [(by) = "*.user_id"];
+    //     string username = 1 [(by) = "*.user_id"];
     // }
     //
     string enrichment = 57126; // NOTE: this field number is used in the `tools` project,
@@ -121,7 +121,7 @@ extend google.protobuf.FieldOptions {
     // }
     //
     // message MyEventEnrichment {
-    //     string str = 1 [(by) = "MyEvent.user_id"];
+    //     string username = 1 [(by) = "MyEvent.user_id"];
     // }
     //
     // If a single enrichment message is used to enrich several events, a wildcard syntax may be used.
@@ -129,18 +129,16 @@ extend google.protobuf.FieldOptions {
     // An example:
     //
     // message EnrichmentForSeveralEvents {
-    //     string str = 1 [(by) = "*.user_id"];
+    //     string username = 1 [(by) = "*.user_id"];
     // }
     //
     // message EventOne {
-    //
     //     option (enrichment) = "EnrichmentForSeveralEvents";
     //
     //     int32 user_id = 1;
     // }
     //
     // message EventTwo {
-    //
     //     option (enrichment) = "EnrichmentForSeveralEvents";
     //
     //     int32 user_id = 1;
