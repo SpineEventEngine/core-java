@@ -32,7 +32,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
-                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */})
+        "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
+        "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
     @Test
@@ -52,23 +53,23 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_previousValue() {
-        Changes.of(null, ByteString.copyFromUtf8("do_not_accept_null_previousValue"));
+        Changes.of(null, ByteString.copyFromUtf8("do_not_accept_null_byte_string_previousValue"));
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_newValue() {
-        Changes.of(ByteString.copyFromUtf8("do_not_accept_null_newValue"), null);
+        Changes.of(ByteString.copyFromUtf8("do_not_accept_null_byte_string_newValue"), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_string_values() {
-        final String value = "do_not_accept_equal_values";
+        final String value = "do_not_accept_equal_string_values";
         Changes.of(value, value);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_byte_string_values() {
-        final ByteString value = ByteString.copyFromUtf8("do_not_accept_equal_values");
+        final ByteString value = ByteString.copyFromUtf8("do_not_accept_equal_byte_string_values");
         Changes.of(value, value);
     }
 
@@ -161,7 +162,7 @@ public class ChangesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_float_values() {
-        final float value = 1543f;
+        final float value = 1543.0f;
         Changes.of(value, value);
     }
 
