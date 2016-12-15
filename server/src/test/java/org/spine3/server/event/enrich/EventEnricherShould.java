@@ -34,10 +34,13 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
 import org.spine3.server.event.Subscribe;
+import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectId;
+import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.users.UserId;
 
@@ -121,6 +124,20 @@ public class EventEnricherShould {
     }
 
     @Test
+    public void enrich_several_events_with_same_enrichment_message_with_wildcard_by() {
+        final ProjectCompleted completed = Given.EventMessage.projectCompleted();
+        final ProjectStarred starred = Given.EventMessage.projectStarred();
+        final ProjectId completedProjectId = completed.getProjectId();
+        final ProjectId starredProjectId = starred.getProjectId();
+
+        eventBus.post(createEvent(completed));
+        eventBus.post(createEvent(starred));
+
+        assertEquals(getProjectName.apply(completedProjectId), subscriber.projectCompletedEnrichment.getProjectName());
+        assertEquals(getProjectName.apply(starredProjectId), subscriber.projectStarredEnrichment.getProjectName());
+    }
+
+    @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
         assertTrue(enricher.canBeEnriched(Given.Event.projectStarted()));
     }
@@ -151,24 +168,47 @@ public class EventEnricherShould {
         return event;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
         private ProjectStarted.Enrichment projectStartedEnrichment;
+        private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
+        private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
+
         @SuppressWarnings("InstanceVariableNamingConvention")
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
 
+        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
-            this.projectCreatedEnrichment = getEnrichment(ProjectCreated.Enrichment.class, context).get();
-            this.projectCreatedSeparateEnrichment = getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
-            this.projectCreatedAnotherPackEnrichment = getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
+            this.projectCreatedEnrichment =
+                    getEnrichment(ProjectCreated.Enrichment.class, context).get();
+            this.projectCreatedSeparateEnrichment =
+                    getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
+            this.projectCreatedAnotherPackEnrichment =
+                    getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
         }
 
+        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
             this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class, context).get();
+        }
+
+        @SuppressWarnings("UnusedParameters")
+        @Subscribe
+        public void on(ProjectCompleted event, EventContext context) {
+            this.projectCompletedEnrichment =
+                    getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
+        }
+
+        @SuppressWarnings("UnusedParameters")
+        @Subscribe
+        public void on(ProjectStarred event, EventContext context) {
+            this.projectStarredEnrichment =
+                    getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
         }
     }
 }
