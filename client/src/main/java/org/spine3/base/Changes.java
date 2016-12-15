@@ -20,9 +20,8 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.UInt32Value;
+import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,12 +30,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utility class for working with field changes.
  *
  * @author Alexander Yevsyukov
+ * @author Alexander Aleksandrov
  */
+@SuppressWarnings("OverlyCoupledClass") /* ... because we want one utility class for all the Changes classes. */
 public class Changes {
 
     private static final String PREVIOUS_VALUE = "previousValue";
     private static final String NEW_VALUE = "newValue";
     private static final String ERR_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
+    private static final String ERR_NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
 
     private Changes() {
     }
@@ -49,7 +51,7 @@ public class Changes {
     public static StringChange of(String previousValue, String newValue) {
         checkNotNull(previousValue, PREVIOUS_VALUE);
         checkNotNull(newValue, NEW_VALUE);
-        checkArgument(!newValue.isEmpty(), "newValue cannot be empty");
+        checkArgument(!newValue.isEmpty(), ERR_NEW_VALUE_CANNOT_BE_EMPTY);
         checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final StringChange result = StringChange.newBuilder()
@@ -264,7 +266,7 @@ public class Changes {
     public static BytesChange of(ByteString previousValue, ByteString newValue) {
         checkNotNull(previousValue, PREVIOUS_VALUE);
         checkNotNull(newValue, NEW_VALUE);
-        checkArgument(!newValue.isEmpty(), "newValue cannot be empty");
+        checkArgument(!newValue.isEmpty(), ERR_NEW_VALUE_CANNOT_BE_EMPTY);
         checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final BytesChange result = BytesChange.newBuilder()
