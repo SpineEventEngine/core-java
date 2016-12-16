@@ -51,7 +51,7 @@ public class CommandValidator {
 
     /** Returns a validator instance. */
     public static CommandValidator getInstance() {
-        return LogSingleton.INSTANCE.value;
+        return Singleton.INSTANCE.value;
     }
 
     private CommandValidator() {}
@@ -130,7 +130,7 @@ public class CommandValidator {
         }
     }
 
-    private enum LogSingleton {
+    private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final CommandValidator value = new CommandValidator();

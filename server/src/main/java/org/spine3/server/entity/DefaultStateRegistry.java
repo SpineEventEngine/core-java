@@ -20,12 +20,13 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.collect.MapMaker;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * A wrapper for the map from entity classes to entity default states.
@@ -34,7 +35,11 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 /* package */ class DefaultStateRegistry {
 
-    private final Map<Class<? extends Entity>, Message> defaultStates = newHashMap();
+    /**
+     * NOTE: The implementation is not customized with {@link MapMaker#makeMap()} options,
+     * as it is difficult to predict which work best within the real end-user application scenarios.
+     **/
+    private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
 
     /**
      * Specifies if the entity state of this class is already registered.
