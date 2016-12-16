@@ -1,0 +1,70 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.time.change;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TimeChangeProto";
+option java_package = "org.spine3.time.change";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+import "spine/annotations.proto";
+import "spine/validate.proto";
+import "spine/time/zone_offset.proto";
+
+//
+// This file provides messages that define changes of fields in other messages.
+// The `TimeChange` messages can be use as a request to change a value (e.g. as a field of a command),
+// or as information on the change made (e.g. as a part of an event).
+//
+// For all types the following rule apply: `new_value` field must not be equal to `previous_value`.
+//
+
+// Definition of an interval change.
+message IntervalChange {
+
+    // The value of the field that's changing.
+    //
+    // This field is blank if the target field is blank too.
+    //
+    // A previous start of the interval.
+    google.protobuf.Timestamp previouse_start_value = 1;
+
+    // An previous end of the interval.
+    google.protobuf.Timestamp previouse_end_value = 2;
+
+    // The new value of the field.
+    //
+    // This field must be populated. If you want to clear a field, use a special command.
+    // We encourage separate commands for removal to make event handlers more straightforward.
+    // Usually removal of a value and changing a value should have different consequences.
+    // Hence separate handles.
+    //
+    // A new start of the interval.
+    google.protobuf.Timestamp new_start_value = 3;
+
+    // An new end of the interval.
+    google.protobuf.Timestamp new_end_value = 4;
+}
