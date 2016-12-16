@@ -28,8 +28,10 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.test.Tests;
+import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
+import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.users.UserId;
 
@@ -63,6 +65,8 @@ public class Given {
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
         private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
+        private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(DUMMY_PROJECT_ID);
+        private static final ProjectStarred PROJECT_STARRED = projectStarred(DUMMY_PROJECT_ID);
 
         private EventMessage() {}
 
@@ -74,6 +78,14 @@ public class Given {
             return PROJECT_STARTED;
         }
 
+        public static ProjectCompleted projectCompleted() {
+            return PROJECT_COMPLETED;
+        }
+
+        public static ProjectStarred projectStarred() {
+            return PROJECT_STARRED;
+        }
+
         public static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
@@ -82,6 +94,18 @@ public class Given {
 
         public static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
+        }
+
+        public static ProjectCompleted projectCompleted(ProjectId id) {
+            return ProjectCompleted.newBuilder()
+                                   .setProjectId(id)
+                                   .build();
+        }
+
+        public static ProjectStarred projectStarred(ProjectId id) {
+            return ProjectStarred.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }

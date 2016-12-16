@@ -30,7 +30,7 @@ import "spine/annotations.proto";
 import "spine/users/user_id.proto";
 import "spine/validate.proto";
 import "spine/test/event/project.proto";
-import "spine/event_annotations.proto";
+import "spine/enrichment_annotations.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;
@@ -86,4 +86,20 @@ message EnrichmentByContextFields {
     string by_attributes = 6 [(by) = "context.attributes"];
 
     string by_event_field = 7 [(by) = "project_id"];
+}
+
+message ProjectCompleted {
+    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
+
+    ProjectId project_id = 1;
+}
+
+message ProjectStarred {
+    option (enrichment) = "SeparateEnrichmentForMultipleProjectEvents";
+
+    ProjectId project_id = 1;
+}
+
+message SeparateEnrichmentForMultipleProjectEvents {
+    string project_name = 1 [(by) = "*.project_id"];
 }

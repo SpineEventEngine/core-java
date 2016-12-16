@@ -19,27 +19,36 @@
 //
 syntax = "proto3";
 
-package spine.test.event.enrichment;
+package spine.change;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.event.enrichment";
+option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
+option java_outer_classname = "ValueMismatchProto";
+option java_package = "org.spine3.change";
+
+import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
-import "spine/enrichment_annotations.proto";
+import "spine/validate.proto";
 
-message ProjectCreatedEnrichmentAnotherPackage {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+// A failure to handle a command because an entity contains a value different than expected in a command.
+message ValueMismatch {
 
-    string project_name = 1 [(by) = "project_id"];
-}
+    option (required_field) = "expected|actual";
 
-message ProjectCreatedEnrichmentAnotherPackageFqn {
-    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
-}
+    // A value which a command expected in an entity field.
+    //
+    // This field is not populated if the command expects to initialize the attribute.
+    //
+    google.protobuf.Any expected = 1;
 
-message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
-    option (enrichment_for) = "spine.test.event.ProjectCreated";
+    // An actual value in the entity.
+    //
+    // This field is not populated if the entity does not have the attribute set.
+    //
+    google.protobuf.Any actual = 2;
 
-    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+    // A version of the entity which generated the failure.
+    int32 version = 3 [(required) = true];
 }

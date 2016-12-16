@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.change;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
@@ -39,6 +39,7 @@ import static org.spine3.util.Exceptions.wrapped;
 public class Mismatch {
 
     private Mismatch() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

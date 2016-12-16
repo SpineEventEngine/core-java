@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.change;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
@@ -32,9 +32,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
-            "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-            "ClassWithTooManyMethods",
-            "OverlyCoupledClass"})
+        "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
+        "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
     private static final String nullPreviousValueErrorMesage = "do_not_accept_null_previousValue";
@@ -45,7 +44,6 @@ public class ChangesShould {
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Changes.class));
     }
-
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_previousValue() {
