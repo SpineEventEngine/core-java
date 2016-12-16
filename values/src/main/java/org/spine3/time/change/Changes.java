@@ -20,6 +20,8 @@
 package org.spine3.time.change;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.time.Interval;
+import org.spine3.time.MonthOfYear;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,7 +48,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static IntervalChange ofInterval(Timestamp previousStartValue, Timestamp newStartValue,
-                                    Timestamp previousEndValue, Timestamp newEndValue) {
+                                            Timestamp previousEndValue, Timestamp newEndValue) {
         checkNotNull(previousStartValue, PREVIOUS_VALUE);
         checkNotNull(newStartValue, NEW_VALUE);
         checkNotNull(previousEndValue, PREVIOUS_VALUE);
@@ -54,11 +56,36 @@ public class Changes {
         checkArgument(!newStartValue.equals(previousStartValue) && !newEndValue.equals(previousEndValue), ERR_CANNOT_BE_EQUAL);
 
         final IntervalChange result = IntervalChange.newBuilder()
-                                                    .setPreviouseStartValue(previousStartValue)
-                                                    .setPreviouseEndValue(previousEndValue)
+                                                    .setPreviousStartValue(previousStartValue)
+                                                    .setPreviousEndValue(previousEndValue)
                                                     .setNewStartValue(newStartValue)
                                                     .setNewEndValue(newEndValue)
                                                     .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link LocalDateChange} object for the passed previous and new field values of local date.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static LocalDateChange ofLocalDate(int previousYearValue, MonthOfYear previousMonthValue,
+                                              int previousDayValue, int newYearValue,
+                                              MonthOfYear newMonthValue, int newDayValue) {
+        checkNotNull(previousMonthValue, PREVIOUS_VALUE);
+        checkNotNull(newMonthValue, NEW_VALUE);
+        checkArgument(Integer.compare(newYearValue, previousYearValue) != 0
+                              && Integer.compare(newDayValue, previousDayValue) != 0
+                              && !newMonthValue.equals(previousMonthValue), ERR_CANNOT_BE_EQUAL);
+
+        final LocalDateChange result = LocalDateChange.newBuilder()
+                                                      .setPreviousYearValue(previousYearValue)
+                                                      .setPreviousMonthValue(previousMonthValue)
+                                                      .setPreviousDayValue(previousDayValue)
+                                                      .setNewYearValue(newYearValue)
+                                                      .setNewMonthValue(newMonthValue)
+                                                      .setNewDayValue(newDayValue)
+                                                      .build();
         return result;
     }
 }

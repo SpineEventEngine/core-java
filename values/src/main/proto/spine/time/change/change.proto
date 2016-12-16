@@ -29,7 +29,7 @@ option java_package = "org.spine3.time.change";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
-
+import "spine/time/time.proto";
 import "spine/annotations.proto";
 import "spine/validate.proto";
 import "spine/time/zone_offset.proto";
@@ -49,11 +49,9 @@ message IntervalChange {
     //
     // This field is blank if the target field is blank too.
     //
-    // A previous start of the interval.
-    google.protobuf.Timestamp previouse_start_value = 1;
-
-    // An previous end of the interval.
-    google.protobuf.Timestamp previouse_end_value = 2;
+    // A previous start and end of the interval.
+    google.protobuf.Timestamp previous_start_value = 1;
+    google.protobuf.Timestamp previous_end_value = 2;
 
     // The new value of the field.
     //
@@ -62,9 +60,22 @@ message IntervalChange {
     // Usually removal of a value and changing a value should have different consequences.
     // Hence separate handles.
     //
-    // A new start of the interval.
+    // A new start and end of the interval.
     google.protobuf.Timestamp new_start_value = 3;
-
-    // An new end of the interval.
     google.protobuf.Timestamp new_end_value = 4;
+}
+
+// Definition of a change of `LocalDate` fields.
+message LocalDateChange {
+
+    // The value of fields that are changing.
+    int32 previous_year_value = 1 [(required) = true];
+    MonthOfYear previous_month_value = 2 [(required) = true];
+    int32 previous_day_value = 3 [(required) = true];
+
+    // The new value of fields.
+    int32 new_year_value = 4 [(required) = true];
+    MonthOfYear new_month_value = 5 [(required) = true];
+    int32 new_day_value = 6 [(required) = true];
+
 }

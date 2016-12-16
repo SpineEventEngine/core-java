@@ -23,6 +23,7 @@ package org.spine3.time.change;
 import org.junit.Test;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.time.MonthOfYear;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -33,17 +34,13 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
         "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
-    private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL = "do_not_accept_null_previousValue";
-    private static final String ERR_NEW_VALUE_CANNOT_BE_NULL = "do_not_accept_null_newValue";
-    private static final String ERR_VALUES_CANNOT_BE_EQUAL = "do_not_accept_equal_values";
-
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Changes.class));
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_interval_previousStartValue() {
+    public void do_not_accept_null_Interval_previousStartValue() {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
@@ -51,7 +48,7 @@ public class ChangesShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_interval_newStartValue() {
+    public void do_not_accept_null_Interval_newStartValue() {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
@@ -59,7 +56,7 @@ public class ChangesShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_interval_previousEndValue() {
+    public void do_not_accept_null_Interval_previousEndValue() {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
@@ -67,7 +64,7 @@ public class ChangesShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_interval_newEndValue() {
+    public void do_not_accept_null_Interval_newEndValue() {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
@@ -75,9 +72,48 @@ public class ChangesShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_Timestamp_values() {
+    public void do_not_accept_equal_Interval_values() {
+        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        org.spine3.change.Changes.of(now, now);
+        Changes.ofInterval(now, now, fourMinutesAgo, fourMinutesAgo);
     }
 
+    @Test
+    public void create_IntervalChange_instance() {
+        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
+        final Timestamp now = Timestamps.getCurrentTime();
+
+        final IntervalChange result = Changes.ofInterval(fiveMinutesAgo, now, fiveMinutesAgo, now);
+
+        assertEquals(fiveMinutesAgo, result.getPreviousStartValue());
+        assertEquals(now, result.getNewStartValue());
+        assertEquals(fiveMinutesAgo, result.getPreviousEndValue());
+        assertEquals(now, result.getNewEndValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_LocalDate_previousMonthValue() {
+        final MonthOfYear newMonthValue = MonthOfYear.JANUARY;
+        final int previousYearValue = 1984;
+        final int newYearValue = 1983;
+        final int previousDayValue = 6;
+        final int newDayValue = 3;
+
+        Changes.ofLocalDate(previousYearValue, null,
+                            previousDayValue, newYearValue,
+                            newMonthValue, newDayValue );
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_LocalDate_newMonthValue() {
+        final MonthOfYear previousMonthValue = MonthOfYear.JANUARY;
+        final int previousYearValue = 1984;
+        final int newYearValue = 1983;
+        final int previousDayValue = 4;
+        final int newDayValue = 5;
+
+        Changes.ofLocalDate(previousYearValue, previousMonthValue,
+                            previousDayValue, newYearValue,
+                            null, newDayValue );
+    }
 }
