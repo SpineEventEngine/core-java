@@ -36,9 +36,9 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
         "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
-    private static final String nullPreviousValueErrorMesage = "do_not_accept_null_previousValue";
-    private static final String nullNewValueErrorMesage = "do_not_accept_null_newValue";
-    private static final String equalValuesErrorMesage = "do_not_accept_equal_values";
+    private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL = "do_not_accept_null_previousValue";
+    private static final String ERR_NEW_VALUE_CANNOT_BE_NULL = "do_not_accept_null_newValue";
+    private static final String ERR_VALUES_CANNOT_BE_EQUAL = "do_not_accept_equal_values";
 
     @Test
     public void have_private_constructor() {
@@ -47,33 +47,33 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_previousValue() {
-        Changes.of(null, nullPreviousValueErrorMesage);
+        Changes.of(null, ERR_PREVIOUS_VALUE_CANNOT_BE_NULL);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_newValue() {
-        Changes.of(nullNewValueErrorMesage, null);
+        Changes.of(ERR_NEW_VALUE_CANNOT_BE_NULL, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_previousValue() {
-        Changes.of(null, ByteString.copyFromUtf8(nullPreviousValueErrorMesage));
+        Changes.of(null, ByteString.copyFromUtf8(ERR_PREVIOUS_VALUE_CANNOT_BE_NULL));
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_newValue() {
-        Changes.of(ByteString.copyFromUtf8(nullNewValueErrorMesage), null);
+        Changes.of(ByteString.copyFromUtf8(ERR_NEW_VALUE_CANNOT_BE_NULL), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_string_values() {
-        final String value = equalValuesErrorMesage;
+        final String value = ERR_VALUES_CANNOT_BE_EQUAL;
         Changes.of(value, value);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_byte_string_values() {
-        final ByteString value = ByteString.copyFromUtf8(equalValuesErrorMesage);
+        final ByteString value = ByteString.copyFromUtf8(ERR_VALUES_CANNOT_BE_EQUAL);
         Changes.of(value, value);
     }
 
