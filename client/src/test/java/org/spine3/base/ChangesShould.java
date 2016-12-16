@@ -32,43 +32,50 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
-                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */})
+            "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
+            "ClassWithTooManyMethods",
+            "OverlyCoupledClass"})
 public class ChangesShould {
+
+    private static final String nullPreviousValueErrorMesage = "do_not_accept_null_previousValue";
+    private static final String nullNewValueErrorMesage = "do_not_accept_null_newValue";
+    private static final String equalValuesErrorMesage = "do_not_accept_equal_values";
 
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Changes.class));
     }
 
+
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_previousValue() {
-        Changes.of(null, "do_not_accept_null_previousValue");
+        Changes.of(null, nullPreviousValueErrorMesage);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_newValue() {
-        Changes.of("do_not_accept_null_newValue", null);
+        Changes.of(nullNewValueErrorMesage, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_previousValue() {
-        Changes.of(null, ByteString.copyFromUtf8("do_not_accept_null_previousValue"));
+        Changes.of(null, ByteString.copyFromUtf8(nullPreviousValueErrorMesage));
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_byte_string_newValue() {
-        Changes.of(ByteString.copyFromUtf8("do_not_accept_null_newValue"), null);
+        Changes.of(ByteString.copyFromUtf8(nullNewValueErrorMesage), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_string_values() {
-        final String value = "do_not_accept_equal_values";
+        final String value = equalValuesErrorMesage;
         Changes.of(value, value);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_byte_string_values() {
-        final ByteString value = ByteString.copyFromUtf8("do_not_accept_equal_values");
+        final ByteString value = ByteString.copyFromUtf8(equalValuesErrorMesage);
         Changes.of(value, value);
     }
 
@@ -161,7 +168,7 @@ public class ChangesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_float_values() {
-        final float value = 1543f;
+        final float value = 1543.0f;
         Changes.of(value, value);
     }
 

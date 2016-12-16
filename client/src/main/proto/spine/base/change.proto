@@ -196,7 +196,7 @@ message BooleanChange {
     bool previous_value = 1;
 
     // The new value of the field.
-    bool new_value = 2 [(required) = true];
+    bool new_value = 2;
 }
 
 // Definition of a change in a `bytes` field.
