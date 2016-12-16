@@ -111,7 +111,7 @@ extend google.protobuf.FieldOptions {
     // }
     //
     // message MyEventEnrichment {
-    //     string str = 1 [(by) = "MyEvent.user_id"];
+    //     string username = 1 [(by) = "MyEvent.user_id"];
     // }
     //
     string by = 57125; // NOTE: this field number is used in the `tools` project,

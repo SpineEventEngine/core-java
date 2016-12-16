@@ -26,7 +26,7 @@ option java_package="org.spine3.test.event.enrichment";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
-import "spine/event_annotations.proto";
+import "spine/enrichment_annotations.proto";
 
 message ProjectCreatedEnrichmentAnotherPackage {
     option (enrichment_for) = "spine.test.event.ProjectCreated";
