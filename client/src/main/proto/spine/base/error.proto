@@ -37,9 +37,11 @@ import "spine/validate/constraint_violation.proto";
 // See `spine.base.BusinessFailure` for definition of business failure type.
 //
 message Error {
+
     // The type of the error.
     //
     // It can be an exception from Java, C# (or another language) or a Proto enum name.
+    //
     string type = 1;
 
     // An integer code resulting from a native code call, or a number from a Proto enum value.
@@ -62,6 +64,7 @@ message Error {
 
 // An error indicating that a message did not pass validation.
 message ValidationError {
+
     // Validation constraint violations found by validator.
     repeated validate.ConstraintViolation constraint_violation = 1;
 }

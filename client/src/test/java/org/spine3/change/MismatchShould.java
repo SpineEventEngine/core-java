@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.change;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
@@ -30,8 +30,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Mismatch.getActualString;
-import static org.spine3.base.Mismatch.getExpectedString;
+import static org.spine3.change.Mismatch.getActualString;
+import static org.spine3.change.Mismatch.getExpectedString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;

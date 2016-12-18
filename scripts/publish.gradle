@@ -31,15 +31,21 @@ if (credentialsFile.exists()) {
     repositoryUserPassword = properties.getProperty("user.password")
 }
 
-task checkPublishingCredentials << {
-    if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials must be set in '${credentialsPropertyFile}' file in the project\'s root.")
+task checkPublishingCredentials {
+    doLast {
+        if (repositoryUserName == null || repositoryUserPassword == null) {
+            throw new InvalidUserDataException("Please set up valid credentials. " +
+                    "Credentials must be set in '${credentialsPropertyFile}' file in the project\'s root.")
+        }
+        println "Publishing build as ${repositoryUserName}"
     }
-    println "Publishing build as ${repositoryUserName}"
 }
 
-task publish << {}
+task publish {
+    doLast {
+        // Keep the task for dynamic generation while publishing.
+    }
+}
 
 void dependPublish(final Project project) {
     final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false)

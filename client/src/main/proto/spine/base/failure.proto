@@ -24,7 +24,7 @@ package spine.base;
 option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "BusinessFailureProto";
+option java_outer_classname = "FailureProto";
 option java_package = "org.spine3.base";
 
 import "google/protobuf/any.proto";
@@ -54,25 +54,4 @@ message Failure {
 
     // Additional information on the failure.
     map<string, google.protobuf.Value> attributes = 4;
-}
-
-// A failure to handle a command because an entity contains a value different than expected in a command.
-message ValueMismatch {
-
-    option (required_field) = "expected|actual";
-
-    // A value which a command expected in an entity field.
-    //
-    // This field is not populated if the command expects to initialize the attribute.
-    //
-    google.protobuf.Any expected = 1;
-
-    // An actual value in the entity.
-    //
-    // This field is not populated if the entity does not have the attribute set.
-    //
-    google.protobuf.Any actual = 2;
-
-    // A version of the entity which generated the failure.
-    int32 version = 3 [(required) = true];
 }
