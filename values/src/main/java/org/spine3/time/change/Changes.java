@@ -39,7 +39,6 @@ public class Changes {
     private static final String PREVIOUS_VALUE = "previousValue";
     private static final String NEW_VALUE = "newValue";
     private static final String ERR_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
-    private static final String ERR_NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
 
     private Changes() {
     }

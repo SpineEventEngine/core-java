@@ -103,7 +103,7 @@ public class ChangesShould {
     @Test
     public void create_LocalDateChange_instance() {
         final LocalDate today = LocalDates.today();
-        final LocalDate tomorrow = LocalDates.inDays(1);
+        final LocalDate tomorrow = LocalDates.plusDays(1);
 
         final LocalDateChange result = Changes.of(today, tomorrow);
 
@@ -132,7 +132,7 @@ public class ChangesShould {
     @Test
     public void create_LocalTimeChange_instance() {
         final LocalTime now = LocalTimes.now();
-        final LocalTime inFiveHours = LocalTimes.inHours(5);
+        final LocalTime inFiveHours = LocalTimes.plusHours(5);
 
         final LocalTimeChange result = Changes.of(now, inFiveHours);
 

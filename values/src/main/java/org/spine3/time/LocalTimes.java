@@ -60,11 +60,11 @@ public class LocalTimes {
     /**
      * Obtains the local time in future after specified amount of hours.
      */
-    public static LocalTime inHours(int hoursDelta) {
+    public static LocalTime plusHours(int hoursToAdd) {
         final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time.getSeconds() / 1000);
-        calendar.add(Calendar.HOUR, hoursDelta);
+        calendar.add(Calendar.HOUR, hoursToAdd);
         final int hours = calendar.get(Calendar.HOUR);
         final int minutes = calendar.get(Calendar.MINUTE);
         final int seconds = calendar.get(Calendar.SECOND);

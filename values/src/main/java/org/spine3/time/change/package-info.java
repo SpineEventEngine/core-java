@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains classes and interfaces for working with field value changes.
+ * This package contains classes and interfaces for working with Time value changes.
  */
 
 @ParametersAreNonnullByDefault

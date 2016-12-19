@@ -54,7 +54,7 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_time_in_future_after_specified_number_of_hours() {
-        final LocalTime now = LocalTimes.inHours(2);
+        final LocalTime now = LocalTimes.plusHours(2);
         final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time.getSeconds() / 1000);

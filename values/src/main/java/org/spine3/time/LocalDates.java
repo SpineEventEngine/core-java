@@ -48,11 +48,11 @@ public class LocalDates {
     }
 
     /**
-     * Obtains the date in the future after adding the specified amount of days.
+     * Obtains the date in the future after certain amount of days.
      */
-    public static LocalDate inDays(int daysDelta) {
+    public static LocalDate plusDays(int daysToAdd) {
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, daysDelta);
+        calendar.add(Calendar.DAY_OF_MONTH, daysToAdd);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);

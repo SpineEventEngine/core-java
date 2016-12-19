@@ -48,7 +48,7 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_days() {
-        final LocalDate today = LocalDates.inDays(5);
+        final LocalDate today = LocalDates.plusDays(5);
         final Calendar calendar = Calendar.getInstance();
         assertEquals(calendar.get(Calendar.YEAR), today.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());

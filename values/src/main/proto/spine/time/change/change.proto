@@ -27,12 +27,9 @@ option java_multiple_files = true;
 option java_outer_classname = "TimeChangeProto";
 option java_package = "org.spine3.time.change";
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/duration.proto";
 import "spine/time/time.proto";
 import "spine/annotations.proto";
 import "spine/validate.proto";
-import "spine/time/zone_offset.proto";
 
 //
 // This file provides messages that define changes of fields in other messages.
@@ -46,18 +43,9 @@ import "spine/time/zone_offset.proto";
 message IntervalChange {
 
     // The value of the field that's changing.
-    //
-    // This field is blank if the target field is blank too.
-    //
-    // A previous start and end of the interval.
     Interval previous_value = 1;
 
     // The new value of the field.
-    //
-    // This field must be populated. If you want to clear a field, use a special command.
-    // We encourage separate commands for removal to make event handlers more straightforward.
-    // Usually removal of a value and changing a value should have different consequences.
-    // Hence separate handles.
     Interval new_value = 2;
 }
 
