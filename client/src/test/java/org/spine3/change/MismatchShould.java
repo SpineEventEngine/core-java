@@ -45,7 +45,7 @@ public class MismatchShould {
     private static final String ACTUAL = "ACTUAL";
     private static final int VERSION = 0;
     private static final String DEFAULT_VALUE = "";
-    public static final double DELTA = 0.01;
+    private static final double DELTA = 0.01;
 
     @Test
     public void has_private_constructor() {
