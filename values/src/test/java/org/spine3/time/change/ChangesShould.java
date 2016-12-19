@@ -31,7 +31,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
         "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-        "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
+        "ClassWithTooManyMethods", "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
     @Test
@@ -99,9 +99,8 @@ public class ChangesShould {
         final int previousDayValue = 6;
         final int newDayValue = 3;
 
-        Changes.ofLocalDate(previousYearValue, null,
-                            previousDayValue, newYearValue,
-                            newMonthValue, newDayValue );
+        Changes.ofLocalDate(previousYearValue, null, previousDayValue,
+                            newYearValue, newMonthValue, newDayValue);
     }
 
     @Test(expected = NullPointerException.class)
@@ -112,8 +111,80 @@ public class ChangesShould {
         final int previousDayValue = 4;
         final int newDayValue = 5;
 
-        Changes.ofLocalDate(previousYearValue, previousMonthValue,
-                            previousDayValue, newYearValue,
-                            null, newDayValue );
+        Changes.ofLocalDate(previousYearValue, previousMonthValue, previousDayValue,
+                            newYearValue, null, newDayValue);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_LocalDate_values() {
+        final MonthOfYear monthValue = MonthOfYear.JANUARY;
+        final int yearValue = 1984;
+        final int dayValue = 5;
+
+        Changes.ofLocalDate(yearValue, monthValue, dayValue,
+                            yearValue, monthValue, dayValue);
+    }
+
+    @Test
+    public void create_LocalDateChange_instance() {
+        final MonthOfYear previousMonthValue = MonthOfYear.JANUARY;
+        final MonthOfYear newMonthValue = MonthOfYear.APRIL;
+        final int previousYearValue = 1984;
+        final int newYearValue = 1983;
+        final int previousDayValue = 20;
+        final int newDayValue = 31;
+
+        final LocalDateChange result = Changes.ofLocalDate(previousYearValue, previousMonthValue, previousDayValue,
+                                                           newYearValue, newMonthValue, newDayValue);
+
+        assertTrue(Integer.compare(previousYearValue, result.getPreviousYearValue()) == 0);
+        assertEquals(previousMonthValue, result.getPreviousMonthValue());
+        assertTrue(Integer.compare(previousDayValue, result.getPreviousDayValue()) == 0);
+        assertTrue(Integer.compare(newYearValue, result.getNewYearValue()) == 0);
+        assertEquals(newMonthValue, result.getNewMonthValue());
+        assertTrue(Integer.compare(newDayValue, result.getNewDayValue()) == 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_LocalTime_values() {
+        final int hoursValue = 12;
+        final int minutesValue = 59;
+        final int secondsValue = 1;
+        final int millisValue = 9;
+        final long nanosValue = 112L;
+
+        Changes.ofLocalTime(hoursValue, minutesValue, secondsValue, millisValue, nanosValue,
+                            hoursValue, minutesValue, secondsValue, millisValue, nanosValue);
+    }
+
+    @Test
+    public void create_LocalTimeChange_instance() {
+        final int previousHoursValue = 12;
+        final int previousMinutesValue = 59;
+        final int previousSecondsValue = 1;
+        final int previousMillisValue = 9;
+        final long previousNanosValue = 112L;
+        final int newHoursValue = 11;
+        final int newMinutesValue = 58;
+        final int newSecondsValue = 2;
+        final int newMillisValue = 10;
+        final long newNanosValue = 111L;
+
+        final LocalTimeChange result = Changes.ofLocalTime(previousHoursValue, previousMinutesValue,
+                                                           previousSecondsValue, previousMillisValue,
+                                                           previousNanosValue, newHoursValue,
+                                                           newMinutesValue, newSecondsValue,
+                                                           newMillisValue, newNanosValue);
+
+        assertTrue(Integer.compare(previousHoursValue, result.getPreviousHoursValue()) == 0);
+        assertTrue(Integer.compare(previousMinutesValue, result.getPreviousMinutesValue()) == 0);
+        assertTrue(Integer.compare(previousSecondsValue, result.getPreviousSecondsValue()) == 0);
+        assertTrue(Integer.compare(previousMillisValue, result.getPreviousMillisValue()) == 0);
+        assertTrue(Long.compare(previousNanosValue, result.getPreviousNanosValue()) == 0);
+        assertTrue(Integer.compare(newHoursValue, result.getNewHoursValue()) == 0);
+        assertTrue(Integer.compare(newMinutesValue, result.getNewMinutesValue()) == 0);
+        assertTrue(Integer.compare(newSecondsValue, result.getNewSecondsValue()) == 0);
+        assertTrue(Integer.compare(newMillisValue, result.getNewMillisValue()) == 0);
+        assertTrue(Long.compare(newNanosValue, result.getNewNanosValue()) == 0);
     }
 }

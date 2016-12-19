@@ -36,6 +36,7 @@
       <w>procman</w>
       <w>proto's</w>
       <w>protos</w>
+      <w>sfixed</w>
       <w>stderr</w>
       <w>testutil</w>
       <w>threeten</w>
@@ -44,7 +45,6 @@
       <w>websocket</w>
       <w>workflows</w>
       <w>yevsyukov</w>
-      <w>sfixed</w>
     </words>
   </dictionary>
 </component>
