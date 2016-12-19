@@ -55,7 +55,7 @@ public class MismatchShould {
     @Test
     public void set_default_expected_value_if_it_was_passed_as_null() {
         final ValueMismatch mismatch = Mismatch.of(null, ACTUAL, VERSION);
-        final String expected = mismatch.getExpected()
+        final String expected = mismatch.getExpectedPreviousValue()
                                         .toString();
 
         assertEquals(DEFAULT_VALUE, expected);
@@ -64,7 +64,7 @@ public class MismatchShould {
     @Test
     public void set_default_actual_value_if_it_was_passed_as_null() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, null, VERSION);
-        final String actual = mismatch.getActual()
+        final String actual = mismatch.getActualPreviousValue()
                                       .toString();
 
         assertEquals(DEFAULT_VALUE, actual);
@@ -73,8 +73,8 @@ public class MismatchShould {
     @Test
     public void return_mismatch_object_with_string_values() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, VERSION);
-        final StringValue expected = unpack(mismatch.getExpected());
-        final StringValue actual = unpack(mismatch.getActual());
+        final StringValue expected = unpack(mismatch.getExpectedPreviousValue());
+        final StringValue actual = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
@@ -85,8 +85,8 @@ public class MismatchShould {
         final int expected = 0;
         final int actual = 1;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
-        final Int32Value expectedWrapper = unpack(mismatch.getExpected());
-        final Int32Value actualWrapper = unpack(mismatch.getActual());
+        final Int32Value expectedWrapper = unpack(mismatch.getExpectedPreviousValue());
+        final Int32Value actualWrapper = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(expected, expectedWrapper.getValue());
         assertEquals(actual, actualWrapper.getValue());
@@ -97,8 +97,8 @@ public class MismatchShould {
         final long expected = 0L;
         final long actual = 1L;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
-        final Int64Value expectedWrapped = unpack(mismatch.getExpected());
-        final Int64Value actualWrapped = unpack(mismatch.getActual());
+        final Int64Value expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
+        final Int64Value actualWrapped = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
@@ -109,8 +109,8 @@ public class MismatchShould {
         final float expected = 0.0F;
         final float actual = 1.0F;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
-        final FloatValue expectedWrapped = unpack(mismatch.getExpected());
-        final FloatValue actualWrapped = unpack(mismatch.getActual());
+        final FloatValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
+        final FloatValue actualWrapped = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
@@ -121,8 +121,8 @@ public class MismatchShould {
         final double expected = 0.1;
         final double actual = 0.2;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
-        final DoubleValue expectedWrapped = unpack(mismatch.getExpected());
-        final DoubleValue actualWrapped = unpack(mismatch.getActual());
+        final DoubleValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
+        final DoubleValue actualWrapped = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
@@ -133,8 +133,8 @@ public class MismatchShould {
         final boolean expected = true;
         final boolean actual = false;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, VERSION);
-        final BoolValue expectedWrapped = unpack(mismatch.getExpected());
-        final BoolValue actualWrapped = unpack(mismatch.getActual());
+        final BoolValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
+        final BoolValue actualWrapped = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
@@ -143,7 +143,7 @@ public class MismatchShould {
     @Test
     public void set_default_expected_value_if_it_was_passed_as_null_message_overload() {
         final ValueMismatch mismatch = Mismatch.of(null, newStringValue(ACTUAL), VERSION);
-        final String expected = mismatch.getExpected()
+        final String expected = mismatch.getExpectedPreviousValue()
                                         .toString();
 
         assertEquals(DEFAULT_VALUE, expected);
@@ -152,7 +152,7 @@ public class MismatchShould {
     @Test
     public void set_default_actual_value_if_it_was_passed_as_null_message_overload() {
         final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), null, VERSION);
-        final String actual = mismatch.getActual()
+        final String actual = mismatch.getActualPreviousValue()
                                       .toString();
 
         assertEquals(DEFAULT_VALUE, actual);
@@ -161,8 +161,8 @@ public class MismatchShould {
     @Test
     public void return_mismatch_object_with_message_values() {
         final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), VERSION);
-        final StringValue expected = unpack(mismatch.getExpected());
-        final StringValue actual = unpack(mismatch.getActual());
+        final StringValue expected = unpack(mismatch.getExpectedPreviousValue());
+        final StringValue actual = unpack(mismatch.getActualPreviousValue());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());

@@ -32,23 +32,26 @@ import "google/protobuf/any.proto";
 import "spine/annotations.proto";
 import "spine/validate.proto";
 
-// A failure to handle a command because an entity contains a value different than expected in a command.
+// The failure to handle a command because an entity contains a value different than expected in a command.
 message ValueMismatch {
 
     option (required_field) = "expected|actual";
 
-    // A value which a command expected in an entity field.
+    // The value which a command expected in an entity field.
     //
     // This field is not populated if the command expects to initialize the attribute.
     //
-    google.protobuf.Any expected = 1;
+    google.protobuf.Any expected_previous_value = 1;
 
-    // An actual value in the entity.
+    // The value discovered in the field (instead of the expected).
     //
     // This field is not populated if the entity does not have the attribute set.
     //
-    google.protobuf.Any actual = 2;
+    google.protobuf.Any actual_previous_value = 2;
+
+    // The value which a command could have set if expected value was discovered in the entity.
+    google.protobuf.Any new_value = 3;
 
     // A version of the entity which generated the failure.
-    int32 version = 3 [(required) = true];
+    int32 version = 4;
 }

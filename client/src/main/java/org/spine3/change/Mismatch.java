@@ -53,10 +53,10 @@ public class Mismatch {
     public static ValueMismatch of(@Nullable String expected, @Nullable String actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
         if (expected != null) {
-            builder.setExpected(pack(expected));
+            builder.setExpectedPreviousValue(pack(expected));
         }
         if (actual != null) {
-            builder.setActual(pack(actual));
+            builder.setActualPreviousValue(pack(actual));
         }
         builder.setVersion(version);
         return builder.build();
@@ -72,8 +72,8 @@ public class Mismatch {
      */
     public static ValueMismatch of(int expected, int actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -88,8 +88,8 @@ public class Mismatch {
      */
     public static ValueMismatch of(long expected, long actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -104,8 +104,8 @@ public class Mismatch {
      */
     public static ValueMismatch of(float expected, float actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -120,8 +120,8 @@ public class Mismatch {
      */
     public static ValueMismatch of(double expected, double actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -136,8 +136,8 @@ public class Mismatch {
      */
     public static ValueMismatch of(boolean expected, boolean actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -153,10 +153,10 @@ public class Mismatch {
     public static ValueMismatch of(@Nullable Message expected, @Nullable Message actual, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
         if (expected != null) {
-            builder.setExpected(AnyPacker.pack(expected));
+            builder.setExpectedPreviousValue(AnyPacker.pack(expected));
         }
         if (actual != null) {
-            builder.setActual(AnyPacker.pack(actual));
+            builder.setActualPreviousValue(AnyPacker.pack(actual));
         }
         builder.setVersion(version);
         return builder.build();
@@ -170,7 +170,7 @@ public class Mismatch {
      */
     public static String getExpectedString(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getExpected()
+            final StringValue result = mismatch.getExpectedPreviousValue()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
@@ -185,7 +185,7 @@ public class Mismatch {
      */
     public static String getActualString(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getActual()
+            final StringValue result = mismatch.getActualPreviousValue()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
