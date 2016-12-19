@@ -27,13 +27,32 @@ import java.util.Calendar;
  */
 public class LocalDates {
 
-    private LocalDates() {}
+    private LocalDates() {
+    }
 
     /**
      * Obtains the current date.
      */
     public static LocalDate today() {
         final Calendar calendar = Calendar.getInstance();
+        final int year = calendar.get(Calendar.YEAR);
+        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
+        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        final LocalDate result = LocalDate.newBuilder()
+                                          .setYear(year)
+                                          .setMonth(month)
+                                          .setDay(dayOfMonth)
+                                          .build();
+        return result;
+    }
+
+    /**
+     * Obtains the date in the future after adding the specified amount of days.
+     */
+    public static LocalDate inDays(int daysDelta) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, daysDelta);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);

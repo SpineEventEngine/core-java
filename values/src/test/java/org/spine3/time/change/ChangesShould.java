@@ -97,4 +97,14 @@ public class ChangesShould {
         final LocalDate today = LocalDates.today();
         Changes.of(today, today);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void create_LocalDateChange_instance() {
+        final LocalDate today = LocalDates.today();
+        final LocalDate tomorrow = LocalDates.inDays(1);
+        final LocalDateChange result = Changes.of(today, tomorrow);
+
+        assertEquals(today, result.getPreviousValue());
+        assertEquals(tomorrow, result.getNewValue());
+    }
 }

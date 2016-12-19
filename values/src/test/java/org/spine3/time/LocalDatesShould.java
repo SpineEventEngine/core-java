@@ -45,4 +45,13 @@ public class LocalDatesShould {
         assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
     }
+
+    @Test
+    public void obtain_date_in_future_after_specified_number_of_days() {
+        final LocalDate today = LocalDates.inDays(5);
+        final Calendar calendar = Calendar.getInstance();
+        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH) + 5, today.getDay());
+    }
 }
