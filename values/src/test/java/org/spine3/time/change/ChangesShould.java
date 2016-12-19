@@ -27,6 +27,8 @@ import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
+import org.spine3.time.LocalTime;
+import org.spine3.time.LocalTimes;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +48,7 @@ public class ChangesShould {
     public void do_not_accept_null_Interval_previousValue() {
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         Changes.of(null, fourMinutes);
     }
 
@@ -54,7 +56,7 @@ public class ChangesShould {
     public void do_not_accept_null_Interval_newValue() {
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         Changes.of(fourMinutes, null);
     }
 
@@ -71,8 +73,8 @@ public class ChangesShould {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
-        final Interval fiveMinutes = Intervals.between(now, fiveMinutesAgo);
+        final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
+        final Interval fiveMinutes = Intervals.between(fiveMinutesAgo, now);
 
         final IntervalChange result = Changes.of(fourMinutes, fiveMinutes);
 
@@ -98,13 +100,43 @@ public class ChangesShould {
         Changes.of(today, today);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void create_LocalDateChange_instance() {
         final LocalDate today = LocalDates.today();
         final LocalDate tomorrow = LocalDates.inDays(1);
+
         final LocalDateChange result = Changes.of(today, tomorrow);
 
         assertEquals(today, result.getPreviousValue());
         assertEquals(tomorrow, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_LocalTime_previousValue() {
+        final LocalTime now = LocalTimes.now();
+        Changes.of(null, now);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_LocalTime_newValue() {
+        final LocalTime now = LocalTimes.now();
+        Changes.of(now, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_LocalTime_values() {
+        final LocalTime now = LocalTimes.now();
+        Changes.of(now, now);
+    }
+
+    @Test
+    public void create_LocalTimeChange_instance() {
+        final LocalTime now = LocalTimes.now();
+        final LocalTime inFiveHours = LocalTimes.inHours(5);
+
+        final LocalTimeChange result = Changes.of(now, inFiveHours);
+
+        assertEquals(now, result.getPreviousValue());
+        assertEquals(inFiveHours, result.getNewValue());
     }
 }
