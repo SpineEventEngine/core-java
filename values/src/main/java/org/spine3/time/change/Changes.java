@@ -19,8 +19,12 @@
  */
 package org.spine3.time.change;
 
-import com.google.protobuf.Timestamp;
-import org.spine3.time.MonthOfYear;
+import org.spine3.time.Interval;
+import org.spine3.time.LocalDate;
+import org.spine3.time.LocalTime;
+import org.spine3.time.OffsetDate;
+import org.spine3.time.OffsetDateTime;
+import org.spine3.time.OffsetTime;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Aleksandrov
  */
-@SuppressWarnings("OverlyCoupledClass") /* ... because we want one utility class for all the TimeChanges classes. */
 public class Changes {
 
     private static final String PREVIOUS_VALUE = "previousValue";
@@ -46,19 +49,14 @@ public class Changes {
      *
      * <p>Passed values cannot be equal.
      */
-    public static IntervalChange ofInterval(Timestamp previousStartValue, Timestamp newStartValue,
-                                            Timestamp previousEndValue, Timestamp newEndValue) {
-        checkNotNull(previousStartValue, PREVIOUS_VALUE);
-        checkNotNull(newStartValue, NEW_VALUE);
-        checkNotNull(previousEndValue, PREVIOUS_VALUE);
-        checkNotNull(newEndValue, NEW_VALUE);
-        checkArgument(!newStartValue.equals(previousStartValue) && !newEndValue.equals(previousEndValue), ERR_CANNOT_BE_EQUAL);
+    public static IntervalChange of(Interval previousValue, Interval newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final IntervalChange result = IntervalChange.newBuilder()
-                                                    .setPreviousStartValue(previousStartValue)
-                                                    .setPreviousEndValue(previousEndValue)
-                                                    .setNewStartValue(newStartValue)
-                                                    .setNewEndValue(newEndValue)
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
                                                     .build();
         return result;
     }
@@ -68,23 +66,14 @@ public class Changes {
      *
      * <p>Passed values cannot be equal.
      */
-    @SuppressWarnings("MethodWithTooManyParameters")
-    public static LocalDateChange ofLocalDate(int previousYearValue, MonthOfYear previousMonthValue,
-                                              int previousDayValue, int newYearValue,
-                                              MonthOfYear newMonthValue, int newDayValue) {
-        checkNotNull(previousMonthValue, PREVIOUS_VALUE);
-        checkNotNull(newMonthValue, NEW_VALUE);
-        checkArgument(Integer.compare(newYearValue, previousYearValue) != 0
-                              && Integer.compare(newDayValue, previousDayValue) != 0
-                              && newMonthValue != previousMonthValue, ERR_CANNOT_BE_EQUAL);
+    public static LocalDateChange of(LocalDate previousValue, LocalDate newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final LocalDateChange result = LocalDateChange.newBuilder()
-                                                      .setPreviousYearValue(previousYearValue)
-                                                      .setPreviousMonthValue(previousMonthValue)
-                                                      .setPreviousDayValue(previousDayValue)
-                                                      .setNewYearValue(newYearValue)
-                                                      .setNewMonthValue(newMonthValue)
-                                                      .setNewDayValue(newDayValue)
+                                                      .setPreviousValue(previousValue)
+                                                      .setNewValue(newValue)
                                                       .build();
         return result;
     }
@@ -94,32 +83,66 @@ public class Changes {
      *
      * <p>Passed values cannot be equal.
      */
-    @SuppressWarnings({"MethodWithTooManyParameters", "MethodWithMoreThanThreeNegations"})
-    public static LocalTimeChange ofLocalTime(int previousHoursValue, int previousMinutesValue,
-                                              int previousSecondsValue, int previousMillisValue,
-                                              long previousNanosValue, int newHoursValue,
-                                              int newMinutesValue, int newSecondsValue,
-                                              int newMillisValue, long newNanosValue) {
-
-        //noinspection OverlyComplexBooleanExpression
-        checkArgument(Integer.compare(newHoursValue, previousHoursValue) != 0
-                              && Integer.compare(newMinutesValue, previousMinutesValue) != 0
-                              && Integer.compare(newSecondsValue, previousSecondsValue) != 0
-                              && Integer.compare(newMillisValue, previousMillisValue) != 0
-                              && Long.compare(newNanosValue, previousNanosValue) != 0, ERR_CANNOT_BE_EQUAL);
+    public static LocalTimeChange of(LocalTime previousValue, LocalTime newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
 
         final LocalTimeChange result = LocalTimeChange.newBuilder()
-                                                      .setPreviousHoursValue(previousHoursValue)
-                                                      .setPreviousMinutesValue(previousMinutesValue)
-                                                      .setPreviousSecondsValue(previousSecondsValue)
-                                                      .setPreviousMillisValue(previousMillisValue)
-                                                      .setPreviousNanosValue(previousNanosValue)
-                                                      .setNewHoursValue(newHoursValue)
-                                                      .setNewMinutesValue(newMinutesValue)
-                                                      .setNewSecondsValue(newSecondsValue)
-                                                      .setNewMillisValue(newMillisValue)
-                                                      .setNewNanosValue(newNanosValue)
+                                                      .setPreviousValue(previousValue)
+                                                      .setNewValue(newValue)
                                                       .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link OffsetTimeChange} object for the passed previous and new field values of offset time.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static OffsetTimeChange of(OffsetTime previousValue, OffsetTime newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+
+        final OffsetTimeChange result = OffsetTimeChange.newBuilder()
+                                                        .setPreviousValue(previousValue)
+                                                        .setNewValue(newValue)
+                                                        .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link OffsetDateChange} object for the passed previous and new field values of offset time.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static OffsetDateChange of(OffsetDate previousValue, OffsetDate newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+
+        final OffsetDateChange result = OffsetDateChange.newBuilder()
+                                                        .setPreviousValue(previousValue)
+                                                        .setNewValue(newValue)
+                                                        .build();
+        return result;
+    }
+
+    /**
+     * Creates {@link OffsetDateTimeChange} object for the passed previous and new field values of offset time.
+     *
+     * <p>Passed values cannot be equal.
+     */
+    public static OffsetDateTimeChange of(OffsetDateTime previousValue, OffsetDateTime newValue) {
+        checkNotNull(previousValue, PREVIOUS_VALUE);
+        checkNotNull(newValue, NEW_VALUE);
+        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+
+        final OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
+                                                        .setPreviousValue(previousValue)
+                                                        .setNewValue(newValue)
+                                                        .build();
         return result;
     }
 }

@@ -50,8 +50,7 @@ message IntervalChange {
     // This field is blank if the target field is blank too.
     //
     // A previous start and end of the interval.
-    google.protobuf.Timestamp previous_start_value = 1;
-    google.protobuf.Timestamp previous_end_value = 2;
+    Interval previous_value = 1;
 
     // The new value of the field.
     //
@@ -59,52 +58,55 @@ message IntervalChange {
     // We encourage separate commands for removal to make event handlers more straightforward.
     // Usually removal of a value and changing a value should have different consequences.
     // Hence separate handles.
-    //
-    // A new start and end of the interval.
-    google.protobuf.Timestamp new_start_value = 3;
-    google.protobuf.Timestamp new_end_value = 4;
+    Interval new_value = 2;
 }
 
 // Definition of a change of `LocalDate` fields.
 message LocalDateChange {
 
     // The value of fields that are changing.
-    int32 previous_year_value = 1 [(required) = true];
-    MonthOfYear previous_month_value = 2 [(required) = true];
-    int32 previous_day_value = 3 [(required) = true];
+    LocalDate previous_value = 1;
 
     // The new value of fields.
-    int32 new_year_value = 4 [(required) = true];
-    MonthOfYear new_month_value = 5 [(required) = true];
-    int32 new_day_value = 6 [(required) = true];
+    LocalDate new_value = 2;
 }
 
 // Definition of a change of `LocalTime` fields.
 message LocalTimeChange {
 
     // The value of fields that are changing.
-    int32 previous_hours_value = 1 [(required) = true];
-    int32 previous_minutes_value = 2 [(required) = true];
-    int32 previous_seconds_value = 3;
-    int32 previous_millis_value = 4;
-    int64 previous_nanos_value = 5;
+    LocalTime previous_value = 1;
 
     // The new value of fields.
-    int32 new_hours_value = 6 [(required) = true];
-    int32 new_minutes_value = 7 [(required) = true];
-    int32 new_seconds_value = 8;
-    int32 new_millis_value = 9;
-    int64 new_nanos_value = 10;
+    LocalTime new_value = 2;
 }
 
 // Definition of a change of `OffsetTime` fields.
-message OffsetTime {
+message OffsetTimeChange {
 
     // The value of fields that are changing.
-    LocalTime previous_time_value = 1 [(required) = true];
-    ZoneOffset previous_offset_value = 2 [(required) = true];
+    OffsetTime previous_value = 1;
 
     // The new value of fields.
-    LocalTime new_time_value = 3 [(required) = true];
-    ZoneOffset new_offset_value = 4 [(required) = true];
+    OffsetTime new_value = 2;
+}
+
+// Definition of a change of `OffsetDate` fields.
+message OffsetDateChange {
+
+    // The value of fields that are changing.
+    OffsetDate previous_value = 1;
+
+    // The new value of fields.
+    OffsetDate new_value = 2;
+}
+
+// Definition of a change of `OffsetDateTime` fields.
+message OffsetDateTimeChange {
+
+    // The value of fields that are changing.
+    OffsetDateTime previous_value = 1;
+
+    // The new value of fields.
+    OffsetDateTime new_value = 2;
 }

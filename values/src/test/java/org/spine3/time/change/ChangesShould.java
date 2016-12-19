@@ -23,7 +23,10 @@ package org.spine3.time.change;
 import org.junit.Test;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.time.MonthOfYear;
+import org.spine3.time.Interval;
+import org.spine3.time.Intervals;
+import org.spine3.time.LocalDate;
+import org.spine3.time.LocalDates;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -40,151 +43,58 @@ public class ChangesShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_previousStartValue() {
-        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
+    public void do_not_accept_null_Interval_previousValue() {
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        Changes.ofInterval(null, fourMinutesAgo, now, fiveMinutesAgo);
+        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        Changes.of(null, fourMinutes);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_newStartValue() {
-        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
+    public void do_not_accept_null_Interval_newValue() {
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        Changes.ofInterval(fourMinutesAgo, null, now, fiveMinutesAgo);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_previousEndValue() {
-        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
-        Changes.ofInterval(now, fourMinutesAgo, null, fiveMinutesAgo);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Interval_newEndValue() {
-        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
-        Changes.ofInterval(fourMinutesAgo, fiveMinutesAgo, now, null);
+        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        Changes.of(fourMinutes, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_Interval_values() {
         final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
-        Changes.ofInterval(now, now, fourMinutesAgo, fourMinutesAgo);
+        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        Changes.of(fourMinutes, fourMinutes);
     }
 
     @Test
     public void create_IntervalChange_instance() {
         final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
+        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
         final Timestamp now = Timestamps.getCurrentTime();
+        final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
+        final Interval fiveMinutes = Intervals.between(now, fiveMinutesAgo);
 
-        final IntervalChange result = Changes.ofInterval(fiveMinutesAgo, now, fiveMinutesAgo, now);
+        final IntervalChange result = Changes.of(fourMinutes, fiveMinutes);
 
-        assertEquals(fiveMinutesAgo, result.getPreviousStartValue());
-        assertEquals(now, result.getNewStartValue());
-        assertEquals(fiveMinutesAgo, result.getPreviousEndValue());
-        assertEquals(now, result.getNewEndValue());
+        assertEquals(fourMinutes, result.getPreviousValue());
+        assertEquals(fiveMinutes, result.getNewValue());
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalDate_previousMonthValue() {
-        final MonthOfYear newMonthValue = MonthOfYear.JANUARY;
-        final int previousYearValue = 1984;
-        final int newYearValue = 1983;
-        final int previousDayValue = 6;
-        final int newDayValue = 3;
-
-        Changes.ofLocalDate(previousYearValue, null, previousDayValue,
-                            newYearValue, newMonthValue, newDayValue);
+    public void do_not_accept_null_LocalDate_previousValue() {
+        final LocalDate today = LocalDates.today();
+        Changes.of(null, today);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_LocalDate_newMonthValue() {
-        final MonthOfYear previousMonthValue = MonthOfYear.JANUARY;
-        final int previousYearValue = 1984;
-        final int newYearValue = 1983;
-        final int previousDayValue = 4;
-        final int newDayValue = 5;
-
-        Changes.ofLocalDate(previousYearValue, previousMonthValue, previousDayValue,
-                            newYearValue, null, newDayValue);
+    public void do_not_accept_null_LocalDate_newValue() {
+        final LocalDate today = LocalDates.today();
+        Changes.of(today, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_LocalDate_values() {
-        final MonthOfYear monthValue = MonthOfYear.JANUARY;
-        final int yearValue = 1984;
-        final int dayValue = 5;
-
-        Changes.ofLocalDate(yearValue, monthValue, dayValue,
-                            yearValue, monthValue, dayValue);
-    }
-
-    @Test
-    public void create_LocalDateChange_instance() {
-        final MonthOfYear previousMonthValue = MonthOfYear.JANUARY;
-        final MonthOfYear newMonthValue = MonthOfYear.APRIL;
-        final int previousYearValue = 1984;
-        final int newYearValue = 1983;
-        final int previousDayValue = 20;
-        final int newDayValue = 31;
-
-        final LocalDateChange result = Changes.ofLocalDate(previousYearValue, previousMonthValue, previousDayValue,
-                                                           newYearValue, newMonthValue, newDayValue);
-
-        assertTrue(Integer.compare(previousYearValue, result.getPreviousYearValue()) == 0);
-        assertEquals(previousMonthValue, result.getPreviousMonthValue());
-        assertTrue(Integer.compare(previousDayValue, result.getPreviousDayValue()) == 0);
-        assertTrue(Integer.compare(newYearValue, result.getNewYearValue()) == 0);
-        assertEquals(newMonthValue, result.getNewMonthValue());
-        assertTrue(Integer.compare(newDayValue, result.getNewDayValue()) == 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_equal_LocalTime_values() {
-        final int hoursValue = 12;
-        final int minutesValue = 59;
-        final int secondsValue = 1;
-        final int millisValue = 9;
-        final long nanosValue = 112L;
-
-        Changes.ofLocalTime(hoursValue, minutesValue, secondsValue, millisValue, nanosValue,
-                            hoursValue, minutesValue, secondsValue, millisValue, nanosValue);
-    }
-
-    @Test
-    public void create_LocalTimeChange_instance() {
-        final int previousHoursValue = 12;
-        final int previousMinutesValue = 59;
-        final int previousSecondsValue = 1;
-        final int previousMillisValue = 9;
-        final long previousNanosValue = 112L;
-        final int newHoursValue = 11;
-        final int newMinutesValue = 58;
-        final int newSecondsValue = 2;
-        final int newMillisValue = 10;
-        final long newNanosValue = 111L;
-
-        final LocalTimeChange result = Changes.ofLocalTime(previousHoursValue, previousMinutesValue,
-                                                           previousSecondsValue, previousMillisValue,
-                                                           previousNanosValue, newHoursValue,
-                                                           newMinutesValue, newSecondsValue,
-                                                           newMillisValue, newNanosValue);
-
-        assertTrue(Integer.compare(previousHoursValue, result.getPreviousHoursValue()) == 0);
-        assertTrue(Integer.compare(previousMinutesValue, result.getPreviousMinutesValue()) == 0);
-        assertTrue(Integer.compare(previousSecondsValue, result.getPreviousSecondsValue()) == 0);
-        assertTrue(Integer.compare(previousMillisValue, result.getPreviousMillisValue()) == 0);
-        assertTrue(Long.compare(previousNanosValue, result.getPreviousNanosValue()) == 0);
-        assertTrue(Integer.compare(newHoursValue, result.getNewHoursValue()) == 0);
-        assertTrue(Integer.compare(newMinutesValue, result.getNewMinutesValue()) == 0);
-        assertTrue(Integer.compare(newSecondsValue, result.getNewSecondsValue()) == 0);
-        assertTrue(Integer.compare(newMillisValue, result.getNewMillisValue()) == 0);
-        assertTrue(Long.compare(newNanosValue, result.getNewNanosValue()) == 0);
+        final LocalDate today = LocalDates.today();
+        Changes.of(today, today);
     }
 }
