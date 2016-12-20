@@ -146,35 +146,35 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_OffsetDate_previousValue() {
-        final ZoneOffset lassVegasOffset = ZoneOffsets.ofHours(8);
-        final OffsetDate dateInLassVegas = OffsetDates.now(lassVegasOffset);
-        Changes.of(null, dateInLassVegas);
+        final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
+        final OffsetDate date = OffsetDates.now(inLassVegas);
+        Changes.of(null, date);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_OffsetDate_newValue() {
-        final ZoneOffset kievOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate dateInKiev = OffsetDates.now(kievOffset);
-        Changes.of(dateInKiev, null);
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDate date = OffsetDates.now(inKiev);
+        Changes.of(date, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_OffsetDate_values() {
-        final ZoneOffset luxembourgOffset = ZoneOffsets.ofHours(1);
-        final OffsetDate dateInLuxembourg = OffsetDates.now(luxembourgOffset);
-        Changes.of(dateInLuxembourg, dateInLuxembourg);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDate date = OffsetDates.now(inLuxembourg);
+        Changes.of(date, date);
     }
 
     @Test
     public void create_OffsetDateChange_instance() {
-        final ZoneOffset kievOffset = ZoneOffsets.ofHours(3);
-        final ZoneOffset luxembourgOffset = ZoneOffsets.ofHours(1);
-        final OffsetDate dateInKiev = OffsetDates.now(kievOffset);
-        final OffsetDate dateInLuxembourg = OffsetDates.now(luxembourgOffset);
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDate previousDate = OffsetDates.now(inKiev);
+        final OffsetDate newDate = OffsetDates.now(inLuxembourg);
 
-        final OffsetDateChange result = Changes.of(dateInKiev, dateInLuxembourg);
+        final OffsetDateChange result = Changes.of(previousDate, newDate);
 
-        assertEquals(dateInKiev, result.getPreviousValue());
-        assertEquals(dateInLuxembourg, result.getNewValue());
+        assertEquals(previousDate, result.getPreviousValue());
+        assertEquals(newDate, result.getNewValue());
     }
 }

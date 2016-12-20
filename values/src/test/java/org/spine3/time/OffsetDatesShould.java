@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class LocalDatesShould {
+public class OffsetDatesShould {
 
     @Test
     public void have_private_constructor() {
@@ -37,32 +37,31 @@ public class LocalDatesShould {
     }
 
     @Test
-    public void obtain_current_date() {
-        final LocalDate today = LocalDates.now();
-
+    public void obtain_current_OffsetDate_using_ZoneOffset() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDate today = OffsetDates.now(inKiev);
         final Calendar calendar = Calendar.getInstance();
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
+        calendar.add(Calendar.HOUR, 3);
+
+        assertEquals(calendar.get(Calendar.YEAR), today.getDate().getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getDate().getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDate().getDay());
     }
 
     @Test
-    public void obtain_date_in_future_after_specified_number_of_days() {
-        final LocalDate today = LocalDates.plusDays(5);
+    public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
+        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
+        final LocalDate tomorrow = LocalDates.plusDays(1);
+
+        final OffsetDate tomorrowInDelhi = OffsetDates.of(tomorrow, inDelhi);
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 5);
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.HOUR, 5);
+        calendar.add(Calendar.MINUTE, 30);
+
+        assertEquals(calendar.get(Calendar.YEAR), tomorrowInDelhi.getDate().getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, tomorrowInDelhi.getDate().getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), tomorrowInDelhi.getDate().getDay());
     }
 
-    @Test
-    public void obtain_date_in_future_after_specified_number_of_minutes() {
-        final LocalDate today = LocalDates.plusMinutes(120);
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 120);
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
-    }
 }
