@@ -19,10 +19,6 @@
  */
 package org.spine3.time;
 
-import org.spine3.protobuf.Durations;
-
-import javax.xml.datatype.Duration;
-
 /**
  *  Routines for working with {@link OffsetTime}.
  *

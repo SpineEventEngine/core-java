@@ -64,23 +64,4 @@ public class LocalDates {
                                           .build();
         return result;
     }
-
-    /**
-     * Obtains current LocalDate instance with the specified number of seconds added.
-     */
-    public static LocalDate plusSeconds(int secondsToAdd) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, secondsToAdd);
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(year)
-                                          .setMonth(month)
-                                          .setDay(dayOfMonth)
-                                          .build();
-        return result;
-    }
-
 }
