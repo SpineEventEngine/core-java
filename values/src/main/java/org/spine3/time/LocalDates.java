@@ -66,11 +66,11 @@ public class LocalDates {
     }
 
     /**
-     * Obtains current LocalDate instance with the specified number of minutes added.
+     * Obtains current LocalDate instance with the specified number of seconds added.
      */
-    public static LocalDate plusMinutes(int minutesToAdd) {
+    public static LocalDate plusSeconds(int secondsToAdd) {
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, minutesToAdd);
+        calendar.add(Calendar.SECOND, secondsToAdd);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);

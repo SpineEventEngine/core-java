@@ -58,7 +58,7 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_minutes() {
-        final LocalDate today = LocalDates.plusMinutes(120);
+        final LocalDate today = LocalDates.plusSeconds(120);
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 120);
         assertEquals(calendar.get(Calendar.YEAR), today.getYear());

@@ -31,56 +31,49 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class LocalTimesShould {
+public class OffsetTimesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
+        assertTrue(hasPrivateUtilityConstructor(OffsetTimes.class));
     }
 
     @Test
-    public void obtain_current_LocalTime() {
-        final LocalTime now = LocalTimes.now();
+    public void obtain_current_OffsetTime_using_ZoneOffset() {
+        final int expectedSeconds = 3*Timestamps.SECONDS_PER_HOUR;
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetTime now = OffsetTimes.now(inKiev);
+
         final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time.getSeconds() / 1000);
 
-        assertEquals(calendar.get(Calendar.HOUR), now.getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), now.getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), now.getSeconds());
-
+        assertEquals(calendar.get(Calendar.HOUR), now.getTime().getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), now.getTime().getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND), now.getTime().getSeconds());
+        assertEquals(expectedSeconds, now.getOffset().getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
     @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_hours() {
-        final LocalTime inTwoHours = LocalTimes.plusHours(2);
+    public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
+        final int expectedSeconds = 5*Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
+        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
+        final LocalTime inOneHour = LocalTimes.plusHours(1);
+        final OffsetTime inOneHourInDelhi = OffsetTimes.of(inOneHour, inDelhi);
+
         final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time.getSeconds() / 1000);
+        calendar.add(Calendar.HOUR, 1);
 
-        assertEquals(calendar.get(Calendar.HOUR) + 2, inTwoHours.getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), inTwoHours.getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), inTwoHours.getSeconds());
 
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
-
+        assertEquals(calendar.get(Calendar.HOUR), inOneHourInDelhi.getTime().getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), inOneHourInDelhi.getTime().getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND), inOneHourInDelhi.getTime().getSeconds());
+        assertEquals(expectedSeconds, inOneHourInDelhi.getOffset().getAmountSeconds());
+         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
-
-    @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_seconds() {
-        final LocalTime inFourSeconds = LocalTimes.plusSeconds(4);
-        final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-
-        assertEquals(calendar.get(Calendar.HOUR), inFourSeconds.getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), inFourSeconds.getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND) + 4, inFourSeconds.getSeconds());
-
-        /* We cannot check milliseconds and nanos due to time gap between object creation.
-        This also will be consistent for big amount of seconds.  */
-
-    }
+    
 
 }

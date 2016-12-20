@@ -58,6 +58,45 @@ public class LocalTimes {
     }
 
     /**
+     * Obtains LocalTime instance from an hour, minute, second millisecond and nanosecond.
+     */
+    public static LocalTime of(int hour, int minute, int second, int milli, int nano) {
+        final LocalTime result = LocalTime.newBuilder()
+                                          .setHours(hour)
+                                          .setMinutes(minute)
+                                          .setSeconds(second)
+                                          .setMillis(milli)
+                                          .setNanos(nano)
+                                          .build();
+        return result;
+    }
+
+    /**
+     * Obtains LocalTime instance from an hour, minute, second millisecond.
+     */
+    public static LocalTime of(int hour, int minute, int second, int milli) {
+        final LocalTime result = LocalTime.newBuilder()
+                                          .setHours(hour)
+                                          .setMinutes(minute)
+                                          .setSeconds(second)
+                                          .setMillis(milli)
+                                          .build();
+        return result;
+    }
+
+    /**
+     * Obtains LocalTime instance from an hour, minute, second.
+     */
+    public static LocalTime of(int hour, int minute, int second) {
+        final LocalTime result = LocalTime.newBuilder()
+                                          .setHours(hour)
+                                          .setMinutes(minute)
+                                          .setSeconds(second)
+                                          .build();
+        return result;
+    }
+
+    /**
      * Obtains current LocalTime instance with the specified number of hours added.
      */
     public static LocalTime plusHours(int hoursToAdd) {
@@ -82,7 +121,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains current LocalTime instance with the specified number of hours added.
+     * Obtains current LocalTime instance with the specified number of seconds added.
      */
     public static LocalTime plusSeconds(int secondsToAdd) {
         final Timestamp time = Timestamps.getCurrentTime();

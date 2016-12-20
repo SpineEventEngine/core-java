@@ -21,6 +21,7 @@
 package org.spine3.time;
 
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
 
 import java.util.Calendar;
 
@@ -38,30 +39,31 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_current_OffsetDate_using_ZoneOffset() {
+        final int expectedSeconds = 3*Timestamps.SECONDS_PER_HOUR;
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetDate today = OffsetDates.now(inKiev);
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR, 3);
 
         assertEquals(calendar.get(Calendar.YEAR), today.getDate().getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, today.getDate().getMonthValue());
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDate().getDay());
+        assertEquals(expectedSeconds, today.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
+        final int expectedSeconds = 5* Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
         final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
         final LocalDate tomorrow = LocalDates.plusDays(1);
 
         final OffsetDate tomorrowInDelhi = OffsetDates.of(tomorrow, inDelhi);
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 1);
-        calendar.add(Calendar.HOUR, 5);
-        calendar.add(Calendar.MINUTE, 30);
 
         assertEquals(calendar.get(Calendar.YEAR), tomorrowInDelhi.getDate().getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, tomorrowInDelhi.getDate().getMonthValue());
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), tomorrowInDelhi.getDate().getDay());
+        assertEquals(expectedSeconds, tomorrowInDelhi.getOffset().getAmountSeconds());
     }
 
 }

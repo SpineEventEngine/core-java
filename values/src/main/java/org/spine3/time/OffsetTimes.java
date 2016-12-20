@@ -19,38 +19,43 @@
  */
 package org.spine3.time;
 
+import org.spine3.protobuf.Durations;
+
+import javax.xml.datatype.Duration;
+
 /**
- * Routines for working with {@link OffsetDate}.
+ *  Routines for working with {@link OffsetTime}.
  *
  * @author Alexander Aleksandrov
  */
-public class OffsetDates {
+public class OffsetTimes {
 
-    private OffsetDates() {
+    private OffsetTimes() {
     }
 
     /**
-     * Obtains current OffsetDate instance using {@link ZoneOffset}.
+     * Obtains current OffsetTime instance using {@link ZoneOffset}.
      */
-    public static OffsetDate now(ZoneOffset zoneOffset) {
-        final LocalDate localDate = LocalDates.now();
+    public static OffsetTime now(ZoneOffset zoneOffset) {
+        final LocalTime localTime = LocalTimes.now();
 
-        final OffsetDate result = OffsetDate.newBuilder()
-                                            .setDate(localDate)
+        final OffsetTime result = OffsetTime.newBuilder()
+                                            .setTime(localTime)
                                             .setOffset(zoneOffset)
                                             .build();
         return result;
     }
 
     /**
-     * Obtains OffsetDate instance using {@link LocalDate} and {@link ZoneOffset}.
+     * Obtains OffsetTime instance using {@link LocalTime} and {@link ZoneOffset}.
      */
-    public static OffsetDate of(LocalDate localDate, ZoneOffset zoneOffset) {
+    public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
 
-        final OffsetDate result = OffsetDate.newBuilder()
-                                            .setDate(localDate)
+        final OffsetTime result = OffsetTime.newBuilder()
+                                            .setTime(localTime)
                                             .setOffset(zoneOffset)
                                             .build();
         return result;
     }
+    
 }
