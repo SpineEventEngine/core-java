@@ -31,9 +31,9 @@ public class LocalDates {
     }
 
     /**
-     * Obtains the current date.
+     * Obtains current LocalDate instance.
      */
-    public static LocalDate today() {
+    public static LocalDate now() {
         final Calendar calendar = Calendar.getInstance();
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
@@ -48,7 +48,7 @@ public class LocalDates {
     }
 
     /**
-     * Obtains the date in the future after certain amount of days.
+     * Obtains current LocalDate instance with the specified number of days added.
      */
     public static LocalDate plusDays(int daysToAdd) {
         final Calendar calendar = Calendar.getInstance();
@@ -64,4 +64,23 @@ public class LocalDates {
                                           .build();
         return result;
     }
+
+    /**
+     * Obtains current LocalDate instance with the specified number of minutes added.
+     */
+    public static LocalDate plusMinutes(int minutesToAdd) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, minutesToAdd);
+        final int year = calendar.get(Calendar.YEAR);
+        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
+        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        final LocalDate result = LocalDate.newBuilder()
+                                          .setYear(year)
+                                          .setMonth(month)
+                                          .setDay(dayOfMonth)
+                                          .build();
+        return result;
+    }
+
 }

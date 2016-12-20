@@ -38,7 +38,7 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_current_date() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
 
         final Calendar calendar = Calendar.getInstance();
         assertEquals(calendar.get(Calendar.YEAR), today.getYear());
