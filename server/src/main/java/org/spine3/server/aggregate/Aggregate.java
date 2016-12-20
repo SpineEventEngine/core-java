@@ -112,7 +112,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @Nullable
     private volatile B builder;
 
-    /** Cached value of the ID in the form of Any instance. */
+    /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
 
     /**
@@ -124,6 +124,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
     /**
      * Creates a new aggregate instance.
+     *
+     * <p>Constructors of aggregates should have package access level because of the following reasons:
+     * <ol>
+     *     <li>Aggregate constructors are not public API of an application. Commands and aggregate IDs are.
+     *     <li>These constructors need to be accessible from tests in the same package.
+     * </ol>
+     *
+     * <p>Because of the last reason consider annotating constructors with {@code @VisibleForTesting}.
+     * The package access is needed only for tests. Otherwise aggregate constructors (that are invoked
+     * by {@link AggregateRepository} via Reflection) may be left {@code private}.
      *
      * @param id the ID for the new aggregate
      * @throws IllegalArgumentException if the ID is not of one of the supported types
