@@ -1,0 +1,103 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.time.change;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TimeChangeProto";
+option java_package = "org.spine3.time.change";
+
+import "spine/time/time.proto";
+import "spine/annotations.proto";
+import "spine/validate.proto";
+
+//
+// This file provides messages that define changes of date/time fields in other messages.
+//
+// Types in this file are modeled after those from changes defined in "spine/change/change.proto" file.
+//
+// The `TimeChange` messages can be use as a request to change a value (e.g. as a field of a command),
+// or as information on the change made (e.g. as a part of an event).
+//
+// For all types the following rule apply: `new_value` field must not be equal to `previous_value`.
+//
+
+// Definition of an interval change.
+message IntervalChange {
+
+    // The value of the field that's changing.
+    Interval previous_value = 1;
+
+    // The new value of the field.
+    Interval new_value = 2;
+}
+
+// Definition of a change of `LocalDate` fields.
+message LocalDateChange {
+
+    // The value of fields that are changing.
+    LocalDate previous_value = 1;
+
+    // The new value of fields.
+    LocalDate new_value = 2;
+}
+
+// Definition of a change of `LocalTime` fields.
+message LocalTimeChange {
+
+    // The value of fields that are changing.
+    LocalTime previous_value = 1;
+
+    // The new value of fields.
+    LocalTime new_value = 2;
+}
+
+// Definition of a change of `OffsetTime` fields.
+message OffsetTimeChange {
+
+    // The value of fields that are changing.
+    OffsetTime previous_value = 1;
+
+    // The new value of fields.
+    OffsetTime new_value = 2;
+}
+
+// Definition of a change of `OffsetDate` fields.
+message OffsetDateChange {
+
+    // The value of fields that are changing.
+    OffsetDate previous_value = 1;
+
+    // The new value of fields.
+    OffsetDate new_value = 2;
+}
+
+// Definition of a change of `OffsetDateTime` fields.
+message OffsetDateTimeChange {
+
+    // The value of fields that are changing.
+    OffsetDateTime previous_value = 1;
+
+    // The new value of fields.
+    OffsetDateTime new_value = 2;
+}

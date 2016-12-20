@@ -20,7 +20,9 @@
 
 package org.spine3.time;
 
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
 
 import java.util.Calendar;
 
@@ -29,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class LocalDatesShould {
+public class LocalTimesShould {
 
     @Test
     public void have_private_constructor() {
@@ -37,21 +39,32 @@ public class LocalDatesShould {
     }
 
     @Test
-    public void obtain_current_date() {
-        final LocalDate today = LocalDates.today();
-
+    public void obtain_current_LocalTime() {
+        final LocalTime now = LocalTimes.now();
+        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
+        calendar.setTimeInMillis(time.getSeconds() / 1000);
+
+        assertEquals(calendar.get(Calendar.HOUR), now.getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), now.getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND), now.getSeconds());
+
+        /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
     @Test
-    public void obtain_date_in_future_after_specified_number_of_days() {
-        final LocalDate today = LocalDates.plusDays(5);
+    public void obtain_time_in_future_after_specified_number_of_hours() {
+        final LocalTime now = LocalTimes.plusHours(2);
+        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH) + 5, today.getDay());
+        calendar.setTimeInMillis(time.getSeconds() / 1000);
+
+        assertEquals(calendar.get(Calendar.HOUR) + 2, now.getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), now.getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND), now.getSeconds());
+
+        /* We cannot check milliseconds and nanos due to time gap between object creation */
+
     }
+
 }
