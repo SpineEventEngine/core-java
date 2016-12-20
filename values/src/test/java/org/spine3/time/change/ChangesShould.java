@@ -30,6 +30,8 @@ import org.spine3.time.LocalDates;
 import org.spine3.time.LocalTime;
 import org.spine3.time.LocalTimes;
 import org.spine3.time.OffsetDate;
+import org.spine3.time.OffsetDateTime;
+import org.spine3.time.OffsetDateTimes;
 import org.spine3.time.OffsetDates;
 import org.spine3.time.OffsetTime;
 import org.spine3.time.OffsetTimes;
@@ -212,5 +214,39 @@ public class ChangesShould {
 
         assertEquals(previousTime, result.getPreviousValue());
         assertEquals(newTime, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDateTime_previousValue() {
+        final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
+        final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
+        Changes.of(null, now);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDateTime_newValue() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDateTime now = OffsetDateTimes.now(inKiev);
+        Changes.of(now, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_OffsetDateTime_values() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
+        Changes.of(now, now);
+    }
+
+    @Test
+    public void create_OffsetDateTimeChange_instance() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);
+        final OffsetDateTime newDateTime = OffsetDateTimes.now(inLuxembourg);
+
+        final OffsetDateTimeChange result = Changes.of(previousDateTime, newDateTime);
+
+        assertEquals(previousDateTime, result.getPreviousValue());
+        assertEquals(newDateTime, result.getNewValue());
     }
 }

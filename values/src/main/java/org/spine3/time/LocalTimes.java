@@ -97,6 +97,17 @@ public class LocalTimes {
     }
 
     /**
+     * Obtains LocalTime instance from an hour and minute.
+     */
+    public static LocalTime of(int hour, int minute) {
+        final LocalTime result = LocalTime.newBuilder()
+                                          .setHours(hour)
+                                          .setMinutes(minute)
+                                          .build();
+        return result;
+    }
+
+    /**
      * Obtains current LocalTime instance with the specified number of hours added.
      */
     public static LocalTime plusHours(int hoursToAdd) {
