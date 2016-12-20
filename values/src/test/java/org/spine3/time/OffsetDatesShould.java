@@ -33,7 +33,7 @@ public class OffsetDatesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
+        assertTrue(hasPrivateUtilityConstructor(OffsetDates.class));
     }
 
     @Test

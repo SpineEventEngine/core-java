@@ -51,4 +51,25 @@ public class ZoneOffsetsShould {
                                                     .getAmountSeconds();
         assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_more_than_18_hours() {
+        ZoneOffsets.ofHours(19);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_more_than_18_hours_by_abs() {
+        ZoneOffsets.ofHours(-19);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_more_than_60_minutes() {
+        ZoneOffsets.ofHoursMinutes(11, 61);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_more_than_17_hours_and_61_minutes() {
+        ZoneOffsets.ofHoursMinutes(18, 30);
+    }
+
 }
