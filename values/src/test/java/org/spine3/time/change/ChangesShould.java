@@ -29,6 +29,10 @@ import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.time.LocalTime;
 import org.spine3.time.LocalTimes;
+import org.spine3.time.OffsetDate;
+import org.spine3.time.OffsetDates;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -84,25 +88,25 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_previousValue() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(null, today);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_newValue() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(today, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_LocalDate_values() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(today, today);
     }
 
     @Test
     public void create_LocalDateChange_instance() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         final LocalDate tomorrow = LocalDates.plusDays(1);
 
         final LocalDateChange result = Changes.of(today, tomorrow);
@@ -138,5 +142,39 @@ public class ChangesShould {
 
         assertEquals(now, result.getPreviousValue());
         assertEquals(inFiveHours, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDate_previousValue() {
+        final ZoneOffset lassVegasOffset = ZoneOffsets.ofHours(8);
+        final OffsetDate dateInLassVegas = OffsetDates.now(lassVegasOffset);
+        Changes.of(null, dateInLassVegas);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDate_newValue() {
+        final ZoneOffset kievOffset = ZoneOffsets.ofHours(3);
+        final OffsetDate dateInKiev = OffsetDates.now(kievOffset);
+        Changes.of(dateInKiev, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_OffsetDate_values() {
+        final ZoneOffset luxembourgOffset = ZoneOffsets.ofHours(1);
+        final OffsetDate dateInLuxembourg = OffsetDates.now(luxembourgOffset);
+        Changes.of(dateInLuxembourg, dateInLuxembourg);
+    }
+
+    @Test
+    public void create_OffsetDateChange_instance() {
+        final ZoneOffset kievOffset = ZoneOffsets.ofHours(3);
+        final ZoneOffset luxembourgOffset = ZoneOffsets.ofHours(1);
+        final OffsetDate dateInKiev = OffsetDates.now(kievOffset);
+        final OffsetDate dateInLuxembourg = OffsetDates.now(luxembourgOffset);
+
+        final OffsetDateChange result = Changes.of(dateInKiev, dateInLuxembourg);
+
+        assertEquals(dateInKiev, result.getPreviousValue());
+        assertEquals(dateInLuxembourg, result.getNewValue());
     }
 }

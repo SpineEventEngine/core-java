@@ -35,7 +35,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains the current local time .
+     * Obtains current LocalTime instance.
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps.getCurrentTime();
@@ -58,7 +58,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains the local time in future after specified amount of hours.
+     * Obtains current LocalTime instance with the specified number of hours added.
      */
     public static LocalTime plusHours(int hoursToAdd) {
         final Timestamp time = Timestamps.getCurrentTime();
