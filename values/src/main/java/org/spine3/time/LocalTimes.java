@@ -80,4 +80,28 @@ public class LocalTimes {
                                           .build();
         return result;
     }
+
+    /**
+     * Obtains current LocalTime instance with the specified number of hours added.
+     */
+    public static LocalTime plusSeconds(int secondsToAdd) {
+        final Timestamp time = Timestamps.getCurrentTime();
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time.getSeconds() / 1000);
+        calendar.add(Calendar.SECOND, secondsToAdd);
+        final int hours = calendar.get(Calendar.HOUR);
+        final int minutes = calendar.get(Calendar.MINUTE);
+        final int seconds = calendar.get(Calendar.SECOND);
+        final int millis = calendar.get(Calendar.MILLISECOND);
+        final long nanos = time.getNanos();
+
+        final LocalTime result = LocalTime.newBuilder()
+                                          .setHours(hours)
+                                          .setMinutes(minutes)
+                                          .setSeconds(seconds)
+                                          .setMillis(millis)
+                                          .setNanos(nanos)
+                                          .build();
+        return result;
+    }
 }

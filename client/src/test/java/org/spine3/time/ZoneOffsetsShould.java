@@ -68,7 +68,7 @@ public class ZoneOffsetsShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_more_than_17_hours_and_61_minutes() {
+    public void do_not_accept_more_than_17_hours_and_60_minutes() {
         ZoneOffsets.ofHoursMinutes(18, 30);
     }
 

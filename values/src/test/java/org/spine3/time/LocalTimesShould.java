@@ -67,4 +67,20 @@ public class LocalTimesShould {
 
     }
 
+    @Test
+    public void obtain_time_in_future_after_specified_number_of_seconds() {
+        final LocalTime now = LocalTimes.plusSeconds(4);
+        final Timestamp time = Timestamps.getCurrentTime();
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time.getSeconds() / 1000);
+
+        assertEquals(calendar.get(Calendar.HOUR), now.getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), now.getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND) + 4, now.getSeconds());
+
+        /* We cannot check milliseconds and nanos due to time gap between object creation.
+        This also will be consistent for big amount of seconds.  */
+
+    }
+
 }
