@@ -31,13 +31,24 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 public class ZoneOffsetsShould {
 
     @Test
-    public void have_private_utility_ctor() {
+    public void have_private_utility_constructor() {
         assertTrue(hasPrivateUtilityConstructor(ZoneOffsets.class));
     }
 
     @Test
-    public void create_instance_by_hour_offset() {
-        assertEquals(Timestamps.SECONDS_PER_MINUTE * Timestamps.MINUTES_PER_HOUR * 2,
-                     ZoneOffsets.ofHours(2).getAmountSeconds());
+    public void create_instance_by_hours_offset() {
+        final int secondsInTwoHours = Timestamps.SECONDS_PER_MINUTE * Timestamps.MINUTES_PER_HOUR * 2;
+        assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
+                                                   .getAmountSeconds());
+    }
+
+    @Test
+    public void create_instance_by_hours_and_minutes_offset() {
+        final int secondsIn8Hours45Minutes = Timestamps.SECONDS_PER_MINUTE
+                * Timestamps.MINUTES_PER_HOUR * 8
+                + Timestamps.SECONDS_PER_MINUTE * 45;
+        final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
+                                                    .getAmountSeconds();
+        assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
     }
 }
