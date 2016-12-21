@@ -39,6 +39,11 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ValidateShould {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_int_value_is_not_positive() {
+        Validate.checkPositive(-1, "Day");
+    }
+
     @Test
     public void verify_that_message_is_not_in_default_state() {
         final Message msg = newStringValue("check_if_message_is_not_in_default_state");

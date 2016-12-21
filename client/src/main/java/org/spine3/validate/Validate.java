@@ -215,6 +215,17 @@ public class Validate {
     }
 
     /**
+     * Ensures that the passed int value is positive:
+     *
+     * @param value the value to check
+     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @throws IllegalArgumentException if requirement is not met
+     */
+    public static void checkPositive(int value, String argumentName) {
+        checkParameter(value > 0, argumentName, "%s must have a positive value");
+    }
+
+    /**
      * Ensures that the passed ID is valid.
      *
      * @param id an ID to check
