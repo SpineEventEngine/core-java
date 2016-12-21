@@ -49,7 +49,7 @@ public class Mismatch {
      * @param actual   the value found in an entity, or {@code null} if the value is not set
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity  @return info on the mismatch
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(@Nullable String expected,
                                    @Nullable String actual,
@@ -76,6 +76,7 @@ public class Mismatch {
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -93,7 +94,7 @@ public class Mismatch {
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity  @return info on the mismatch
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(long expected, long actual, long newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -111,7 +112,7 @@ public class Mismatch {
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity  @return info on the mismatch
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -129,7 +130,7 @@ public class Mismatch {
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(double expected, double actual, double newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -147,7 +148,7 @@ public class Mismatch {
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -164,7 +165,8 @@ public class Mismatch {
      * @param expected the value expected by a command, or {@code null} if the command expects not populated field
      * @param actual   the value actual in an entity, or {@code null} if the value is not set
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     *@param version  the current version of the entity  @return info on the mismatch
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
     public static ValueMismatch of(@Nullable Message expected,
                                    @Nullable Message actual,
