@@ -27,7 +27,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.reflect.Classes;
-import org.spine3.util.Exceptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -324,7 +323,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     @Override
-    @SuppressWarnings("ConstantConditions" /** It is required to check for null. */)
+    @SuppressWarnings("ConstantConditions" /* It is required to check for null. */)
     public boolean equals(Object anotherObj) {
         if (this == anotherObj) {
             return true;

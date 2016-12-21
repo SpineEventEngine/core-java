@@ -153,9 +153,29 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object)
-                                                                                   .getTypeName());
+        if (!isDefault(object)) {
+            final String typeName = TypeUrl.of(object)
+                                           .getTypeName();
+            final String errorMessage = "The message is not in the default state: " + typeName;
+            throw new IllegalStateException(errorMessage);
+        }
         return object;
+    }
+
+    /**
+     * Ensures the truth of an expression involving one parameter to the calling method.
+     *
+     * @param expression a boolean expression with the parameter we check
+     * @param parameterName the name of the parameter
+     * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
+     *                           the parameter name
+     * @throws IllegalArgumentException if {@code expression} is false
+     */
+    public static void checkParameter(boolean expression, String parameterName, String errorMessageFormat) {
+        if (!expression) {
+            final String errorMessage = String.format(errorMessageFormat, parameterName);
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 
     /**
@@ -168,9 +188,9 @@ public class Validate {
      */
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
-        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim()
-                                   .length() > 0, fieldName + " must not be a blank string.");
+        checkParameter(!stringToCheck.isEmpty(), fieldName, "%s must not be an empty string.");
+        checkParameter(stringToCheck.trim()
+                                    .length() > 0, fieldName, "%s must not be a blank string.");
         return stringToCheck;
     }
 
@@ -183,14 +203,14 @@ public class Validate {
      * </ul>
      *
      * @param timestamp the timestamp to check
-     * @param nameToLog the name of the checked timestamp used in logging
+     * @param argumentName the name of the checked timestamp to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
-    public static Timestamp checkPositive(Timestamp timestamp, String nameToLog) {
-        checkNotNull(timestamp, nameToLog + " is null.");
-        checkArgument(timestamp.getSeconds() > 0, nameToLog + " must have a positive number of seconds.");
-        checkArgument(timestamp.getNanos() >= 0, nameToLog + " must not have a negative number of nanoseconds.");
+    public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
+        checkNotNull(timestamp, argumentName + " is null.");
+        checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
+        checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
