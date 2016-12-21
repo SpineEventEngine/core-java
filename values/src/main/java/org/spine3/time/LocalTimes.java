@@ -35,7 +35,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains current LocalTime instance.
+     * Obtains current local time.
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps.getCurrentTime();
@@ -58,7 +58,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains LocalTime instance from an hour, minute, second millisecond and nanosecond.
+     * Obtains local time from an hour, minute, second millisecond and nanosecond.
      */
     public static LocalTime of(int hour, int minute, int second, int milli, int nano) {
         final LocalTime result = LocalTime.newBuilder()
@@ -72,7 +72,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains LocalTime instance from an hour, minute, second millisecond.
+     * Obtains local time from an hour, minute, second millisecond.
      */
     public static LocalTime of(int hour, int minute, int second, int milli) {
         final LocalTime result = LocalTime.newBuilder()
@@ -85,7 +85,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains LocalTime instance from an hour, minute, second.
+     * Obtains local time from an hour, minute, second.
      */
     public static LocalTime of(int hour, int minute, int second) {
         final LocalTime result = LocalTime.newBuilder()
@@ -97,7 +97,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains LocalTime instance from an hour and minute.
+     * Obtains local time from an hour and minute.
      */
     public static LocalTime of(int hour, int minute) {
         final LocalTime result = LocalTime.newBuilder()
@@ -108,7 +108,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains current LocalTime instance with the specified number of hours added.
+     * Obtains local time copy with the specified number of hours added.
      */
     public static LocalTime plusHours(int hoursToAdd) {
         final Timestamp time = Timestamps.getCurrentTime();

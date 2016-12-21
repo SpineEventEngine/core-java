@@ -54,16 +54,16 @@ public class OffsetDatesShould {
     public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
         final int expectedSeconds = 5* Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
         final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalDate tomorrow = LocalDates.plusDays(1);
+        final LocalDate today = LocalDates.now();
 
-        final OffsetDate tomorrowInDelhi = OffsetDates.of(tomorrow, inDelhi);
+        final OffsetDate todayInDelhi = OffsetDates.of(today, inDelhi);
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-        assertEquals(calendar.get(Calendar.YEAR), tomorrowInDelhi.getDate().getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, tomorrowInDelhi.getDate().getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), tomorrowInDelhi.getDate().getDay());
-        assertEquals(expectedSeconds, tomorrowInDelhi.getOffset().getAmountSeconds());
+        assertEquals(calendar.get(Calendar.YEAR), todayInDelhi.getDate().getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, todayInDelhi.getDate().getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), todayInDelhi.getDate().getDay());
+        assertEquals(expectedSeconds, todayInDelhi.getOffset().getAmountSeconds());
     }
 
 }

@@ -30,7 +30,7 @@ public class OffsetTimes {
     }
 
     /**
-     * Obtains current OffsetTime instance using {@link ZoneOffset}.
+     * Obtains current OffsetTime instance using {@code ZoneOffset}.
      */
     public static OffsetTime now(ZoneOffset zoneOffset) {
         final LocalTime localTime = LocalTimes.now();
@@ -43,7 +43,7 @@ public class OffsetTimes {
     }
 
     /**
-     * Obtains OffsetTime instance using {@link LocalTime} and {@link ZoneOffset}.
+     * Obtains OffsetTime instance using {@code LocalTime} and {@code ZoneOffset}.
      */
     public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
 

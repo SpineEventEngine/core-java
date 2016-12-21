@@ -30,7 +30,7 @@ public class OffsetDates {
     }
 
     /**
-     * Obtains current OffsetDate instance using {@link ZoneOffset}.
+     * Obtains current OffsetDate instance using {@code ZoneOffset}.
      */
     public static OffsetDate now(ZoneOffset zoneOffset) {
         final LocalDate localDate = LocalDates.now();
@@ -43,7 +43,7 @@ public class OffsetDates {
     }
 
     /**
-     * Obtains OffsetDate instance using {@link LocalDate} and {@link ZoneOffset}.
+     * Obtains OffsetDate instance using {@code LocalDate} and {@code ZoneOffset}.
      */
     public static OffsetDate of(LocalDate localDate, ZoneOffset zoneOffset) {
 

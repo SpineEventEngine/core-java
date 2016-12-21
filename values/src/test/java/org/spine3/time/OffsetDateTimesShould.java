@@ -65,25 +65,25 @@ public class OffsetDateTimesShould {
     public void obtain_current_OffsetDateTime_using_OffsetDate_OffsetTime_ZoneOffset() {
         final int expectedSeconds = 5* Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
         final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalDate tomorrow = LocalDates.plusDays(1);
-        final LocalTime inHour = LocalTimes.plusHours(1);
-        final OffsetDateTime tomorrowInDelhi = OffsetDateTimes.of(tomorrow, inHour, inDelhi);
+        final LocalDate today = LocalDates.now();
+        final LocalTime now = LocalTimes.now();
+        final OffsetDateTime todayInDelhi = OffsetDateTimes.of(today, now, inDelhi);
 
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-        assertEquals(calendar.get(Calendar.YEAR), tomorrowInDelhi.getDate().getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, tomorrowInDelhi.getDate().getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), tomorrowInDelhi.getDate().getDay());
+        assertEquals(calendar.get(Calendar.YEAR), todayInDelhi.getDate().getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, todayInDelhi.getDate().getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), todayInDelhi.getDate().getDay());
 
         final Timestamp time = Timestamps.getCurrentTime();
         calendar.setTimeInMillis(time.getSeconds() / 1000);
         calendar.add(Calendar.HOUR, 1);
 
-        assertEquals(calendar.get(Calendar.HOUR), tomorrowInDelhi.getTime().getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), tomorrowInDelhi.getTime().getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), tomorrowInDelhi.getTime().getSeconds());
-        assertEquals(expectedSeconds, tomorrowInDelhi.getOffset().getAmountSeconds());
+        assertEquals(calendar.get(Calendar.HOUR), todayInDelhi.getTime().getHours());
+        assertEquals(calendar.get(Calendar.MINUTE), todayInDelhi.getTime().getMinutes());
+        assertEquals(calendar.get(Calendar.SECOND), todayInDelhi.getTime().getSeconds());
+        assertEquals(expectedSeconds, todayInDelhi.getOffset().getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 

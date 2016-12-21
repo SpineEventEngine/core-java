@@ -111,7 +111,7 @@ public class ChangesShould {
     @Test
     public void create_LocalDateChange_instance() {
         final LocalDate today = LocalDates.now();
-        final LocalDate tomorrow = LocalDates.plusDays(1);
+        final LocalDate tomorrow = LocalDates.plusDays(today, 1);
 
         final LocalDateChange result = Changes.of(today, tomorrow);
 

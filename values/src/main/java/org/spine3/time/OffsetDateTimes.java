@@ -30,7 +30,7 @@ public class OffsetDateTimes {
     }
 
     /**
-     * Obtains current OffsetDateTime instance using {@link ZoneOffset}.
+     * Obtains current OffsetDateTime instance using {@code ZoneOffset}.
      */
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
         final LocalDate localDate = LocalDates.now();
@@ -45,10 +45,9 @@ public class OffsetDateTimes {
     }
 
     /**
-     * Obtains OffsetDateTime instance using {@link LocalDate}, {@link LocalTime} and {@link ZoneOffset}.
+     * Obtains OffsetDateTime instance using {@code LocalDate}, {@code LocalTime} and {@code ZoneOffset}.
      */
     public static OffsetDateTime of(LocalDate localDate, LocalTime localTime, ZoneOffset zoneOffset) {
-
         final OffsetDateTime result = OffsetDateTime.newBuilder()
                                                     .setDate(localDate)
                                                     .setTime(localTime)
