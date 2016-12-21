@@ -72,6 +72,15 @@ public class MismatchShould {
     }
 
     @Test
+    public void set_default_new_value_if_it_was_passed_as_null() {
+        final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, null, VERSION);
+        final String newValue = mismatch.getNewValue()
+                                      .toString();
+
+        assertEquals(DEFAULT_VALUE, newValue);
+    }
+
+    @Test
     public void return_mismatch_object_with_string_values() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
         final StringValue expected = unpack(mismatch.getExpectedPreviousValue());
