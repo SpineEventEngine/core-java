@@ -47,16 +47,23 @@ public class Mismatch {
      *
      * @param expected the value expected by a command, or {@code null} if the command expects not populated field
      * @param actual   the value found in an entity, or {@code null} if the value is not set
-     * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(@Nullable String expected, @Nullable String actual, int version) {
+    public static ValueMismatch of(@Nullable String expected,
+                                   @Nullable String actual,
+                                   @Nullable String newValue,
+                                   int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
         if (expected != null) {
-            builder.setExpected(pack(expected));
+            builder.setExpectedPreviousValue(pack(expected));
         }
         if (actual != null) {
-            builder.setActual(pack(actual));
+            builder.setActualPreviousValue(pack(actual));
+        }
+        if (newValue != null) {
+            builder.setNewValue(pack(newValue));
         }
         builder.setVersion(version);
         return builder.build();
@@ -67,13 +74,15 @@ public class Mismatch {
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
-     * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(int expected, int actual, int version) {
+    public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
+                                                           .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -83,13 +92,15 @@ public class Mismatch {
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
-     * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(long expected, long actual, int version) {
+    public static ValueMismatch of(long expected, long actual, long newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
+                                                           .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -99,13 +110,15 @@ public class Mismatch {
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
-     * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(float expected, float actual, int version) {
+    public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
+                                                           .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -115,13 +128,15 @@ public class Mismatch {
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(double expected, double actual, int version) {
+    public static ValueMismatch of(double expected, double actual, double newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
+                                                           .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -131,13 +146,15 @@ public class Mismatch {
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(boolean expected, boolean actual, int version) {
+    public static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
+                                                           .setExpectedPreviousValue(pack(expected))
+                                                           .setActualPreviousValue(pack(actual))
+                                                           .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
@@ -147,21 +164,27 @@ public class Mismatch {
      *
      * @param expected the value expected by a command, or {@code null} if the command expects not populated field
      * @param actual   the value actual in an entity, or {@code null} if the value is not set
-     * @param version  the current version of the entity
-     * @return info on the mismatch
+     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
+     * @param version  the current version of the entity  @return info on the mismatch
+     * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(@Nullable Message expected, @Nullable Message actual, int version) {
+    public static ValueMismatch of(@Nullable Message expected,
+                                   @Nullable Message actual,
+                                   @Nullable Message newValue,
+                                   int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
         if (expected != null) {
-            builder.setExpected(AnyPacker.pack(expected));
+            builder.setExpectedPreviousValue(AnyPacker.pack(expected));
         }
         if (actual != null) {
-            builder.setActual(AnyPacker.pack(actual));
+            builder.setActualPreviousValue(AnyPacker.pack(actual));
+        }
+        if (newValue != null) {
+            builder.setNewValue(AnyPacker.pack(newValue));
         }
         builder.setVersion(version);
         return builder.build();
     }
-
 
     /**
      * Obtains expected string from the passed mismatch.
@@ -170,7 +193,7 @@ public class Mismatch {
      */
     public static String getExpectedString(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getExpected()
+            final StringValue result = mismatch.getExpectedPreviousValue()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
@@ -185,7 +208,7 @@ public class Mismatch {
      */
     public static String getActualString(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getActual()
+            final StringValue result = mismatch.getActualPreviousValue()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
