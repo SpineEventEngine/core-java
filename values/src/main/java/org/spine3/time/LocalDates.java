@@ -71,20 +71,6 @@ public class LocalDates {
     }
 
     /**
-     * Obtains a copy of this local date with the specified number of years subtracted.
-     */
-    public static LocalDate minusYears(LocalDate localDate, int yearsToSubtract) {
-        return changeYear(localDate, yearsToSubtract);
-    }
-
-    /**
-     * Obtains a copy of this local date with the specified number of months subtracted.
-     */
-    public static LocalDate minusMonths(LocalDate localDate, int monthsToSubtract) {
-        return changeMonth(localDate, monthsToSubtract);
-    }
-
-    /**
      * Obtains a copy of this local date with the specified number of months added.
      */
     public static LocalDate plusMonths(LocalDate localDate, int monthsToAdd) {
@@ -99,10 +85,24 @@ public class LocalDates {
     }
 
     /**
+     * Obtains a copy of this local date with the specified number of years subtracted.
+     */
+    public static LocalDate minusYears(LocalDate localDate, int yearsToSubtract) {
+        return changeYear(localDate, -yearsToSubtract);
+    }
+
+    /**
+     * Obtains a copy of this local date with the specified number of months subtracted.
+     */
+    public static LocalDate minusMonths(LocalDate localDate, int monthsToSubtract) {
+        return changeMonth(localDate, -monthsToSubtract);
+    }
+
+    /**
      * Obtains a copy of this local date with the specified number of days subtracted.
      */
     public static LocalDate minusDays(LocalDate localDate, int daysToSubtract) {
-        return changeDays(localDate, daysToSubtract);
+        return changeDays(localDate, -daysToSubtract);
     }
 
     private static LocalDate changeYear(LocalDate localDate, int yearsToChange) {

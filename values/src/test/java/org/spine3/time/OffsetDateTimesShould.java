@@ -70,7 +70,6 @@ public class OffsetDateTimesShould {
         final OffsetDateTime todayInDelhi = OffsetDateTimes.of(today, now, inDelhi);
 
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
 
         assertEquals(calendar.get(Calendar.YEAR), todayInDelhi.getDate().getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, todayInDelhi.getDate().getMonthValue());
@@ -78,7 +77,6 @@ public class OffsetDateTimesShould {
 
         final Timestamp time = Timestamps.getCurrentTime();
         calendar.setTimeInMillis(time.getSeconds() / 1000);
-        calendar.add(Calendar.HOUR, 1);
 
         assertEquals(calendar.get(Calendar.HOUR), todayInDelhi.getTime().getHours());
         assertEquals(calendar.get(Calendar.MINUTE), todayInDelhi.getTime().getMinutes());

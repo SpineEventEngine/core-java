@@ -58,7 +58,6 @@ public class OffsetDatesShould {
 
         final OffsetDate todayInDelhi = OffsetDates.of(today, inDelhi);
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
 
         assertEquals(calendar.get(Calendar.YEAR), todayInDelhi.getDate().getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, todayInDelhi.getDate().getMonthValue());
