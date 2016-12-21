@@ -52,6 +52,6 @@ message ValueMismatch {
     // The value which a command could have set if expected value was discovered in the entity.
     google.protobuf.Any new_value = 3;
 
-    // A version of the entity which generated the failure.
+    // The version of the entity which generated the failure.
     int32 version = 4;
 }
