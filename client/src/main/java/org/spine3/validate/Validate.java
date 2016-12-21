@@ -153,9 +153,12 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        //TODO:2016-12-21:alexander.yevsyukov: Can we avoid getting the typename if all is OK?
-        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object)
-                                                                                   .getTypeName());
+        if (!isDefault(object)) {
+            final String typeName = TypeUrl.of(object)
+                                           .getTypeName();
+            final String errorMessage = "The message is not in the default state: " + typeName;
+            throw new IllegalStateException(errorMessage);
+        }
         return object;
     }
 
@@ -200,14 +203,14 @@ public class Validate {
      * </ul>
      *
      * @param timestamp the timestamp to check
-     * @param nameToLog the name of the checked timestamp used in logging
+     * @param argumentName the name of the checked timestamp to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
-    public static Timestamp checkPositive(Timestamp timestamp, String nameToLog) {
-        checkNotNull(timestamp, nameToLog + " is null.");
-        checkParameter(timestamp.getSeconds() > 0, nameToLog, "%s must have a positive number of seconds.");
-        checkParameter(timestamp.getNanos() >= 0, nameToLog, "%s must not have a negative number of nanoseconds.");
+    public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
+        checkNotNull(timestamp, argumentName + " is null.");
+        checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
+        checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
