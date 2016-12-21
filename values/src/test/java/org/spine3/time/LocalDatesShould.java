@@ -139,4 +139,60 @@ public class LocalDatesShould {
         assertEquals(calendar.get(Calendar.MONTH) + 1, inFiveDays.getMonthValue());
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), inFiveDays.getDay());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_years() {
+        final int year = -1987;
+        final int day = 20;
+        LocalDates.of(year, MonthOfYear.AUGUST, day);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_days() {
+        final int year = 1987;
+        final int day = -20;
+        LocalDates.of(year, MonthOfYear.AUGUST, day);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_yearsToAdd() {
+        final int yearsToAdd = -5;
+        final LocalDate now = LocalDates.now();
+        LocalDates.plusYears(now, yearsToAdd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_monthsToAdd() {
+        final int monthsToAdd = -7;
+        final LocalDate now = LocalDates.now();
+        LocalDates.plusMonths(now, monthsToAdd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_daysToAdd() {
+        final int daysToAdd = -25;
+        final LocalDate now = LocalDates.now();
+        LocalDates.plusDays(now, daysToAdd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_yearsToSubtract() {
+        final int yearsToSubtract = -6;
+        final LocalDate now = LocalDates.now();
+        LocalDates.minusYears(now, yearsToSubtract);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_monthsToSubtract() {
+        final int monthsToSubtract = -8;
+        final LocalDate now = LocalDates.now();
+        LocalDates.minusMonths(now, monthsToSubtract);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_amount_of_daysToSubtract() {
+        final int daysToSubtract = -27;
+        final LocalDate now = LocalDates.now();
+        LocalDates.minusDays(now, daysToSubtract);
+    }
 }

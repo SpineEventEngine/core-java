@@ -222,7 +222,7 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, "%s must have a positive value");
+        checkParameter(value > 0, argumentName, "%s must be a positive value");
     }
 
     /**
