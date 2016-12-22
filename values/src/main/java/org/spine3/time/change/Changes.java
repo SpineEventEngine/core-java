@@ -37,6 +37,30 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Changes {
 
+    public interface ArgumentName {
+        String YEARS_TO_ADD = "yearsToAdd";
+        String MONTHS_TO_ADD = "monthsToAdd";
+        String DAYS_TO_ADD = "daysToAdd";
+        String HOURS_TO_ADD = "hoursToAdd";
+        String MINUTES_TO_ADD = "minutesToAdd";
+        String SECONDS_TO_ADD = "secondsToAdd";
+        String MILLIS_TO_ADD = "millisToAdd";
+        String NANOS_TO_ADD = "nanosToAdd";
+        String YEARS_TO_SUBTRACT = "yearsToSubtract";
+        String MONTHS_TO_SUBTRACT = "monthsToSubtract";
+        String DAYS_TO_SUBTRACT = "daysToSubtract";
+        String HOURS_TO_SUBTRACT = "hoursToSubtract";
+        String MINUTES_TO_SUBTRACT = "minutesToSubtract";
+        String SECONDS_TO_SUBTRACT = "secondsToSubtract";
+        String MILLIS_TO_SUBTRACT = "millisToSubtract";
+        String NANOS_TO_SUBTRACT = "nanosToSubtract";
+        String HOURS = "hours";
+        String MINUTES = "minutes";
+        String SECONDS = "seconds";
+        String MILLIS = "millis";
+        String NANOS = "nanos";
+    }
+
     private Changes() {
     }
 

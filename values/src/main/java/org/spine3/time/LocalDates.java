@@ -20,7 +20,10 @@
 
 package org.spine3.time;
 
+import org.spine3.time.change.Changes.ArgumentName;
+
 import java.util.Calendar;
+
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -69,7 +72,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of years added.
      */
     public static LocalDate plusYears(LocalDate localDate, int yearsToAdd) {
-        checkPositive(yearsToAdd, "yearsToAdd");
+        checkPositive(yearsToAdd, ArgumentName.YEARS_TO_ADD);
         return changeYear(localDate, yearsToAdd);
     }
 
@@ -77,7 +80,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of months added.
      */
     public static LocalDate plusMonths(LocalDate localDate, int monthsToAdd) {
-        checkPositive(monthsToAdd, "monthsToAdd");
+        checkPositive(monthsToAdd, ArgumentName.MONTHS_TO_ADD);
         return changeMonth(localDate, monthsToAdd);
     }
 
@@ -85,7 +88,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of days added.
      */
     public static LocalDate plusDays(LocalDate localDate, int daysToAdd) {
-        checkPositive(daysToAdd, "daysToAdd");
+        checkPositive(daysToAdd, ArgumentName.DAYS_TO_ADD);
         return changeDays(localDate, daysToAdd);
     }
 
@@ -93,7 +96,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of years subtracted.
      */
     public static LocalDate minusYears(LocalDate localDate, int yearsToSubtract) {
-        checkPositive(yearsToSubtract, "yearsToSubtract");
+        checkPositive(yearsToSubtract, ArgumentName.YEARS_TO_SUBTRACT);
         return changeYear(localDate, -yearsToSubtract);
     }
 
@@ -101,7 +104,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of months subtracted.
      */
     public static LocalDate minusMonths(LocalDate localDate, int monthsToSubtract) {
-        checkPositive(monthsToSubtract, "monthsToSubtract");
+        checkPositive(monthsToSubtract, ArgumentName.MONTHS_TO_SUBTRACT);
         return changeMonth(localDate, -monthsToSubtract);
     }
 
@@ -109,14 +112,14 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of days subtracted.
      */
     public static LocalDate minusDays(LocalDate localDate, int daysToSubtract) {
-        checkPositive(daysToSubtract, "daysToSubtract");
+        checkPositive(daysToSubtract, ArgumentName.DAYS_TO_SUBTRACT);
         return changeDays(localDate, -daysToSubtract);
     }
 
     /**
      * Obtains local date changed on specified amount of years.
      *
-     * @param localDate local date that will be changed
+     * @param localDate  local date that will be changed
      * @param yearsDelta a number of years that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local date with new years value
      */
@@ -128,7 +131,6 @@ public class LocalDates {
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
         calendar.add(Calendar.YEAR, yearsDelta);
         final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
@@ -143,7 +145,7 @@ public class LocalDates {
     /**
      * Obtains local date changed on specified amount of months.
      *
-     * @param localDate local date that will be changed
+     * @param localDate  local date that will be changed
      * @param monthDelta a number of months that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local date with new months value
      */
@@ -155,7 +157,6 @@ public class LocalDates {
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
         calendar.add(Calendar.MONTH, monthDelta);
         final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
@@ -182,7 +183,6 @@ public class LocalDates {
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
         calendar.add(Calendar.DAY_OF_MONTH, daysDelta);
         final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
         final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 

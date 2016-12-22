@@ -22,8 +22,6 @@ package org.spine3.time;
 
 import org.spine3.protobuf.Durations;
 
-import java.util.Calendar;
-
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -59,14 +57,14 @@ public class ZoneOffsets {
     /**
      * Obtains the ZoneOffset instance using an offset in hours and minutes.
      */
+    @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
         final int maxHoursBound = 17;
         final int maxMinutesBound = 60;
         checkArgument(Math.abs(hours) <= maxHoursBound, "offset hour size must be between -17 and 17 hours inclusive");
         checkArgument(Math.abs(minutes) <= maxMinutesBound, "offset minute size must be between -60 and 60 minutes inclusive");
-        @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
-        final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours)) ;
-        final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes)) ;
+        final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours));
+        final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes));
         final int seconds = secondsInHours + secondsInMinutes;
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(seconds)
