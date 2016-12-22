@@ -41,7 +41,7 @@ public class LocalDates {
         final Calendar calendar = Calendar.getInstance();
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(year)
@@ -113,16 +113,23 @@ public class LocalDates {
         return changeDays(localDate, -daysToSubtract);
     }
 
-    private static LocalDate changeYear(LocalDate localDate, int yearsToChange) {
+    /**
+     * Obtains local date changed on specified amount of years.
+     *
+     * @param localDate local date that will be changed
+     * @param yearsDelta a number of years that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this local date with new years value
+     */
+    private static LocalDate changeYear(LocalDate localDate, int yearsDelta) {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, localDate.getYear());
         // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
         calendar.set(Calendar.MONTH, localDate.getMonthValue() - 1);
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
-        calendar.add(Calendar.YEAR, yearsToChange);
+        calendar.add(Calendar.YEAR, yearsDelta);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
         final LocalDate result = LocalDate.newBuilder()
@@ -133,16 +140,23 @@ public class LocalDates {
         return result;
     }
 
-    private static LocalDate changeMonth(LocalDate localDate, int monthToChange) {
+    /**
+     * Obtains local date changed on specified amount of months.
+     *
+     * @param localDate local date that will be changed
+     * @param monthDelta a number of months that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this local date with new months value
+     */
+    private static LocalDate changeMonth(LocalDate localDate, int monthDelta) {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, localDate.getYear());
         // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
         calendar.set(Calendar.MONTH, localDate.getMonthValue() - 1);
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
-        calendar.add(Calendar.MONTH, monthToChange);
+        calendar.add(Calendar.MONTH, monthDelta);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
         final LocalDate result = LocalDate.newBuilder()
@@ -153,16 +167,23 @@ public class LocalDates {
         return result;
     }
 
-    private static LocalDate changeDays(LocalDate localDate, int daysToChange) {
+    /**
+     * Obtains local date changed on specified amount of days.
+     *
+     * @param localDate local date that will be changed
+     * @param daysDelta a number of days that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this local date with new days value
+     */
+    private static LocalDate changeDays(LocalDate localDate, int daysDelta) {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, localDate.getYear());
         // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
         calendar.set(Calendar.MONTH, localDate.getMonthValue() - 1);
         calendar.set(Calendar.DAY_OF_MONTH, localDate.getDay());
-        calendar.add(Calendar.DAY_OF_MONTH, daysToChange);
+        calendar.add(Calendar.DAY_OF_MONTH, daysDelta);
         final int year = calendar.get(Calendar.YEAR);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
+        final MonthOfYear month = MonthOfYears.getMonth(calendar);
         final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
         final LocalDate result = LocalDate.newBuilder()
