@@ -51,9 +51,10 @@ public class LocalDatesShould {
         final int year = 1976;
         final int month = 3;
         final int day = 1;
-        final LocalDate birthday = LocalDates.of(1976, MonthOfYear.APRIL, 1);
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
+        final LocalDate birthday = LocalDates.of(1976, MonthOfYears.getMonth(calendar), 1);
+
         assertEquals(calendar.get(Calendar.YEAR), birthday.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, birthday.getMonthValue());
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), birthday.getDay());
@@ -64,10 +65,10 @@ public class LocalDatesShould {
         final int year = 2007;
         final int month = 1;
         final int day = 28;
-        final LocalDate today = LocalDates.of(2008, MonthOfYear.FEBRUARY, 29);
-        final LocalDate yearAgo = LocalDates.minusYears(today, 1);
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
+        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        final LocalDate yearAgo = LocalDates.minusYears(today, 1);
 
         assertEquals(calendar.get(Calendar.YEAR), yearAgo.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, yearAgo.getMonthValue());
@@ -79,10 +80,10 @@ public class LocalDatesShould {
         final int year = 2007;
         final int month = 11;
         final int day = 29;
-        final LocalDate today = LocalDates.of(2008, MonthOfYear.FEBRUARY, 29);
-        final LocalDate twoMonthAgo = LocalDates.minusMonths(today, 2);
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
+        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        final LocalDate twoMonthAgo = LocalDates.minusMonths(today, 2);
 
         assertEquals(calendar.get(Calendar.YEAR), twoMonthAgo.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, twoMonthAgo.getMonthValue());
@@ -94,10 +95,10 @@ public class LocalDatesShould {
         final int year = 2007;
         final int month = 11;
         final int day = 31;
-        final LocalDate today = LocalDates.of(2008, MonthOfYear.FEBRUARY, 29);
-        final LocalDate sixtyDaysAgo = LocalDates.minusDays(today, 60);
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day);
+        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        final LocalDate sixtyDaysAgo = LocalDates.minusDays(today, 60);
 
         assertEquals(calendar.get(Calendar.YEAR), sixtyDaysAgo.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, sixtyDaysAgo.getMonthValue());
