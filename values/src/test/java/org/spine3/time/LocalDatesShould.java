@@ -62,13 +62,11 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_years() {
-        final int year = 2007;
-        final int month = 1;
-        final int day = 28;
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        calendar.add(Calendar.YEAR, -1);
+        final LocalDate today = LocalDates.now();
         final LocalDate yearAgo = LocalDates.minusYears(today, 1);
+
 
         assertEquals(calendar.get(Calendar.YEAR), yearAgo.getYear());
         assertEquals(calendar.get(Calendar.MONTH) + 1, yearAgo.getMonthValue());
@@ -77,12 +75,9 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_months() {
-        final int year = 2007;
-        final int month = 11;
-        final int day = 29;
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        calendar.add(Calendar.MONTH, -2);
+        final LocalDate today = LocalDates.now();
         final LocalDate twoMonthAgo = LocalDates.minusMonths(today, 2);
 
         assertEquals(calendar.get(Calendar.YEAR), twoMonthAgo.getYear());
@@ -92,12 +87,9 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_days() {
-        final int year = 2007;
-        final int month = 11;
-        final int day = 31;
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        final LocalDate today = LocalDates.of(2008, MonthOfYears.getMonth(calendar), 29);
+        calendar.add(Calendar.DAY_OF_MONTH, -60);
+        final LocalDate today = LocalDates.now();
         final LocalDate sixtyDaysAgo = LocalDates.minusDays(today, 60);
 
         assertEquals(calendar.get(Calendar.YEAR), sixtyDaysAgo.getYear());
