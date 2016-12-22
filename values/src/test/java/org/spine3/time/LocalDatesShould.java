@@ -87,8 +87,9 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_days() {
+        final int daysToSubtract = -60;
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, -60);
+        calendar.add(Calendar.DAY_OF_MONTH, daysToSubtract);
         final LocalDate today = LocalDates.now();
         final LocalDate sixtyDaysAgo = LocalDates.minusDays(today, 60);
 

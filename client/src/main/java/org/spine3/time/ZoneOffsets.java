@@ -47,7 +47,8 @@ public class ZoneOffsets {
      * Obtains the ZoneOffset instance using an offset in hours.
      */
     public static ZoneOffset ofHours(int hours) {
-        checkArgument(Math.abs(hours) <= 18, "offset size must be between -18 and 18 hours inclusive");
+        final int maxHoursBound = 18;
+        checkArgument(Math.abs(hours) <= maxHoursBound, "offset size must be between -18 and 18 hours inclusive");
         @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
         final int seconds = (int) Durations.toSeconds(Durations.ofHours(hours));
         return ZoneOffset.newBuilder()
@@ -59,8 +60,10 @@ public class ZoneOffsets {
      * Obtains the ZoneOffset instance using an offset in hours and minutes.
      */
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
-        checkArgument(Math.abs(hours) <= 17, "offset hour size must be between -17 and 17 hours inclusive");
-        checkArgument(Math.abs(minutes) <= 60, "offset minute size must be between -60 and 60 minutes inclusive");
+        final int maxHoursBound = 17;
+        final int maxMinutesBound = 60;
+        checkArgument(Math.abs(hours) <= maxHoursBound, "offset hour size must be between -17 and 17 hours inclusive");
+        checkArgument(Math.abs(minutes) <= maxMinutesBound, "offset minute size must be between -60 and 60 minutes inclusive");
         @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
         final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours)) ;
         final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes)) ;
