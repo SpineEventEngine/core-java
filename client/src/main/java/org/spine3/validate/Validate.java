@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.change.Changes.ErrorMessage;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -222,7 +223,18 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, "%s must be a positive value");
+        checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+    }
+
+    /**
+     * Ensures that the passed long value is positive:
+     *
+     * @param value the value to check
+     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @throws IllegalArgumentException if requirement is not met
+     */
+    public static void checkPositive(long value, String argumentName) {
+        checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
     }
 
     /**

@@ -59,7 +59,8 @@ public class OffsetTimesShould {
     public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
         final int expectedSeconds = 5*Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
         final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalTime inOneHour = LocalTimes.plusHours(1);
+        final LocalTime localTime = LocalTimes.now();
+        final LocalTime inOneHour = LocalTimes.plusHours(localTime, 1);
         final OffsetTime inOneHourInDelhi = OffsetTimes.of(inOneHour, inDelhi);
 
         final Timestamp time = Timestamps.getCurrentTime();

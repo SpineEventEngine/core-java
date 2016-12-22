@@ -61,7 +61,7 @@ public class LocalDatesShould {
     }
 
     @Test
-    public void obtain_date_in_past_after_specified_number_of_years() {
+    public void obtain_date_in_past_before_specified_number_of_years() {
         final int year = 2007;
         final int month = 1;
         final int day = 28;
@@ -76,7 +76,7 @@ public class LocalDatesShould {
     }
 
     @Test
-    public void obtain_date_in_past_after_specified_number_of_months() {
+    public void obtain_date_in_past_before_specified_number_of_months() {
         final int year = 2007;
         final int month = 11;
         final int day = 29;
@@ -91,7 +91,7 @@ public class LocalDatesShould {
     }
 
     @Test
-    public void obtain_date_in_past_after_specified_number_of_days() {
+    public void obtain_date_in_past_before_specified_number_of_days() {
         final int year = 2007;
         final int month = 11;
         final int day = 31;
