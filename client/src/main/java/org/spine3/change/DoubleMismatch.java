@@ -34,18 +34,18 @@ public class DoubleMismatch {
     }
 
     /**
-     * Creates a {@link ValueMismatch} instance for a double attribute.
+     * Creates a ValueMismatch instance for a double attribute.
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return new {@link ValueMismatch} instance
+     * @return new ValueMismatch instance
      */
     public static ValueMismatch of(double expected, double actual, double newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpectedPreviousValue(pack(expected))
-                                                           .setActualPreviousValue(pack(actual))
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
                                                            .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();

@@ -24,11 +24,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.util.Exceptions.wrapped;
 
 /**
- * Utility class for working with string values in {@link ValueMismatch}es.
+ * Utility class for working with string values in ValueMismatches.
  *
  * @author Alexander Yevsyukov
  */
@@ -39,7 +40,7 @@ public class StringMismatch {
     }
 
     /**
-     * Creates {@link ValueMismatch} for the case of discovering a non-empty value,
+     * Creates ValueMismatch for the case of discovering a non-empty value,
      * when an empty string was expected by a command.
      *
      * @param actual the value discovered instead of the empty string
@@ -58,8 +59,8 @@ public class StringMismatch {
      * that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear
-     * @param version the current version of the entity
-     * @return new {@link ValueMismatch} instance
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new ValueMismatch instance
      */
     public static ValueMismatch expectedNotEmpty(String expected, int version) {
         checkNotNull(expected);
@@ -67,35 +68,26 @@ public class StringMismatch {
     }
 
     /**
-     * Creates {@link ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates ValueMismatch for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual the value discovered instead of the expected string
      * @param newValue the new value requested in the command
      * @param version the version of the entity in which the mismatch is discovered
-     * @return new {@code ValueMismatch} instance
+     * @return new ValueMismatch instance
      */
     public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
-        checkNotNull(expected);
-        checkNotNull(actual);
+        checkNotNullOrEqual(expected, actual);
         checkNotNull(newValue);
+
         return of(expected, actual, newValue, version);
     }
 
-    /**
-     * Creates a {@link ValueMismatch} instance for a string attribute.
-     *
-     * @param expected the value expected by a command
-     * @param actual   the value found in an entity
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity
-     * @return new {@link ValueMismatch} instance
-     */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch
                 .newBuilder()
-                .setExpectedPreviousValue(pack(expected))
-                .setActualPreviousValue(pack(actual))
+                .setExpected(pack(expected))
+                .setActual(pack(actual))
                 .setNewValue(pack(newValue))
                 .setVersion(version);
         return builder.build();
@@ -108,7 +100,7 @@ public class StringMismatch {
      */
     public static String unpackExpected(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getExpectedPreviousValue()
+            final StringValue result = mismatch.getExpected()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
@@ -123,7 +115,7 @@ public class StringMismatch {
      */
     public static String unpackActual(ValueMismatch mismatch) {
         try {
-            final StringValue result = mismatch.getActualPreviousValue()
+            final StringValue result = mismatch.getActual()
                                                .unpack(StringValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
@@ -132,7 +124,7 @@ public class StringMismatch {
     }
 
     /**
-     * Obtains actual string from the passed mismatch.
+     * Obtains new value string from the passed mismatch.
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */

@@ -44,8 +44,8 @@ public class FloatMismatchShould {
         final float actual = 1.0F;
         final float newValue = 19.0F;
         final ValueMismatch mismatch = FloatMismatch.of(expected, actual, newValue, VERSION);
-        final FloatValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
-        final FloatValue actualWrapped = unpack(mismatch.getActualPreviousValue());
+        final FloatValue expectedWrapped = unpack(mismatch.getExpected());
+        final FloatValue actualWrapped = unpack(mismatch.getActual());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);

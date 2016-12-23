@@ -25,19 +25,21 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.change.StringMismatch.unpackActual;
-import static org.spine3.change.StringMismatch.unpackExpected;
-import static org.spine3.change.StringMismatch.unpackNewValue;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.change.MessageMismatch.expectedDefault;
+import static org.spine3.change.MessageMismatch.expectedNotDefault;
+import static org.spine3.change.MessageMismatch.unexpectedValue;
+import static org.spine3.change.MessageMismatch.unpackActual;
+import static org.spine3.change.MessageMismatch.unpackExpected;
+import static org.spine3.change.MessageMismatch.unpackNewValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class MessageMismatchShould {
 
-    private static final String EXPECTED = "expected_value";
-    private static final String ACTUAL = "actual-value";
-    private static final String NEW_VALUE = "new-value";
-    private static final String DEFAULT_VALUE = "";
+    private static final StringValue EXPECTED = newStringValue("expected_value");
+    private static final StringValue ACTUAL = newStringValue("actual-value");
+    private static final StringValue NEW_VALUE = newStringValue("new-value");
+    private static final StringValue DEFAULT_VALUE = StringValue.getDefaultInstance();
     private static final int VERSION = 1;
 
     @Test
@@ -46,48 +48,37 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void set_default_expected_value_if_it_was_passed_as_null_message_overload() {
-        final ValueMismatch mismatch = MessageMismatch.of(null, newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
-        final String expected = mismatch.getExpectedPreviousValue()
-                                        .toString();
+    public void create_instance_for_expected_default_value() {
+        final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
-        assertEquals(DEFAULT_VALUE, expected);
-    }
-
-    @Test
-    public void set_default_actual_value_if_it_was_passed_as_null_message_overload() {
-        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), null, newStringValue(NEW_VALUE), VERSION);
-        final String actual = mismatch.getActualPreviousValue()
-                                      .toString();
-
-        assertEquals(DEFAULT_VALUE, actual);
-    }
-
-    @Test
-    public void return_mismatch_object_with_message_values() {
-        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
-        final StringValue expected = unpack(mismatch.getExpectedPreviousValue());
-        final StringValue actual = unpack(mismatch.getActualPreviousValue());
-
-        assertEquals(EXPECTED, expected.getValue());
-        assertEquals(ACTUAL, actual.getValue());
-    }
-
-    @Test
-    public void unpack_expected() {
-        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
-        assertEquals(EXPECTED, unpackExpected(mismatch));
-    }
-
-    @Test
-    public void unpack_actual() {
-        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
+        assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
     }
 
     @Test
-    public void unpack_newValue() {
-        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
+    public void creates_instance_for_unexpected_default_value() {
+        final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+
+        // Check that the actual value is default.
+        assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
+
+        // Check that newValue has default value as the command intends to clear the field.
+        assertEquals(DEFAULT_VALUE, unpackNewValue(mismatch));
+
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_unexpected_value() {
+        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
     }
 }

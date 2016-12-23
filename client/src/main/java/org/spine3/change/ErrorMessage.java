@@ -20,33 +20,12 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.Int64Value;
-import org.junit.Test;
+/**
+ * Error messages common for all mismatch types.
+ *
+ * @author Alexander Yevsyukov
+ */
+/* package */ interface ErrorMessage {
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-
-public class LongMismatchShould {
-
-    private static final int VERSION = 7;
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LongMismatch.class));
-    }
-
-    @Test
-    public void return_mismatch_object_with_int64_values() {
-        final long expected = 0L;
-        final long actual = 1L;
-        final long newValue = 5L;
-        final ValueMismatch mismatch = LongMismatch.of(expected, actual, newValue, VERSION);
-        final Int64Value expectedWrapped = unpack(mismatch.getExpected());
-        final Int64Value actualWrapped = unpack(mismatch.getActual());
-
-        assertEquals(expected, expectedWrapped.getValue());
-        assertEquals(actual, actualWrapped.getValue());
-    }
+    String EXPECTED_AND_ACTUAL_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
 }

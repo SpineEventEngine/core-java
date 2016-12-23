@@ -43,8 +43,8 @@ public class IntMismatchShould {
         final int actual = 1;
         final int newValue = 2;
         final ValueMismatch mismatch = IntMismatch.of(expected, actual, newValue, VERSION);
-        final Int32Value expectedWrapper = unpack(mismatch.getExpectedPreviousValue());
-        final Int32Value actualWrapper = unpack(mismatch.getActualPreviousValue());
+        final Int32Value expectedWrapper = unpack(mismatch.getExpected());
+        final Int32Value actualWrapper = unpack(mismatch.getActual());
 
         assertEquals(expected, expectedWrapper.getValue());
         assertEquals(actual, actualWrapper.getValue());

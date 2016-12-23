@@ -20,33 +20,23 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.Int64Value;
-import org.junit.Test;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+/**
+ * Routines common for all mismatches.
+ *
+ * @author Alexander Yevsyukov
+ */
+/* package */ class Mismatches {
 
-public class LongMismatchShould {
-
-    private static final int VERSION = 7;
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LongMismatch.class));
+    private Mismatches() {
+        // Prevent instantiations.
     }
 
-    @Test
-    public void return_mismatch_object_with_int64_values() {
-        final long expected = 0L;
-        final long actual = 1L;
-        final long newValue = 5L;
-        final ValueMismatch mismatch = LongMismatch.of(expected, actual, newValue, VERSION);
-        final Int64Value expectedWrapped = unpack(mismatch.getExpected());
-        final Int64Value actualWrapped = unpack(mismatch.getActual());
-
-        assertEquals(expected, expectedWrapped.getValue());
-        assertEquals(actual, actualWrapped.getValue());
+    /* package */ static void checkNotNullOrEqual(Object expected, Object actual) {
+        checkNotNull(expected);
+        checkNotNull(actual);
+        checkArgument(!expected.equals(actual), ErrorMessage.EXPECTED_AND_ACTUAL_CANNOT_BE_EQUAL);
     }
 }

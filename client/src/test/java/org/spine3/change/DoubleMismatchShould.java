@@ -45,8 +45,8 @@ public class DoubleMismatchShould {
         final double actual = 0.2;
         final double newValue = 0.5;
         final ValueMismatch mismatch = DoubleMismatch.of(expected, actual, newValue, VERSION);
-        final DoubleValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
-        final DoubleValue actualWrapped = unpack(mismatch.getActualPreviousValue());
+        final DoubleValue expectedWrapped = unpack(mismatch.getExpected());
+        final DoubleValue actualWrapped = unpack(mismatch.getActual());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);

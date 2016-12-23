@@ -34,18 +34,18 @@ public class FloatMismatch {
     }
 
     /**
-     * Creates a {@link ValueMismatch} instance for a float attribute.
+     * Creates a ValueMismatch instance for a float attribute.
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity  @return info on the mismatch
-     * @return new {@link ValueMismatch} instance
+     * @return new ValueMismatch instance
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpectedPreviousValue(pack(expected))
-                                                           .setActualPreviousValue(pack(actual))
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
                                                            .setNewValue(pack(newValue))
                                                            .setVersion(version);
         return builder.build();

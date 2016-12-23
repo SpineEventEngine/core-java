@@ -54,6 +54,7 @@ public class StringMismatchShould {
         assertEquals("", unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
     }
 
     @Test
@@ -67,18 +68,28 @@ public class StringMismatchShould {
 
         // We wanted to clear the field. Check that `newValue` is an empty string.
         assertEquals("", unpackNewValue(mismatch));
+
+        // Check version.
+        assertEquals(VERSION, mismatch.getVersion());
     }
 
     @Test
     public void create_instance_for_unexpected_value() {
         final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
-        final StringValue expected = unpack(mismatch.getExpectedPreviousValue());
-        final StringValue actual = unpack(mismatch.getActualPreviousValue());
+        final StringValue expected = unpack(mismatch.getExpected());
+        final StringValue actual = unpack(mismatch.getActual());
         final StringValue newValue = unpack(mismatch.getNewValue());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
         assertEquals(NEW_VALUE, newValue.getValue());
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_same_expected_and_actual() {
+        final String value = "same-same";
+        unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 }

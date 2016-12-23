@@ -43,8 +43,8 @@ public class BooleanMismatchShould {
         final boolean actual = false;
         final boolean newValue = false;
         final ValueMismatch mismatch = BooleanMismatch.of(expected, actual, newValue, VERSION);
-        final BoolValue expectedWrapped = unpack(mismatch.getExpectedPreviousValue());
-        final BoolValue actualWrapped = unpack(mismatch.getActualPreviousValue());
+        final BoolValue expectedWrapped = unpack(mismatch.getExpected());
+        final BoolValue actualWrapped = unpack(mismatch.getActual());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());

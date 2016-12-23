@@ -22,12 +22,14 @@ package org.spine3.change;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
- * Utility class for working with {@link ValueMismatch}es for {@code Message} values.
+ * Utility class for working with ValueMismatches for {@code Message} values.
  *
  * @author Alexander Yevsyukov
  */
@@ -37,40 +39,60 @@ public class MessageMismatch {
         // Prevent instantiation of this utility class.
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Rename properties of the ValueMismatch proto removing 'previous_value' suffix.
-
     /**
-     * Creates a {@link ValueMismatch} instance for a Message attribute.
+     * Creates ValueMismatch for the case of discovering a non-default value,
+     * when the default value was expected by a command.
      *
-     * @param expected the value expected by a command, or {@code null} if the command expects not populated field
-     * @param actual   the value actual in an entity, or {@code null} if the value is not set
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity
-     * @return new {@link ValueMismatch} instance
+     * @param actual the value discovered instead of the default value
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch of(@Nullable Message expected,
-                                   @Nullable Message actual,
-                                   @Nullable Message newValue,
-                                   int version) {
-        //TODO:2016-12-22:alexander.yevsyukov: check that expected and actual are not equal. Document this fact
-
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
-
-        //TODO:2016-12-22:alexander.yevsyukov: Handle packing default values when nulls passed or disallow nulls at all.
-        if (expected != null) {
-            builder.setExpectedPreviousValue(AnyPacker.pack(expected));
-        }
-        if (actual != null) {
-            builder.setActualPreviousValue(AnyPacker.pack(actual));
-        }
-        if (newValue != null) {
-            builder.setNewValue(AnyPacker.pack(newValue));
-        }
-        builder.setVersion(version);
-        return builder.build();
+    public static ValueMismatch expectedDefault(Message actual, Message newValue, int version) {
+        checkNotNull(actual);
+        checkNotNull(newValue);
+        final Message expectedDefault = actual.getDefaultInstanceForType();
+        return of(expectedDefault, actual, newValue, version);
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Add tests for the methods below.
+    /**
+     * Creates a mismatch for a command that wanted to clear a value, but discovered 
+     * that the field already has the default value.
+     * 
+     * @param expected the value of the field that the command wanted to clear
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new ValueMismatch instance
+     */
+    public static ValueMismatch expectedNotDefault(Message expected, int version) {
+        checkNotNull(expected);
+        final Message defaultValue = expected.getDefaultInstanceForType();
+        return of(expected, defaultValue, defaultValue, version);
+    }
+
+    /**
+     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     *
+     * @param expected the value expected by the command
+     * @param actual the value discovered instead of the expected value
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new ValueMismatch instance
+     */
+    public static ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue, int version) {
+        checkNotNullOrEqual(expected, actual);
+        checkNotNull(newValue);
+
+        return of(expected, actual, newValue, version);
+    }
+
+    private static ValueMismatch of(Message expected, Message actual, Message newValue, int version) {
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setNewValue(pack(newValue))
+                                                           .setVersion(version);
+        return builder.build();
+    }
 
     /**
      * Obtains expected value as a {@code Message} from the passed mismatch.
@@ -78,8 +100,8 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
-        final Any any = mismatch.getExpectedPreviousValue();
-        final Message result = AnyPacker.unpack(any);
+        final Any any = mismatch.getExpected();
+        final Message result = unpack(any);
         return result;
     }
 
@@ -89,8 +111,8 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
      */
     public static Message unpackActual(ValueMismatch mismatch) {
-        final Any any = mismatch.getActualPreviousValue();
-        final Message result = AnyPacker.unpack(any);
+        final Any any = mismatch.getActual();
+        final Message result = unpack(any);
         return result;
     }
 
@@ -100,8 +122,8 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
-        final Any any = mismatch.getActualPreviousValue();
-        final Message result = AnyPacker.unpack(any);
+        final Any any = mismatch.getNewValue();
+        final Message result = unpack(any);
         return result;
     }
 }
