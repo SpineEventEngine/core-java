@@ -19,6 +19,20 @@
  */
 package org.spine3.time;
 
+import org.spine3.change.Changes;
+
+import java.util.Calendar;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Changes.*;
+import static org.spine3.time.Calendars.createDateWithZoneOffset;
+import static org.spine3.time.Calendars.createTimeWithZoneOffset;
+import static org.spine3.time.Calendars.getDay;
+import static org.spine3.time.Calendars.getHours;
+import static org.spine3.time.Calendars.getMinutes;
+import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.Calendars.getYear;
+
 /**
  * Routines for working with {@link OffsetDateTime}.
  *
@@ -33,8 +47,11 @@ public class OffsetDateTimes {
      * Obtains current OffsetDateTime instance using {@code ZoneOffset}.
      */
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
-        final LocalDate localDate = LocalDates.now();
-        final LocalTime localTime = LocalTimes.now();
+        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
+        final Calendar time = createTimeWithZoneOffset(zoneOffset);
+        final LocalTime localTime = LocalTimes.of(getHours(time), getMinutes(time), getSeconds(time));
+        final Calendar date = createDateWithZoneOffset(zoneOffset);
+        final LocalDate localDate = LocalDates.of(getYear(date), MonthOfYears.getMonth(date), getDay(date));
 
         final OffsetDateTime result = OffsetDateTime.newBuilder()
                                                     .setDate(localDate)

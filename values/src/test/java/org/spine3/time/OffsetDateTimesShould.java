@@ -20,15 +20,21 @@
 
 package org.spine3.time;
 
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
 
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.time.Calendars.createTimeWithZoneOffset;
+import static org.spine3.time.Calendars.getDay;
+import static org.spine3.time.Calendars.getHours;
+import static org.spine3.time.Calendars.getMinutes;
+import static org.spine3.time.Calendars.getMonth;
+import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.Calendars.getYear;
+import static org.spine3.time.Calendars.getZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 
@@ -41,48 +47,45 @@ public class OffsetDateTimesShould {
 
     @Test
     public void obtain_current_OffsetDateTime_using_ZoneOffset() {
-        final int expectedSeconds = 3*Timestamps.SECONDS_PER_HOUR;
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetDateTime today = OffsetDateTimes.now(inKiev);
+        final Calendar cal = createTimeWithZoneOffset(inKiev);
 
-        final Calendar calendar = Calendar.getInstance();
 
-        assertEquals(calendar.get(Calendar.YEAR), today.getDate().getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getDate().getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDate().getDay());
-
-        final Timestamp time = Timestamps.getCurrentTime();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-
-        assertEquals(calendar.get(Calendar.HOUR), today.getTime().getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), today.getTime().getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), today.getTime().getSeconds());
-        assertEquals(expectedSeconds, today.getOffset().getAmountSeconds());
+        assertEquals(getYear(cal), today.getDate().getYear());
+        assertEquals(getMonth(cal), today.getDate().getMonthValue());
+        assertEquals(getDay(cal), today.getDate().getDay());
+        assertEquals(getHours(cal), today.getTime().getHours());
+        assertEquals(getMinutes(cal), today.getTime().getMinutes());
+        assertEquals(getSeconds(cal), today.getTime().getSeconds());
+        assertEquals(getZoneOffset(cal), today.getOffset().getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
     @Test
     public void obtain_current_OffsetDateTime_using_OffsetDate_OffsetTime_ZoneOffset() {
-        final int expectedSeconds = 5* Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
-        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalDate today = LocalDates.now();
-        final LocalTime now = LocalTimes.now();
-        final OffsetDateTime todayInDelhi = OffsetDateTimes.of(today, now, inDelhi);
+        final int year = 2006;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 25;
+        final int hours = 12;
+        final int minutes = 5;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(3, 30);
+        final LocalDate someDay = LocalDates.of(year, month, day);
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final OffsetDateTime todayInDelhi = OffsetDateTimes.of(someDay, localTime, inDelhi);
 
-        final Calendar calendar = Calendar.getInstance();
-
-        assertEquals(calendar.get(Calendar.YEAR), todayInDelhi.getDate().getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, todayInDelhi.getDate().getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), todayInDelhi.getDate().getDay());
-
-        final Timestamp time = Timestamps.getCurrentTime();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-
-        assertEquals(calendar.get(Calendar.HOUR), todayInDelhi.getTime().getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), todayInDelhi.getTime().getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), todayInDelhi.getTime().getSeconds());
-        assertEquals(expectedSeconds, todayInDelhi.getOffset().getAmountSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(year == todayInDelhi.getDate().getYear());
+        assertTrue(month == todayInDelhi.getDate().getMonth());
+        assertTrue(day == todayInDelhi.getDate().getDay());
+        assertTrue(hours == todayInDelhi.getTime().getHours());
+        assertTrue(minutes == todayInDelhi.getTime().getMinutes());
+        assertTrue(seconds == todayInDelhi.getTime().getSeconds());
+        assertTrue(millis == todayInDelhi.getTime().getMillis());
+        assertTrue(nanos == todayInDelhi.getTime().getNanos());
+        assertTrue(inDelhi.getAmountSeconds() == todayInDelhi.getOffset().getAmountSeconds());
     }
 
 }
