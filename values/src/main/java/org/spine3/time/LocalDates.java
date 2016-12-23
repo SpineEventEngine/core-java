@@ -24,6 +24,8 @@ import org.spine3.time.change.Changes.ArgumentName;
 
 import java.util.Calendar;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Changes.ErrorMessage;
 import static org.spine3.time.Calendars.createDate;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getYear;
@@ -71,6 +73,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of years added.
      */
     public static LocalDate plusYears(LocalDate localDate, int yearsToAdd) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(yearsToAdd, ArgumentName.YEARS_TO_ADD);
         return changeYear(localDate, yearsToAdd);
     }
@@ -79,6 +82,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of months added.
      */
     public static LocalDate plusMonths(LocalDate localDate, int monthsToAdd) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(monthsToAdd, ArgumentName.MONTHS_TO_ADD);
         return changeMonth(localDate, monthsToAdd);
     }
@@ -87,6 +91,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of days added.
      */
     public static LocalDate plusDays(LocalDate localDate, int daysToAdd) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(daysToAdd, ArgumentName.DAYS_TO_ADD);
         return changeDays(localDate, daysToAdd);
     }
@@ -95,6 +100,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of years subtracted.
      */
     public static LocalDate minusYears(LocalDate localDate, int yearsToSubtract) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(yearsToSubtract, ArgumentName.YEARS_TO_SUBTRACT);
         return changeYear(localDate, -yearsToSubtract);
     }
@@ -103,6 +109,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of months subtracted.
      */
     public static LocalDate minusMonths(LocalDate localDate, int monthsToSubtract) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(monthsToSubtract, ArgumentName.MONTHS_TO_SUBTRACT);
         return changeMonth(localDate, -monthsToSubtract);
     }
@@ -111,6 +118,7 @@ public class LocalDates {
      * Obtains a copy of this local date with the specified number of days subtracted.
      */
     public static LocalDate minusDays(LocalDate localDate, int daysToSubtract) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
         checkPositive(daysToSubtract, ArgumentName.DAYS_TO_SUBTRACT);
         return changeDays(localDate, -daysToSubtract);
     }

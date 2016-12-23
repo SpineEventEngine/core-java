@@ -20,11 +20,13 @@
 package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.change.Changes;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.change.Changes.ArgumentName;
 
 import java.util.Calendar;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.createTimeInMillis;
 import static org.spine3.time.Calendars.getHours;
@@ -128,6 +130,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of hours added.
      */
     public static LocalTime plusHours(LocalTime localTime, int hoursToAdd) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(hoursToAdd, ArgumentName.HOURS_TO_ADD);
         return changeHours(localTime, hoursToAdd);
     }
@@ -136,6 +139,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of minutes added.
      */
     public static LocalTime plusMinutes(LocalTime localTime, int minutesToAdd) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(minutesToAdd, ArgumentName.MINUTES_TO_ADD);
         return changeMinutes(localTime, minutesToAdd);
     }
@@ -144,6 +148,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of seconds added.
      */
     public static LocalTime plusSeconds(LocalTime localTime, int secondsToAdd) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(secondsToAdd, ArgumentName.SECONDS_TO_ADD);
         return changeSeconds(localTime, secondsToAdd);
     }
@@ -152,6 +157,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of milliseconds added.
      */
     public static LocalTime plusMillis(LocalTime localTime, int millisToAdd) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(millisToAdd, ArgumentName.MILLIS_TO_ADD);
         return changeMillis(localTime, millisToAdd);
     }
@@ -160,6 +166,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of hours subtracted.
      */
     public static LocalTime minusHours(LocalTime localTime, int hoursToSubtract) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(hoursToSubtract, ArgumentName.HOURS_TO_SUBTRACT);
         return changeHours(localTime, hoursToSubtract);
     }
@@ -168,6 +175,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of minutes subtracted.
      */
     public static LocalTime minusMinutes(LocalTime localTime, int minutesToSubtract) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(minutesToSubtract, ArgumentName.MINUTES_TO_SUBTRACT);
         return changeMinutes(localTime, minutesToSubtract);
     }
@@ -176,6 +184,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of seconds subtracted.
      */
     public static LocalTime minusSeconds(LocalTime localTime, int secondsToSubtract) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(secondsToSubtract, ArgumentName.SECONDS_TO_SUBTRACT);
         return changeSeconds(localTime, secondsToSubtract);
     }
@@ -184,6 +193,7 @@ public class LocalTimes {
      * Obtains a copy of this local time with the specified number of milliseconds subtracted.
      */
     public static LocalTime minusMillis(LocalTime localTime, int millisToSubtract) {
+        checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
         return changeMillis(localTime, millisToSubtract);
     }

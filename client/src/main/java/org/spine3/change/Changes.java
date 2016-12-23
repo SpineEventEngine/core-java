@@ -41,6 +41,7 @@ public class Changes {
         String ZONE_OFFSET = "zoneOffset";
         String LOCAL_DATE = "localDate";
         String OFFSET_DATE = "offsetDate";
+        String LOCAL_TIME = "localTime";
         String VALUES_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
         String NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
         String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
@@ -153,9 +154,9 @@ public class Changes {
         checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final UInt32Change result = UInt32Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -168,9 +169,9 @@ public class Changes {
         checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final UInt64Change result = UInt64Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -213,9 +214,9 @@ public class Changes {
         checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Fixed32Change result = Fixed32Change.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -228,9 +229,9 @@ public class Changes {
         checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Fixed64Change result = Fixed64Change.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -243,9 +244,9 @@ public class Changes {
         checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Sfixed32Change result = Sfixed32Change.newBuilder()
-                                                  .setPreviousValue(previousValue)
-                                                  .setNewValue(newValue)
-                                                  .build();
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 
@@ -258,9 +259,9 @@ public class Changes {
         checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Sfixed64Change result = Sfixed64Change.newBuilder()
-                                                  .setPreviousValue(previousValue)
-                                                  .setNewValue(newValue)
-                                                  .build();
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 

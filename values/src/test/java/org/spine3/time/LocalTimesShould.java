@@ -221,6 +221,62 @@ public class LocalTimesShould {
         assertEquals(millisNow + millisToSubtract, beforeFewmillis.getMillis());
         /* We cannot check nanos due to time gap between object creation */
     }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_hoursToAdd() {
+        final int hoursToAdd = -5;
+        final LocalTime now = null;
+        LocalTimes.plusHours(now, hoursToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_minutesToAdd() {
+        final int minutesToAdd = 7;
+        final LocalTime now = null;
+        LocalTimes.plusMinutes(now, minutesToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_secondsToAdd() {
+        final int secondsToAdd = 25;
+        final LocalTime now = null;
+        LocalTimes.plusSeconds(now, secondsToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_millisToAdd() {
+        final int millisToAdd = 205;
+        final LocalTime now = null;
+        LocalTimes.plusMillis(now, millisToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_hoursToSubtract() {
+        final int hoursToSubtract = 6;
+        final LocalTime now = null;
+        LocalTimes.minusHours(now, hoursToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_minutesToSubtract() {
+        final int minutesToSubtract = 8;
+        final LocalTime now = null;
+        LocalTimes.minusMinutes(now, minutesToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_secondsToSubtract() {
+        final int secondsToSubtract = 27;
+        final LocalTime now = null;
+        LocalTimes.minusSeconds(now, secondsToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_LocalTime_value_with_millisToSubtract() {
+        final int millisToSubtract = 245;
+        final LocalTime now = null;
+        LocalTimes.minusMillis(now, millisToSubtract);
+    }
     
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hours() {
