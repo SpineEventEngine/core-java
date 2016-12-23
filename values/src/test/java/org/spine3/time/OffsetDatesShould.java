@@ -44,11 +44,9 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_current_OffsetDate_using_ZoneOffset() {
-        final int hours = 3;
-        final int expectedZoneOffset = hours * Timestamps.SECONDS_PER_HOUR;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(hours);
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetDate today = OffsetDates.now(inKiev);
-        final Calendar cal = createDateWithZoneOffset(expectedZoneOffset);
+        final Calendar cal = createDateWithZoneOffset(inKiev);
 
         assertEquals(getYear(cal), today.getDate().getYear());
         assertEquals(getMonth(cal), today.getDate().getMonthValue());
@@ -58,18 +56,17 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
-        final int hours = 5;
-        final int minutes = 30;
-        final int expectedZoneOffset = hours * Timestamps.SECONDS_PER_HOUR + minutes * Timestamps.SECONDS_PER_MINUTE;
-        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(hours, minutes);
-        final LocalDate today = LocalDates.now();
-        final OffsetDate todayInDelhi = OffsetDates.of(today, inDelhi);
-        final Calendar cal = createDateWithZoneOffset(expectedZoneOffset);
+        final int year = 2006;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 25;
+        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
+        final LocalDate someDay = LocalDates.of(year, month, day);
+        final OffsetDate localDateInDelhi = OffsetDates.of(someDay, inDelhi);
 
-        assertEquals(getYear(cal), todayInDelhi.getDate().getYear());
-        assertEquals(getMonth(cal), todayInDelhi.getDate().getMonthValue());
-        assertEquals(getDay(cal), todayInDelhi.getDate().getDay());
-        assertEquals(getZoneOffset(cal), todayInDelhi.getOffset().getAmountSeconds());
+        assertTrue(year == localDateInDelhi.getDate().getYear());
+        assertTrue(month == localDateInDelhi.getDate().getMonth());
+        assertTrue(day == localDateInDelhi.getDate().getDay());
+        assertTrue(inDelhi.getAmountSeconds() == localDateInDelhi.getOffset().getAmountSeconds());
     }
 
     @Test

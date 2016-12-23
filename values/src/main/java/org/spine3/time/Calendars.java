@@ -32,6 +32,9 @@ import java.util.Calendar;
  */
 public class Calendars {
 
+    private Calendars() {
+    }
+
     /**
      * Obtains zone offset using {@code Calendar}.
      */
@@ -142,10 +145,23 @@ public class Calendars {
     /**
      * Obtains calendar using zone offset in seconds.
      */
-    public static Calendar createDateWithZoneOffset(int zoneOffset) {
+    public static Calendar createDateWithZoneOffset(ZoneOffset zoneOffset) {
+
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MILLISECOND, -zoneOffset * 1000);
-        calendar.set(Calendar.ZONE_OFFSET, zoneOffset * 1000);
+        calendar.add(Calendar.SECOND, -zoneOffset.getAmountSeconds());
+        calendar.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
+
+        return calendar;
+    }
+
+    /**
+     * Obtains calendar time using zone offset in seconds.
+     */
+    public static Calendar createTimeWithZoneOffset(ZoneOffset zoneOffset) {
+        final Calendar calendar = createTimeInMillis();
+        //TODO:2016-12-23:alexander.aleksandrov: need to write our own logic for reducing a time from the zone where JVM was runned to GMT 00:00.
+        calendar.add(Calendar.SECOND, -zoneOffset.getAmountSeconds());
+        calendar.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
 
         return calendar;
     }
@@ -156,7 +172,7 @@ public class Calendars {
     public static Calendar createDateWithNoOffset() {
         final Calendar calendar = Calendar.getInstance();
         final int zoneOffset = getZoneOffset(calendar);
-        calendar.add(Calendar.MILLISECOND, -zoneOffset * 1000);
+        calendar.add(Calendar.SECOND, -zoneOffset);
         calendar.set(Calendar.ZONE_OFFSET, 0);
 
         return calendar;
@@ -168,7 +184,7 @@ public class Calendars {
     public static Calendar createTimeInMillis() {
         final Timestamp time = Timestamps.getCurrentTime();
         final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
+        calendar.setTimeInMillis(time.getSeconds() * 1000);
         return calendar;
     }
 }

@@ -29,6 +29,11 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.time.Calendars.createTimeWithZoneOffset;
+import static org.spine3.time.Calendars.getHours;
+import static org.spine3.time.Calendars.getMinutes;
+import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.Calendars.getZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetTimesShould {
@@ -40,41 +45,91 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_current_OffsetTime_using_ZoneOffset() {
-        final int expectedSeconds = 3*Timestamps.SECONDS_PER_HOUR;
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetTime now = OffsetTimes.now(inKiev);
+        final Calendar cal = createTimeWithZoneOffset(inKiev);
 
-        final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-
-        assertEquals(calendar.get(Calendar.HOUR), now.getTime().getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), now.getTime().getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), now.getTime().getSeconds());
-        assertEquals(expectedSeconds, now.getOffset().getAmountSeconds());
+        assertEquals(getHours(cal), now.getTime().getHours());
+        assertEquals(getMinutes(cal), now.getTime().getMinutes());
+        assertEquals(getSeconds(cal), now.getTime().getSeconds());
+        assertEquals(getZoneOffset(cal), now.getOffset().getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
     @Test
     public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
-        final int expectedSeconds = 5*Timestamps.SECONDS_PER_HOUR + 30*Timestamps.SECONDS_PER_MINUTE;
+        final int hours = 12;
+        final int minutes = 5;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
         final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalTime localTime = LocalTimes.now();
-        final LocalTime inOneHour = LocalTimes.plusHours(localTime, 1);
-        final OffsetTime inOneHourInDelhi = OffsetTimes.of(inOneHour, inDelhi);
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, inDelhi);
 
-        final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-        calendar.add(Calendar.HOUR, 1);
-
-
-        assertEquals(calendar.get(Calendar.HOUR), inOneHourInDelhi.getTime().getHours());
-        assertEquals(calendar.get(Calendar.MINUTE), inOneHourInDelhi.getTime().getMinutes());
-        assertEquals(calendar.get(Calendar.SECOND), inOneHourInDelhi.getTime().getSeconds());
-        assertEquals(expectedSeconds, inOneHourInDelhi.getOffset().getAmountSeconds());
-         /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours == localTimeInDelhi.getTime().getHours());
+        assertTrue(minutes == localTimeInDelhi.getTime().getMinutes());
+        assertTrue(seconds == localTimeInDelhi.getTime().getSeconds());
+        assertTrue(millis == localTimeInDelhi.getTime().getMillis());
+        assertTrue(nanos == localTimeInDelhi.getTime().getNanos());
+        assertTrue(inDelhi.getAmountSeconds() == localTimeInDelhi.getOffset().getAmountSeconds());
     }
-    
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_hoursToAdd() {
+        final int hoursToAdd = -5;
+        final OffsetTime now = null;
+        OffsetTimes.plusHours(now, hoursToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_minutesToAdd() {
+        final int minutesToAdd = 7;
+        final OffsetTime now = null;
+        OffsetTimes.plusMinutes(now, minutesToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_secondsToAdd() {
+        final int secondsToAdd = 25;
+        final OffsetTime now = null;
+        OffsetTimes.plusSeconds(now, secondsToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_millisToAdd() {
+        final int millisToAdd = 205;
+        final OffsetTime now = null;
+        OffsetTimes.plusMillis(now, millisToAdd);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_hoursToSubtract() {
+        final int hoursToSubtract = 6;
+        final OffsetTime now = null;
+        OffsetTimes.minusHours(now, hoursToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_minutesToSubtract() {
+        final int minutesToSubtract = 8;
+        final OffsetTime now = null;
+        OffsetTimes.minusMinutes(now, minutesToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_secondsToSubtract() {
+        final int secondsToSubtract = 27;
+        final OffsetTime now = null;
+        OffsetTimes.minusSeconds(now, secondsToSubtract);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_OffsetTime_value_with_millisToSubtract() {
+        final int millisToSubtract = 245;
+        final OffsetTime now = null;
+        OffsetTimes.minusMillis(now, millisToSubtract);
+    }
+
 
 }

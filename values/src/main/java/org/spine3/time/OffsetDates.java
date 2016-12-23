@@ -27,6 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Changes.ErrorMessage;
 import static org.spine3.time.Calendars.createDate;
 import static org.spine3.time.Calendars.createDateWithNoOffset;
+import static org.spine3.time.Calendars.createDateWithZoneOffset;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getYear;
 import static org.spine3.validate.Validate.checkPositive;
@@ -46,9 +47,7 @@ public class OffsetDates {
      */
     public static OffsetDate now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
-        final Calendar cal = createDateWithNoOffset();
-        cal.add(Calendar.MILLISECOND, zoneOffset.getAmountSeconds()*1000);
-        cal.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds()*1000);
+        final Calendar cal = createDateWithZoneOffset(zoneOffset);
         final LocalDate localDate = LocalDates.of(getYear(cal),
                                                   MonthOfYears.getMonth(cal),
                                                   getDay(cal));
