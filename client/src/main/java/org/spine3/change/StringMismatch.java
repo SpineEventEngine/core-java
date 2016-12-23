@@ -20,13 +20,10 @@
 
 package org.spine3.change;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 
-import javax.annotation.Nullable;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.util.Exceptions.wrapped;
 
@@ -41,19 +38,21 @@ public class StringMismatch {
         // Prevent instantiation of this utility class.
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Document.
-    //TODO:2016-12-22:alexander.yevsyukov: Test.
+    /**
+     * Creates {@link ValueMismatch} for the case of discovering a non-empty value,
+     * when an empty string was expected by a command.
+     *
+     * @param actual the value discovered instead of the empty string
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
     public static ValueMismatch expectedEmpty(String actual, String newValue, int version) {
+        checkNotNull(actual);
+        checkNotNull(newValue);
         return of("", actual, newValue, version);
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Document.
-    //TODO:2016-12-22:alexander.yevsyukov: Test.
-    public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
-        return of(expected, actual, newValue, version);
-    }
-
-    //TODO:2016-12-22:alexander.yevsyukov: Test.
     /**
      * Creates a mismatch for a command that wanted to clear a string value, but discovered
      * that the field is already empty.
@@ -62,34 +61,44 @@ public class StringMismatch {
      * @param version the current version of the entity
      * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch alreadyEmpty(String expected, int version) {
+    public static ValueMismatch expectedNotEmpty(String expected, int version) {
+        checkNotNull(expected);
         return of(expected, "", "", version);
+    }
+
+    /**
+     * Creates {@link ValueMismatch} for the case of discovering a value different than by a command.
+     *
+     * @param expected the value expected by the command
+     * @param actual the value discovered instead of the expected string
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
+        checkNotNull(expected);
+        checkNotNull(actual);
+        checkNotNull(newValue);
+        return of(expected, actual, newValue, version);
     }
 
     /**
      * Creates a {@link ValueMismatch} instance for a string attribute.
      *
-     * @param expected the value expected by a command, or {@code null} if the command expects not populated field
-     * @param actual   the value found in an entity, or {@code null} if the value is not set
+     * @param expected the value expected by a command
+     * @param actual   the value found in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
      * @return new {@link ValueMismatch} instance
      */
-    public static ValueMismatch of(@Nullable String expected,
-                                   @Nullable String actual,
-                                   @Nullable String newValue,
-                                   int version) {
+    private static ValueMismatch of(String expected, String actual, String newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch
                 .newBuilder()
-                .setExpectedPreviousValue(packStr(expected))
-                .setActualPreviousValue(packStr(actual))
-                .setNewValue(packStr(newValue))
+                .setExpectedPreviousValue(pack(expected))
+                .setActualPreviousValue(pack(actual))
+                .setNewValue(pack(newValue))
                 .setVersion(version);
         return builder.build();
-    }
-
-    private static Any packStr(@Nullable String expected) {
-        return pack(Strings.nullToEmpty(expected));
     }
 
     /**
