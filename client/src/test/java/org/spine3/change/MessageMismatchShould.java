@@ -25,6 +25,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.change.StringMismatch.unpackActual;
+import static org.spine3.change.StringMismatch.unpackExpected;
+import static org.spine3.change.StringMismatch.unpackNewValue;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -70,4 +73,21 @@ public class MessageMismatchShould {
         assertEquals(ACTUAL, actual.getValue());
     }
 
+    @Test
+    public void unpack_expected() {
+        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+    }
+
+    @Test
+    public void unpack_actual() {
+        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
+        assertEquals(ACTUAL, unpackActual(mismatch));
+    }
+
+    @Test
+    public void unpack_newValue() {
+        final ValueMismatch mismatch = MessageMismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(NEW_VALUE), VERSION);
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+    }
 }

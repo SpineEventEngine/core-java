@@ -37,6 +37,8 @@ public class MessageMismatch {
         // Prevent instantiation of this utility class.
     }
 
+    //TODO:2016-12-22:alexander.yevsyukov: Rename properties of the ValueMismatch proto removing 'previous_value' suffix.
+
     /**
      * Creates a {@link ValueMismatch} instance for a Message attribute.
      *
