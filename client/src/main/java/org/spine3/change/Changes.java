@@ -38,6 +38,9 @@ public class Changes {
     public interface ErrorMessage {
         String PREVIOUS_VALUE = "previousValue";
         String NEW_VALUE = "newValue";
+        String ZONE_OFFSET = "zoneOffset";
+        String LOCAL_DATE = "localDate";
+        String OFFSET_DATE = "offsetDate";
         String VALUES_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
         String NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
         String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";

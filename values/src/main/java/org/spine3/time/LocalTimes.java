@@ -25,6 +25,12 @@ import org.spine3.time.change.Changes.ArgumentName;
 
 import java.util.Calendar;
 
+import static org.spine3.time.Calendars.createTime;
+import static org.spine3.time.Calendars.createTimeInMillis;
+import static org.spine3.time.Calendars.getHours;
+import static org.spine3.time.Calendars.getMillis;
+import static org.spine3.time.Calendars.getMinutes;
+import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -42,26 +48,20 @@ public class LocalTimes {
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() / 1000);
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-        final int seconds = calendar.get(Calendar.SECOND);
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        final long nanos = time.getNanos();
+        final Calendar cal = createTimeInMillis();
 
         final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(hours)
-                                          .setMinutes(minutes)
-                                          .setSeconds(seconds)
-                                          .setMillis(millis)
-                                          .setNanos(nanos)
+                                          .setHours(getHours(cal))
+                                          .setMinutes(getMinutes(cal))
+                                          .setSeconds(getSeconds(cal))
+                                          .setMillis(getMillis(cal))
+                                          .setNanos(time.getNanos())
                                           .build();
         return result;
     }
 
     /**
-     * Obtains local time from an hours, minutes, seconds millisecond and nanosecond.
+     * Obtains local time from an hours, minutes, seconds, milliseconds, and nanoseconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds, int millis, long nanos) {
         checkPositive(hours, ArgumentName.HOURS);
@@ -80,7 +80,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains local time from an hours, minutes, seconds and milliseconds.
+     * Obtains local time from an hours, minutes, seconds, and milliseconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds, int millis) {
         checkPositive(hours, ArgumentName.HOURS);
@@ -97,7 +97,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains local time from an hours, minutes and seconds.
+     * Obtains local time from an hours, minutes, and seconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds) {
         checkPositive(hours, ArgumentName.HOURS);
@@ -112,7 +112,7 @@ public class LocalTimes {
     }
 
     /**
-     * Obtains local time from an hours and minutes.
+     * Obtains local time from an hours, and minutes.
      */
     public static LocalTime of(int hours, int minutes) {
         checkPositive(hours, ArgumentName.HOURS);
@@ -187,35 +187,26 @@ public class LocalTimes {
         checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
         return changeMillis(localTime, millisToSubtract);
     }
-    
+
     /**
      * Obtains local time changed on specified amount of hours.
      *
-     * @param localTime local time that will be changed
+     * @param localTime  local time that will be changed
      * @param hoursDelta a number of hours that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local time with new hours value
      */
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, localTime.getHours());
-        calendar.set(Calendar.MINUTE, localTime.getMinutes());
-        calendar.set(Calendar.SECOND, localTime.getSeconds());
-        calendar.set(Calendar.MILLISECOND, localTime.getMillis());
-        calendar.add(Calendar.HOUR, hoursDelta);
-
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-        final int seconds = calendar.get(Calendar.SECOND);
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        final long nanos = time.getNanos();
+        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
+                                        localTime.getSeconds(), localTime.getMillis());
+        cal.add(Calendar.HOUR, hoursDelta);
 
         final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(hours)
-                                          .setMinutes(minutes)
-                                          .setSeconds(seconds)
-                                          .setMillis(millis)
-                                          .setNanos(nanos)
+                                          .setHours(getHours(cal))
+                                          .setMinutes(getMinutes(cal))
+                                          .setSeconds(getSeconds(cal))
+                                          .setMillis(getMillis(cal))
+                                          .setNanos(time.getNanos())
                                           .build();
         return result;
     }
@@ -223,31 +214,22 @@ public class LocalTimes {
     /**
      * Obtains local time changed on specified amount of minutes.
      *
-     * @param localTime local time that will be changed
+     * @param localTime    local time that will be changed
      * @param minutesDelta a number of minutes that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local time with new minutes value
      */
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, localTime.getHours());
-        calendar.set(Calendar.MINUTE, localTime.getMinutes());
-        calendar.set(Calendar.SECOND, localTime.getSeconds());
-        calendar.set(Calendar.MILLISECOND, localTime.getMillis());
-        calendar.add(Calendar.MINUTE, minutesDelta);
-
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-        final int seconds = calendar.get(Calendar.SECOND);
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        final long nanos = time.getNanos();
+        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
+                                        localTime.getSeconds(), localTime.getMillis());
+        cal.add(Calendar.MINUTE, minutesDelta);
 
         final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(hours)
-                                          .setMinutes(minutes)
-                                          .setSeconds(seconds)
-                                          .setMillis(millis)
-                                          .setNanos(nanos)
+                                          .setHours(getHours(cal))
+                                          .setMinutes(getMinutes(cal))
+                                          .setSeconds(getSeconds(cal))
+                                          .setMillis(getMillis(cal))
+                                          .setNanos(time.getNanos())
                                           .build();
         return result;
     }
@@ -255,31 +237,22 @@ public class LocalTimes {
     /**
      * Obtains local time changed on specified amount of seconds.
      *
-     * @param localTime local time that will be changed
+     * @param localTime    local time that will be changed
      * @param secondsDelta a number of seconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local time with new seconds value
      */
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, localTime.getHours());
-        calendar.set(Calendar.MINUTE, localTime.getMinutes());
-        calendar.set(Calendar.SECOND, localTime.getSeconds());
-        calendar.set(Calendar.MILLISECOND, localTime.getMillis());
-        calendar.add(Calendar.SECOND, secondsDelta);
-
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-        final int seconds = calendar.get(Calendar.SECOND);
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        final long nanos = time.getNanos();
+        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
+                                        localTime.getSeconds(), localTime.getMillis());
+        cal.add(Calendar.SECOND, secondsDelta);
 
         final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(hours)
-                                          .setMinutes(minutes)
-                                          .setSeconds(seconds)
-                                          .setMillis(millis)
-                                          .setNanos(nanos)
+                                          .setHours(getHours(cal))
+                                          .setMinutes(getMinutes(cal))
+                                          .setSeconds(getSeconds(cal))
+                                          .setMillis(getMillis(cal))
+                                          .setNanos(time.getNanos())
                                           .build();
         return result;
     }
@@ -287,31 +260,22 @@ public class LocalTimes {
     /**
      * Obtains local time changed on specified amount of milliseconds.
      *
-     * @param localTime local time that will be changed
+     * @param localTime   local time that will be changed
      * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this local time with new milliseconds value
      */
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, localTime.getHours());
-        calendar.set(Calendar.MINUTE, localTime.getMinutes());
-        calendar.set(Calendar.SECOND, localTime.getSeconds());
-        calendar.set(Calendar.MILLISECOND, localTime.getMillis());
-        calendar.add(Calendar.MILLISECOND, millisDelta);
-
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-        final int seconds = calendar.get(Calendar.SECOND);
-        final int millis = calendar.get(Calendar.MILLISECOND);
-        final long nanos = time.getNanos();
+        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
+                                        localTime.getSeconds(), localTime.getMillis());
+        cal.add(Calendar.MILLISECOND, millisDelta);
 
         final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(hours)
-                                          .setMinutes(minutes)
-                                          .setSeconds(seconds)
-                                          .setMillis(millis)
-                                          .setNanos(nanos)
+                                          .setHours(getHours(cal))
+                                          .setMinutes(getMinutes(cal))
+                                          .setSeconds(getSeconds(cal))
+                                          .setMillis(getMillis(cal))
+                                          .setNanos(time.getNanos())
                                           .build();
         return result;
     }

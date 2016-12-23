@@ -46,7 +46,6 @@ public class OffsetTimes {
      * Obtains OffsetTime instance using {@code LocalTime} and {@code ZoneOffset}.
      */
     public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
-
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
                                             .setOffset(zoneOffset)

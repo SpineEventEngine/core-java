@@ -33,6 +33,14 @@ import java.util.Calendar;
 public class Calendars {
 
     /**
+     * Obtains zone offset using {@code Calendar}.
+     */
+    public static int getZoneOffset(Calendar cal) {
+        final int zoneOffset = cal.get(Calendar.ZONE_OFFSET) / 1000;
+        return zoneOffset;
+    }
+
+    /**
      * Obtains year using {@code Calendar}.
      */
     public static int getYear(Calendar cal) {
@@ -94,7 +102,7 @@ public class Calendars {
      */
     public static Calendar createDate(int year, int month, int day) {
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month-1, day);
+        calendar.set(year, month - 1, day);
         return calendar;
     }
 
@@ -128,6 +136,29 @@ public class Calendars {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR, hours);
         calendar.set(Calendar.MINUTE, minutes);
+        return calendar;
+    }
+
+    /**
+     * Obtains calendar using zone offset in seconds.
+     */
+    public static Calendar createDateWithZoneOffset(int zoneOffset) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MILLISECOND, -zoneOffset * 1000);
+        calendar.set(Calendar.ZONE_OFFSET, zoneOffset * 1000);
+
+        return calendar;
+    }
+
+    /**
+     * Obtains calendar with GMT 00:00 zone offset.
+     */
+    public static Calendar createDateWithNoOffset() {
+        final Calendar calendar = Calendar.getInstance();
+        final int zoneOffset = getZoneOffset(calendar);
+        calendar.add(Calendar.MILLISECOND, -zoneOffset * 1000);
+        calendar.set(Calendar.ZONE_OFFSET, 0);
+
         return calendar;
     }
 

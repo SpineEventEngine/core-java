@@ -19,12 +19,16 @@
  */
 package org.spine3.time;
 
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.time.change.Changes.ArgumentName;
 
 import java.util.Calendar;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Changes.ErrorMessage;
+import static org.spine3.time.Calendars.createDate;
+import static org.spine3.time.Calendars.createDateWithNoOffset;
+import static org.spine3.time.Calendars.getDay;
+import static org.spine3.time.Calendars.getYear;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -41,13 +45,13 @@ public class OffsetDates {
      * Obtains offset date in specified {@code ZoneOffset}.
      */
     public static OffsetDate now(ZoneOffset zoneOffset) {
-        final Timestamp now = Timestamps.getCurrentTime();
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(now.getSeconds() / 1000);
-        final LocalDate localDate = LocalDates.of(calendar.get(Calendar.YEAR),
-                                                  MonthOfYears.getMonth(calendar),
-                                                  calendar.get(Calendar.DAY_OF_MONTH));
-
+        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
+        final Calendar cal = createDateWithNoOffset();
+        cal.add(Calendar.MILLISECOND, zoneOffset.getAmountSeconds()*1000);
+        cal.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds()*1000);
+        final LocalDate localDate = LocalDates.of(getYear(cal),
+                                                  MonthOfYears.getMonth(cal),
+                                                  getDay(cal));
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
                                             .setOffset(zoneOffset)
@@ -59,6 +63,8 @@ public class OffsetDates {
      * Obtains offset date using {@code LocalDate} and {@code ZoneOffset}.
      */
     public static OffsetDate of(LocalDate localDate, ZoneOffset zoneOffset) {
+        checkNotNull(localDate, ErrorMessage.LOCAL_DATE);
+        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
                                             .setOffset(zoneOffset)
@@ -70,6 +76,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of years added.
      */
     public static OffsetDate plusYears(OffsetDate offsetDate, int yearsToAdd) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(yearsToAdd, ArgumentName.YEARS_TO_ADD);
         return changeYear(offsetDate, yearsToAdd);
     }
@@ -78,6 +85,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of months added.
      */
     public static OffsetDate plusMonths(OffsetDate offsetDate, int monthsToAdd) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(monthsToAdd, ArgumentName.MONTHS_TO_ADD);
         return changeMonth(offsetDate, monthsToAdd);
     }
@@ -86,6 +94,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of days added.
      */
     public static OffsetDate plusDays(OffsetDate offsetDate, int daysToAdd) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(daysToAdd, ArgumentName.DAYS_TO_ADD);
         return changeDays(offsetDate, daysToAdd);
     }
@@ -94,6 +103,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of years subtracted.
      */
     public static OffsetDate minusYears(OffsetDate offsetDate, int yearsToSubtract) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(yearsToSubtract, ArgumentName.YEARS_TO_SUBTRACT);
         return changeYear(offsetDate, -yearsToSubtract);
     }
@@ -102,6 +112,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of months subtracted.
      */
     public static OffsetDate minusMonths(OffsetDate offsetDate, int monthsToSubtract) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(monthsToSubtract, ArgumentName.MONTHS_TO_SUBTRACT);
         return changeMonth(offsetDate, -monthsToSubtract);
     }
@@ -110,6 +121,7 @@ public class OffsetDates {
      * Obtains a copy of this offset date with the specified number of days subtracted.
      */
     public static OffsetDate minusDays(OffsetDate offsetDate, int daysToSubtract) {
+        checkNotNull(offsetDate, ErrorMessage.OFFSET_DATE);
         checkPositive(daysToSubtract, ArgumentName.DAYS_TO_SUBTRACT);
         return changeDays(offsetDate, -daysToSubtract);
     }
@@ -122,22 +134,18 @@ public class OffsetDates {
      * @return copy of this offset date with new years value
      */
     private static OffsetDate changeYear(OffsetDate offsetDate, int yearsDelta) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, offsetDate.getDate().getYear());
-        // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
-        calendar.set(Calendar.MONTH, offsetDate.getDate().getMonthValue() - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, offsetDate.getDate().getDay());
-        calendar.add(Calendar.YEAR, yearsDelta);
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYears.getMonth(calendar);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate localDate = LocalDates.of(year, month, dayOfMonth);
-        final ZoneOffset zoneOffset = offsetDate.getOffset();
+        final Calendar cal = createDate(offsetDate.getDate().getYear(),
+                                        offsetDate.getDate().getMonthValue(),
+                                        offsetDate.getDate().getDay());
+        cal.add(Calendar.YEAR, yearsDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(cal),
+                                                  MonthOfYears.getMonth(cal),
+                                                  getDay(cal));
 
         final OffsetDate result = OffsetDate.newBuilder()
                                           .setDate(localDate)
-                                          .setOffset(zoneOffset)
+                                          .setOffset(offsetDate.getOffset())
                                           .build();
         return result;
     }
@@ -150,22 +158,18 @@ public class OffsetDates {
      * @return copy of this offset date with new months value
      */
     private static OffsetDate changeMonth(OffsetDate offsetDate, int monthDelta) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, offsetDate.getDate().getYear());
-        // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
-        calendar.set(Calendar.MONTH, offsetDate.getDate().getMonthValue() - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, offsetDate.getDate().getDay());
-        calendar.add(Calendar.MONTH, monthDelta);
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYears.getMonth(calendar);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate localDate = LocalDates.of(year, month, dayOfMonth);
-        final ZoneOffset zoneOffset = offsetDate.getOffset();
+        final Calendar cal = createDate(offsetDate.getDate().getYear(),
+                                        offsetDate.getDate().getMonthValue(),
+                                        offsetDate.getDate().getDay());
+        cal.add(Calendar.MONTH, monthDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(cal),
+                                                  MonthOfYears.getMonth(cal),
+                                                  getDay(cal));
 
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
-                                            .setOffset(zoneOffset)
+                                            .setOffset(offsetDate.getOffset())
                                             .build();
         return result;
     }
@@ -178,22 +182,18 @@ public class OffsetDates {
      * @return copy of this offset date with new days value
      */
     private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, offsetDate.getDate().getYear());
-        // The Calendar class assumes JANUARY is zero. Therefore subtract 1 to set the value of Calendar.MONTH.
-        calendar.set(Calendar.MONTH, offsetDate.getDate().getMonthValue() - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, offsetDate.getDate().getDay());
-        calendar.add(Calendar.DAY_OF_MONTH, daysDelta);
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYears.getMonth(calendar);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate localDate = LocalDates.of(year, month, dayOfMonth);
-        final ZoneOffset zoneOffset = offsetDate.getOffset();
+        final Calendar cal = createDate(offsetDate.getDate().getYear(),
+                                        offsetDate.getDate().getMonthValue(),
+                                        offsetDate.getDate().getDay());
+        cal.add(Calendar.DAY_OF_MONTH, daysDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(cal),
+                                                  MonthOfYears.getMonth(cal),
+                                                  getDay(cal));
 
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
-                                            .setOffset(zoneOffset)
+                                            .setOffset(offsetDate.getOffset())
                                             .build();
         return result;
     }

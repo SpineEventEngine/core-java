@@ -56,7 +56,7 @@ public class LocalDatesShould {
         final int month = 4;
         final int day = 1;
         final Calendar cal = createDate(year, month, day);
-        final LocalDate localDate = LocalDates.of(1976, MonthOfYear.APRIL, 1);
+        final LocalDate localDate = LocalDates.of(year, MonthOfYear.APRIL, day);
 
         assertEquals(getYear(cal), localDate.getYear());
         assertEquals(getMonth(cal), localDate.getMonthValue());
