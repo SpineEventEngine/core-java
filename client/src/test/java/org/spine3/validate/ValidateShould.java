@@ -41,7 +41,12 @@ public class ValidateShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_int_value_is_not_positive() {
-        Validate.checkPositive(-1, "Day");
+        Validate.checkPositive(-1, "negativeInteger");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_long_value_is_not_positive() {
+        Validate.checkPositive(-2L, "negativeLong");
     }
 
     @Test
