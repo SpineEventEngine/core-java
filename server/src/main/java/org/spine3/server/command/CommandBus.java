@@ -32,6 +32,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
