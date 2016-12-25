@@ -472,6 +472,8 @@ public class CommandBus implements AutoCloseable {
 
             final CommandBus commandBus = new CommandBus(this);
 
+            commandScheduler.setCommandBus(commandBus);
+
             if (autoReschedule) {
                 commandBus.rescheduleCommands();
             }
