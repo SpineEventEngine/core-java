@@ -58,7 +58,7 @@ import static org.spine3.time.Intervals.toDuration;
 
     @VisibleForTesting
     /* package */ void rescheduleCommands() {
-        final Iterator<Command> commands = commandBus.getCommandStore().iterator(SCHEDULED);
+        final Iterator<Command> commands = commandBus.commandStore().iterator(SCHEDULED);
         while (commands.hasNext()) {
             final Command command = commands.next();
             final Timestamp now = getCurrentTime();
@@ -69,7 +69,7 @@ import static org.spine3.time.Intervals.toDuration;
                 final Interval interval = between(now, timeToPost);
                 final Duration newDelay = toDuration(interval);
                 final Command commandUpdated = setSchedule(command, newDelay, now);
-                commandBus.getScheduler().schedule(commandUpdated);
+                commandBus.scheduler().schedule(commandUpdated);
             }
         }
     }
@@ -86,7 +86,7 @@ import static org.spine3.time.Intervals.toDuration;
         // Also, posting it can be undesirable.
         final Message msg = getMessage(command);
         final CommandId id = getId(command);
-        commandBus.getProblemLog().errorExpiredCommand(msg, id);
+        commandBus.problemLog().errorExpiredCommand(msg, id);
         commandBus.getCommandStatusService().setToError(id, commandExpiredError(msg));
     }
 }

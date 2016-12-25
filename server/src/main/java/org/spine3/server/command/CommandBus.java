@@ -320,21 +320,21 @@ public class CommandBus implements AutoCloseable {
     }
 
 
-    /* package */ CommandStore getCommandStore() {
+    /* package */ CommandStore commandStore() {
         return commandStore;
     }
 
-    /* package */ ProblemLog getProblemLog() {
+    /* package */ ProblemLog problemLog() {
         return problemLog;
     }
 
     @VisibleForTesting
-    /* package */ Rescheduler getRescheduler() {
+    /* package */ Rescheduler rescheduler() {
         return rescheduler;
     }
 
     @VisibleForTesting
-    /* package */ CommandScheduler getScheduler() {
+    /* package */ CommandScheduler scheduler() {
         return scheduler;
     }
 

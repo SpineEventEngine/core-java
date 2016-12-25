@@ -170,7 +170,7 @@ public class CommandBusShould {
                                                 .build();
         assertNotNull(commandBus);
 
-        final CommandScheduler actualScheduler = commandBus.getScheduler();
+        final CommandScheduler actualScheduler = commandBus.scheduler();
         assertEquals(expectedScheduler, actualScheduler);
     }
 
@@ -565,7 +565,7 @@ public class CommandBusShould {
         final List<Command> commandsPrimary = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        commandBus.getRescheduler().rescheduleCommands();
+        commandBus.rescheduler().rescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -657,7 +657,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        commandBus.getRescheduler().rescheduleCommands();
+        commandBus.rescheduler().rescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);
