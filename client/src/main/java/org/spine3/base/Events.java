@@ -29,7 +29,6 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.users.UserId;
-import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
