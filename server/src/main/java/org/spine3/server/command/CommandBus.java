@@ -21,17 +21,15 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
@@ -43,28 +41,19 @@ import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
-import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.isScheduled;
-import static org.spine3.base.Commands.setSchedule;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.isLaterThan;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
-import static org.spine3.time.Intervals.between;
-import static org.spine3.time.Intervals.toDuration;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -89,7 +78,7 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandScheduler scheduler;
 
-    private final CommandRescheduler rescheduler;
+    private final Rescheduler rescheduler;
 
     private final ProblemLog problemLog;
 
@@ -144,7 +133,7 @@ public class CommandBus implements AutoCloseable {
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
-        this.rescheduler = new CommandRescheduler();
+        this.rescheduler = new Rescheduler(this);
         this.isThreadSpawnAllowed = threadSpawnAllowed;
     }
 
@@ -330,8 +319,17 @@ public class CommandBus implements AutoCloseable {
         return commandStatusService;
     }
 
+
+    /* package */ CommandStore getCommandStore() {
+        return commandStore;
+    }
+
+    /* package */ ProblemLog getProblemLog() {
+        return problemLog;
+    }
+
     @VisibleForTesting
-    /* package */ CommandRescheduler getRescheduler() {
+    /* package */ Rescheduler getRescheduler() {
         return rescheduler;
     }
 
@@ -398,43 +396,6 @@ public class CommandBus implements AutoCloseable {
         handlerRegistry.unregisterAll();
         commandStore.close();
         scheduler.shutdown();
-    }
-
-    @VisibleForTesting
-    /* package */ class CommandRescheduler {
-
-        @VisibleForTesting
-        /* package */ void rescheduleCommands() {
-            final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
-            while (commands.hasNext()) {
-                final Command command = commands.next();
-                final Timestamp now = getCurrentTime();
-                final Timestamp timeToPost = getTimeToPost(command);
-                if (isLaterThan(now, /*than*/ timeToPost)) {
-                    onScheduledCommandExpired(command);
-                } else {
-                    final Interval interval = between(now, timeToPost);
-                    final Duration newDelay = toDuration(interval);
-                    final Command commandUpdated = setSchedule(command, newDelay, now);
-                    scheduler.schedule(commandUpdated);
-                }
-            }
-        }
-
-        private Timestamp getTimeToPost(Command command) {
-            final Schedule schedule = command.getContext().getSchedule();
-            final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
-            return timeToPost;
-        }
-
-        private void onScheduledCommandExpired(Command command) {
-            // We cannot post this command because there is no handler/dispatcher registered yet.
-            // Also, posting it can be undesirable.
-            final Message msg = getMessage(command);
-            final CommandId id = getId(command);
-            problemLog.errorExpiredCommand(msg, id);
-            commandStatusService.setToError(id, commandExpiredError(msg));
-        }
     }
 
     /**
