@@ -56,21 +56,41 @@ import static org.spine3.time.Intervals.toDuration;
         this.commandBus = commandBus;
     }
 
-    @VisibleForTesting
     /* package */ void rescheduleCommands() {
+        final Runnable reschedulingAction = new Runnable() {
+            @Override
+            public void run() {
+                doRescheduleCommands();
+            }
+        };
+
+        if (commandBus.isThreadSpawnAllowed()) {
+            final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
+            thread.start();
+        } else {
+            reschedulingAction.run();
+        }
+    }
+
+    @VisibleForTesting
+    /* package */ void doRescheduleCommands() {
         final Iterator<Command> commands = commandBus.commandStore().iterator(SCHEDULED);
         while (commands.hasNext()) {
             final Command command = commands.next();
-            final Timestamp now = getCurrentTime();
-            final Timestamp timeToPost = getTimeToPost(command);
-            if (isLaterThan(now, /*than*/ timeToPost)) {
-                onScheduledCommandExpired(command);
-            } else {
-                final Interval interval = between(now, timeToPost);
-                final Duration newDelay = toDuration(interval);
-                final Command commandUpdated = setSchedule(command, newDelay, now);
-                commandBus.scheduler().schedule(commandUpdated);
-            }
+            reschedule(command);
+        }
+    }
+
+    private void reschedule(Command command) {
+        final Timestamp now = getCurrentTime();
+        final Timestamp timeToPost = getTimeToPost(command);
+        if (isLaterThan(now, /*than*/ timeToPost)) {
+            onScheduledCommandExpired(command);
+        } else {
+            final Interval interval = between(now, timeToPost);
+            final Duration newDelay = toDuration(interval);
+            final Command commandUpdated = setSchedule(command, newDelay, now);
+            commandBus.scheduler().schedule(commandUpdated);
         }
     }
 

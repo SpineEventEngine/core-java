@@ -35,16 +35,12 @@ import org.spine3.base.Responses;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
-import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
-import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,7 +48,6 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.isScheduled;
-import static org.spine3.validate.Validate.isDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -60,11 +55,14 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  * @author Alexander Litus
+ * @author Alex Tymchenko
  */
 public class CommandBus implements AutoCloseable {
 
     // TODO:2016-05-31:alexander.litus: consider extracting class(es), moving methods, etc,
     // because this class is overly coupled.
+
+    private final Filter filter;
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
 
@@ -104,7 +102,13 @@ public class CommandBus implements AutoCloseable {
              builder.getCommandScheduler(),
              new Log(),
              builder.isThreadSpawnAllowed());
-        rescheduleCommands();
+    }
+
+    /**
+     * Initializes the instance by rescheduling commands.
+     */
+    private void init() {
+        rescheduler.rescheduleCommands();
     }
 
     /**
@@ -122,7 +126,7 @@ public class CommandBus implements AutoCloseable {
      * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK here because Rescheduler only stores the reference.
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only stores the reference.
     @VisibleForTesting
     /* package */ CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
@@ -130,10 +134,11 @@ public class CommandBus implements AutoCloseable {
                              boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
-        this.scheduler = scheduler;
-        this.log = log;
-        this.rescheduler = new Rescheduler(this);
+        this.scheduler = checkNotNull(scheduler);
+        this.log = checkNotNull(log);
         this.isThreadSpawnAllowed = threadSpawnAllowed;
+        this.filter = new Filter(this);
+        this.rescheduler = new Rescheduler(this);
     }
 
     /**
@@ -193,12 +198,13 @@ public class CommandBus implements AutoCloseable {
      */
     public void post(Command command, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(command);
+
         // If the command is not supported, return as error.
         if (!isSupportedCommand(commandClass)) {
             handleUnsupported(command, responseObserver);
             return;
         }
-        if (!handleValidation(command, responseObserver)) {
+        if (!filter.handleValidation(command, responseObserver)) {
             return;
         }
         if (isScheduled(command)) {
@@ -234,33 +240,10 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    /** Returns {@code true} if a command is valid, {@code false} otherwise. */
-    private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
-        final TenantId tenantId = command.getContext().getTenantId();
-        if (isMultitenant && isDefault(tenantId)) {
-            final CommandException noTenantDefined = InvalidCommandException.onMissingTenantId(command);
-            storeWithError(command, noTenantDefined);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
-            return false; // and nothing else matters
-        }
-        final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
-        if (!violations.isEmpty()) {
-            final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
-            storeWithError(command, invalidCommand);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
-            return false;
-        }
-        return true;
-    }
-
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(command);
-        storeWithError(command, unsupported);
+        commandStore.storeWithError(command, unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
-    }
-
-    private void storeWithError(Command command, CommandException exception) {
-        commandStore.store(command, exception.getError());
     }
 
     private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
@@ -268,21 +251,6 @@ public class CommandBus implements AutoCloseable {
         commandStore.store(command, SCHEDULED);
         responseObserver.onNext(Responses.ok());
         responseObserver.onCompleted();
-    }
-
-    private void rescheduleCommands() {
-        final Runnable reschedulingAction = new Runnable() {
-            @Override
-            public void run() {
-                rescheduler.rescheduleCommands();
-            }
-        };
-        if(isThreadSpawnAllowed) {
-            final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
-            thread.start();
-        } else {
-            reschedulingAction.run();
-        }
     }
 
     /**
@@ -313,11 +281,20 @@ public class CommandBus implements AutoCloseable {
         return result;
     }
 
-    /** Obtains the instance of the {@link CommandStatusService} associated with this command bus. */
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
     public CommandStatusService getCommandStatusService() {
         return commandStatusService;
     }
 
+    /* package */ boolean isMultitenant() {
+        return isMultitenant;
+    }
+
+    /* package */ boolean isThreadSpawnAllowed() {
+        return isThreadSpawnAllowed;
+    }
 
     /* package */ CommandStore commandStore() {
         return commandStore;
@@ -472,6 +449,7 @@ public class CommandBus implements AutoCloseable {
             }
 
             final CommandBus commandBus = new CommandBus(this);
+            commandBus.init();
             return commandBus;
         }
     }
