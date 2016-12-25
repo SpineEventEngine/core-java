@@ -23,8 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -80,7 +78,7 @@ public class CommandBus implements AutoCloseable {
 
     private final Rescheduler rescheduler;
 
-    private final ProblemLog problemLog;
+    private final Log log;
 
     /**
      * Is true, if the {@code BoundedContext} (to which this {@code CommandBus} belongs) is multi-tenant.
@@ -104,7 +102,7 @@ public class CommandBus implements AutoCloseable {
     private CommandBus(Builder builder) {
         this(builder.getCommandStore(),
              builder.getCommandScheduler(),
-             new ProblemLog(),
+             new Log(),
              builder.isThreadSpawnAllowed());
         rescheduleCommands();
     }
@@ -121,18 +119,19 @@ public class CommandBus implements AutoCloseable {
      *
      * @param commandStore       a store to save commands
      * @param scheduler          a command scheduler
-     * @param problemLog         a problem logger
+     * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK here because Rescheduler only stores the reference.
     @VisibleForTesting
     /* package */ CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
-                             ProblemLog problemLog,
+                             Log log,
                              boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
-        this.problemLog = problemLog;
+        this.log = log;
         this.rescheduler = new Rescheduler(this);
         this.isThreadSpawnAllowed = threadSpawnAllowed;
     }
@@ -324,8 +323,8 @@ public class CommandBus implements AutoCloseable {
         return commandStore;
     }
 
-    /* package */ ProblemLog problemLog() {
-        return problemLog;
+    /* package */ Log problemLog() {
+        return log;
     }
 
     @VisibleForTesting
@@ -345,7 +344,7 @@ public class CommandBus implements AutoCloseable {
         try {
             dispatcher.dispatch(command);
         } catch (Exception e) {
-            problemLog.errorDispatching(e, command);
+            log.errorDispatching(e, command);
             commandStatusService.setToError(commandId, e);
         }
     }
@@ -367,14 +366,14 @@ public class CommandBus implements AutoCloseable {
         //noinspection ChainOfInstanceofChecks
         if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
-            problemLog.errorHandling(exception, msg, commandId);
+            log.errorHandling(exception, msg, commandId);
             commandStatusService.setToError(commandId, exception);
         } else if (cause instanceof FailureThrowable){
             final FailureThrowable failure = (FailureThrowable) cause;
-            problemLog.failureHandling(failure, msg, commandId);
+            log.failureHandling(failure, msg, commandId);
             commandStatusService.setToFailure(commandId, failure);
         } else {
-            problemLog.errorHandlingUnknown(cause, msg, commandId);
+            log.errorHandlingUnknown(cause, msg, commandId);
             final Error error = Errors.fromThrowable(cause);
             commandStatusService.setToError(commandId, error);
         }
@@ -475,16 +474,5 @@ public class CommandBus implements AutoCloseable {
             final CommandBus commandBus = new CommandBus(this);
             return commandBus;
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
-    }
-
-    /** The logger instance used by {@code CommandBus}. */
-    /* package */ static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

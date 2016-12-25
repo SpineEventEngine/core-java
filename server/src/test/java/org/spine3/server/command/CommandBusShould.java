@@ -108,7 +108,7 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private ProblemLog log;
+    private Log log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -119,7 +119,7 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new ProblemLog());
+        log = spy(new Log());
         commandBus = new CommandBus(commandStore, scheduler, log, true);
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
@@ -274,7 +274,7 @@ public class CommandBusShould {
 
     @Test // To improve coverage stats.
     public void have_log() {
-        assertNotNull(CommandBus.log());
+        assertNotNull(Log.log());
     }
 
     @Test // To improve coverage stats.

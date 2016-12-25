@@ -21,16 +21,33 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
 
 import static org.spine3.base.Commands.formatCommandTypeAndId;
 import static org.spine3.base.Commands.formatMessageTypeAndId;
-import static org.spine3.server.command.CommandBus.log;
 
-/** Convenience wrapper for logging errors and warnings. */
-/* package */ class ProblemLog {
+/**
+ * Convenience wrapper for logging errors and warnings.
+ *
+ * @author Alexander Yevsyukov
+ */
+/* package */ class Log {
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
+    }
+
+    /** The logger instance used by {@code CommandBus}. */
+    /* package */ static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
     /* package */ void errorDispatching(Exception exception, Command command) {
         final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
         log().error(msg, exception);
