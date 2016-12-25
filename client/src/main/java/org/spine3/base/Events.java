@@ -286,9 +286,6 @@ public class Events {
         return Optional.fromNullable(result);
     }
 
-    //TODO:2016-06-17:alexander.yevsyukov: Evaluate using this function instead of Messages.fromAny() in general.
-    // The below approach may already work.
-
     private static <T extends Message> T unpack(Class<T> clazz, Any any) {
         final T result;
         try {
