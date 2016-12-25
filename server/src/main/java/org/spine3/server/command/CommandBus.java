@@ -59,9 +59,6 @@ import static org.spine3.base.Commands.isScheduled;
  */
 public class CommandBus implements AutoCloseable {
 
-    // TODO:2016-05-31:alexander.litus: consider extracting class(es), moving methods, etc,
-    // because this class is overly coupled.
-
     private final Filter filter;
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
@@ -100,14 +97,14 @@ public class CommandBus implements AutoCloseable {
     private CommandBus(Builder builder) {
         this(builder.getCommandStore(),
              builder.getCommandScheduler(),
-             new Log(),
+             builder.log,
              builder.isThreadSpawnAllowed());
     }
 
     /**
      * Initializes the instance by rescheduling commands.
      */
-    private void init() {
+    private void rescheduleCommands() {
         rescheduler.rescheduleCommands();
     }
 
@@ -126,9 +123,8 @@ public class CommandBus implements AutoCloseable {
      * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only stores the reference.
-    @VisibleForTesting
-    /* package */ CommandBus(CommandStore commandStore,
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only store the reference.
+    private CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
                              Log log,
                              boolean threadSpawnAllowed) {
@@ -381,6 +377,8 @@ public class CommandBus implements AutoCloseable {
 
         private CommandStore commandStore;
 
+        private Log log;
+
         /**
          * Optional field for the {@code CommandBus}.
          *
@@ -397,6 +395,13 @@ public class CommandBus implements AutoCloseable {
          * <p>The default value of this flag is set upon the best guess, based on current {@link Environment}.
          */
         private boolean threadSpawnAllowed = detectThreadsAllowed();
+
+        /**
+         * If set the builder will not call {@link CommandBus#rescheduleCommands()}.
+         *
+         * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
+         */
+        private boolean autoReschedule;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed withing the current runtime environment.
@@ -436,7 +441,20 @@ public class CommandBus implements AutoCloseable {
             return this;
         }
 
-        private Builder() {}
+        @VisibleForTesting
+        /* package */ Builder setLog(Log log) {
+            this.log = log;
+            return this;
+        }
+
+        @VisibleForTesting Builder setAutoReschedule(boolean autoReschedule) {
+            this.autoReschedule = autoReschedule;
+            return this;
+        }
+
+        private Builder() {
+            // Do not allow creating builder instances directly.
+        }
 
         /**
          * Builds an instance of {@link CommandBus}.
@@ -448,8 +466,16 @@ public class CommandBus implements AutoCloseable {
                 commandScheduler = new ExecutorCommandScheduler();
             }
 
+            if (log == null) {
+                log = new Log();
+            }
+
             final CommandBus commandBus = new CommandBus(this);
-            commandBus.init();
+
+            if (autoReschedule) {
+                commandBus.rescheduleCommands();
+            }
+
             return commandBus;
         }
     }

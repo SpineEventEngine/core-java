@@ -120,7 +120,13 @@ public class CommandBusShould {
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
-        commandBus = new CommandBus(commandStore, scheduler, log, true);
+        commandBus = CommandBus.newBuilder()
+                .setCommandStore(commandStore)
+                .setCommandScheduler(scheduler)
+                .setThreadSpawnAllowed(true)
+                .setLog(log)
+                .setAutoReschedule(false)
+                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -587,6 +593,7 @@ public class CommandBusShould {
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(true)
+                                                .setAutoReschedule(true)
                                                 .build();
         assertNotNull(commandBus);
 
@@ -618,6 +625,7 @@ public class CommandBusShould {
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(false)
+                                                .setAutoReschedule(true)
                                                 .build();
         assertNotNull(commandBus);
 
