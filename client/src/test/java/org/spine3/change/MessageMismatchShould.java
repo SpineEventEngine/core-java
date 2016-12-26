@@ -58,7 +58,7 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void creates_instance_for_unexpected_default_value() {
+    public void create_instance_for_unexpected_default_value() {
         final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
