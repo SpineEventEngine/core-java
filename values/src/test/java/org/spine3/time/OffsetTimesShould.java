@@ -36,6 +36,8 @@ import static org.spine3.time.Calendars.getZoneOffset;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetTimesShould {
 
+    private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(3, 30);
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(OffsetTimes.class));
@@ -43,10 +45,8 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_current_OffsetTime_using_ZoneOffset() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(inKiev);
-        final Calendar cal = createTimeWithZoneOffset(inKiev);
-
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final Calendar cal = createTimeWithZoneOffset(ZONE_OFFSET);
         assertEquals(getHours(cal), now.getTime().getHours());
         assertEquals(getMinutes(cal), now.getTime().getMinutes());
         assertEquals(getSeconds(cal), now.getTime().getSeconds());
@@ -61,16 +61,15 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, inDelhi);
+        final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, ZONE_OFFSET);
 
         assertTrue(hours == localTimeInDelhi.getTime().getHours());
         assertTrue(minutes == localTimeInDelhi.getTime().getMinutes());
         assertTrue(seconds == localTimeInDelhi.getTime().getSeconds());
         assertTrue(millis == localTimeInDelhi.getTime().getMillis());
         assertTrue(nanos == localTimeInDelhi.getTime().getNanos());
-        assertTrue(inDelhi.getAmountSeconds() == localTimeInDelhi.getOffset().getAmountSeconds());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == localTimeInDelhi.getOffset().getAmountSeconds());
     }
 
     @Test
@@ -81,10 +80,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.plusHours(localTimeInKiev, hoursToAdd);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.plusHours(offsetTime, hoursToAdd);
 
         assertEquals(hours + hoursToAdd, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -101,10 +99,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.plusMinutes(localTimeInKiev, minutesToAdd);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.plusMinutes(offsetTime, minutesToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
         assertEquals(minutes + minutesToAdd, inFewHours.getTime().getMinutes());
@@ -121,10 +118,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.plusSeconds(localTimeInKiev, secondsToAdd);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.plusSeconds(offsetTime, secondsToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -141,10 +137,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.plusMillis(localTimeInKiev, millisToAdd);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.plusMillis(offsetTime, millisToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -161,10 +156,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.minusHours(localTimeInKiev, hoursToSubtract);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.minusHours(offsetTime, hoursToSubtract);
 
         assertEquals(hours - hoursToSubtract, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -182,10 +176,9 @@ public class OffsetTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.minusMinutes(localTimeInKiev, minutesToSubtract);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.minusMinutes(offsetTime, minutesToSubtract);
 
         assertEquals(hours - 1, inFewHours.getTime().getHours());
         assertEquals(expectedMinutes, inFewHours.getTime().getMinutes());
@@ -202,10 +195,9 @@ public class OffsetTimesShould {
         final int seconds = 36;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.minusSeconds(localTimeInKiev, secondsToSubtract);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.minusSeconds(offsetTime, secondsToSubtract);
 
         assertEquals(hours, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -223,10 +215,9 @@ public class OffsetTimesShould {
         final int seconds = 36;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(5);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetTime localTimeInKiev = OffsetTimes.of(localTime, inKiev);
-        final OffsetTime inFewHours = OffsetTimes.minusMillis(localTimeInKiev, millisToSubtract);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime inFewHours = OffsetTimes.minusMillis(offsetTime, millisToSubtract);
 
         assertEquals(hours, inFewHours.getTime().getHours());
         assertEquals(minutes, inFewHours.getTime().getMinutes());
@@ -294,48 +285,42 @@ public class OffsetTimesShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hoursToAdd() {
         final int hoursToAdd = -5;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.plusHours(now, hoursToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_minutesToAdd() {
         final int minutesToAdd = -7;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.plusMinutes(now, minutesToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_secondsToAdd() {
         final int secondsToAdd = -25;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.plusSeconds(now, secondsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hoursToSubtract() {
         final int hoursToSubtract = -6;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.minusHours(now, hoursToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_minutesToSubtract() {
         final int minutesToSubtract = -8;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.minusMinutes(now, minutesToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_secondsToSubtract() {
         final int secondsToSubtract = -27;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.minusSeconds(now, secondsToSubtract);
     }
 

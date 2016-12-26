@@ -21,7 +21,6 @@
 package org.spine3.time;
 
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
 
 import java.util.Calendar;
 
@@ -37,6 +36,8 @@ import static org.spine3.time.Calendars.getZoneOffset;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetDatesShould {
 
+    private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(5, 30);
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(OffsetDates.class));
@@ -44,9 +45,8 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_current_OffsetDate_using_ZoneOffset() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetDate today = OffsetDates.now(inKiev);
-        final Calendar cal = createDateWithZoneOffset(inKiev);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final Calendar cal = createDateWithZoneOffset(ZONE_OFFSET);
 
         assertEquals(getYear(cal), today.getDate().getYear());
         assertEquals(getMonth(cal), today.getDate().getMonthValue());
@@ -59,40 +59,37 @@ public class OffsetDatesShould {
         final int year = 2006;
         final MonthOfYear month = MonthOfYear.APRIL;
         final int day = 25;
-        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(5, 30);
-        final LocalDate someDay = LocalDates.of(year, month, day);
-        final OffsetDate localDateInDelhi = OffsetDates.of(someDay, inDelhi);
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
 
-        assertTrue(year == localDateInDelhi.getDate().getYear());
-        assertTrue(month == localDateInDelhi.getDate().getMonth());
-        assertTrue(day == localDateInDelhi.getDate().getDay());
-        assertTrue(inDelhi.getAmountSeconds() == localDateInDelhi.getOffset().getAmountSeconds());
+        assertTrue(year == offsetDate.getDate().getYear());
+        assertTrue(month == offsetDate.getDate().getMonth());
+        assertTrue(day == offsetDate.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDate.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_years() {
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate yearAgo = OffsetDates.minusYears(today, 1);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.minusYears(today, 1);
 
-        assertEquals(getYear(cal), yearAgo.getDate().getYear());
-        assertEquals(getMonth(cal), yearAgo.getDate().getMonthValue());
-        assertEquals(getDay(cal), yearAgo.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_months() {
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -2);
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate twoMonthAgo = OffsetDates.minusMonths(today, 2);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.minusMonths(today, 2);
 
-        assertEquals(getYear(cal), twoMonthAgo.getDate().getYear());
-        assertEquals(getMonth(cal), twoMonthAgo.getDate().getMonthValue());
-        assertEquals(getDay(cal), twoMonthAgo.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test
@@ -100,52 +97,48 @@ public class OffsetDatesShould {
         final int daysToSubtract = -60;
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, daysToSubtract);
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate sixtyDaysAgo = OffsetDates.minusDays(today, 60);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.minusDays(today, 60);
 
-        assertEquals(getYear(cal), sixtyDaysAgo.getDate().getYear());
-        assertEquals(getMonth(cal), sixtyDaysAgo.getDate().getMonthValue());
-        assertEquals(getDay(cal), sixtyDaysAgo.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_years() {
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate inFiveYears = OffsetDates.plusYears(today, 5);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.plusYears(today, 5);
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, 5);
 
-        assertEquals(getYear(cal), inFiveYears.getDate().getYear());
-        assertEquals(getMonth(cal), inFiveYears.getDate().getMonthValue());
-        assertEquals(getDay(cal), inFiveYears.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_months() {
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(6);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate inTwoMonths = OffsetDates.plusMonths(today, 2);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.plusMonths(today, 2);
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, 2);
 
-        assertEquals(getYear(cal), inTwoMonths.getDate().getYear());
-        assertEquals(getMonth(cal), inTwoMonths.getDate().getMonthValue());
-        assertEquals(getDay(cal), inTwoMonths.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_days() {
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(2);
-        final OffsetDate today = OffsetDates.now(zoneOffset);
-        final OffsetDate inFiveDays = OffsetDates.plusDays(today, 5);
+        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
+        final OffsetDate offsetDate = OffsetDates.plusDays(today, 5);
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, 5);
 
-        assertEquals(getYear(cal), inFiveDays.getDate().getYear());
-        assertEquals(getMonth(cal), inFiveDays.getDate().getMonthValue());
-        assertEquals(getDay(cal), inFiveDays.getDate().getDay());
+        assertEquals(getYear(cal), offsetDate.getDate().getYear());
+        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
+        assertEquals(getDay(cal), offsetDate.getDate().getDay());
     }
 
     @Test(expected = NullPointerException.class)
@@ -157,8 +150,7 @@ public class OffsetDatesShould {
     @Test(expected = NullPointerException.class)
     public void not_accept_null_LocalDate_value() {
         final LocalDate localDate = null;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        OffsetDates.of(localDate, zoneOffset);
+        OffsetDates.of(localDate, ZONE_OFFSET);
     }
 
     @Test(expected = NullPointerException.class)
@@ -171,7 +163,6 @@ public class OffsetDatesShould {
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_yearsToAdd() {
         final int yearsToAdd = -5;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
         final OffsetDate now = null;
         OffsetDates.plusYears(now, yearsToAdd);
     }
@@ -214,48 +205,42 @@ public class OffsetDatesShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_yearsToAdd() {
         final int yearsToAdd = -5;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.plusYears(now, yearsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToAdd() {
         final int monthsToAdd = -7;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.plusMonths(now, monthsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToAdd() {
         final int daysToAdd = -25;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.plusDays(now, daysToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_yearsToSubtract() {
         final int yearsToSubtract = -6;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.minusYears(now, yearsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToSubtract() {
         final int monthsToSubtract = -8;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.minusMonths(now, monthsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToSubtract() {
         final int daysToSubtract = -27;
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final OffsetDate now = OffsetDates.now(zoneOffset);
+        final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
         OffsetDates.minusDays(now, daysToSubtract);
     }
 }

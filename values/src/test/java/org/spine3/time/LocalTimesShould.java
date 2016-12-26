@@ -110,116 +110,146 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_hours() {
-        final int hoursToAdd = 12;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime inFewHours = LocalTimes.plusHours(now, hoursToAdd);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.HOUR, hoursToAdd);
-        
-        assertEquals(getHours(cal), inFewHours.getHours());
-        assertEquals(getMinutes(cal), inFewHours.getMinutes());
-        assertEquals(getSeconds(cal), inFewHours.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        final int hoursToAdd = 2;
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime inFewHours = LocalTimes.plusHours(localTime, hoursToAdd);
+
+        assertTrue(hours + hoursToAdd == inFewHours.getHours());
+        assertTrue(minutes == inFewHours.getMinutes());
+        assertTrue(seconds == inFewHours.getSeconds());
+        assertTrue(millis == inFewHours.getMillis());
+        assertTrue(nanos == inFewHours.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_minutes() {
-        final int minutesToAdd = 75;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime inFewMinutes = LocalTimes.plusMinutes(now, minutesToAdd);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.MINUTE, minutesToAdd);
+        final int minutesToAdd = 25;
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime inFewMinutes = LocalTimes.plusMinutes(localTime, minutesToAdd);
 
-        assertEquals(getHours(cal), inFewMinutes.getHours());
-        assertEquals(getMinutes(cal), inFewMinutes.getMinutes());
-        assertEquals(getSeconds(cal), inFewMinutes.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours == inFewMinutes.getHours());
+        assertTrue(minutes + minutesToAdd == inFewMinutes.getMinutes());
+        assertTrue(seconds == inFewMinutes.getSeconds());
+        assertTrue(millis == inFewMinutes.getMillis());
+        assertTrue(nanos == inFewMinutes.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_seconds() {
-        final int secondsToAdd = 128;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime inFewSeconds = LocalTimes.plusSeconds(now, secondsToAdd);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.SECOND, secondsToAdd);
+        final int secondsToAdd = 28;
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime inFewSeconds = LocalTimes.plusSeconds(localTime, secondsToAdd);
 
-        assertEquals(getHours(cal), inFewSeconds.getHours());
-        assertEquals(getMinutes(cal), inFewSeconds.getMinutes());
-        assertEquals(getSeconds(cal), inFewSeconds.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours == inFewSeconds.getHours());
+        assertTrue(minutes == inFewSeconds.getMinutes());
+        assertTrue(seconds + secondsToAdd == inFewSeconds.getSeconds());
+        assertTrue(millis == inFewSeconds.getMillis());
+        assertTrue(nanos == inFewSeconds.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_millis() {
         final int millisToAdd = 288;
-        final LocalTime now = LocalTimes.now();
-        final int millisNow = now.getMillis();
-        final int secondsNow = now.getSeconds();
-        final Calendar cal = Calendars.createTime();
-        final LocalTime inFewMillis = LocalTimes.plusMillis(now, millisToAdd);
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime inFewMillis = LocalTimes.plusMillis(localTime, millisToAdd);
 
-        assertEquals(getHours(cal), inFewMillis.getHours());
-        assertEquals(getMinutes(cal), inFewMillis.getMinutes());
-        assertEquals(secondsNow, inFewMillis.getSeconds());
-        assertEquals(millisNow + millisToAdd, inFewMillis.getMillis());
-        /* We cannot check nanos due to time gap between object creation */
+        assertTrue(hours == inFewMillis.getHours());
+        assertTrue(minutes == inFewMillis.getMinutes());
+        assertTrue(seconds == inFewMillis.getSeconds());
+        assertTrue(millis + millisToAdd == inFewMillis.getMillis());
+        assertTrue(nanos == inFewMillis.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 2;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime beforeFewHours = LocalTimes.minusHours(now, hoursToSubtract);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.HOUR, -hoursToSubtract);
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime beforeFewHours = LocalTimes.minusHours(localTime, hoursToSubtract);
 
-        assertEquals(getHours(cal), beforeFewHours.getHours());
-        assertEquals(getMinutes(cal), beforeFewHours.getMinutes());
-        assertEquals(getSeconds(cal), beforeFewHours.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours - hoursToSubtract == beforeFewHours.getHours());
+        assertTrue(minutes == beforeFewHours.getMinutes());
+        assertTrue(seconds == beforeFewHours.getSeconds());
+        assertTrue(millis == beforeFewHours.getMillis());
+        assertTrue(nanos == beforeFewHours.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_minutes() {
         final int minutesToSubtract = 25;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime beforeFewMinutes = LocalTimes.minusMinutes(now, minutesToSubtract);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.MINUTE, -minutesToSubtract);
+        final int hours = 6;
+        final int minutes = 35;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime beforeFewMinutes = LocalTimes.minusMinutes(localTime, minutesToSubtract);
 
-        assertEquals(getHours(cal), beforeFewMinutes.getHours());
-        assertEquals(getMinutes(cal), beforeFewMinutes.getMinutes());
-        assertEquals(getSeconds(cal), beforeFewMinutes.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours == beforeFewMinutes.getHours());
+        assertTrue(minutes - minutesToSubtract == beforeFewMinutes.getMinutes());
+        assertTrue(seconds == beforeFewMinutes.getSeconds());
+        assertTrue(millis == beforeFewMinutes.getMillis());
+        assertTrue(nanos == beforeFewMinutes.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_seconds() {
-        final int secondsToSubtract = 128;
-        final LocalTime now = LocalTimes.now();
-        final LocalTime beforeFewSeconds = LocalTimes.minusSeconds(now, secondsToSubtract);
-        final Calendar cal = Calendars.createTime();
-        cal.add(Calendar.SECOND, -secondsToSubtract);
+        final int secondsToSubtract = 12;
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime beforeFewSeconds = LocalTimes.minusSeconds(localTime, secondsToSubtract);
 
-        assertEquals(getHours(cal), beforeFewSeconds.getHours());
-        assertEquals(getMinutes(cal), beforeFewSeconds.getMinutes());
-        assertEquals(getSeconds(cal), beforeFewSeconds.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
+        assertTrue(hours == beforeFewSeconds.getHours());
+        assertTrue(minutes == beforeFewSeconds.getMinutes());
+        assertTrue(seconds - secondsToSubtract == beforeFewSeconds.getSeconds());
+        assertTrue(millis == beforeFewSeconds.getMillis());
+        assertTrue(nanos == beforeFewSeconds.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 28;
-        final LocalTime now = LocalTimes.now();
-        final Calendar cal = Calendars.createTime();
-        final int millisNow = now.getMillis();
-        final LocalTime beforeFewMillis = LocalTimes.minusMillis(now, millisToSubtract);
+        final int hours = 6;
+        final int minutes = 15;
+        final int seconds = 23;
+        final int millis = 124;
+        final long nanos = 122L;
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime beforeFewMillis = LocalTimes.minusMillis(localTime, millisToSubtract);
 
-        assertEquals(getHours(cal), beforeFewMillis.getHours());
-        assertEquals(getMinutes(cal), beforeFewMillis.getMinutes());
-        assertEquals(getSeconds(cal), beforeFewMillis.getSeconds());
-        assertEquals(millisNow - millisToSubtract, beforeFewMillis.getMillis());
+        assertTrue(hours == beforeFewMillis.getHours());
+        assertTrue(minutes == beforeFewMillis.getMinutes());
+        assertTrue(seconds == beforeFewMillis.getSeconds());
+        assertTrue(millis - millisToSubtract == beforeFewMillis.getMillis());
+        assertTrue(nanos == beforeFewMillis.getNanos());
         /* We cannot check nanos due to time gap between object creation */
     }
 

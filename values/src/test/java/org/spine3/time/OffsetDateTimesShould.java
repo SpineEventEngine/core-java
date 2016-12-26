@@ -40,6 +40,8 @@ import static org.spine3.time.Calendars.getZoneOffset;
 
 public class OffsetDateTimesShould {
 
+    private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(3, 30);
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(OffsetDateTimes.class));
@@ -47,10 +49,8 @@ public class OffsetDateTimesShould {
 
     @Test
     public void obtain_current_OffsetDateTime_using_ZoneOffset() {
-        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-        final OffsetDateTime today = OffsetDateTimes.now(inKiev);
-        final Calendar cal = createTimeWithZoneOffset(inKiev);
-
+        final OffsetDateTime today = OffsetDateTimes.now(ZONE_OFFSET);
+        final Calendar cal = createTimeWithZoneOffset(ZONE_OFFSET);
 
         assertEquals(getYear(cal), today.getDate().getYear());
         assertEquals(getMonth(cal), today.getDate().getMonthValue());
@@ -72,20 +72,19 @@ public class OffsetDateTimesShould {
         final int seconds = 23;
         final int millis = 124;
         final long nanos = 122L;
-        final ZoneOffset inDelhi = ZoneOffsets.ofHoursMinutes(3, 30);
-        final LocalDate someDay = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final OffsetDateTime todayInDelhi = OffsetDateTimes.of(someDay, localTime, inDelhi);
+        final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
 
-        assertTrue(year == todayInDelhi.getDate().getYear());
-        assertTrue(month == todayInDelhi.getDate().getMonth());
-        assertTrue(day == todayInDelhi.getDate().getDay());
-        assertTrue(hours == todayInDelhi.getTime().getHours());
-        assertTrue(minutes == todayInDelhi.getTime().getMinutes());
-        assertTrue(seconds == todayInDelhi.getTime().getSeconds());
-        assertTrue(millis == todayInDelhi.getTime().getMillis());
-        assertTrue(nanos == todayInDelhi.getTime().getNanos());
-        assertTrue(inDelhi.getAmountSeconds() == todayInDelhi.getOffset().getAmountSeconds());
+        assertTrue(year == offsetDateTime.getDate().getYear());
+        assertTrue(month == offsetDateTime.getDate().getMonth());
+        assertTrue(day == offsetDateTime.getDate().getDay());
+        assertTrue(hours == offsetDateTime.getTime().getHours());
+        assertTrue(minutes == offsetDateTime.getTime().getMinutes());
+        assertTrue(seconds == offsetDateTime.getTime().getSeconds());
+        assertTrue(millis == offsetDateTime.getTime().getMillis());
+        assertTrue(nanos == offsetDateTime.getTime().getNanos());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateTime.getOffset().getAmountSeconds());
     }
 
 }
