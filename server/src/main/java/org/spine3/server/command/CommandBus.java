@@ -447,7 +447,8 @@ public class CommandBus implements AutoCloseable {
             return this;
         }
 
-        @VisibleForTesting Builder setAutoReschedule(boolean autoReschedule) {
+        @VisibleForTesting
+        /* package */ Builder setAutoReschedule(boolean autoReschedule) {
             this.autoReschedule = autoReschedule;
             return this;
         }
@@ -472,7 +473,9 @@ public class CommandBus implements AutoCloseable {
 
             final CommandBus commandBus = new CommandBus(this);
 
-            commandScheduler.setCommandBus(commandBus);
+            if (commandScheduler.getCommandBus() == null) {
+                commandScheduler.setCommandBus(commandBus);
+            }
 
             if (autoReschedule) {
                 commandBus.rescheduleCommands();

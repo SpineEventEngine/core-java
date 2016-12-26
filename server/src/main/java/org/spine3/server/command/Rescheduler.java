@@ -47,7 +47,6 @@ import static org.spine3.time.Intervals.toDuration;
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
 /* package */ class Rescheduler {
 
     private final CommandBus commandBus;
