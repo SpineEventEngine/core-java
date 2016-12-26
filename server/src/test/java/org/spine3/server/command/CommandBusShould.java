@@ -108,7 +108,7 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private ProblemLog log;
+    private Log log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -119,8 +119,14 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new ProblemLog());
-        commandBus = new CommandBus(commandStore, scheduler, log, true);
+        log = spy(new Log());
+        commandBus = CommandBus.newBuilder()
+                .setCommandStore(commandStore)
+                .setCommandScheduler(scheduler)
+                .setThreadSpawnAllowed(true)
+                .setLog(log)
+                .setAutoReschedule(false)
+                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -170,7 +176,7 @@ public class CommandBusShould {
                                                 .build();
         assertNotNull(commandBus);
 
-        final CommandScheduler actualScheduler = commandBus.getScheduler();
+        final CommandScheduler actualScheduler = commandBus.scheduler();
         assertEquals(expectedScheduler, actualScheduler);
     }
 
@@ -274,7 +280,7 @@ public class CommandBusShould {
 
     @Test // To improve coverage stats.
     public void have_log() {
-        assertNotNull(CommandBus.log());
+        assertNotNull(Log.log());
     }
 
     @Test // To improve coverage stats.
@@ -565,7 +571,7 @@ public class CommandBusShould {
         final List<Command> commandsPrimary = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        commandBus.getRescheduler().rescheduleCommands();
+        commandBus.rescheduler().doRescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -587,6 +593,7 @@ public class CommandBusShould {
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(true)
+                                                .setAutoReschedule(true)
                                                 .build();
         assertNotNull(commandBus);
 
@@ -618,6 +625,7 @@ public class CommandBusShould {
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
                                                 .setThreadSpawnAllowed(false)
+                                                .setAutoReschedule(true)
                                                 .build();
         assertNotNull(commandBus);
 
@@ -657,7 +665,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        commandBus.getRescheduler().rescheduleCommands();
+        commandBus.rescheduler().doRescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);
