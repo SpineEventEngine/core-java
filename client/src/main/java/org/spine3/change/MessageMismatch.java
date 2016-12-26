@@ -29,7 +29,7 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
- * Utility class for working with ValueMismatches for {@code Message} values.
+ * Utility class for working with {@code ValueMismatch}es for {@code Message} values.
  *
  * @author Alexander Yevsyukov
  */
@@ -40,7 +40,7 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a non-default value,
+     * Creates {@code ValueMismatch} for the case of discovering a non-default value,
      * when the default value was expected by a command.
      *
      * @param actual the value discovered instead of the default value
@@ -61,7 +61,7 @@ public class MessageMismatch {
      * 
      * @param expected the value of the field that the command wanted to clear
      * @param version the version of the entity in which the mismatch is discovered
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedNotDefault(Message expected, int version) {
         checkNotNull(expected);
@@ -70,13 +70,13 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual the value discovered instead of the expected value
      * @param newValue the new value requested in the command
      * @param version the version of the entity in which the mismatch is discovered
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue, int version) {
         checkNotNullOrEqual(expected, actual);
@@ -97,7 +97,7 @@ public class MessageMismatch {
     /**
      * Obtains expected value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
         final Any any = mismatch.getExpected();
@@ -108,7 +108,7 @@ public class MessageMismatch {
     /**
      * Obtains actual value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackActual(ValueMismatch mismatch) {
         final Any any = mismatch.getActual();
@@ -119,7 +119,7 @@ public class MessageMismatch {
     /**
      * Obtains new value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-Message values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
         final Any any = mismatch.getNewValue();

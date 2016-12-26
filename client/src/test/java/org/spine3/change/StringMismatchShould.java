@@ -88,7 +88,7 @@ public class StringMismatchShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_same_expected_and_actual() {
+    public void not_accept_same_expected_and_actual() {
         final String value = "same-same";
         unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
