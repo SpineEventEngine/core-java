@@ -28,7 +28,7 @@ import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.time.Calendars.createTime;
-import static org.spine3.time.Calendars.createTimeInMillis;
+import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
@@ -50,7 +50,7 @@ public class LocalTimes {
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar cal = createTimeInMillis();
+        final Calendar cal = Calendars.createTime();
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
@@ -71,6 +71,7 @@ public class LocalTimes {
         checkPositive(seconds, ArgumentName.SECONDS);
         checkPositive(millis, ArgumentName.MILLIS);
         checkPositive(nanos, ArgumentName.NANOS);
+
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
                                           .setMinutes(minutes)
@@ -89,6 +90,7 @@ public class LocalTimes {
         checkPositive(minutes, ArgumentName.MINUTES);
         checkPositive(seconds, ArgumentName.SECONDS);
         checkPositive(millis, ArgumentName.MILLIS);
+
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
                                           .setMinutes(minutes)
@@ -105,6 +107,7 @@ public class LocalTimes {
         checkPositive(hours, ArgumentName.HOURS);
         checkPositive(minutes, ArgumentName.MINUTES);
         checkPositive(seconds, ArgumentName.SECONDS);
+
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
                                           .setMinutes(minutes)
@@ -119,6 +122,7 @@ public class LocalTimes {
     public static LocalTime of(int hours, int minutes) {
         checkPositive(hours, ArgumentName.HOURS);
         checkPositive(minutes, ArgumentName.MINUTES);
+
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
                                           .setMinutes(minutes)
@@ -168,7 +172,7 @@ public class LocalTimes {
     public static LocalTime minusHours(LocalTime localTime, int hoursToSubtract) {
         checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(hoursToSubtract, ArgumentName.HOURS_TO_SUBTRACT);
-        return changeHours(localTime, hoursToSubtract);
+        return changeHours(localTime, -hoursToSubtract);
     }
 
     /**
@@ -177,7 +181,7 @@ public class LocalTimes {
     public static LocalTime minusMinutes(LocalTime localTime, int minutesToSubtract) {
         checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(minutesToSubtract, ArgumentName.MINUTES_TO_SUBTRACT);
-        return changeMinutes(localTime, minutesToSubtract);
+        return changeMinutes(localTime, -minutesToSubtract);
     }
 
     /**
@@ -186,7 +190,7 @@ public class LocalTimes {
     public static LocalTime minusSeconds(LocalTime localTime, int secondsToSubtract) {
         checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(secondsToSubtract, ArgumentName.SECONDS_TO_SUBTRACT);
-        return changeSeconds(localTime, secondsToSubtract);
+        return changeSeconds(localTime, -secondsToSubtract);
     }
 
     /**
@@ -195,7 +199,7 @@ public class LocalTimes {
     public static LocalTime minusMillis(LocalTime localTime, int millisToSubtract) {
         checkNotNull(localTime, Changes.ErrorMessage.LOCAL_TIME);
         checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
-        return changeMillis(localTime, millisToSubtract);
+        return changeMillis(localTime, -millisToSubtract);
     }
 
     /**
@@ -206,7 +210,6 @@ public class LocalTimes {
      * @return copy of this local time with new hours value
      */
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
-        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
         cal.add(Calendar.HOUR, hoursDelta);
@@ -216,7 +219,7 @@ public class LocalTimes {
                                           .setMinutes(getMinutes(cal))
                                           .setSeconds(getSeconds(cal))
                                           .setMillis(getMillis(cal))
-                                          .setNanos(time.getNanos())
+                                          .setNanos(localTime.getNanos())
                                           .build();
         return result;
     }
@@ -239,7 +242,7 @@ public class LocalTimes {
                                           .setMinutes(getMinutes(cal))
                                           .setSeconds(getSeconds(cal))
                                           .setMillis(getMillis(cal))
-                                          .setNanos(time.getNanos())
+                                          .setNanos(localTime.getNanos())
                                           .build();
         return result;
     }
@@ -262,7 +265,7 @@ public class LocalTimes {
                                           .setMinutes(getMinutes(cal))
                                           .setSeconds(getSeconds(cal))
                                           .setMillis(getMillis(cal))
-                                          .setNanos(time.getNanos())
+                                          .setNanos(localTime.getNanos())
                                           .build();
         return result;
     }
@@ -285,7 +288,7 @@ public class LocalTimes {
                                           .setMinutes(getMinutes(cal))
                                           .setSeconds(getSeconds(cal))
                                           .setMillis(getMillis(cal))
-                                          .setNanos(time.getNanos())
+                                          .setNanos(localTime.getNanos())
                                           .build();
         return result;
     }

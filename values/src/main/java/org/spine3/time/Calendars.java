@@ -20,9 +20,6 @@
 
 package org.spine3.time;
 
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps;
-
 import java.util.Calendar;
 
 /**
@@ -155,12 +152,13 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar time using zone offset in seconds.
+     * Obtains calendar time using {@code ZoneOffset}.
      */
     public static Calendar createTimeWithZoneOffset(ZoneOffset zoneOffset) {
-        final Calendar calendar = createTimeInMillis();
-        //TODO:2016-12-23:alexander.aleksandrov: need to write our own logic for reducing a time from the zone where JVM was runned to GMT 00:00.
-        calendar.add(Calendar.SECOND, -zoneOffset.getAmountSeconds());
+        final Calendar calendar = createTime();
+        final int currentZoneOffset = getZoneOffset(calendar);
+        calendar.add(Calendar.SECOND, -currentZoneOffset);
+        calendar.add(Calendar.SECOND, zoneOffset.getAmountSeconds());
         calendar.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
 
         return calendar;
@@ -181,10 +179,8 @@ public class Calendars {
     /**
      * Obtains current calendar.
      */
-    public static Calendar createTimeInMillis() {
-        final Timestamp time = Timestamps.getCurrentTime();
+    public static Calendar createTime() {
         final Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(time.getSeconds() * 1000);
         return calendar;
     }
 }
