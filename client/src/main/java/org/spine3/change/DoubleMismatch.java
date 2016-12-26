@@ -23,7 +23,7 @@ package org.spine3.change;
 import static org.spine3.protobuf.Values.pack;
 
 /**
- * Utility class for working with {@code int} values in {@link ValueMismatch}es.
+ * Utility class for working with {@code double} values in {@link ValueMismatch}es.
  *
  * @author Alexander Yevsyukov
  */
