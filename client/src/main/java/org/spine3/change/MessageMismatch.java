@@ -85,6 +85,9 @@ public class MessageMismatch {
         return of(expected, actual, newValue, version);
     }
 
+    /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values.
+     */
     private static ValueMismatch of(Message expected, Message actual, Message newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))

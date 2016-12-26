@@ -83,6 +83,9 @@ public class StringMismatch {
         return of(expected, actual, newValue, version);
     }
 
+    /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values.
+     */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch
                 .newBuilder()
