@@ -21,29 +21,54 @@
 package org.spine3.time;
 
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Utilities for working with ZoneOffset objects.
  *
+ * @author Alexander Yevsyukov
+ * @author Alexander Aleksandrov
  * @see ZoneOffset
  */
 public class ZoneOffsets {
 
-    private ZoneOffsets() {}
+    private ZoneOffsets() {
+    }
 
-    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
+    public static final ZoneOffset UTC = ZoneOffset.newBuilder()
+                                                   .setId("UTC")
+                                                   .setAmountSeconds(0)
+                                                   .build();
 
-
+    /**
+     * Obtains the ZoneOffset instance using an offset in hours.
+     */
     public static ZoneOffset ofHours(int hours) {
-        checkArgument(Math.abs(hours) < Timestamps.HOURS_PER_DAY, "offset size must be < 24 hours");
+        final int maxHoursBound = 18;
+        checkArgument(Math.abs(hours) <= maxHoursBound, "offset size must be between -18 and 18 hours inclusive");
         @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
-        final int seconds = (int)Durations.toSeconds(Durations.ofHours(hours));
+        final int seconds = (int) Durations.toSeconds(Durations.ofHours(hours));
         return ZoneOffset.newBuilder()
-                .setAmountSeconds(seconds)
-                .build();
+                         .setAmountSeconds(seconds)
+                         .build();
+    }
+
+    /**
+     * Obtains the ZoneOffset instance using an offset in hours and minutes.
+     */
+    @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
+    public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
+        final int maxHoursBound = 17;
+        final int maxMinutesBound = 60;
+        checkArgument(Math.abs(hours) <= maxHoursBound, "offset hour size must be between -17 and 17 hours inclusive");
+        checkArgument(Math.abs(minutes) <= maxMinutesBound, "offset minute size must be between -60 and 60 minutes inclusive");
+        final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours));
+        final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes));
+        final int seconds = secondsInHours + secondsInMinutes;
+        return ZoneOffset.newBuilder()
+                         .setAmountSeconds(seconds)
+                         .build();
     }
 
     //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
