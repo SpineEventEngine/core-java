@@ -769,7 +769,6 @@ public final class Verify extends Assert {
         }
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod")
     @SafeVarargs
     public static<T> void assertContainsAll(
             Iterable<T> iterable,

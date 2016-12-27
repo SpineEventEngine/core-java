@@ -102,7 +102,6 @@ public class Tests {
      */
     public static <T> T nullRef() {
         final T nullRef = null;
-        //noinspection ConstantConditions
         return nullRef;
     }
 
