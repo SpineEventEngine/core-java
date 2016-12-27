@@ -226,7 +226,12 @@ public class EventBus implements AutoCloseable {
         return enriched;
     }
 
-    /** Call dispatchers for the {@code event} passed and return the number of dispatchers called */
+    /**
+     * Call the dispatchers for the {@code event}.
+     *
+     * @param event the event to pass to the dispatchers.
+     * @return the number of the dispatchers called, or {@code 0} if there weren't any.
+     */
     private int callDispatchers(Event event) {
         int dispatchersCalled = 0;
         final EventClass eventClass = EventClass.of(event);
@@ -238,7 +243,13 @@ public class EventBus implements AutoCloseable {
         return dispatchersCalled;
     }
 
-    /** Invoke subscribers to the {@code event} passed and return the number of subscribers invoked */
+    /**
+     * Invoke the subscribers for the {@code event}.
+     *
+     * @param event   the event to pass to the subscribers.
+     * @param context the event context related to the {@code event}.
+     * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
+     */
     private int invokeSubscribers(Message event, EventContext context) {
         int subscribersInvoked = 0;
         final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(EventClass.of(event));
