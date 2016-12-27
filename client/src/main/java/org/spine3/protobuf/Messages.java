@@ -130,7 +130,7 @@ public class Messages {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final JsonFormat.Printer value = JsonFormat.printer().usingTypeRegistry(forKnownTypes());
 
-        private static com.google.protobuf.util.JsonFormat.Printer instance() {
+        private static JsonFormat.Printer instance() {
             return INSTANCE.value;
         }
     }
