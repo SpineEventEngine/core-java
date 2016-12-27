@@ -25,6 +25,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.change.BooleanMismatch.expectedFalse;
+import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.BooleanMismatch.unpackActual;
+import static org.spine3.change.BooleanMismatch.unpackExpected;
+import static org.spine3.change.BooleanMismatch.unpackNewValue;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -38,15 +43,28 @@ public class BooleanMismatchShould {
     }
 
     @Test
-    public void return_mismatch_object_with_boolean_values() {
+    public void create_ValueMismatch_instance_for_expectedFalse_case() {
+        final boolean expected = false;
+        final boolean actual = true;
+        final boolean newValue = true;
+        final ValueMismatch mismatch = expectedFalse(VERSION);
+
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_ValueMismatch_instance_for_expectedTrue_case() {
         final boolean expected = true;
         final boolean actual = false;
         final boolean newValue = false;
-        final ValueMismatch mismatch = BooleanMismatch.of(expected, actual, newValue, VERSION);
-        final BoolValue expectedWrapped = unpack(mismatch.getExpected());
-        final BoolValue actualWrapped = unpack(mismatch.getActual());
+        final ValueMismatch mismatch = expectedTrue(VERSION);
 
-        assertEquals(expected, expectedWrapped.getValue());
-        assertEquals(actual, actualWrapped.getValue());
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
     }
 }
