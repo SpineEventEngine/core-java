@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.validate.Validate.isDefault;
@@ -229,7 +230,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 checkState(classIsSame,
                            "Unexpected ID of type " + messageClass + " encountered. " + "Expected: " + expectedIdClass);
 
-                final Message idAsMessage = AnyPacker.unpack(idAsAny);
+                final Message idAsMessage = unpack(idAsAny);
 
                 // As the message class is the same as expected, the conversion is safe.
                 @SuppressWarnings("unchecked")
@@ -256,7 +257,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
     private EntityStorageRecord toEntityRecord(E entity) {
         final M state = entity.getState();
-        final Any stateAny = AnyPacker.pack(state);
+        final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
