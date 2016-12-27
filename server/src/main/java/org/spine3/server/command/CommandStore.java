@@ -154,7 +154,7 @@ public class CommandStore implements AutoCloseable {
      * @param error the error, which occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    public void updateStatus(CommandId commandId, org.spine3.base.Error error) {
+    public void updateStatus(CommandId commandId, Error error) {
         checkIsOpened();
         storage.updateStatus(commandId, error);
     }

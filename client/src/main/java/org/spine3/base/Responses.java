@@ -31,9 +31,6 @@ import static org.spine3.base.Response.StatusCase.OK;
  */
 public class Responses {
 
-    private Responses() {
-    }
-
     /** The response returned on successful acceptance of a message for processing. */
     private static final Response RESPONSE_OK = Response.newBuilder()
             .setOk(Empty.getDefaultInstance())
@@ -43,6 +40,8 @@ public class Responses {
     public static Response ok() {
         return RESPONSE_OK;
     }
+
+    private Responses() {}
 
     /**
      * Checks if the response is OK.

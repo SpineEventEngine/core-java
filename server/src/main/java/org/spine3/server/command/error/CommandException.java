@@ -36,6 +36,8 @@ import java.util.Map;
  */
 public abstract class CommandException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     private final Command command;
     private final Error error;
 
@@ -79,6 +81,4 @@ public abstract class CommandException extends RuntimeException {
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
     }
-
-    private static final long serialVersionUID = 0L;
 }

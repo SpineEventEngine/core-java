@@ -33,6 +33,8 @@ import java.util.Map;
 @SuppressWarnings("UtilityClass")
 /* package */ class Schemas {
 
+    private static final Map<String, Schema> stringSchemas = buildSchemasMap();
+
     private Schemas() {
     }
 
@@ -59,8 +61,6 @@ import java.util.Map;
     /* package */ static String getLowerCaseName(Schema schema) {
         return schema.name().toLowerCase();
     }
-
-    private static final Map<String, Schema> stringSchemas = buildSchemasMap();
 
     private static Map<String, Schema> buildSchemasMap() {
         final ImmutableMap.Builder<String, Schema> schemas = new ImmutableMap.Builder<>();
