@@ -25,12 +25,18 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class IntervalsShould {
+
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Intervals.class));
+    }
 
     @Test
     public void return_interval_between_two_timestamps() {
@@ -53,7 +59,20 @@ public class IntervalsShould {
                                           .setNanos(end.getNanos() - start.getNanos())
                                           .build();
         final Interval interval = Intervals.between(start, end);
+        final Duration actualDuration = Intervals.toDuration(interval);
 
+        assertEquals(expectedDuration, actualDuration);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void calculate_duration_of_zero_interval() {
+        final Timestamp start = newTimestamp(5, 6);
+        final Timestamp end = newTimestamp(5, 6);
+        final Duration expectedDuration = Duration.newBuilder()
+                                                  .setSeconds(end.getSeconds() - start.getSeconds())
+                                                  .setNanos(end.getNanos() - start.getNanos())
+                                                  .build();
+        final Interval interval = Intervals.between(start, end);
         final Duration actualDuration = Intervals.toDuration(interval);
 
         assertEquals(expectedDuration, actualDuration);

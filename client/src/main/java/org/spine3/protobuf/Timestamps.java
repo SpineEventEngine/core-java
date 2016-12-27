@@ -81,6 +81,9 @@ public class Timestamps {
     /** The count of seconds in one minute. */
     public static final int SECONDS_PER_MINUTE = 60;
 
+    /** The count of seconds in one minute. */
+    public static final int SECONDS_PER_HOUR = 3600;
+
     /** The count of minutes in one hour. */
     public static final int MINUTES_PER_HOUR = 60;
 

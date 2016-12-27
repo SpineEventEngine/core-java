@@ -140,7 +140,7 @@ public class Given {
         private static int customerNumber = 1;
 
         /* package */ static org.spine3.base.Command createCustomer() {
-            final LocalDate localDate = LocalDates.today();
+            final LocalDate localDate = LocalDates.now();
             final CustomerId customerId = CustomerId.newBuilder()
                                                     .setRegistrationDate(localDate)
                                                     .setNumber(customerNumber)
