@@ -26,6 +26,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
+import org.spine3.server.command.error.CommandException;
 import org.spine3.server.storage.CommandStorage;
 
 import java.util.Iterator;
@@ -85,6 +86,17 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command, Exception exception) {
         checkIsOpened();
         storage.store(command, Errors.fromException(exception));
+    }
+
+    /**
+     * Stores the command with the error status.
+     *
+     * @param command the command to store
+     * @param exception the exception occurred, which encloses {@link org.spine3.base.Error} to store
+     * @throws IllegalStateException if the storage is closed
+     */
+    public void storeWithError(Command command, CommandException exception) {
+        store(command, exception.getError());
     }
 
     /**

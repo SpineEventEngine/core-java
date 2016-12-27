@@ -41,13 +41,13 @@ message ValueMismatch {
     //
     // This field is not populated if the command expects to initialize the attribute.
     //
-    google.protobuf.Any expected_previous_value = 1;
+    google.protobuf.Any expected = 1;
 
     // The value discovered in the field (instead of the expected).
     //
     // This field is not populated if the entity does not have the attribute set.
     //
-    google.protobuf.Any actual_previous_value = 2;
+    google.protobuf.Any actual = 2;
 
     // The value which a command could have set if expected value was discovered in the entity.
     google.protobuf.Any new_value = 3;

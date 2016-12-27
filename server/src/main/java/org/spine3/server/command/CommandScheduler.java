@@ -23,6 +23,8 @@ package org.spine3.server.command;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -60,6 +62,16 @@ public abstract class CommandScheduler {
         final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
         markAsScheduled(commandUpdated);
+    }
+
+    /**
+     * Obtains {@code CommandBus} associated with this scheduler or {@code null}
+     * if the scheduler is not linked to a {@code CommandBus}.
+     */
+    @Nullable
+    @CheckReturnValue
+    protected CommandBus getCommandBus() {
+        return commandBus;
     }
 
     /**

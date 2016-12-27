@@ -54,9 +54,8 @@ public class UrlParserShould {
         final Url protocolHost = new UrlParser(HOST).parse();
 
         final Url.Record record = protocolHost.getRecord();
-        assertEquals(HOST, record.getHost());
 
-        // TODO:2016-05-24:mikhail.mikhaylov: Should we have HTTP as default protocol?
+        assertEquals(HOST, record.getHost());
         assertEquals(Url.Record.Schema.UNDEFINED, record.getProtocol()
                                                         .getSchema());
     }
