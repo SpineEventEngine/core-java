@@ -47,6 +47,7 @@ public class OffsetTimesShould {
     public void obtain_current_OffsetTime_using_ZoneOffset() {
         final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         final Calendar cal = createTimeWithZoneOffset(ZONE_OFFSET);
+
         assertEquals(getHours(cal), now.getTime().getHours());
         assertEquals(getMinutes(cal), now.getTime().getMinutes());
         assertEquals(getSeconds(cal), now.getTime().getSeconds());

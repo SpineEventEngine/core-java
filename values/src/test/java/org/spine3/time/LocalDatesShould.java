@@ -53,88 +53,102 @@ public class LocalDatesShould {
     @Test
     public void obtain_date_from_year_month_day_values() {
         final int year = 1976;
-        final int month = 4;
+        final MonthOfYear month = MonthOfYear.APRIL;
         final int day = 1;
-        final Calendar cal = createDate(year, month, day);
-        final LocalDate localDate = LocalDates.of(year, MonthOfYear.APRIL, day);
+        final LocalDate localDate = LocalDates.of(year, month, day);
 
-        assertEquals(getYear(cal), localDate.getYear());
-        assertEquals(getMonth(cal), localDate.getMonthValue());
-        assertEquals(getDay(cal), localDate.getDay());
+        assertTrue(year == localDate.getYear());
+        assertTrue(month == localDate.getMonth());
+        assertTrue(day == localDate.getDay());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_years() {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        final LocalDate today = LocalDates.now();
-        final LocalDate yearAgo = LocalDates.minusYears(today, 1);
+        final int yearsToSubstract = 2;
+        final int year = 1976;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 1;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate fewYearsAgo = LocalDates.minusYears(localDate, yearsToSubstract);
 
-
-        assertEquals(getYear(cal), yearAgo.getYear());
-        assertEquals(getMonth(cal), yearAgo.getMonthValue());
-        assertEquals(getDay(cal), yearAgo.getDay());
+        assertTrue(year - yearsToSubstract == fewYearsAgo.getYear());
+        assertTrue(month == fewYearsAgo.getMonth());
+        assertTrue(day == fewYearsAgo.getDay());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_months() {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -2);
-        final LocalDate today = LocalDates.now();
-        final LocalDate twoMonthAgo = LocalDates.minusMonths(today, 2);
+        final int monthsToSubstract = 2;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int expectedMonth = month.getNumber() - monthsToSubstract;
+        final int year = 1976;
+        final int day = 1;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate fewMonthsAgo = LocalDates.minusMonths(localDate, monthsToSubstract);
 
-        assertEquals(getYear(cal), twoMonthAgo.getYear());
-        assertEquals(getMonth(cal), twoMonthAgo.getMonthValue());
-        assertEquals(getDay(cal), twoMonthAgo.getDay());
+        assertTrue(year == fewMonthsAgo.getYear());
+        assertTrue(expectedMonth == fewMonthsAgo.getMonth().getNumber());
+        assertTrue(day == fewMonthsAgo.getDay());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_days() {
-        final int daysToSubtract = -60;
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, daysToSubtract);
-        final LocalDate today = LocalDates.now();
-        final LocalDate sixtyDaysAgo = LocalDates.minusDays(today, 60);
+        final int daysToSubstract = 15;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final MonthOfYear monthExpected = MonthOfYear.MARCH;
+        final int year = 1976;
+        final int day = 1;
+        final int dayExpected = 17;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate fewDaysAgo = LocalDates.minusDays(localDate, daysToSubstract);
 
-        assertEquals(getYear(cal), sixtyDaysAgo.getYear());
-        assertEquals(getMonth(cal), sixtyDaysAgo.getMonthValue());
-        assertEquals(getDay(cal), sixtyDaysAgo.getDay());
+        assertTrue(year == fewDaysAgo.getYear());
+        assertTrue(monthExpected == fewDaysAgo.getMonth());
+        assertTrue(dayExpected == fewDaysAgo.getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_years() {
-        final LocalDate today = LocalDates.now();
-        final LocalDate inFiveYears = LocalDates.plusYears(today, 5);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, 5);
+        final int yearsToAdd = 2;
+        final int year = 1976;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 1;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate plusYears = LocalDates.plusYears(localDate, yearsToAdd);
 
-        assertEquals(getYear(cal), inFiveYears.getYear());
-        assertEquals(getMonth(cal), inFiveYears.getMonthValue());
-        assertEquals(getDay(cal), inFiveYears.getDay());
+        assertTrue(year + yearsToAdd == plusYears.getYear());
+        assertTrue(month == plusYears.getMonth());
+        assertTrue(day == plusYears.getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_months() {
-        final LocalDate today = LocalDates.now();
-        final LocalDate inTwoMonths = LocalDates.plusMonths(today, 2);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 2);
+        final int monthsToAdd = 2;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int expectedMonth = month.getNumber() + monthsToAdd;
+        final int year = 1976;
+        final int day = 1;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate plusMonths = LocalDates.plusMonths(localDate, monthsToAdd);
 
-        assertEquals(getYear(cal), inTwoMonths.getYear());
-        assertEquals(getMonth(cal), inTwoMonths.getMonthValue());
-        assertEquals(getDay(cal), inTwoMonths.getDay());
+        assertTrue(year == plusMonths.getYear());
+        assertTrue(expectedMonth == plusMonths.getMonth().getNumber());
+        assertTrue(day == plusMonths.getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_days() {
-        final LocalDate today = LocalDates.now();
-        final LocalDate inFiveDays = LocalDates.plusDays(today, 5);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 5);
+        final int daysToAdd = 15;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int year = 1976;
+        final int day = 1;
+        final int dayExpected = 16;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate plusDays = LocalDates.plusDays(localDate, daysToAdd);
 
-        assertEquals(getYear(cal), inFiveDays.getYear());
-        assertEquals(getMonth(cal), inFiveDays.getMonthValue());
-        assertEquals(getDay(cal), inFiveDays.getDay());
+        assertTrue(year == plusDays.getYear());
+        assertTrue(month == plusDays.getMonth());
+        assertTrue(dayExpected == plusDays.getDay());
     }
 
     @Test(expected = NullPointerException.class)

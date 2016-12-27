@@ -70,75 +70,103 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_years() {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.minusYears(today, 1);
+        final int yearsToSubstract = 2;
+        final int year = 2006;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 25;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate, yearsToSubstract);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year - yearsToSubstract == offsetDateMinusYears.getDate().getYear());
+        assertTrue(month == offsetDateMinusYears.getDate().getMonth());
+        assertTrue(day == offsetDateMinusYears.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateMinusYears.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_months() {
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -2);
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.minusMonths(today, 2);
+        final int monthsToSubstract = 2;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int expectedMonth = month.getNumber() - monthsToSubstract;
+        final int year = 2006;
+        final int day = 25;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate, monthsToSubstract);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year == offsetDateMinusMonths.getDate().getYear());
+        assertTrue(expectedMonth == offsetDateMinusMonths.getDate().getMonth().getNumber());
+        assertTrue(day == offsetDateMinusMonths.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateMinusMonths.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_days() {
-        final int daysToSubtract = -60;
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, daysToSubtract);
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.minusDays(today, 60);
+        final int daysToSubstract = 15;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final MonthOfYear monthExpected = MonthOfYear.MARCH;
+        final int year = 2006;
+        final int day = 1;
+        final int dayExpected = 17;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate, daysToSubstract);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year == offsetDateMinusMonths.getDate().getYear());
+        assertTrue(monthExpected == offsetDateMinusMonths.getDate().getMonth());
+        assertTrue(dayExpected == offsetDateMinusMonths.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateMinusMonths.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_years() {
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.plusYears(today, 5);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, 5);
+        final int yearsToAdd = 2;
+        final int year = 2006;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int day = 25;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDatePlusYears = OffsetDates.plusYears(offsetDate, yearsToAdd);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year + yearsToAdd == offsetDatePlusYears.getDate().getYear());
+        assertTrue(month == offsetDatePlusYears.getDate().getMonth());
+        assertTrue(day == offsetDatePlusYears.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDatePlusYears.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_months() {
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.plusMonths(today, 2);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 2);
+        final int monthsToAdd = 2;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int expectedMonth = month.getNumber() + monthsToAdd;
+        final int year = 2006;
+        final int day = 25;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDatePlusMonths = OffsetDates.plusMonths(offsetDate, monthsToAdd);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year == offsetDatePlusMonths.getDate().getYear());
+        assertTrue(expectedMonth == offsetDatePlusMonths.getDate().getMonth().getNumber());
+        assertTrue(day == offsetDatePlusMonths.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDatePlusMonths.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_days() {
-        final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final OffsetDate offsetDate = OffsetDates.plusDays(today, 5);
-        final Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 5);
+        final int daysToAdd = 15;
+        final MonthOfYear month = MonthOfYear.APRIL;
+        final int year = 2006;
+        final int day = 1;
+        final int dayExpected = 16;
+        final LocalDate localDate = LocalDates.of(year, month, day);
+        final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
+        final OffsetDate offsetDatePlusMonths = OffsetDates.plusDays(offsetDate, daysToAdd);
 
-        assertEquals(getYear(cal), offsetDate.getDate().getYear());
-        assertEquals(getMonth(cal), offsetDate.getDate().getMonthValue());
-        assertEquals(getDay(cal), offsetDate.getDate().getDay());
+        assertTrue(year == offsetDatePlusMonths.getDate().getYear());
+        assertTrue(month == offsetDatePlusMonths.getDate().getMonth());
+        assertTrue(dayExpected == offsetDatePlusMonths.getDate().getDay());
+        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDatePlusMonths.getOffset().getAmountSeconds());
     }
 
     @Test(expected = NullPointerException.class)
