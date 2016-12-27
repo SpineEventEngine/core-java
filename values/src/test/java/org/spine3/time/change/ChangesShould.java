@@ -29,6 +29,14 @@ import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.time.LocalTime;
 import org.spine3.time.LocalTimes;
+import org.spine3.time.OffsetDate;
+import org.spine3.time.OffsetDateTime;
+import org.spine3.time.OffsetDateTimes;
+import org.spine3.time.OffsetDates;
+import org.spine3.time.OffsetTime;
+import org.spine3.time.OffsetTimes;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -84,26 +92,26 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_previousValue() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(null, today);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_newValue() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(today, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_LocalDate_values() {
-        final LocalDate today = LocalDates.today();
+        final LocalDate today = LocalDates.now();
         Changes.of(today, today);
     }
 
     @Test
     public void create_LocalDateChange_instance() {
-        final LocalDate today = LocalDates.today();
-        final LocalDate tomorrow = LocalDates.plusDays(1);
+        final LocalDate today = LocalDates.now();
+        final LocalDate tomorrow = LocalDates.plusDays(today, 1);
 
         final LocalDateChange result = Changes.of(today, tomorrow);
 
@@ -132,11 +140,113 @@ public class ChangesShould {
     @Test
     public void create_LocalTimeChange_instance() {
         final LocalTime now = LocalTimes.now();
-        final LocalTime inFiveHours = LocalTimes.plusHours(5);
+        final LocalTime inFiveHours = LocalTimes.plusHours(now, 5);
 
         final LocalTimeChange result = Changes.of(now, inFiveHours);
 
         assertEquals(now, result.getPreviousValue());
         assertEquals(inFiveHours, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDate_previousValue() {
+        final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
+        final OffsetDate date = OffsetDates.now(inLassVegas);
+        Changes.of(null, date);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDate_newValue() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDate date = OffsetDates.now(inKiev);
+        Changes.of(date, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_OffsetDate_values() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDate date = OffsetDates.now(inLuxembourg);
+        Changes.of(date, date);
+    }
+
+    @Test
+    public void create_OffsetDateChange_instance() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDate previousDate = OffsetDates.now(inKiev);
+        final OffsetDate newDate = OffsetDates.now(inLuxembourg);
+
+        final OffsetDateChange result = Changes.of(previousDate, newDate);
+
+        assertEquals(previousDate, result.getPreviousValue());
+        assertEquals(newDate, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetTime_previousValue() {
+        final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
+        final OffsetTime now = OffsetTimes.now(inLassVegas);
+        Changes.of(null, now);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetTime_newValue() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetTime now = OffsetTimes.now(inKiev);
+        Changes.of(now, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_OffsetTime_values() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetTime now = OffsetTimes.now(inLuxembourg);
+        Changes.of(now, now);
+    }
+
+    @Test
+    public void create_OffsetTimeChange_instance() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetTime previousTime = OffsetTimes.now(inKiev);
+        final OffsetTime newTime = OffsetTimes.now(inLuxembourg);
+
+        final OffsetTimeChange result = Changes.of(previousTime, newTime);
+
+        assertEquals(previousTime, result.getPreviousValue());
+        assertEquals(newTime, result.getNewValue());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDateTime_previousValue() {
+        final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
+        final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
+        Changes.of(null, now);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_OffsetDateTime_newValue() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final OffsetDateTime now = OffsetDateTimes.now(inKiev);
+        Changes.of(now, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_equal_OffsetDateTime_values() {
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
+        Changes.of(now, now);
+    }
+
+    @Test
+    public void create_OffsetDateTimeChange_instance() {
+        final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
+        final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
+        final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);
+        final OffsetDateTime newDateTime = OffsetDateTimes.now(inLuxembourg);
+
+        final OffsetDateTimeChange result = Changes.of(previousDateTime, newDateTime);
+
+        assertEquals(previousDateTime, result.getPreviousValue());
+        assertEquals(newDateTime, result.getNewValue());
     }
 }
