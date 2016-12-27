@@ -27,6 +27,7 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
@@ -48,7 +49,7 @@ public class LocalTimesShould {
     @Test
     public void obtain_current_LocalTime() {
         final LocalTime now = LocalTimes.now();
-        final Calendar cal = Calendars.createTime();
+        final Calendar cal = createTime();
 
         assertEquals(getHours(cal), now.getHours());
         assertEquals(getMinutes(cal), now.getMinutes());

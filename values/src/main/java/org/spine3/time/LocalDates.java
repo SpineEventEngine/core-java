@@ -25,6 +25,9 @@ import org.spine3.time.change.Changes.ArgumentName;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Calendar.YEAR;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.DAY_OF_MONTH;
 import static org.spine3.change.Changes.ErrorMessage;
 import static org.spine3.time.Calendars.createDate;
 import static org.spine3.time.Calendars.getDay;
@@ -132,7 +135,7 @@ public class LocalDates {
      */
     private static LocalDate changeYear(LocalDate localDate, int yearsDelta) {
         final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(Calendar.YEAR, yearsDelta);
+        cal.add(YEAR, yearsDelta);
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
@@ -151,7 +154,7 @@ public class LocalDates {
      */
     private static LocalDate changeMonth(LocalDate localDate, int monthDelta) {
         final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(Calendar.MONTH, monthDelta);
+        cal.add(MONTH, monthDelta);
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
@@ -170,7 +173,7 @@ public class LocalDates {
      */
     private static LocalDate changeDays(LocalDate localDate, int daysDelta) {
         final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(Calendar.DAY_OF_MONTH, daysDelta);
+        cal.add(DAY_OF_MONTH, daysDelta);
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))

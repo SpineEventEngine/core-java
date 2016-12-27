@@ -27,6 +27,10 @@ import org.spine3.time.change.Changes.ArgumentName;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.MILLISECOND;
 import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
@@ -211,7 +215,7 @@ public class LocalTimes {
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
-        cal.add(Calendar.HOUR, hoursDelta);
+        cal.add(HOUR, hoursDelta);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
@@ -233,7 +237,7 @@ public class LocalTimes {
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
-        cal.add(Calendar.MINUTE, minutesDelta);
+        cal.add(MINUTE, minutesDelta);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
@@ -255,7 +259,7 @@ public class LocalTimes {
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
-        cal.add(Calendar.SECOND, secondsDelta);
+        cal.add(SECOND, secondsDelta);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
@@ -277,7 +281,7 @@ public class LocalTimes {
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
-        cal.add(Calendar.MILLISECOND, millisDelta);
+        cal.add(MILLISECOND, millisDelta);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))

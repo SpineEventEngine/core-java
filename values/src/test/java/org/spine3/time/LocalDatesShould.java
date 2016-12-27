@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
+import static java.util.Calendar.getInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -46,7 +47,7 @@ public class LocalDatesShould {
     @Test
     public void obtain_current_date() {
         final LocalDate today = LocalDates.now();
-        final Calendar cal = Calendar.getInstance();
+        final Calendar cal = getInstance();
 
         assertEquals(getYear(cal), today.getYear());
         assertEquals(getMonth(cal), today.getMonthValue());
