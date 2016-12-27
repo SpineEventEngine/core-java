@@ -43,7 +43,7 @@ public class LocalTimesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
+        assertTrue(hasPrivateUtilityConstructor(LocalTimes.class));
     }
 
     @Test

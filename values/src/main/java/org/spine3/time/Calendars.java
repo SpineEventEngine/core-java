@@ -22,6 +22,17 @@ package org.spine3.time;
 
 import java.util.Calendar;
 
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.YEAR;
+import static java.util.Calendar.ZONE_OFFSET;
+import static java.util.Calendar.getInstance;
+
+
 /**
  * Routines for working with {@link Calendar}.
  *
@@ -36,7 +47,7 @@ public class Calendars {
      * Obtains zone offset using {@code Calendar}.
      */
     public static int getZoneOffset(Calendar cal) {
-        final int zoneOffset = cal.get(Calendar.ZONE_OFFSET) / 1000;
+        final int zoneOffset = cal.get(ZONE_OFFSET) / 1000;
         return zoneOffset;
     }
 
@@ -44,7 +55,7 @@ public class Calendars {
      * Obtains year using {@code Calendar}.
      */
     public static int getYear(Calendar cal) {
-        final int year = cal.get(Calendar.YEAR);
+        final int year = cal.get(YEAR);
         return year;
     }
 
@@ -53,7 +64,7 @@ public class Calendars {
      */
     public static int getMonth(Calendar cal) {
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the reasonable value of month
-        final int month = cal.get(Calendar.MONTH) + 1;
+        final int month = cal.get(MONTH) + 1;
         return month;
     }
 
@@ -61,7 +72,7 @@ public class Calendars {
      * Obtains day of month using {@code Calendar}.
      */
     public static int getDay(Calendar cal) {
-        final int result = cal.get(Calendar.DAY_OF_MONTH);
+        final int result = cal.get(DAY_OF_MONTH);
         return result;
     }
 
@@ -69,7 +80,7 @@ public class Calendars {
      * Obtains hours using {@code Calendar}.
      */
     public static int getHours(Calendar cal) {
-        final int hours = cal.get(Calendar.HOUR);
+        final int hours = cal.get(HOUR);
         return hours;
     }
 
@@ -77,7 +88,7 @@ public class Calendars {
      * Obtains minutes using {@code Calendar}.
      */
     public static int getMinutes(Calendar cal) {
-        final int minutes = cal.get(Calendar.MINUTE);
+        final int minutes = cal.get(MINUTE);
         return minutes;
     }
 
@@ -85,7 +96,7 @@ public class Calendars {
      * Obtains seconds using {@code Calendar}.
      */
     public static int getSeconds(Calendar cal) {
-        final int seconds = cal.get(Calendar.SECOND);
+        final int seconds = cal.get(SECOND);
         return seconds;
     }
 
@@ -93,7 +104,7 @@ public class Calendars {
      * Obtains milliseconds using {@code Calendar}.
      */
     public static int getMillis(Calendar cal) {
-        final int millis = cal.get(Calendar.MILLISECOND);
+        final int millis = cal.get(MILLISECOND);
         return millis;
     }
 
@@ -101,7 +112,7 @@ public class Calendars {
      * Obtains calendar from year, month and day values.
      */
     public static Calendar createDate(int year, int month, int day) {
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = getInstance();
         calendar.set(year, month - 1, day);
         return calendar;
     }
@@ -110,11 +121,11 @@ public class Calendars {
      * Obtains calendar from hours, minutes, seconds and milliseconds values.
      */
     public static Calendar createTime(int hours, int minutes, int seconds, int millis) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, hours);
-        calendar.set(Calendar.MINUTE, minutes);
-        calendar.set(Calendar.SECOND, seconds);
-        calendar.set(Calendar.MILLISECOND, millis);
+        final Calendar calendar = getInstance();
+        calendar.set(HOUR, hours);
+        calendar.set(MINUTE, minutes);
+        calendar.set(SECOND, seconds);
+        calendar.set(MILLISECOND, millis);
         return calendar;
     }
 
@@ -122,10 +133,10 @@ public class Calendars {
      * Obtains calendar from hours, minutes and seconds values.
      */
     public static Calendar createTime(int hours, int minutes, int seconds) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, hours);
-        calendar.set(Calendar.MINUTE, minutes);
-        calendar.set(Calendar.SECOND, seconds);
+        final Calendar calendar = getInstance();
+        calendar.set(HOUR, hours);
+        calendar.set(MINUTE, minutes);
+        calendar.set(SECOND, seconds);
         return calendar;
     }
 
@@ -133,9 +144,9 @@ public class Calendars {
      * Obtains calendar from hours and minutes values.
      */
     public static Calendar createTime(int hours, int minutes) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, hours);
-        calendar.set(Calendar.MINUTE, minutes);
+        final Calendar calendar = getInstance();
+        calendar.set(HOUR, hours);
+        calendar.set(MINUTE, minutes);
         return calendar;
     }
 
@@ -143,10 +154,9 @@ public class Calendars {
      * Obtains calendar using zone offset in seconds.
      */
     public static Calendar createDateWithZoneOffset(ZoneOffset zoneOffset) {
-
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, -zoneOffset.getAmountSeconds());
-        calendar.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
+        final Calendar calendar = getInstance();
+        calendar.add(SECOND, -zoneOffset.getAmountSeconds());
+        calendar.set(ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
 
         return calendar;
     }
@@ -157,9 +167,9 @@ public class Calendars {
     public static Calendar createTimeWithZoneOffset(ZoneOffset zoneOffset) {
         final Calendar calendar = createTime();
         final int currentZoneOffset = getZoneOffset(calendar);
-        calendar.add(Calendar.SECOND, -currentZoneOffset);
-        calendar.add(Calendar.SECOND, zoneOffset.getAmountSeconds());
-        calendar.set(Calendar.ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
+        calendar.add(SECOND, -currentZoneOffset);
+        calendar.add(SECOND, zoneOffset.getAmountSeconds());
+        calendar.set(ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
 
         return calendar;
     }
@@ -168,7 +178,7 @@ public class Calendars {
      * Obtains current calendar.
      */
     public static Calendar createTime() {
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = getInstance();
         return calendar;
     }
 }

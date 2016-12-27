@@ -226,6 +226,14 @@ public class Validate {
         checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
     }
 
+    public static void checkPositive(int value) {
+        checkPositive(value, "");
+    }
+
+    public static void checkPositive(long value) {
+        checkPositive(value, "");
+    }
+
     /**
      * Ensures that the passed long value is positive:
      *
