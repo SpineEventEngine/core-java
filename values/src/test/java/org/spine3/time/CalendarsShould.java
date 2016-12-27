@@ -24,14 +24,15 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createDateWithZoneOffset;
 import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.getZoneOffset;
+import static org.spine3.time.Calendars.nowAt;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CalendarsShould {
@@ -45,7 +46,7 @@ public class CalendarsShould {
     public void obtain_zoneOffset() {
         final int amountOfSeconds = 3*3600;
         final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final Calendar cal = createDateWithZoneOffset(zoneOffset);
+        final Calendar cal = nowAt(zoneOffset);
 
         assertTrue(amountOfSeconds == getZoneOffset(cal));
     }
@@ -70,5 +71,14 @@ public class CalendarsShould {
 
         assertTrue(hours == getHours(cal));
         assertTrue(minutes == getMinutes(cal));
+    }
+
+    @Test
+    public void obtain_month_of_year_using_calendar() {
+        final Calendar calendar = Calendar.getInstance();
+        int april = 3;
+        calendar.set(Calendar.MONTH, april);
+        // The Calendar class assumes JANUARY is zero. Therefore add 1 to expected result.
+        assertEquals(calendar.get(Calendar.MONTH) + 1, Calendars.getMonthOfYear(calendar).getNumber());
     }
 }

@@ -27,7 +27,6 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createTimeWithZoneOffset;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
@@ -52,7 +51,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_current_OffsetTime_using_ZoneOffset() {
         final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
-        final Calendar cal = createTimeWithZoneOffset(ZONE_OFFSET);
+        final Calendar cal = Calendars.nowAt(ZONE_OFFSET);
 
         assertEquals(getHours(cal), now.getTime().getHours());
         assertEquals(getMinutes(cal), now.getTime().getMinutes());

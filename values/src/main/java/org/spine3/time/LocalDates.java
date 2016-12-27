@@ -50,7 +50,7 @@ public class LocalDates {
         final Calendar cal = getInstance();
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
-                                          .setMonth(MonthOfYears.getMonth(cal))
+                                          .setMonth(Calendars.getMonthOfYear(cal))
                                           .setDay(getDay(cal))
                                           .build();
         return result;
@@ -144,7 +144,7 @@ public class LocalDates {
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
-                                          .setMonth(MonthOfYears.getMonth(cal))
+                                          .setMonth(Calendars.getMonthOfYear(cal))
                                           .setDay(getDay(cal))
                                           .build();
         return result;
@@ -163,7 +163,7 @@ public class LocalDates {
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
-                                          .setMonth(MonthOfYears.getMonth(cal))
+                                          .setMonth(Calendars.getMonthOfYear(cal))
                                           .setDay(getDay(cal))
                                           .build();
         return result;
@@ -182,7 +182,7 @@ public class LocalDates {
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(getYear(cal))
-                                          .setMonth(MonthOfYears.getMonth(cal))
+                                          .setMonth(Calendars.getMonthOfYear(cal))
                                           .setDay(getDay(cal))
                                           .build();
         return result;

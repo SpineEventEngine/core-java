@@ -19,17 +19,15 @@
  */
 package org.spine3.time;
 
-import org.spine3.time.change.Changes.ArgumentName;
-
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Calendar.*;
-import static org.spine3.change.Changes.ErrorMessage;
-import static org.spine3.time.Calendars.createDate;
-import static org.spine3.time.Calendars.createDateWithZoneOffset;
-import static org.spine3.time.Calendars.getDay;
-import static org.spine3.time.Calendars.getYear;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.YEAR;
+import static org.spine3.time.Calendars.nowAt;
+import static org.spine3.time.Calendars.toCalendar;
+import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -48,10 +46,8 @@ public class OffsetDates {
     public static OffsetDate now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
 
-        final Calendar cal = createDateWithZoneOffset(zoneOffset);
-        final LocalDate localDate = LocalDates.of(getYear(cal),
-                                                  MonthOfYears.getMonth(cal),
-                                                  getDay(cal));
+        final Calendar cal = nowAt(zoneOffset);
+        final LocalDate localDate = toLocalDate(cal);
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
                                             .setOffset(zoneOffset)
@@ -141,19 +137,7 @@ public class OffsetDates {
      * @return copy of this offset date with new years value
      */
     private static OffsetDate changeYear(OffsetDate offsetDate, int yearsDelta) {
-        final Calendar cal = createDate(offsetDate.getDate().getYear(),
-                                        offsetDate.getDate().getMonthValue(),
-                                        offsetDate.getDate().getDay());
-        cal.add(YEAR, yearsDelta);
-
-        final LocalDate localDate = LocalDates.of(getYear(cal),
-                                                  MonthOfYears.getMonth(cal),
-                                                  getDay(cal));
-
-        final OffsetDate result = OffsetDate.newBuilder()
-                                          .setDate(localDate)
-                                          .setOffset(offsetDate.getOffset())
-                                          .build();
+        final OffsetDate result = add(offsetDate, YEAR, yearsDelta);
         return result;
     }
 
@@ -165,20 +149,14 @@ public class OffsetDates {
      * @return copy of this offset date with new months value
      */
     private static OffsetDate changeMonth(OffsetDate offsetDate, int monthDelta) {
-        final Calendar cal = createDate(offsetDate.getDate().getYear(),
-                                        offsetDate.getDate().getMonthValue(),
-                                        offsetDate.getDate().getDay());
-        cal.add(MONTH, monthDelta);
-
-        final LocalDate localDate = LocalDates.of(getYear(cal),
-                                                  MonthOfYears.getMonth(cal),
-                                                  getDay(cal));
-
-        final OffsetDate result = OffsetDate.newBuilder()
-                                            .setDate(localDate)
-                                            .setOffset(offsetDate.getOffset())
-                                            .build();
+        final OffsetDate result = add(offsetDate, MONTH, monthDelta);
         return result;
+    }
+
+    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
+        return offsetDate.toBuilder()
+                         .setDate(localDate)
+                         .build();
     }
 
     /**
@@ -189,19 +167,16 @@ public class OffsetDates {
      * @return copy of this offset date with new days value
      */
     private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {
-        final Calendar cal = createDate(offsetDate.getDate().getYear(),
-                                        offsetDate.getDate().getMonthValue(),
-                                        offsetDate.getDate().getDay());
-        cal.add(DAY_OF_MONTH, daysDelta);
+        final OffsetDate result = add(offsetDate, DAY_OF_MONTH, daysDelta);
+        return result;
+    }
 
-        final LocalDate localDate = LocalDates.of(getYear(cal),
-                                                  MonthOfYears.getMonth(cal),
-                                                  getDay(cal));
+    private static OffsetDate add(OffsetDate offsetDate, int calendarField, int delta) {
+        final Calendar cal = toCalendar(offsetDate);
+        cal.add(calendarField, delta);
 
-        final OffsetDate result = OffsetDate.newBuilder()
-                                            .setDate(localDate)
-                                            .setOffset(offsetDate.getOffset())
-                                            .build();
+        final LocalDate localDate = toLocalDate(cal);
+        final OffsetDate result = withDate(offsetDate, localDate);
         return result;
     }
 }

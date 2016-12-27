@@ -21,6 +21,10 @@
 package org.spine3.time;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.HOUR;
@@ -34,11 +38,18 @@ import static java.util.Calendar.getInstance;
 
 
 /**
- * Routines for working with {@link Calendar}.
+ * Utilities for working with {@link Calendar}.
+ *
+ * <p> This utility class is needed while Spine is based on Java 7.
+ * Java 8 introduces new date/time API in the package {@code java.time}.
+ * Spine v2 will be based on Java 8 and this class will be deprecated.
  *
  * @author Alexander Aleksandrov
+ * @since 0.6.12
  */
 public class Calendars {
+
+    private static final String TIME_ZONE_GMT = "GMT";
 
     private Calendars() {
     }
@@ -117,6 +128,10 @@ public class Calendars {
         return calendar;
     }
 
+    public static void setDate(Calendar calendar, LocalDate date) {
+        calendar.set(date.getYear(), date.getMonth().getNumber() - 1, date.getDay());
+    }
+
     /**
      * Obtains calendar from hours, minutes, seconds and milliseconds values.
      */
@@ -151,27 +166,55 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar using zone offset in seconds.
+     * Converts the passed {@code Calendar} to a new instance at the UTC time zone.
      */
-    public static Calendar createDateWithZoneOffset(ZoneOffset zoneOffset) {
-        final Calendar calendar = getInstance();
-        calendar.add(SECOND, -zoneOffset.getAmountSeconds());
-        calendar.set(ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
+    public static Calendar toGmt(Calendar cal) {
+        final Date date = cal.getTime();
+        final TimeZone tz = cal.getTimeZone();
+
+        // Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
+        long msFromEpochGmt = date.getTime();
+
+        // Gives you the current offset in ms from GMT at the current date
+        int offsetFromUTC = tz.getOffset(msFromEpochGmt);
+
+        //create a new calendar in GMT timezone, set to this date and add the offset
+        Calendar gmtCal = getInstance(TimeZone.getTimeZone(TIME_ZONE_GMT));
+        gmtCal.setTime(date);
+        gmtCal.add(MILLISECOND, offsetFromUTC);
+
+        return gmtCal;
+    }
+
+    public static Calendar nowAtGmt() {
+        Calendar gmtCal = getInstance(TimeZone.getTimeZone(TIME_ZONE_GMT));
+        return gmtCal;
+    }
+
+    /**
+     * Obtains calendar for the passed zone offset.
+     */
+    public static Calendar nowAt(ZoneOffset zoneOffset) {
+        final Calendar utc = nowAtGmt();
+        final Date timeAtGmt = utc.getTime();
+        long msFromEpoch = timeAtGmt.getTime();
+
+        final Calendar calendar = at(zoneOffset);
+
+        // Gives you the current offset in ms from UTC at the current date
+        int offsetFromGmt = calendar.getTimeZone().getOffset(msFromEpoch);
+        calendar.setTime(timeAtGmt);
+        calendar.add(MILLISECOND, offsetFromGmt);
 
         return calendar;
     }
 
-    /**
-     * Obtains calendar time using {@code ZoneOffset}.
-     */
-    public static Calendar createTimeWithZoneOffset(ZoneOffset zoneOffset) {
-        final Calendar calendar = createTime();
-        final int currentZoneOffset = getZoneOffset(calendar);
-        calendar.add(SECOND, -currentZoneOffset);
-        calendar.add(SECOND, zoneOffset.getAmountSeconds());
-        calendar.set(ZONE_OFFSET, zoneOffset.getAmountSeconds() * 1000);
-
-        return calendar;
+    public static Calendar at(ZoneOffset zoneOffset) {
+        @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset isn't that big.
+        final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
+        final SimpleTimeZone timeZone = new SimpleTimeZone(offsetMillis, "temp");
+        final Calendar result = getInstance(timeZone);
+        return result;
     }
 
     /**
@@ -180,5 +223,35 @@ public class Calendars {
     public static Calendar createTime() {
         final Calendar calendar = getInstance();
         return calendar;
+    }
+
+    /**
+     * Obtains month of year using calendar.
+     */
+    public static MonthOfYear getMonthOfYear(Calendar calendar) {
+        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
+        final int monthByCalendar = calendar.get(MONTH);
+        final MonthOfYear month = MonthOfYear.forNumber(monthByCalendar + 1);
+        return month;
+    }
+
+    static LocalDate toLocalDate(Calendar cal) {
+        return LocalDates.of(getYear(cal),
+                             getMonthOfYear(cal),
+                             getDay(cal));
+    }
+
+    static Calendar toCalendar(OffsetDate offsetDate) {
+        final Calendar calendar = at(offsetDate.getOffset());
+        setDate(calendar, offsetDate.getDate());
+        return calendar;
+    }
+
+    static LocalTime toLocalTime(Calendar calendar) {
+        final int hours = getHours(calendar);
+        final int minutes = getMinutes(calendar);
+        final int seconds = getSeconds(calendar);
+
+        return LocalTimes.of(hours, minutes, seconds);
     }
 }

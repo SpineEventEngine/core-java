@@ -24,7 +24,6 @@ import java.util.Calendar;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Changes.ErrorMessage;
 import static org.spine3.time.Calendars.createTime;
-import static org.spine3.time.Calendars.createTimeWithZoneOffset;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
@@ -47,7 +46,7 @@ public class OffsetTimes {
      */
     public static OffsetTime now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
-        final Calendar cal = createTimeWithZoneOffset(zoneOffset);
+        final Calendar cal = Calendars.nowAt(zoneOffset);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal), getSeconds(cal), getMillis(cal));
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
