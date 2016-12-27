@@ -223,7 +223,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             store(aggregate);
             final Message state = aggregate.getState();
             final Any packedAny = AnyPacker.pack(state);
-            standFunnel.post(aggregateId, packedAny);
+            standFunnel.post(aggregateId, packedAny, aggregate.getVersion());
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }

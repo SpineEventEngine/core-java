@@ -68,14 +68,15 @@ public class StandFunnel {
      *
      * <p>The state data is posted as {@link Any} to allow transferring over the network.
      *
-     * @param id          the id of an entity
-     * @param entityState the state of an {@code Entity}
+     * @param id            the id of an entity
+     * @param entityState   the state of an {@code Entity}
+     * @param entityVersion the version of an {@code Entity}
      */
-    public void post(final Object id, final Any entityState) {
+    public void post(final Object id, final Any entityState, final int entityVersion) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                stand.update(id, entityState);
+                stand.update(id, entityState, entityVersion);
             }
         });
     }
