@@ -22,9 +22,13 @@ package org.spine3.time;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.change.Changes.ErrorMessage;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
 import static org.spine3.time.Calendars.createDate;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
@@ -34,7 +38,6 @@ import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
-import static org.spine3.time.change.Changes.ArgumentName;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -51,7 +54,7 @@ public class OffsetDateTimes {
      * Obtains current OffsetDateTime instance using {@code ZoneOffset}.
      */
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
-        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
+        checkNotNull(zoneOffset);
 
         final Calendar now = nowAt(zoneOffset);
         final LocalTime localTime = toLocalTime(now);
@@ -229,10 +232,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(date.getYear(),
                                             date.getMonthValue(),
                                             date.getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calDate.add(Calendar.YEAR, yearsDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -261,10 +264,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calDate.add(MONTH, monthDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -293,10 +296,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calDate.add(DAY_OF_MONTH, daysDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -325,10 +328,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calTime.add(HOUR, hoursDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -357,10 +360,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calTime.add(MINUTE, minutesDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -389,10 +392,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calTime.add(SECOND, secondsDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
@@ -421,10 +424,10 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
-                                            offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(),
-                                            offsetDateTime.getTime().getMillis());
+        final Calendar calTime = Calendars.createWithTime(offsetDateTime.getTime().getHours(),
+                                                          offsetDateTime.getTime().getMinutes(),
+                                                          offsetDateTime.getTime().getSeconds(),
+                                                          offsetDateTime.getTime().getMillis());
         calTime.add(MILLISECOND, millisDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),

@@ -27,7 +27,6 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
@@ -56,7 +55,7 @@ public class CalendarsShould {
         final int hours = 3;
         final int minutes = 23;
         final int seconds = 12;
-        final Calendar cal = createTime(hours, minutes, seconds);
+        final Calendar cal = Calendars.createWithTime(hours, minutes, seconds);
 
         assertTrue(hours == getHours(cal));
         assertTrue(minutes == getMinutes(cal));
@@ -67,7 +66,7 @@ public class CalendarsShould {
     public void obtain_calendar_using_hours_minutes() {
         final int hours = 3;
         final int minutes = 23;
-        final Calendar cal = createTime(hours, minutes);
+        final Calendar cal = Calendars.createWithTime(hours, minutes);
 
         assertTrue(hours == getHours(cal));
         assertTrue(minutes == getMinutes(cal));

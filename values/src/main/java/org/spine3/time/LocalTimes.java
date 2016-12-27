@@ -29,12 +29,14 @@ import static java.util.Calendar.HOUR;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.Calendars.toCalendar;
+import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
+import static org.spine3.validate.Validate.checkPositiveOrZero;
 
 /**
  * Routines for working with {@link LocalTime}.
@@ -51,7 +53,7 @@ public class LocalTimes {
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps.getCurrentTime();
-        final Calendar cal = createTime();
+        final Calendar cal = Calendars.now();
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
@@ -67,11 +69,9 @@ public class LocalTimes {
      * Obtains local time from an hours, minutes, seconds, milliseconds, and nanoseconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds, int millis, long nanos) {
-        checkPositive(hours);
-        checkPositive(minutes);
-        checkPositive(seconds);
-        checkPositive(millis);
-        checkPositive(nanos);
+        checkClockTime(hours, minutes, seconds);
+        checkPositiveOrZero(millis);
+        checkPositiveOrZero(nanos);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
@@ -83,14 +83,18 @@ public class LocalTimes {
         return result;
     }
 
+    private static void checkClockTime(int hours, int minutes, int seconds) {
+        checkPositiveOrZero(hours);
+        checkPositiveOrZero(minutes);
+        checkPositiveOrZero(seconds);
+    }
+
     /**
      * Obtains local time from an hours, minutes, seconds, and milliseconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds, int millis) {
-        checkPositive(hours);
-        checkPositive(minutes);
-        checkPositive(seconds);
-        checkPositive(millis);
+        checkClockTime(hours, minutes, seconds);
+        checkPositiveOrZero(millis);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
@@ -105,9 +109,7 @@ public class LocalTimes {
      * Obtains local time from an hours, minutes, and seconds.
      */
     public static LocalTime of(int hours, int minutes, int seconds) {
-        checkPositive(hours);
-        checkPositive(minutes);
-        checkPositive(seconds);
+        checkClockTime(hours, minutes, seconds);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
@@ -121,8 +123,7 @@ public class LocalTimes {
      * Obtains local time from an hours, and minutes.
      */
     public static LocalTime of(int hours, int minutes) {
-        checkPositive(hours);
-        checkPositive(minutes);
+        checkClockTime(hours, minutes, 0);
 
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(hours)
@@ -219,18 +220,7 @@ public class LocalTimes {
      * @return copy of this local time with new hours value
      */
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
-        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
-                                        localTime.getSeconds(), localTime.getMillis());
-        cal.add(HOUR, hoursDelta);
-
-        final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(getHours(cal))
-                                          .setMinutes(getMinutes(cal))
-                                          .setSeconds(getSeconds(cal))
-                                          .setMillis(getMillis(cal))
-                                          .setNanos(localTime.getNanos())
-                                          .build();
-        return result;
+        return add(localTime, HOUR, hoursDelta);
     }
 
     /**
@@ -241,18 +231,7 @@ public class LocalTimes {
      * @return copy of this local time with new minutes value
      */
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
-        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
-                                        localTime.getSeconds(), localTime.getMillis());
-        cal.add(MINUTE, minutesDelta);
-
-        final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(getHours(cal))
-                                          .setMinutes(getMinutes(cal))
-                                          .setSeconds(getSeconds(cal))
-                                          .setMillis(getMillis(cal))
-                                          .setNanos(localTime.getNanos())
-                                          .build();
-        return result;
+        return add(localTime, MINUTE, minutesDelta);
     }
 
     /**
@@ -263,18 +242,7 @@ public class LocalTimes {
      * @return copy of this local time with new seconds value
      */
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
-        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
-                                        localTime.getSeconds(), localTime.getMillis());
-        cal.add(SECOND, secondsDelta);
-
-        final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(getHours(cal))
-                                          .setMinutes(getMinutes(cal))
-                                          .setSeconds(getSeconds(cal))
-                                          .setMillis(getMillis(cal))
-                                          .setNanos(localTime.getNanos())
-                                          .build();
-        return result;
+        return add(localTime, SECOND, secondsDelta);
     }
 
     /**
@@ -285,17 +253,15 @@ public class LocalTimes {
      * @return copy of this local time with new milliseconds value
      */
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {
-        final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
-                                        localTime.getSeconds(), localTime.getMillis());
-        cal.add(MILLISECOND, millisDelta);
+        return add(localTime, MILLISECOND, millisDelta);
+    }
 
-        final LocalTime result = LocalTime.newBuilder()
-                                          .setHours(getHours(cal))
-                                          .setMinutes(getMinutes(cal))
-                                          .setSeconds(getSeconds(cal))
-                                          .setMillis(getMillis(cal))
-                                          .setNanos(localTime.getNanos())
-                                          .build();
+    private static LocalTime add(LocalTime value, int calendarField, int delta) {
+        final Calendar cal = toCalendar(value);
+        cal.add(calendarField, delta);
+        final LocalTime result = toLocalTime(cal).toBuilder()
+                                                 .setNanos(value.getNanos())
+                                                 .build();
         return result;
     }
 }

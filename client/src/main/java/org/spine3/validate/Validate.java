@@ -245,6 +245,10 @@ public class Validate {
         checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
     }
 
+    public static void checkPositiveOrZero(long value) {
+        checkArgument(value >= 0);
+    }
+
     /**
      * Ensures that the passed ID is valid.
      *

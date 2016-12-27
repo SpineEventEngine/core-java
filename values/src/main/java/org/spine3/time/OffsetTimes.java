@@ -26,11 +26,11 @@ import static java.util.Calendar.HOUR;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -50,8 +50,7 @@ public class OffsetTimes {
         checkNotNull(zoneOffset);
         final Calendar cal = Calendars.nowAt(zoneOffset);
 
-        final Calendar cal = createTimeWithZoneOffset(zoneOffset);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal), getSeconds(cal), getMillis(cal));
+        final LocalTime localTime = toLocalTime(cal);
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
                                             .setOffset(zoneOffset)
@@ -161,8 +160,8 @@ public class OffsetTimes {
      * @return copy of this offset time with new hours value
      */
     private static OffsetTime changeHours(OffsetTime offsetTime, int hoursDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
         cal.add(HOUR, hoursDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
@@ -183,8 +182,8 @@ public class OffsetTimes {
      * @return copy of this offset time with new minutes value
      */
     private static OffsetTime changeMinutes(OffsetTime offsetTime, int minutesDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
         cal.add(MINUTE, minutesDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
@@ -205,8 +204,8 @@ public class OffsetTimes {
      * @return copy of this offset time with new seconds value
      */
     private static OffsetTime changeSeconds(OffsetTime offsetTime, int secondsDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
         cal.add(SECOND, secondsDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
@@ -227,8 +226,8 @@ public class OffsetTimes {
      * @return copy of this offset time with new milliseconds value
      */
     private static OffsetTime changeMillis(OffsetTime offsetTime, int millisDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
         cal.add(MILLISECOND, millisDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());

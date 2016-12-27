@@ -134,7 +134,7 @@ public class Calendars {
     /**
      * Obtains calendar from hours, minutes, seconds and milliseconds values.
      */
-    public static Calendar createTime(int hours, int minutes, int seconds, int millis) {
+    public static Calendar createWithTime(int hours, int minutes, int seconds, int millis) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -146,7 +146,7 @@ public class Calendars {
     /**
      * Obtains calendar from hours, minutes and seconds values.
      */
-    public static Calendar createTime(int hours, int minutes, int seconds) {
+    public static Calendar createWithTime(int hours, int minutes, int seconds) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -157,7 +157,7 @@ public class Calendars {
     /**
      * Obtains calendar from hours and minutes values.
      */
-    public static Calendar createTime(int hours, int minutes) {
+    public static Calendar createWithTime(int hours, int minutes) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -219,7 +219,7 @@ public class Calendars {
     /**
      * Obtains current calendar.
      */
-    public static Calendar createTime() {
+    public static Calendar now() {
         final Calendar calendar = getInstance();
         return calendar;
     }
@@ -250,7 +250,15 @@ public class Calendars {
         final int hours = getHours(calendar);
         final int minutes = getMinutes(calendar);
         final int seconds = getSeconds(calendar);
+        final int millis = getMillis(calendar);
 
-        return LocalTimes.of(hours, minutes, seconds);
+        return LocalTimes.of(hours, minutes, seconds, millis);
+    }
+
+    static Calendar toCalendar(LocalTime localTime) {
+        return createWithTime(localTime.getHours(),
+                              localTime.getMinutes(),
+                              localTime.getSeconds(),
+                              localTime.getMillis());
     }
 }
