@@ -95,7 +95,7 @@ public class Messages {
      */
     public static String toJson(Message message) {
         checkNotNull(message);
-        String result = null;
+        String result;
         try {
             result = JsonPrinter.instance().print(message);
         } catch (InvalidProtocolBufferException e) {
