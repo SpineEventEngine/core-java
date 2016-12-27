@@ -26,7 +26,6 @@ import java.util.Calendar;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Changes.ErrorMessage;
 import static org.spine3.time.Calendars.createDate;
-import static org.spine3.time.Calendars.createDateWithNoOffset;
 import static org.spine3.time.Calendars.createDateWithZoneOffset;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getYear;

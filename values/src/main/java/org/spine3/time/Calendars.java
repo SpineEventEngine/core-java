@@ -165,18 +165,6 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar with GMT 00:00 zone offset.
-     */
-    public static Calendar createDateWithNoOffset() {
-        final Calendar calendar = Calendar.getInstance();
-        final int zoneOffset = getZoneOffset(calendar);
-        calendar.add(Calendar.SECOND, -zoneOffset);
-        calendar.set(Calendar.ZONE_OFFSET, 0);
-
-        return calendar;
-    }
-
-    /**
      * Obtains current calendar.
      */
     public static Calendar createTime() {

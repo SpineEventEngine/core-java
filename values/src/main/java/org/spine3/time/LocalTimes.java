@@ -28,7 +28,6 @@ import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.time.Calendars.createTime;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
@@ -232,7 +231,6 @@ public class LocalTimes {
      * @return copy of this local time with new minutes value
      */
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
-        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
         cal.add(Calendar.MINUTE, minutesDelta);
@@ -255,7 +253,6 @@ public class LocalTimes {
      * @return copy of this local time with new seconds value
      */
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
-        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
         cal.add(Calendar.SECOND, secondsDelta);
@@ -278,7 +275,6 @@ public class LocalTimes {
      * @return copy of this local time with new milliseconds value
      */
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {
-        final Timestamp time = Timestamps.getCurrentTime();
         final Calendar cal = createTime(localTime.getHours(), localTime.getMinutes(),
                                         localTime.getSeconds(), localTime.getMillis());
         cal.add(Calendar.MILLISECOND, millisDelta);
@@ -292,5 +288,4 @@ public class LocalTimes {
                                           .build();
         return result;
     }
-    //TODO:2016-12-22:alexander.aleksandrov: Add methods to work with nanos after we will migrate to java 1.8 and java.time
 }

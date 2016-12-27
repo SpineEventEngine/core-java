@@ -24,13 +24,12 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
-import static org.spine3.time.Calendars.createDate;
-import static org.spine3.time.Calendars.getDay;
-import static org.spine3.time.Calendars.getMonth;
-import static org.spine3.time.Calendars.getYear;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.time.Calendars.getDay;
+import static org.spine3.time.Calendars.getMonth;
+import static org.spine3.time.Calendars.getYear;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalDatesShould {

@@ -21,15 +21,13 @@
 package org.spine3.time;
 
 import org.junit.Test;
+
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createTime;
-import static org.spine3.time.Calendars.createTime;
 import static org.spine3.time.Calendars.getHours;
-import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 
