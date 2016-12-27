@@ -19,13 +19,12 @@
  */
 package org.spine3.time;
 
-import org.spine3.time.change.Changes.ArgumentName;
-
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Calendar.*;
-import static org.spine3.change.Changes.ErrorMessage;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.YEAR;
 import static org.spine3.time.Calendars.createDate;
 import static org.spine3.time.Calendars.createDateWithZoneOffset;
 import static org.spine3.time.Calendars.getDay;

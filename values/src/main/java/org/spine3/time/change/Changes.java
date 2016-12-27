@@ -37,30 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Changes {
 
-    public interface ArgumentName {
-        String YEARS_TO_ADD = "yearsToAdd";
-        String MONTHS_TO_ADD = "monthsToAdd";
-        String DAYS_TO_ADD = "daysToAdd";
-        String HOURS_TO_ADD = "hoursToAdd";
-        String MINUTES_TO_ADD = "minutesToAdd";
-        String SECONDS_TO_ADD = "secondsToAdd";
-        String MILLIS_TO_ADD = "millisToAdd";
-        String NANOS_TO_ADD = "nanosToAdd";
-        String YEARS_TO_SUBTRACT = "yearsToSubtract";
-        String MONTHS_TO_SUBTRACT = "monthsToSubtract";
-        String DAYS_TO_SUBTRACT = "daysToSubtract";
-        String HOURS_TO_SUBTRACT = "hoursToSubtract";
-        String MINUTES_TO_SUBTRACT = "minutesToSubtract";
-        String SECONDS_TO_SUBTRACT = "secondsToSubtract";
-        String MILLIS_TO_SUBTRACT = "millisToSubtract";
-        String NANOS_TO_SUBTRACT = "nanosToSubtract";
-        String HOURS = "hours";
-        String MINUTES = "minutes";
-        String SECONDS = "seconds";
-        String MILLIS = "millis";
-        String NANOS = "nanos";
-    }
-
     private Changes() {
     }
 
@@ -70,8 +46,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static IntervalChange of(Interval previousValue, Interval newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final IntervalChange result = IntervalChange.newBuilder()
@@ -87,8 +63,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static LocalDateChange of(LocalDate previousValue, LocalDate newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final LocalDateChange result = LocalDateChange.newBuilder()
@@ -104,8 +80,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static LocalTimeChange of(LocalTime previousValue, LocalTime newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final LocalTimeChange result = LocalTimeChange.newBuilder()
@@ -121,8 +97,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static OffsetTimeChange of(OffsetTime previousValue, OffsetTime newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final OffsetTimeChange result = OffsetTimeChange.newBuilder()
@@ -138,8 +114,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static OffsetDateChange of(OffsetDate previousValue, OffsetDate newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final OffsetDateChange result = OffsetDateChange.newBuilder()
@@ -155,8 +131,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static OffsetDateTimeChange of(OffsetDateTime previousValue, OffsetDateTime newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
