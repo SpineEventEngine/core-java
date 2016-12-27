@@ -47,8 +47,8 @@ import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -64,7 +64,8 @@ public class Commands {
     private static final char FILE_PATH_SEPARATOR = '/';
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
-    private Commands() {}
+    private Commands() {
+    }
 
     /**
      * Creates a new {@link CommandId} based on random UUID.
@@ -72,8 +73,11 @@ public class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        final String value = UUID.randomUUID().toString();
-        return CommandId.newBuilder().setUuid(value).build();
+        final String value = UUID.randomUUID()
+                                 .toString();
+        return CommandId.newBuilder()
+                        .setUuid(value)
+                        .build();
     }
 
     /**
@@ -83,8 +87,8 @@ public class Commands {
      * Commands in client applications should be created by {@link CommandFactory#create(Message)},
      * which creates {@code CommandContext} automatically.
      *
-     * @param tenantId the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId the actor id
+     * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId     the actor id
      * @param zoneOffset the offset of the timezone in which the user works
      * @see CommandFactory#create(Message)
      */
@@ -118,7 +122,7 @@ public class Commands {
      * Creates a command instance with the given message wrapped to {@link Any} and the {@code context}.
      *
      * @param messageAny the domain model message wrapped to {@link Any}
-     * @param context the context of the command
+     * @param context    the context of the command
      * @return a new command
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
@@ -133,7 +137,7 @@ public class Commands {
      * Extracts the message from the passed {@code Command} instance.
      *
      * @param command a command to extract a message from
-     * @param <M> a type of the command message
+     * @param <M>     a type of the command message
      * @return an unpacked message
      */
     public static <M extends Message> M getMessage(Command command) {
@@ -143,7 +147,8 @@ public class Commands {
 
     /** Extracts a command ID from the passed {@code Command} instance. */
     public static CommandId getId(Command command) {
-        final CommandId id = command.getContext().getCommandId();
+        final CommandId id = command.getContext()
+                                    .getCommandId();
         return id;
     }
 
@@ -172,7 +177,8 @@ public class Commands {
     }
 
     private static Timestamp getTimestamp(Command request) {
-        final Timestamp result = request.getContext().getTimestamp();
+        final Timestamp result = request.getContext()
+                                        .getTimestamp();
         return result;
     }
 
@@ -198,7 +204,7 @@ public class Commands {
      * <p>The {@code format} string must have two {@code %s} format specifiers.
      * The first specifier is for command type name. The second is for command ID.
      *
-     * @param format the format string with two parameters
+     * @param format  the format string with two parameters
      * @param command the command to log
      * @return formatted string
      */
@@ -215,7 +221,7 @@ public class Commands {
      * <p>The {@code format} string must have two {@code %s} format specifiers.
      * The first specifier is for message type name. The second is for command ID.
      *
-     * @param format the format string
+     * @param format    the format string
      * @param commandId the ID of the command
      * @return formatted string
      */
@@ -252,7 +258,8 @@ public class Commands {
      * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
-        final Schedule schedule = command.getContext().getSchedule();
+        final Schedule schedule = command.getContext()
+                                         .getSchedule();
         final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
@@ -262,9 +269,9 @@ public class Commands {
     }
 
     /**
-     * Sets a new scheduling time to {@link CommandContext.Schedule}.
+     * Sets a new scheduling time to {@link Schedule}.
      *
-     * @param command a command to update
+     * @param command        a command to update
      * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
@@ -278,10 +285,10 @@ public class Commands {
     }
 
     /**
-     * Updates {@link CommandContext.Schedule}.
+     * Updates {@link Schedule}.
      *
-     * @param command a command to update
-     * @param delay a delay to set (see {@link Schedule#getDelay()} for details)
+     * @param command        a command to update
+     * @param delay          a delay to set (see {@link Schedule#getDelay()} for details)
      * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
@@ -289,11 +296,11 @@ public class Commands {
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
         checkPositive(schedulingTime, "command scheduling time");
         final CommandContext context = command.getContext();
-        final CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                               .toBuilder()
-                                                               .setDelay(delay)
-                                                               .setSchedulingTime(schedulingTime)
-                                                               .build();
+        final Schedule scheduleUpdated = context.getSchedule()
+                                                .toBuilder()
+                                                .setDelay(delay)
+                                                .setSchedulingTime(schedulingTime)
+                                                .build();
         final CommandContext contextUpdated = context.toBuilder()
                                                      .setSchedule(scheduleUpdated)
                                                      .build();
