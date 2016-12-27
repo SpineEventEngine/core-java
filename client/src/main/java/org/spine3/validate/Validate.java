@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.change.Changes.ErrorMessage;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -212,6 +213,40 @@ public class Validate {
         checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
         checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
+    }
+
+    /**
+     * Ensures that the passed int value is positive:
+     *
+     * @param value the value to check
+     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @throws IllegalArgumentException if requirement is not met
+     */
+    public static void checkPositive(int value, String argumentName) {
+        checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+    }
+
+    public static void checkPositive(int value) {
+        checkPositive(value, "");
+    }
+
+    public static void checkPositive(long value) {
+        checkPositive(value, "");
+    }
+
+    /**
+     * Ensures that the passed long value is positive:
+     *
+     * @param value the value to check
+     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @throws IllegalArgumentException if requirement is not met
+     */
+    public static void checkPositive(long value, String argumentName) {
+        checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+    }
+
+    public static void checkPositiveOrZero(long value) {
+        checkArgument(value >= 0);
     }
 
     /**

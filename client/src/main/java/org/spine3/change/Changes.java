@@ -35,10 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("OverlyCoupledClass") /* ... because we want one utility class for all the Changes classes. */
 public class Changes {
 
-    private static final String PREVIOUS_VALUE = "previousValue";
-    private static final String NEW_VALUE = "newValue";
-    private static final String ERR_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
-    private static final String ERR_NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
+    public interface ErrorMessage {
+        String VALUES_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
+        String NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
+        String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
+    }
 
     private Changes() {
     }
@@ -49,10 +50,10 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static StringChange of(String previousValue, String newValue) {
-        checkNotNull(previousValue, PREVIOUS_VALUE);
-        checkNotNull(newValue, NEW_VALUE);
-        checkArgument(!newValue.isEmpty(), ERR_NEW_VALUE_CANNOT_BE_EMPTY);
-        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
+        checkArgument(!newValue.isEmpty(), ErrorMessage.NEW_VALUE_CANNOT_BE_EMPTY);
+        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final StringChange result = StringChange.newBuilder()
                                                 .setPreviousValue(previousValue)
@@ -67,9 +68,9 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static TimestampChange of(Timestamp previousValue, Timestamp newValue) {
-        checkNotNull(previousValue, PREVIOUS_VALUE);
-        checkNotNull(newValue, NEW_VALUE);
-        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
+        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final TimestampChange result = TimestampChange.newBuilder()
                                                       .setPreviousValue(previousValue)
@@ -84,7 +85,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static DoubleChange of(double previousValue, double newValue) {
-        checkArgument(Double.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Double.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final DoubleChange result = DoubleChange.newBuilder()
                                                 .setPreviousValue(previousValue)
@@ -99,7 +100,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static FloatChange of(float previousValue, float newValue) {
-        checkArgument(Float.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Float.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final FloatChange result = FloatChange.newBuilder()
                                               .setPreviousValue(previousValue)
@@ -114,7 +115,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Int32Change ofInt32(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Int32Change result = Int32Change.newBuilder()
                                               .setPreviousValue(previousValue)
@@ -129,7 +130,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Int64Change ofInt64(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Int64Change result = Int64Change.newBuilder()
                                               .setPreviousValue(previousValue)
@@ -144,12 +145,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static UInt32Change ofUInt32(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final UInt32Change result = UInt32Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -159,12 +160,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static UInt64Change ofUInt64(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final UInt64Change result = UInt64Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -174,7 +175,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static SInt32Change ofSInt32(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final SInt32Change result = SInt32Change.newBuilder()
                                                 .setPreviousValue(previousValue)
@@ -189,7 +190,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static SInt64Change ofSInt64(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final SInt64Change result = SInt64Change.newBuilder()
                                                 .setPreviousValue(previousValue)
@@ -204,12 +205,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Fixed32Change ofFixed32(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Fixed32Change result = Fixed32Change.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -219,12 +220,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Fixed64Change ofFixed64(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Fixed64Change result = Fixed64Change.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -234,12 +235,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Sfixed32Change ofSfixed32(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Sfixed32Change result = Sfixed32Change.newBuilder()
-                                                  .setPreviousValue(previousValue)
-                                                  .setNewValue(newValue)
-                                                  .build();
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 
@@ -249,12 +250,12 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static Sfixed64Change ofSfixed64(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final Sfixed64Change result = Sfixed64Change.newBuilder()
-                                                  .setPreviousValue(previousValue)
-                                                  .setNewValue(newValue)
-                                                  .build();
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 
@@ -264,10 +265,10 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static BytesChange of(ByteString previousValue, ByteString newValue) {
-        checkNotNull(previousValue, PREVIOUS_VALUE);
-        checkNotNull(newValue, NEW_VALUE);
-        checkArgument(!newValue.isEmpty(), ERR_NEW_VALUE_CANNOT_BE_EMPTY);
-        checkArgument(!newValue.equals(previousValue), ERR_CANNOT_BE_EQUAL);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
+        checkArgument(!newValue.isEmpty(), ErrorMessage.NEW_VALUE_CANNOT_BE_EMPTY);
+        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final BytesChange result = BytesChange.newBuilder()
                                               .setPreviousValue(previousValue)
@@ -282,7 +283,7 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static BooleanChange of(boolean previousValue, boolean newValue) {
-        checkArgument(Boolean.compare(newValue, previousValue) != 0, ERR_CANNOT_BE_EQUAL);
+        checkArgument(Boolean.compare(newValue, previousValue) != 0, ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final BooleanChange result = BooleanChange.newBuilder()
                                                   .setPreviousValue(previousValue)
