@@ -154,6 +154,7 @@ public class Messages {
      * @return the class of the field
      * @throws IllegalArgumentException if the field type is unknown
      */
+    @SuppressWarnings("OverlyComplexMethod")    // as each branch is a fairly simple.
     public static Class<?> getFieldClass(FieldDescriptor field) {
         final FieldDescriptor.JavaType javaType = field.getJavaType();
         switch (javaType) {
@@ -179,7 +180,8 @@ public class Messages {
                 final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
                 final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
+            default:
+                throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
         }
-        throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
     }
 }
