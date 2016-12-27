@@ -45,10 +45,9 @@ public class Math {
      * @return the new total
      * @throws ArithmeticException if the result overflows a long
      */
+    @SuppressWarnings("SwitchStatementWithoutDefaultBranch")    // no need for default branch in this method.
     public static long safeMultiply(long a, int b) {
 
-        // no need for default branch here
-        // noinspection SwitchStatementWithoutDefaultBranch
         switch (b) {
             case -1:
                 if (a == Long.MIN_VALUE) {
