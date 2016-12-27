@@ -42,9 +42,6 @@ import static com.google.protobuf.util.Timestamps.subtract;
  */
 public class Timestamps {
 
-    private Timestamps() {
-    }
-
     /**
      * The following constants are taken from {@link com.google.protobuf.util.Timestamps}
      * in order to make them publicly visible to time management utils:
@@ -97,6 +94,9 @@ public class Timestamps {
             return new SystemTimeProvider();
         }
     };
+
+    private Timestamps() {
+    }
 
     /**
      * Obtains current time.

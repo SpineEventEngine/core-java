@@ -30,6 +30,8 @@ import org.spine3.server.type.CommandClass;
  */
 public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     /**
      * Accepts event type and both old and new handlers.
      *
@@ -48,6 +50,4 @@ public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
                         + " Consider un-registering the current handler first.",
                 commandClass, currentHandler, discoveredHandler));
     }
-
-    private static final long serialVersionUID = 0L;
 }

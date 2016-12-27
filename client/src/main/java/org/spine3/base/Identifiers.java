@@ -57,8 +57,6 @@ import static org.spine3.protobuf.Values.newStringValue;
  */
 public class Identifiers {
 
-    private Identifiers() {}
-
     /** A {@code null} ID string representation. */
     public static final String NULL_ID = "NULL";
 
@@ -73,6 +71,7 @@ public class Identifiers {
     private static final Pattern PATTERN_T = Pattern.compile("T");
     private static final String EQUAL_SIGN = "=";
 
+    private Identifiers() {}
 
     /**
      * Converts the passed ID value into the string representation.
