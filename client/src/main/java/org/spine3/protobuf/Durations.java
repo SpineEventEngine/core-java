@@ -180,7 +180,7 @@ public class Durations {
 
     /** Convert a duration to the number of seconds. */
     public static long toSeconds(Duration duration) {
-        final long millis = com.google.protobuf.util.Durations.toMillis(duration);
+        final long millis = toMillis(duration);
         final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
         return seconds;
     }
