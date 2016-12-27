@@ -45,7 +45,7 @@ public class Tests {
     private Tests() {}
 
     /**
-     * Verifies if the passed class has private parameterless constructor and invokes it
+     * Verifies if the passed class has private parameter-less constructor and invokes it
      * using Reflection.
      *
      * <p>Use this method to add utility constructor into covered code:
@@ -57,7 +57,7 @@ public class Tests {
      *         assertTrue(hasPrivateUtilityConstructor(MyUtility.class));
      *     }
      * </pre>
-     * @return true if the class has private parameterless constructor
+     * @return true if the class has private parameter-less constructor
      */
     public static boolean hasPrivateUtilityConstructor(Class<?> utilityClass) {
         final Constructor constructor;
