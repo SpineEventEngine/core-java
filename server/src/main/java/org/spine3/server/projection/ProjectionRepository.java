@@ -280,7 +280,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return builder.build();
     }
 
-    /** Sets the repository only bypassing updating from {@code EventStore}. */
+    /** Sets the repository online bypassing the catch-up from the {@code EventStore}. */
     public void setOnline() {
         setStatus(Status.ONLINE);
     }
