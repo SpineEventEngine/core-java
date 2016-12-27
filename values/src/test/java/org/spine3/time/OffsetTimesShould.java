@@ -36,7 +36,13 @@ import static org.spine3.time.Calendars.getZoneOffset;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetTimesShould {
 
+    private static final int hours = 9;
+    private static final int minutes = 25;
+    private static final int seconds = 30;
+    private static final int millis = 124;
+    private static final long nanos = 122L;
     private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(3, 30);
+    private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
 
     @Test
     public void have_private_constructor() {
@@ -57,12 +63,6 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
-        final int hours = 12;
-        final int minutes = 5;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, ZONE_OFFSET);
 
         assertTrue(hours == localTimeInDelhi.getTime().getHours());
@@ -75,32 +75,20 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_hours() {
-        final int hoursToAdd = 5;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final int hoursToAdd = 2;
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.plusHours(offsetTime, hoursToAdd);
 
-        assertEquals(hours + hoursToAdd, inFewHours.getTime().getHours());
-        assertEquals(minutes, inFewHours.getTime().getMinutes());
-        assertEquals(seconds, inFewHours.getTime().getSeconds());
-        assertEquals(millis, inFewHours.getTime().getMillis());
-        assertEquals(nanos, inFewHours.getTime().getNanos());
+        assertTrue(hours + hoursToAdd == inFewHours.getTime().getHours());
+        assertTrue(minutes == inFewHours.getTime().getMinutes());
+        assertTrue(seconds == inFewHours.getTime().getSeconds());
+        assertTrue(millis == inFewHours.getTime().getMillis());
+        assertTrue(nanos == inFewHours.getTime().getNanos());
     }
 
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_minutes() {
-        final int minutesToAdd = 35;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final int minutesToAdd = 15;
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.plusMinutes(offsetTime, minutesToAdd);
 
@@ -113,13 +101,7 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_seconds() {
-        final int secondsToAdd = 27;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final int secondsToAdd = 17;
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.plusSeconds(offsetTime, secondsToAdd);
 
@@ -133,12 +115,6 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_millis() {
         final int millisToAdd = 271;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.plusMillis(offsetTime, millisToAdd);
 
@@ -152,12 +128,6 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 2;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.minusHours(offsetTime, hoursToSubtract);
 
@@ -170,19 +140,12 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_minutes() {
-        final int hours = 5;
-        final int minutes = 15;
-        final int minutesToSubtract = 25;
-        final int expectedMinutes = 50;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final int minutesToSubtract = 11;
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.minusMinutes(offsetTime, minutesToSubtract);
 
-        assertEquals(hours - 1, inFewHours.getTime().getHours());
-        assertEquals(expectedMinutes, inFewHours.getTime().getMinutes());
+        assertEquals(hours, inFewHours.getTime().getHours());
+        assertEquals(minutes - minutesToSubtract, inFewHours.getTime().getMinutes());
         assertEquals(seconds, inFewHours.getTime().getSeconds());
         assertEquals(millis, inFewHours.getTime().getMillis());
         assertEquals(nanos, inFewHours.getTime().getNanos());
@@ -191,12 +154,6 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_seconds() {
         final int secondsToSubtract = 28;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 36;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.minusSeconds(offsetTime, secondsToSubtract);
 
@@ -211,12 +168,6 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 99;
-        final int hours = 5;
-        final int minutes = 15;
-        final int seconds = 36;
-        final int millis = 124;
-        final long nanos = 122L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.minusMillis(offsetTime, millisToSubtract);
 

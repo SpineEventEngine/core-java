@@ -104,6 +104,42 @@ public class OffsetDateTimes {
     }
 
     /**
+     * Obtains a copy of this offset date and time with the specified number of hours added.
+     */
+    public static OffsetDateTime plusHours(OffsetDateTime offsetDateTime, int hoursToAdd) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(hoursToAdd, ArgumentName.HOURS_TO_ADD);
+        return changeHours(offsetDateTime, hoursToAdd);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of minutes added.
+     */
+    public static OffsetDateTime plusMinutes(OffsetDateTime offsetDateTime, int minutesToAdd) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(minutesToAdd, ArgumentName.MINUTES_TO_ADD);
+        return changeMinutes(offsetDateTime, minutesToAdd);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of seconds added.
+     */
+    public static OffsetDateTime plusSeconds(OffsetDateTime offsetDateTime, int secondsToAdd) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(secondsToAdd, ArgumentName.SECONDS_TO_ADD);
+        return changeSeconds(offsetDateTime, secondsToAdd);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of milliseconds added.
+     */
+    public static OffsetDateTime plusMillis(OffsetDateTime offsetDateTime, int millisToAdd) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(millisToAdd, ArgumentName.MILLIS_TO_ADD);
+        return changeMillis(offsetDateTime, millisToAdd);
+    }
+
+    /**
      * Obtains a copy of this offset date and time with the specified number of years subtracted.
      */
     public static OffsetDateTime minusYears(OffsetDateTime offsetDateTime, int yearsToSubtract) {
@@ -131,6 +167,42 @@ public class OffsetDateTimes {
     }
 
     /**
+     * Obtains a copy of this offset date and time with the specified number of hours subtracted.
+     */
+    public static OffsetDateTime minusHours(OffsetDateTime offsetDateTime, int hoursToSubtract) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(hoursToSubtract, ArgumentName.HOURS_TO_SUBTRACT);
+        return changeHours(offsetDateTime, -hoursToSubtract);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of minutes subtracted.
+     */
+    public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime, int minutesToSubtract) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(minutesToSubtract, ArgumentName.MINUTES_TO_SUBTRACT);
+        return changeMinutes(offsetDateTime, -minutesToSubtract);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of seconds subtracted.
+     */
+    public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime, int secondsToSubtract) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(secondsToSubtract, ArgumentName.SECONDS_TO_SUBTRACT);
+        return changeSeconds(offsetDateTime, -secondsToSubtract);
+    }
+
+    /**
+     * Obtains a copy of this offset date and time with the specified number of milliseconds subtracted.
+     */
+    public static OffsetDateTime minusMillis(OffsetDateTime offsetDateTime, int millisToSubtract) {
+        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
+        checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
+        return changeMillis(offsetDateTime, -millisToSubtract);
+    }
+
+    /**
      * Obtains offset date and time changed on specified amount of years.
      *
      * @param offsetDateTime offset date and time that will be changed
@@ -141,9 +213,9 @@ public class OffsetDateTimes {
         final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
                                             offsetDateTime.getDate().getMonthValue(),
                                             offsetDateTime.getDate().getDay());
-        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(), 
+        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
                                             offsetDateTime.getTime().getMinutes(),
-                                            offsetDateTime.getTime().getSeconds(), 
+                                            offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
         calDate.add(Calendar.YEAR, yearsDelta);
 
@@ -210,6 +282,134 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
         calDate.add(Calendar.DAY_OF_MONTH, daysDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(calDate),
+                                                  MonthOfYears.getMonth(calDate),
+                                                  getDay(calDate));
+        final LocalTime localTime = LocalTimes.of(getHours(calTime), getMinutes(calTime),
+                                                  getSeconds(calTime), getMillis(calTime),
+                                                  offsetDateTime.getTime().getNanos());
+
+        final OffsetDateTime result = OffsetDateTime.newBuilder()
+                                                    .setDate(localDate)
+                                                    .setTime(localTime)
+                                                    .setOffset(offsetDateTime.getOffset())
+                                                    .build();
+        return result;
+    }
+
+    /**
+     * Obtains offset date and time changed on specified amount of hours.
+     *
+     * @param offsetDateTime  offset date and time that will be changed
+     * @param hoursDelta a number of hours that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this offset date and time with new hours value
+     */
+    private static OffsetDateTime changeHours(OffsetDateTime offsetDateTime, int hoursDelta) {
+        final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
+                                            offsetDateTime.getDate().getMonthValue(),
+                                            offsetDateTime.getDate().getDay());
+        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
+                                            offsetDateTime.getTime().getMinutes(),
+                                            offsetDateTime.getTime().getSeconds(),
+                                            offsetDateTime.getTime().getMillis());
+        calTime.add(Calendar.HOUR, hoursDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(calDate),
+                                                  MonthOfYears.getMonth(calDate),
+                                                  getDay(calDate));
+        final LocalTime localTime = LocalTimes.of(getHours(calTime), getMinutes(calTime),
+                                                  getSeconds(calTime), getMillis(calTime),
+                                                  offsetDateTime.getTime().getNanos());
+
+        final OffsetDateTime result = OffsetDateTime.newBuilder()
+                                                    .setDate(localDate)
+                                                    .setTime(localTime)
+                                                    .setOffset(offsetDateTime.getOffset())
+                                                    .build();
+        return result;
+    }
+
+    /**
+     * Obtains offset date and time changed on specified amount of minutes.
+     *
+     * @param offsetDateTime    offset date and time that will be changed
+     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this offset date and time with new minutes value
+     */
+    private static OffsetDateTime changeMinutes(OffsetDateTime offsetDateTime, int minutesDelta) {
+        final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
+                                            offsetDateTime.getDate().getMonthValue(),
+                                            offsetDateTime.getDate().getDay());
+        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
+                                            offsetDateTime.getTime().getMinutes(),
+                                            offsetDateTime.getTime().getSeconds(),
+                                            offsetDateTime.getTime().getMillis());
+        calTime.add(Calendar.MINUTE, minutesDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(calDate),
+                                                  MonthOfYears.getMonth(calDate),
+                                                  getDay(calDate));
+        final LocalTime localTime = LocalTimes.of(getHours(calTime), getMinutes(calTime),
+                                                  getSeconds(calTime), getMillis(calTime),
+                                                  offsetDateTime.getTime().getNanos());
+
+        final OffsetDateTime result = OffsetDateTime.newBuilder()
+                                                    .setDate(localDate)
+                                                    .setTime(localTime)
+                                                    .setOffset(offsetDateTime.getOffset())
+                                                    .build();
+        return result;
+    }
+
+    /**
+     * Obtains offset date and time changed on specified amount of seconds.
+     *
+     * @param offsetDateTime    offset date and time that will be changed
+     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this offset date and time with new seconds value
+     */
+    private static OffsetDateTime changeSeconds(OffsetDateTime offsetDateTime, int secondsDelta) {
+        final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
+                                            offsetDateTime.getDate().getMonthValue(),
+                                            offsetDateTime.getDate().getDay());
+        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
+                                            offsetDateTime.getTime().getMinutes(),
+                                            offsetDateTime.getTime().getSeconds(),
+                                            offsetDateTime.getTime().getMillis());
+        calTime.add(Calendar.SECOND, secondsDelta);
+
+        final LocalDate localDate = LocalDates.of(getYear(calDate),
+                                                  MonthOfYears.getMonth(calDate),
+                                                  getDay(calDate));
+        final LocalTime localTime = LocalTimes.of(getHours(calTime), getMinutes(calTime),
+                                                  getSeconds(calTime), getMillis(calTime),
+                                                  offsetDateTime.getTime().getNanos());
+
+        final OffsetDateTime result = OffsetDateTime.newBuilder()
+                                                    .setDate(localDate)
+                                                    .setTime(localTime)
+                                                    .setOffset(offsetDateTime.getOffset())
+                                                    .build();
+        return result;
+    }
+
+    /**
+     * Obtains offset date and time changed on specified amount of milliseconds.
+     *
+     * @param offsetDateTime   offset date and time that will be changed
+     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
+     * @return copy of this offset date and time with new milliseconds value
+     */
+    private static OffsetDateTime changeMillis(OffsetDateTime offsetDateTime, int millisDelta) {
+        final Calendar calDate = createDate(offsetDateTime.getDate().getYear(),
+                                            offsetDateTime.getDate().getMonthValue(),
+                                            offsetDateTime.getDate().getDay());
+        final Calendar calTime = createTime(offsetDateTime.getTime().getHours(),
+                                            offsetDateTime.getTime().getMinutes(),
+                                            offsetDateTime.getTime().getSeconds(),
+                                            offsetDateTime.getTime().getMillis());
+        calTime.add(Calendar.MILLISECOND, millisDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   MonthOfYears.getMonth(calDate),

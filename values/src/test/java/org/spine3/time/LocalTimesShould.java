@@ -36,6 +36,12 @@ import static org.spine3.time.Calendars.getSeconds;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalTimesShould {
 
+    private static final int hours = 9;
+    private static final int minutes = 25;
+    private static final int seconds = 30;
+    private static final int millis = 124;
+    private static final long nanos = 122L;
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
@@ -54,68 +60,45 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_LocalTime_using_hours_minutes() {
-        final int hours = 5;
-        final int minutes = 30;
         final LocalTime localTime = LocalTimes.of(hours, minutes);
-        final Calendar cal = createTime(hours, minutes);
 
-        assertEquals(getHours(cal), localTime.getHours());
-        assertEquals(getMinutes(cal), localTime.getMinutes());
+        assertTrue(hours == localTime.getHours());
+        assertTrue(minutes == localTime.getMinutes());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds() {
-        final int hours = 5;
-        final int minutes = 31;
-        final int seconds = 25;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds);
-        final Calendar cal = createTime(hours, minutes, seconds);
 
-        assertEquals(getHours(cal), localTime.getHours());
-        assertEquals(getMinutes(cal), localTime.getMinutes());
-        assertEquals(getSeconds(cal), localTime.getSeconds());
+        assertTrue(hours == localTime.getHours());
+        assertTrue(minutes == localTime.getMinutes());
+        assertTrue(seconds == localTime.getSeconds());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds_millis() {
-        final int hours = 5;
-        final int minutes = 31;
-        final int seconds = 25;
-        final int millis = 125;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis);
-        final Calendar cal = createTime(hours, minutes, seconds, millis);
 
-        assertEquals(getHours(cal), localTime.getHours());
-        assertEquals(getMinutes(cal), localTime.getMinutes());
-        assertEquals(getSeconds(cal), localTime.getSeconds());
-        assertEquals(getMillis(cal), localTime.getMillis());
+        assertTrue(hours == localTime.getHours());
+        assertTrue(minutes == localTime.getMinutes());
+        assertTrue(seconds == localTime.getSeconds());
+        assertTrue(millis == localTime.getMillis());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds_millis_nanos() {
-        final int hours = 5;
-        final int minutes = 51;
-        final int seconds = 45;
-        final int millis = 125;
-        final long nanos = 2356L;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, 2356L);
-        final Calendar cal = createTime(hours, minutes, seconds, millis);
+        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
 
-        assertEquals(getHours(cal), localTime.getHours());
-        assertEquals(getMinutes(cal), localTime.getMinutes());
-        assertEquals(getSeconds(cal), localTime.getSeconds());
-        assertEquals(getMillis(cal), localTime.getMillis());
-        assertEquals(nanos, localTime.getNanos());
+        assertTrue(hours == localTime.getHours());
+        assertTrue(minutes == localTime.getMinutes());
+        assertTrue(seconds == localTime.getSeconds());
+        assertTrue(millis == localTime.getMillis());
+        assertTrue(nanos == localTime.getNanos());
     }
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_hours() {
         final int hoursToAdd = 2;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewHours = LocalTimes.plusHours(localTime, hoursToAdd);
 
@@ -128,12 +111,7 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_minutes() {
-        final int minutesToAdd = 25;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
+        final int minutesToAdd = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMinutes = LocalTimes.plusMinutes(localTime, minutesToAdd);
 
@@ -146,12 +124,7 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_seconds() {
-        final int secondsToAdd = 28;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
+        final int secondsToAdd = 18;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewSeconds = LocalTimes.plusSeconds(localTime, secondsToAdd);
 
@@ -165,11 +138,6 @@ public class LocalTimesShould {
     @Test
     public void obtain_LocalTime_in_future_after_specified_number_of_millis() {
         final int millisToAdd = 288;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMillis = LocalTimes.plusMillis(localTime, millisToAdd);
 
@@ -183,11 +151,6 @@ public class LocalTimesShould {
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 2;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewHours = LocalTimes.minusHours(localTime, hoursToSubtract);
 
@@ -200,12 +163,7 @@ public class LocalTimesShould {
 
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_minutes() {
-        final int minutesToSubtract = 25;
-        final int hours = 6;
-        final int minutes = 35;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
+        final int minutesToSubtract = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMinutes = LocalTimes.minusMinutes(localTime, minutesToSubtract);
 
@@ -219,11 +177,6 @@ public class LocalTimesShould {
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_seconds() {
         final int secondsToSubtract = 12;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewSeconds = LocalTimes.minusSeconds(localTime, secondsToSubtract);
 
@@ -237,11 +190,6 @@ public class LocalTimesShould {
     @Test
     public void obtain_LocalTime_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 28;
-        final int hours = 6;
-        final int minutes = 15;
-        final int seconds = 23;
-        final int millis = 124;
-        final long nanos = 122L;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMillis = LocalTimes.minusMillis(localTime, millisToSubtract);
 
@@ -250,7 +198,6 @@ public class LocalTimesShould {
         assertTrue(seconds == beforeFewMillis.getSeconds());
         assertTrue(millis - millisToSubtract == beforeFewMillis.getMillis());
         assertTrue(nanos == beforeFewMillis.getNanos());
-        /* We cannot check nanos due to time gap between object creation */
     }
 
     @Test(expected = NullPointerException.class)

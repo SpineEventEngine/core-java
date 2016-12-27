@@ -35,6 +35,10 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalDatesShould {
 
+    private static final int year = 2014;
+    private static final MonthOfYear month = MonthOfYear.JULY;
+    private static final int day = 20;
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
@@ -52,9 +56,6 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_from_year_month_day_values() {
-        final int year = 1976;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int day = 1;
         final LocalDate localDate = LocalDates.of(year, month, day);
 
         assertTrue(year == localDate.getYear());
@@ -65,9 +66,6 @@ public class LocalDatesShould {
     @Test
     public void obtain_date_in_past_before_specified_number_of_years() {
         final int yearsToSubstract = 2;
-        final int year = 1976;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int day = 1;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate fewYearsAgo = LocalDates.minusYears(localDate, yearsToSubstract);
 
@@ -79,40 +77,28 @@ public class LocalDatesShould {
     @Test
     public void obtain_date_in_past_before_specified_number_of_months() {
         final int monthsToSubstract = 2;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int expectedMonth = month.getNumber() - monthsToSubstract;
-        final int year = 1976;
-        final int day = 1;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate fewMonthsAgo = LocalDates.minusMonths(localDate, monthsToSubstract);
 
         assertTrue(year == fewMonthsAgo.getYear());
-        assertTrue(expectedMonth == fewMonthsAgo.getMonth().getNumber());
+        assertTrue(month.getNumber() - monthsToSubstract == fewMonthsAgo.getMonth().getNumber());
         assertTrue(day == fewMonthsAgo.getDay());
     }
 
     @Test
     public void obtain_date_in_past_before_specified_number_of_days() {
         final int daysToSubstract = 15;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final MonthOfYear monthExpected = MonthOfYear.MARCH;
-        final int year = 1976;
-        final int day = 1;
-        final int dayExpected = 17;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate fewDaysAgo = LocalDates.minusDays(localDate, daysToSubstract);
 
         assertTrue(year == fewDaysAgo.getYear());
-        assertTrue(monthExpected == fewDaysAgo.getMonth());
-        assertTrue(dayExpected == fewDaysAgo.getDay());
+        assertTrue(month == fewDaysAgo.getMonth());
+        assertTrue(day - daysToSubstract == fewDaysAgo.getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_years() {
         final int yearsToAdd = 2;
-        final int year = 1976;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int day = 1;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate plusYears = LocalDates.plusYears(localDate, yearsToAdd);
 
@@ -124,31 +110,23 @@ public class LocalDatesShould {
     @Test
     public void obtain_date_in_future_after_specified_number_of_months() {
         final int monthsToAdd = 2;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int expectedMonth = month.getNumber() + monthsToAdd;
-        final int year = 1976;
-        final int day = 1;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate plusMonths = LocalDates.plusMonths(localDate, monthsToAdd);
 
         assertTrue(year == plusMonths.getYear());
-        assertTrue(expectedMonth == plusMonths.getMonth().getNumber());
+        assertTrue(month.getNumber() + monthsToAdd == plusMonths.getMonth().getNumber());
         assertTrue(day == plusMonths.getDay());
     }
 
     @Test
     public void obtain_date_in_future_after_specified_number_of_days() {
-        final int daysToAdd = 15;
-        final MonthOfYear month = MonthOfYear.APRIL;
-        final int year = 1976;
-        final int day = 1;
-        final int dayExpected = 16;
+        final int daysToAdd = 8;
         final LocalDate localDate = LocalDates.of(year, month, day);
         final LocalDate plusDays = LocalDates.plusDays(localDate, daysToAdd);
 
         assertTrue(year == plusDays.getYear());
         assertTrue(month == plusDays.getMonth());
-        assertTrue(dayExpected == plusDays.getDay());
+        assertTrue(day + daysToAdd == plusDays.getDay());
     }
 
     @Test(expected = NullPointerException.class)

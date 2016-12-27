@@ -19,9 +19,6 @@
  */
 package org.spine3.time;
 
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps;
-
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,8 +29,8 @@ import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.time.change.Changes.ArgumentName;
+import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Routines for working with {@link OffsetTime}.
