@@ -29,7 +29,6 @@ import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
