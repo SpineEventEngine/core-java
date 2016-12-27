@@ -81,8 +81,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of years added.
      */
     public static OffsetDateTime plusYears(OffsetDateTime offsetDateTime, int yearsToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(yearsToAdd, ArgumentName.YEARS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(yearsToAdd);
+
         return changeYear(offsetDateTime, yearsToAdd);
     }
 
@@ -90,8 +91,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of months added.
      */
     public static OffsetDateTime plusMonths(OffsetDateTime offsetDateTime, int monthsToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(monthsToAdd, ArgumentName.MONTHS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(monthsToAdd);
+
         return changeMonth(offsetDateTime, monthsToAdd);
     }
 
@@ -99,8 +101,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of days added.
      */
     public static OffsetDateTime plusDays(OffsetDateTime offsetDateTime, int daysToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(daysToAdd, ArgumentName.DAYS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(daysToAdd);
+
         return changeDays(offsetDateTime, daysToAdd);
     }
 
@@ -108,8 +111,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of hours added.
      */
     public static OffsetDateTime plusHours(OffsetDateTime offsetDateTime, int hoursToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(hoursToAdd, ArgumentName.HOURS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(hoursToAdd);
+
         return changeHours(offsetDateTime, hoursToAdd);
     }
 
@@ -117,8 +121,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of minutes added.
      */
     public static OffsetDateTime plusMinutes(OffsetDateTime offsetDateTime, int minutesToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(minutesToAdd, ArgumentName.MINUTES_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(minutesToAdd);
+
         return changeMinutes(offsetDateTime, minutesToAdd);
     }
 
@@ -126,8 +131,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of seconds added.
      */
     public static OffsetDateTime plusSeconds(OffsetDateTime offsetDateTime, int secondsToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(secondsToAdd, ArgumentName.SECONDS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(secondsToAdd);
+
         return changeSeconds(offsetDateTime, secondsToAdd);
     }
 
@@ -135,8 +141,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of milliseconds added.
      */
     public static OffsetDateTime plusMillis(OffsetDateTime offsetDateTime, int millisToAdd) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(millisToAdd, ArgumentName.MILLIS_TO_ADD);
+        checkNotNull(offsetDateTime);
+        checkPositive(millisToAdd);
+
         return changeMillis(offsetDateTime, millisToAdd);
     }
 
@@ -144,8 +151,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of years subtracted.
      */
     public static OffsetDateTime minusYears(OffsetDateTime offsetDateTime, int yearsToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(yearsToSubtract, ArgumentName.YEARS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(yearsToSubtract);
+
         return changeYear(offsetDateTime, -yearsToSubtract);
     }
 
@@ -153,8 +161,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of months subtracted.
      */
     public static OffsetDateTime minusMonths(OffsetDateTime offsetDateTime, int monthsToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(monthsToSubtract, ArgumentName.MONTHS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(monthsToSubtract);
+
         return changeMonth(offsetDateTime, -monthsToSubtract);
     }
 
@@ -162,8 +171,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of days subtracted.
      */
     public static OffsetDateTime minusDays(OffsetDateTime offsetDateTime, int daysToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(daysToSubtract, ArgumentName.DAYS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(daysToSubtract);
+
         return changeDays(offsetDateTime, -daysToSubtract);
     }
 
@@ -171,8 +181,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of hours subtracted.
      */
     public static OffsetDateTime minusHours(OffsetDateTime offsetDateTime, int hoursToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(hoursToSubtract, ArgumentName.HOURS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(hoursToSubtract);
+
         return changeHours(offsetDateTime, -hoursToSubtract);
     }
 
@@ -180,8 +191,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of minutes subtracted.
      */
     public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime, int minutesToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(minutesToSubtract, ArgumentName.MINUTES_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(minutesToSubtract);
+
         return changeMinutes(offsetDateTime, -minutesToSubtract);
     }
 
@@ -189,8 +201,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of seconds subtracted.
      */
     public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime, int secondsToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(secondsToSubtract, ArgumentName.SECONDS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(secondsToSubtract);
+
         return changeSeconds(offsetDateTime, -secondsToSubtract);
     }
 
@@ -198,8 +211,9 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of milliseconds subtracted.
      */
     public static OffsetDateTime minusMillis(OffsetDateTime offsetDateTime, int millisToSubtract) {
-        checkNotNull(offsetDateTime, ErrorMessage.OFFSET_DATE_TIME);
-        checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
+        checkNotNull(offsetDateTime);
+        checkPositive(millisToSubtract);
+
         return changeMillis(offsetDateTime, -millisToSubtract);
     }
 
@@ -251,7 +265,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calDate.add(Calendar.MONTH, monthDelta);
+        calDate.add(MONTH, monthDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),
@@ -283,7 +297,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calDate.add(Calendar.DAY_OF_MONTH, daysDelta);
+        calDate.add(DAY_OF_MONTH, daysDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),
@@ -315,7 +329,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calTime.add(Calendar.HOUR, hoursDelta);
+        calTime.add(HOUR, hoursDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),
@@ -347,7 +361,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calTime.add(Calendar.MINUTE, minutesDelta);
+        calTime.add(MINUTE, minutesDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),
@@ -379,7 +393,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calTime.add(Calendar.SECOND, secondsDelta);
+        calTime.add(SECOND, secondsDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),
@@ -411,7 +425,7 @@ public class OffsetDateTimes {
                                             offsetDateTime.getTime().getMinutes(),
                                             offsetDateTime.getTime().getSeconds(),
                                             offsetDateTime.getTime().getMillis());
-        calTime.add(Calendar.MILLISECOND, millisDelta);
+        calTime.add(MILLISECOND, millisDelta);
 
         final LocalDate localDate = LocalDates.of(getYear(calDate),
                                                   Calendars.getMonthOfYear(calDate),

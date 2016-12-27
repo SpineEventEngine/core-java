@@ -36,7 +36,6 @@ import static java.util.Calendar.YEAR;
 import static java.util.Calendar.ZONE_OFFSET;
 import static java.util.Calendar.getInstance;
 
-
 /**
  * Utilities for working with {@link Calendar}.
  *
