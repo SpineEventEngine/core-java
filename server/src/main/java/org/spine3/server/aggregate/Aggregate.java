@@ -480,7 +480,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setState(state)
                 .setWhenModified(whenModified)
                 .setVersion(version)
-                .setTimestamp(Timestamps.getCurrentTime());
+                .setTimestamp(getCurrentTime());
         return builder.build();
     }
 
