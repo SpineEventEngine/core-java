@@ -234,19 +234,13 @@ public class Calendars {
         return month;
     }
 
-    static LocalDate toLocalDate(Calendar cal) {
+    public static LocalDate toLocalDate(Calendar cal) {
         return LocalDates.of(getYear(cal),
                              getMonthOfYear(cal),
                              getDay(cal));
     }
 
-    static Calendar toCalendar(OffsetDate offsetDate) {
-        final Calendar calendar = at(offsetDate.getOffset());
-        setDate(calendar, offsetDate.getDate());
-        return calendar;
-    }
-
-    static LocalTime toLocalTime(Calendar calendar) {
+    public static LocalTime toLocalTime(Calendar calendar) {
         final int hours = getHours(calendar);
         final int minutes = getMinutes(calendar);
         final int seconds = getSeconds(calendar);
@@ -255,10 +249,25 @@ public class Calendars {
         return LocalTimes.of(hours, minutes, seconds, millis);
     }
 
-    static Calendar toCalendar(LocalTime localTime) {
+    public static Calendar toCalendar(OffsetDate offsetDate) {
+        final Calendar calendar = at(offsetDate.getOffset());
+        setDate(calendar, offsetDate.getDate());
+        return calendar;
+    }
+
+    public static Calendar toCalendar(LocalTime localTime) {
         return createWithTime(localTime.getHours(),
                               localTime.getMinutes(),
                               localTime.getSeconds(),
                               localTime.getMillis());
+    }
+
+    public static Calendar toCalendar(LocalDate localDate) {
+        return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
+    }
+
+    public static Calendar toCalendar(OffsetTime offsetTime) {
+        return createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                              offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
     }
 }

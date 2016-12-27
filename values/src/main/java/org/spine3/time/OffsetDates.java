@@ -153,17 +153,11 @@ public class OffsetDates {
         return result;
     }
 
-    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
-        return offsetDate.toBuilder()
-                         .setDate(localDate)
-                         .build();
-    }
-
     /**
      * Obtains offset date changed on specified amount of days.
      *
      * @param offsetDate offset date that will be changed
-     * @param daysDelta a number of days that needs to be added or subtracted that can be either positive or negative
+     * @param daysDelta  a number of days that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset date with new days value
      */
     private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {
@@ -171,10 +165,30 @@ public class OffsetDates {
         return result;
     }
 
+    /**
+     * Returns the same instance of offset date with changed local time parameter.
+     *
+     * @param offsetDate offset date that will be changed
+     * @param localDate  new local date for this offset date
+     * @return instance of this offset date with changed parameter
+     */
+    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
+        return offsetDate.toBuilder()
+                         .setDate(localDate)
+                         .build();
+    }
+
+    /**
+     * Returns offset date changed on some value by specified parameter.
+     *
+     * @param offsetDate    instance of date that will be changed
+     * @param calendarField field name of the parameter tha will be changed
+     * @param delta amount to be changed on
+     * @return offset date instance after changing
+     */
     private static OffsetDate add(OffsetDate offsetDate, int calendarField, int delta) {
         final Calendar cal = toCalendar(offsetDate);
         cal.add(calendarField, delta);
-
         final LocalDate localDate = toLocalDate(cal);
         final OffsetDate result = withDate(offsetDate, localDate);
         return result;

@@ -256,6 +256,14 @@ public class LocalTimes {
         return add(localTime, MILLISECOND, millisDelta);
     }
 
+    /**
+     * Returns local time after changing one of the parameters on specified value.
+     *
+     * @param value local time that will be changed
+     * @param calendarField field name of the parameter tha will be changed
+     * @param delta amount to be changed on
+     * @return local time instance after changing
+     */
     private static LocalTime add(LocalTime value, int calendarField, int delta) {
         final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
