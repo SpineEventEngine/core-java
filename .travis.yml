@@ -12,12 +12,18 @@ before_install:
   - curl -sL https://github.com/jpm4j/jpm4j.installers/raw/master/dist/biz.aQute.jpm.run.jar >jpm4j.jar
   - java -jar jpm4j.jar -u init
   - ~/jpm/bin/jpm install com.codacy:codacy-coverage-reporter:assembly
+  # END of Codacy setup.
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
   # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
-  - ~/jpm/bin/codacy-coverage-reporter -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./client/build/reports/jacoco/test/jacocoTestReport.xml
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./server/build/reports/jacoco/test/jacocoTestReport.xml
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./testutil/build/reports/jacoco/test/jacocoTestReport.xml
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./users/build/reports/jacoco/test/jacocoTestReport.xml
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./values/build/reports/jacoco/test/jacocoTestReport.xml
+  # END of Codacy setup.
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 
