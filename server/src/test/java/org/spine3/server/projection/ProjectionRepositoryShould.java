@@ -34,7 +34,9 @@ import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
+import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.projection.Project;
@@ -55,6 +57,7 @@ import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
+import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -62,7 +65,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
         extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
@@ -77,8 +80,29 @@ public class ProjectionRepositoryShould
         boundedContext = newBoundedContext();
         repository = new TestProjectionRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
-        repository.setOnline();
         TestProjection.clearMessageDeliveryHistory();
+    }
+
+    /**
+     * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in the `setUp`,
+     * the catch-up should be automatically triggered. The repository should become {@code ONLINE} after the catch-up.
+     **/
+    @Test
+    public void become_online_automatically_after_init_storage() {
+        assertTrue(repository.isOnline());
+    }
+
+    /**
+     * As long as {@link ManualCatchupProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
+     * the catch-up should be automatically triggered.
+     *
+     * <p>The repository should become {@code ONLINE} after the catch-up.
+     **/
+    @Test
+    public void not_become_online_automatically_after_init_storage_if_auto_catch_up_disabled() {
+        final ManualCatchupProjectionRepository repo = repoWithManualCatchup();
+        assertEquals(STORAGE_ASSIGNED, repo.getStatus());
+        assertFalse(repo.isOnline());
     }
 
     @Test
@@ -94,7 +118,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void not_dispatch_event_if_is_not_online() {
-        for (ProjectionRepository.Status status : ProjectionRepository.Status.values()) {
+        for (Status status : Status.values()) {
             if (status != ONLINE) {
                 checkDoesNotDispatchEventWith(status);
             }
@@ -114,7 +138,7 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(eventMessage));
     }
 
-    private void checkDoesNotDispatchEventWith(ProjectionRepository.Status status) {
+    private void checkDoesNotDispatchEventWith(Status status) {
         repository.setStatus(status);
         final ProjectCreated eventMsg = Given.EventMessage.projectCreated(ID);
         final Event event = Events.createEvent(eventMsg, createEventContext(ID));
@@ -163,7 +187,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void update_status() {
-        final ProjectionRepository.Status status = CATCHING_UP;
+        final Status status = CATCHING_UP;
 
         repository.setStatus(status);
 
@@ -178,12 +202,6 @@ public class ProjectionRepositoryShould
     }
 
     @Test
-    public void return_true_if_status_is_ONLINE() {
-        /** ONLINE status is set in the {@link ProjectionRepositoryShould#setUp()} method. */
-        assertTrue(repository.isOnline());
-    }
-
-    @Test
     public void return_false_if_status_is_not_ONLINE() {
         repository.setStatus(CLOSED);
 
@@ -191,7 +209,26 @@ public class ProjectionRepositoryShould
     }
 
     @Test
+    public void return_true_if_explicitly_set_ONLINE() {
+        repository.setStatus(CLOSED);
+        repository.setOnline();
+        assertTrue(repository.isOnline());
+    }
+
+    @Test
     public void catches_up_from_EventStorage() {
+        ensureCatchesUpFromEventStorage(repository);
+    }
+
+    @Test
+    public void catches_up_from_EventStorage_even_if_automatic_catchup_disabled() {
+        final ManualCatchupProjectionRepository repo = repoWithManualCatchup();
+        repo.setOnline();
+
+        ensureCatchesUpFromEventStorage(repo);
+    }
+
+    private void ensureCatchesUpFromEventStorage(ProjectionRepository<ProjectId, TestProjection, Project> repo) {
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
 
@@ -205,7 +242,7 @@ public class ProjectionRepositoryShould
         final Event projectStartedEvent = Given.Event.projectStarted(ID);
         eventStore.append(projectStartedEvent);
 
-        repository.catchUp();
+        repo.catchUp();
 
         assertTrue(TestProjection.processed(Events.getMessage(projectCreatedEvent)));
         assertTrue(TestProjection.processed(Events.getMessage(taskAddedEvent)));
@@ -239,6 +276,12 @@ public class ProjectionRepositoryShould
         }
 
         return projections;
+    }
+
+    private ManualCatchupProjectionRepository repoWithManualCatchup() {
+        final ManualCatchupProjectionRepository repo = new ManualCatchupProjectionRepository(boundedContext);
+        repo.initStorage(InMemoryStorageFactory.getInstance());
+        return repo;
     }
 
     /** The projection stub used in tests. */
@@ -302,6 +345,13 @@ public class ProjectionRepositoryShould
     private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
         protected TestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+    }
+
+    /** Stub projection repository with the disabled automatic catch-up */
+    private static class ManualCatchupProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
+        protected ManualCatchupProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext, false);
         }
     }
 }

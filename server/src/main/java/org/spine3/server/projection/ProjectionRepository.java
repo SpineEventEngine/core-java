@@ -152,7 +152,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         setStatus(Status.STORAGE_ASSIGNED);
 
         if(catchUpAfterStorageInit) {
-            log().debug("Storage assigned. Starting catch-up.");
+            if(log().isDebugEnabled()) {
+                log().debug("Storage assigned. Starting catch-up.");
+            }
             catchUp();
         }
     }
