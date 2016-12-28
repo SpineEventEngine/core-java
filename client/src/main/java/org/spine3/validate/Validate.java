@@ -204,49 +204,44 @@ public class Validate {
      * </ul>
      *
      * @param timestamp the timestamp to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param argumentName the name of the checked value to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
     public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
-        checkNotNull(timestamp, argumentName + " is null.");
+        checkNotNull(timestamp, argumentName);
         checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
         checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
     /**
-     * Ensures that the passed int value is positive:
+     * Ensures that the passed value is positive.
      *
      * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
-    public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, MUST_BE_A_POSITIVE_VALUE);
-    }
-
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static void checkPositive(int value) {
-        checkPositive(value, "");
-    }
-
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static void checkPositive(long value) {
         checkPositive(value, "");
     }
 
     /**
-     * Ensures that the passed long value is positive:
+     * Ensures that the passed value is positive.
      *
      * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param argumentName the name of the checked value to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value, String argumentName) {
         checkParameter(value > 0L, argumentName, MUST_BE_A_POSITIVE_VALUE);
     }
 
+    /**
+     * Ensures that the passed value is positive or zero.
+     *
+     * @param value the value to check
+     * @throws IllegalArgumentException if requirement is not met
+     */
     public static void checkPositiveOrZero(long value) {
         checkArgument(value >= 0);
     }
@@ -275,5 +270,4 @@ public class Validate {
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
-
 }
