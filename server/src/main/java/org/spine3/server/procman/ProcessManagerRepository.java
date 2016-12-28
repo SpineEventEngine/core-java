@@ -46,7 +46,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
 
@@ -54,13 +53,13 @@ import static org.spine3.base.Commands.getMessage;
  * The abstract base for Process Managers repositories.
  *
  * @param <I> the type of IDs of process managers
- * @param <PM> the type of process managers
+ * @param <P> the type of process managers
  * @param <S> the type of process manager state messages
  * @see ProcessManager
  * @author Alexander Litus
  */
-public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S>, S extends Message>
-                          extends EntityRepository<I, PM, S>
+public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>, S extends Message>
+                          extends EntityRepository<I, P, S>
                           implements CommandDispatcher, EntityEventDispatcher<I> {
 
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
@@ -118,7 +117,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final CommandClass commandClass = CommandClass.of(commandMessage);
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.getId(commandMessage, context);
-        final PM manager = load(id);
+        final P manager = load(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         postEvents(events);
@@ -152,7 +151,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         // All ID functions are supposed to return IDs of this type.
         @SuppressWarnings("unchecked")
         final I id = (I) idFunction.getId(message, context);
-        final PM manager = load(id);
+        final P manager = load(id);
         try {
             manager.dispatchEvent(message, context);
             store(manager);
@@ -174,8 +173,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      */
     @Nonnull
     @Override
-    public PM load(I id) {
-        PM result = super.load(id);
+    public P load(I id) {
+        P result = super.load(id);
         if (result == null) {
             result = create(id);
         }
@@ -186,13 +185,20 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
         final Set<CommandClass> classes = getCommandClasses();
-        checkArgument(classes.contains(commandClass), "Unexpected command of class: " + commandClass.value().getName());
+        if (!classes.contains(commandClass)) {
+            final String eventClassName = commandClass.value()
+                                                      .getName();
+            throw new IllegalArgumentException("Unexpected command of class: " + eventClassName);
+        }
     }
 
     private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
         final Set<EventClass> classes = getEventClasses();
-        checkArgument(classes.contains(eventClass), "Unexpected event of class: " + eventClass.value()
-                                                                                              .getName());
+        if (!classes.contains(eventClass)) {
+            final String eventClassName = eventClass.value()
+                                                    .getName();
+            throw new IllegalArgumentException("Unexpected event of class: " + eventClassName);
+        }
     }
 
     private enum LogSingleton {
