@@ -20,7 +20,13 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.Values.pack;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code float} values in {@link ValueMismatch}es.
@@ -34,13 +40,35 @@ public class FloatMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a float attribute.
+     * Creates ValueMismatch for the case of discovering not zero value,
+     * when a zero amount was expected by a command.
      *
-     * @param expected the value expected by a command
-     * @param actual   the value actual in an entity
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity  @return info on the mismatch
+     * @param actual the value discovered instead of zero
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedZero(float actual, float newValue, int version) {
+        return of(0.0f, actual, newValue, version);
+    }
+
+    /**
+     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     *
+     * @param expected the value expected by the command
+     * @param actual the value discovered instead of the expected string
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
      * @return new ValueMismatch instance
+     */
+    public static ValueMismatch unexpectedValue(float expected, float actual, float newValue, int version) {
+        checkNotNullOrEqual(expected, actual);
+
+        return of(expected, actual, newValue, version);
+    }
+
+    /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values for a float attribute.
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -51,5 +79,48 @@ public class FloatMismatch {
         return builder.build();
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Add methods for unpacking expected, actual, and newValue.
+    /**
+     * Obtains expected float value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     */
+    public static float unpackExpected(ValueMismatch mismatch) {
+        try {
+            final FloatValue result = mismatch.getExpected()
+                                               .unpack(FloatValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains actual float value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     */
+    public static float unpackActual(ValueMismatch mismatch) {
+        try {
+            final FloatValue result = mismatch.getActual()
+                                               .unpack(FloatValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains new float value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     */
+    public static float unpackNewValue(ValueMismatch mismatch) {
+        try {
+            final FloatValue result = mismatch.getNewValue()
+                                              .unpack(FloatValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
 }
