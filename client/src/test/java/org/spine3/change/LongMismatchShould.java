@@ -67,7 +67,6 @@ public class LongMismatchShould {
 
     @Test
     public void create_instance_for_unexpected_int_value() {
-
         final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
