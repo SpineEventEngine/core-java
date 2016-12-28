@@ -163,12 +163,7 @@ public class LocalDates {
     }
 
     /**
-     * Returns local date after changing one of the parameters on specified value.
-     *
-     * @param localDate local date that will be changed
-     * @param calendarField field name of the parameter tha will be changed
-     * @param delta amount to be changed on
-     * @return local date instance after changing
+     * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static LocalDate add(LocalDate localDate, int calendarField, int delta) {
         final Calendar cal = toCalendar(localDate);

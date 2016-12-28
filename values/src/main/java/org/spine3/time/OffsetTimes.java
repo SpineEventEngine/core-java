@@ -201,12 +201,7 @@ public class OffsetTimes {
     }
 
     /**
-     * Returns offset time after changing one of the parameters on specified value.
-     *
-     * @param offsetTime offset time that will be changed
-     * @param calendarField field name of the parameter tha will be changed
-     * @param delta amount to be changed on
-     * @return offset time instance after changing
+     * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static OffsetTime add(OffsetTime offsetTime, int calendarField,  int delta) {
         final Calendar cal = Calendars.toCalendar(offsetTime);

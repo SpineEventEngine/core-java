@@ -36,7 +36,6 @@ import static org.spine3.protobuf.Timestamps.isLaterThan;
 public class Intervals {
 
     private Intervals() {
-
     }
 
     /**

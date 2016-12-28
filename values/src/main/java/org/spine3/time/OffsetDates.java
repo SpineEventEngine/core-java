@@ -166,11 +166,11 @@ public class OffsetDates {
     }
 
     /**
-     * Returns the same instance of offset date with changed local time parameter.
+     * Returns a new instance of offset date with changed local time parameter.
      *
      * @param offsetDate offset date that will be changed
      * @param localDate  new local date for this offset date
-     * @return instance of this offset date with changed parameter
+     * @return new {@code OffsetDate} instance with changed parameter
      */
     private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
         return offsetDate.toBuilder()
@@ -179,12 +179,7 @@ public class OffsetDates {
     }
 
     /**
-     * Returns offset date changed on some value by specified parameter.
-     *
-     * @param offsetDate    instance of date that will be changed
-     * @param calendarField field name of the parameter that will be changed
-     * @param delta amount to be changed on
-     * @return offset date instance after changing
+     * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static OffsetDate add(OffsetDate offsetDate, int calendarField, int delta) {
         final Calendar cal = toCalendar(offsetDate);

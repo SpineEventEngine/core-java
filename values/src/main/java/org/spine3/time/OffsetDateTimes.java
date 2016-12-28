@@ -294,12 +294,7 @@ public class OffsetDateTimes {
     }
 
     /**
-     * Returns offset date and time changed on some value by specified parameter.
-     *
-     * @param offsetDateTime instance of date and time that will be changed
-     * @param calendarField  field name of the parameter that will be changed
-     * @param delta          amount to be changed on
-     * @return offset date and time instance after changing
+     * Performs date and time calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static OffsetDateTime add(OffsetDateTime offsetDateTime, int calendarField, int delta) {
         final Calendar calDate = toCalendar(offsetDateTime.getDate());
@@ -308,19 +303,20 @@ public class OffsetDateTimes {
         calTime.add(calendarField, delta);
         final LocalDate localDate = toLocalDate(calDate);
         final LocalTime localTime = toLocalTime(calTime).toBuilder()
-                                                        .setNanos(offsetDateTime.getTime().getNanos())
+                                                        .setNanos(offsetDateTime.getTime()
+                                                                                .getNanos())
                                                         .build();
 
         return withDateTime(offsetDateTime, localDate, localTime);
     }
 
     /**
-     * Returns the same instance of offset date and time with changed local date or local time parameter.
+     * Returns a new instance of offset date and time with changed local date or local time parameter.
      *
      * @param offsetDateTime offset date and time that will be changed
      * @param localDate      new local date for this offset date and time
      * @param localTime      new local time for this offset date and time
-     * @return instance of this offset date and time with changed parameter
+     * @return new {@code OffsetDateTime} instance with changed parameter
      */
     private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate localDate, LocalTime localTime) {
         return offsetDateTime.toBuilder()

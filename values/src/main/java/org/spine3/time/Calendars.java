@@ -128,10 +128,10 @@ public class Calendars {
     }
 
     /**
-     * Sets the date to calendar using local date.
+     * Sets the date to calendar.
      *
-     * @param calendar this calendar will be set
-     * @param date     local date that should be set
+     * @param calendar the target calendar
+     * @param date     the date to set
      */
     public static void setDate(Calendar calendar, LocalDate date) {
         calendar.set(date.getYear(), date.getMonth()
@@ -139,7 +139,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar from hours, minutes, seconds and milliseconds values.
+     * Obtains {@code Calendar} from hours, minutes, seconds and milliseconds values.
      */
     public static Calendar createWithTime(int hours, int minutes, int seconds, int millis) {
         final Calendar calendar = getInstance();
@@ -151,7 +151,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar from hours, minutes and seconds values.
+     * Obtains {@code Calendar} from hours, minutes and seconds values.
      */
     public static Calendar createWithTime(int hours, int minutes, int seconds) {
         final Calendar calendar = getInstance();
@@ -162,7 +162,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar from hours and minutes values.
+     * Obtains {@code Calendar} from hours and minutes values.
      */
     public static Calendar createWithTime(int hours, int minutes) {
         final Calendar calendar = getInstance();
@@ -172,9 +172,9 @@ public class Calendars {
     }
 
     /**
-     * Obtains a calendar with default GMT time zone.
+     * Obtains a {@code Calendar} with GMT time zone.
      *
-     * @return calendar instance
+     * @return new {@code Calendar} instance
      */
     public static Calendar nowAtGmt() {
         Calendar gmtCal = getInstance(TimeZone.getTimeZone(TIME_ZONE_GMT));
@@ -182,7 +182,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar for the passed zone offset.
+     * Obtains current time calendar for the passed zone offset.
      */
     public static Calendar nowAt(ZoneOffset zoneOffset) {
         final Calendar utc = nowAtGmt();
@@ -201,10 +201,10 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar at specified zone offset
+     * Obtains calendar at the specified zone offset
      *
      * @param zoneOffset time offset for specified zone
-     * @return calendar instance at specific zone offset
+     * @return new {@code Calendar} instance at specific zone offset
      */
     public static Calendar at(ZoneOffset zoneOffset) {
         @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset isn't that big.
@@ -254,7 +254,9 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar using the data from offset date
+     * Converts the passed {@code OffsetDate} into {@code Calendar}.
+     *
+     * <p>The calendar is initialized at the offset from the passed date.
      */
     public static Calendar toCalendar(OffsetDate offsetDate) {
         final Calendar calendar = at(offsetDate.getOffset());
@@ -263,7 +265,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar using the data from local time
+     * Converts the passed {@code LocalTime} into {@code Calendar}.
      */
     public static Calendar toCalendar(LocalTime localTime) {
         return createWithTime(localTime.getHours(),
@@ -273,14 +275,14 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar using the data from local date
+     * Converts the passed {@code LocalDate} into {@code Calendar}.
      */
     public static Calendar toCalendar(LocalDate localDate) {
         return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
     }
 
     /**
-     * Obtains calendar using the data from offset time
+     * Converts the passed {@code OffsetTime} into {@code Calendar}.
      */
     public static Calendar toCalendar(OffsetTime offsetTime) {
         return createWithTime(offsetTime.getTime()
