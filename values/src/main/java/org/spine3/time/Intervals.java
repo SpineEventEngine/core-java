@@ -35,7 +35,9 @@ import static org.spine3.protobuf.Timestamps.isLaterThan;
  */
 public class Intervals {
 
-    private Intervals() {}
+    private Intervals() {
+
+    }
 
     /**
      * Returns an interval between two timestamps.

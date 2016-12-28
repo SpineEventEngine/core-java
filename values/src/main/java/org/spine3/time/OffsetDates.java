@@ -182,7 +182,7 @@ public class OffsetDates {
      * Returns offset date changed on some value by specified parameter.
      *
      * @param offsetDate    instance of date that will be changed
-     * @param calendarField field name of the parameter tha will be changed
+     * @param calendarField field name of the parameter that will be changed
      * @param delta amount to be changed on
      * @return offset date instance after changing
      */
