@@ -20,7 +20,6 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.BoolValue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -30,7 +29,7 @@ import static org.spine3.change.BooleanMismatch.expectedTrue;
 import static org.spine3.change.BooleanMismatch.unpackActual;
 import static org.spine3.change.BooleanMismatch.unpackExpected;
 import static org.spine3.change.BooleanMismatch.unpackNewValue;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.change.IntMismatch.of;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class BooleanMismatchShould {
@@ -66,5 +65,23 @@ public class BooleanMismatchShould {
         assertEquals(actual, unpackActual(mismatch));
         assertEquals(newValue, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackExpected_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackExpected(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackActual_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackActual(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackNewValue(mismatch);
     }
 }

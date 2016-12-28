@@ -98,7 +98,7 @@ public class BooleanMismatch {
     public static Boolean unpackActual(ValueMismatch mismatch) {
         try {
             final BoolValue result = mismatch.getActual()
-                                               .unpack(BoolValue.class);
+                                             .unpack(BoolValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
             throw wrapped(e);
@@ -113,12 +113,10 @@ public class BooleanMismatch {
     public static Boolean unpackNewValue(ValueMismatch mismatch) {
         try {
             final BoolValue result = mismatch.getNewValue()
-                                               .unpack(BoolValue.class);
+                                             .unpack(BoolValue.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
             throw wrapped(e);
         }
     }
-
-    //TODO:2016-12-22:alexander.yevsyukov: Add unpacking for expected, actual, and newValue.
 }

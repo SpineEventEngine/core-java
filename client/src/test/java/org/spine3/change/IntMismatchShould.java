@@ -20,12 +20,14 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.Int32Value;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.IntMismatch.unpackActual;
+import static org.spine3.change.IntMismatch.unpackExpected;
+import static org.spine3.change.IntMismatch.unpackNewValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class IntMismatchShould {
@@ -38,16 +40,46 @@ public class IntMismatchShould {
     }
 
     @Test
-    public void return_mismatch_object_with_int32_values() {
+    public void create_instance_for_expected_zero_amount() {
         final int expected = 0;
         final int actual = 1;
         final int newValue = 2;
-        final ValueMismatch mismatch = IntMismatch.of(expected, actual, newValue, VERSION);
-        final Int32Value expectedWrapper = unpack(mismatch.getExpected());
-        final Int32Value actualWrapper = unpack(mismatch.getActual());
+        final ValueMismatch mismatch = IntMismatch.expectedZero(actual, newValue, VERSION);
 
-        assertEquals(expected, expectedWrapper.getValue());
-        assertEquals(actual, actualWrapper.getValue());
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
     }
 
+    @Test
+    public void return_mismatch_object_with_int32_values() {
+        final int expected = 3;
+        final int actual = 1;
+        final int newValue = 2;
+        final ValueMismatch mismatch = IntMismatch.of(expected, actual, newValue, VERSION);
+
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackExpected_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackExpected(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackActual_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackActual(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackNewValue_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackNewValue(mismatch);
+    }
 }
