@@ -63,6 +63,9 @@ import static com.google.common.collect.Iterators.filter;
 
     /** Compares event records by timestamps of events. */
     private static class EventStorageRecordComparator implements Comparator<EventStorageRecord>, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
         @Override
         public int compare(EventStorageRecord record1, EventStorageRecord record2) {
             final Timestamp time1 = record1.getTimestamp();
@@ -70,7 +73,6 @@ import static com.google.common.collect.Iterators.filter;
             final int result = Timestamps.compare(time1, time2);
             return result;
         }
-        private static final long serialVersionUID = 0L;
     }
 
     @Override
@@ -95,10 +97,5 @@ import static com.google.common.collect.Iterators.filter;
     protected EventStorageRecord readRecord(EventId eventId) {
         final EventStorageRecord result = index.get(eventId.getUuid());
         return result;
-    }
-
-    @Override
-    public void close() throws Exception {
-        super.close();
     }
 }

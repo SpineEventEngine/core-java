@@ -27,6 +27,8 @@ package org.spine3.protobuf.error;
  */
 public class UnknownTypeException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     private static final String ERR_MSG = "No Java class found for the Protobuf message of type: ";
 
     /**
@@ -47,6 +49,4 @@ public class UnknownTypeException extends RuntimeException {
     public UnknownTypeException(String typeName, Throwable cause) {
         super(ERR_MSG + typeName, cause);
     }
-
-    private static final long serialVersionUID = 0L;
 }
