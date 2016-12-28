@@ -256,6 +256,9 @@ public class LocalTimes {
         return add(localTime, MILLISECOND, millisDelta);
     }
 
+    /**
+     * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
+     */
     private static LocalTime add(LocalTime value, int calendarField, int delta) {
         final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
