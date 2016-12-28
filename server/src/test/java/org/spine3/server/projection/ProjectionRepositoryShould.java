@@ -84,8 +84,10 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in the `setUp`,
-     * the catch-up should be automatically triggered. The repository should become {@code ONLINE} after the catch-up.
+     * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
+     * the catch-up should be automatically triggered.
+     *
+     * <p>The repository should become {@code ONLINE} after the catch-up.
      **/
     @Test
     public void become_online_automatically_after_init_storage() {
@@ -93,10 +95,8 @@ public class ProjectionRepositoryShould
     }
 
     /**
-     * As long as {@link ManualCatchupProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
-     * the catch-up should be automatically triggered.
-     *
-     * <p>The repository should become {@code ONLINE} after the catch-up.
+     * As long as {@code ManualCatchupProjectionRepository} has automatic catch-up disabled, it does not become online
+     * automatically after {@link ManualCatchupProjectionRepository#initStorage(StorageFactory)} is called.
      **/
     @Test
     public void not_become_online_automatically_after_init_storage_if_auto_catch_up_disabled() {
