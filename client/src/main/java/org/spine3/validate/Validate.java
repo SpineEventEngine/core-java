@@ -24,11 +24,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.change.Changes.ErrorMessage;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,6 +40,8 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 public class Validate {
+
+    private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
 
     private Validate() {
     }
@@ -223,13 +223,15 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+        checkParameter(value > 0, argumentName, MUST_BE_A_POSITIVE_VALUE);
     }
 
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static void checkPositive(int value) {
         checkPositive(value, "");
     }
 
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static void checkPositive(long value) {
         checkPositive(value, "");
     }
@@ -242,7 +244,7 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value, String argumentName) {
-        checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+        checkParameter(value > 0L, argumentName, MUST_BE_A_POSITIVE_VALUE);
     }
 
     public static void checkPositiveOrZero(long value) {
@@ -274,32 +276,4 @@ public class Validate {
         return id;
     }
 
-    /**
-     * Returns a formatted string using the format string and parameters from the violation.
-     *
-     * @param violation violation which contains the format string and
-     *                  arguments referenced by the format specifiers in it
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(ConstraintViolation violation) {
-        final String format = violation.getMsgFormat();
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
-    }
-
-    /**
-     * Returns a formatted string using the specified format string and parameters from the violation.
-     *
-     * @param format    a format string
-     * @param violation violation which contains arguments referenced by the format specifiers in the format string
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(String format, ConstraintViolation violation) {
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
-    }
 }

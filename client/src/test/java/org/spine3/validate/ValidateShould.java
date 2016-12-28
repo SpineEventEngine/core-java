@@ -176,7 +176,7 @@ public class ValidateShould {
                 .addParam("1")
                 .addParam("2")
                 .build();
-        final String formatted = Validate.toText(violation);
+        final String formatted = ConstraintViolations.toText(violation);
 
         assertEquals("test 1 test 2", formatted);
     }
@@ -187,7 +187,7 @@ public class ValidateShould {
                 .addParam("1")
                 .addParam("2")
                 .build();
-        final String formatted = Validate.toText("abc %s abc %s", violation);
+        final String formatted = ConstraintViolations.toText("abc %s abc %s", violation);
 
         assertEquals("abc 1 abc 2", formatted);
     }

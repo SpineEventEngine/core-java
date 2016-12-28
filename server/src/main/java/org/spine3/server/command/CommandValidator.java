@@ -49,12 +49,13 @@ public class CommandValidator {
     private static final String COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK =
             "Command target entity ID cannot be empty or blank.";
 
+    private CommandValidator() {
+    }
+
     /** Returns a validator instance. */
     public static CommandValidator getInstance() {
         return Singleton.INSTANCE.value;
     }
-
-    private CommandValidator() {}
 
     /**
      * Validates a command checking that its required fields are valid and
