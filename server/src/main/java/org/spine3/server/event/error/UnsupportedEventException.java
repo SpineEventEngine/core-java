@@ -33,6 +33,8 @@ import org.spine3.server.type.EventClass;
  */
 public class UnsupportedEventException extends EventException {
 
+    private static final long serialVersionUID = 0L;
+
     public UnsupportedEventException(Message eventMsg) {
         super(messageFormat(eventMsg), eventMsg, unsupportedEventError(eventMsg));
     }
@@ -57,6 +59,4 @@ public class UnsupportedEventException extends EventException {
                 .setMessage(errMsg);
         return error.build();
     }
-
-    private static final long serialVersionUID = 0L;
 }
