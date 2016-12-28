@@ -30,6 +30,8 @@ import org.spine3.server.type.EventClass;
  */
 public class DuplicateApplierException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     /**
      * Creates new exception.
      *
@@ -50,6 +52,4 @@ public class DuplicateApplierException extends RuntimeException {
                 currentApplier,
                 discoveredApplier));
     }
-
-    private static final long serialVersionUID = 0L;
 }
