@@ -23,6 +23,8 @@ package org.spine3.change;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.util.Exceptions.wrapped;
 
@@ -52,13 +54,22 @@ public class IntMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a integer attribute.
+     * Creates ValueMismatch for the case of discovering a value different than by a command.
      *
-     * @param expected the value expected by a command
-     * @param actual   the value actual in an entity
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity
+     * @param expected the value expected by the command
+     * @param actual the value discovered instead of the expected string
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
      * @return new ValueMismatch instance
+     */
+    public static ValueMismatch unexpectedValue(int expected, int actual, int newValue, int version) {
+        checkNotNullOrEqual(expected, actual);
+
+        return of(expected, actual, newValue, version);
+    }
+
+     /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()

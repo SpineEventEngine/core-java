@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.IntMismatch.unexpectedValue;
 import static org.spine3.change.IntMismatch.unpackActual;
 import static org.spine3.change.IntMismatch.unpackExpected;
 import static org.spine3.change.IntMismatch.unpackNewValue;
@@ -32,6 +33,9 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class IntMismatchShould {
 
+    private static final int EXPECTED = 1986;
+    private static final int ACTUAL = 1567;
+    private static final int NEW_VALUE = 1452;
     private static final int VERSION = 5;
 
     @Test
@@ -40,28 +44,34 @@ public class IntMismatchShould {
     }
 
     @Test
-    public void create_instance_for_expected_zero_amount() {
-        final int expected = 0;
-        final int actual = 1;
-        final int newValue = 2;
-        final ValueMismatch mismatch = IntMismatch.expectedZero(actual, newValue, VERSION);
+    public void return_mismatch_object_with_int32_values() {
+        final ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
-        assertEquals(expected, unpackExpected(mismatch));
-        assertEquals(actual, unpackActual(mismatch));
-        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }
 
     @Test
-    public void return_mismatch_object_with_int32_values() {
-        final int expected = 3;
-        final int actual = 1;
-        final int newValue = 2;
-        final ValueMismatch mismatch = IntMismatch.of(expected, actual, newValue, VERSION);
+    public void create_instance_for_expected_zero_amount() {
+        final int expected = 0;
+        final ValueMismatch mismatch = IntMismatch.expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(expected, unpackExpected(mismatch));
-        assertEquals(actual, unpackActual(mismatch));
-        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_unexpected_int_value() {
+
+        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }
 
@@ -81,5 +91,11 @@ public class IntMismatchShould {
     public void not_unpackNewValue_if_its_not_a_IntMismatch() {
         final ValueMismatch mismatch = expectedTrue(VERSION);
         unpackNewValue(mismatch);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_same_expected_and_actual() {
+        final int value = 5;
+        unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 }

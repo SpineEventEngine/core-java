@@ -20,7 +20,12 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.Values.pack;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code long} values in {@link ValueMismatch}es.
@@ -34,13 +39,35 @@ public class LongMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a long integer attribute.
+     * Creates ValueMismatch for the case of discovering not zero value,
+     * when a zero amount was expected by a command.
      *
-     * @param expected the value expected by a command
-     * @param actual   the value actual in an entity
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity
+     * @param actual the value discovered instead of zero
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedZero(long actual, long newValue, int version) {
+        return of(0L, actual, newValue, version);
+    }
+
+    /**
+     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     *
+     * @param expected the value expected by the command
+     * @param actual the value discovered instead of the expected string
+     * @param newValue the new value requested in the command
+     * @param version the version of the entity in which the mismatch is discovered
      * @return new ValueMismatch instance
+     */
+    public static ValueMismatch unexpectedValue(long expected, long actual, long newValue, int version) {
+        checkNotNullOrEqual(expected, actual);
+
+        return of(expected, actual, newValue, version);
+    }
+    
+    /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values for a long attribute.
      */
     public static ValueMismatch of(long expected, long actual, long newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -51,5 +78,48 @@ public class LongMismatch {
         return builder.build();
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Add extraction of previous, actual, and newValue.
+    /**
+     * Obtains expected long value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     */
+    public static long unpackExpected(ValueMismatch mismatch) {
+        try {
+            final Int64Value result = mismatch.getExpected()
+                                              .unpack(Int64Value.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains actual long value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     */
+    public static long unpackActual(ValueMismatch mismatch) {
+        try {
+            final Int64Value result = mismatch.getActual()
+                                              .unpack(Int64Value.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains new long value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     */
+    public static long unpackNewValue(ValueMismatch mismatch) {
+        try {
+            final Int64Value result = mismatch.getNewValue()
+                                              .unpack(Int64Value.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
 }

@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.change.BooleanMismatch.expectedTrue;
 import static org.spine3.change.StringMismatch.expectedEmpty;
 import static org.spine3.change.StringMismatch.expectedNotEmpty;
 import static org.spine3.change.StringMismatch.unexpectedValue;
@@ -77,13 +78,9 @@ public class StringMismatchShould {
     public void create_instance_for_unexpected_value() {
         final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
-        final StringValue expected = unpack(mismatch.getExpected());
-        final StringValue actual = unpack(mismatch.getActual());
-        final StringValue newValue = unpack(mismatch.getNewValue());
-
-        assertEquals(EXPECTED, expected.getValue());
-        assertEquals(ACTUAL, actual.getValue());
-        assertEquals(NEW_VALUE, newValue.getValue());
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }
 
@@ -92,4 +89,23 @@ public class StringMismatchShould {
         final String value = "same-same";
         unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackExpected_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackExpected(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackActual_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackActual(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackNewValue_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackNewValue(mismatch);
+    }
+
 }
