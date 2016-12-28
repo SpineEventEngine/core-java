@@ -24,14 +24,12 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
 import org.spine3.server.error.MissingEntityIdException;
 
 /**
- * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
+ * Obtains a command target entity ID based on a command message and context.
  *
- * <p>An entity ID must be the first field in command messages (in Protobuf definition).
- * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ * <p>The command target must be the first field defined in the command message.
  *
  * @param <I> the type of target entity IDs
  * @param <M> the type of command messages to get IDs from
@@ -40,7 +38,7 @@ import org.spine3.server.error.MissingEntityIdException;
 @Internal
 public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
 
-    public static final int ID_FIELD_INDEX = 0;
+    private static final int ID_FIELD_INDEX = 0;
 
     private GetTargetIdFromCommand() {
         super(ID_FIELD_INDEX);

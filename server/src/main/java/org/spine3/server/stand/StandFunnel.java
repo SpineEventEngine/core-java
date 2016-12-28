@@ -24,6 +24,12 @@ import com.google.protobuf.Any;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.projection.ProjectionRepository;
 
 import java.util.concurrent.Executor;
 
@@ -31,20 +37,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Delivers the latest {@link org.spine3.server.entity.Entity} states from the {@code Entity} repositories
- * to the {@link Stand}.
+ * Delivers the latest {@link Entity} states from the entity repositories to the {@link Stand}.
  *
- * <p>Note: Unlike {@link org.spine3.server.event.EventBus} and {@link org.spine3.server.command.CommandBus},
- * which assume many publishers and many subscribers, the funnel may have zero or more publishers (typically, instances
- * of {@link org.spine3.server.aggregate.AggregateRepository} or {@link org.spine3.server.projection.ProjectionRepository}),
- * but the only subscriber, the instance of {@code Stand}.
+ * <p>Note: Unlike {@link EventBus} and {@link CommandBus}, which assume many publishers and many subscribers,
+ * the funnel may have zero or more publishers (typically, instances of {@link AggregateRepository} or
+ * {@link ProjectionRepository}), but the only subscriber, the instance of {@code Stand}.
  *
- * <p>In scope of a single {@link org.spine3.server.BoundedContext} there can be the only instance of {@code StandFunnel}.
+ * <p>In scope of a single {@link BoundedContext} there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
- * @see org.spine3.server.aggregate.AggregateRepository#dispatch(Command)
- * @see org.spine3.server.projection.ProjectionRepository#dispatch(Event)
+ * @see AggregateRepository#dispatch(Command)
+ * @see ProjectionRepository#dispatch(Event)
  */
+@SuppressWarnings("unusedImports") // we use some imports for shortening links in the documentation
 @Internal
 public class StandFunnel {
 
@@ -64,7 +69,7 @@ public class StandFunnel {
     }
 
     /**
-     * Post the state of an {@link org.spine3.server.entity.Entity} to an instance of {@link Stand}.
+     * Post the state of an {@link Entity} to an instance of {@link Stand}.
      *
      * <p>The state data is posted as {@link Any} to allow transferring over the network.
      *

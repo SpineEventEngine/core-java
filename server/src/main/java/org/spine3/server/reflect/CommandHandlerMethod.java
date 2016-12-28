@@ -159,17 +159,15 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             return isAnnotated;
         }
 
-        @SuppressWarnings("RedundantIfStatement")   // to make code more readable.
         @Override
         protected boolean isReturnTypeCorrect(Method method) {
             final Class<?> returnType = method.getReturnType();
-            if (Message.class.isAssignableFrom(returnType)) {
+            final boolean isMessage = Message.class.isAssignableFrom(returnType);
+            if (isMessage) {
                 return true;
             }
-            if (List.class.isAssignableFrom(returnType)) {
-                return true;
-            }
-            return false;
+            final boolean isList = List.class.isAssignableFrom(returnType);
+            return isList;
         }
 
         @Override
