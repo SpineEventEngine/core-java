@@ -140,7 +140,7 @@ import java.util.List;
             final String stringQuery = QueryParameters.toString(queryList.get(i));
             sb.append(stringQuery);
             if (i != queriesSize - 1) {
-                sb.append(UrlParser.QUERIES_SEPARATOR);
+                sb.append(UrlParser.QUERY_SEPARATOR);
             }
         }
     }

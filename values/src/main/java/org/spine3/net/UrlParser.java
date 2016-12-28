@@ -20,6 +20,7 @@
 
 package org.spine3.net;
 
+import com.google.common.base.Splitter;
 import org.spine3.net.Url.Record.Protocol;
 import org.spine3.net.Url.Record.QueryParameter;
 import org.spine3.net.Url.Record.Schema;
@@ -31,15 +32,17 @@ import org.spine3.net.Url.Record.Schema;
  */
 /* package */ class UrlParser {
 
+    private static final char SEMICOLON = ':';
     /* package */ static final String PROTOCOL_ENDING = "://";
-    /* package */ static final String CREDENTIALS_ENDING = "@";
-    /* package */ static final String CREDENTIALS_SEPARATOR = ":";
-    /* package */ static final String HOST_ENDING = "/";
-    /* package */ static final String HOST_PORT_SEPARATOR = ":";
+    /* package */ static final char CREDENTIALS_ENDING = '@';
+    /* package */ static final char CREDENTIALS_SEPARATOR = SEMICOLON;
+    /* package */ static final char HOST_ENDING = '/';
+    /* package */ static final char HOST_PORT_SEPARATOR = SEMICOLON;
 
-    /* package */ static final String FRAGMENT_START = "#";
-    /* package */ static final String QUERIES_START = "?";
-    /* package */ static final String QUERIES_SEPARATOR = "&";
+    /* package */ static final char FRAGMENT_START = '#';
+    /* package */ static final char QUERIES_START = '?';
+    /* package */ static final char QUERY_SEPARATOR = '&';
+    private static final Splitter querySplitter = Splitter.on(QUERY_SEPARATOR);
 
     private final String originalUrl;
 
@@ -120,15 +123,14 @@ import org.spine3.net.Url.Record.Schema;
         }
 
         final String credential = unProcessedInput.substring(0, credentialsEndingIndex);
-        unProcessedInput = unProcessedInput.substring(credentialsEndingIndex + CREDENTIALS_ENDING.length());
+        unProcessedInput = unProcessedInput.substring(credentialsEndingIndex + 1);
 
         final Url.Record.Authorization.Builder auth = Url.Record.Authorization.newBuilder();
 
         final int credentialsSeparatorIndex = credential.indexOf(CREDENTIALS_SEPARATOR);
         if (credentialsSeparatorIndex != -1) {
             final String userName = credential.substring(0, credentialsSeparatorIndex);
-            final String password = credential.substring(
-                    credentialsSeparatorIndex + CREDENTIALS_SEPARATOR.length());
+            final String password = credential.substring(credentialsSeparatorIndex + 1);
             auth.setPassword(password);
             auth.setUserName(userName);
         } else {
@@ -148,12 +150,12 @@ import org.spine3.net.Url.Record.Schema;
             unProcessedInput = "";
         } else {
             host = unProcessedInput.substring(0, hostEndingIndex);
-            unProcessedInput = unProcessedInput.substring(hostEndingIndex + HOST_ENDING.length());
+            unProcessedInput = unProcessedInput.substring(hostEndingIndex + 1);
         }
 
         final int portIndex = host.indexOf(HOST_PORT_SEPARATOR);
         if (portIndex != -1) {
-            final String port = host.substring(portIndex + HOST_PORT_SEPARATOR.length());
+            final String port = host.substring(portIndex + 1);
             record.setPort(port);
             final String hostAddress = host.substring(0, portIndex);
             record.setHost(hostAddress);
@@ -169,7 +171,7 @@ import org.spine3.net.Url.Record.Schema;
             return;
         }
 
-        final String fragment = unProcessedInput.substring(fragmentIndex + FRAGMENT_START.length());
+        final String fragment = unProcessedInput.substring(fragmentIndex + 1);
         unProcessedInput = unProcessedInput.substring(0, fragmentIndex);
 
         record.setFragment(fragment);
@@ -186,12 +188,11 @@ import org.spine3.net.Url.Record.Schema;
             return;
         }
 
-        final String queriesString = unProcessedInput.substring(queriesStartIndex + QUERIES_START.length());
+        final String queriesString = unProcessedInput.substring(queriesStartIndex + 1);
         unProcessedInput = unProcessedInput.substring(0, queriesStartIndex);
 
-        final String[] queries = queriesString.split(QUERIES_SEPARATOR);
+        final Iterable<String> queries = querySplitter.split(queriesString);
         for (String query : queries) {
-
             final QueryParameter param = QueryParameters.parse(query);
             record.addQuery(param);
         }
