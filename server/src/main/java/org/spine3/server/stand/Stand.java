@@ -131,10 +131,11 @@ public class Stand implements AutoCloseable {
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
-     * @param id          the entity identifier
-     * @param entityState the entity state
+     * @param id            the entity identifier
+     * @param entityState   the entity state
+     * @param entityVersion the version of the entity
      */
-    /* package */ void update(Object id, Any entityState) {
+    /* package */ void update(Object id, Any entityState, int entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
@@ -146,6 +147,7 @@ public class Stand implements AutoCloseable {
             final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                                                                   .setState(entityState)
                                                                   .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setVersion(entityVersion)
                                                                   .build();
             storage.write(aggregateStateId, record);
         }
@@ -285,7 +287,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for the postponed processing
      * of updates.
      *
-     * @see #update(Object, Any)
+     * @see #update(Object, Any, int)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {

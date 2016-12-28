@@ -38,6 +38,8 @@ import static java.lang.String.format;
  */
 public class CommandExpiredException extends CommandException {
 
+    private static final long serialVersionUID = 0L;
+
     public CommandExpiredException(Command command) {
         super(messageFormat(command), command, commandExpiredError(Commands.getMessage(command)));
     }
@@ -59,6 +61,4 @@ public class CommandExpiredException extends CommandException {
                 .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
-
-    private static final long serialVersionUID = 0L;
 }

@@ -90,12 +90,12 @@ import static com.google.common.collect.Maps.newHashMap;
     /** Used for sorting by timestamp descending (from newer to older). */
     private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
                                                                             Serializable {
+        private static final long serialVersionUID = 0L;
+
         @Override
         public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
-
-        private static final long serialVersionUID = 0L;
     }
 }

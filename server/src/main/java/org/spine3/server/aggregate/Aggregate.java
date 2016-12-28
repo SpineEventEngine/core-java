@@ -221,6 +221,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      * @see #dispatchForTest(Message, CommandContext)
      */
+    @SuppressWarnings("AssignmentToMethodParameter")    // it's fine, see the comments below for more details.
     /* package */ List<? extends Message> dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
@@ -229,7 +230,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
             // such a call especially from the testing code.
             final Any any = (Any) command;
-            //noinspection AssignmentToMethodParameter
             command = AnyPacker.unpack(any);
         }
         try {
@@ -480,7 +480,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setState(state)
                 .setWhenModified(whenModified)
                 .setVersion(version)
-                .setTimestamp(Timestamps.getCurrentTime());
+                .setTimestamp(getCurrentTime());
         return builder.build();
     }
 

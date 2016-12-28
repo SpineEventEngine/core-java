@@ -245,7 +245,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         store(projection);
         final M state = projection.getState();
         final Any packedState = AnyPacker.pack(state);
-        standFunnel.post(id, packedState);
+        standFunnel.post(id, packedState, projection.getVersion());
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);
@@ -280,7 +280,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return builder.build();
     }
 
-    /** Sets the repository only bypassing updating from {@code EventStore}. */
+    /** Sets the repository online bypassing the catch-up from the {@code EventStore}. */
     public void setOnline() {
         setStatus(Status.ONLINE);
     }

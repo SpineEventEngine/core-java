@@ -31,8 +31,6 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.testdata.TestStandFactory;
 
-import java.security.SecureRandom;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -90,17 +89,18 @@ public class StandFunnelShould {
     public void deliver_mock_updates_to_stand() {
         final Object id = new Object();
         final Any state = Any.getDefaultInstance();
+        final int version = 8;  // random number
 
         final Stand stand = mock(Stand.class);
-        doNothing().when(stand).update(id, state);
+        doNothing().when(stand).update(id, state, version);
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
 
-        funnel.post(id, state);
+        funnel.post(id, state, version);
 
-        verify(stand).update(id, state);
+        verify(stand).update(id, state, version);
     }
 
 
@@ -122,7 +122,8 @@ public class StandFunnelShould {
 
         final Any someState = Any.getDefaultInstance();
         final Object someId = new Object();
-        standFunnel.post(someId, someState);
+        final int someVersion = 17;
+        standFunnel.post(someId, someState, someVersion);
 
         verify(executor).execute(any(Runnable.class));
     }
@@ -170,7 +171,6 @@ public class StandFunnelShould {
 
     private static BoundedContextAction[] getSeveralRepositoryDispatchCalls() {
         final BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
-        final Random random = new SecureRandom();
 
         for (int i = 0; i < result.length; i++) {
             result[i] = (i % 2 == 0) ? aggregateRepositoryDispatch() : projectionRepositoryDispatch();
@@ -204,7 +204,7 @@ public class StandFunnelShould {
             }
         }
 
-        verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class));
+        verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class), anyInt());
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
@@ -262,7 +262,7 @@ public class StandFunnelShould {
         final Set<String> threadInvocationRegistry = new ConcurrentSet<>();
 
         final Stand stand = mock(Stand.class);
-        doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class));
+        doNothing().when(stand).update(ArgumentMatchers.any(), any(Any.class), anyInt());
 
         final StandFunnel standFunnel = StandFunnel.newBuilder()
                                                    .setStand(stand)
@@ -277,7 +277,8 @@ public class StandFunnelShould {
                 final String threadName = Thread.currentThread().getName();
                 Assert.assertFalse(threadInvocationRegistry.contains(threadName));
 
-                standFunnel.post(new Object(), Any.getDefaultInstance());
+                final int entityVersion = 1;
+                standFunnel.post(new Object(), Any.getDefaultInstance(), entityVersion);
 
                 threadInvocationRegistry.add(threadName);
             }

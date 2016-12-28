@@ -29,7 +29,6 @@ import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -96,7 +95,7 @@ public class Messages {
      */
     public static String toJson(Message message) {
         checkNotNull(message);
-        String result = null;
+        String result;
         try {
             result = JsonPrinter.instance().print(message);
         } catch (InvalidProtocolBufferException e) {
@@ -131,7 +130,7 @@ public class Messages {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final JsonFormat.Printer value = JsonFormat.printer().usingTypeRegistry(forKnownTypes());
 
-        private static com.google.protobuf.util.JsonFormat.Printer instance() {
+        private static JsonFormat.Printer instance() {
             return INSTANCE.value;
         }
     }
@@ -155,6 +154,7 @@ public class Messages {
      * @return the class of the field
      * @throws IllegalArgumentException if the field type is unknown
      */
+    @SuppressWarnings("OverlyComplexMethod")    // as each branch is a fairly simple.
     public static Class<?> getFieldClass(FieldDescriptor field) {
         final FieldDescriptor.JavaType javaType = field.getJavaType();
         switch (javaType) {
@@ -180,7 +180,8 @@ public class Messages {
                 final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
                 final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
+            default:
+                throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
         }
-        throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
     }
 }

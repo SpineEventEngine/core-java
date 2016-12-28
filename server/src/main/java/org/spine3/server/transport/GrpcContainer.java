@@ -52,7 +52,7 @@ public class GrpcContainer {
     private final ImmutableSet<ServerServiceDefinition> services;
 
     @Nullable
-    private io.grpc.Server grpcServer;
+    private Server grpcServer;
 
     public static Builder newBuilder() {
         return new Builder();
