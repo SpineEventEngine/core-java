@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.EventContext;
@@ -50,18 +49,6 @@ public class EventApplierMethodShould {
         final ProjectCreated event = Given.EventMessage.projectCreated();
 
         applier.invoke(applierObject, event);
-
-        assertEquals(event, applierObject.eventApplied);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void have_deprecated_invoke_method_with_context() throws InvocationTargetException {
-        final ValidApplier applierObject = new ValidApplier();
-        final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
-        final ProjectCreated event = Given.EventMessage.projectCreated();
-
-        applier.invoke(applierObject, event, Empty.getDefaultInstance());
 
         assertEquals(event, applierObject.eventApplied);
     }
