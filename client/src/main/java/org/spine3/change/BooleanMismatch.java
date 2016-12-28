@@ -38,7 +38,7 @@ public class BooleanMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case when command finds false value instead of true.
+     * Creates {@code ValueMismatch} for the case when command finds false value instead of true.
      *
      * @param version the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
@@ -48,7 +48,7 @@ public class BooleanMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case when command finds true value instead of false.
+     * Creates {@code ValueMismatch} for the case when command finds true value instead of false.
      *
      * @param version the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
@@ -58,13 +58,13 @@ public class BooleanMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a boolean attribute.
+     * Creates a {@code ValueMismatch} instance for a boolean attribute.
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
     private static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()

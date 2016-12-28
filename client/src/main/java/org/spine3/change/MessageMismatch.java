@@ -56,7 +56,7 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates a mismatch for a command that wanted to clear a value, but discovered 
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a value, but discovered
      * that the field already has the default value.
      * 
      * @param expected the value of the field that the command wanted to clear

@@ -40,7 +40,7 @@ public class StringMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a non-empty value,
+     * Creates {@code ValueMismatch} for the case of discovering a non-empty value,
      * when an empty string was expected by a command.
      *
      * @param actual the value discovered instead of the empty string
@@ -55,7 +55,7 @@ public class StringMismatch {
     }
 
     /**
-     * Creates a mismatch for a command that wanted to clear a string value, but discovered
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value, but discovered
      * that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear
@@ -68,13 +68,13 @@ public class StringMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual the value discovered instead of the expected string
      * @param newValue the new value requested in the command
      * @param version the version of the entity in which the mismatch is discovered
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
         checkNotNullOrEqual(expected, actual);

@@ -107,5 +107,4 @@ public class StringMismatchShould {
         final ValueMismatch mismatch = expectedTrue(VERSION);
         unpackNewValue(mismatch);
     }
-
 }

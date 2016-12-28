@@ -23,7 +23,6 @@ package org.spine3.change;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.util.Exceptions.wrapped;
@@ -35,18 +34,17 @@ import static org.spine3.util.Exceptions.wrapped;
  */
 public class IntMismatch {
 
-
     private IntMismatch() {
         // Prevent instantiation.
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering not zero value,
+     * Creates {@code ValueMismatch} for the case of discovering not zero value,
      * when a zero amount was expected by a command.
      *
-     * @param actual the value discovered instead of zero
+     * @param actual   the value discovered instead of zero
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedZero(int actual, int newValue, int version) {
@@ -54,13 +52,26 @@ public class IntMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering zero value,
+     * when a non zero amount was expected by a command.
+     *
+     * @param expected the value of the field that the command wanted to clear
+     * @param newValue the new value requested in the command
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedNonZero(int expected, int newValue, int version) {
+        return of(expected, 0, newValue, version);
+    }
+
+    /**
+     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
-     * @param actual the value discovered instead of the expected string
+     * @param actual   the value discovered instead of the expected string
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
-     * @return new ValueMismatch instance
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(int expected, int actual, int newValue, int version) {
         checkNotNullOrEqual(expected, actual);
@@ -68,7 +79,7 @@ public class IntMismatch {
         return of(expected, actual, newValue, version);
     }
 
-     /**
+    /**
      * Creates a new instance of {@code ValueMismatch} with the passed values for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
@@ -103,7 +114,7 @@ public class IntMismatch {
     public static int unpackActual(ValueMismatch mismatch) {
         try {
             final Int32Value result = mismatch.getActual()
-                                             .unpack(Int32Value.class);
+                                              .unpack(Int32Value.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
             throw wrapped(e);
@@ -118,7 +129,7 @@ public class IntMismatch {
     public static int unpackNewValue(ValueMismatch mismatch) {
         try {
             final Int32Value result = mismatch.getNewValue()
-                                             .unpack(Int32Value.class);
+                                              .unpack(Int32Value.class);
             return result.getValue();
         } catch (InvalidProtocolBufferException e) {
             throw wrapped(e);

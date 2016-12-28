@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.LongMismatch.expectedNonZero;
 import static org.spine3.change.LongMismatch.expectedZero;
 import static org.spine3.change.LongMismatch.unexpectedValue;
 import static org.spine3.change.LongMismatch.unpackActual;
@@ -61,6 +62,17 @@ public class LongMismatchShould {
 
         assertEquals(expected, unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_expected_non_zero_amount() {
+        final long actual = 0L;
+        final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }

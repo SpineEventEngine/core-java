@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.IntMismatch.*;
 import static org.spine3.change.IntMismatch.unexpectedValue;
 import static org.spine3.change.IntMismatch.unpackActual;
 import static org.spine3.change.IntMismatch.unpackExpected;
@@ -45,7 +46,7 @@ public class IntMismatchShould {
 
     @Test
     public void return_mismatch_object_with_int32_values() {
-        final ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+        final ValueMismatch mismatch = of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
@@ -56,10 +57,21 @@ public class IntMismatchShould {
     @Test
     public void create_instance_for_expected_zero_amount() {
         final int expected = 0;
-        final ValueMismatch mismatch = IntMismatch.expectedZero(ACTUAL, NEW_VALUE, VERSION);
+        final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
         assertEquals(expected, unpackExpected(mismatch));
         assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_expected_non_zero_amount() {
+        final int actual = 0;
+        final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }

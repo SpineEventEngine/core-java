@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.FloatMismatch.expectedNonZero;
 import static org.spine3.change.FloatMismatch.expectedZero;
 import static org.spine3.change.FloatMismatch.unexpectedValue;
 import static org.spine3.change.FloatMismatch.unpackActual;
@@ -62,6 +63,17 @@ public class FloatMismatchShould {
 
         assertEquals(expected, unpackExpected(mismatch), DELTA);
         assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch), DELTA);
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_expected_non_zero_amount() {
+        final float actual = 0.0f;
+        final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
+        assertEquals(actual, unpackActual(mismatch), DELTA);
         assertEquals(NEW_VALUE, unpackNewValue(mismatch), DELTA);
         assertEquals(VERSION, mismatch.getVersion());
     }

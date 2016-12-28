@@ -39,7 +39,7 @@ public class DoubleMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering not zero value,
+     * Creates {@code ValueMismatch} for the case of discovering not zero value,
      * when a zero amount was expected by a command.
      *
      * @param actual the value discovered instead of zero
@@ -52,13 +52,26 @@ public class DoubleMismatch {
     }
 
     /**
-     * Creates ValueMismatch for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering zero value,
+     * when a non zero amount was expected by a command.
+     *
+     * @param expected the value of the field that the command wanted to clear
+     * @param newValue the new value requested in the command
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedNonZero(double expected, double newValue, int version) {
+        return of(expected, 0.0, newValue, version);
+    }
+
+    /**
+     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual the value discovered instead of the expected string
      * @param newValue the new value requested in the command
      * @param version the version of the entity in which the mismatch is discovered
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(double expected, double actual, double newValue, int version) {
         checkNotNullOrEqual(expected, actual);
