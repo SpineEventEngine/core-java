@@ -20,16 +20,24 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.Int64Value;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.LongMismatch.expectedNonZero;
+import static org.spine3.change.LongMismatch.expectedZero;
+import static org.spine3.change.LongMismatch.unexpectedValue;
+import static org.spine3.change.LongMismatch.unpackActual;
+import static org.spine3.change.LongMismatch.unpackExpected;
+import static org.spine3.change.LongMismatch.unpackNewValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class LongMismatchShould {
 
+    private static final long EXPECTED = 1839L;
+    private static final long ACTUAL = 1900L;
+    private static final long NEW_VALUE = 1452L;
     private static final int VERSION = 7;
 
     @Test
@@ -39,14 +47,67 @@ public class LongMismatchShould {
 
     @Test
     public void return_mismatch_object_with_int64_values() {
-        final long expected = 0L;
-        final long actual = 1L;
-        final long newValue = 5L;
-        final ValueMismatch mismatch = LongMismatch.of(expected, actual, newValue, VERSION);
-        final Int64Value expectedWrapped = unpack(mismatch.getExpected());
-        final Int64Value actualWrapped = unpack(mismatch.getActual());
+        final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
-        assertEquals(expected, expectedWrapped.getValue());
-        assertEquals(actual, actualWrapped.getValue());
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_expected_zero_amount() {
+        final long expected = 0L;
+        final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_expected_non_zero_amount() {
+        final long actual = 0L;
+        final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_unexpected_int_value() {
+        final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+        assertEquals(ACTUAL, unpackActual(mismatch));
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackExpected_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackExpected(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackActual_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackActual(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackNewValue_if_its_not_a_IntMismatch() {
+        final ValueMismatch mismatch = expectedTrue(VERSION);
+        unpackNewValue(mismatch);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_same_expected_and_actual() {
+        final long value = 1919L;
+        unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 }

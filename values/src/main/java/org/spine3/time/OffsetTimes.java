@@ -160,17 +160,7 @@ public class OffsetTimes {
      * @return copy of this offset time with new hours value
      */
     private static OffsetTime changeHours(OffsetTime offsetTime, int hoursDelta) {
-        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(HOUR, hoursDelta);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
-                                                  getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
-        final ZoneOffset zoneOffset = offsetTime.getOffset();
-
-        final OffsetTime result = OffsetTime.newBuilder()
-                                            .setTime(localTime)
-                                            .setOffset(zoneOffset)
-                                            .build();
+        final OffsetTime result = add(offsetTime, HOUR, hoursDelta);
         return result;
     }
 
@@ -182,17 +172,7 @@ public class OffsetTimes {
      * @return copy of this offset time with new minutes value
      */
     private static OffsetTime changeMinutes(OffsetTime offsetTime, int minutesDelta) {
-        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(MINUTE, minutesDelta);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
-                                                  getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
-        final ZoneOffset zoneOffset = offsetTime.getOffset();
-
-        final OffsetTime result = OffsetTime.newBuilder()
-                                            .setTime(localTime)
-                                            .setOffset(zoneOffset)
-                                            .build();
+        final OffsetTime result = add(offsetTime, MINUTE, minutesDelta);
         return result;
     }
 
@@ -204,17 +184,7 @@ public class OffsetTimes {
      * @return copy of this offset time with new seconds value
      */
     private static OffsetTime changeSeconds(OffsetTime offsetTime, int secondsDelta) {
-        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(SECOND, secondsDelta);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
-                                                  getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
-        final ZoneOffset zoneOffset = offsetTime.getOffset();
-
-        final OffsetTime result = OffsetTime.newBuilder()
-                                            .setTime(localTime)
-                                            .setOffset(zoneOffset)
-                                            .build();
+        final OffsetTime result = add(offsetTime, SECOND, secondsDelta);
         return result;
     }
 
@@ -226,18 +196,22 @@ public class OffsetTimes {
      * @return copy of this offset time with new milliseconds value
      */
     private static OffsetTime changeMillis(OffsetTime offsetTime, int millisDelta) {
-        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(MILLISECOND, millisDelta);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
-                                                  getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
-        final ZoneOffset zoneOffset = offsetTime.getOffset();
-
-        final OffsetTime result = OffsetTime.newBuilder()
-                                            .setTime(localTime)
-                                            .setOffset(zoneOffset)
-                                            .build();
+        final OffsetTime result = add(offsetTime, MILLISECOND, millisDelta);
         return result;
+    }
+
+    /**
+     * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
+     */
+    private static OffsetTime add(OffsetTime offsetTime, int calendarField,  int delta) {
+        final Calendar cal = Calendars.toCalendar(offsetTime);
+        cal.add(calendarField, delta);
+        final LocalTime localTime = toLocalTime(cal).toBuilder().setNanos(offsetTime.getTime().getNanos()).build();
+        final ZoneOffset zoneOffset = offsetTime.getOffset();
+        return OffsetTime.newBuilder()
+                         .setTime(localTime)
+                         .setOffset(zoneOffset)
+                         .build();
     }
 
 }
