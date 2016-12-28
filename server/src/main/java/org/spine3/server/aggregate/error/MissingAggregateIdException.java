@@ -34,6 +34,8 @@ import org.spine3.base.Identifiers;
  */
 public class MissingAggregateIdException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public MissingAggregateIdException(Message command, String methodName, Throwable cause) {
         super(createMessage(command, methodName), cause);
     }
@@ -47,6 +49,4 @@ public class MissingAggregateIdException extends RuntimeException {
         super("The first property of the aggregate command " + commandClassName +
                 " must define aggregate ID with a name ending with '" + Identifiers.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
     }
-
-    private static final long serialVersionUID = 0L;
 }

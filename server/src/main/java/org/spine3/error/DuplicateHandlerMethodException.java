@@ -29,6 +29,8 @@ import com.google.protobuf.Message;
  */
 public class DuplicateHandlerMethodException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public DuplicateHandlerMethodException(
             Class<?> targetClass,
             Class<? extends Message> messageClass,
@@ -41,7 +43,4 @@ public class DuplicateHandlerMethodException extends RuntimeException {
                 targetClass.getName(), messageClass.getName(),
                 firstMethodName, secondMethodName));
     }
-
-    private static final long serialVersionUID = 0L;
-
 }

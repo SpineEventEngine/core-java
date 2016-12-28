@@ -36,6 +36,8 @@ import org.spine3.server.type.CommandClass;
  */
 public class UnsupportedCommandException extends CommandException {
 
+    private static final long serialVersionUID = 0L;
+
     public UnsupportedCommandException(Command command) {
         super(messageFormat(command), command, unsupportedCommandError(Commands.getMessage(command)));
     }
@@ -61,6 +63,4 @@ public class UnsupportedCommandException extends CommandException {
                 .setMessage(errMsg);
         return error.build();
     }
-
-    private static final long serialVersionUID = 0L;
 }

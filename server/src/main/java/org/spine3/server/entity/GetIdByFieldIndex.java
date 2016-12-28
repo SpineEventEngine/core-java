@@ -27,8 +27,6 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.MessageField;
 import org.spine3.server.error.MissingEntityIdException;
 
-import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
-
 /**
  * Obtains an entity ID based on an event/command message, context and message field index.
  *
@@ -79,7 +77,7 @@ public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
         @Override
         protected boolean isFieldAvailable(Message message) {
             final String fieldName = MessageField.getFieldName(message, getIndex());
-            final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
+            final boolean result = fieldName.endsWith(Identifiers.ID_PROPERTY_SUFFIX);
             return result;
         }
     }
