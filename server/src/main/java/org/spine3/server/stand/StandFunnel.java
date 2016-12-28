@@ -49,7 +49,6 @@ import static com.google.common.base.Preconditions.checkState;
  * @see AggregateRepository#dispatch(Command)
  * @see ProjectionRepository#dispatch(Event)
  */
-@SuppressWarnings("unusedImports") // we use some imports for shortening links in the documentation
 @Internal
 public class StandFunnel {
 
