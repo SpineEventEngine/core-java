@@ -25,10 +25,17 @@ import org.spine3.protobuf.Timestamps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
+import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
+
+    @Test
+    public void has_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(ZoneOffsets.class));
+    }
 
     @Test
     public void have_private_utility_constructor() {
@@ -37,16 +44,15 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = Timestamps.SECONDS_PER_MINUTE * Timestamps.MINUTES_PER_HOUR * 2;
+        final int secondsInTwoHours = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 2;
         assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
                                                    .getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = Timestamps.SECONDS_PER_MINUTE
-                * Timestamps.MINUTES_PER_HOUR * 8
-                + Timestamps.SECONDS_PER_MINUTE * 45;
+        final int secondsIn8Hours45Minutes = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 8
+                + SECONDS_PER_MINUTE * 45;
         final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
                                                     .getAmountSeconds();
         assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);

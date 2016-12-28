@@ -42,13 +42,13 @@ public class LocalTimesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
+        assertTrue(hasPrivateUtilityConstructor(LocalTimes.class));
     }
 
     @Test
     public void obtain_current_LocalTime() {
         final LocalTime now = LocalTimes.now();
-        final Calendar cal = Calendars.createTime();
+        final Calendar cal = Calendars.now();
 
         assertEquals(getHours(cal), now.getHours());
         assertEquals(getMinutes(cal), now.getMinutes());

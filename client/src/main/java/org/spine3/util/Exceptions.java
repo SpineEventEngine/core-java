@@ -20,8 +20,6 @@
 
 package org.spine3.util;
 
-import com.google.common.base.Throwables;
-
 /**
  * Utility class for working with exceptions for cases that are not
  * supported by {@link com.google.common.base.Throwables}.

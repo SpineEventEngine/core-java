@@ -26,9 +26,9 @@ package org.spine3.error;
  */
 public class AccessLevelException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public AccessLevelException(String message) {
         super(message);
     }
-
-    private static final long serialVersionUID = 0L;
 }

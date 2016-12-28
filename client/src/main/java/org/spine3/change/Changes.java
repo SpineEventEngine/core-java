@@ -36,14 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Changes {
 
     public interface ErrorMessage {
-        String PREVIOUS_VALUE = "previousValue";
-        String NEW_VALUE = "newValue";
-        String ZONE_OFFSET = "zoneOffset";
-        String LOCAL_DATE = "localDate";
-        String OFFSET_DATE = "offsetDate";
-        String LOCAL_TIME = "localTime";
-        String OFFSET_TIME = "offsetTime";
-        String OFFSET_DATE_TIME = "offsetDateTime";
         String VALUES_CANNOT_BE_EQUAL = "newValue cannot be equal to previousValue";
         String NEW_VALUE_CANNOT_BE_EMPTY = "newValue cannot be empty";
         String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
@@ -58,8 +50,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static StringChange of(String previousValue, String newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), ErrorMessage.NEW_VALUE_CANNOT_BE_EMPTY);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
@@ -76,8 +68,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static TimestampChange of(Timestamp previousValue, Timestamp newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 
         final TimestampChange result = TimestampChange.newBuilder()
@@ -273,8 +265,8 @@ public class Changes {
      * <p>Passed values cannot be equal.
      */
     public static BytesChange of(ByteString previousValue, ByteString newValue) {
-        checkNotNull(previousValue, ErrorMessage.PREVIOUS_VALUE);
-        checkNotNull(newValue, ErrorMessage.NEW_VALUE);
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), ErrorMessage.NEW_VALUE_CANNOT_BE_EMPTY);
         checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
 

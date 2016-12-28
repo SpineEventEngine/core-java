@@ -29,10 +29,9 @@ import com.google.protobuf.Message;
  */
 public class MissingEventApplierException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public MissingEventApplierException(Message event) {
         super("There is no registered applier for the event: " + event.getClass());
     }
-
-    private static final long serialVersionUID = 0L;
-
 }

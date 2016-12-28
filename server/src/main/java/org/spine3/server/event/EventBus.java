@@ -207,10 +207,14 @@ public class EventBus implements AutoCloseable {
     public void post(Event event) {
         store(event);
         final Event enriched = enrich(event);
-        callDispatchers(enriched);
+        final int dispatchersCalled = callDispatchers(enriched);
         final Message message = getMessage(enriched);
         final EventContext context = enriched.getContext();
-        invokeSubscribers(message, context);
+        final int subscribersInvoked = invokeSubscribers(message, context);
+
+        if(dispatchersCalled == 0 && subscribersInvoked == 0) {
+            handleDeadEvent(event);
+        }
     }
 
     private Event enrich(Event event) {
@@ -222,23 +226,38 @@ public class EventBus implements AutoCloseable {
         return enriched;
     }
 
-    private void callDispatchers(Event event) {
+    /**
+     * Call the dispatchers for the {@code event}.
+     *
+     * @param event the event to pass to the dispatchers.
+     * @return the number of the dispatchers called, or {@code 0} if there weren't any.
+     */
+    private int callDispatchers(Event event) {
+        int dispatchersCalled = 0;
         final EventClass eventClass = EventClass.of(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
             dispatcher.dispatch(event);
+            dispatchersCalled++;
         }
+        return dispatchersCalled;
     }
 
-    private void invokeSubscribers(Message event, EventContext context) {
+    /**
+     * Invoke the subscribers for the {@code event}.
+     *
+     * @param event   the event to pass to the subscribers.
+     * @param context the event context related to the {@code event}.
+     * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
+     */
+    private int invokeSubscribers(Message event, EventContext context) {
+        int subscribersInvoked = 0;
         final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(EventClass.of(event));
-        if (subscribers.isEmpty()) {
-            handleDeadEvent(event);
-            return;
-        }
         for (EventSubscriber subscriber : subscribers) {
             invokeSubscriber(subscriber, event, context);
+            subscribersInvoked++;
         }
+        return subscribersInvoked;
     }
 
     private void store(Event event) {
@@ -296,7 +315,7 @@ public class EventBus implements AutoCloseable {
     }
 
     private static void handleDeadEvent(Message event) {
-        log().warn("No subscriber defined for event class: " + event.getClass().getName());
+        log().warn("No subscriber or dispatcher defined for the event class: " + event.getClass().getName());
     }
 
     private static void handleSubscriberException(InvocationTargetException e,

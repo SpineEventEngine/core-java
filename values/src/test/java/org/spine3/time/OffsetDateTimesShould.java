@@ -27,7 +27,6 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createTimeWithZoneOffset;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
@@ -59,16 +58,20 @@ public class OffsetDateTimesShould {
 
     @Test
     public void obtain_current_OffsetDateTime_using_ZoneOffset() {
-        final OffsetDateTime today = OffsetDateTimes.now(ZONE_OFFSET);
-        final Calendar cal = createTimeWithZoneOffset(ZONE_OFFSET);
+        final OffsetDateTime now = OffsetDateTimes.now(ZONE_OFFSET);
+        final Calendar cal = Calendars.nowAt(ZONE_OFFSET);
 
-        assertEquals(getYear(cal), today.getDate().getYear());
-        assertEquals(getMonth(cal), today.getDate().getMonthValue());
-        assertEquals(getDay(cal), today.getDate().getDay());
-        assertEquals(getHours(cal), today.getTime().getHours());
-        assertEquals(getMinutes(cal), today.getTime().getMinutes());
-        assertEquals(getSeconds(cal), today.getTime().getSeconds());
-        assertEquals(getZoneOffset(cal), today.getOffset().getAmountSeconds());
+        final LocalDate today = now.getDate();
+        assertEquals(getYear(cal), today.getYear());
+        assertEquals(getMonth(cal), today.getMonthValue());
+        assertEquals(getDay(cal), today.getDay());
+
+        final LocalTime time = now.getTime();
+        assertEquals(getHours(cal), time.getHours());
+        assertEquals(getMinutes(cal), time.getMinutes());
+        assertEquals(getSeconds(cal), time.getSeconds());
+        assertEquals(getZoneOffset(cal), now.getOffset()
+                                              .getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
@@ -76,14 +79,17 @@ public class OffsetDateTimesShould {
     public void obtain_current_OffsetDateTime_using_OffsetDate_OffsetTime_ZoneOffset() {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
 
-        assertTrue(year == offsetDateTime.getDate().getYear());
-        assertTrue(month == offsetDateTime.getDate().getMonth());
-        assertTrue(day == offsetDateTime.getDate().getDay());
-        assertTrue(hours == offsetDateTime.getTime().getHours());
-        assertTrue(minutes == offsetDateTime.getTime().getMinutes());
-        assertTrue(seconds == offsetDateTime.getTime().getSeconds());
-        assertTrue(millis == offsetDateTime.getTime().getMillis());
-        assertTrue(nanos == offsetDateTime.getTime().getNanos());
+        final LocalDate date = offsetDateTime.getDate();
+        assertTrue(year == date.getYear());
+        assertTrue(month == date.getMonth());
+        assertTrue(day == date.getDay());
+
+        final LocalTime time = offsetDateTime.getTime();
+        assertTrue(hours == time.getHours());
+        assertTrue(minutes == time.getMinutes());
+        assertTrue(seconds == time.getSeconds());
+        assertTrue(millis == time.getMillis());
+        assertTrue(nanos == time.getNanos());
         assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateTime.getOffset().getAmountSeconds());
     }
 
@@ -93,14 +99,17 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusYears = OffsetDateTimes.minusYears(offsetDateTime, yearsToSubtract);
 
-        assertTrue(year - yearsToSubtract == minusYears.getDate().getYear());
-        assertTrue(month == minusYears.getDate().getMonth());
-        assertTrue(day == minusYears.getDate().getDay());
-        assertTrue(hours == minusYears.getTime().getHours());
-        assertTrue(minutes == minusYears.getTime().getMinutes());
-        assertTrue(seconds == minusYears.getTime().getSeconds());
-        assertTrue(millis == minusYears.getTime().getMillis());
-        assertTrue(nanos == minusYears.getTime().getNanos());
+        final LocalDate date = minusYears.getDate();
+        assertTrue(year - yearsToSubtract == date.getYear());
+        assertTrue(month == date.getMonth());
+        assertTrue(day == date.getDay());
+
+        final LocalTime time = minusYears.getTime();
+        assertTrue(hours == time.getHours());
+        assertTrue(minutes == time.getMinutes());
+        assertTrue(seconds == time.getSeconds());
+        assertTrue(millis == time.getMillis());
+        assertTrue(nanos == time.getNanos());
         assertTrue(ZONE_OFFSET.getAmountSeconds() == minusYears.getOffset().getAmountSeconds());
     }
 
@@ -110,14 +119,17 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusYears = OffsetDateTimes.minusMonths(offsetDateTime, monthsToSubtract);
 
-        assertTrue(year == minusYears.getDate().getYear());
-        assertTrue(month.getNumber() - monthsToSubtract == minusYears.getDate().getMonth().getNumber());
-        assertTrue(day == minusYears.getDate().getDay());
-        assertTrue(hours == minusYears.getTime().getHours());
-        assertTrue(minutes == minusYears.getTime().getMinutes());
-        assertTrue(seconds == minusYears.getTime().getSeconds());
-        assertTrue(millis == minusYears.getTime().getMillis());
-        assertTrue(nanos == minusYears.getTime().getNanos());
+        final LocalDate date = minusYears.getDate();
+        assertTrue(year == date.getYear());
+        assertTrue(month.getNumber() - monthsToSubtract == date.getMonth().getNumber());
+        assertTrue(day == date.getDay());
+
+        final LocalTime time = minusYears.getTime();
+        assertTrue(hours == time.getHours());
+        assertTrue(minutes == time.getMinutes());
+        assertTrue(seconds == time.getSeconds());
+        assertTrue(millis == time.getMillis());
+        assertTrue(nanos == time.getNanos());
         assertTrue(ZONE_OFFSET.getAmountSeconds() == minusYears.getOffset().getAmountSeconds());
     }
 

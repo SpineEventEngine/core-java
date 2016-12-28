@@ -27,15 +27,15 @@ package org.spine3.util;
  */
 public class Math {
 
-    private Math() {
-    }
-
     /* safeMultiply(), floorDiv() methods are copied from ThreeTen project.
        https://github.com/ThreeTen/threetenbp/blob/master/src/main/java/org/threeten/bp/jdk8/Jdk8Methods.java
        We don't want to have the dependency on the library now expecting availability of
        new Date/Time API under Google App Engine.
      */
     private static final String MULTIPLICATION_OVERFLOWS_A_LONG = "Multiplication overflows a long: ";
+
+    private Math() {
+    }
 
     /**
      * Safely multiply a long by an int.
@@ -45,10 +45,9 @@ public class Math {
      * @return the new total
      * @throws ArithmeticException if the result overflows a long
      */
+    @SuppressWarnings("SwitchStatementWithoutDefaultBranch")    // no need for default branch in this method.
     public static long safeMultiply(long a, int b) {
 
-        // no need for default branch here
-        // noinspection SwitchStatementWithoutDefaultBranch
         switch (b) {
             case -1:
                 if (a == Long.MIN_VALUE) {

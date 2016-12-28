@@ -159,6 +159,7 @@ public class SubscriptionServiceShould {
         assertTrue(observer.isCompleted);
     }
 
+    @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
     @Test
     public void handle_subscription_process_exceptions_and_call_observer_error_callback() {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
@@ -203,13 +204,15 @@ public class SubscriptionServiceShould {
         final Message projectState = Project.newBuilder()
                                             .setId(projectId)
                                             .build();
+        final int version = 1;
         boundedContext.getStandFunnel()
-                      .post(projectId, AnyPacker.pack(projectState));
+                      .post(projectId, AnyPacker.pack(projectState), version);
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
     }
 
+    @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
     @Test
     public void handle_activation_process_exceptions_and_call_observer_error_callback() {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
@@ -258,8 +261,9 @@ public class SubscriptionServiceShould {
         final Message projectState = Project.newBuilder()
                                             .setId(projectId)
                                             .build();
+        final int version = 1;
         boundedContext.getStandFunnel()
-                      .post(projectId, AnyPacker.pack(projectState));
+                      .post(projectId, AnyPacker.pack(projectState), version);
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));

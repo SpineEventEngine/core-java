@@ -47,7 +47,6 @@ import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
-import org.spine3.util.Exceptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

@@ -22,14 +22,15 @@ package org.spine3.time;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.change.Changes.ErrorMessage;
-import static org.spine3.time.Calendars.createTime;
-import static org.spine3.time.Calendars.createTimeWithZoneOffset;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.SECOND;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMillis;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
-import static org.spine3.time.change.Changes.ArgumentName;
+import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -46,9 +47,10 @@ public class OffsetTimes {
      * Obtains offset time using {@code ZoneOffset}.
      */
     public static OffsetTime now(ZoneOffset zoneOffset) {
-        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
-        final Calendar cal = createTimeWithZoneOffset(zoneOffset);
-        final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal), getSeconds(cal), getMillis(cal));
+        checkNotNull(zoneOffset);
+        final Calendar cal = Calendars.nowAt(zoneOffset);
+
+        final LocalTime localTime = toLocalTime(cal);
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
                                             .setOffset(zoneOffset)
@@ -60,8 +62,9 @@ public class OffsetTimes {
      * Obtains offset time using {@code LocalTime} and {@code ZoneOffset}.
      */
     public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
-        checkNotNull(localTime, ErrorMessage.LOCAL_TIME);
-        checkNotNull(zoneOffset, ErrorMessage.ZONE_OFFSET);
+        checkNotNull(localTime);
+        checkNotNull(zoneOffset);
+
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
                                             .setOffset(zoneOffset)
@@ -73,8 +76,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of hours added.
      */
     public static OffsetTime plusHours(OffsetTime offsetTime, int hoursToAdd) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(hoursToAdd, ArgumentName.HOURS_TO_ADD);
+        checkNotNull(offsetTime);
+        checkPositive(hoursToAdd);
+
         return changeHours(offsetTime, hoursToAdd);
     }
 
@@ -82,8 +86,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of minutes added.
      */
     public static OffsetTime plusMinutes(OffsetTime offsetTime, int minutesToAdd) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(minutesToAdd, ArgumentName.MINUTES_TO_ADD);
+        checkNotNull(offsetTime);
+        checkPositive(minutesToAdd);
+
         return changeMinutes(offsetTime, minutesToAdd);
     }
 
@@ -91,8 +96,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of seconds added.
      */
     public static OffsetTime plusSeconds(OffsetTime offsetTime, int secondsToAdd) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(secondsToAdd, ArgumentName.SECONDS_TO_ADD);
+        checkNotNull(offsetTime);
+        checkPositive(secondsToAdd);
+
         return changeSeconds(offsetTime, secondsToAdd);
     }
 
@@ -100,8 +106,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of milliseconds added.
      */
     public static OffsetTime plusMillis(OffsetTime offsetTime, int millisToAdd) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(millisToAdd, ArgumentName.MILLIS_TO_ADD);
+        checkNotNull(offsetTime);
+        checkPositive(millisToAdd);
+
         return changeMillis(offsetTime, millisToAdd);
     }
 
@@ -109,8 +116,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of hours subtracted.
      */
     public static OffsetTime minusHours(OffsetTime offsetTime, int hoursToSubtract) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(hoursToSubtract, ArgumentName.HOURS_TO_SUBTRACT);
+        checkNotNull(offsetTime);
+        checkPositive(hoursToSubtract);
+
         return changeHours(offsetTime, -hoursToSubtract);
     }
 
@@ -118,8 +126,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of minutes subtracted.
      */
     public static OffsetTime minusMinutes(OffsetTime offsetTime, int minutesToSubtract) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(minutesToSubtract, ArgumentName.MINUTES_TO_SUBTRACT);
+        checkNotNull(offsetTime);
+        checkPositive(minutesToSubtract);
+
         return changeMinutes(offsetTime, -minutesToSubtract);
     }
 
@@ -127,8 +136,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of seconds subtracted.
      */
     public static OffsetTime minusSeconds(OffsetTime offsetTime, int secondsToSubtract) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(secondsToSubtract, ArgumentName.SECONDS_TO_SUBTRACT);
+        checkNotNull(offsetTime);
+        checkPositive(secondsToSubtract);
+
         return changeSeconds(offsetTime, -secondsToSubtract);
     }
 
@@ -136,8 +146,9 @@ public class OffsetTimes {
      * Obtains a copy of this offset time with the specified number of milliseconds subtracted.
      */
     public static OffsetTime minusMillis(OffsetTime offsetTime, int millisToSubtract) {
-        checkNotNull(offsetTime, ErrorMessage.OFFSET_TIME);
-        checkPositive(millisToSubtract, ArgumentName.MILLIS_TO_SUBTRACT);
+        checkNotNull(offsetTime);
+        checkPositive(millisToSubtract);
+
         return changeMillis(offsetTime, -millisToSubtract);
     }
 
@@ -149,9 +160,9 @@ public class OffsetTimes {
      * @return copy of this offset time with new hours value
      */
     private static OffsetTime changeHours(OffsetTime offsetTime, int hoursDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(Calendar.HOUR, hoursDelta);
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        cal.add(HOUR, hoursDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
         final ZoneOffset zoneOffset = offsetTime.getOffset();
@@ -171,9 +182,9 @@ public class OffsetTimes {
      * @return copy of this offset time with new minutes value
      */
     private static OffsetTime changeMinutes(OffsetTime offsetTime, int minutesDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(Calendar.MINUTE, minutesDelta);
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        cal.add(MINUTE, minutesDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
         final ZoneOffset zoneOffset = offsetTime.getOffset();
@@ -193,9 +204,9 @@ public class OffsetTimes {
      * @return copy of this offset time with new seconds value
      */
     private static OffsetTime changeSeconds(OffsetTime offsetTime, int secondsDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(Calendar.SECOND, secondsDelta);
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        cal.add(SECOND, secondsDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
         final ZoneOffset zoneOffset = offsetTime.getOffset();
@@ -215,9 +226,9 @@ public class OffsetTimes {
      * @return copy of this offset time with new milliseconds value
      */
     private static OffsetTime changeMillis(OffsetTime offsetTime, int millisDelta) {
-        final Calendar cal = createTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
-                                        offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
-        cal.add(Calendar.MILLISECOND, millisDelta);
+        final Calendar cal = Calendars.createWithTime(offsetTime.getTime().getHours(), offsetTime.getTime().getMinutes(),
+                                                      offsetTime.getTime().getSeconds(), offsetTime.getTime().getMillis());
+        cal.add(MILLISECOND, millisDelta);
         final LocalTime localTime = LocalTimes.of(getHours(cal), getMinutes(cal),
                                                   getSeconds(cal), getMillis(cal), offsetTime.getTime().getNanos());
         final ZoneOffset zoneOffset = offsetTime.getOffset();

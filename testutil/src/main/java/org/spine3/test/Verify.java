@@ -511,15 +511,7 @@ public final class Verify extends Assert {
             Assert.assertNotNull(arrayName + " should not be null", actualArray);
 
             final int actualSize = actualArray.length;
-            if (actualSize != expectedSize) {
-                Assert.fail("Incorrect size for "
-                        + arrayName
-                        + "; expected:<"
-                        + expectedSize
-                        + "> but was:<"
-                        + actualSize
-                        + '>');
-            }
+            failOnSizeMismatch(arrayName, expectedSize, actualSize);
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -544,48 +536,7 @@ public final class Verify extends Assert {
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
             final int actualSize = fluentIterable.size();
-            if (actualSize != expectedSize) {
-                Assert.fail("Incorrect size for "
-                        + iterableName
-                        + "; expected:<"
-                        + expectedSize
-                        + "> but was:<"
-                        + actualSize
-                        + '>');
-            }
-        } catch (AssertionError e) {
-            throw mangledException(e);
-        }
-    }
-
-    /** Assert the size of the given {@link Iterable}. */
-    public static void assertIterableSize(int expectedSize, Iterable<?> actualIterable) {
-        try {
-            assertIterableSize(ITERABLE, expectedSize, actualIterable);
-        } catch (AssertionError e) {
-            throw mangledException(e);
-        }
-    }
-
-    /** Assert the size of the given {@link Iterable}. */
-    public static void assertIterableSize(
-            String iterableName,
-            int expectedSize,
-            Iterable<?> actualIterable) {
-        try {
-            assertObjectNotNull(iterableName, actualIterable);
-
-            final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
-            final int actualSize = fluentIterable.size();
-            if (actualSize != expectedSize) {
-                Assert.fail("Incorrect size for "
-                        + iterableName
-                        + "; expected:<"
-                        + expectedSize
-                        + "> but was:<"
-                        + actualSize
-                        + '>');
-            }
+            failOnSizeMismatch(iterableName, expectedSize, actualSize);
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -622,17 +573,21 @@ public final class Verify extends Assert {
     public static void assertSize(String multimapName, int expectedSize, Multimap<?, ?> actualMultimap) {
         try {
             final int actualSize = actualMultimap.size();
-            if (actualSize != expectedSize) {
-                Assert.fail("Incorrect size for "
-                        + multimapName
-                        + "; expected:<"
-                        + expectedSize
-                        + "> but was:<"
-                        + actualSize
-                        + '>');
-            }
+            failOnSizeMismatch(multimapName, expectedSize, actualSize);
         } catch (AssertionError e) {
             throw mangledException(e);
+        }
+    }
+
+    private static void failOnSizeMismatch(String collectionName, int expectedSize, int actualSize) {
+        if (actualSize != expectedSize) {
+            Assert.fail("Incorrect size for "
+                    + collectionName
+                    + "; expected:<"
+                    + expectedSize
+                    + "> but was:<"
+                    + actualSize
+                    + '>');
         }
     }
 
@@ -649,15 +604,7 @@ public final class Verify extends Assert {
     public static void assertSize(String immutableSetName, int expectedSize, Collection<?> actualImmutableSet) {
         try {
             final int actualSize = actualImmutableSet.size();
-            if (actualSize != expectedSize) {
-                Assert.fail("Incorrect size for "
-                        + immutableSetName
-                        + "; expected:<"
-                        + expectedSize
-                        + "> but was:<"
-                        + actualSize
-                        + '>');
-            }
+            failOnSizeMismatch(immutableSetName, expectedSize, actualSize);
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -733,15 +680,7 @@ public final class Verify extends Assert {
             String collectionName,
             Object expectedItem,
             Collection<?> actualCollection) {
-        try {
-            assertObjectNotNull(collectionName, actualCollection);
-
-            if (!actualCollection.contains(expectedItem)) {
-                Assert.fail(collectionName + " did not contain expectedItem:<" + expectedItem + '>');
-            }
-        } catch (AssertionError e) {
-            throw mangledException(e);
-        }
+        assertCollectionContains(collectionName, expectedItem, actualCollection);
     }
 
     /** Assert that the given {@link ImmutableCollection} contains the given item. */
@@ -758,6 +697,10 @@ public final class Verify extends Assert {
             String collectionName,
             Object expectedItem,
             ImmutableCollection<?> actualCollection) {
+        assertCollectionContains(collectionName, expectedItem, actualCollection);
+    }
+
+    private static void assertCollectionContains(String collectionName, Object expectedItem, Collection<?> actualCollection) {
         try {
             assertObjectNotNull(collectionName, actualCollection);
 
@@ -769,7 +712,6 @@ public final class Verify extends Assert {
         }
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod")
     @SafeVarargs
     public static<T> void assertContainsAll(
             Iterable<T> iterable,
@@ -1509,30 +1451,7 @@ public final class Verify extends Assert {
             code.call();
         } catch (Exception ex) {
             try {
-                Assert.assertSame(
-                        "Caught exception of type <"
-                                + ex.getClass()
-                                    .getName()
-                                + ">, expected one of type <"
-                                + exceptionClass.getName()
-                                + '>',
-                        exceptionClass,
-                        ex.getClass());
-                final Throwable actualCauseClass = ex.getCause();
-                Assert.assertNotNull(
-                        "Caught exception with null cause, expected cause of type <"
-                                + expectedCauseClass.getName()
-                                + '>',
-                        actualCauseClass);
-                Assert.assertSame(
-                        "Caught exception with cause of type<"
-                                + actualCauseClass.getClass()
-                                                  .getName()
-                                + ">, expected cause of type <"
-                                + expectedCauseClass.getName()
-                                + '>',
-                        expectedCauseClass,
-                        actualCauseClass.getClass());
+                assertExceptionWithCause(ex, exceptionClass, expectedCauseClass);
                 return;
             } catch (AssertionError e) {
                 throw mangledException(e);
@@ -1582,30 +1501,7 @@ public final class Verify extends Assert {
             code.run();
         } catch (RuntimeException ex) {
             try {
-                Assert.assertSame(
-                        "Caught exception of type <"
-                                + ex.getClass()
-                                    .getName()
-                                + ">, expected one of type <"
-                                + exceptionClass.getName()
-                                + '>',
-                        exceptionClass,
-                        ex.getClass());
-                final Throwable actualCauseClass = ex.getCause();
-                Assert.assertNotNull(
-                        "Caught exception with null cause, expected cause of type <"
-                                + expectedCauseClass.getName()
-                                + '>',
-                        actualCauseClass);
-                Assert.assertSame(
-                        "Caught exception with cause of type<"
-                                + actualCauseClass.getClass()
-                                                  .getName()
-                                + ">, expected cause of type <"
-                                + expectedCauseClass.getName()
-                                + '>',
-                        expectedCauseClass,
-                        actualCauseClass.getClass());
+                assertExceptionWithCause(ex, exceptionClass, expectedCauseClass);
                 return;
             } catch (AssertionError e) {
                 throw mangledException(e);
@@ -1617,5 +1513,34 @@ public final class Verify extends Assert {
         } catch (AssertionError e) {
             throw mangledException(e);
         }
+    }
+
+    private static void assertExceptionWithCause(Exception actual,
+                                                 Class<? extends Exception> expectedClass,
+                                                 Class<? extends Throwable> expectedCauseClass) {
+        Assert.assertSame(
+                "Caught exception of type <"
+                        + actual.getClass()
+                                .getName()
+                        + ">, expected one of type <"
+                        + expectedClass.getName()
+                        + '>',
+                expectedClass,
+                actual.getClass());
+        final Throwable actualCauseClass = actual.getCause();
+        Assert.assertNotNull(
+                "Caught exception with null cause, expected cause of type <"
+                        + expectedCauseClass.getName()
+                        + '>',
+                actualCauseClass);
+        Assert.assertSame(
+                "Caught exception with cause of type<"
+                        + actualCauseClass.getClass()
+                                          .getName()
+                        + ">, expected cause of type <"
+                        + expectedCauseClass.getName()
+                        + '>',
+                expectedCauseClass,
+                actualCauseClass.getClass());
     }
 }

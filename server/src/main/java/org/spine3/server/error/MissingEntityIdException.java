@@ -31,6 +31,8 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  */
 public class MissingEntityIdException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public MissingEntityIdException(String messageClassName, String propertyName, int fieldIndex) {
         super(createMessage(messageClassName, propertyName, fieldIndex));
     }
@@ -41,6 +43,4 @@ public class MissingEntityIdException extends RuntimeException {
                 "'. Found property with the name: " + propertyName;
         return message;
     }
-
-    private static final long serialVersionUID = 0L;
 }

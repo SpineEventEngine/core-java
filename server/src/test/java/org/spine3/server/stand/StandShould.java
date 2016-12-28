@@ -177,7 +177,8 @@ public class StandShould {
 
         final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
         final Object someId = new Object();
-        stand.update(someId, someUpdate);
+        final int someVersion = 1;
+        stand.update(someId, someUpdate, someVersion);
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -200,10 +201,11 @@ public class StandShould {
         final Customer customerState = customerAggregate.getState();
         final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
+        final int stateVersion = 1;
 
         verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityStorageRecord.class));
 
-        stand.update(customerId, packedState);
+        stand.update(customerId, packedState, stateVersion);
 
         final AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
         final EntityStorageRecord expectedRecord = EntityStorageRecord.newBuilder()
@@ -305,7 +307,8 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        stand.update(customerId, packedState);
+        final int stateVersion = 1;
+        stand.update(customerId, packedState, stateVersion);
 
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
@@ -327,7 +330,8 @@ public class StandShould {
         final ProjectId projectId = sampleData.getKey();
         final Project project = sampleData.getValue();
         final Any packedState = AnyPacker.pack(project);
-        stand.update(projectId, packedState);
+        final int stateVersion = 1;
+        stand.update(projectId, packedState, stateVersion);
 
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
@@ -350,7 +354,8 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        stand.update(customerId, packedState);
+        final int stateVersion = 1;
+        stand.update(customerId, packedState, stateVersion);
 
         assertNull(memoizeCallback.newEntityState);
     }
@@ -386,7 +391,8 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        stand.update(customerId, packedState);
+        final int stateVersion = 1;
+        stand.update(customerId, packedState, stateVersion);
 
         for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
@@ -406,7 +412,8 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        stand.update(customerId, packedState);
+        final int stateVersion = 1;
+        stand.update(customerId, packedState, stateVersion);
 
         verify(callback, never()).onStateChanged(any(Any.class));
     }
@@ -434,7 +441,8 @@ public class StandShould {
             final CustomerId customerId = sampleEntry.getKey();
             final Customer customer = sampleEntry.getValue();
             final Any packedState = AnyPacker.pack(customer);
-            stand.update(customerId, packedState);
+            final int stateVersion = 1;
+            stand.update(customerId, packedState, stateVersion);
         }
 
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
@@ -466,8 +474,8 @@ public class StandShould {
                                                                               .build());
 
         final Customer sampleCustomer = getSampleCustomer();
-
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+        final int stateVersion = 1;
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         final Query customerQuery = Queries.readAll(Customer.class);
 
@@ -581,8 +589,8 @@ public class StandShould {
             // Has new ID each time
             final Customer customer = getSampleCustomer();
             customers.add(customer);
-
-            stand.update(customer.getId(), AnyPacker.pack(customer));
+            final int stateVersion = 1;
+            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
         }
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
@@ -609,8 +617,8 @@ public class StandShould {
                                                                               .build());
 
         final Customer sampleCustomer = getSampleCustomer();
-
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+        final int stateVersion = 1;
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         // FieldMask with invalid type URLs.
         final String[] paths = {"invalid_type_url_example", Project.getDescriptor()
@@ -689,8 +697,8 @@ public class StandShould {
                                                                               .build());
 
         final Customer sampleCustomer = getSampleCustomer();
-
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer));
+        final int stateVersion = 1;
+        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         final String[] paths = new String[fieldIndexes.length];
 
@@ -757,14 +765,13 @@ public class StandShould {
         final int querySize = 2;
 
         final Set<CustomerId> ids = new HashSet<>();
-
         for (int i = 0; i < querySize; i++) {
             final Customer customer = getSampleCustomer().toBuilder()
                                                          .setId(CustomerId.newBuilder()
                                                                           .setNumber(i))
                                                          .build();
-
-            stand.update(customer.getId(), AnyPacker.pack(customer));
+            final int stateVersion = 1;
+            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
 
             ids.add(customer.getId());
         }
@@ -967,7 +974,8 @@ public class StandShould {
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
             final Any customerState = AnyPacker.pack(sampleCustomer);
-            stand.update(id, customerState);
+            final int stateVersion = 1;
+            stand.update(id, customerState, stateVersion);
         }
     }
 

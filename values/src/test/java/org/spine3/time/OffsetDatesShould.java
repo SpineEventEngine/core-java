@@ -27,11 +27,11 @@ import java.util.Calendar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.time.Calendars.createDateWithZoneOffset;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.getZoneOffset;
+import static org.spine3.time.Calendars.nowAt;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetDatesShould {
@@ -50,7 +50,7 @@ public class OffsetDatesShould {
     @Test
     public void obtain_current_OffsetDate_using_ZoneOffset() {
         final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final Calendar cal = createDateWithZoneOffset(ZONE_OFFSET);
+        final Calendar cal = nowAt(ZONE_OFFSET);
 
         assertEquals(getYear(cal), today.getDate().getYear());
         assertEquals(getMonth(cal), today.getDate().getMonthValue());
