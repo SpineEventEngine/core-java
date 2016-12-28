@@ -20,7 +20,11 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import static org.spine3.protobuf.Values.pack;
+import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code boolean} values in {@link ValueMismatch}es.
@@ -34,15 +38,35 @@ public class BooleanMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a boolean attribute.
+     * Creates {@code ValueMismatch} for the case when command finds false value instead of true.
+     *
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedTrue(int version) {
+        return of(true, false, false, version);
+    }
+
+    /**
+     * Creates {@code ValueMismatch} for the case when command finds true value instead of false.
+     *
+     * @param version the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedFalse(int version) {
+        return of(false, true, true, version);
+    }
+
+    /**
+     * Creates a {@code ValueMismatch} instance for a boolean attribute.
      *
      * @param expected the value expected by a command
      * @param actual   the value actual in an entity
      * @param newValue the value from a command, which we wanted to set instead of {@code expected}
      * @param version  the current version of the entity
-     * @return new ValueMismatch instance
+     * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
+    private static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))
@@ -51,5 +75,48 @@ public class BooleanMismatch {
         return builder.build();
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Add unpacking for expected, actual, and newValue.
+    /**
+     * Obtains expected boolean value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
+     */
+    public static Boolean unpackExpected(ValueMismatch mismatch) {
+        try {
+            final BoolValue result = mismatch.getExpected()
+                                             .unpack(BoolValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains actual boolean value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
+     */
+    public static Boolean unpackActual(ValueMismatch mismatch) {
+        try {
+            final BoolValue result = mismatch.getActual()
+                                             .unpack(BoolValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
+
+    /**
+     * Obtains new boolean value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
+     */
+    public static Boolean unpackNewValue(ValueMismatch mismatch) {
+        try {
+            final BoolValue result = mismatch.getNewValue()
+                                             .unpack(BoolValue.class);
+            return result.getValue();
+        } catch (InvalidProtocolBufferException e) {
+            throw wrapped(e);
+        }
+    }
 }
