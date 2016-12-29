@@ -91,9 +91,36 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /** An instance of {@link StandFunnel} to be informed about state updates */
     private final StandFunnel standFunnel;
 
+    private final boolean catchUpAfterStorageInit;
+
+    /**
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
+     * after the storage initialization.
+     *
+     * <p>NOTE: The {@link #catchUp()} will be called automatically after the {@link #initStorage(StorageFactory)} call
+     * is performed. To override this behavior, please use
+     * {@link ProjectionRepository#ProjectionRepository(BoundedContext, boolean)} constructor.
+     *
+     * @param boundedContext the target {@code BoundedContext}
+     */
     protected ProjectionRepository(BoundedContext boundedContext) {
+        this(boundedContext, true);
+    }
+
+    /**
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
+     *
+     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
+     * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     *
+     * @param boundedContext the target {@code BoundedContext}
+     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
+     */
+    @SuppressWarnings("MethodParameterNamingConvention")
+    protected ProjectionRepository(BoundedContext boundedContext, boolean catchUpAfterStorageInit) {
         super(boundedContext);
         this.standFunnel = boundedContext.getStandFunnel();
+        this.catchUpAfterStorageInit = catchUpAfterStorageInit;
     }
 
     protected Status getStatus() {
@@ -123,6 +150,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     public void initStorage(StorageFactory factory) {
         super.initStorage(factory);
         setStatus(Status.STORAGE_ASSIGNED);
+
+        if(catchUpAfterStorageInit) {
+            if(log().isDebugEnabled()) {
+                log().debug("Storage assigned. {} is starting to catch-up", getClass());
+            }
+            catchUp();
+        }
     }
 
     /** {@inheritDoc} */
