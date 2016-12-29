@@ -309,7 +309,7 @@ public class KnownTypes {
         }
 
         private void putEnum(EnumDescriptor desc, Class<? extends EnumLite> enumClass) {
-            final TypeUrl typeUrl = TypeUrl.of(desc);
+            final TypeUrl typeUrl = TypeUrl.from(desc);
             final ClassName className = ClassName.of(enumClass);
             put(typeUrl, className);
         }

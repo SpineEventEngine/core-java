@@ -30,7 +30,7 @@ import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -229,8 +229,7 @@ public class Commands {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final String cmdType = TypeUrl.of(commandMessage)
-                                      .getTypeName();
+        final String cmdType = TypeName.of(commandMessage);
         final String id = idToString(commandId);
         final String result = String.format(format, cmdType, id);
         return result;

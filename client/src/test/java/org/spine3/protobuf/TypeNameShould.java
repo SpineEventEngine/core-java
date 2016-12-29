@@ -18,14 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.change;
+package org.spine3.protobuf;
 
-/**
- * Error messages common for all mismatch types.
- *
- * @author Alexander Yevsyukov
- */
-/* package */ interface ErrorMessage {
+import org.junit.Test;
 
-    String EXPECTED_AND_ACTUAL_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
+public class TypeNameShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(TypeName.class));
+    }
+
+    /**
+     * Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by its own set of tests.
+     **/
 }
