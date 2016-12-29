@@ -42,7 +42,7 @@ import static org.spine3.base.Identifiers.idToString;
 public class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
-    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values inclusiv. Found:%d";
+    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values inclusive. Found: %d";
 
     private Validate() {
     }
