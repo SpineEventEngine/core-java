@@ -33,13 +33,14 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class ZoneOffsets {
 
-    private ZoneOffsets() {
-    }
-
     public static final ZoneOffset UTC = ZoneOffset.newBuilder()
                                                    .setId("UTC")
                                                    .setAmountSeconds(0)
                                                    .build();
+
+    private ZoneOffsets() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Obtains the ZoneOffset instance using an offset in hours.
@@ -70,6 +71,4 @@ public class ZoneOffsets {
                          .setAmountSeconds(seconds)
                          .build();
     }
-
-    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
 }
