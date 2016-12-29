@@ -304,8 +304,8 @@ public class OffsetDateTimes {
         final long nanos = dateTime.getTime()
                                    .getNanos();
         final LocalTime localTimeWithNanos = localTime.toBuilder()
-                                                         .setNanos(nanos)
-                                                         .build();
+                                                      .setNanos(nanos)
+                                                      .build();
 
         return withDateTime(dateTime, localDate, localTimeWithNanos);
     }
@@ -314,14 +314,14 @@ public class OffsetDateTimes {
      * Returns a new instance of offset date and time with changed local date or local time parameter.
      *
      * @param offsetDateTime offset date and time that will be changed
-     * @param localDate      new local date for this offset date and time
-     * @param localTime      new local time for this offset date and time
+     * @param date      new local date for this offset date and time
+     * @param time      new local time for this offset date and time
      * @return new {@code OffsetDateTime} instance with changed parameter
      */
-    private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate localDate, LocalTime localTime) {
+    private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate date, LocalTime time) {
         return offsetDateTime.toBuilder()
-                             .setDate(localDate)
-                             .setTime(localTime)
+                             .setDate(date)
+                             .setTime(time)
                              .build();
     }
 }
