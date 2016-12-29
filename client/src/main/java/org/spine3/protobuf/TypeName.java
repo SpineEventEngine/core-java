@@ -32,7 +32,7 @@ import org.spine3.base.Command;
 public class TypeName {
 
     private TypeName() {
-        // Prevent instantiation.
+        // Prevent instantiation of this utility class.
     }
 
     /**
