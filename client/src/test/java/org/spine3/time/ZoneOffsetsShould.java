@@ -21,7 +21,6 @@
 package org.spine3.time;
 
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

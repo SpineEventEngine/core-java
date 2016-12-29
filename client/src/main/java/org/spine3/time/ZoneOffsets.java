@@ -22,7 +22,6 @@ package org.spine3.time;
 
 import org.spine3.protobuf.Durations;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -52,7 +51,7 @@ public class ZoneOffsets {
      * Obtains the ZoneOffset instance using an offset in hours.
      */
     public static ZoneOffset ofHours(int hours) {
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET, MAX_HOURS_OFFSET, true);
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET, MAX_HOURS_OFFSET);
 
         @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
         final int seconds = (int) Durations.toSeconds(Durations.ofHours(hours));
@@ -66,8 +65,8 @@ public class ZoneOffsets {
      */
     @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET + 1, MAX_HOURS_OFFSET - 1, true);
-        checkBounds(minutes, "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET, true);
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET + 1, MAX_HOURS_OFFSET - 1);
+        checkBounds(minutes, "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
 
         final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours));
         final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes));

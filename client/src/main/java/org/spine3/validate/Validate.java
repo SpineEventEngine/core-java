@@ -42,7 +42,7 @@ import static org.spine3.base.Identifiers.idToString;
 public class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
-    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values%s. Found:%d";
+    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values inclusiv. Found:%d";
 
     private Validate() {
     }
@@ -252,23 +252,12 @@ public class Validate {
      * @param paramName value name
      * @param lowBound  lower bound to check
      * @param highBound higher bound
-     * @param inclusive states if bounds should be excluded or included from the range
      */
-    public static void checkBounds(int value, String paramName, int lowBound, int highBound, boolean inclusive) {
-        final String isInclusive = (inclusive ? " inclusive" : "");
-        if (inclusive) {
-            if (!isBetween(value, lowBound, highBound)) {
-                final String errMsg = String.format(MUST_BE_IN_BOUNDS,
-                                                    paramName, lowBound, highBound, isInclusive, value);
-                throw new IllegalArgumentException(errMsg);
-            }
-        }
-        if (!inclusive) {
-            if (!isBetween(value, lowBound + 1, highBound - 1)) {
-                final String errMsg = String.format(MUST_BE_IN_BOUNDS,
-                                                    paramName, lowBound + 1, highBound - 1, isInclusive, value);
-                throw new IllegalArgumentException(errMsg);
-            }
+    public static void checkBounds(int value, String paramName, int lowBound, int highBound) {
+        if (!isBetween(value, lowBound, highBound)) {
+            final String errMsg = String.format(MUST_BE_IN_BOUNDS,
+                                                paramName, lowBound, highBound, value);
+            throw new IllegalArgumentException(errMsg);
         }
     }
 

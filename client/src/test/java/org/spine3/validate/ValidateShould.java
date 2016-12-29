@@ -60,7 +60,7 @@ public class ValidateShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_value_out_of_bounds() {
-        checkBounds(10, "value", -5, 9, true);
+        checkBounds(10, "value", -5, 9);
     }
 
     @Test
@@ -178,10 +178,10 @@ public class ValidateShould {
     @Test
     public void format_message_from_constraint_violation() {
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat("test %s test %s")
-                .addParam("1")
-                .addParam("2")
-                .build();
+                                                                 .setMsgFormat("test %s test %s")
+                                                                 .addParam("1")
+                                                                 .addParam("2")
+                                                                 .build();
         final String formatted = ConstraintViolations.toText(violation);
 
         assertEquals("test 1 test 2", formatted);
@@ -190,9 +190,9 @@ public class ValidateShould {
     @Test
     public void format_message_using_params_from_constraint_violation() {
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .addParam("1")
-                .addParam("2")
-                .build();
+                                                                 .addParam("1")
+                                                                 .addParam("2")
+                                                                 .build();
         final String formatted = ConstraintViolations.toText("abc %s abc %s", violation);
 
         assertEquals("abc 1 abc 2", formatted);
