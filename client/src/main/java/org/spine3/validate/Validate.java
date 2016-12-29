@@ -42,6 +42,7 @@ import static org.spine3.base.Identifiers.idToString;
 public class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
+    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values%s. Found:%d";
 
     private Validate() {
     }
@@ -164,8 +165,8 @@ public class Validate {
     /**
      * Ensures the truth of an expression involving one parameter to the calling method.
      *
-     * @param expression a boolean expression with the parameter we check
-     * @param parameterName the name of the parameter
+     * @param expression         a boolean expression with the parameter we check
+     * @param parameterName      the name of the parameter
      * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
      *                           the parameter name
      * @throws IllegalArgumentException if {@code expression} is false
@@ -201,7 +202,7 @@ public class Validate {
      * <li>{@code nanos} >= 0.
      * </ul>
      *
-     * @param timestamp the timestamp to check
+     * @param timestamp    the timestamp to check
      * @param argumentName the name of the checked value to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
@@ -226,7 +227,7 @@ public class Validate {
     /**
      * Ensures that the passed value is positive.
      *
-     * @param value the value to check
+     * @param value        the value to check
      * @param argumentName the name of the checked value to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
@@ -242,6 +243,37 @@ public class Validate {
      */
     public static void checkPositiveOrZero(long value) {
         checkArgument(value >= 0);
+    }
+
+    /**
+     * Ensures that target value is in between passed bounds.
+     *
+     * @param value     target value
+     * @param paramName value name
+     * @param lowBound  lower bound to check
+     * @param highBound higher bound
+     * @param inclusive states if bounds should be excluded or included from the range
+     */
+    public static void checkBounds(int value, String paramName, int lowBound, int highBound, boolean inclusive) {
+        final String isInclusive = (inclusive ? " inclusive" : "");
+        if (inclusive) {
+            if (!isBetween(value, lowBound, highBound)) {
+                final String errMsg = String.format(MUST_BE_IN_BOUNDS,
+                                                    paramName, lowBound, highBound, isInclusive, value);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+        if (!inclusive) {
+            if (!isBetween(value, lowBound + 1, highBound - 1)) {
+                final String errMsg = String.format(MUST_BE_IN_BOUNDS,
+                                                    paramName, lowBound + 1, highBound - 1, isInclusive, value);
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+    }
+
+    private static boolean isBetween(int value, int lowBound, int highBound) {
+        return lowBound <= value && value <= highBound;
     }
 
     /**

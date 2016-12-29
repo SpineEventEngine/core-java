@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.validate.Validate.checkBounds;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ValidateShould {
@@ -55,6 +56,11 @@ public class ValidateShould {
 
         assertTrue(Validate.isNotDefault(msg));
         assertFalse(Validate.isNotDefault(StringValue.getDefaultInstance()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_value_out_of_bounds() {
+        checkBounds(10, "value", -5, 9, true);
     }
 
     @Test
