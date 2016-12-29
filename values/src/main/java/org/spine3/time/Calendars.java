@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.HOUR;
+import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
@@ -285,11 +286,29 @@ public class Calendars {
      * Converts the passed {@code OffsetTime} into {@code Calendar}.
      */
     public static Calendar toCalendar(OffsetTime offsetTime) {
-        return createWithTime(offsetTime.getTime()
-                                        .getHours(), offsetTime.getTime()
-                                                               .getMinutes(),
-                              offsetTime.getTime()
-                                        .getSeconds(), offsetTime.getTime()
-                                                                 .getMillis());
+        final LocalTime time = offsetTime.getTime();
+        final Calendar calendar = at(offsetTime.getOffset());
+        calendar.set(HOUR_OF_DAY, time.getHours());
+        calendar.set(MINUTE, time.getMinutes());
+        calendar.set(SECOND, time.getSeconds());
+        calendar.set(MILLISECOND, time.getMillis());
+        return calendar;
+    }
+
+    /**
+     * Converts the passed {@code OffsetDateTime} into {@code Calendar}.
+     */
+    public static Calendar toCalendar(OffsetDateTime dateTime) {
+        final Calendar cal = at(dateTime.getOffset());
+        final LocalDate date = dateTime.getDate();
+        final LocalTime time = dateTime.getTime();
+        cal.set(date.getYear(),
+              date.getMonth().getNumber() - 1,
+              date.getDay(),
+              time.getHours(),
+              time.getMinutes(),
+              time.getSeconds());
+        cal.set(MILLISECOND, time.getMillis());
+        return cal;
     }
 }

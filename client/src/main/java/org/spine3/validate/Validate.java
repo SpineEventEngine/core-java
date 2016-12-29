@@ -189,8 +189,8 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkParameter(!stringToCheck.isEmpty(), fieldName, "%s must not be an empty string.");
-        checkParameter(stringToCheck.trim()
-                                    .length() > 0, fieldName, "%s must not be a blank string.");
+        final String trimmed = stringToCheck.trim();
+        checkParameter(trimmed.length() > 0, fieldName, "%s must not be a blank string.");
         return stringToCheck;
     }
 
