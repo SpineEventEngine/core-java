@@ -44,7 +44,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static void checkNotEqual(int previousValue, int newValue) {
-        com.google.common.base.Preconditions.checkArgument(Integer.compare(newValue, previousValue) != 0, VALUES_CANNOT_BE_EQUAL);
+        checkArgument(Integer.compare(newValue, previousValue) != 0, VALUES_CANNOT_BE_EQUAL);
     }
 
     /**
@@ -53,7 +53,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static void checkNotEqual(long previousValue, long newValue) {
-        com.google.common.base.Preconditions.checkArgument(Long.compare(newValue, previousValue) != 0, VALUES_CANNOT_BE_EQUAL);
+        checkArgument(Long.compare(newValue, previousValue) != 0, VALUES_CANNOT_BE_EQUAL);
     }
 
     /**
@@ -80,7 +80,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static <T> void checkNotEqual(T previousValue, T newValue) {
-        com.google.common.base.Preconditions.checkArgument(!newValue.equals(previousValue), VALUES_CANNOT_BE_EQUAL);
+        checkArgument(!newValue.equals(previousValue), VALUES_CANNOT_BE_EQUAL);
     }
 
     /**
@@ -89,7 +89,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if parameter is empty
      */
     public static void checkNewValueNotEmpty(ByteString newValue) {
-        com.google.common.base.Preconditions.checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
+        checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }
 
     /**
@@ -98,6 +98,6 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if parameter is empty
      */
     public static void checkNewValueNotEmpty(String newValue) {
-        com.google.common.base.Preconditions.checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
+        checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }
 }
