@@ -19,7 +19,6 @@
  */
 package org.spine3.time.change;
 
-import org.spine3.change.Changes.ErrorMessage;
 import org.spine3.time.Interval;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalTime;
@@ -27,8 +26,8 @@ import org.spine3.time.OffsetDate;
 import org.spine3.time.OffsetDateTime;
 import org.spine3.time.OffsetTime;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.change.Preconditions.checkNotEqual;
 
 /**
  * Utility class for working with field changes.
@@ -48,7 +47,7 @@ public class Changes {
     public static IntervalChange of(Interval previousValue, Interval newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final IntervalChange result = IntervalChange.newBuilder()
                                                     .setPreviousValue(previousValue)
@@ -65,7 +64,7 @@ public class Changes {
     public static LocalDateChange of(LocalDate previousValue, LocalDate newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final LocalDateChange result = LocalDateChange.newBuilder()
                                                       .setPreviousValue(previousValue)
@@ -82,7 +81,7 @@ public class Changes {
     public static LocalTimeChange of(LocalTime previousValue, LocalTime newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final LocalTimeChange result = LocalTimeChange.newBuilder()
                                                       .setPreviousValue(previousValue)
@@ -99,7 +98,7 @@ public class Changes {
     public static OffsetTimeChange of(OffsetTime previousValue, OffsetTime newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final OffsetTimeChange result = OffsetTimeChange.newBuilder()
                                                         .setPreviousValue(previousValue)
@@ -116,7 +115,7 @@ public class Changes {
     public static OffsetDateChange of(OffsetDate previousValue, OffsetDate newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final OffsetDateChange result = OffsetDateChange.newBuilder()
                                                         .setPreviousValue(previousValue)
@@ -133,7 +132,7 @@ public class Changes {
     public static OffsetDateTimeChange of(OffsetDateTime previousValue, OffsetDateTime newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
-        checkArgument(!newValue.equals(previousValue), ErrorMessage.VALUES_CANNOT_BE_EQUAL);
+        checkNotEqual(previousValue, newValue);
 
         final OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
                                                         .setPreviousValue(previousValue)

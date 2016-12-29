@@ -17,18 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
 
-/**
- * This exception is thrown if a handler method is defined with wrong access level modifier.
- *
- * @author Alexander Yevsyukov
- */
-public class AccessLevelException extends RuntimeException {
+package org.spine3.change;
 
-    private static final long serialVersionUID = 0L;
+import com.google.protobuf.ByteString;
+import org.junit.Test;
 
-    public AccessLevelException(String message) {
-        super(message);
+import static org.junit.Assert.assertTrue;
+import static org.spine3.change.Preconditions.checkNewValueNotEmpty;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
+public class PreconditionsShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Preconditions.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_empty_ByteString_value() {
+        final ByteString str = ByteString.EMPTY;
+        checkNewValueNotEmpty(str);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_empty_String_value() {
+        final String str = "";
+        checkNewValueNotEmpty(str);
     }
 }

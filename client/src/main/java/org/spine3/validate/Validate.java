@@ -24,11 +24,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.change.Changes.ErrorMessage;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,6 +40,8 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 public class Validate {
+
+    private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
 
     private Validate() {
     }
@@ -204,47 +204,44 @@ public class Validate {
      * </ul>
      *
      * @param timestamp the timestamp to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param argumentName the name of the checked value to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
     public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
-        checkNotNull(timestamp, argumentName + " is null.");
+        checkNotNull(timestamp, argumentName);
         checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
         checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
     /**
-     * Ensures that the passed int value is positive:
+     * Ensures that the passed value is positive.
      *
      * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
-    public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
-    }
-
-    public static void checkPositive(int value) {
-        checkPositive(value, "");
-    }
-
     public static void checkPositive(long value) {
         checkPositive(value, "");
     }
 
     /**
-     * Ensures that the passed long value is positive:
+     * Ensures that the passed value is positive.
      *
      * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param argumentName the name of the checked value to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value, String argumentName) {
-        checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+        checkParameter(value > 0L, argumentName, MUST_BE_A_POSITIVE_VALUE);
     }
 
+    /**
+     * Ensures that the passed value is positive or zero.
+     *
+     * @param value the value to check
+     * @throws IllegalArgumentException if requirement is not met
+     */
     public static void checkPositiveOrZero(long value) {
         checkArgument(value >= 0);
     }
@@ -272,34 +269,5 @@ public class Validate {
         final String idStr = idToString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Returns a formatted string using the format string and parameters from the violation.
-     *
-     * @param violation violation which contains the format string and
-     *                  arguments referenced by the format specifiers in it
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(ConstraintViolation violation) {
-        final String format = violation.getMsgFormat();
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
-    }
-
-    /**
-     * Returns a formatted string using the specified format string and parameters from the violation.
-     *
-     * @param format    a format string
-     * @param violation violation which contains arguments referenced by the format specifiers in the format string
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(String format, ConstraintViolation violation) {
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
     }
 }
