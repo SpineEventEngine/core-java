@@ -29,6 +29,7 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -191,11 +192,9 @@ public class Queries {
             return result;
         }
 
-        /* package */
-        static Target composeTarget(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids) {
-            final TypeUrl type = TypeUrl.of(entityClass);
-
-            final boolean includeAll = ids == null;
+        /* package */ static Target composeTarget(Class<? extends Message> entityClass,
+                                                  @Nullable Set<? extends Message> ids) {
+            final boolean includeAll = (ids == null);
 
             final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
@@ -213,7 +212,7 @@ public class Queries {
                                                        .setIdFilter(idFilter)
                                                        .build();
             final Target.Builder builder = Target.newBuilder()
-                                                 .setType(type.getTypeName());
+                                                 .setType(TypeName.of(entityClass));
             if (includeAll) {
                 builder.setIncludeAll(true);
             } else {

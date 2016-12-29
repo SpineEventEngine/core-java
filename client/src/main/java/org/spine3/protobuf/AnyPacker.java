@@ -45,7 +45,7 @@ public class AnyPacker {
      * @return the instance of {@link Any} object that wraps given message
      */
     public static Any pack(Message message) {
-        final TypeUrl typeUrl = TypeUrl.of(message.getDescriptorForType());
+        final TypeUrl typeUrl = TypeUrl.from(message.getDescriptorForType());
         final String typeUrlPrefix = typeUrl.getPrefix();
         final Any result = Any.pack(message, typeUrlPrefix);
         return result;

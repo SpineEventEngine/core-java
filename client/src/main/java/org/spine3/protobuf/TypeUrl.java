@@ -79,6 +79,13 @@ public final class TypeUrl extends StringTypeValue {
         this.typeName = checkNotEmptyOrBlank(typeName, "typeName");
     }
 
+    /**
+     * Create new {@code TypeUrl}.
+     */
+    private static TypeUrl create(String prefix, String typeName) {
+        return new TypeUrl(prefix, typeName);
+    }
+
     @VisibleForTesting
     /* package */ static String composeTypeUrl(String typeUrlPrefix, String typeName) {
         final String url = typeUrlPrefix + SEPARATOR + typeName;
@@ -91,7 +98,7 @@ public final class TypeUrl extends StringTypeValue {
      * @param msg an instance to get the type URL from
      */
     public static TypeUrl of(Message msg) {
-        return of(msg.getDescriptorForType());
+        return from(msg.getDescriptorForType());
     }
 
     /**
@@ -99,9 +106,9 @@ public final class TypeUrl extends StringTypeValue {
      *
      * @param descriptor the descriptor of the type
      */
-    public static TypeUrl of(Descriptor descriptor) {
+    public static TypeUrl from(Descriptor descriptor) {
         final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
-        return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
+        return create(typeUrlPrefix, descriptor.getFullName());
     }
 
     /**
@@ -109,9 +116,9 @@ public final class TypeUrl extends StringTypeValue {
      *
      * @param descriptor the descriptor of the type
      */
-    public static TypeUrl of(EnumDescriptor descriptor) {
+    public static TypeUrl from(EnumDescriptor descriptor) {
         final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
-        return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
+        return create(typeUrlPrefix, descriptor.getFullName());
     }
 
     /**
@@ -137,7 +144,7 @@ public final class TypeUrl extends StringTypeValue {
         if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
             throw wrapped(new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
         }
-        return new TypeUrl(parts[0], parts[1]);
+        return create(parts[0], parts[1]);
     }
 
     private static TypeUrl ofTypeName(String typeName) {
