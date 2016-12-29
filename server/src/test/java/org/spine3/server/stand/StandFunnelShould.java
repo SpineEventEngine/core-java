@@ -241,9 +241,7 @@ public class StandFunnelShould {
             public void perform(BoundedContext context) {
                 // Init repository
                 final ProjectionRepository repository = Given.projectionRepo(context);
-
                 repository.initStorage(InMemoryStorageFactory.getInstance());
-                repository.setOnline();
 
                 // Dispatch an update from projection repo
                 repository.dispatch(Given.validEvent());
