@@ -27,13 +27,6 @@ package org.spine3.util;
  */
 public class Math {
 
-    /* safeMultiply(), floorDiv() methods are copied from ThreeTen project.
-       https://github.com/ThreeTen/threetenbp/blob/master/src/main/java/org/threeten/bp/jdk8/Jdk8Methods.java
-       We don't want to have the dependency on the library now expecting availability of
-       new Date/Time API under Google App Engine.
-     */
-    private static final String MULTIPLICATION_OVERFLOWS_A_LONG = "Multiplication overflows a long: ";
-
     private Math() {
     }
 
@@ -45,40 +38,46 @@ public class Math {
      * @return the new total
      * @throws ArithmeticException if the result overflows a long
      */
-    @SuppressWarnings("SwitchStatementWithoutDefaultBranch")    // no need for default branch in this method.
     public static long safeMultiply(long a, int b) {
-
         switch (b) {
             case -1:
                 if (a == Long.MIN_VALUE) {
-                    throw new ArithmeticException(MULTIPLICATION_OVERFLOWS_A_LONG + a + " * " + b);
+                    return throwOverflow(a, b);
                 }
                 return -a;
             case 0:
                 return 0L;
             case 1:
                 return a;
+            default:
+                // fall through.
         }
         final long total = a * b;
         if (total / b != a) {
-            throw new ArithmeticException(MULTIPLICATION_OVERFLOWS_A_LONG + a + " * " + b);
+            throwOverflow(a, b);
         }
         return total;
     }
 
+    private static long throwOverflow(long a, int b) {
+        throw new ArithmeticException(String.format("Multiplication overflows a long: %d * %d", a, b));
+    }
+
     /**
      * Returns the floor division.
-     * <p>
-     * This returns {@code 0} for {@code floorDiv(0, 4)}.<br />
-     * This returns {@code -1} for {@code floorDiv(-1, 4)}.<br />
-     * This returns {@code -1} for {@code floorDiv(-2, 4)}.<br />
-     * This returns {@code -1} for {@code floorDiv(-3, 4)}.<br />
-     * This returns {@code -1} for {@code floorDiv(-4, 4)}.<br />
-     * This returns {@code -2} for {@code floorDiv(-5, 4)}.<br />
      *
      * @param a  the dividend
      * @param b  the divisor
-     * @return the floor division
+     * @return the floor division. Examples:
+     * <ul>
+     *   <li>returns {@code 0} for {@code floorDiv(0, 4)}
+     *   <li>returns {@code -1} for {@code floorDiv(-1, 4)}
+     *   <li>returns {@code -1} for {@code floorDiv(-2, 4)}
+     *   <li>returns {@code -1} for {@code floorDiv(-3, 4)}
+     *   <li>returns {@code -1} for {@code floorDiv(-4, 4)}
+     *   <li>returns {@code -2} for {@code floorDiv(-5, 4)}
+     * </ul>
+     * <li>
      */
     public static long floorDiv(long a, long b) {
         return (a >= 0 ? a / b : ((a + 1) / b) - 1);

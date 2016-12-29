@@ -57,17 +57,6 @@ import java.lang.reflect.Modifier;
         return super.invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
-    /**
-     * This method is deprecated because event appliers do not have context parameter.
-     *
-     * <p>Please use {@link EventApplierMethod#invoke(Object, Message)} instead.
-     */
-    @Deprecated
-    @Override
-    public <R> R invoke(Object target, Message message, Empty context) throws InvocationTargetException {
-        return super.invoke(target, message, Empty.getDefaultInstance());
-    }
-
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.instance();
     }
