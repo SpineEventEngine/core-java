@@ -89,7 +89,7 @@ public class KnownTypesShould {
 
     @Test
     public void return_java_inner_class_name_by_proto_type_url() {
-        final TypeUrl typeUrl = TypeUrl.of(CommandContext.Schedule.getDescriptor());
+        final TypeUrl typeUrl = TypeUrl.from(CommandContext.Schedule.getDescriptor());
 
         final ClassName className = KnownTypes.getClassName(typeUrl);
 
@@ -102,12 +102,12 @@ public class KnownTypesShould {
 
         final TypeUrl typeUrl = KnownTypes.getTypeUrl(className);
 
-        assertEquals(TypeUrl.of(Command.getDescriptor()), typeUrl);
+        assertEquals(TypeUrl.from(Command.getDescriptor()), typeUrl);
     }
 
     @Test
     public void return_proto_type_url_by_proto_type_name() {
-        final TypeUrl typeUrlExpected = TypeUrl.of(StringValue.getDescriptor());
+        final TypeUrl typeUrlExpected = TypeUrl.from(StringValue.getDescriptor());
 
         final TypeUrl typeUrlActual = KnownTypes.getTypeUrl(typeUrlExpected.getTypeName());
 

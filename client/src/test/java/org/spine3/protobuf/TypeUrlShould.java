@@ -50,7 +50,7 @@ public class TypeUrlShould {
 
     private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
 
-    private final TypeUrl stringValueTypeUrl = TypeUrl.of(StringValue.getDescriptor());
+    private final TypeUrl stringValueTypeUrl = TypeUrl.from(StringValue.getDescriptor());
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_value() {
@@ -121,7 +121,7 @@ public class TypeUrlShould {
 
     @Test
     public void create_by_descriptor_of_google_msg() {
-        final TypeUrl typeUrl = TypeUrl.of(StringValue.getDescriptor());
+        final TypeUrl typeUrl = TypeUrl.from(StringValue.getDescriptor());
 
         assertIsStringValueUrl(typeUrl);
     }
@@ -131,7 +131,7 @@ public class TypeUrlShould {
         final Descriptors.Descriptor descriptor = UserId.getDescriptor();
         final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, descriptor.getFullName());
 
-        final TypeUrl typeUrl = TypeUrl.of(descriptor);
+        final TypeUrl typeUrl = TypeUrl.from(descriptor);
 
         assertEquals(expectedUrl, typeUrl.value());
     }
@@ -149,7 +149,7 @@ public class TypeUrlShould {
     private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor, String typeUrlPrefix) {
         final String expected = composeTypeUrl(typeUrlPrefix, enumDescriptor.getFullName());
 
-        final TypeUrl typeUrl = TypeUrl.of(enumDescriptor);
+        final TypeUrl typeUrl = TypeUrl.from(enumDescriptor);
 
         assertEquals(expected, typeUrl.value());
     }

@@ -177,7 +177,7 @@ public class Messages {
                 final Class<? extends Message> enumClass = toMessageClass(TypeUrl.of(enumTypeName));
                 return enumClass;
             case MESSAGE:
-                final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
+                final TypeUrl typeUrl = TypeUrl.from(field.getMessageType());
                 final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
             default:

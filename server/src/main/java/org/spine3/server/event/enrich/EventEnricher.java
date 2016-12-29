@@ -36,6 +36,7 @@ import org.spine3.base.Enrichments;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
@@ -152,8 +153,7 @@ public class EventEnricher {
             final Message enriched = apply(function, eventMessage);
             checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
                                     function, eventMessage);
-            final String typeName = TypeUrl.of(enriched)
-                                           .getTypeName();
+            final String typeName = TypeName.of(enriched);
             enrichments.put(typeName, AnyPacker.pack(enriched));
         }
         final EventContext enrichedContext = event.getContext()

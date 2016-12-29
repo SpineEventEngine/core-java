@@ -28,7 +28,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
@@ -75,7 +75,7 @@ public class ValidateShould {
     public void check_if_message_is_in_default_state_throwing_exception_with_parameterized_error_message() {
         final StringValue nonDefault = newStringValue("check_if_message_is_in_default_state_with_template");
         Validate.checkDefault(nonDefault,
-            "Message value: %s, Type name: %s", nonDefault, TypeUrl.of(nonDefault).getTypeName());
+                              "Message value: %s, Type name: %s", nonDefault, TypeName.of(nonDefault));
     }
 
     @Test
