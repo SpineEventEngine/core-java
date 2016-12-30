@@ -20,11 +20,11 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.InvalidProtocolBufferException;
+import org.spine3.protobuf.AnyPacker;
 
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code boolean} values in {@link ValueMismatch}es.
@@ -75,19 +75,19 @@ public class BooleanMismatch {
         return builder.build();
     }
 
+    private static Boolean unpacked(Any any) {
+        final BoolValue unpacked = AnyPacker.unpack(any, BoolValue.class);
+        return unpacked.getValue();
+    }
+
     /**
      * Obtains expected boolean value from the passed mismatch.
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
-    public static Boolean unpackExpected(ValueMismatch mismatch) {
-        try {
-            final BoolValue result = mismatch.getExpected()
-                                             .unpack(BoolValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+    public static boolean unpackExpected(ValueMismatch mismatch) {
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
     }
 
     /**
@@ -95,14 +95,9 @@ public class BooleanMismatch {
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
-    public static Boolean unpackActual(ValueMismatch mismatch) {
-        try {
-            final BoolValue result = mismatch.getActual()
-                                             .unpack(BoolValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+    public static boolean unpackActual(ValueMismatch mismatch) {
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
     }
 
     /**
@@ -110,13 +105,8 @@ public class BooleanMismatch {
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
-    public static Boolean unpackNewValue(ValueMismatch mismatch) {
-        try {
-            final BoolValue result = mismatch.getNewValue()
-                                             .unpack(BoolValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+    public static boolean unpackNewValue(ValueMismatch mismatch) {
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
     }
 }
