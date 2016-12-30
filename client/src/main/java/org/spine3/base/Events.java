@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
@@ -117,7 +118,7 @@ public class Events {
      */
     public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final M result = AnyPacker.unpack(any);
+        final M result = unpack(any);
         return result;
     }
 
@@ -279,7 +280,7 @@ public class Events {
         if (any == null) {
             return Optional.absent();
         }
-        final E result = AnyPacker.unpack(any);
+        final E result = unpack(any);
         return Optional.fromNullable(result);
     }
 }
