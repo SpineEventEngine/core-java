@@ -30,7 +30,6 @@ import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static org.spine3.time.Calendars.nowAt;
-import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
@@ -285,43 +284,44 @@ public class OffsetDateTimes {
     /**
      * Obtains offset date and time changed on specified amount of milliseconds.
      *
-     * @param offsetDateTime offset date and time that will be changed
+     * @param dateTime offset date and time that will be changed
      * @param millisDelta    a number of milliseconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset date and time with new milliseconds value
      */
-    private static OffsetDateTime changeMillis(OffsetDateTime offsetDateTime, int millisDelta) {
-        return add(offsetDateTime, MILLISECOND, millisDelta);
+    private static OffsetDateTime changeMillis(OffsetDateTime dateTime, int millisDelta) {
+        return add(dateTime, MILLISECOND, millisDelta);
     }
 
     /**
      * Performs date and time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetDateTime add(OffsetDateTime offsetDateTime, int calendarField, int delta) {
-        final Calendar calDate = toCalendar(offsetDateTime.getDate());
-        final Calendar calTime = toCalendar(offsetDateTime.getTime());
-        calDate.add(calendarField, delta);
-        calTime.add(calendarField, delta);
-        final LocalDate localDate = toLocalDate(calDate);
-        final LocalTime localTime = toLocalTime(calTime).toBuilder()
-                                                        .setNanos(offsetDateTime.getTime()
-                                                                                .getNanos())
-                                                        .build();
+    private static OffsetDateTime add(OffsetDateTime dateTime, int calendarField, int delta) {
+        final Calendar calendar = Calendars.toCalendar(dateTime);
+        calendar.add(calendarField, delta);
 
-        return withDateTime(offsetDateTime, localDate, localTime);
+        final LocalDate localDate = toLocalDate(calendar);
+        final LocalTime localTime = toLocalTime(calendar);
+        final long nanos = dateTime.getTime()
+                                   .getNanos();
+        final LocalTime localTimeWithNanos = localTime.toBuilder()
+                                                      .setNanos(nanos)
+                                                      .build();
+
+        return withDateTime(dateTime, localDate, localTimeWithNanos);
     }
 
     /**
      * Returns a new instance of offset date and time with changed local date or local time parameter.
      *
      * @param offsetDateTime offset date and time that will be changed
-     * @param localDate      new local date for this offset date and time
-     * @param localTime      new local time for this offset date and time
+     * @param date      new local date for this offset date and time
+     * @param time      new local time for this offset date and time
      * @return new {@code OffsetDateTime} instance with changed parameter
      */
-    private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate localDate, LocalTime localTime) {
+    private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate date, LocalTime time) {
         return offsetDateTime.toBuilder()
-                             .setDate(localDate)
-                             .setTime(localTime)
+                             .setDate(date)
+                             .setTime(time)
                              .build();
     }
 }

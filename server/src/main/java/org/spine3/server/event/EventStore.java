@@ -72,6 +72,7 @@ public abstract class EventStore implements AutoCloseable {
      * @param logger         debug logger instance
      */
     protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
+        super();
         this.streamExecutor = streamExecutor;
         this.logger = logger;
     }

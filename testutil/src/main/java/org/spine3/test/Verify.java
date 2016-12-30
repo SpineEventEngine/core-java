@@ -67,7 +67,9 @@ public final class Verify extends Assert {
     private static final String HAS_INCORRECT_ELEMENT_AT_INDEX = " has incorrect element at index:<";
     private static final String SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM = " should not contain unexpectedItem:<";
 
-    private Verify() {}
+    private Verify() {
+        super();
+    }
 
     /**
      * Mangles the stack trace of {@link AssertionError} so that it looks like its been thrown from the line that
@@ -79,7 +81,7 @@ public final class Verify extends Assert {
      * that calls another custom assert i.e. the source line calling the custom asserts is more than two stack frames
      * away.
      *
-     * @param e The exception to mangle.
+     * @param e the exception to mangle
      * @see #mangledException(AssertionError, int)
      */
     public static AssertionError mangledException(AssertionError e) {
