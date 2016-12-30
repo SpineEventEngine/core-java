@@ -24,11 +24,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.change.Changes.ErrorMessage;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,6 +40,9 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 public class Validate {
+
+    private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
+    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values inclusive. Found: %d";
 
     private Validate() {
     }
@@ -110,8 +111,7 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object)
-                                                                                  .getTypeName());
+        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
         return object;
     }
 
@@ -155,8 +155,7 @@ public class Validate {
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
         if (!isDefault(object)) {
-            final String typeName = TypeUrl.of(object)
-                                           .getTypeName();
+            final String typeName = TypeName.of(object);
             final String errorMessage = "The message is not in the default state: " + typeName;
             throw new IllegalStateException(errorMessage);
         }
@@ -166,8 +165,8 @@ public class Validate {
     /**
      * Ensures the truth of an expression involving one parameter to the calling method.
      *
-     * @param expression a boolean expression with the parameter we check
-     * @param parameterName the name of the parameter
+     * @param expression         a boolean expression with the parameter we check
+     * @param parameterName      the name of the parameter
      * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
      *                           the parameter name
      * @throws IllegalArgumentException if {@code expression} is false
@@ -190,8 +189,8 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkParameter(!stringToCheck.isEmpty(), fieldName, "%s must not be an empty string.");
-        checkParameter(stringToCheck.trim()
-                                    .length() > 0, fieldName, "%s must not be a blank string.");
+        final String trimmed = stringToCheck.trim();
+        checkParameter(trimmed.length() > 0, fieldName, "%s must not be a blank string.");
         return stringToCheck;
     }
 
@@ -203,50 +202,67 @@ public class Validate {
      * <li>{@code nanos} >= 0.
      * </ul>
      *
-     * @param timestamp the timestamp to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param timestamp    the timestamp to check
+     * @param argumentName the name of the checked value to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
      */
     public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
-        checkNotNull(timestamp, argumentName + " is null.");
+        checkNotNull(timestamp, argumentName);
         checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
         checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
         return timestamp;
     }
 
     /**
-     * Ensures that the passed int value is positive:
+     * Ensures that the passed value is positive.
      *
      * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
-    public static void checkPositive(int value, String argumentName) {
-        checkParameter(value > 0, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
-    }
-
-    public static void checkPositive(int value) {
-        checkPositive(value, "");
-    }
-
     public static void checkPositive(long value) {
         checkPositive(value, "");
     }
 
     /**
-     * Ensures that the passed long value is positive:
+     * Ensures that the passed value is positive.
      *
-     * @param value the value to check
-     * @param argumentName the name of the checked timestamp to be used in the error message
+     * @param value        the value to check
+     * @param argumentName the name of the checked value to be used in the error message
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value, String argumentName) {
-        checkParameter(value > 0L, argumentName, ErrorMessage.MUST_BE_A_POSITIVE_VALUE);
+        checkParameter(value > 0L, argumentName, MUST_BE_A_POSITIVE_VALUE);
     }
 
+    /**
+     * Ensures that the passed value is positive or zero.
+     *
+     * @param value the value to check
+     * @throws IllegalArgumentException if requirement is not met
+     */
     public static void checkPositiveOrZero(long value) {
         checkArgument(value >= 0);
+    }
+
+    /**
+     * Ensures that target value is in between passed bounds.
+     *
+     * @param value     target value
+     * @param paramName value name
+     * @param lowBound  lower bound to check
+     * @param highBound higher bound
+     */
+    public static void checkBounds(int value, String paramName, int lowBound, int highBound) {
+        if (!isBetween(value, lowBound, highBound)) {
+            final String errMsg = String.format(MUST_BE_IN_BOUNDS,
+                                                paramName, lowBound, highBound, value);
+            throw new IllegalArgumentException(errMsg);
+        }
+    }
+
+    private static boolean isBetween(int value, int lowBound, int highBound) {
+        return lowBound <= value && value <= highBound;
     }
 
     /**
@@ -272,34 +288,5 @@ public class Validate {
         final String idStr = idToString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Returns a formatted string using the format string and parameters from the violation.
-     *
-     * @param violation violation which contains the format string and
-     *                  arguments referenced by the format specifiers in it
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(ConstraintViolation violation) {
-        final String format = violation.getMsgFormat();
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
-    }
-
-    /**
-     * Returns a formatted string using the specified format string and parameters from the violation.
-     *
-     * @param format    a format string
-     * @param violation violation which contains arguments referenced by the format specifiers in the format string
-     * @return a formatted string
-     * @see String#format(String, Object...)
-     */
-    public static String toText(String format, ConstraintViolation violation) {
-        final List<String> params = violation.getParamList();
-        final String result = String.format(format, params.toArray());
-        return result;
     }
 }

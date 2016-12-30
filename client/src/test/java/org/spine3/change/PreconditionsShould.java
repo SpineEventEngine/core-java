@@ -20,12 +20,29 @@
 
 package org.spine3.change;
 
-/**
- * Error messages common for all mismatch types.
- *
- * @author Alexander Yevsyukov
- */
-/* package */ interface ErrorMessage {
+import com.google.protobuf.ByteString;
+import org.junit.Test;
 
-    String EXPECTED_AND_ACTUAL_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
+import static org.junit.Assert.assertTrue;
+import static org.spine3.change.Preconditions.checkNewValueNotEmpty;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
+public class PreconditionsShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Preconditions.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_empty_ByteString_value() {
+        final ByteString str = ByteString.EMPTY;
+        checkNewValueNotEmpty(str);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_empty_String_value() {
+        final String str = "";
+        checkNewValueNotEmpty(str);
+    }
 }

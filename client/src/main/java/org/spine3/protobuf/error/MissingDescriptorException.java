@@ -28,10 +28,9 @@ import com.google.protobuf.Message;
  */
 public class MissingDescriptorException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public MissingDescriptorException(Class<? extends Message> clazz, Throwable cause) {
         super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
     }
-
-    private static final long serialVersionUID = 0L;
-
 }

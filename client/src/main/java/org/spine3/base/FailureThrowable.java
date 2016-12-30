@@ -40,6 +40,7 @@ public abstract class FailureThrowable extends Throwable {
     private final Timestamp timestamp;
 
     protected FailureThrowable(GeneratedMessageV3 failure) {
+        super();
         this.failure = failure;
         this.timestamp = getCurrentTime();
     }
