@@ -22,8 +22,8 @@ package org.spine3.change;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
-import org.spine3.protobuf.AnyPacker;
 
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
 
 /**
@@ -75,8 +75,8 @@ public class BooleanMismatch {
         return builder.build();
     }
 
-    private static Boolean unpacked(Any any) {
-        final BoolValue unpacked = AnyPacker.unpack(any, BoolValue.class);
+    private static boolean unpacked(Any any) {
+        final BoolValue unpacked = unpack(any, BoolValue.class);
         return unpacked.getValue();
     }
 

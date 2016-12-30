@@ -20,12 +20,12 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FloatValue;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code float} values in {@link ValueMismatch}es.
@@ -75,7 +75,6 @@ public class FloatMismatch {
      */
     public static ValueMismatch unexpectedValue(float expected, float actual, float newValue, int version) {
         checkNotNullOrEqual(expected, actual);
-
         return of(expected, actual, newValue, version);
     }
 
@@ -91,19 +90,19 @@ public class FloatMismatch {
         return builder.build();
     }
 
+    private static float unpacked(Any any) {
+        final FloatValue unpacked = unpack(any, FloatValue.class);
+        return unpacked.getValue();
+    }
+
     /**
      * Obtains expected float value from the passed mismatch.
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackExpected(ValueMismatch mismatch) {
-        try {
-            final FloatValue result = mismatch.getExpected()
-                                               .unpack(FloatValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
     }
 
     /**
@@ -112,13 +111,8 @@ public class FloatMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackActual(ValueMismatch mismatch) {
-        try {
-            final FloatValue result = mismatch.getActual()
-                                               .unpack(FloatValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
     }
 
     /**
@@ -127,12 +121,7 @@ public class FloatMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackNewValue(ValueMismatch mismatch) {
-        try {
-            final FloatValue result = mismatch.getNewValue()
-                                              .unpack(FloatValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
     }
 }

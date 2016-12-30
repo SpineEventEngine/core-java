@@ -20,13 +20,13 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with string values in ValueMismatches.
@@ -87,13 +87,17 @@ public class StringMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch
-                .newBuilder()
-                .setExpected(pack(expected))
-                .setActual(pack(actual))
-                .setNewValue(pack(newValue))
-                .setVersion(version);
+        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                           .setExpected(pack(expected))
+                                                           .setActual(pack(actual))
+                                                           .setNewValue(pack(newValue))
+                                                           .setVersion(version);
         return builder.build();
+    }
+
+    private static String unpacked(Any any) {
+        final StringValue unpacked = unpack(any, StringValue.class);
+        return unpacked.getValue();
     }
 
     /**
@@ -102,13 +106,8 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackExpected(ValueMismatch mismatch) {
-        try {
-            final StringValue result = mismatch.getExpected()
-                                               .unpack(StringValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
     }
 
     /**
@@ -117,13 +116,8 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackActual(ValueMismatch mismatch) {
-        try {
-            final StringValue result = mismatch.getActual()
-                                               .unpack(StringValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
     }
 
     /**
@@ -132,12 +126,7 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackNewValue(ValueMismatch mismatch) {
-        try {
-            final StringValue result = mismatch.getNewValue()
-                                               .unpack(StringValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
     }
 }

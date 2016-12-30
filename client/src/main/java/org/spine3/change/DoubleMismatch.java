@@ -20,12 +20,12 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code double} values in {@link ValueMismatch}es.
@@ -75,7 +75,6 @@ public class DoubleMismatch {
      */
     public static ValueMismatch unexpectedValue(double expected, double actual, double newValue, int version) {
         checkNotNullOrEqual(expected, actual);
-
         return of(expected, actual, newValue, version);
     }
 
@@ -91,19 +90,19 @@ public class DoubleMismatch {
         return builder.build();
     }
 
+    private static double unpacked(Any any) {
+        final DoubleValue unpacked = unpack(any, DoubleValue.class);
+        return unpacked.getValue();
+    }
+
     /**
      * Obtains expected double value from the passed mismatch.
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackExpected(ValueMismatch mismatch) {
-        try {
-            final DoubleValue result = mismatch.getExpected()
-                                              .unpack(DoubleValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
     }
 
     /**
@@ -112,13 +111,8 @@ public class DoubleMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackActual(ValueMismatch mismatch) {
-        try {
-            final DoubleValue result = mismatch.getActual()
-                                              .unpack(DoubleValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
     }
 
     /**
@@ -127,12 +121,7 @@ public class DoubleMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackNewValue(ValueMismatch mismatch) {
-        try {
-            final DoubleValue result = mismatch.getNewValue()
-                                               .unpack(DoubleValue.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
     }
 }
