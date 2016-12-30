@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract storage tests.
@@ -78,7 +77,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
             try {
                 storage.close();
             } catch (Exception e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
         }
     }

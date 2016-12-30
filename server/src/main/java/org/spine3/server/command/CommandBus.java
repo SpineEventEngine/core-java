@@ -332,6 +332,8 @@ public class CommandBus implements AutoCloseable {
         } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
             onHandlerException(msg, commandId, cause);
+        } catch (RuntimeException e) {
+            onHandlerException(msg, commandId, e);
         }
     }
 

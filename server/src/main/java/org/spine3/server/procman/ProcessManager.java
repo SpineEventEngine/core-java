@@ -59,7 +59,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -331,7 +330,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
                 try {
                     finishFuture.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    throw wrapped(e);
+                    throw new IllegalArgumentException(e);
                 }
                 result.addProduced(command);
             }

@@ -59,7 +59,6 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * @author Alexander Litus
@@ -208,7 +207,7 @@ public class CommandHandlerShould {
             try {
                 super.handle(commandMessage, context);
             } catch (InvocationTargetException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
         }
 

@@ -100,7 +100,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
-import static org.spine3.util.Exceptions.wrapped;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {
@@ -601,7 +600,7 @@ public class CommandBusShould {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
 
         // Ensure the scheduler has been called for a single command,
