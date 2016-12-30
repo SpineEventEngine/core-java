@@ -22,7 +22,7 @@ package org.spine3.time;
 
 import org.spine3.protobuf.Durations;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.spine3.validate.Validate.checkBounds;
 
 /**
  * Utilities for working with ZoneOffset objects.
@@ -33,20 +33,26 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class ZoneOffsets {
 
-    private ZoneOffsets() {
-    }
+    public static final int MAX_HOURS_OFFSET = 14;
+    public static final int MIN_HOURS_OFFSET = -11;
+    public static final int MAX_MINUTES_OFFSET = 60;
+    public static final int MIN_MINUTES_OFFSET = 0;
 
     public static final ZoneOffset UTC = ZoneOffset.newBuilder()
                                                    .setId("UTC")
                                                    .setAmountSeconds(0)
                                                    .build();
 
+    private ZoneOffsets() {
+        // Prevent instantiation of this utility class.
+    }
+
     /**
      * Obtains the ZoneOffset instance using an offset in hours.
      */
     public static ZoneOffset ofHours(int hours) {
-        final int maxHoursBound = 18;
-        checkArgument(Math.abs(hours) <= maxHoursBound, "offset size must be between -18 and 18 hours inclusive");
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET, MAX_HOURS_OFFSET);
+
         @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
         final int seconds = (int) Durations.toSeconds(Durations.ofHours(hours));
         return ZoneOffset.newBuilder()
@@ -59,10 +65,9 @@ public class ZoneOffsets {
      */
     @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
-        final int maxHoursBound = 17;
-        final int maxMinutesBound = 60;
-        checkArgument(Math.abs(hours) <= maxHoursBound, "offset hour size must be between -17 and 17 hours inclusive");
-        checkArgument(Math.abs(minutes) <= maxMinutesBound, "offset minute size must be between -60 and 60 minutes inclusive");
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET + 1, MAX_HOURS_OFFSET - 1);
+        checkBounds(minutes, "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
+
         final int secondsInHours = (int) Durations.toSeconds(Durations.ofHours(hours));
         final int secondsInMinutes = (int) Durations.toSeconds(Durations.ofMinutes(minutes));
         final int seconds = secondsInHours + secondsInMinutes;
@@ -70,6 +75,4 @@ public class ZoneOffsets {
                          .setAmountSeconds(seconds)
                          .build();
     }
-
-    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
 }

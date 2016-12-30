@@ -220,24 +220,37 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      * @see #dispatchForTest(Message, CommandContext)
      */
-    @SuppressWarnings("AssignmentToMethodParameter")    // it's fine, see the comments below for more details.
     /* package */ List<? extends Message> dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
-        if (command instanceof Any) {
-            // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
-            // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
-            // such a call especially from the testing code.
-            final Any any = (Any) command;
-            command = AnyPacker.unpack(any);
-        }
+
+        final Message commandMessage = ensureCommandMessage(command);
+
         try {
-            final List<? extends Message> events = invokeHandler(command, context);
+            final List<? extends Message> events = invokeHandler(commandMessage, context);
             apply(events, context);
             return events;
         } catch (InvocationTargetException e) {
             throw wrappedCause(e);
         }
+    }
+
+    /**
+     * Ensures that the passed instance of {@code Message} is not an {@code Any},
+     * and unwraps the command message if {@code Any} is passed.
+     */
+    private static Message ensureCommandMessage(Message command) {
+        Message commandMessage;
+        if (command instanceof Any) {
+            // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
+            // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
+            // such a call especially from the testing code.
+            final Any any = (Any) command;
+            commandMessage = AnyPacker.unpack(any);
+        } else {
+            commandMessage = command;
+        }
+        return commandMessage;
     }
 
     /**

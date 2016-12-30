@@ -38,6 +38,7 @@ import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.Stand;
 
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,18 +50,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("MethodDoesntCallSuperMethod") // as we override default implementation with `unimplemented` status.
 public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionServiceImplBase {
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-    private SubscriptionService(Builder builder) {
-        this.typeToContextMap = builder.getBoundedContextMap();
+    private SubscriptionService(Map<TypeUrl, BoundedContext> map) {
+        super();
+        this.typeToContextMap = ImmutableMap.copyOf(map);
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         log().debug("Creating the subscription to a topic: {}", topic);
@@ -80,7 +82,6 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         }
     }
 
-    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
     @Override
     public void activate(final Subscription subscription, final StreamObserver<SubscriptionUpdate> responseObserver) {
         log().debug("Activating the subscription: {}", subscription);
@@ -108,7 +109,6 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         }
     }
 
-    @SuppressWarnings("RefusedBequest")     // as we override default implementation with `unimplemented` status.
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         log().debug("Incoming cancel request for the subscription topic: {}", subscription);
@@ -143,22 +143,16 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
 
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-        private ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-        public Builder addBoundedContext(BoundedContext boundedContext) {
+        public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
 
-        public Builder removeBoundedContext(BoundedContext boundedContext) {
+        public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
-        }
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
-        public ImmutableMap<TypeUrl, BoundedContext> getBoundedContextMap() {
-            return typeToContextMap;
         }
 
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
@@ -175,22 +169,21 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             if (boundedContexts.isEmpty()) {
                 throw new IllegalStateException("Subscription service must have at least one bounded context.");
             }
-            this.typeToContextMap = createBoundedContextMap();
-            final SubscriptionService result = new SubscriptionService(this);
+            final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
+            final SubscriptionService result = new SubscriptionService(map);
             return result;
         }
 
-        private ImmutableMap<TypeUrl, BoundedContext> createBoundedContextMap() {
+        private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             final ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
-                addBoundedContext(builder, boundedContext);
+                putIntoMap(boundedContext, builder);
             }
             return builder.build();
         }
 
-        private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
-                                              BoundedContext boundedContext) {
-
+        private static void putIntoMap(BoundedContext boundedContext,
+                                       ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
             final Stand stand = boundedContext.getStand();
             final ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
             for (TypeUrl availableType : exposedTypes) {

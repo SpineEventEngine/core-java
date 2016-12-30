@@ -28,10 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.client.grpc.CommandServiceGrpc;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,20 +42,28 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandService
-        extends CommandServiceGrpc.CommandServiceImplBase {
+public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
 
     private final ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
+    /**
+     * Creates a new builder for {@code CommandService}.
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    protected CommandService(Builder builder) {
-        this.boundedContextMap = builder.getBoundedContextMap();
+    /**
+     * Constructs new instance using the map from a {@code CommandClass} to a {@code BoundedContext} instance
+     * which handles the command.
+     */
+    protected CommandService(Map<CommandClass, BoundedContext> map) {
+        super();
+        this.boundedContextMap = ImmutableMap.copyOf(map);
     }
 
-    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
@@ -61,8 +71,8 @@ public class CommandService
         if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            boundedContext.getCommandBus()
-                          .post(request, responseObserver);
+            final CommandBus commandBus = boundedContext.getCommandBus();
+            commandBus.post(request, responseObserver);
         }
     }
 
@@ -75,45 +85,63 @@ public class CommandService
     public static class Builder {
 
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-        private ImmutableMap<CommandClass, BoundedContext> boundedContextMap;
 
-        public Builder addBoundedContext(BoundedContext boundedContext) {
+        /**
+         * Adds the {@code BoundedContext} to the builder.
+         */
+        public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
 
-        public Builder removeBoundedContext(BoundedContext boundedContext) {
+        /**
+         * Removes the {@code BoundedContext} from the builder.
+         */
+        public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
-        public ImmutableMap<CommandClass, BoundedContext> getBoundedContextMap() {
-            return boundedContextMap;
+        /**
+         * Verifies if the passed {@code BoundedContext} was previously added to the builder.
+         *
+         * @param boundedContext the instance to check
+         * @return {@code true} if the instance was added to the builder, {@code false} otherwise
+         */
+        public boolean contains(BoundedContext boundedContext) {
+            final boolean contains = boundedContexts.contains(boundedContext);
+            return contains;
         }
 
         /**
-         * Builds the {@link CommandService}.
+         * Builds a new {@link CommandService}.
          */
         public CommandService build() {
-            this.boundedContextMap = createBoundedContextMap();
-            final CommandService result = new CommandService(this);
+            final ImmutableMap<CommandClass, BoundedContext> map = createMap();
+            final CommandService result = new CommandService(map);
             return result;
         }
 
-        private ImmutableMap<CommandClass, BoundedContext> createBoundedContextMap() {
+        /**
+         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that handle such commands.
+         */
+        private ImmutableMap<CommandClass, BoundedContext> createMap() {
             final ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
-                addBoundedContext(builder, boundedContext);
+                putIntoMap(boundedContext, builder);
             }
             return builder.build();
         }
 
-        private static void addBoundedContext(ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder,
-                BoundedContext boundedContext) {
-            final Set<CommandClass> cmdClasses = boundedContext.getCommandBus()
-                                                               .getSupportedCommandClasses();
+        /**
+         * Associates {@code CommandClass}es with the instance of {@code BoundedContext}
+         * that handles such commands.
+         */
+        private static void putIntoMap(BoundedContext boundedContext,
+                                       ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder) {
+            final CommandBus commandBus = boundedContext.getCommandBus();
+            final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 mapBuilder.put(commandClass, boundedContext);
             }

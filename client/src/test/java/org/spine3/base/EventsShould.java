@@ -28,7 +28,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.testdata.TestCommandContextFactory;
 
 import java.util.List;
@@ -203,10 +203,10 @@ public class EventsShould {
         assertFalse(isEnrichmentEnabled(event));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure the optional is populated in this method.
     @Test
     public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(stringValue)
-                                                                          .getTypeName(), stringValue);
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
 
         final Optional<Enrichments> enrichments = Events.getEnrichments(context);
 
@@ -220,9 +220,10 @@ public class EventsShould {
                           .isPresent());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure the optional is populated in this method.
     @Test
     public void return_specific_event_enrichment() {
-        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(stringValue).getTypeName(), stringValue);
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
 
         final Optional<? extends StringValue> enrichment = Events.getEnrichment(stringValue.getClass(), context);
 
@@ -238,7 +239,7 @@ public class EventsShould {
 
     @Test
     public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
-        final EventContext context = newEventContextWithEnrichment(TypeUrl.of(boolValue).getTypeName(), boolValue);
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue), boolValue);
         assertFalse(Events.getEnrichment(StringValue.class, context)
                           .isPresent());
     }

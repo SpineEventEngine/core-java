@@ -64,7 +64,7 @@ public class SubscriptionServiceShould {
         final BoundedContext singleBoundedContext = newBoundedContext("Single", newSimpleStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .addBoundedContext(singleBoundedContext);
+                                                                       .add(singleBoundedContext);
 
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
@@ -81,9 +81,9 @@ public class SubscriptionServiceShould {
         final BoundedContext thirdBoundedContext = newBoundedContext("Third", newSimpleStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .addBoundedContext(firstBoundedContext)
-                                                                       .addBoundedContext(secondBoundedContext)
-                                                                       .addBoundedContext(thirdBoundedContext);
+                                                                       .add(firstBoundedContext)
+                                                                       .add(secondBoundedContext)
+                                                                       .add(thirdBoundedContext);
         final SubscriptionService service = builder.build();
         assertNotNull(service);
 
@@ -101,11 +101,11 @@ public class SubscriptionServiceShould {
         final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newSimpleStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .addBoundedContext(firstBoundedContext)
-                                                                       .addBoundedContext(secondBoundedContext)
-                                                                       .addBoundedContext(thirdBoundedContext)
-                                                                       .removeBoundedContext(secondBoundedContext)
-                                                                       .removeBoundedContext(firstBoundedContext);
+                                                                       .add(firstBoundedContext)
+                                                                       .add(secondBoundedContext)
+                                                                       .add(thirdBoundedContext)
+                                                                       .remove(secondBoundedContext)
+                                                                       .remove(firstBoundedContext);
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
@@ -132,7 +132,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
         final String type = boundedContext.getStand()
                                           .getExposedTypes()
@@ -165,7 +165,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
         final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
         // Causes NPE
@@ -181,7 +181,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
         final Target target = getProjectQueryTarget();
 
@@ -218,7 +218,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
         final MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
         // Causes NPE
@@ -234,7 +234,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
 
         final Target target = getProjectQueryTarget();
@@ -275,7 +275,7 @@ public class SubscriptionServiceShould {
         final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .addBoundedContext(boundedContext)
+                                                                           .add(boundedContext)
                                                                            .build();
         final Target target = getProjectQueryTarget();
         final Topic topic = Topic.newBuilder()

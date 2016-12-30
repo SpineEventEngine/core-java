@@ -89,6 +89,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private BoundedContext(Builder builder) {
+        super();
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = builder.storageFactory;
@@ -201,8 +202,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
     }
 
-    @SuppressWarnings("RefusedBequest") /* We ignore method from super because the default
-                                         implementation sets unimplemented status. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") /* We ignore method from super because the default
+                                                        implementation sets unimplemented status. */
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         final Message eventMsg = unpack(integrationEvent.getMessage());

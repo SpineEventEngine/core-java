@@ -1083,7 +1083,7 @@ public class StandShould {
 
         final TypeUrl actualTypeUrl = availableTypes.iterator()
                                                     .next();
-        final TypeUrl expectedTypeUrl = TypeUrl.of(expectedType);
+        final TypeUrl expectedTypeUrl = TypeUrl.from(expectedType);
         assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
     }
 

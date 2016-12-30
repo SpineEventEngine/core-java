@@ -27,7 +27,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -56,6 +56,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
+@SuppressWarnings("EmptyClass") // This class is a wrapper for enclosed so that we can write Given.EventMessage, etc.
 public class Given {
 
     /* package */ static class AggregateId {
@@ -164,12 +165,11 @@ public class Given {
 
     /* package */ static class Query {
 
-        private Query() {};
+        private Query() {}
 
         /* package */ static org.spine3.client.Query readAllProjects() {
 
-            final String typeName = TypeUrl.of(org.spine3.test.projection.Project.class)
-                                           .getTypeName();
+            final String typeName = TypeName.of(org.spine3.test.projection.Project.class);
             final Target queryTarget = Target.newBuilder()
                                              .setType(typeName)
                                              .setIncludeAll(true)

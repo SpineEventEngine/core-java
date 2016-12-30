@@ -85,7 +85,7 @@ public class QueryServiceShould {
         final QueryService.Builder builder = QueryService.newBuilder();
 
         for (BoundedContext context : boundedContexts) {
-            builder.addBoundedContext(context);
+            builder.add(context);
         }
 
         service = spy(builder.build());
@@ -122,8 +122,8 @@ public class QueryServiceShould {
         final BoundedContext boundedContext = newBoundedContext(TestStandFactory.create());
 
         final QueryService.Builder builder = QueryService.newBuilder();
-        builder.addBoundedContext(boundedContext)
-               .removeBoundedContext(boundedContext)
+        builder.add(boundedContext)
+               .remove(boundedContext)
                .build();
     }
 
