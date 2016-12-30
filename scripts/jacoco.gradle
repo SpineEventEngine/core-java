@@ -1,10 +1,32 @@
 // Apply this script to enable JaCoCo test report.
+//
+// This task aggregates the XML report results from all the subprojects.
+// Inspired by: https://gist.github.com/aalmiray/e6f54aa4b3803be0bcac
 
-jacocoTestReport {
+// Required to grab org.jacoco:org.jacoco.ant:0.7.7.201606060606 dependency.
+repositories {
+    mavenCentral()
+}
+
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories = files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
     reports {
-        xml.enabled = true
         html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+    onlyIf = {
+        true
+    }
+    doFirst {
+        executionData = files(executionData.findAll {
+            it.exists()
+        })
     }
 }
 
-check.dependsOn jacocoTestReport
+check.dependsOn jacocoRootReport

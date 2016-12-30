@@ -18,12 +18,7 @@ after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
   # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
-  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./client/build/reports/jacoco/test/jacocoTestReport.xml ./server/build/reports/jacoco/test/jacocoTestReport.xml ./testutil/build/reports/jacoco/test/jacocoTestReport.xml ./users/build/reports/jacoco/test/jacocoTestReport.xml ./values/build/reports/jacoco/test/jacocoTestReport.xml
-#  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./server/build/reports/jacoco/test/jacocoTestReport.xml
-#  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./testutil/build/reports/jacoco/test/jacocoTestReport.xml
-#  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./users/build/reports/jacoco/test/jacocoTestReport.xml
-#  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./values/build/reports/jacoco/test/jacocoTestReport.xml
-  # END of Codacy setup.
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 

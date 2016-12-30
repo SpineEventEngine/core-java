@@ -97,12 +97,10 @@ subprojects {
         testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
         generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
-        jacocoScript = "${rootDir}/scripts/jacoco.gradle"
     }
 
     apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
-    apply from: jacocoScript
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -202,5 +200,8 @@ idea.project.ipr {
                 .mapping.@vcs = 'Git'
     }
 }
+
+// Aggregated coverage report across all subprojects.
+apply from: "${rootDir}/scripts/jacoco.gradle"
 
 apply from: publishPlugin
