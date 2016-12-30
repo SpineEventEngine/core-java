@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.GenericDescriptor;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -99,7 +98,7 @@ public class Messages {
         try {
             result = JsonPrinter.instance().print(message);
         } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
+            throw new UnknownTypeException(e);
         }
         checkState(result != null);
         return result;

@@ -38,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * A server-side object with an identity.
@@ -132,7 +131,7 @@ public abstract class Entity<I, S extends Message> {
             final S state = constructor.newInstance();
             return state;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
     }
 
