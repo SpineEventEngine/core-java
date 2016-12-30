@@ -22,7 +22,6 @@ package org.spine3.base;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
@@ -39,7 +38,6 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.isBetween;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -281,17 +279,7 @@ public class Events {
         if (any == null) {
             return Optional.absent();
         }
-        final E result = unpack(enrichmentClass, any);
+        final E result = AnyPacker.unpack(any);
         return Optional.fromNullable(result);
-    }
-
-    private static <T extends Message> T unpack(Class<T> clazz, Any any) {
-        final T result;
-        try {
-            result = any.unpack(clazz);
-            return result;
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
     }
 }
