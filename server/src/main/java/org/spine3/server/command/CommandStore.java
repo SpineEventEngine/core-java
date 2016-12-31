@@ -60,7 +60,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command) {
-        checkIsOpened();
+        checkNotClosed();
         storage.store(command);
     }
 
@@ -72,7 +72,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, Error error) {
-        checkIsOpened();
+        checkNotClosed();
         storage.store(command, error);
     }
 
@@ -84,7 +84,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, Exception exception) {
-        checkIsOpened();
+        checkNotClosed();
         storage.store(command, Errors.fromException(exception));
     }
 
@@ -107,7 +107,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, CommandStatus status) {
-        checkIsOpened();
+        checkNotClosed();
         storage.store(command, status);
     }
 
@@ -119,7 +119,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public Iterator<Command> iterator(CommandStatus status) {
-        checkIsOpened();
+        checkNotClosed();
         final Iterator<Command> commands = storage.iterator(status);
         return commands;
     }
@@ -131,7 +131,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void setCommandStatusOk(CommandId commandId) {
-        checkIsOpened();
+        checkNotClosed();
         storage.setOkStatus(commandId);
     }
 
@@ -143,7 +143,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void updateStatus(CommandId commandId, Exception exception) {
-        checkIsOpened();
+        checkNotClosed();
         storage.updateStatus(commandId, Errors.fromException(exception));
     }
 
@@ -155,7 +155,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void updateStatus(CommandId commandId, Error error) {
-        checkIsOpened();
+        checkNotClosed();
         storage.updateStatus(commandId, error);
     }
 
@@ -167,7 +167,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void updateStatus(CommandId commandId, Failure failure) {
-        checkIsOpened();
+        checkNotClosed();
         storage.updateStatus(commandId, failure);
     }
 
@@ -189,7 +189,7 @@ public class CommandStore implements AutoCloseable {
         return isClosed;
     }
 
-    private void checkIsOpened() {
+    private void checkNotClosed() {
         checkState(isOpen(), "The command store is closed.");
     }
 }
