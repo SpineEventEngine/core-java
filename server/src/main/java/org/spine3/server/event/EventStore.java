@@ -294,16 +294,20 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    /** gRPC service over the locally running implementation. */
+    /**
+     * gRPC service over the locally running implementation.
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        /* as we override default implementation with `unimplemented` status. */
     private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
         private final LocalImpl eventStore;
 
         private GrpcService(LocalImpl eventStore) {
+            super();
             this.eventStore = eventStore;
         }
 
-        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void append(Event request, StreamObserver<Response> responseObserver) {
             try {
@@ -315,7 +319,6 @@ public abstract class EventStore implements AutoCloseable {
             }
         }
 
-        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
             eventStore.read(request, responseObserver);
