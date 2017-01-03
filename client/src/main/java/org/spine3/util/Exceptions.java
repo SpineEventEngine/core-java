@@ -76,22 +76,12 @@ public class Exceptions {
     }
 
     /**
-     * Sets a throwable as the cause of a {@link RuntimeException} and throws it.
+     * Sets a throwable's cause as the cause of a {@link IllegalStateException} and throws it.
      *
      * @param throwable to wrap
      * @return always throws an exception, the return type is for convenience
      */
-    public static RuntimeException wrapped(Throwable throwable) {
-        throw new RuntimeException(throwable);
-    }
-
-    /**
-     * Sets a throwable's cause as the cause of a {@link RuntimeException} and throws it.
-     *
-     * @param throwable to wrap
-     * @return always throws an exception, the return type is for convenience
-     */
-    public static RuntimeException wrappedCause(Throwable throwable) {
-        throw wrapped(throwable.getCause());
+    public static IllegalStateException wrappedCause(Throwable throwable) {
+        throw new IllegalStateException(throwable.getCause());
     }
 }

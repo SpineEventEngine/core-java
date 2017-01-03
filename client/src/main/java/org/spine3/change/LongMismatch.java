@@ -20,12 +20,12 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@code long} values in {@link ValueMismatch}es.
@@ -75,7 +75,6 @@ public class LongMismatch {
      */
     public static ValueMismatch unexpectedValue(long expected, long actual, long newValue, int version) {
         checkNotNullOrEqual(expected, actual);
-
         return of(expected, actual, newValue, version);
     }
     
@@ -91,19 +90,19 @@ public class LongMismatch {
         return builder.build();
     }
 
+    private static long unpacked(Any any) {
+        final Int64Value unpacked = unpack(any, Int64Value.class);
+        return unpacked.getValue();
+    }
+
     /**
      * Obtains expected long value from the passed mismatch.
      *
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackExpected(ValueMismatch mismatch) {
-        try {
-            final Int64Value result = mismatch.getExpected()
-                                              .unpack(Int64Value.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
     }
 
     /**
@@ -112,13 +111,8 @@ public class LongMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackActual(ValueMismatch mismatch) {
-        try {
-            final Int64Value result = mismatch.getActual()
-                                              .unpack(Int64Value.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
     }
 
     /**
@@ -127,12 +121,7 @@ public class LongMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackNewValue(ValueMismatch mismatch) {
-        try {
-            final Int64Value result = mismatch.getNewValue()
-                                              .unpack(Int64Value.class);
-            return result.getValue();
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
     }
 }

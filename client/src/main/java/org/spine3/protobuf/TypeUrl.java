@@ -37,7 +37,6 @@ import org.spine3.type.StringTypeValue;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -142,7 +141,8 @@ public final class TypeUrl extends StringTypeValue {
     private static TypeUrl ofTypeUrl(String typeUrl) {
         final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
         if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            throw wrapped(new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
+            throw new IllegalArgumentException(
+                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
         }
         return create(parts[0], parts[1]);
     }

@@ -17,48 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.protobuf.error;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * Exception that is thrown when unsupported message is obtained
- * or in case when there is no class for given Protobuf message.
+ * Exception thrown when the content of {@link Any} does not match one we expect
+ * when unpacking.
  *
- * @author Mikhail Melnik
+ * <p>Typically this exception wraps {@link InvalidProtocolBufferException} thrown
+ * in unsuccessful call of {@link Any#unpack(Class)}.
+ *
+ * @author Alexander Yevsyukov
  */
-public class UnknownTypeException extends RuntimeException {
+public class UnexpectedTypeException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String ERR_MSG = "No Java class found for the Protobuf message of type: ";
-
-    /**
-     * Creates a new instance with the type name.
-     *
-     * @param typeName the unknown type
-     */
-    public UnknownTypeException(String typeName) {
-        super(ERR_MSG + typeName);
-    }
-
-    /**
-     * Creates a new instance with the type name and the cause.
-     *
-     * @param typeName the unknown type
-     * @param cause the exception cause
-     */
-    public UnknownTypeException(String typeName, Throwable cause) {
-        super(ERR_MSG + typeName, cause);
-    }
-
-    /**
-     * Creates a new instance when only the cause is known.
-     *
-     * <p>Use this constructor when propagating {@link InvalidProtocolBufferException}
-     * without knowing which type caused the exception (e.g. when calling {@code JsonFormat.print()}.
-     */
-    public UnknownTypeException(Throwable cause) {
+    public UnexpectedTypeException(Throwable cause) {
         super(cause);
     }
 }

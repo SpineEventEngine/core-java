@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.util.Exceptions.wrapped;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class HandlerMethodShould {
@@ -153,7 +152,7 @@ public class HandlerMethodShould {
             try {
                 method = clazz.getMethod("on", StringValue.class, EventContext.class);
             } catch (NoSuchMethodException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
             return method;
         }
@@ -165,7 +164,7 @@ public class HandlerMethodShould {
                 //noinspection DuplicateStringLiteralInspection
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
             } catch (NoSuchMethodException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
             return method;
         }

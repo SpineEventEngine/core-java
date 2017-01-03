@@ -33,7 +33,6 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -112,13 +111,7 @@ public abstract class HandlerMethod<C extends Message> {
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
-            throw wrapped(e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
-                throw (Error) e.getCause();
-            }
-            throw e;
+            throw new IllegalStateException(e);
         }
     }
 
