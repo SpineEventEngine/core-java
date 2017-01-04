@@ -3,16 +3,75 @@
 // This task aggregates the XML report results from all the subprojects.
 // Inspired by: https://gist.github.com/aalmiray/e6f54aa4b3803be0bcac
 
-// Required to grab org.jacoco:org.jacoco.ant:0.7.7.201606060606 dependency.
+// Required to grab dependencies for `jacocoRootReport` task.
 repositories {
     mavenCentral()
 }
 
+FileCollection filterOutGenerated(final FileCollection files) {
+    return files.filter {
+        !it.absolutePath.contains("generated")
+    }
+}
+
+FileCollection filterOnlyGenerated(final FileCollection files) {
+    return files.filter {
+        it.absolutePath.contains("generated")
+    }
+}
+
+String parseClassName(final File file, final String sourceFolderName, final String extension) {
+
+    final def index = file.absolutePath.indexOf(sourceFolderName)
+    if(index > 0) {
+        def filePathInFolder = file.absolutePath.substring(index + sourceFolderName.length())
+        if(filePathInFolder.endsWith(extension)) {
+            filePathInFolder = filePathInFolder.substring(0, filePathInFolder.length() - extension.length())
+        }
+        final def className = filePathInFolder.replace('/', '.')
+        return className
+    } else {
+        return ""
+    }
+}
+
+task filterTest {
+
+    final def generatedSourceFiles = filterOnlyGenerated(files(subprojects.sourceSets.main.java.srcDirs));
+
+    final def generatedClassNames = generatedSourceFiles.collect { final folder ->
+
+        def files = folder.listFiles()
+        files.collect {file ->
+            final def name = parseClassName(file, "java/", ".java")
+            println("Parsed: ${name}")
+        }
+    }
+    final def filtered = filterOutGenerated(files(subprojects.sourceSets.main.output))
+    filtered.each { final outputFolder ->
+        println(" ++ Folder : ${outputFolder.absolutePath}")
+        final def classFiles = outputFolder.listFiles()
+
+
+        final def generatedClassFiles = classFiles.findAll {
+            final def className = parseClassName(it, "main/", ".class")
+            return generatedClassNames.contains(className)
+        }
+        generatedClassFiles.each { final file ->
+            println("    -- ${file.absolutePath}");
+        }
+    }
+
+}
+
+
+
 task jacocoRootReport(type: JacocoReport) {
+
     dependsOn = subprojects.test
-    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories = files(subprojects.sourceSets.main.output)
+    additionalSourceDirs = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
+    sourceDirectories = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
+    classDirectories = filterOutGenerated(files(subprojects.sourceSets.main.output))
     executionData = files(subprojects.jacocoTestReport.executionData)
     reports {
         html.enabled = true
