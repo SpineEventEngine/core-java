@@ -20,6 +20,7 @@
 
 package org.spine3.server.stand;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -46,6 +47,7 @@ import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -68,9 +70,10 @@ import java.util.concurrent.Executors;
             super(boundedContext);
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        protected ProjectId getProjectionId(Message event, EventContext context) {
-            return ProjectId.newBuilder().setId(PROJECT_UUID).build();
+        protected Set<ProjectId> getProjectionIds(Message event, EventContext context) {
+            return ImmutableSet.of(ProjectId.newBuilder().setId(PROJECT_UUID).build());
         }
     }
 

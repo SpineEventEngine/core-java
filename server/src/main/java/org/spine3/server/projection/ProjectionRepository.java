@@ -203,17 +203,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Obtains the ID of the event producer from the passed event context and
-     * casts it to the type of index used by this repository.
+     * Obtains the set of IDs of projections to which apply the passed event.
+     *
+     * <p>The default implementation obtains the ID of the event producer from the
+     * passed event context and casts it to the type of index used by this repository.
      *
      * @param event the event message. This parameter is not used by default implementation.
      *              Override to provide custom logic of ID generation.
      * @param context the event context
      */
     @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
-    protected I getProjectionId(Message event, EventContext context) {
+    protected Set<I> getProjectionIds(Message event, EventContext context) {
         final I id = Events.getProducer(context);
-        return id;
+        return ImmutableSet.of(id);
     }
 
     /**
@@ -274,7 +276,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /* package */ void internalDispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
-        final I id = getProjectionId(eventMessage, context);
+        final Set<I> ids = getProjectionIds(eventMessage, context);
+        for (I id : ids) {
+            handleForProjection(id, eventMessage, context);
+        }
+    }
+
+    private void handleForProjection(I id, Message eventMessage, EventContext context) {
         final P projection = load(id);
         projection.handle(eventMessage, context);
         store(projection);
