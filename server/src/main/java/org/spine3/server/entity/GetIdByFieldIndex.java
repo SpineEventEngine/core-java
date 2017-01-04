@@ -56,7 +56,7 @@ public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
      * @throws ClassCastException if the field type is invalid
      */
     @Override
-    public I getId(M message, C context) throws MissingEntityIdException {
+    public I apply(M message, C context) throws MissingEntityIdException {
         @SuppressWarnings("unchecked") // we expect that the field is of this type
         final I id = (I) idField.getValue(message);
         return id;
