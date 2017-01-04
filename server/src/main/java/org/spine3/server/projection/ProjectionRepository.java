@@ -226,6 +226,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @param id the ID of the projection to load
      * @return loaded or created projection instance
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // we do call it, but IDEA somehow doesn't get it because
+        // the signature of the parent class uses another letter for the generic type.
     @Nonnull
     @Override
     public P load(I id) {
