@@ -423,6 +423,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
         private final Map<EventClass, IdSetFunction<I, Message, EventContext>> map = Maps.newHashMap();
 
+        /** The function used when there's no matching entry in the map. */
         private final IdSetFunction<I, Message, EventContext> defaultFunction = new DefaultIdSetFunction<>();
 
         private <E extends Message> void put(IdSetFunction<I, E, EventContext> func) {
