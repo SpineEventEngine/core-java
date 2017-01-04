@@ -67,6 +67,7 @@ import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.testdata.TestEventBusFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -753,14 +754,14 @@ public class CommandBusShould {
         }
 
         // Always return an empty set of command classes forwarded by this repository.
-        @SuppressWarnings("RefusedBequest")
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public Set<CommandClass> getCommandClasses() {
             return newHashSet();
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }
@@ -878,17 +879,17 @@ public class CommandBusShould {
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
+        @Nonnull
         private final Throwable throwable;
 
-        protected ThrowingCreateProjectHandler(Throwable throwable) {
+        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
             super(newUuid(), eventBus);
             this.throwable = throwable;
         }
 
         @Assign
-        @SuppressWarnings("unused")
+        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
         public ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
-            //noinspection ProhibitedExceptionThrown
             throw throwable;
         }
     }
