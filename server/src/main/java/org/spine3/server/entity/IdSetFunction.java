@@ -36,5 +36,12 @@ import java.util.Set;
  */
 public interface IdSetFunction<I, M extends Message, C extends Message> {
 
+    /**
+     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     *
+     * @param message an event or a command message
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return a set of entity identifiers
+     */
     Set<I> apply(M message, C context);
 }
