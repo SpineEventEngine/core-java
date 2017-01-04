@@ -21,6 +21,7 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -34,10 +35,12 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.IdSetFunction;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.reflect.Classes;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -46,6 +49,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -91,7 +95,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /** An instance of {@link StandFunnel} to be informed about state updates */
     private final StandFunnel standFunnel;
 
+    /** If {@code true} the projection will {@link #catchUp()} after initialization. */
     private final boolean catchUpAfterStorageInit;
+
+    private final IdSetFunctions<I> idSetFunctions = new IdSetFunctions<>();
 
     /**
      * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
@@ -144,6 +151,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.getRecordStorage();
         return projectionStorage;
+    }
+
+    /**
+     * Adds {@code IdSetFunction} for the repository.
+     *
+     * @param func the function instance
+     * @param <E> the type of the event message handled by the function
+     */
+    public <E extends Message> void addIdSetFunction(IdSetFunction<I, E, EventContext> func) {
+        idSetFunctions.put(func);
+    }
+
+    public <E extends Message> void removeIdSetFunction(IdSetFunction<I, E, EventContext> func) {
+        idSetFunctions.remove(func);
     }
 
     /** {@inheritDoc} */
@@ -214,8 +235,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
     protected Set<I> getProjectionIds(Message event, EventContext context) {
-        final I id = Events.getProducer(context);
-        return ImmutableSet.of(id);
+        return idSetFunctions.findAndApply(event, context);
     }
 
     /**
@@ -348,8 +368,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * The stream observer passed to Event Store, which passes obtained events
-     * to the associated Projection Repository.
+     * The stream observer which redirects events from {@code EventStore} to
+     * the associated {@code ProjectionRepository}.
      */
     private static class EventStreamObserver implements StreamObserver<Event> {
 
@@ -376,6 +396,59 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
                 final Class<? extends ProjectionRepository> repositoryClass = projectionRepository.getClass();
                 log().info("{} catch-up complete", repositoryClass.getName());
             }
+        }
+    }
+
+    /**
+     * The {@code IdSetFunction} that obtains event producer ID from an {@code EventContext}
+     * and returns it as a sole element of the {@code ImmutableSet}.
+     *
+     * @param <I> the type of the project IDs managed by the repository
+     */
+    private static class DefaultIdSetFunction<I> implements IdSetFunction<I, Message, EventContext> {
+        @Override
+        public Set<I> apply(Message message, EventContext context) {
+            final I id = Events.getProducer(context);
+            return ImmutableSet.of(id);
+        }
+    }
+
+    /**
+     * Helper class for managing {@link IdSetFunction}s associated with the projection repository.
+     *
+     * @param <I> the type of the projection IDs of this repository
+     */
+    private static class IdSetFunctions<I> {
+
+        /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
+        private final Map<EventClass, IdSetFunction<I, Message, EventContext>> map = Maps.newHashMap();
+
+        private final IdSetFunction<I, Message, EventContext> defaultFunction = new DefaultIdSetFunction<>();
+
+        private <E extends Message> void put(IdSetFunction<I, E, EventContext> func) {
+            final EventClass eventClass = getEventClass(func);
+            map.put(eventClass, (IdSetFunction<I, Message, EventContext>) func);
+        }
+
+        private <E extends Message> void remove(IdSetFunction<I, E, EventContext> func) {
+            final EventClass eventClass = getEventClass(func);
+            map.remove(eventClass);
+        }
+
+        private <E extends Message> EventClass getEventClass(IdSetFunction<I, E, EventContext> func) {
+            Class<E> clazz = Classes.getGenericParameterType(func.getClass(), 1);
+            return EventClass.of(clazz);
+        }
+
+        private Set<I> findAndApply(Message event, EventContext context) {
+            final EventClass eventClass = EventClass.of(event);
+            final IdSetFunction<I, Message, EventContext> func = map.get(eventClass);
+            if (func != null) {
+                final Set<I> result = func.apply(event, context);
+                return result;
+            }
+
+            return defaultFunction.apply(event, context);
         }
     }
 }
