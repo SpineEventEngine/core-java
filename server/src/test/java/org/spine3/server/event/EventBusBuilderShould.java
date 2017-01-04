@@ -23,6 +23,7 @@ package org.spine3.server.event;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Event;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -66,7 +67,8 @@ public class EventBusBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Executor() {
-        EventBus.newBuilder().setExecutor(Tests.<Executor>nullRef());
+        EventBus.newBuilder()
+                .setExecutor(Tests.<Executor>nullRef());
     }
 
     @Test
@@ -93,15 +95,39 @@ public class EventBusBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void require_set_EventStore() {
-        EventBus.newBuilder().build();
+        EventBus.newBuilder()
+                .build();
     }
 
     @Test
-    public void sets_directExector_if_not_set_explicitly() {
+    public void return_set_DispatcherEventPropagator() {
+        // Create a custom event propagator to differ from the default one.
+        final DispatcherEventPropagator propagator = new DispatcherEventPropagator() {
+            @Override
+            public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
+                return true;
+            }
+        };
+        assertEquals(propagator, EventBus.newBuilder()
+                                         .setDispatcherEventPropagator(propagator)
+                                         .getDispatcherEventPropagator());
+    }
+
+    @Test
+    public void set_directExector_if_not_set_explicitly() {
         assertEquals(MoreExecutors.directExecutor(), EventBus.newBuilder()
                                                              .setEventStore(eventStore)
                                                              .build()
                                                              .getExecutor());
+    }
+
+    @Test
+    public void set_direct_dispatcher_event_propagator_if_not_set_explicitly() {
+        final DispatcherEventPropagator actualValue = EventBus.newBuilder()
+                                                              .setEventStore(eventStore)
+                                                              .build()
+                                                              .getDispatcherEventPropagator();
+        assertEquals(DispatcherEventPropagator.directPropagator(), actualValue);
     }
 
     @Test
@@ -114,7 +140,9 @@ public class EventBusBuilderShould {
 
     @Test
     public void accept_null_Enricher() {
-        assertNull(EventBus.newBuilder().setEnricher(Tests.<EventEnricher>nullRef()).getEnricher());
+        assertNull(EventBus.newBuilder()
+                           .setEnricher(Tests.<EventEnricher>nullRef())
+                           .getEnricher());
     }
 
     @Test

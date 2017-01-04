@@ -1,0 +1,153 @@
+/*
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package org.spine3.server.event;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.MoreExecutors;
+import org.spine3.SPI;
+import org.spine3.base.Event;
+import org.spine3.server.type.EventClass;
+
+import javax.annotation.Nullable;
+import java.util.Set;
+import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Propagates events from the {@link EventBus} to the matching {@link EventDispatcher}s.
+ *
+ * @author Alex Tymchenko
+ */
+@SPI
+@SuppressWarnings("WeakerAccess")   // Part of API.
+public abstract class DispatcherEventPropagator extends EventPropagator {
+
+    /**
+     * A pre-defined instance of the {@code DispatcherEventPropagator}, which does not postpone any event dispatching
+     * and uses {@link MoreExecutors#directExecutor()} for operation.
+     */
+    private static final DispatcherEventPropagator DIRECT_EXECUTOR = new DispatcherEventPropagator() {
+        @Override
+        public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
+            return false;
+        }
+    };
+
+    private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
+
+    @SuppressWarnings({"WeakerAccess", "unused"})   // Part of API.
+    protected DispatcherEventPropagator(Executor delegate) {
+        super(delegate);
+    }
+
+    @SuppressWarnings("WeakerAccess")   // Part of API.
+    protected DispatcherEventPropagator() {
+        super();
+    }
+
+    /**
+     * Postpones the event dispatching if applicable to the given {@code event} and {@code dispatcher}.
+     *
+     * <p>This method should be implemented in descendants to define how the event dispatching is postponed.
+     *
+     * @param event      the event to potentially postpone
+     * @param dispatcher the target dispatcher for the event
+     * @return {@code true}, if the event dispatching should be postponed, {@code false} otherwise.
+     */
+    @SuppressWarnings("WeakerAccess")   // Part of API.
+    public abstract boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher);
+
+    /**
+     * Dispatches the event immediately.
+     *
+     * <p>Typically used to dispatch the previously postponed events.
+     *
+     * <p>As the execution context may be lost since then, this method uses to specified dispatcher {@code class}
+     * to choose which {@link EventDispatcher#dispatch(Event)} should be invoked.
+     *
+     * @param event           the event to dispatch
+     * @param dispatcherClass the class of the target dispatcher
+     */
+    @SuppressWarnings("WeakerAccess")   // Part of API.
+    public void dispatchNow(final Event event, final Class<? extends EventDispatcher> dispatcherClass) {
+        final Set<EventDispatcher> dispatchers = dispatchersFor(event);
+        final Iterable<EventDispatcher> matching = Iterables.filter(dispatchers, matchClass(dispatcherClass));
+
+        for (final EventDispatcher eventDispatcher : matching) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    eventDispatcher.dispatch(event);
+                }
+            });
+        }
+    }
+
+    /**
+     * Passes the event to the matching dispatchers and invokes {@link EventDispatcher#dispatch(Event)} using
+     * the {@code executor} configured for this instance of {@code DispatcherEventPropagator}.
+     *
+     * <p>The dispatching of the event to each of the dispatchers may be postponed according to
+     * {@link #maybePostponeDispatch(Event, EventDispatcher)} invocation result. In case of {@code false},
+     *
+     * @param event the event to dispatch.
+     */
+    /* package */ void dispatch(Event event) {
+        final Set<EventDispatcher> eventDispatchers = dispatchersFor(event);
+        for (EventDispatcher dispatcher : eventDispatchers) {
+            final boolean shouldPostpone = maybePostponeDispatch(event, dispatcher);
+            if (!shouldPostpone) {
+                dispatchNow(event, dispatcher.getClass());
+            }
+        }
+    }
+
+    /**
+     * Obtains a pre-defined instance of the {@code DispatcherEventPropagator}, which does NOT postpone any event dispatching
+     * and uses {@link MoreExecutors#directExecutor()} for operation.
+     *
+     * @return the pre-configured default dispatcher.
+     */
+    public static DispatcherEventPropagator directPropagator() {
+        return DIRECT_EXECUTOR;
+    }
+
+    /* package */ void setDispatcherProvider(Function<EventClass, Set<EventDispatcher>> dispatcherProvider) {
+        this.dispatcherProvider = dispatcherProvider;
+    }
+
+    private Set<EventDispatcher> dispatchersFor(Event event) {
+        final EventClass eventClass = EventClass.of(event);
+        return dispatcherProvider.apply(eventClass);
+    }
+
+    private static Predicate<EventDispatcher> matchClass(final Class<? extends EventDispatcher> dispatcherClass) {
+        return new Predicate<EventDispatcher>() {
+            @Override
+            public boolean apply(@Nullable EventDispatcher input) {
+                checkNotNull(input);
+                return dispatcherClass.equals(input.getClass());
+            }
+        };
+    }
+}

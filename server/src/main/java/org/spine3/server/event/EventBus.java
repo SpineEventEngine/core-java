@@ -20,6 +20,7 @@
 package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -78,9 +79,9 @@ import static org.spine3.base.Events.getMessage;
  *
  * <p>If there is no subscriber for the posted event, the fact is logged as warning, with no further processing.
  *
- * @see Subscribe
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
+ * @see Subscribe
  */
 public class EventBus implements AutoCloseable {
 
@@ -102,6 +103,9 @@ public class EventBus implements AutoCloseable {
     /** The executor for invoking subscriber methods. */
     private final Executor executor;
 
+    /** The executor for calling the dispatchers. */
+    private final DispatcherEventPropagator dispatcherEventPropagator;
+
     /** The validator for events posted to the bus. */
     private final MessageValidator eventValidator;
 
@@ -117,6 +121,24 @@ public class EventBus implements AutoCloseable {
         this.executor = builder.executor;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
+        this.dispatcherEventPropagator = builder.dispatcherEventPropagator;
+        injectDispatcherProvider();
+    }
+
+    /**
+     * Sets up the {@code DispatcherProvider} with an ability to obtain matching {@link EventDispatcher}s
+     * by a given {@link EventClass} instance.
+     */
+    private void injectDispatcherProvider() {
+        dispatcherEventPropagator.setDispatcherProvider(new Function<EventClass, Set<EventDispatcher>>() {
+            @Nullable
+            @Override
+            public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
+                checkNotNull(eventClass);
+                final Set<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
+                return dispatchers;
+            }
+        });
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -138,6 +160,12 @@ public class EventBus implements AutoCloseable {
     @Nullable
     /* package */ EventEnricher getEnricher() {
         return enricher;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    /* package */ DispatcherEventPropagator getDispatcherEventPropagator() {
+        return dispatcherEventPropagator;
     }
 
     /**
@@ -212,14 +240,14 @@ public class EventBus implements AutoCloseable {
         final EventContext context = enriched.getContext();
         final int subscribersInvoked = invokeSubscribers(message, context);
 
-        if(dispatchersCalled == 0 && subscribersInvoked == 0) {
+        if (dispatchersCalled == 0 && subscribersInvoked == 0) {
             handleDeadEvent(event);
         }
     }
 
     private Event enrich(Event event) {
         if (enricher == null ||
-            !enricher.canBeEnriched(event)) {
+                !enricher.canBeEnriched(event)) {
             return event;
         }
         final Event enriched = enricher.enrich(event);
@@ -233,14 +261,11 @@ public class EventBus implements AutoCloseable {
      * @return the number of the dispatchers called, or {@code 0} if there weren't any.
      */
     private int callDispatchers(Event event) {
-        int dispatchersCalled = 0;
         final EventClass eventClass = EventClass.of(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
-        for (EventDispatcher dispatcher : dispatchers) {
-            dispatcher.dispatch(event);
-            dispatchersCalled++;
-        }
-        return dispatchersCalled;
+
+        dispatcherEventPropagator.dispatch(event);
+        return dispatchers.size();
     }
 
     /**
@@ -251,13 +276,11 @@ public class EventBus implements AutoCloseable {
      * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
      */
     private int invokeSubscribers(Message event, EventContext context) {
-        int subscribersInvoked = 0;
         final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(EventClass.of(event));
         for (EventSubscriber subscriber : subscribers) {
             invokeSubscriber(subscriber, event, context);
-            subscribersInvoked++;
         }
-        return subscribersInvoked;
+        return subscribers.size();
     }
 
     private void store(Event event) {
@@ -284,9 +307,9 @@ public class EventBus implements AutoCloseable {
      * this {@code EventBus}.
      * The message also must satisfy validation constraints defined in its Protobuf type.
      *
-     * @param event the event message to check
+     * @param event            the event message to check
      * @param responseObserver the observer to obtain the result of the call;
-     *          {@link StreamObserver#onError(Throwable)} is called if an event is unsupported or invalid
+     *                         {@link StreamObserver#onError(Throwable)} is called if an event is unsupported or invalid
      * @return {@code true} if event is supported and valid and can be posted, {@code false} otherwise
      */
     public boolean validate(Message event, StreamObserver<Response> responseObserver) {
@@ -315,12 +338,13 @@ public class EventBus implements AutoCloseable {
     }
 
     private static void handleDeadEvent(Message event) {
-        log().warn("No subscriber or dispatcher defined for the event class: " + event.getClass().getName());
+        log().warn("No subscriber or dispatcher defined for the event class: " + event.getClass()
+                                                                                      .getName());
     }
 
     private static void handleSubscriberException(InvocationTargetException e,
-            Message eventMessage,
-            EventContext eventContext) {
+                                                  Message eventMessage,
+                                                  EventContext eventContext) {
         log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
                     eventMessage, eventContext, e.getCause());
     }
@@ -343,6 +367,13 @@ public class EventBus implements AutoCloseable {
          * <p>If not set, a default value will be set by the builder.
          */
         private Executor executor;
+
+        /**
+         * Optional {@code DispatcherEventPropagator} for calling the dispatchers.
+         *
+         * <p>If not set, a default value will be set by the builder.
+         */
+        private DispatcherEventPropagator dispatcherEventPropagator;
 
         /**
          * Optional validator for events.
@@ -368,7 +399,7 @@ public class EventBus implements AutoCloseable {
 
         /**
          * Sets an {@code Executor} to be used for executing subscriber methods
-         * int the {@code EventBus} we build.
+         * in the {@code EventBus} we build.
          *
          * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
          */
@@ -380,6 +411,23 @@ public class EventBus implements AutoCloseable {
         @Nullable
         public Executor getExecutor() {
             return executor;
+        }
+
+        /**
+         * Sets an {@code DispatcherEventPropagator} to be used for passing the event to the target dispatchers
+         * in the {@code EventBus} we build.
+         *
+         * <p>If the {@code DispatcherEventPropagator} is not set, {@link DispatcherEventPropagator#directPropagator()}
+         * will be used.
+         */
+        public Builder setDispatcherEventPropagator(DispatcherEventPropagator executor) {
+            this.dispatcherEventPropagator = checkNotNull(executor);
+            return this;
+        }
+
+        @Nullable
+        public DispatcherEventPropagator getDispatcherEventPropagator() {
+            return dispatcherEventPropagator;
         }
 
         public Builder setEventValidator(MessageValidator eventValidator) {
@@ -414,6 +462,10 @@ public class EventBus implements AutoCloseable {
 
             if (executor == null) {
                 executor = MoreExecutors.directExecutor();
+            }
+
+            if (dispatcherEventPropagator == null) {
+                dispatcherEventPropagator = DispatcherEventPropagator.directPropagator();
             }
 
             if (eventValidator == null) {
