@@ -67,7 +67,6 @@ import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.testdata.TestEventBusFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -761,7 +760,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }

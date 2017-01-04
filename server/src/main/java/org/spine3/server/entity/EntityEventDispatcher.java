@@ -25,8 +25,6 @@ import org.spine3.base.EventContext;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nonnull;
-
 /**
  * Delivers events to handlers (which are supposed to be entities).
  *
@@ -36,11 +34,13 @@ import javax.annotation.Nonnull;
  */
 public interface EntityEventDispatcher<I> extends EventDispatcher {
 
+    //TODO:2017-01-04:alexander.yevsyukov: This should return IdSetFunction instead.
+    //TODO:2017-01-04:alexander.yevsyukov: Then make ProjectionRepository implement EntityEventDispatcher
     /**
      * Returns a function which can obtain an ID using a message of the passed class.
      *
      * @param eventClass a class of any event handled by the entity
      * @return an ID function
      */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass);
+    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
 }

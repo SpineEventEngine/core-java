@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
@@ -32,6 +33,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.IdSetFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -49,10 +51,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
@@ -74,6 +80,17 @@ public class ProjectionRepositoryShould
     private BoundedContext boundedContext;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
+
+    /**
+     * {@code IdSetFunction} used for testing add/get/remove.
+     */
+    private static final IdSetFunction<ProjectId, ProjectCreated, EventContext> idSetForCreateProject =
+            new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+        @Override
+        public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+            return newHashSet();
+        }
+    };
 
     @Before
     public void setUp() {
@@ -249,6 +266,48 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
+    @Test
+    public void use_id_set_function() {
+        final IdSetFunction<ProjectId, ProjectCreated, EventContext> delegateFn =
+                new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+                    @Override
+                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                        return newHashSet();
+                    }
+                };
+
+        final IdSetFunction<ProjectId, ProjectCreated, EventContext> idSetFunction = spy(delegateFn);
+        repository.addIdSetFunction(ProjectCreated.class, idSetFunction);
+
+        final Event event = Given.Event.projectCreated(ID);
+        repository.dispatch(event);
+
+        final ProjectCreated expectedEventMessage = Events.getMessage(event);
+        final EventContext context = event.getContext();
+        verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
+    }
+
+    @Test
+    public void obtain_id_set_function_after_put() {
+        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+
+        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> out = repository.getIdSetFunction(ProjectCreated.class);
+
+        assertTrue(out.isPresent());
+        //noinspection OptionalGetWithoutIsPresent
+        assertEquals(idSetForCreateProject, out.get());
+    }
+
+    @Test
+    public void remove_id_set_function_after_put() {
+        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+
+        repository.removeIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> out = repository.getIdSetFunction(ProjectCreated.class);
+
+        assertFalse(out.isPresent());
+    }
+
     @Override
     protected EntityRepository<ProjectId, TestProjection, Project> repository() {
         return repository;
@@ -354,4 +413,5 @@ public class ProjectionRepositoryShould
             super(boundedContext, false);
         }
     }
+
 }

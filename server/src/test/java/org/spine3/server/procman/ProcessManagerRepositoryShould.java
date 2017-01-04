@@ -59,7 +59,6 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -249,7 +248,7 @@ public class ProcessManagerRepositoryShould
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }
@@ -284,9 +283,9 @@ public class ProcessManagerRepositoryShould
             messagesDelivered.clear();
         }
 
-        // is overridden to make it accessible from tests
-        @Override
-        @SuppressWarnings("RefusedBequest")
+
+        @Override // is overridden to make it accessible from tests
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }

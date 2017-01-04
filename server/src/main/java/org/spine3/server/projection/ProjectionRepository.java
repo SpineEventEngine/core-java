@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
@@ -40,7 +41,6 @@ import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -156,15 +156,38 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /**
      * Adds {@code IdSetFunction} for the repository.
      *
+     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
+     * (derived from this class) to provide mapping between events to projection identifiers.
+     *
+     * <p>Such a mapping may be required when...
+     * <ul>
+     *     <li>An event should be matched to more than one projection.</li>
+     *     <li>The type of an event producer ID (stored in {@code EventContext}) differs from {@code <I>}.</li>
+     * </ul>
+     *
+     * <p>If there is no function for the class of the passed event message,
+     * the repository will use the event producer ID from an {@code EventContext} passed with the event message.
+     *
      * @param func the function instance
      * @param <E> the type of the event message handled by the function
      */
-    public <E extends Message> void addIdSetFunction(IdSetFunction<I, E, EventContext> func) {
-        idSetFunctions.put(func);
+    public <E extends Message> void addIdSetFunction(Class<E> eventClass,
+                                                     IdSetFunction<I, E, EventContext> func) {
+        idSetFunctions.put(eventClass, func);
     }
 
-    public <E extends Message> void removeIdSetFunction(IdSetFunction<I, E, EventContext> func) {
-        idSetFunctions.remove(func);
+    /**
+     * Removes {@code IdSetFunction} from the repository.
+     *
+     * @param eventClass the class of the event message
+     * @param <E> the type of the event message handled by the function we want to remove
+     */
+    public <E extends Message> void removeIdSetFunction(Class<E> eventClass) {
+        idSetFunctions.remove(eventClass);
+    }
+
+    public <E extends Message> Optional<IdSetFunction<I, E, EventContext>> getIdSetFunction(Class<E> eventClass) {
+        return idSetFunctions.get(eventClass);
     }
 
     /** {@inheritDoc} */
@@ -426,19 +449,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         /** The function used when there's no matching entry in the map. */
         private final IdSetFunction<I, Message, EventContext> defaultFunction = new DefaultIdSetFunction<>();
 
-        private <E extends Message> void put(IdSetFunction<I, E, EventContext> func) {
-            final EventClass eventClass = getEventClass(func);
-            map.put(eventClass, (IdSetFunction<I, Message, EventContext>) func);
-        }
-
-        private <E extends Message> void remove(IdSetFunction<I, E, EventContext> func) {
-            final EventClass eventClass = getEventClass(func);
-            map.remove(eventClass);
-        }
-
-        private <E extends Message> EventClass getEventClass(IdSetFunction<I, E, EventContext> func) {
-            Class<E> clazz = Classes.getGenericParameterType(func.getClass(), 1);
-            return EventClass.of(clazz);
+        private <E extends Message> void remove(Class<E> eventClass) {
+            final EventClass clazz = EventClass.of(eventClass);
+            map.remove(clazz);
         }
 
         private Set<I> findAndApply(Message event, EventContext context) {
@@ -449,7 +462,25 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
                 return result;
             }
 
-            return defaultFunction.apply(event, context);
+            final Set<I> result = defaultFunction.apply(event, context);
+            return result;
+        }
+
+        private <E extends Message> void put(Class<E> eventClass, IdSetFunction<I, E, EventContext> func) {
+            final EventClass clazz = EventClass.of(eventClass);
+
+            @SuppressWarnings("unchecked")    // since we want to store {@code IdSetFunction}s for various event types.
+            final IdSetFunction<I, Message, EventContext> casted = (IdSetFunction<I, Message, EventContext>) func;
+            map.put(clazz, casted);
+        }
+
+        private <E extends Message> Optional<IdSetFunction<I, E, EventContext>> get(Class<E> eventClass) {
+            final EventClass clazz = EventClass.of(eventClass);
+            final IdSetFunction<I, Message, EventContext> func = map.get(clazz);
+
+            @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
+            final IdSetFunction<I, E, EventContext> result = (IdSetFunction<I, E, EventContext>) func;
+            return Optional.fromNullable(result);
         }
     }
 }
