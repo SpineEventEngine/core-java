@@ -168,7 +168,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
+        final ProjectId actual = repository.getProjectionId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
         assertEquals(ID, actual);
     }
 

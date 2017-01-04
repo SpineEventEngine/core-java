@@ -69,7 +69,7 @@ import java.util.concurrent.Executors;
         }
 
         @Override
-        protected ProjectId getEntityId(Message event, EventContext context) {
+        protected ProjectId getProjectionId(Message event, EventContext context) {
             return ProjectId.newBuilder().setId(PROJECT_UUID).build();
         }
     }

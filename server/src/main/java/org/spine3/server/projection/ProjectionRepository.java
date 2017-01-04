@@ -211,7 +211,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @param context the event context
      */
     @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
-    protected I getEntityId(Message event, EventContext context) {
+    protected I getProjectionId(Message event, EventContext context) {
         final I id = Events.getProducer(context);
         return id;
     }
@@ -274,7 +274,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /* package */ void internalDispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
-        final I id = getEntityId(eventMessage, context);
+        final I id = getProjectionId(eventMessage, context);
         final P projection = load(id);
         projection.handle(eventMessage, context);
         store(projection);
@@ -286,7 +286,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         storage.writeLastHandledEventTime(eventTime);
     }
 
-    /** Updates projections from the event stream obtained from {@code EventStore}. */
+    /**
+     * Updates projections from the event stream obtained from {@code EventStore}.
+     */
     public void catchUp() {
         // Get the timestamp of the last event. This also ensures we have the storage.
         final Timestamp timestamp = projectionStorage().readLastHandledEventTime();
@@ -303,7 +305,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         eventStore.read(query, new EventStreamObserver(this));
     }
 
-    /** Obtains event filters for event classes handled by projections of this repository. */
+    /**
+     * Obtains event filters for event classes handled by projections of this repository.
+     */
     private Set<EventFilter> getEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getEventClasses();
@@ -315,7 +319,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return builder.build();
     }
 
-    /** Sets the repository online bypassing the catch-up from the {@code EventStore}. */
+    /**
+     * Sets the repository online bypassing the catch-up from the {@code EventStore}.
+     */
     public void setOnline() {
         setStatus(Status.ONLINE);
     }
