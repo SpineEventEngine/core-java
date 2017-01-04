@@ -90,7 +90,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
 
         CommandValidator.checkCommand(command);
 
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
+        final CommandStorageRecord record = newRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
     }
@@ -107,11 +107,12 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     public void store(Command command, Error error) {
         checkNotClosed();
         checkNotDefault(error);
+
         CommandId id = getId(command);
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, ERROR)
+        final CommandStorageRecord record = newRecordBuilder(command, ERROR)
                 .setError(error)
                 .setCommandId(idToString(id))
                 .build();
@@ -159,8 +160,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @return a storage record
      */
     @VisibleForTesting
-    /* package */ static CommandStorageRecord.Builder newCommandStorageRecordBuilder(Command command,
-                                                                                     CommandStatus status) {
+    /* package */ static CommandStorageRecord.Builder newRecordBuilder(Command command, CommandStatus status) {
         final CommandContext context = command.getContext();
 
         final CommandId commandId = context.getCommandId();
