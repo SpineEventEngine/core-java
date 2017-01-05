@@ -39,8 +39,8 @@ import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
@@ -136,8 +136,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest") /* We do not call super.createStorage() because we create a specific
-                                           type of a storage, not regular entity storage created in the parent. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        /* We do not call super.createStorage() because we create a specific type of a storage,
+           not a regular entity storage created in the parent. */
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
@@ -174,7 +175,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @Override
     @Nonnull
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     protected RecordStorage<I> recordStorage() {
         return checkStorage(recordStorage);
     }

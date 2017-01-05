@@ -21,7 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
@@ -32,6 +31,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -48,7 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
@@ -199,7 +199,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * <p>Field mask is applied according to
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported. All other filters are ignored.
+     * <p>At this point only {@link EntityIdFilter} is supported. All other filters are ignored.
      *
      * <p>Filtering by IDs set via {@code EntityIdFilter} is performed in the same way as by {@link #loadAll(Iterable)}.
      *
@@ -219,15 +219,12 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             @Nullable
             @Override
             public I apply(@Nullable EntityId input) {
-                Preconditions.checkNotNull(input);
+                checkNotNull(input);
                 final Any idAsAny = input.getId();
 
                 final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
                 final Class messageClass = toMessageClass(typeUrl);
-
-                final boolean classIsSame = expectedIdClass.equals(messageClass);
-                checkState(classIsSame,
-                           "Unexpected ID of type " + messageClass + " encountered. " + "Expected: " + expectedIdClass);
+                checkIdClass(messageClass);
 
                 final Message idAsMessage = unpack(idAsAny);
 
@@ -235,6 +232,15 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 @SuppressWarnings("unchecked")
                 final I id = (I) idAsMessage;
                 return id;
+            }
+
+            private void checkIdClass(Class messageClass) {
+                final boolean classIsSame = expectedIdClass.equals(messageClass);
+                if (!classIsSame) {
+                    final String errMsg = String.format("Unexpected ID class encountered: %s. Expected: %s",
+                                                        messageClass, expectedIdClass);
+                    throw new IllegalStateException(errMsg);
+                }
             }
         });
 
@@ -248,8 +254,10 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
     private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
         final E entity = create(id);
+        final Message unpacked = unpack(record.getState());
+        final TypeUrl entityStateType = getEntityStateType();
         @SuppressWarnings("unchecked")
-        final M state = (M) FieldMasks.applyMask(fieldMask, unpack(record.getState()), getEntityStateType());
+        final M state = (M) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
@@ -271,7 +279,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             @Nullable
             @Override
             public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
-                Preconditions.checkNotNull(input);
+                checkNotNull(input);
                 final E result = toEntity(input.getKey(), input.getValue());
                 return result;
             }
