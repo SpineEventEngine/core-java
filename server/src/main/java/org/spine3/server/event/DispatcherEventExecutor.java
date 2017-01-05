@@ -19,12 +19,12 @@
  */
 package org.spine3.server.event;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.SPI;
 import org.spine3.base.Event;
+import org.spine3.server.event.EventBus.DispatcherProvider;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nullable;
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherEventExecutor extends EventExecutor {
 
-    private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
+    private DispatcherProvider dispatcherProvider;
 
     /**
      * Creates an instance of event executor with an {@link Executor} used for event dispatching.
@@ -128,7 +128,7 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
     }
 
     /** Used by the instance of {@link EventBus} to inject the knowledge about up-to-date event dispatchers */
-    /* package */ void setDispatcherProvider(Function<EventClass, Set<EventDispatcher>> dispatcherProvider) {
+    /* package */ void setDispatcherProvider(DispatcherProvider dispatcherProvider) {
         this.dispatcherProvider = dispatcherProvider;
     }
 

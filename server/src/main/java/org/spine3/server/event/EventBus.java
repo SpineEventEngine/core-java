@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
@@ -126,11 +127,11 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Sets up the {@code DispatcherProvider} with an ability to obtain matching {@link EventDispatcher}s
-     * by a given {@link EventClass} instance.
+     * Sets up the {@code DispatcherEventExecutor} with an ability to obtain matching {@link EventDispatcher}s
+     * by a given {@link EventClass} instance according to the up-to-date state of the {@code dispatcherRegistry}.
      */
     private void injectDispatcherProvider() {
-        dispatcherEventExecutor.setDispatcherProvider(new Function<EventClass, Set<EventDispatcher>>() {
+        dispatcherEventExecutor.setDispatcherProvider(new DispatcherProvider() {
             @Nullable
             @Override
             public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
@@ -475,6 +476,17 @@ public class EventBus implements AutoCloseable {
             final EventBus result = new EventBus(this);
             return result;
         }
+    }
+
+    /**
+     * Instances of this type are used to inject the knowledge about current {@code EventDispatcher}s for
+     * a particular {@code EventClass} instance.
+     *
+     * <p> Such an approach is chosen in order to keep the {@link #dispatcherRegistry} private to the
+     * {@code EventBus}.
+     */
+    @Internal
+    /* package */ interface DispatcherProvider extends Function<EventClass, Set<EventDispatcher>> {
     }
 
     private enum LogSingleton {
