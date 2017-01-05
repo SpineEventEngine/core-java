@@ -247,16 +247,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
 
     /**
      * Obtains the set of IDs of projections to which apply the passed event.
-     *
-     * <p>The default implementation obtains the ID of the event producer from the
-     * passed event context and casts it to the type of index used by this repository.
-     *
-     * @param event the event message. This parameter is not used by default implementation.
-     *              Override to provide custom logic of ID generation.
-     * @param context the event context
      */
-    @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
-    protected Set<I> getProjectionIds(Message event, EventContext context) {
+    private Set<I> getProjectionIds(Message event, EventContext context) {
         return idSetFunctions.findAndApply(event, context);
     }
 
