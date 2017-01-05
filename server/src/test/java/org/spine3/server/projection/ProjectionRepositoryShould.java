@@ -287,15 +287,16 @@ public class ProjectionRepositoryShould
         verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // because the test checks that the function is present.
     @Test
     public void obtain_id_set_function_after_put() {
         repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
-        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> out = repository.getIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> func =
+                repository.getIdSetFunction(ProjectCreated.class);
 
-        assertTrue(out.isPresent());
-        //noinspection OptionalGetWithoutIsPresent
-        assertEquals(idSetForCreateProject, out.get());
+        assertTrue(func.isPresent());
+        assertEquals(idSetForCreateProject, func.get());
     }
 
     @Test

@@ -143,9 +143,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     @Override
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        /* We do not call super.createStorage() because we create a specific type of a storage,
-           not a regular entity storage created in the parent. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
+                       we create a specific type of a storage, not a regular entity storage created in the parent. */)
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
