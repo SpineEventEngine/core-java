@@ -42,17 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherEventExecutor extends EventExecutor {
 
-    /**
-     * A pre-defined instance of the {@code DispatcherEventExecutor}, which does not postpone any event dispatching
-     * and uses {@link MoreExecutors#directExecutor()} for operation.
-     */
-    private static final DispatcherEventExecutor DIRECT_EXECUTOR = new DispatcherEventExecutor() {
-        @Override
-        public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
-            return false;
-        }
-    };
-
     private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
 
     @SuppressWarnings({"WeakerAccess", "unused"})   // Part of API.
@@ -129,7 +118,7 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
      * @return the pre-configured default dispatcher.
      */
     public static DispatcherEventExecutor directExecutor() {
-        return DIRECT_EXECUTOR;
+        return PredefinedExecutors.DIRECT_EXECUTOR;
     }
 
     /* package */ void setDispatcherProvider(Function<EventClass, Set<EventDispatcher>> dispatcherProvider) {
@@ -147,6 +136,21 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
             public boolean apply(@Nullable EventDispatcher input) {
                 checkNotNull(input);
                 return dispatcherClass.equals(input.getClass());
+            }
+        };
+    }
+
+    /* Utility wrapper class for predefined executors designed to be constants */
+    private static class PredefinedExecutors {
+
+        /**
+         * A pre-defined instance of the {@code DispatcherEventExecutor}, which does not postpone any event dispatching
+         * and uses {@link MoreExecutors#directExecutor()} for operation.
+         */
+        private static final DispatcherEventExecutor DIRECT_EXECUTOR = new DispatcherEventExecutor() {
+            @Override
+            public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
+                return false;
             }
         };
     }
