@@ -34,7 +34,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Executes the will of {@link EventBus}  and delivers events to the matching {@link EventDispatcher}s.
+ * Executes the will of {@link EventBus} and delivers events to the matching {@link EventDispatcher}s.
  *
  * @author Alex Tymchenko
  */
@@ -117,6 +117,7 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
         return PredefinedExecutors.DIRECT_EXECUTOR;
     }
 
+    /** Used by the instance of {@link EventBus} to inject the knowledge about up-to-date event dispatchers */
     /* package */ void setDispatcherProvider(Function<EventClass, Set<EventDispatcher>> dispatcherProvider) {
         this.dispatcherProvider = dispatcherProvider;
     }
@@ -136,7 +137,7 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
         };
     }
 
-    /* Utility wrapper class for predefined executors designed to be constants */
+    /** Utility wrapper class for predefined executors designed to be constants */
     private static class PredefinedExecutors {
 
         /**
