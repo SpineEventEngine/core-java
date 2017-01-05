@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
-import org.spine3.protobuf.TypeUrl;
 
 import java.util.Set;
 
@@ -88,13 +87,5 @@ public final class EventClass extends MessageClass {
             builder.add(of(cls));
         }
         return builder.build();
-    }
-
-    /**
-     * Obtains a type URL corresponding to the event class.
-     */
-    public TypeUrl toTypeUrl() {
-        TypeUrl result = TypeUrl.of(value());
-        return result;
     }
 }

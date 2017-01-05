@@ -32,10 +32,9 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.entity.EntityEventDispatcher;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.DefaultIdSetEventFunction;
+import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
@@ -59,8 +58,8 @@ import static org.spine3.base.Commands.getMessage;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>, S extends Message>
-                          extends EntityRepository<I, P, S>
-                          implements CommandDispatcher, EntityEventDispatcher<I> {
+                extends EventDispatchingRepository<I, P, S>
+                implements CommandDispatcher {
 
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
 
@@ -72,7 +71,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromFirstMessageField());
     }
 
     @Override
@@ -143,17 +142,17 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      */
     @Override
     public void dispatch(Event event) throws IllegalArgumentException {
-        final Message message = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        final EventClass eventClass = EventClass.of(message);
-        checkEventClass(eventClass);
-        final IdFunction idFunction = getIdFunction(eventClass);
-        // All ID functions are supposed to return IDs of this type.
-        @SuppressWarnings("unchecked")
-        final I id = (I) idFunction.apply(message, context);
+        final Message eventMessage = Events.getMessage(event);
+        checkEventClass(EventClass.of(eventMessage));
+
+        doDispatch(event);
+    }
+
+    @Override
+    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P manager = load(id);
         try {
-            manager.dispatchEvent(message, context);
+            manager.dispatchEvent(eventMessage, context);
             store(manager);
         } catch (InvocationTargetException e) {
             log().error("Error during dispatching event", e);
