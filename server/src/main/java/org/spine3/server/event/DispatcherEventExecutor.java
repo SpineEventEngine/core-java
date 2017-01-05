@@ -44,10 +44,20 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
 
     private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
 
+    /**
+     * Creates an instance of event executor with an {@link Executor} used for event dispatching.
+     *
+     * @param delegate the instance of {@code Executor} used to dispatch events.
+     */
     protected DispatcherEventExecutor(Executor delegate) {
         super(delegate);
     }
 
+    /**
+     * Creates an instance of event executor with a default {@link Executor}.
+     *
+     * @see EventExecutor#EventExecutor()
+     */
     protected DispatcherEventExecutor() {
         super();
     }

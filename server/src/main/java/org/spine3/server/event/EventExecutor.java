@@ -35,10 +35,17 @@ import java.util.concurrent.Executor;
 
     private final Executor delegate;
 
+    /**
+     * Creates an instance of event executor with a specified {@link Executor} used for the processing.
+     */
+
     protected EventExecutor(Executor delegate) {
         this.delegate = delegate;
     }
 
+    /**
+     * Creates an instance of event executor with a {@link MoreExecutors#directExecutor()} used for the processing.
+     */
     protected EventExecutor() {
         this(MoreExecutors.directExecutor());
     }
