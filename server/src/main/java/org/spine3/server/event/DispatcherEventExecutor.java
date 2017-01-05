@@ -44,12 +44,10 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
 
     private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
 
-    @SuppressWarnings({"WeakerAccess", "unused"})   // Part of API.
     protected DispatcherEventExecutor(Executor delegate) {
         super(delegate);
     }
 
-    @SuppressWarnings("WeakerAccess")   // Part of API.
     protected DispatcherEventExecutor() {
         super();
     }
@@ -63,7 +61,6 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
      * @param dispatcher the target dispatcher for the event
      * @return {@code true}, if the event dispatching should be postponed, {@code false} otherwise.
      */
-    @SuppressWarnings("WeakerAccess")   // Part of API.
     public abstract boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher);
 
     /**
@@ -77,7 +74,6 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
      * @param event           the event to dispatch
      * @param dispatcherClass the class of the target dispatcher
      */
-    @SuppressWarnings("WeakerAccess")   // Part of API.
     public void dispatchNow(final Event event, final Class<? extends EventDispatcher> dispatcherClass) {
         final Set<EventDispatcher> dispatchers = dispatchersFor(event);
         final Iterable<EventDispatcher> matching = Iterables.filter(dispatchers, matchClass(dispatcherClass));
