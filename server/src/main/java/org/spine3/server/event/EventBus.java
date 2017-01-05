@@ -21,7 +21,6 @@ package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -42,7 +41,6 @@ import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -102,7 +100,7 @@ public class EventBus implements AutoCloseable {
     private final EventStore eventStore;
 
     /** The executor for invoking subscriber methods. */
-    private final Executor executor;
+    private final SubscriberEventExecutor subscriberEventExecutor;
 
     /** The executor for calling the dispatchers. */
     private final DispatcherEventExecutor dispatcherEventExecutor;
@@ -119,11 +117,13 @@ public class EventBus implements AutoCloseable {
      */
     private EventBus(Builder builder) {
         this.eventStore = builder.eventStore;
-        this.executor = builder.executor;
+        this.subscriberEventExecutor = builder.subscriberEventExecutor;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
         this.dispatcherEventExecutor = builder.dispatcherEventExecutor;
+
         injectDispatcherProvider();
+        injectSubscriberProvider();
     }
 
     /**
@@ -142,14 +142,30 @@ public class EventBus implements AutoCloseable {
         });
     }
 
+    /**
+     * Sets up the {@code SubscriberEventExecutor} with an ability to obtain matching {@link EventSubscriber}s
+     * by a given {@link EventClass} instance according to the up-to-date state of the {@code subscriberRegistry}.
+     */
+    private void injectSubscriberProvider() {
+        subscriberEventExecutor.setSubscriberProvider(new SubscriberProvider() {
+            @Nullable
+            @Override
+            public Collection<EventSubscriber> apply(@Nullable EventClass eventClass) {
+                checkNotNull(eventClass);
+                final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
+                return subscribers;
+            }
+        });
+    }
+
     /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
     }
 
     @VisibleForTesting
-    /* package */ Executor getExecutor() {
-        return executor;
+    /* package */ SubscriberEventExecutor getExecutor() {
+        return subscriberEventExecutor;
     }
 
     @VisibleForTesting
@@ -277,28 +293,14 @@ public class EventBus implements AutoCloseable {
      * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
      */
     private int invokeSubscribers(Message event, EventContext context) {
-        final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(EventClass.of(event));
-        for (EventSubscriber subscriber : subscribers) {
-            invokeSubscriber(subscriber, event, context);
-        }
+        final EventClass eventClass = EventClass.of(event);
+        final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
+        subscriberEventExecutor.deliverToSubscribers(event, context);
         return subscribers.size();
     }
 
     private void store(Event event) {
         eventStore.append(event);
-    }
-
-    private void invokeSubscriber(final EventSubscriber target, final Message event, final EventContext context) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    target.handle(event, context);
-                } catch (InvocationTargetException e) {
-                    handleSubscriberException(e, event, context);
-                }
-            }
-        });
     }
 
     /**
@@ -343,13 +345,6 @@ public class EventBus implements AutoCloseable {
                                                                                       .getName());
     }
 
-    private static void handleSubscriberException(InvocationTargetException e,
-                                                  Message eventMessage,
-                                                  EventContext eventContext) {
-        log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
-                    eventMessage, eventContext, e.getCause());
-    }
-
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
@@ -363,11 +358,11 @@ public class EventBus implements AutoCloseable {
         private EventStore eventStore;
 
         /**
-         * Optional {@code Executor} for executing subscriber methods.
+         * Optional {@code SubscriberEventExecutor} for executing subscriber methods.
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        private Executor executor;
+        private SubscriberEventExecutor subscriberEventExecutor;
 
         /**
          * Optional {@code DispatcherEventExecutor} for calling the dispatchers.
@@ -399,19 +394,20 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets an {@code Executor} to be used for executing subscriber methods
+         * Sets an {@code SubscriberEventExecutor} to be used for executing subscriber methods
          * in the {@code EventBus} we build.
          *
-         * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
+         * <p>If the {@code SubscriberEventExecutor} is not set, {@link SubscriberEventExecutor#directExecutor()}
+         * will be used.
          */
-        public Builder setExecutor(Executor executor) {
-            this.executor = checkNotNull(executor);
+        public Builder setSubscriberEventExecutor(SubscriberEventExecutor executor) {
+            this.subscriberEventExecutor = checkNotNull(executor);
             return this;
         }
 
         @Nullable
-        public Executor getExecutor() {
-            return executor;
+        public SubscriberEventExecutor getExecutor() {
+            return subscriberEventExecutor;
         }
 
         /**
@@ -461,8 +457,8 @@ public class EventBus implements AutoCloseable {
         public EventBus build() {
             checkNotNull(eventStore, "eventStore must be set");
 
-            if (executor == null) {
-                executor = MoreExecutors.directExecutor();
+            if (subscriberEventExecutor == null) {
+                subscriberEventExecutor = SubscriberEventExecutor.directExecutor();
             }
 
             if (dispatcherEventExecutor == null) {
@@ -487,6 +483,17 @@ public class EventBus implements AutoCloseable {
      */
     @Internal
     /* package */ interface DispatcherProvider extends Function<EventClass, Set<EventDispatcher>> {
+    }
+
+    /**
+     * Instances of this type are used to inject the knowledge about current {@code EventSubscriber}s for
+     * a particular {@code EventClass} instance.
+     *
+     * <p> Such an approach is chosen in order to keep the {@link #subscriberRegistry} private to the
+     * {@code EventBus}.
+     */
+    @Internal
+    /* package */ interface SubscriberProvider extends Function<EventClass, Collection<EventSubscriber>> {
     }
 
     private enum LogSingleton {

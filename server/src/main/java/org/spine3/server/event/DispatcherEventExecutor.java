@@ -19,7 +19,6 @@
  */
 package org.spine3.server.event;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.SPI;
@@ -27,14 +26,11 @@ import org.spine3.base.Event;
 import org.spine3.server.event.EventBus.DispatcherProvider;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Executes the will of {@link EventBus} and delivers events to the matching {@link EventDispatcher}s.
+ * Delivers the {@code Event}s from the {@link EventBus} to the matching {@link EventDispatcher}s.
  *
  * @author Alex Tymchenko
  */
@@ -54,24 +50,23 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
     }
 
     /**
-     * Creates an instance of event executor with a default {@link Executor}.
+     * Creates an instance of event executor with a {@link MoreExecutors#directExecutor()} used for event dispatching.
      *
-     * @see EventExecutor#EventExecutor()
      */
     protected DispatcherEventExecutor() {
-        super();
+        super(MoreExecutors.directExecutor());
     }
 
     /**
      * Postpones the event dispatching if applicable to the given {@code event} and {@code dispatcher}.
      *
-     * <p>This method should be implemented in descendants to define how the event dispatching is postponed.
+     * <p>This method should be implemented in descendants to define whether the event dispatching is postponed.
      *
      * @param event      the event to potentially postpone
      * @param dispatcher the target dispatcher for the event
      * @return {@code true}, if the event dispatching should be postponed, {@code false} otherwise.
      */
-    public abstract boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher);
+    protected abstract boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher);
 
     /**
      * Dispatches the event immediately.
@@ -103,9 +98,9 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
      * the {@code executor} configured for this instance of {@code DispatcherEventExecutor}.
      *
      * <p>The dispatching of the event to each of the dispatchers may be postponed according to
-     * {@link #maybePostponeDispatch(Event, EventDispatcher)} invocation result. In case of {@code false},
+     * {@link #maybePostponeDispatch(Event, EventDispatcher)} invocation result.
      *
-     * @param event the event to dispatch.
+     * @param event the event to dispatch
      */
     /* package */ void dispatch(Event event) {
         final Set<EventDispatcher> eventDispatchers = dispatchersFor(event);
@@ -121,7 +116,7 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
      * Obtains a pre-defined instance of the {@code DispatcherEventExecutor}, which does NOT postpone any
      * event dispatching and uses {@link MoreExecutors#directExecutor()} for operation.
      *
-     * @return the pre-configured default dispatcher.
+     * @return the pre-configured default executor.
      */
     public static DispatcherEventExecutor directExecutor() {
         return PredefinedExecutors.DIRECT_EXECUTOR;
@@ -135,16 +130,6 @@ public abstract class DispatcherEventExecutor extends EventExecutor {
     private Set<EventDispatcher> dispatchersFor(Event event) {
         final EventClass eventClass = EventClass.of(event);
         return dispatcherProvider.apply(eventClass);
-    }
-
-    private static Predicate<EventDispatcher> matchClass(final Class<? extends EventDispatcher> dispatcherClass) {
-        return new Predicate<EventDispatcher>() {
-            @Override
-            public boolean apply(@Nullable EventDispatcher input) {
-                checkNotNull(input);
-                return dispatcherClass.equals(input.getClass());
-            }
-        };
     }
 
     /** Utility wrapper class for predefined executors designed to be constants */

@@ -19,10 +19,13 @@
  */
 package org.spine3.server.event;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.base.Predicate;
 import org.spine3.Internal;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Base functionality for the routines delivering the {@link org.spine3.base.Event}s to event consumers,
@@ -39,18 +42,21 @@ import java.util.concurrent.Executor;
      * Creates an instance of event executor with a specified {@link Executor} used for the processing.
      */
 
-    protected EventExecutor(Executor delegate) {
+    /* package */ EventExecutor(Executor delegate) {
         this.delegate = delegate;
-    }
-
-    /**
-     * Creates an instance of event executor with a {@link MoreExecutors#directExecutor()} used for the processing.
-     */
-    protected EventExecutor() {
-        this(MoreExecutors.directExecutor());
     }
 
     protected void execute(Runnable command) {
         delegate.execute(command);
+    }
+
+    /* package */ static <T> Predicate<T> matchClass(final Class<? extends T> classToMatch) {
+        return new Predicate<T>() {
+            @Override
+            public boolean apply(@Nullable T input) {
+                checkNotNull(input);
+                return classToMatch.equals(input.getClass());
+            }
+        };
     }
 }

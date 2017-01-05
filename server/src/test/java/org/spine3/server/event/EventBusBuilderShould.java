@@ -21,16 +21,16 @@
 package org.spine3.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
-
-import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -66,16 +66,21 @@ public class EventBusBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Executor() {
+    public void do_not_accept_null_SubscriberEventExecutor() {
         EventBus.newBuilder()
-                .setExecutor(Tests.<Executor>nullRef());
+                .setSubscriberEventExecutor(Tests.<SubscriberEventExecutor>nullRef());
     }
 
     @Test
     public void return_set_Executor() {
-        final Executor executor = MoreExecutors.directExecutor();
+        final SubscriberEventExecutor executor = new SubscriberEventExecutor() {
+            @Override
+            protected boolean maybePostponeDelivery(Message event, EventContext context, EventSubscriber subscriber) {
+                return false;
+            }
+        };
         assertEquals(executor, EventBus.newBuilder()
-                                       .setExecutor(executor)
+                                       .setSubscriberEventExecutor(executor)
                                        .getExecutor());
     }
 
@@ -99,6 +104,12 @@ public class EventBusBuilderShould {
                 .build();
     }
 
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_DispatcherEventExecutor() {
+        EventBus.newBuilder()
+                .setDispatcherEventExecutor(Tests.<DispatcherEventExecutor>nullRef());
+    }
+
     @Test
     public void return_set_DispatcherEventExecutor() {
         // Create a custom event executor to differ from the default one.
@@ -114,11 +125,11 @@ public class EventBusBuilderShould {
     }
 
     @Test
-    public void set_directExector_if_not_set_explicitly() {
-        assertEquals(MoreExecutors.directExecutor(), EventBus.newBuilder()
-                                                             .setEventStore(eventStore)
-                                                             .build()
-                                                             .getExecutor());
+    public void set_direct_subscriber_event_executor_if_not_set_explicitly() {
+        assertEquals(SubscriberEventExecutor.directExecutor(), EventBus.newBuilder()
+                                                                       .setEventStore(eventStore)
+                                                                       .build()
+                                                                       .getExecutor());
     }
 
     @Test
