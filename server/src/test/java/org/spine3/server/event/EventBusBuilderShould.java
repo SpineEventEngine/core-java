@@ -100,17 +100,17 @@ public class EventBusBuilderShould {
     }
 
     @Test
-    public void return_set_DispatcherEventPropagator() {
-        // Create a custom event propagator to differ from the default one.
-        final DispatcherEventPropagator propagator = new DispatcherEventPropagator() {
+    public void return_set_DispatcherEventExecutor() {
+        // Create a custom event executor to differ from the default one.
+        final DispatcherEventExecutor executor = new DispatcherEventExecutor() {
             @Override
             public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
                 return true;
             }
         };
-        assertEquals(propagator, EventBus.newBuilder()
-                                         .setDispatcherEventPropagator(propagator)
-                                         .getDispatcherEventPropagator());
+        assertEquals(executor, EventBus.newBuilder()
+                                         .setDispatcherEventExecutor(executor)
+                                         .getDispatcherEventExecutor());
     }
 
     @Test
@@ -122,12 +122,12 @@ public class EventBusBuilderShould {
     }
 
     @Test
-    public void set_direct_dispatcher_event_propagator_if_not_set_explicitly() {
-        final DispatcherEventPropagator actualValue = EventBus.newBuilder()
-                                                              .setEventStore(eventStore)
-                                                              .build()
-                                                              .getDispatcherEventPropagator();
-        assertEquals(DispatcherEventPropagator.directPropagator(), actualValue);
+    public void set_direct_dispatcher_event_executor_if_not_set_explicitly() {
+        final DispatcherEventExecutor actualValue = EventBus.newBuilder()
+                                                            .setEventStore(eventStore)
+                                                            .build()
+                                                            .getDispatcherEventExecutor();
+        assertEquals(DispatcherEventExecutor.directExecutor(), actualValue);
     }
 
     @Test

@@ -104,7 +104,7 @@ public class EventBus implements AutoCloseable {
     private final Executor executor;
 
     /** The executor for calling the dispatchers. */
-    private final DispatcherEventPropagator dispatcherEventPropagator;
+    private final DispatcherEventExecutor dispatcherEventExecutor;
 
     /** The validator for events posted to the bus. */
     private final MessageValidator eventValidator;
@@ -121,7 +121,7 @@ public class EventBus implements AutoCloseable {
         this.executor = builder.executor;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
-        this.dispatcherEventPropagator = builder.dispatcherEventPropagator;
+        this.dispatcherEventExecutor = builder.dispatcherEventExecutor;
         injectDispatcherProvider();
     }
 
@@ -130,7 +130,7 @@ public class EventBus implements AutoCloseable {
      * by a given {@link EventClass} instance.
      */
     private void injectDispatcherProvider() {
-        dispatcherEventPropagator.setDispatcherProvider(new Function<EventClass, Set<EventDispatcher>>() {
+        dispatcherEventExecutor.setDispatcherProvider(new Function<EventClass, Set<EventDispatcher>>() {
             @Nullable
             @Override
             public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
@@ -164,8 +164,8 @@ public class EventBus implements AutoCloseable {
 
     @VisibleForTesting
     @Nullable
-    /* package */ DispatcherEventPropagator getDispatcherEventPropagator() {
-        return dispatcherEventPropagator;
+    /* package */ DispatcherEventExecutor getDispatcherEventExecutor() {
+        return dispatcherEventExecutor;
     }
 
     /**
@@ -264,7 +264,7 @@ public class EventBus implements AutoCloseable {
         final EventClass eventClass = EventClass.of(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
 
-        dispatcherEventPropagator.dispatch(event);
+        dispatcherEventExecutor.dispatch(event);
         return dispatchers.size();
     }
 
@@ -369,11 +369,11 @@ public class EventBus implements AutoCloseable {
         private Executor executor;
 
         /**
-         * Optional {@code DispatcherEventPropagator} for calling the dispatchers.
+         * Optional {@code DispatcherEventExecutor} for calling the dispatchers.
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        private DispatcherEventPropagator dispatcherEventPropagator;
+        private DispatcherEventExecutor dispatcherEventExecutor;
 
         /**
          * Optional validator for events.
@@ -414,20 +414,20 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets an {@code DispatcherEventPropagator} to be used for passing the event to the target dispatchers
+         * Sets an {@code DispatcherEventExecutor} to be used for passing the event to the target dispatchers
          * in the {@code EventBus} we build.
          *
-         * <p>If the {@code DispatcherEventPropagator} is not set, {@link DispatcherEventPropagator#directPropagator()}
+         * <p>If the {@code DispatcherEventExecutor} is not set, {@link DispatcherEventExecutor#directExecutor()}
          * will be used.
          */
-        public Builder setDispatcherEventPropagator(DispatcherEventPropagator executor) {
-            this.dispatcherEventPropagator = checkNotNull(executor);
+        public Builder setDispatcherEventExecutor(DispatcherEventExecutor executor) {
+            this.dispatcherEventExecutor = checkNotNull(executor);
             return this;
         }
 
         @Nullable
-        public DispatcherEventPropagator getDispatcherEventPropagator() {
-            return dispatcherEventPropagator;
+        public DispatcherEventExecutor getDispatcherEventExecutor() {
+            return dispatcherEventExecutor;
         }
 
         public Builder setEventValidator(MessageValidator eventValidator) {
@@ -464,8 +464,8 @@ public class EventBus implements AutoCloseable {
                 executor = MoreExecutors.directExecutor();
             }
 
-            if (dispatcherEventPropagator == null) {
-                dispatcherEventPropagator = DispatcherEventPropagator.directPropagator();
+            if (dispatcherEventExecutor == null) {
+                dispatcherEventExecutor = DispatcherEventExecutor.directExecutor();
             }
 
             if (eventValidator == null) {

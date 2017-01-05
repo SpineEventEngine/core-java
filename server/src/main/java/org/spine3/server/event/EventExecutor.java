@@ -31,15 +31,15 @@ import java.util.concurrent.Executor;
  * @author Alex Tymchenko
  */
 @Internal
-/* package */ abstract class EventPropagator {
+/* package */ abstract class EventExecutor {
 
     private final Executor delegate;
 
-    protected EventPropagator(Executor delegate) {
+    protected EventExecutor(Executor delegate) {
         this.delegate = delegate;
     }
 
-    protected EventPropagator() {
+    protected EventExecutor() {
         this(MoreExecutors.directExecutor());
     }
 

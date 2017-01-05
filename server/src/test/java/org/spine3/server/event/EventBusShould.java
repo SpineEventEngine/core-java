@@ -66,9 +66,9 @@ public class EventBusShould {
 
     private EventStore eventStore;
     private EventBus eventBus;
-    private EventBus eventBusWithPosponedPropagation;
+    private EventBus eventBusWithPosponedExecution;
     private TestResponseObserver responseObserver;
-    private PostponingDispatcherEventPropagator postponingPropagator;
+    private PostponingDispatcherEventExecutor postponingExecutor;
     private Executor executor;
 
     @Before
@@ -87,13 +87,13 @@ public class EventBusShould {
          * Cannot use {@link MoreExecutors#directExecutor()} because it's impossible to spy on {@code final} classes.
          */
         this.executor = spy(directExecutor());
-        this.postponingPropagator = new PostponingDispatcherEventPropagator(executor);
+        this.postponingExecutor = new PostponingDispatcherEventExecutor(executor);
         buildEventBus(enricher);
-        buildEventBusWithPostponedPropagation(enricher);
+        buildEventBusWithPostponedExecution(enricher);
         this.responseObserver = new TestResponseObserver();
     }
 
-    private Executor directExecutor() {
+    private static Executor directExecutor() {
         return new Executor() {
             @Override
             public void execute(Runnable command) {
@@ -102,14 +102,14 @@ public class EventBusShould {
         };
     }
 
-    private void buildEventBusWithPostponedPropagation(@Nullable EventEnricher enricher) {
+    private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
                                                     .setEventStore(eventStore)
-                                                    .setDispatcherEventPropagator(postponingPropagator);
+                                                    .setDispatcherEventExecutor(postponingExecutor);
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
-        this.eventBusWithPosponedPropagation = busBuilder.build();
+        this.eventBusWithPosponedExecution = busBuilder.build();
     }
 
     private void buildEventBus(@Nullable EventEnricher enricher) {
@@ -214,13 +214,13 @@ public class EventBusShould {
     public void not_call_dispatchers_if_event_propagation_postponed() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
-        eventBusWithPosponedPropagation.register(dispatcher);
+        eventBusWithPosponedExecution.register(dispatcher);
 
         final Event event = Given.Event.projectCreated();
-        eventBusWithPosponedPropagation.post(event);
+        eventBusWithPosponedExecution.post(event);
         assertFalse(dispatcher.isDispatchCalled());
 
-        final boolean eventPostponed = postponingPropagator.isPostponed(event, dispatcher);
+        final boolean eventPostponed = postponingExecutor.isPostponed(event, dispatcher);
         assertTrue(eventPostponed);
     }
 
@@ -228,15 +228,15 @@ public class EventBusShould {
     public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
-        eventBusWithPosponedPropagation.register(dispatcher);
+        eventBusWithPosponedExecution.register(dispatcher);
 
         final Event event = Given.Event.projectCreated();
-        eventBusWithPosponedPropagation.post(event);
-        final Set<Event> postponedEvents = postponingPropagator.getPostponedEvents();
+        eventBusWithPosponedExecution.post(event);
+        final Set<Event> postponedEvents = postponingExecutor.getPostponedEvents();
         final Event postponedEvent = postponedEvents.iterator()
                                                     .next();
         verify(executor, never()).execute(any(Runnable.class));
-        postponingPropagator.dispatchNow(postponedEvent, dispatcher.getClass());
+        postponingExecutor.dispatchNow(postponedEvent, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
         verify(executor).execute(any(Runnable.class));
     }
@@ -463,29 +463,29 @@ public class EventBusShould {
         }
     }
 
-    private static class PostponingDispatcherEventPropagator extends DispatcherEventPropagator {
+    private static class PostponingDispatcherEventExecutor extends DispatcherEventExecutor {
 
-        private final Map<Event, Class<? extends EventDispatcher>> postponedPropagations = newHashMap();
+        private final Map<Event, Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
 
-        public PostponingDispatcherEventPropagator(Executor delegate) {
+        public PostponingDispatcherEventExecutor(Executor delegate) {
             super(delegate);
         }
 
         @Override
         public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
-            postponedPropagations.put(event, dispatcher.getClass());
+            postponedExecutions.put(event, dispatcher.getClass());
             return true;
         }
 
         private boolean isPostponed(Event event, EventDispatcher dispatcher) {
-            final Class<? extends EventDispatcher> actualClass = postponedPropagations.get(event);
+            final Class<? extends EventDispatcher> actualClass = postponedExecutions.get(event);
             final boolean eventPostponed = actualClass != null;
             final boolean dispatcherMatches = eventPostponed && dispatcher.getClass().equals(actualClass);
             return dispatcherMatches;
         }
 
         private Set<Event> getPostponedEvents() {
-            return postponedPropagations.keySet();
+            return postponedExecutions.keySet();
         }
     }
 }

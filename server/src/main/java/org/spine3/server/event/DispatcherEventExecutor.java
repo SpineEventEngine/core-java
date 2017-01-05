@@ -34,19 +34,19 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Propagates events from the {@link EventBus} to the matching {@link EventDispatcher}s.
+ * Executes the will of {@link EventBus}  and delivers events to the matching {@link EventDispatcher}s.
  *
  * @author Alex Tymchenko
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherEventPropagator extends EventPropagator {
+public abstract class DispatcherEventExecutor extends EventExecutor {
 
     /**
-     * A pre-defined instance of the {@code DispatcherEventPropagator}, which does not postpone any event dispatching
+     * A pre-defined instance of the {@code DispatcherEventExecutor}, which does not postpone any event dispatching
      * and uses {@link MoreExecutors#directExecutor()} for operation.
      */
-    private static final DispatcherEventPropagator DIRECT_EXECUTOR = new DispatcherEventPropagator() {
+    private static final DispatcherEventExecutor DIRECT_EXECUTOR = new DispatcherEventExecutor() {
         @Override
         public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
             return false;
@@ -56,12 +56,12 @@ public abstract class DispatcherEventPropagator extends EventPropagator {
     private Function<EventClass, Set<EventDispatcher>> dispatcherProvider;
 
     @SuppressWarnings({"WeakerAccess", "unused"})   // Part of API.
-    protected DispatcherEventPropagator(Executor delegate) {
+    protected DispatcherEventExecutor(Executor delegate) {
         super(delegate);
     }
 
     @SuppressWarnings("WeakerAccess")   // Part of API.
-    protected DispatcherEventPropagator() {
+    protected DispatcherEventExecutor() {
         super();
     }
 
@@ -105,7 +105,7 @@ public abstract class DispatcherEventPropagator extends EventPropagator {
 
     /**
      * Passes the event to the matching dispatchers and invokes {@link EventDispatcher#dispatch(Event)} using
-     * the {@code executor} configured for this instance of {@code DispatcherEventPropagator}.
+     * the {@code executor} configured for this instance of {@code DispatcherEventExecutor}.
      *
      * <p>The dispatching of the event to each of the dispatchers may be postponed according to
      * {@link #maybePostponeDispatch(Event, EventDispatcher)} invocation result. In case of {@code false},
@@ -123,12 +123,12 @@ public abstract class DispatcherEventPropagator extends EventPropagator {
     }
 
     /**
-     * Obtains a pre-defined instance of the {@code DispatcherEventPropagator}, which does NOT postpone any event dispatching
-     * and uses {@link MoreExecutors#directExecutor()} for operation.
+     * Obtains a pre-defined instance of the {@code DispatcherEventExecutor}, which does NOT postpone any
+     * event dispatching and uses {@link MoreExecutors#directExecutor()} for operation.
      *
      * @return the pre-configured default dispatcher.
      */
-    public static DispatcherEventPropagator directPropagator() {
+    public static DispatcherEventExecutor directExecutor() {
         return DIRECT_EXECUTOR;
     }
 
