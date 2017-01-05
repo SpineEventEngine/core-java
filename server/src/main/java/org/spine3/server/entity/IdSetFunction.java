@@ -21,24 +21,27 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-import org.spine3.server.event.EventDispatcher;
-import org.spine3.server.type.EventClass;
+
+import java.util.Set;
 
 /**
- * Delivers events to handlers (which are supposed to be entities).
+ * Obtains a set of entity IDs based on an event/command message and its context.
  *
  * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @author Alexander Yevsyukov
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
+public interface IdSetFunction<I, M extends Message, C extends Message> {
 
     /**
-     * Returns a function which can obtain an ID using a message of the passed class.
+     * Obtains a set of entity IDs based on the passed event or command message and its context.
      *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
+     * @param message an event or a command message
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return a set of entity identifiers
      */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
+    Set<I> apply(M message, C context);
 }

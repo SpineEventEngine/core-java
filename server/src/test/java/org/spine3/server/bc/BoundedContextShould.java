@@ -62,7 +62,6 @@ import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -349,7 +348,7 @@ public class BoundedContextShould {
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
             return GetProducerIdFromEvent.newInstance(0);
         }
     }

@@ -39,7 +39,8 @@ public interface EventDispatcher {
      */
     Set<EventClass> getEventClasses();
 
-    /** Dispatches the event. */
+    /**
+     * Dispatches the event.
+     */
     void dispatch(Event event);
-
 }

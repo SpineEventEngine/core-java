@@ -20,9 +20,8 @@
 
 package org.spine3.server.stand;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -36,6 +35,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.entity.IdSetFunction;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -46,42 +46,92 @@ import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * @author Dmytro Dashenkov
  */
-/*package*/ class Given {
+/* package */ class Given {
 
-    /*package*/ static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
-    /*package*/ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
-
+    /* package */ static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
+    /* package */ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
+    /* package */ static final int AWAIT_SECONDS = 6;
     private static final String PROJECT_UUID = Identifiers.newUuid();
-    /*package*/ static final int AWAIT_SECONDS = 6;
 
     private Given() {
     }
 
-    /*package*/ static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        /*package*/ StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
+    /* package */
+    static Event validEvent() {
+        return Event.newBuilder()
+                    .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
+                                                             .setProjectId(ProjectId.newBuilder()
+                                                                                    .setId("12345AD0"))
+                                                             .build())
+                                         .toBuilder()
+                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' + ProjectCreated.getDescriptor()
+                                                                                                         .getFullName())
+                                         .build())
+                    .setContext(EventContext.newBuilder()
+                                            .setDoNotEnrich(true)
+                                            .setCommandContext(CommandContext.getDefaultInstance())
+                                            .setEventId(EventId.newBuilder()
+                                                               .setUuid(Identifiers.newUuid())
+                                                               .build()))
+                    .build();
+    }
 
-        @Override
-        protected ProjectId getEntityId(Message event, EventContext context) {
-            return ProjectId.newBuilder().setId(PROJECT_UUID).build();
+    /* package */
+    static Command validCommand() {
+        return Command.newBuilder()
+                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
+                      .setContext(CommandContext.getDefaultInstance())
+                      .build();
+    }
+
+    /* package */ static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
+        return new StandTestProjectionRepository(context);
+    }
+
+    /* package */ static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
+        return new StandTestAggregateRepository(context);
+    }
+
+    /* package */ static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
+        return boundedContextBuilder(stand)
+                .setStandFunnelExecutor(standFunnelExecutor)
+                .build();
+    }
+
+    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
+        return BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setStorageFactory(InMemoryStorageFactory.getInstance());
+    }
+
+    /* package */ static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+        /* package */ StandTestProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+            addIdSetFunction(ProjectCreated.class, new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+                @Override
+                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                    return ImmutableSet.of(ProjectId.newBuilder()
+                                                    .setId(PROJECT_UUID)
+                                                    .build());
+                }
+            });
         }
     }
 
-    /*package*/ static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+    /* package */ static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
 
         /**
          * Creates a new repository instance.
          *
          * @param boundedContext the bounded context to which this repository belongs
          */
-        /*package*/ StandTestAggregateRepository(BoundedContext boundedContext) {
+        /* package */ StandTestAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
@@ -109,7 +159,7 @@ import java.util.concurrent.Executors;
         }
     }
 
-    /*package*/ static class StandTestProjection extends Projection<ProjectId, Project> {
+    /* package */ static class StandTestProjection extends Projection<ProjectId, Project> {
         /**
          * Creates a new instance.
          *
@@ -126,58 +176,5 @@ import java.util.concurrent.Executors;
         public void handle(ProjectCreated event, EventContext context) {
             // Do nothing
         }
-    }
-
-    /*package*/ static Event validEvent() {
-        return Event.newBuilder()
-                    .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
-                                                             .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
-                                                             .build())
-                                         .toBuilder()
-                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + "/" + ProjectCreated.getDescriptor().getFullName())
-                                         .build())
-                    .setContext(EventContext.newBuilder()
-                                            .setDoNotEnrich(true)
-                                            .setCommandContext(CommandContext.getDefaultInstance())
-                                            .setEventId(EventId.newBuilder()
-                                                               .setUuid(Identifiers.newUuid())
-                                                               .build()))
-                    .build();
-    }
-
-    /*package*/ static Command validCommand() {
-        return Command.newBuilder()
-                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
-                      .setContext(CommandContext.getDefaultInstance())
-                      .build();
-    }
-
-    /*package*/ static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
-        return new StandTestProjectionRepository(context);
-    }
-
-    /*package*/ static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository(context);
-    }
-
-    /*package*/ static BoundedContext boundedContext(Stand stand, int concurrentThreads) {
-        final Executor executor = concurrentThreads > 0 ? Executors.newFixedThreadPool(concurrentThreads) :
-                                  MoreExecutors.directExecutor();
-
-        return boundedContextBuilder(stand)
-                             .setStandFunnelExecutor(executor)
-                             .build();
-    }
-
-    /*package*/ static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
-        return boundedContextBuilder(stand)
-                .setStandFunnelExecutor(standFunnelExecutor)
-                .build();
-    }
-
-    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
-        return BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance());
     }
 }

@@ -116,7 +116,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(commandMessage);
         checkCommandClass(commandClass);
-        final I id = getIdFromCommandMessage.getId(commandMessage, context);
+        final I id = getIdFromCommandMessage.apply(commandMessage, context);
         final P manager = load(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
@@ -150,7 +150,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         final IdFunction idFunction = getIdFunction(eventClass);
         // All ID functions are supposed to return IDs of this type.
         @SuppressWarnings("unchecked")
-        final I id = (I) idFunction.getId(message, context);
+        final I id = (I) idFunction.apply(message, context);
         final P manager = load(id);
         try {
             manager.dispatchEvent(message, context);
