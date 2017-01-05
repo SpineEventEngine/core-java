@@ -93,7 +93,8 @@ public class EventBusShould {
         this.responseObserver = new TestResponseObserver();
     }
 
-    private static Executor directExecutor() {
+    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
+    private Executor directExecutor() {
         return new Executor() {
             @Override
             public void execute(Runnable command) {
