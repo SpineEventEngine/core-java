@@ -59,6 +59,11 @@ public class DefaultIdSetEventFunction {
         return new ProducerFromFirstEventMessageField<>();
     }
 
+    /**
+     * The {@code IdSetFunction} that obtains an event producer ID from the context of the event.
+     *
+     * @param <I> the type of entity IDs
+     */
     private static class ProducerFromContext<I> implements IdSetEventFunction<I, Message> {
         @Override
         public Set<I> apply(Message message, EventContext context) {
@@ -67,6 +72,11 @@ public class DefaultIdSetEventFunction {
         }
     }
 
+    /**
+     * The {@code IdSetFunction} that obtains an event producer ID from the context of the event.
+     *
+     * @param <I> the type of entity IDs
+     */
     private static class ProducerFromFirstEventMessageField<I> implements IdSetEventFunction<I, Message> {
 
         private final GetProducerIdFromEvent<I, Message> func = GetProducerIdFromEvent.fromFieldIndex(0);
