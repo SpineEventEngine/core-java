@@ -72,6 +72,7 @@ public class EventBusShould {
     private PostponedSubscriberEventDelivery postponedSubscriberDelivery;
     private Executor delegateDispatcherExecutor;
     private Executor delegateSubscriberExecutor;
+    private StorageFactory storageFactory;
 
     @Before
     public void setUp() {
@@ -79,12 +80,7 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final EventStore.Builder storeBuilder = EventStore.newBuilder()
-                                                          .setStreamExecutor(MoreExecutors.directExecutor())
-                                                          .setStorage(storageFactory.createEventStorage())
-                                                          .setLogger(EventStore.log());
-        this.eventStore = spy(storeBuilder.build());
+        this.storageFactory = InMemoryStorageFactory.getInstance();
         /**
          * Cannot use {@link MoreExecutors#directExecutor()} because it's impossible to spy on {@code final} classes.
          */
@@ -109,7 +105,7 @@ public class EventBusShould {
 
     private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setEventStore(eventStore)
+                                                    .setStorageFactory(storageFactory)
                                                     .setDispatcherEventDelivery(postponedDispatcherDelivery)
                                                     .setSubscriberEventDelivery(postponedSubscriberDelivery);
 
@@ -121,7 +117,7 @@ public class EventBusShould {
 
     private void buildEventBus(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setEventStore(eventStore);
+                                                    .setStorageFactory(storageFactory);
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
@@ -135,10 +131,11 @@ public class EventBusShould {
 
     @Test
     public void return_associated_EventStore() {
+        final EventStore eventStore = mock(EventStore.class);
         final EventBus result = EventBus.newBuilder()
                                         .setEventStore(eventStore)
                                         .build();
-        assertNotNull(result.getEventStore());
+        assertEquals(eventStore, result.getEventStore());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -337,7 +334,7 @@ public class EventBusShould {
                 .validate(any(Message.class));
 
         final EventBus eventBus = EventBus.newBuilder()
-                                          .setEventStore(eventStore)
+                                          .setStorageFactory(storageFactory)
                                           .setEventValidator(validator)
                                           .build();
         eventBus.subscribe(new ProjectCreatedSubscriber());
@@ -358,6 +355,10 @@ public class EventBusShould {
 
     @Test
     public void unregister_registries_on_close() throws Exception {
+        final EventStore eventStore = spy(mock(EventStore.class));
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(eventStore)
+                                          .build();
         eventBus.register(new BareDispatcher());
         eventBus.subscribe(new ProjectCreatedSubscriber());
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
@@ -513,7 +514,7 @@ public class EventBusShould {
 
         private final Map<Event, Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
 
-        public PostponedDispatcherEventDelivery(Executor delegate) {
+        private PostponedDispatcherEventDelivery(Executor delegate) {
             super(delegate);
         }
 
@@ -540,7 +541,7 @@ public class EventBusShould {
 
         private final Map<Event, Class<? extends EventSubscriber>> postponedExecutions = newHashMap();
 
-        public PostponedSubscriberEventDelivery(Executor delegate) {
+        private PostponedSubscriberEventDelivery(Executor delegate) {
             super(delegate);
         }
 

@@ -21,6 +21,7 @@ package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
@@ -43,8 +45,10 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -346,7 +350,32 @@ public class EventBus implements AutoCloseable {
     /** The {@code Builder} for {@code EventBus}. */
     public static class Builder {
 
+        private static final String EVENT_STORE_CONFIGURED_MESSAGE = "EventStore is already configured.";
+
+        /**
+         * A {@code StorageFactory} for configuring the {@code EventStore} instance for this {@code EventBus}.
+         *
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
+         * {@code EventBus}.
+         */
+        private StorageFactory storageFactory;
+
+        /**
+         * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
+         *
+         * <p>If not set, a default instance will be created by the builder with the help of {@code storageFactory}/
+         *
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
+         * {@code EventBus}.
+         */
         private EventStore eventStore;
+
+        /**
+         * Optional {@code Executor} for returning event stream from {@code EventStore}.
+         *
+         * <p>If not set, a default value will be set by the builder.
+         */
+        private Executor eventStoreStreamExecutor;
 
         /**
          * Optional {@code SubscriberEventDelivery} for executing subscriber methods.
@@ -375,7 +404,41 @@ public class EventBus implements AutoCloseable {
         private Builder() {
         }
 
+        /**
+         * Specifies an {@code StorageFactory} to configure this {@code EventBus}.
+         *
+         * <p>This {@code StorageFactory} instance will be used to create an instance of {@code EventStore}
+         * for this {@code EventBus}, <em>if</em> {@code EventStore} was not explicitly set in the builder.
+         *
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an {@code EventBus}.
+         *
+         * @see #setEventStore(EventStore)
+         */
+        public Builder setStorageFactory(StorageFactory storageFactory) {
+            checkState(eventStore == null, EVENT_STORE_CONFIGURED_MESSAGE);
+            this.storageFactory = checkNotNull(storageFactory);
+            return this;
+        }
+
+        @Nullable
+        public StorageFactory getStorageFactory() {
+            return storageFactory;
+        }
+
+        /**
+         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
+         *
+         * <p>This method can be called if neither {@link #setEventStoreStreamExecutor(Executor)}
+         * nor {@link #setStorageFactory(StorageFactory)} were called before.
+         *
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} must be set to create an {@code EventBus}.
+         *
+         * @see #setEventStoreStreamExecutor(Executor)
+         * @see #setStorageFactory(StorageFactory)
+         */
         public Builder setEventStore(EventStore eventStore) {
+            checkState(storageFactory == null, "storageFactory already set.");
+            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
             this.eventStore = checkNotNull(eventStore);
             return this;
         }
@@ -383,6 +446,30 @@ public class EventBus implements AutoCloseable {
         @Nullable
         public EventStore getEventStore() {
             return eventStore;
+        }
+
+        /**
+         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
+         *
+         * <p>This {@code Executor} instance will be used for creating
+         * new {@code EventStore} instance when building {@code EventBus}, <em>if</em>
+         * {@code EventStore} was not explicitly set in the builder.
+         *
+         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
+         * will be used.
+         *
+         * @see #setEventStore(EventStore)
+         */
+        @SuppressWarnings("MethodParameterNamingConvention")
+        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
+            checkState(eventStore == null, EVENT_STORE_CONFIGURED_MESSAGE);
+            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
+            return this;
+        }
+
+        @Nullable
+        public Executor getEventStoreStreamExecutor() {
+            return eventStoreStreamExecutor;
         }
 
         /**
@@ -447,7 +534,20 @@ public class EventBus implements AutoCloseable {
         }
 
         public EventBus build() {
-            checkNotNull(eventStore, "eventStore must be set");
+            checkState(storageFactory != null || eventStore != null,
+                       "Either storageFactory or eventStore must be set to build the EventBus instance");
+
+            if (eventStoreStreamExecutor == null) {
+                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
+            }
+
+            if (eventStore == null) {
+                eventStore = EventStore.newBuilder()
+                                       .setStreamExecutor(eventStoreStreamExecutor)
+                                       .setStorage(storageFactory.createEventStorage())
+                                       .setLogger(EventStore.log())
+                                       .build();
+            }
 
             if (subscriberEventDelivery == null) {
                 subscriberEventDelivery = SubscriberEventDelivery.directDelivery();
@@ -464,6 +564,7 @@ public class EventBus implements AutoCloseable {
             final EventBus result = new EventBus(this);
             return result;
         }
+
     }
 
     private enum LogSingleton {

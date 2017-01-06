@@ -20,7 +20,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -55,7 +54,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
@@ -262,11 +260,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private StorageFactory storageFactory;
         private CommandStore commandStore;
         private CommandBus commandBus;
-        private EventStore eventStore;
-        private Executor eventStoreStreamExecutor;
         private EventBus eventBus;
         private boolean multitenant;
-        private EventEnricher eventEnricher;
         private Stand stand;
         private StandFunnel standFunnel;
         private Executor standFunnelExecutor;
@@ -333,49 +328,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return commandBus;
         }
 
-        /**
-         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
-         *
-         * <p>This method can be called if {@link #setEventStoreStreamExecutor(Executor)}
-         * was not called before.
-         *
-         * @see #setEventStoreStreamExecutor(Executor)
-         */
-        @SuppressWarnings("unused")
-        public Builder setEventStore(EventStore eventStore) {
-            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
-            this.eventStore = checkNotNull(eventStore);
-            return this;
-        }
-
-        @Nullable
-        public EventStore getEventStore() {
-            return eventStore;
-        }
-
-        /**
-         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
-         *
-         * <p>This {@code Executor} instance will be used for creating
-         * new {@code EventStore} instance when building {@code BoundedContext}, <em>if</em>
-         * {@code EventStore} was not explicitly set in the builder.
-         *
-         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
-         * will be used.
-         *
-         * @see #setEventStore(EventStore)
-         */
-        @SuppressWarnings("MethodParameterNamingConvention")
-        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
-            checkState(eventStore == null, "EventStore is already configured.");
-            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
-            return this;
-        }
-
-        @Nullable
-        public Executor getEventStoreStreamExecutor() {
-            return eventStoreStreamExecutor;
-        }
 
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
@@ -385,16 +337,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         @Nullable
         public EventBus getEventBus() {
             return eventBus;
-        }
-
-        public Builder setEventEnricher(EventEnricher eventEnricher) {
-            this.eventEnricher = eventEnricher;
-            return this;
-        }
-
-        @Nullable
-        public EventEnricher getEventEnricher() {
-            return eventEnricher;
         }
 
         public Builder setStand(Stand stand) {
@@ -426,9 +368,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             }
             if (commandBus == null) {
                 commandBus = createCommandBus();
-            }
-            if (eventStore == null) {
-                eventStore = createEventStore();
             }
             if (eventBus == null) {
                 eventBus = createEventBus();
@@ -468,19 +407,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return result;
         }
 
-        private EventStore createEventStore() {
-            if (eventStoreStreamExecutor == null) {
-                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
-            }
-
-            final EventStore result = EventStore.newBuilder()
-                                                .setStreamExecutor(eventStoreStreamExecutor)
-                                                .setStorage(storageFactory.createEventStorage())
-                                                .setLogger(EventStore.log())
-                                                .build();
-            return result;
-        }
-
         private CommandBus createCommandBus() {
             if (commandStore == null) {
                 this.commandStore = createCommandStore();
@@ -492,12 +418,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         private EventBus createEventBus() {
-            if (eventStore == null) {
-                this.eventStore = createEventStore();
-            }
             final EventBus result = EventBus.newBuilder()
-                                            .setEventStore(eventStore)
-                                            .setEnricher(eventEnricher)
+                                            .setStorageFactory(storageFactory)
                                             .build();
             return result;
         }
