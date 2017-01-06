@@ -39,7 +39,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -204,7 +204,7 @@ public class ProcessManagerRepositoryShould
     }
 
     @Override
-    protected EntityRepository<ProjectId, TestProcessManager, Project> repository() {
+    protected RecordBasedRepository<ProjectId, TestProcessManager, Project> repository() {
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(
                 TestBoundedContextFactory.newBoundedContext());
         repo.initStorage(InMemoryStorageFactory.getInstance());

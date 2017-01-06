@@ -56,17 +56,20 @@ import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
- * The base class for repositories managing entities.
+ * The base class for repositories that store entities as records.
+ *
+ * <p>Such a repository is backed by {@link RecordStorage}.
+ * Entity states are stored as {@link EntityStorageRecord}s.
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Message>
+public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
                 extends Repository<I, E> {
 
-    protected EntityRepository(BoundedContext boundedContext) {
+    protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -128,18 +131,22 @@ public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Mess
     }
 
     /**
-     * Loads all the entities in this repository with IDs, contained within the passed {@code ids} values.
+     * Loads all the entities in this repository with IDs,
+     * contained within the passed {@code ids} values.
      *
-     * <p>Provides a convenience wrapper around multiple invocations of {@link #load(Object)}. Descendants may
-     * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
+     * <p>Provides a convenience wrapper around multiple invocations of
+     * {@link #load(Object)}. Descendants may optimize the execution of this
+     * method, choosing the most suitable way for the particular storage engine used.
      *
-     * <p>The result only contains those entities which IDs are contained inside the passed {@code ids}.
-     * The resulting collection is always returned with no {@code null} values.
+     * <p>The result only contains those entities which IDs are contained inside
+     * the passed {@code ids}. The resulting collection is always returned
+     * with no {@code null} values.
      *
-     * <p>The order of objects in the result is not guaranteed to be the same as the order of IDs passed as argument.
+     * <p>The order of objects in the result is not guaranteed to be the same
+     * as the order of IDs passed as argument.
      *
-     * <p>In case IDs contain duplicates, the result may also contain duplicates, depending on particular
-     * implementation.
+     * <p>In case IDs contain duplicates, the result may also contain duplicates,
+     * depending on particular implementation.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
@@ -152,12 +159,16 @@ public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Mess
     }
 
     /**
-     * Loads all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
+     * Loads all the entities in this repository by their IDs and
+     * applies the {@link FieldMask} to each of them.
      *
-     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with the {@code FieldMask} applied to the results.
+     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with
+     * the {@code FieldMask} applied to the results.
      *
      * <p>Field mask is applied according to
-     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     * <a
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
+     * >FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
@@ -212,14 +223,19 @@ public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Mess
     }
 
     /**
-     * Finds all the entities passing the given filters and applies the given {@link FieldMask} to the results.
+     * Finds all the entities passing the given filters and
+     * applies the given {@link FieldMask} to the results.
      *
      * <p>Field mask is applied according to
-     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     * <a
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
+     * >FieldMask specs</a>.
      *
-     * <p>At this point only {@link EntityIdFilter} is supported. All other filters are ignored.
+     * <p>At this point only {@link EntityIdFilter} is supported.
+     * All other filters are ignored.
      *
-     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed in the same way as by {@link #loadAll(Iterable)}.
+     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed
+     * in the same way as by {@link #loadAll(Iterable)}.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *

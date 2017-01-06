@@ -29,7 +29,7 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.RecordBasedRepository;
 
 /**
  * Processes the queries targeting {@link org.spine3.server.entity.Entity} objects.
@@ -38,9 +38,9 @@ import org.spine3.server.entity.EntityRepository;
  */
 /* package */ class EntityQueryProcessor implements QueryProcessor {
 
-    private final EntityRepository<?, ? extends Entity, ? extends Message> repository;
+    private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
-    /* package */ EntityQueryProcessor(EntityRepository<?, ? extends Entity, ? extends Message> repository) {
+    /* package */ EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
         this.repository = repository;
     }
 

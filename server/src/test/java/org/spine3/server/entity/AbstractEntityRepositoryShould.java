@@ -45,7 +45,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
     @Test
     public void find_single_entity_by_id() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final E entity = entity();
 
@@ -60,7 +60,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void find_multiple_entities_by_ids() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
@@ -89,7 +89,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void find_all_entities() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final int count = 150;
         final List<E> entities = entities(count);
@@ -107,7 +107,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
     @Test
     public void find_no_entities_if_empty() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final Collection<E> found = repo.loadAll();
         assertSize(0, found);
@@ -116,7 +116,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void handle_wrong_passed_ids() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
@@ -142,7 +142,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
-        final EntityRepository<I, E, S> repo = repository();
+        final RecordBasedRepository<I, E, S> repo = repository();
 
         final int count = 10;
         final List<E> entities = entities(count);
@@ -184,7 +184,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
         Tests.assertMatchesMask(state, fieldMask);
     }
 
-    protected abstract EntityRepository<I, E, S> repository();
+    protected abstract RecordBasedRepository<I, E, S> repository();
 
     protected abstract E entity();
 

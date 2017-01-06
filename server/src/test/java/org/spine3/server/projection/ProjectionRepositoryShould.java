@@ -32,8 +32,8 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.IdSetEventFunction;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -305,7 +305,7 @@ public class ProjectionRepositoryShould
     }
 
     @Override
-    protected EntityRepository<ProjectId, TestProjection, Project> repository() {
+    protected RecordBasedRepository<ProjectId, TestProjection, Project> repository() {
         return repository;
     }
 
