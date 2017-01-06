@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.DefaultIdSetEventFunction;
@@ -47,6 +46,8 @@ import org.spine3.server.type.EventClass;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -201,26 +202,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Loads or creates a projection by the passed ID.
-     *
-     * <p>The projection is created if there was no projection with such ID stored before.
-     *
-     * @param id the ID of the projection to load
-     * @return loaded or created projection instance
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // we do call it, but IDEA somehow doesn't get it because
-        // the signature of the parent class uses another letter for the generic type.
-    @Nonnull
-    @Override
-    public P load(I id) {
-        P projection = super.load(id);
-        if (projection == null) {
-            projection = create(id);
-        }
-        return projection;
-    }
-
-    /**
      * Dispatches the passed event to corresponding {@link Projection}s if the repository is
      * in {@link Status#ONLINE}.
      *
@@ -257,11 +238,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P projection = load(id);
+        final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
         store(projection);
         final S state = projection.getState();
-        final Any packedState = AnyPacker.pack(state);
+        final Any packedState = pack(state);
         standFunnel.post(id, packedState, projection.getVersion());
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();

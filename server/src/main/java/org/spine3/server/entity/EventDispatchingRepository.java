@@ -27,6 +27,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 
+import javax.annotation.CheckReturnValue;
 import java.util.Set;
 
 /**
@@ -94,6 +95,25 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
 
     protected Set<I> findIds(Message event, EventContext context) {
         return idSetFunctions.findAndApply(event, context);
+    }
+
+    /**
+     * Loads or creates an entity by the passed ID.
+     *
+     * <p>The entity is created if it was not found.
+     *
+     * @param id the ID of the entity to load
+     * @return loaded or created projection instance
+     */
+    @Override
+    @CheckReturnValue
+    public Optional<E> load(I id) {
+        final Optional<E> loaded = super.load(id);
+        if (loaded.isPresent()) {
+            return loaded;
+        }
+        final E result = create(id);
+        return Optional.of(result);
     }
 
     /**
