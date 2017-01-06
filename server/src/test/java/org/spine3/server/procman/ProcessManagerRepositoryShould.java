@@ -86,6 +86,44 @@ public class ProcessManagerRepositoryShould
     private TestProcessManagerRepository repository;
     private EventBus eventBus;
 
+    // Configuration of the test suite
+    //---------------------------------
+
+    @Override
+    protected ProjectId createId(int value) {
+        return ProjectId.newBuilder()
+                        .setId(String.format("procman-number-%s", value))
+                        .build();
+    }
+
+    @Override
+    protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
+                TestBoundedContextFactory.newBoundedContext());
+        repo.initStorage(InMemoryStorageFactory.getInstance());
+        return repo;
+    }
+
+    @Override
+    protected TestProcessManager createEntity() {
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId("123-id")
+                                      .build();
+        return new TestProcessManager(id);
+    }
+
+    @Override
+    protected List<TestProcessManager> createEntities(int count) {
+        final List<TestProcessManager> procmans = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++) {
+            final ProjectId id = createId(i);
+
+            procmans.add(new TestProcessManager(id));
+        }
+        return procmans;
+    }
+
     @Before
     public void setUp() {
         eventBus = spy(TestEventBusFactory.create());
@@ -114,6 +152,9 @@ public class ProcessManagerRepositoryShould
     public void tearDown() throws Exception {
         boundedContext.close();
     }
+
+    // Tests
+    //----------------------------
 
     @Test
     public void load_empty_manager_by_default() {
@@ -201,36 +242,6 @@ public class ProcessManagerRepositoryShould
         assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
         assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
-    }
-
-    @Override
-    protected RecordBasedRepository<ProjectId, TestProcessManager, Project> repository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
-                TestBoundedContextFactory.newBoundedContext());
-        repo.initStorage(InMemoryStorageFactory.getInstance());
-        return repo;
-    }
-
-    @Override
-    protected TestProcessManager entity() {
-        final ProjectId id = ProjectId.newBuilder()
-                                      .setId("123-id")
-                                      .build();
-        return new TestProcessManager(id);
-    }
-
-    @Override
-    protected List<TestProcessManager> entities(int count) {
-        final List<TestProcessManager> procmans = new ArrayList<>(count);
-
-        for (int i = 0; i < count; i++) {
-            final ProjectId id = ProjectId.newBuilder()
-                                          .setId(String.format("procman-number-%s", i))
-                                          .build();
-
-            procmans.add(new TestProcessManager(id));
-        }
-        return procmans;
     }
 
     private static class TestProcessManagerRepository

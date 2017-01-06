@@ -92,6 +92,39 @@ public class ProjectionRepositoryShould
         }
     };
 
+    @Override
+    protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
+        return repository;
+    }
+
+    @Override
+    protected TestProjection createEntity() {
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
+                                                                      .setId("single-test-projection")
+                                                                      .build());
+        return projection;
+    }
+
+    @Override
+    protected List<TestProjection> createEntities(int count) {
+        final List<TestProjection> projections = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final TestProjection projection = new TestProjection(createId(i));
+
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
+    @Override
+    protected ProjectId createId(int i) {
+        return ProjectId.newBuilder()
+                        .setId(String.format("test-projection-%s", i))
+                        .build();
+    }
+
     @Before
     public void setUp() {
         boundedContext = newBoundedContext();
@@ -99,6 +132,9 @@ public class ProjectionRepositoryShould
         repository.initStorage(InMemoryStorageFactory.getInstance());
         TestProjection.clearMessageDeliveryHistory();
     }
+
+    // Tests
+    //-------------------------
 
     /**
      * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
@@ -302,35 +338,6 @@ public class ProjectionRepositoryShould
         final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository.getIdSetFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
-    }
-
-    @Override
-    protected RecordBasedRepository<ProjectId, TestProjection, Project> repository() {
-        return repository;
-    }
-
-    @Override
-    protected TestProjection entity() {
-        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
-                                                                      .setId("single-test-projection")
-                                                                      .build());
-        return projection;
-    }
-
-    @Override
-    protected List<TestProjection> entities(int count) {
-        final List<TestProjection> projections = new LinkedList<>();
-
-        for (int i = 0; i < count; i++) {
-            final TestProjection projection = new TestProjection(
-                    ProjectId.newBuilder()
-                             .setId(String.format("test-projection-%s", i))
-                             .build());
-
-            projections.add(projection);
-        }
-
-        return projections;
     }
 
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
