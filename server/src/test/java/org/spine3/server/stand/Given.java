@@ -22,6 +22,7 @@ package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -35,7 +36,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.server.entity.IdSetFunction;
+import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -45,6 +46,7 @@ import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -52,17 +54,16 @@ import java.util.concurrent.Executor;
 /**
  * @author Dmytro Dashenkov
  */
-/* package */ class Given {
+class Given {
 
-    /* package */ static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
-    /* package */ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
-    /* package */ static final int AWAIT_SECONDS = 6;
+    static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
+    static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
+    static final int AWAIT_SECONDS = 6;
     private static final String PROJECT_UUID = Identifiers.newUuid();
 
     private Given() {
     }
 
-    /* package */
     static Event validEvent() {
         return Event.newBuilder()
                     .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
@@ -82,7 +83,6 @@ import java.util.concurrent.Executor;
                     .build();
     }
 
-    /* package */
     static Command validCommand() {
         return Command.newBuilder()
                       .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
@@ -90,15 +90,15 @@ import java.util.concurrent.Executor;
                       .build();
     }
 
-    /* package */ static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
+    static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
         return new StandTestProjectionRepository(context);
     }
 
-    /* package */ static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
+    static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
         return new StandTestAggregateRepository(context);
     }
 
-    /* package */ static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
+    static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
         return boundedContextBuilder(stand)
                 .setStandFunnelExecutor(standFunnelExecutor)
                 .build();
@@ -110,10 +110,10 @@ import java.util.concurrent.Executor;
                              .setStorageFactory(InMemoryStorageFactory.getInstance());
     }
 
-    /* package */ static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        /* package */ StandTestProjectionRepository(BoundedContext boundedContext) {
+    static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+        StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            addIdSetFunction(ProjectCreated.class, new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+            addIdSetFunction(ProjectCreated.class, new IdSetEventFunction<ProjectId, ProjectCreated>() {
                 @Override
                 public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                     return ImmutableSet.of(ProjectId.newBuilder()
@@ -124,14 +124,14 @@ import java.util.concurrent.Executor;
         }
     }
 
-    /* package */ static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+    static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
 
         /**
          * Creates a new repository instance.
          *
          * @param boundedContext the bounded context to which this repository belongs
          */
-        /* package */ StandTestAggregateRepository(BoundedContext boundedContext) {
+        StandTestAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
@@ -149,8 +149,9 @@ import java.util.concurrent.Executor;
         }
 
         @Assign
-        public List<? extends Event> handle(CreateProject createProject, CommandContext context) {
-            return null;
+        public List<? extends Message> handle(CreateProject createProject, CommandContext context) {
+            // In real life we would return a list with at least one element populated with real data.
+            return Collections.emptyList();
         }
 
         @Apply
@@ -159,19 +160,13 @@ import java.util.concurrent.Executor;
         }
     }
 
-    /* package */ static class StandTestProjection extends Projection<ProjectId, Project> {
-        /**
-         * Creates a new instance.
-         *
-         * Required to be public.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
+    static class StandTestProjection extends Projection<ProjectId, Project> {
+
         public StandTestProjection(ProjectId id) {
             super(id);
         }
 
+        @SuppressWarnings("unused") // OK for test class.
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
             // Do nothing

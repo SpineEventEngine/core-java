@@ -20,24 +20,20 @@
 
 package org.spine3.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.IdSetFunction;
-import org.spine3.server.event.EventDispatcher;
+import org.spine3.server.entity.DefaultIdSetEventFunction;
+import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
@@ -49,7 +45,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -57,11 +53,11 @@ import java.util.Set;
  *
  * @param <I> the type of IDs of projections
  * @param <P> the type of projections
- * @param <M> the type of projection state messages
+ * @param <S> the type of projection state messages
  * @author Alexander Yevsyukov
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
-        extends EntityRepository<I, P, M> implements EventDispatcher {
+public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
+                extends EventDispatchingRepository<I, P, S> {
 
     /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
     protected enum Status {
@@ -98,8 +94,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /** If {@code true} the projection will {@link #catchUp()} after initialization. */
     private final boolean catchUpAfterStorageInit;
 
-    private final IdSetFunctions<I> idSetFunctions = new IdSetFunctions<>();
-
     /**
      * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
      * after the storage initialization.
@@ -125,7 +119,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @SuppressWarnings("MethodParameterNamingConvention")
     protected ProjectionRepository(BoundedContext boundedContext, boolean catchUpAfterStorageInit) {
-        super(boundedContext);
+        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromContext());
         this.standFunnel = boundedContext.getStandFunnel();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
     }
@@ -152,43 +146,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         return projectionStorage;
     }
 
-    /**
-     * Adds {@code IdSetFunction} for the repository.
-     *
-     * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}
-     * (derived from this class) to provide mapping between events to projection identifiers.
-     *
-     * <p>Such a mapping may be required when...
-     * <ul>
-     *     <li>An event should be matched to more than one projection.</li>
-     *     <li>The type of an event producer ID (stored in {@code EventContext}) differs from {@code <I>}.</li>
-     * </ul>
-     *
-     * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed with the event message.
-     *
-     * @param func the function instance
-     * @param <E> the type of the event message handled by the function
-     */
-    public <E extends Message> void addIdSetFunction(Class<E> eventClass,
-                                                     IdSetFunction<I, E, EventContext> func) {
-        idSetFunctions.put(eventClass, func);
-    }
-
-    /**
-     * Removes {@code IdSetFunction} from the repository.
-     *
-     * @param eventClass the class of the event message
-     * @param <E> the type of the event message handled by the function we want to remove
-     */
-    public <E extends Message> void removeIdSetFunction(Class<E> eventClass) {
-        idSetFunctions.remove(eventClass);
-    }
-
-    public <E extends Message> Optional<IdSetFunction<I, E, EventContext>> getIdSetFunction(Class<E> eventClass) {
-        return idSetFunctions.get(eventClass);
-    }
-
     /** {@inheritDoc} */
     @Override
     public void initStorage(StorageFactory factory) {
@@ -196,9 +153,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         setStatus(Status.STORAGE_ASSIGNED);
 
         if(catchUpAfterStorageInit) {
-            if(log().isDebugEnabled()) {
-                log().debug("Storage assigned. {} is starting to catch-up", getClass());
-            }
+            log().debug("Storage assigned. {} is starting to catch-up", getClass());
             catchUp();
         }
     }
@@ -246,13 +201,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Obtains the set of IDs of projections to which apply the passed event.
-     */
-    private Set<I> getProjectionIds(Message event, EventContext context) {
-        return idSetFunctions.findAndApply(event, context);
-    }
-
-    /**
      * Loads or creates a projection by the passed ID.
      *
      * <p>The projection is created if there was no projection with such ID stored before.
@@ -273,7 +221,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Dispatches the passed event to corresponding {@link Projection} if the repository is
+     * Dispatches the passed event to corresponding {@link Projection}s if the repository is
      * in {@link Status#ONLINE}.
      *
      * <p>If the repository in another status the event is not dispatched. This is needed to
@@ -289,12 +237,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
     @Override
     public void dispatch(Event event) {
         if (!isOnline()) {
-            if (log().isTraceEnabled()) {
-                log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
-            }
+            log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
             return;
         }
 
@@ -302,27 +249,18 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Dispatches event to a projection without checking the status of the repository.
-     *
-     * <p>Also posts an update to the {@code StandFunnel} instance for this repository.
-     *
-     * @param event the event to dispatch
+     * Dispatches the passed event to projections without checking the status.
      */
-    @Internal
-    /* package */ void internalDispatch(Event event) {
-        final Message eventMessage = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        final Set<I> ids = getProjectionIds(eventMessage, context);
-        for (I id : ids) {
-            handleForProjection(id, eventMessage, context);
-        }
+    private void internalDispatch(Event event) {
+        super.dispatch(event);
     }
 
-    private void handleForProjection(I id, Message eventMessage, EventContext context) {
+    @Override
+    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = load(id);
         projection.handle(eventMessage, context);
         store(projection);
-        final M state = projection.getState();
+        final S state = projection.getState();
         final Any packedState = AnyPacker.pack(state);
         standFunnel.post(id, packedState, projection.getVersion());
         final ProjectionStorage<I> storage = projectionStorage();
@@ -335,18 +273,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     public void catchUp() {
         // Get the timestamp of the last event. This also ensures we have the storage.
-        final Timestamp timestamp = projectionStorage().readLastHandledEventTime();
+        final Timestamp timestamp = nullToDefault(projectionStorage().readLastHandledEventTime());
         final EventStore eventStore = getBoundedContext().getEventBus().getEventStore();
 
         final Set<EventFilter> eventFilters = getEventFilters();
 
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-               .setAfter(timestamp == null ? Timestamp.getDefaultInstance() : timestamp)
+               .setAfter(timestamp)
                .addAllFilter(eventFilters)
                .build();
 
         setStatus(Status.CATCHING_UP);
         eventStore.read(query, new EventStreamObserver(this));
+    }
+
+    private static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
+        return timestamp == null ? Timestamp.getDefaultInstance() : timestamp;
     }
 
     /**
@@ -356,8 +298,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getEventClasses();
         for (EventClass eventClass : eventClasses) {
+            final String typeName = TypeName.of(eventClass.value());
             builder.add(EventFilter.newBuilder()
-                                   .setEventType(eventClass.toTypeUrl().getTypeName())
+                                   .setEventType(typeName)
                                    .build());
         }
         return builder.build();
@@ -370,18 +313,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         setStatus(Status.ONLINE);
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    /**
+   /**
      * The stream observer which redirects events from {@code EventStore} to
      * the associated {@code ProjectionRepository}.
      */
@@ -413,65 +345,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         }
     }
 
-    /**
-     * The {@code IdSetFunction} that obtains event producer ID from an {@code EventContext}
-     * and returns it as a sole element of the {@code ImmutableSet}.
-     *
-     * @param <I> the type of the project IDs managed by the repository
-     */
-    private static class DefaultIdSetFunction<I> implements IdSetFunction<I, Message, EventContext> {
-        @Override
-        public Set<I> apply(Message message, EventContext context) {
-            final I id = Events.getProducer(context);
-            return ImmutableSet.of(id);
-        }
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
     }
 
-    /**
-     * Helper class for managing {@link IdSetFunction}s associated with the projection repository.
-     *
-     * @param <I> the type of the projection IDs of this repository
-     */
-    private static class IdSetFunctions<I> {
-
-        /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
-        private final Map<EventClass, IdSetFunction<I, Message, EventContext>> map = Maps.newHashMap();
-
-        /** The function used when there's no matching entry in the map. */
-        private final IdSetFunction<I, Message, EventContext> defaultFunction = new DefaultIdSetFunction<>();
-
-        private <E extends Message> void remove(Class<E> eventClass) {
-            final EventClass clazz = EventClass.of(eventClass);
-            map.remove(clazz);
-        }
-
-        private Set<I> findAndApply(Message event, EventContext context) {
-            final EventClass eventClass = EventClass.of(event);
-            final IdSetFunction<I, Message, EventContext> func = map.get(eventClass);
-            if (func != null) {
-                final Set<I> result = func.apply(event, context);
-                return result;
-            }
-
-            final Set<I> result = defaultFunction.apply(event, context);
-            return result;
-        }
-
-        private <E extends Message> void put(Class<E> eventClass, IdSetFunction<I, E, EventContext> func) {
-            final EventClass clazz = EventClass.of(eventClass);
-
-            @SuppressWarnings("unchecked")    // since we want to store {@code IdSetFunction}s for various event types.
-            final IdSetFunction<I, Message, EventContext> casted = (IdSetFunction<I, Message, EventContext>) func;
-            map.put(clazz, casted);
-        }
-
-        private <E extends Message> Optional<IdSetFunction<I, E, EventContext>> get(Class<E> eventClass) {
-            final EventClass clazz = EventClass.of(eventClass);
-            final IdSetFunction<I, Message, EventContext> func = map.get(clazz);
-
-            @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
-            final IdSetFunction<I, E, EventContext> result = (IdSetFunction<I, E, EventContext>) func;
-            return Optional.fromNullable(result);
-        }
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

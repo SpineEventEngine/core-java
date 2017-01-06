@@ -33,7 +33,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.IdSetFunction;
+import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -84,8 +84,8 @@ public class ProjectionRepositoryShould
     /**
      * {@code IdSetFunction} used for testing add/get/remove.
      */
-    private static final IdSetFunction<ProjectId, ProjectCreated, EventContext> idSetForCreateProject =
-            new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+    private static final IdSetEventFunction<ProjectId, ProjectCreated> idSetForCreateProject =
+            new IdSetEventFunction<ProjectId, ProjectCreated>() {
         @Override
         public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
             return newHashSet();
@@ -262,15 +262,15 @@ public class ProjectionRepositoryShould
 
     @Test
     public void use_id_set_function() {
-        final IdSetFunction<ProjectId, ProjectCreated, EventContext> delegateFn =
-                new IdSetFunction<ProjectId, ProjectCreated, EventContext>() {
+        final IdSetEventFunction<ProjectId, ProjectCreated> delegateFn =
+                new IdSetEventFunction<ProjectId, ProjectCreated>() {
                     @Override
                     public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                         return newHashSet();
                     }
                 };
 
-        final IdSetFunction<ProjectId, ProjectCreated, EventContext> idSetFunction = spy(delegateFn);
+        final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository.addIdSetFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = Given.Event.projectCreated(ID);
@@ -286,7 +286,7 @@ public class ProjectionRepositoryShould
     public void obtain_id_set_function_after_put() {
         repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
-        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> func =
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> func =
                 repository.getIdSetFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
@@ -298,7 +298,7 @@ public class ProjectionRepositoryShould
         repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
         repository.removeIdSetFunction(ProjectCreated.class);
-        final Optional<IdSetFunction<ProjectId, ProjectCreated, EventContext>> out = repository.getIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository.getIdSetFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }

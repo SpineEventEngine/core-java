@@ -40,9 +40,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -174,12 +172,6 @@ public class ProcessManagerRepositoryShould
         assertEquals(ID, message.getProjectId());
     }
 
-    @Test
-    public void return_id_function_for_event_class() {
-        final IdFunction function = repository.getIdFunction(EventClass.of(ProjectCreated.class));
-        assertNotNull(function);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
@@ -245,11 +237,6 @@ public class ProcessManagerRepositoryShould
 
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
-            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 

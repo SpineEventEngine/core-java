@@ -35,11 +35,9 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
-import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
@@ -50,7 +48,6 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.EventClass;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
@@ -345,11 +342,6 @@ public class BoundedContextShould {
 
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
-            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 

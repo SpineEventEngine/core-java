@@ -59,10 +59,10 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
- * @param <M> the type of entity state messages
+ * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
+public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Message> extends Repository<I, E> {
 
     public EntityRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -257,13 +257,13 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         final Message unpacked = unpack(record.getState());
         final TypeUrl entityStateType = getEntityStateType();
         @SuppressWarnings("unchecked")
-        final M state = (M) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
+        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
 
     private EntityStorageRecord toEntityRecord(E entity) {
-        final M state = entity.getState();
+        final S state = entity.getState();
         final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();

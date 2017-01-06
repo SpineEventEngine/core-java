@@ -36,7 +36,7 @@ import org.spine3.server.error.MissingEntityIdException;
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
-public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
+abstract class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
 
     private final EntityIdField idField;
 
@@ -45,7 +45,7 @@ public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
      *
      * @param idIndex a zero-based index of an ID field in this type of messages
      */
-    public GetIdByFieldIndex(int idIndex) {
+    GetIdByFieldIndex(int idIndex) {
         this.idField = new EntityIdField(idIndex);
     }
 
