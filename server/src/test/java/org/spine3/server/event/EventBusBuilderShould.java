@@ -23,13 +23,12 @@ package org.spine3.server.event;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Event;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
-
-import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,16 +64,22 @@ public class EventBusBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_Executor() {
-        EventBus.newBuilder().setExecutor(Tests.<Executor>nullRef());
+    public void do_not_accept_null_SubscriberEventDelivery() {
+        EventBus.newBuilder()
+                .setSubscriberEventDelivery(Tests.<SubscriberEventDelivery>nullRef());
     }
 
     @Test
-    public void return_set_Executor() {
-        final Executor executor = MoreExecutors.directExecutor();
-        assertEquals(executor, EventBus.newBuilder()
-                                       .setExecutor(executor)
-                                       .getExecutor());
+    public void return_set_SubscriberEventDelivery() {
+        final SubscriberEventDelivery delivery = new SubscriberEventDelivery() {
+            @Override
+            protected boolean shouldPostponeDelivery(Event event, EventSubscriber subscriber) {
+                return false;
+            }
+        };
+        assertEquals(delivery, EventBus.newBuilder()
+                                       .setSubscriberEventDelivery(delivery)
+                                       .getSubscriberEventDelivery());
     }
 
     @Test(expected = NullPointerException.class)
@@ -93,15 +98,45 @@ public class EventBusBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void require_set_EventStore() {
-        EventBus.newBuilder().build();
+        EventBus.newBuilder()
+                .build();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_DispatcherEventDelivery() {
+        EventBus.newBuilder()
+                .setDispatcherEventDelivery(Tests.<DispatcherEventDelivery>nullRef());
     }
 
     @Test
-    public void sets_directExector_if_not_set_explicitly() {
-        assertEquals(MoreExecutors.directExecutor(), EventBus.newBuilder()
-                                                             .setEventStore(eventStore)
-                                                             .build()
-                                                             .getExecutor());
+    public void return_set_DispatcherEventDelivery() {
+        // Create a custom event executor to differ from the default one.
+        final DispatcherEventDelivery delivery = new DispatcherEventDelivery() {
+            @Override
+            public boolean shouldPostponeDelivery(Event event, EventDispatcher dispatcher) {
+                return true;
+            }
+        };
+        assertEquals(delivery, EventBus.newBuilder()
+                                         .setDispatcherEventDelivery(delivery)
+                                         .getDispatcherEventDelivery());
+    }
+
+    @Test
+    public void set_direct_subscriber_event_executor_if_not_set_explicitly() {
+        assertEquals(SubscriberEventDelivery.directDelivery(), EventBus.newBuilder()
+                                                                       .setEventStore(eventStore)
+                                                                       .build()
+                                                                       .getSubscriberEventDelivery());
+    }
+
+    @Test
+    public void set_direct_dispatcher_event_executor_if_not_set_explicitly() {
+        final DispatcherEventDelivery actualValue = EventBus.newBuilder()
+                                                            .setEventStore(eventStore)
+                                                            .build()
+                                                            .getDispatcherEventDelivery();
+        assertEquals(DispatcherEventDelivery.directDelivery(), actualValue);
     }
 
     @Test
@@ -114,7 +149,9 @@ public class EventBusBuilderShould {
 
     @Test
     public void accept_null_Enricher() {
-        assertNull(EventBus.newBuilder().setEnricher(Tests.<EventEnricher>nullRef()).getEnricher());
+        assertNull(EventBus.newBuilder()
+                           .setEnricher(Tests.<EventEnricher>nullRef())
+                           .getEnricher());
     }
 
     @Test
