@@ -170,7 +170,6 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * @param id the ID of the process manager to load
      * @return loaded or created process manager instance
      */
-    @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do call, but `super.load()` has different generic letter. */)
     @Override
     @CheckReturnValue
     protected P loadOrCreate(I id) {

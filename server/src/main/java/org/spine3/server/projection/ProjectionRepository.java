@@ -20,7 +20,6 @@
 
 package org.spine3.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.DefaultIdSetEventFunction;
@@ -45,10 +43,11 @@ import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -203,22 +202,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Loads or creates a projection by the passed ID.
-     *
-     * <p>The projection is created if there was no projection with such ID stored before.
-     *
-     * @param id the ID of the projection to load
-     * @return loaded or created projection instance
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `loadOrCreate()`.
-    @Override
-    @CheckReturnValue
-    public Optional<P> load(I id) {
-        final P result = loadOrCreate(id);
-        return Optional.of(result);
-    }
-
-    /**
      * Dispatches the passed event to corresponding {@link Projection}s if the repository is
      * in {@link Status#ONLINE}.
      *
@@ -259,7 +242,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         projection.handle(eventMessage, context);
         store(projection);
         final S state = projection.getState();
-        final Any packedState = AnyPacker.pack(state);
+        final Any packedState = pack(state);
         standFunnel.post(id, packedState, projection.getVersion());
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
