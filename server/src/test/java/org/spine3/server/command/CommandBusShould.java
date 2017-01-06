@@ -36,7 +36,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
-import org.spine3.base.EventContext;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
@@ -46,14 +45,11 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.procman.ProcessManagerRepositoryShould;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.type.EventClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
@@ -754,15 +750,10 @@ public class CommandBusShould {
         }
 
         // Always return an empty set of command classes forwarded by this repository.
-        @SuppressWarnings("RefusedBequest")
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public Set<CommandClass> getCommandClasses() {
             return newHashSet();
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
-            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 
@@ -879,17 +870,17 @@ public class CommandBusShould {
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
+        @Nonnull
         private final Throwable throwable;
 
-        protected ThrowingCreateProjectHandler(Throwable throwable) {
+        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
             super(newUuid(), eventBus);
             this.throwable = throwable;
         }
 
         @Assign
-        @SuppressWarnings("unused")
+        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
         public ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
-            //noinspection ProhibitedExceptionThrown
             throw throwable;
         }
     }

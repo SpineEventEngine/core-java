@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
@@ -32,6 +33,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -49,10 +51,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
@@ -74,6 +80,17 @@ public class ProjectionRepositoryShould
     private BoundedContext boundedContext;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
+
+    /**
+     * {@code IdSetFunction} used for testing add/get/remove.
+     */
+    private static final IdSetEventFunction<ProjectId, ProjectCreated> idSetForCreateProject =
+            new IdSetEventFunction<ProjectId, ProjectCreated>() {
+        @Override
+        public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+            return newHashSet();
+        }
+    };
 
     @Before
     public void setUp() {
@@ -167,12 +184,6 @@ public class ProjectionRepositoryShould
     }
 
     @Test
-    public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
-        assertEquals(ID, actual);
-    }
-
-    @Test
     public void return_entity_storage() {
         final RecordStorage<ProjectId> recordStorage = repository.recordStorage();
         assertNotNull(recordStorage);
@@ -247,6 +258,49 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(Events.getMessage(projectCreatedEvent)));
         assertTrue(TestProjection.processed(Events.getMessage(taskAddedEvent)));
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
+    }
+
+    @Test
+    public void use_id_set_function() {
+        final IdSetEventFunction<ProjectId, ProjectCreated> delegateFn =
+                new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                    @Override
+                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                        return newHashSet();
+                    }
+                };
+
+        final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
+        repository.addIdSetFunction(ProjectCreated.class, idSetFunction);
+
+        final Event event = Given.Event.projectCreated(ID);
+        repository.dispatch(event);
+
+        final ProjectCreated expectedEventMessage = Events.getMessage(event);
+        final EventContext context = event.getContext();
+        verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // because the test checks that the function is present.
+    @Test
+    public void obtain_id_set_function_after_put() {
+        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> func =
+                repository.getIdSetFunction(ProjectCreated.class);
+
+        assertTrue(func.isPresent());
+        assertEquals(idSetForCreateProject, func.get());
+    }
+
+    @Test
+    public void remove_id_set_function_after_put() {
+        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+
+        repository.removeIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository.getIdSetFunction(ProjectCreated.class);
+
+        assertFalse(out.isPresent());
     }
 
     @Override
@@ -354,4 +408,5 @@ public class ProjectionRepositoryShould
             super(boundedContext, false);
         }
     }
+
 }

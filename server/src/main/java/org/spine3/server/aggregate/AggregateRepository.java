@@ -289,7 +289,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private I getAggregateId(Message command) {
-        final I id = getIdFunction.getId(command, CommandContext.getDefaultInstance());
+        final I id = getIdFunction.apply(command, CommandContext.getDefaultInstance());
         return id;
     }
 
