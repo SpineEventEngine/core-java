@@ -38,7 +38,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class IdSetFunctions<I> {
+class IdSetFunctions<I> {
 
     /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
     private final Map<EventClass, IdSetEventFunction<I, Message>> map = Maps.newHashMap();

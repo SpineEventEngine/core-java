@@ -34,7 +34,7 @@ import org.spine3.base.Identifiers;
  * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-public class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
+class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
     private GetProducerIdFromEvent(int idIndex) {
         super(idIndex);
@@ -45,7 +45,7 @@ public class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIn
      *
      * @param index a zero-based index of an ID field in this type of messages
      */
-    public static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
+    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
         return new GetProducerIdFromEvent<>(index);
     }
 }

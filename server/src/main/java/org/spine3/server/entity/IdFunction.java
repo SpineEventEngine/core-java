@@ -32,7 +32,7 @@ import org.spine3.base.EventContext;
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  * @see Entity
  */
-public interface IdFunction<I, M extends Message, C extends Message> {
+interface IdFunction<I, M extends Message, C extends Message> {
 
     /**
      * Obtains an entity ID based on the passed event or command message and its context.
