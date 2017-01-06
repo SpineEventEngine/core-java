@@ -21,6 +21,7 @@
 package org.spine3.server.procman;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
@@ -58,7 +59,6 @@ import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -114,7 +114,7 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected List<TestProcessManager> createEntities(int count) {
-        final List<TestProcessManager> procmans = new ArrayList<>(count);
+        final List<TestProcessManager> procmans = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
             final ProjectId id = createId(i);

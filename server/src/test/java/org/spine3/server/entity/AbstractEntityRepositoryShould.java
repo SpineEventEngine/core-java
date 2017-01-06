@@ -45,7 +45,8 @@ import static org.spine3.test.Verify.assertSize;
  */
 public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
 
-    private RecordBasedRepository<I, E, S> repo;
+    @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
+    protected RecordBasedRepository<I, E, S> repository;
 
     protected abstract RecordBasedRepository<I, E, S> createRepository();
 
@@ -57,7 +58,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
     @Before
     public void initRepository() {
-        this.repo = createRepository();
+        this.repository = createRepository();
     }
 
     private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S> repo, int count) {
@@ -73,10 +74,10 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     public void find_single_entity_by_id() {
         final E entity = createEntity();
 
-        repo.store(entity);
+        repository.store(entity);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
-        final Entity<?, ?> found = repo.load(entity.getId()).get();
+        final Entity<?, ?> found = repository.load(entity.getId()).get();
 
         assertEquals(found, entity);
     }
@@ -85,7 +86,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @Test
     public void find_multiple_entities_by_ids() {
         final int count = 10;
-        final List<E> entities = createAndStoreEntities(repo, count);
+        final List<E> entities = createAndStoreEntities(repository, count);
 
         final List<I> ids = Lists.newLinkedList();
 
@@ -95,7 +96,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
                             .getId());
         }
 
-        final Collection<E> found = repo.loadAll(ids);
+        final Collection<E> found = repository.loadAll(ids);
 
         assertSize(ids.size(), found);
 
@@ -107,8 +108,8 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void find_all_entities() {
-        final List<E> entities = createAndStoreEntities(repo, 150);
-        final Collection<E> found = repo.loadAll();
+        final List<E> entities = createAndStoreEntities(repository, 150);
+        final Collection<E> found = repository.loadAll();
         assertSize(entities.size(), found);
 
         for (E entity : found) {
@@ -118,7 +119,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
     @Test
     public void find_no_entities_if_empty() {
-        final Collection<E> found = repo.loadAll();
+        final Collection<E> found = repository.loadAll();
         assertSize(0, found);
     }
 
@@ -126,10 +127,10 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     public void create_entity_on_loadOrCreate_if_not_found() {
         final int count = 3;
         //noinspection ResultOfMethodCallIgnored
-        createAndStoreEntities(repo, count);
+        createAndStoreEntities(repository, count);
 
         I id = createId(count + 1);
-        final E entity = repo.loadOrCreate(id);
+        final E entity = repository.loadOrCreate(id);
 
         assertNotNull(entity);
         assertEquals(id, entity.getId());
@@ -139,7 +140,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @Test
     public void handle_wrong_passed_ids() {
         final int count = 10;
-        final List<E> entities = createAndStoreEntities(repo, count);
+        final List<E> entities = createAndStoreEntities(repository, count);
         final List<I> ids = Lists.newLinkedList();
         for (int i = 0; i < count; i++) {
             ids.add(entities.get(i)
@@ -148,7 +149,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
         final Entity<I, S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
-        final Collection<E> found = repo.loadAll(ids);
+        final Collection<E> found = repository.loadAll(ids);
         assertSize(ids.size() - 1, found); // Check we've found all existing items
 
         for (E entity : found) {
@@ -160,7 +161,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     @Test
     public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
         final int count = 10;
-        final List<E> entities = createAndStoreEntities(repo, count);
+        final List<E> entities = createAndStoreEntities(repository, count);
         final List<EntityId> ids = Lists.newLinkedList();
 
         // Find some of the records (half of them in this case)
@@ -183,7 +184,7 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
                                                                 .getState()
                                                                 .getDescriptorForType();
         final FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
-        final Iterable<E> readEntities = repo.find(filters, firstFieldOnly);
+        final Iterable<E> readEntities = repository.find(filters, firstFieldOnly);
 
         assertSize(ids.size(), readEntities);
 
