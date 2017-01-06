@@ -32,8 +32,8 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.IdSetEventFunction;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -79,7 +79,9 @@ public class ProjectionRepositoryShould
 
     private BoundedContext boundedContext;
 
-    private ProjectionRepository<ProjectId, TestProjection, Project> repository;
+    private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
+        return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
+    }
 
     /**
      * {@code IdSetFunction} used for testing add/get/remove.
@@ -92,13 +94,49 @@ public class ProjectionRepositoryShould
         }
     };
 
+    @Override
+    protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
+        boundedContext = newBoundedContext();
+        return new TestProjectionRepository(boundedContext);
+    }
+
+    @Override
+    protected TestProjection createEntity() {
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
+                                                                      .setId("single-test-projection")
+                                                                      .build());
+        return projection;
+    }
+
+    @Override
+    protected List<TestProjection> createEntities(int count) {
+        final List<TestProjection> projections = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final TestProjection projection = new TestProjection(createId(i));
+
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
+    @Override
+    protected ProjectId createId(int i) {
+        return ProjectId.newBuilder()
+                        .setId(String.format("test-projection-%s", i))
+                        .build();
+    }
+
     @Before
     public void setUp() {
-        boundedContext = newBoundedContext();
-        repository = new TestProjectionRepository(boundedContext);
+        initRepository();
         repository.initStorage(InMemoryStorageFactory.getInstance());
         TestProjection.clearMessageDeliveryHistory();
     }
+
+    // Tests
+    //-------------------------
 
     /**
      * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
@@ -108,7 +146,7 @@ public class ProjectionRepositoryShould
      **/
     @Test
     public void become_online_automatically_after_init_storage() {
-        assertTrue(repository.isOnline());
+        assertTrue(repository().isOnline());
     }
 
     /**
@@ -152,16 +190,16 @@ public class ProjectionRepositoryShould
 
     private void checkDispatchesEvent(Message eventMessage) {
         final Event event = Events.createEvent(eventMessage, createEventContext(ID));
-        repository.dispatch(event);
+        repository().dispatch(event);
         assertTrue(TestProjection.processed(eventMessage));
     }
 
     private void checkDoesNotDispatchEventWith(Status status) {
-        repository.setStatus(status);
+        repository().setStatus(status);
         final ProjectCreated eventMsg = Given.EventMessage.projectCreated(ID);
         final Event event = Events.createEvent(eventMsg, createEventContext(ID));
 
-        repository.dispatch(event);
+        repository().dispatch(event);
 
         assertFalse(TestProjection.processed(eventMsg));
     }
@@ -172,12 +210,12 @@ public class ProjectionRepositoryShould
 
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
 
-        repository.dispatch(event);
+        repository().dispatch(event);
     }
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository.getEventClasses();
+        final Set<EventClass> eventClasses = repository().getEventClasses();
         assertContainsAll(eventClasses,
                           EventClass.of(ProjectCreated.class),
                           EventClass.of(TaskAdded.class),
@@ -186,7 +224,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_entity_storage() {
-        final RecordStorage<ProjectId> recordStorage = repository.recordStorage();
+        final RecordStorage<ProjectId> recordStorage = repository().recordStorage();
         assertNotNull(recordStorage);
     }
 
@@ -201,35 +239,35 @@ public class ProjectionRepositoryShould
     public void update_status() {
         final Status status = CATCHING_UP;
 
-        repository.setStatus(status);
+        repository().setStatus(status);
 
-        assertEquals(status, repository.getStatus());
+        assertEquals(status, repository().getStatus());
     }
 
     @Test
     public void updates_status_to_CLOSED_on_close() throws Exception {
         repository.close();
 
-        assertEquals(CLOSED, repository.getStatus());
+        assertEquals(CLOSED, repository().getStatus());
     }
 
     @Test
     public void return_false_if_status_is_not_ONLINE() {
-        repository.setStatus(CLOSED);
+        repository().setStatus(CLOSED);
 
-        assertFalse(repository.isOnline());
+        assertFalse(repository().isOnline());
     }
 
     @Test
     public void return_true_if_explicitly_set_ONLINE() {
-        repository.setStatus(CLOSED);
-        repository.setOnline();
-        assertTrue(repository.isOnline());
+        repository().setStatus(CLOSED);
+        repository().setOnline();
+        assertTrue(repository().isOnline());
     }
 
     @Test
     public void catches_up_from_EventStorage() {
-        ensureCatchesUpFromEventStorage(repository);
+        ensureCatchesUpFromEventStorage(repository());
     }
 
     @Test
@@ -272,10 +310,10 @@ public class ProjectionRepositoryShould
                 };
 
         final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
-        repository.addIdSetFunction(ProjectCreated.class, idSetFunction);
+        repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = Given.Event.projectCreated(ID);
-        repository.dispatch(event);
+        repository().dispatch(event);
 
         final ProjectCreated expectedEventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
@@ -285,10 +323,10 @@ public class ProjectionRepositoryShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // because the test checks that the function is present.
     @Test
     public void obtain_id_set_function_after_put() {
-        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
         final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> func =
-                repository.getIdSetFunction(ProjectCreated.class);
+                repository().getIdSetFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(idSetForCreateProject, func.get());
@@ -296,41 +334,12 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_id_set_function_after_put() {
-        repository.addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
-        repository.removeIdSetFunction(ProjectCreated.class);
-        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository.getIdSetFunction(ProjectCreated.class);
+        repository().removeIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository().getIdSetFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
-    }
-
-    @Override
-    protected EntityRepository<ProjectId, TestProjection, Project> repository() {
-        return repository;
-    }
-
-    @Override
-    protected TestProjection entity() {
-        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
-                                                                      .setId("single-test-projection")
-                                                                      .build());
-        return projection;
-    }
-
-    @Override
-    protected List<TestProjection> entities(int count) {
-        final List<TestProjection> projections = new LinkedList<>();
-
-        for (int i = 0; i < count; i++) {
-            final TestProjection projection = new TestProjection(
-                    ProjectId.newBuilder()
-                             .setId(String.format("test-projection-%s", i))
-                             .build());
-
-            projections.add(projection);
-        }
-
-        return projections;
     }
 
     private ManualCatchupProjectionRepository repoWithManualCatchup() {

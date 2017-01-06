@@ -36,7 +36,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.StandStorage;
@@ -87,7 +87,7 @@ public class Stand implements AutoCloseable {
      * The mapping between {@code TypeUrl} instances and repositories providing the entities of this type
      */
     private final ConcurrentMap<TypeUrl,
-            EntityRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
+            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
      * Stores  known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
@@ -293,8 +293,8 @@ public class Stand implements AutoCloseable {
     public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
-        if (repository instanceof EntityRepository) {
-            typeToRepositoryMap.put(entityType, (EntityRepository<I, E, ? extends Message>) repository);
+        if (repository instanceof RecordBasedRepository) {
+            typeToRepositoryMap.put(entityType, (RecordBasedRepository<I, E, ? extends Message>) repository);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
@@ -302,7 +302,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Dumps all {@link TypeUrl}-to-{@link EntityRepository} relations.
+     * Dumps all {@link TypeUrl}-to-{@link RecordBasedRepository} relations.
      */
     @Override
     public void close() throws Exception {
@@ -340,7 +340,7 @@ public class Stand implements AutoCloseable {
     private QueryProcessor processorFor(TypeUrl type) {
         final QueryProcessor result;
 
-        final EntityRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(type);
+        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(type);
         if (repository != null) {
 
             // The query target is an {@code Entity}.
