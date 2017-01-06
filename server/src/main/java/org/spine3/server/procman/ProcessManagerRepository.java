@@ -142,10 +142,9 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      */
     @Override
     public void dispatch(Event event) throws IllegalArgumentException {
-        final Message eventMessage = Events.getMessage(event);
-        checkEventClass(EventClass.of(eventMessage));
+        checkEventClass(event);
 
-        doDispatch(event);
+        super.dispatch(event);
     }
 
     @Override
@@ -170,6 +169,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * @param id the ID of the process manager to load
      * @return loaded or created process manager instance
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We do call it, but the generic type letter is different.
     @Nonnull
     @Override
     public P load(I id) {
@@ -191,7 +191,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         }
     }
 
-    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
+    private void checkEventClass(Event event) throws IllegalArgumentException {
+        final Message eventMessage = Events.getMessage(event);
+        final EventClass eventClass = EventClass.of(eventMessage);
+
         final Set<EventClass> classes = getEventClasses();
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()

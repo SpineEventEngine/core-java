@@ -221,7 +221,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Dispatches the passed event to corresponding {@link Projection} if the repository is
+     * Dispatches the passed event to corresponding {@link Projection}s if the repository is
      * in {@link Status#ONLINE}.
      *
      * <p>If the repository in another status the event is not dispatched. This is needed to
@@ -237,6 +237,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
     @Override
     public void dispatch(Event event) {
         if (!isOnline()) {
@@ -244,7 +245,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             return;
         }
 
-        doDispatch(event);
+        internalDispatch(event);
+    }
+
+    /**
+     * Dispatches the passed event to projections without checking the status.
+     */
+    private void internalDispatch(Event event) {
+        super.dispatch(event);
     }
 
     @Override
@@ -305,18 +313,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         setStatus(Status.ONLINE);
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    /**
+   /**
      * The stream observer which redirects events from {@code EventStore} to
      * the associated {@code ProjectionRepository}.
      */
@@ -330,7 +327,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onNext(Event event) {
-            projectionRepository.doDispatch(event);
+            projectionRepository.internalDispatch(event);
         }
 
         @Override
@@ -346,5 +343,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 log().info("{} catch-up complete", repositoryClass.getName());
             }
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -44,8 +43,14 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
 
     private final IdSetFunctionMap<I> idSetFunctions;
 
-    public EventDispatchingRepository(BoundedContext boundedContext,
-                                      IdSetEventFunction<I, Message> defaultFunction) {
+    /**
+     * Creates new repository instance.
+     *
+     * @param boundedContext the {@code BoundedContext} in which the repository works
+     * @param defaultFunction the default function for getting an target entity IDs
+     */
+    protected EventDispatchingRepository(BoundedContext boundedContext,
+                                         IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
         this.idSetFunctions = new IdSetFunctionMap<>(defaultFunction);
     }
@@ -96,8 +101,8 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
      *
      * @param event the event to dispatch
      */
-    @Internal
-    protected void doDispatch(Event event) {
+    @Override
+    public void dispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final Set<I> ids = findIds(eventMessage, context);
