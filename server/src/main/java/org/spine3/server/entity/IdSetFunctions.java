@@ -38,7 +38,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class IdSetFunctionMap<I> {
+public class IdSetFunctions<I> {
 
     /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
     private final Map<EventClass, IdSetEventFunction<I, Message>> map = Maps.newHashMap();
@@ -51,7 +51,7 @@ public class IdSetFunctionMap<I> {
      *
      * @param defaultFunction the function which used when there is no matching entry in the map
      */
-    public IdSetFunctionMap(IdSetEventFunction<I, Message> defaultFunction) {
+    public IdSetFunctions(IdSetEventFunction<I, Message> defaultFunction) {
         this.defaultFunction = defaultFunction;
     }
 

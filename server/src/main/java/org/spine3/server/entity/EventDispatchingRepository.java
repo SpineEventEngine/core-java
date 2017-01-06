@@ -41,7 +41,7 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
                 extends EntityRepository<I, E, S>
                 implements EntityEventDispatcher<I> {
 
-    private final IdSetFunctionMap<I> idSetFunctions;
+    private final IdSetFunctions<I> idSetFunctions;
 
     /**
      * Creates new repository instance.
@@ -52,7 +52,7 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
     protected EventDispatchingRepository(BoundedContext boundedContext,
                                          IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
-        this.idSetFunctions = new IdSetFunctionMap<>(defaultFunction);
+        this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
     }
 
     /**
