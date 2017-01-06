@@ -20,6 +20,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -891,7 +892,8 @@ public class StandShould {
         final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.load(eq(projectId))).thenReturn(new StandTestProjection(projectId));
+            when(projectionRepository.load(eq(projectId)))
+                    .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));

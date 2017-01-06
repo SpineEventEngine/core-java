@@ -19,6 +19,8 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
@@ -44,7 +46,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
@@ -74,8 +75,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                          extends Repository<I, A>
-                          implements CommandDispatcher {
+                extends Repository<I, A>
+                implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -152,15 +153,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Loads the aggregate by given id.
+     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
      *
-     * @param id id of the aggregate to load
+     * @param id the ID of the aggregate to load
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
-    @Nonnull
     @Override
-    public A load(I id) throws IllegalStateException {
+    public Optional<A> load(I id) throws IllegalStateException {
+        A result = loadOrCreate(id);
+        return Optional.of(result);
+    }
+
+    /**
+     * Loads or creates an aggregate by the passed ID.
+     *
+     * @param id the ID of the aggregate
+     * @return loaded or created aggregate instance
+     */
+    @VisibleForTesting
+    A loadOrCreate(I id) {
         final AggregateEvents aggregateEvents = aggregateStorage().read(id);
         final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
@@ -259,7 +271,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                             getAggregateClass(), aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
-            aggregate = load(aggregateId);
+            aggregate = loadOrCreate(aggregateId);
+
             try {
                 aggregate.dispatch(command, context);
             } catch (RuntimeException e) {

@@ -51,7 +51,8 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
 
         repo.store(entity);
 
-        final Entity<?, ?> found = repo.load(entity.getId());
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
+        final Entity<?, ?> found = repo.load(entity.getId()).get();
 
         assertEquals(found, entity);
     }

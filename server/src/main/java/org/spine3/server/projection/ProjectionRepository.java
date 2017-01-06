@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -44,6 +45,7 @@ import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -208,16 +210,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * @param id the ID of the projection to load
      * @return loaded or created projection instance
      */
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // we do call it, but IDEA somehow doesn't get it because
-        // the signature of the parent class uses another letter for the generic type.
-    @Nonnull
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `loadOrCreate()`.
     @Override
-    public P load(I id) {
-        P projection = super.load(id);
-        if (projection == null) {
-            projection = create(id);
-        }
-        return projection;
+    @CheckReturnValue
+    public Optional<P> load(I id) {
+        final P result = loadOrCreate(id);
+        return Optional.of(result);
     }
 
     /**
@@ -257,7 +255,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P projection = load(id);
+        final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
         store(projection);
         final S state = projection.getState();

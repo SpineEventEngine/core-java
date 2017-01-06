@@ -112,9 +112,10 @@ public class AggregateRepositoryShould {
         repository.close();
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void return_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId());
+        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId()).get();
         final Project state = aggregate.getState();
 
         assertTrue(isDefault(state));
@@ -126,7 +127,8 @@ public class AggregateRepositoryShould {
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
-        final ProjectAggregate actual = repository.load(id);
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        final ProjectAggregate actual = repository.load(id).get();
 
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
@@ -141,7 +143,8 @@ public class AggregateRepositoryShould {
         repository.setSnapshotTrigger(expected.getUncommittedEvents().size());
         repository.store(expected);
 
-        final ProjectAggregate actual = repository.load(id);
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        final ProjectAggregate actual = repository.load(id).get();
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
@@ -311,7 +314,7 @@ public class AggregateRepositoryShould {
         repositorySpy.dispatch(cmd);
 
         // Load should be executed twice due to repeated dispatching.
-        verify(repositorySpy, times(2)).load(projectId);
+        verify(repositorySpy, times(2)).loadOrCreate(projectId);
 
         // Reading event count is executed 2 times per dispatch (so 2 * 2) plus once upon storing the state.
         verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
@@ -350,9 +353,9 @@ public class AggregateRepositoryShould {
             AggregateRepository<ProjectId, ProjectAggregate> repositorySpy) {
         final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
-        final RuntimeException wrapped = new RuntimeException(cause);
-        doThrow(wrapped).when(throwingAggregate).dispatch(msg, cmd.getContext());
-        doReturn(throwingAggregate).when(repositorySpy).load(any(ProjectId.class));
+        final RuntimeException exception = new RuntimeException(cause);
+        doThrow(exception).when(throwingAggregate).dispatch(msg, cmd.getContext());
+        doReturn(throwingAggregate).when(repositorySpy).loadOrCreate(any(ProjectId.class));
     }
 
     private AggregateStorage<ProjectId> givenAggregateStorageMock() {

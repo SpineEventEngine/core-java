@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -180,11 +181,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param id the id of the entity to load
-     * @return the entity or {@code null} if there's no entity with such id
+     * @return the entity or empty {@code Optional} if there's no entity with such id
      */
     @CheckReturnValue
-    @Nullable
-    protected abstract E load(I id);
+    protected abstract Optional<E> load(I id);
 
     /** Returns the storage assigned to this repository or {@code null} if the storage is not assigned yet. */
     @CheckReturnValue

@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
@@ -62,9 +63,10 @@ import static org.spine3.validate.Validate.isDefault;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Message> extends Repository<I, E> {
+public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Message>
+                extends Repository<I, E> {
 
-    public EntityRepository(BoundedContext boundedContext) {
+    protected EntityRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -97,16 +99,32 @@ public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Mess
     }
 
     /** {@inheritDoc} */
-    @Nullable
     @Override
-    public E load(I id) {
+    @CheckReturnValue
+    public Optional<E> load(I id) {
         final RecordStorage<I> storage = recordStorage();
         final EntityStorageRecord record = storage.read(id);
         if (isDefault(record)) {
-            return null;
+            return Optional.absent();
         }
         final E entity = toEntity(id, record);
-        return entity;
+        return Optional.of(entity);
+    }
+
+    /**
+     * Loads an entity by the passed ID or creates a new one, if the entity was not found.
+     */
+    @CheckReturnValue
+    protected E loadOrCreate(I id) {
+        final Optional<E> loaded = load(id);
+
+        if (!loaded.isPresent()) {
+            final E result = create(id);
+            return result;
+        }
+
+        final E result = loaded.get();
+        return result;
     }
 
     /**
@@ -161,8 +179,8 @@ public abstract class EntityRepository<I, E extends Entity<I, S>, S extends Mess
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
 
-            if (record == null) { /*    Record is nullable here since {@code RecordStorage#findBulk}    *
-                                   *    returns an {@code Iterable} that may contain nulls.             */
+            if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
+                                   *    returns an `Iterable` that may contain nulls.             */
                 continue;
             }
 

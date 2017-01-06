@@ -124,7 +124,8 @@ public class ProjectionRepositoryShould
 
     @Test
     public void load_empty_projection_by_default() {
-        final TestProjection projection = repository.load(ID);
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // we're sure because load either loads or creates.
+        final TestProjection projection = repository.load(ID).get();
         assertEquals(Project.getDefaultInstance(), projection.getState());
     }
 
