@@ -39,7 +39,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nonnull;
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -56,6 +56,7 @@ import static org.spine3.base.Commands.getMessage;
  * @param <S> the type of process manager state messages
  * @see ProcessManager
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>, S extends Message>
                 extends EventDispatchingRepository<I, P, S>
@@ -116,7 +117,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         final CommandClass commandClass = CommandClass.of(commandMessage);
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
-        final P manager = load(id);
+        final P manager = loadOrCreate(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         postEvents(events);
@@ -149,7 +150,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P manager = load(id);
+        final P manager = loadOrCreate(id);
         try {
             manager.dispatchEvent(eventMessage, context);
             store(manager);
@@ -169,14 +170,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * @param id the ID of the process manager to load
      * @return loaded or created process manager instance
      */
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We do call it, but the generic type letter is different.
-    @Nonnull
     @Override
-    public P load(I id) {
-        P result = super.load(id);
-        if (result == null) {
-            result = create(id);
-        }
+    @CheckReturnValue
+    protected P loadOrCreate(I id) {
+        final P result = super.loadOrCreate(id);
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
