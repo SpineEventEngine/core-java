@@ -21,11 +21,9 @@
 package org.spine3.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -66,22 +64,22 @@ public class EventBusBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_SubscriberEventExecutor() {
+    public void do_not_accept_null_SubscriberEventDelivery() {
         EventBus.newBuilder()
-                .setSubscriberEventExecutor(Tests.<SubscriberEventExecutor>nullRef());
+                .setSubscriberEventDelivery(Tests.<SubscriberEventDelivery>nullRef());
     }
 
     @Test
-    public void return_set_Executor() {
-        final SubscriberEventExecutor executor = new SubscriberEventExecutor() {
+    public void return_set_SubscriberEventDelivery() {
+        final SubscriberEventDelivery delivery = new SubscriberEventDelivery() {
             @Override
-            protected boolean maybePostponeDelivery(Message event, EventContext context, EventSubscriber subscriber) {
+            protected boolean shouldPostponeDelivery(Event event, EventSubscriber subscriber) {
                 return false;
             }
         };
-        assertEquals(executor, EventBus.newBuilder()
-                                       .setSubscriberEventExecutor(executor)
-                                       .getExecutor());
+        assertEquals(delivery, EventBus.newBuilder()
+                                       .setSubscriberEventDelivery(delivery)
+                                       .getSubscriberEventDelivery());
     }
 
     @Test(expected = NullPointerException.class)
@@ -105,40 +103,40 @@ public class EventBusBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_DispatcherEventExecutor() {
+    public void do_not_accept_null_DispatcherEventDelivery() {
         EventBus.newBuilder()
-                .setDispatcherEventExecutor(Tests.<DispatcherEventExecutor>nullRef());
+                .setDispatcherEventDelivery(Tests.<DispatcherEventDelivery>nullRef());
     }
 
     @Test
-    public void return_set_DispatcherEventExecutor() {
+    public void return_set_DispatcherEventDelivery() {
         // Create a custom event executor to differ from the default one.
-        final DispatcherEventExecutor executor = new DispatcherEventExecutor() {
+        final DispatcherEventDelivery delivery = new DispatcherEventDelivery() {
             @Override
-            public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
+            public boolean shouldPostponeDelivery(Event event, EventDispatcher dispatcher) {
                 return true;
             }
         };
-        assertEquals(executor, EventBus.newBuilder()
-                                         .setDispatcherEventExecutor(executor)
-                                         .getDispatcherEventExecutor());
+        assertEquals(delivery, EventBus.newBuilder()
+                                         .setDispatcherEventDelivery(delivery)
+                                         .getDispatcherEventDelivery());
     }
 
     @Test
     public void set_direct_subscriber_event_executor_if_not_set_explicitly() {
-        assertEquals(SubscriberEventExecutor.directExecutor(), EventBus.newBuilder()
+        assertEquals(SubscriberEventDelivery.directDelivery(), EventBus.newBuilder()
                                                                        .setEventStore(eventStore)
                                                                        .build()
-                                                                       .getExecutor());
+                                                                       .getSubscriberEventDelivery());
     }
 
     @Test
     public void set_direct_dispatcher_event_executor_if_not_set_explicitly() {
-        final DispatcherEventExecutor actualValue = EventBus.newBuilder()
+        final DispatcherEventDelivery actualValue = EventBus.newBuilder()
                                                             .setEventStore(eventStore)
                                                             .build()
-                                                            .getDispatcherEventExecutor();
-        assertEquals(DispatcherEventExecutor.directExecutor(), actualValue);
+                                                            .getDispatcherEventDelivery();
+        assertEquals(DispatcherEventDelivery.directDelivery(), actualValue);
     }
 
     @Test

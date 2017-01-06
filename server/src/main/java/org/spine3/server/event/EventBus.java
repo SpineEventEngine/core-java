@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
@@ -44,10 +43,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.getMessage;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -70,13 +67,11 @@ import static org.spine3.base.Events.getMessage;
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with the {@code EventBus}
  * <strong>before</strong> it is passed to subscribers.
  *
- * <p>The execution of subscriber methods is performed by an {@link Executor} associated with the instance of
- * the {@code EventBus}.
+ * <p>The delivery of the events to the subscribers and dispatchers is performed by an {@link SubscriberEventDelivery}
+ * and {@link DispatcherEventDelivery} strategies associated with the instance of the {@code EventBus}, respectively.
  *
- * <p>If a subscriber method throws an exception (which in general should be avoided), the exception is logged.
- * No other processing occurs.
- *
- * <p>If there is no subscriber for the posted event, the fact is logged as warning, with no further processing.
+ * <p>If there is no subscribers or dispatchers for the posted event, the fact is logged as warning,
+ * with no further processing.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
@@ -99,11 +94,11 @@ public class EventBus implements AutoCloseable {
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /** The executor for invoking subscriber methods. */
-    private final SubscriberEventExecutor subscriberEventExecutor;
+    /** The strategy to deliver events to the subscribers. */
+    private final SubscriberEventDelivery subscriberEventDelivery;
 
-    /** The executor for calling the dispatchers. */
-    private final DispatcherEventExecutor dispatcherEventExecutor;
+    /** The strategy to deliver events to the dispatchers. */
+    private final DispatcherEventDelivery dispatcherEventDelivery;
 
     /** The validator for events posted to the bus. */
     private final MessageValidator eventValidator;
@@ -117,21 +112,24 @@ public class EventBus implements AutoCloseable {
      */
     private EventBus(Builder builder) {
         this.eventStore = builder.eventStore;
-        this.subscriberEventExecutor = builder.subscriberEventExecutor;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
-        this.dispatcherEventExecutor = builder.dispatcherEventExecutor;
+        this.subscriberEventDelivery = builder.subscriberEventDelivery;
+        this.dispatcherEventDelivery = builder.dispatcherEventDelivery;
 
+        /**
+         * Sets up the {@code DispatcherEventDelivery} and {@code SubscriberEventDelivery} with an ability to obtain
+         * {@link EventDispatcher}s and {@link EventSubscriber}s by a given {@link EventClass} instance.
+         *
+         * <p>Such an approach allows to query for an actual state of the {@code dispatcherRegistry}
+         * and {@code subscriberRegistry}, keeping both of the registries private to the {@code EventBus}.
+         **/
         injectDispatcherProvider();
         injectSubscriberProvider();
     }
 
-    /**
-     * Sets up the {@code DispatcherEventExecutor} with an ability to obtain matching {@link EventDispatcher}s
-     * by a given {@link EventClass} instance according to the up-to-date state of the {@code dispatcherRegistry}.
-     */
     private void injectDispatcherProvider() {
-        dispatcherEventExecutor.setDispatcherProvider(new DispatcherProvider() {
+        dispatcherEventDelivery.setConsumerProvider(new Function<EventClass, Set<EventDispatcher>>() {
             @Nullable
             @Override
             public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
@@ -142,12 +140,8 @@ public class EventBus implements AutoCloseable {
         });
     }
 
-    /**
-     * Sets up the {@code SubscriberEventExecutor} with an ability to obtain matching {@link EventSubscriber}s
-     * by a given {@link EventClass} instance according to the up-to-date state of the {@code subscriberRegistry}.
-     */
     private void injectSubscriberProvider() {
-        subscriberEventExecutor.setSubscriberProvider(new SubscriberProvider() {
+        subscriberEventDelivery.setConsumerProvider(new Function<EventClass, Collection<EventSubscriber>>() {
             @Nullable
             @Override
             public Collection<EventSubscriber> apply(@Nullable EventClass eventClass) {
@@ -164,11 +158,6 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ SubscriberEventExecutor getExecutor() {
-        return subscriberEventExecutor;
-    }
-
-    @VisibleForTesting
     /* package */ MessageValidator getEventValidator() {
         return eventValidator;
     }
@@ -181,8 +170,14 @@ public class EventBus implements AutoCloseable {
 
     @VisibleForTesting
     @Nullable
-    /* package */ DispatcherEventExecutor getDispatcherEventExecutor() {
-        return dispatcherEventExecutor;
+    /* package */ DispatcherEventDelivery getDispatcherEventDelivery() {
+        return dispatcherEventDelivery;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    /* package */ SubscriberEventDelivery getSubscriberEventDelivery() {
+        return subscriberEventDelivery;
     }
 
     /**
@@ -253,9 +248,7 @@ public class EventBus implements AutoCloseable {
         store(event);
         final Event enriched = enrich(event);
         final int dispatchersCalled = callDispatchers(enriched);
-        final Message message = getMessage(enriched);
-        final EventContext context = enriched.getContext();
-        final int subscribersInvoked = invokeSubscribers(message, context);
+        final int subscribersInvoked = invokeSubscribers(enriched);
 
         if (dispatchersCalled == 0 && subscribersInvoked == 0) {
             handleDeadEvent(event);
@@ -280,22 +273,20 @@ public class EventBus implements AutoCloseable {
     private int callDispatchers(Event event) {
         final EventClass eventClass = EventClass.of(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
-
-        dispatcherEventExecutor.dispatch(event);
+        dispatcherEventDelivery.deliver(event);
         return dispatchers.size();
     }
 
     /**
      * Invoke the subscribers for the {@code event}.
      *
-     * @param event   the event to pass to the subscribers.
-     * @param context the event context related to the {@code event}.
+     * @param event the event to pass to the subscribers.
      * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
      */
-    private int invokeSubscribers(Message event, EventContext context) {
+    private int invokeSubscribers(Event event) {
         final EventClass eventClass = EventClass.of(event);
         final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
-        subscriberEventExecutor.deliverToSubscribers(event, context);
+        subscriberEventDelivery.deliver(event);
         return subscribers.size();
     }
 
@@ -358,18 +349,18 @@ public class EventBus implements AutoCloseable {
         private EventStore eventStore;
 
         /**
-         * Optional {@code SubscriberEventExecutor} for executing subscriber methods.
+         * Optional {@code SubscriberEventDelivery} for executing subscriber methods.
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        private SubscriberEventExecutor subscriberEventExecutor;
+        private SubscriberEventDelivery subscriberEventDelivery;
 
         /**
-         * Optional {@code DispatcherEventExecutor} for calling the dispatchers.
+         * Optional {@code DispatcherEventDelivery} for calling the dispatchers.
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        private DispatcherEventExecutor dispatcherEventExecutor;
+        private DispatcherEventDelivery dispatcherEventDelivery;
 
         /**
          * Optional validator for events.
@@ -381,7 +372,8 @@ public class EventBus implements AutoCloseable {
         @Nullable
         private EventEnricher enricher;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder setEventStore(EventStore eventStore) {
             this.eventStore = checkNotNull(eventStore);
@@ -394,37 +386,37 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets an {@code SubscriberEventExecutor} to be used for executing subscriber methods
+         * Sets a {@code SubscriberEventDelivery} to be used for the event delivery to the subscribers
          * in the {@code EventBus} we build.
          *
-         * <p>If the {@code SubscriberEventExecutor} is not set, {@link SubscriberEventExecutor#directExecutor()}
+         * <p>If the {@code SubscriberEventDelivery} is not set, {@link SubscriberEventDelivery#directDelivery()}
          * will be used.
          */
-        public Builder setSubscriberEventExecutor(SubscriberEventExecutor executor) {
-            this.subscriberEventExecutor = checkNotNull(executor);
+        public Builder setSubscriberEventDelivery(SubscriberEventDelivery delivery) {
+            this.subscriberEventDelivery = checkNotNull(delivery);
             return this;
         }
 
         @Nullable
-        public SubscriberEventExecutor getExecutor() {
-            return subscriberEventExecutor;
+        public SubscriberEventDelivery getSubscriberEventDelivery() {
+            return subscriberEventDelivery;
         }
 
         /**
-         * Sets an {@code DispatcherEventExecutor} to be used for passing the event to the target dispatchers
+         * Sets a {@code DispatcherEventDelivery} to be used for the event delivery to the dispatchers
          * in the {@code EventBus} we build.
          *
-         * <p>If the {@code DispatcherEventExecutor} is not set, {@link DispatcherEventExecutor#directExecutor()}
+         * <p>If the {@code DispatcherEventDelivery} is not set, {@link DispatcherEventDelivery#directDelivery()}
          * will be used.
          */
-        public Builder setDispatcherEventExecutor(DispatcherEventExecutor executor) {
-            this.dispatcherEventExecutor = checkNotNull(executor);
+        public Builder setDispatcherEventDelivery(DispatcherEventDelivery delivery) {
+            this.dispatcherEventDelivery = checkNotNull(delivery);
             return this;
         }
 
         @Nullable
-        public DispatcherEventExecutor getDispatcherEventExecutor() {
-            return dispatcherEventExecutor;
+        public DispatcherEventDelivery getDispatcherEventDelivery() {
+            return dispatcherEventDelivery;
         }
 
         public Builder setEventValidator(MessageValidator eventValidator) {
@@ -457,12 +449,12 @@ public class EventBus implements AutoCloseable {
         public EventBus build() {
             checkNotNull(eventStore, "eventStore must be set");
 
-            if (subscriberEventExecutor == null) {
-                subscriberEventExecutor = SubscriberEventExecutor.directExecutor();
+            if (subscriberEventDelivery == null) {
+                subscriberEventDelivery = SubscriberEventDelivery.directDelivery();
             }
 
-            if (dispatcherEventExecutor == null) {
-                dispatcherEventExecutor = DispatcherEventExecutor.directExecutor();
+            if (dispatcherEventDelivery == null) {
+                dispatcherEventDelivery = DispatcherEventDelivery.directDelivery();
             }
 
             if (eventValidator == null) {
@@ -474,35 +466,13 @@ public class EventBus implements AutoCloseable {
         }
     }
 
-    /**
-     * Instances of this type are used to inject the knowledge about current {@code EventDispatcher}s for
-     * a particular {@code EventClass} instance.
-     *
-     * <p> Such an approach is chosen in order to keep the {@link #dispatcherRegistry} private to the
-     * {@code EventBus}.
-     */
-    @Internal
-    /* package */ interface DispatcherProvider extends Function<EventClass, Set<EventDispatcher>> {
-    }
-
-    /**
-     * Instances of this type are used to inject the knowledge about current {@code EventSubscriber}s for
-     * a particular {@code EventClass} instance.
-     *
-     * <p> Such an approach is chosen in order to keep the {@link #subscriberRegistry} private to the
-     * {@code EventBus}.
-     */
-    @Internal
-    /* package */ interface SubscriberProvider extends Function<EventClass, Collection<EventSubscriber>> {
-    }
-
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(EventBus.class);
     }
 
-    /* package */ static Logger log() {
+    static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
 }

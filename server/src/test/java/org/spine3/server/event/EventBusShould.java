@@ -20,10 +20,8 @@
 
 package org.spine3.server.event;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
@@ -33,7 +31,6 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
@@ -64,15 +61,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EventBusShould {
 
     private EventStore eventStore;
     private EventBus eventBus;
     private EventBus eventBusWithPosponedExecution;
     private TestResponseObserver responseObserver;
-    private PostponingDispatcherEventExecutor postponingDispatcherExecutor;
-    private PostponingSubscriberEventExecutor postponingSubscriberExecutor;
+    private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
+    private PostponedSubscriberEventDelivery postponedSubscriberDelivery;
     private Executor delegateDispatcherExecutor;
     private Executor delegateSubscriberExecutor;
 
@@ -93,8 +90,8 @@ public class EventBusShould {
          */
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.delegateSubscriberExecutor = spy(directExecutor());
-        this.postponingDispatcherExecutor = new PostponingDispatcherEventExecutor(delegateDispatcherExecutor);
-        this.postponingSubscriberExecutor = new PostponingSubscriberEventExecutor(delegateSubscriberExecutor);
+        this.postponedDispatcherDelivery = new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
+        this.postponedSubscriberDelivery = new PostponedSubscriberEventDelivery(delegateSubscriberExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
         this.responseObserver = new TestResponseObserver();
@@ -113,8 +110,8 @@ public class EventBusShould {
     private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
                                                     .setEventStore(eventStore)
-                                                    .setDispatcherEventExecutor(postponingDispatcherExecutor)
-                                                    .setSubscriberEventExecutor(postponingSubscriberExecutor);
+                                                    .setDispatcherEventDelivery(postponedDispatcherDelivery)
+                                                    .setSubscriberEventDelivery(postponedSubscriberDelivery);
 
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
@@ -233,7 +230,7 @@ public class EventBusShould {
         eventBusWithPosponedExecution.post(event);
         assertFalse(dispatcher.isDispatchCalled());
 
-        final boolean eventPostponed = postponingDispatcherExecutor.isPostponed(event, dispatcher);
+        final boolean eventPostponed = postponedDispatcherDelivery.isPostponed(event, dispatcher);
         assertTrue(eventPostponed);
     }
 
@@ -241,15 +238,12 @@ public class EventBusShould {
     public void not_invoke_subscribers_if_subscriber_event_execution_postponed() {
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
         final Event event = Given.Event.projectCreated();
-        final ProjectCreated eventBody = AnyPacker.unpack(event.getMessage());
-        final EventContext context = event.getContext();
-
         eventBusWithPosponedExecution.subscribe(subscriber);
 
         eventBusWithPosponedExecution.post(event);
         assertNull(subscriber.getEventHandled());
 
-        final boolean eventPostponed = postponingSubscriberExecutor.isPostponed(eventBody, context, subscriber);
+        final boolean eventPostponed = postponedSubscriberDelivery.isPostponed(event, subscriber);
         assertTrue(eventPostponed);
     }
 
@@ -261,11 +255,11 @@ public class EventBusShould {
 
         final Event event = Given.Event.projectCreated();
         eventBusWithPosponedExecution.post(event);
-        final Set<Event> postponedEvents = postponingDispatcherExecutor.getPostponedEvents();
+        final Set<Event> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
         final Event postponedEvent = postponedEvents.iterator()
                                                     .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
-        postponingDispatcherExecutor.dispatchNow(postponedEvent, dispatcher.getClass());
+        postponedDispatcherDelivery.deliverNow(postponedEvent, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
         verify(delegateDispatcherExecutor).execute(any(Runnable.class));
     }
@@ -277,12 +271,12 @@ public class EventBusShould {
         eventBusWithPosponedExecution.subscribe(subscriber);
 
         eventBusWithPosponedExecution.post(event);
-        final Set<EventWithContext> postponedEvents = postponingSubscriberExecutor.getPostponedEvents();
-        final EventWithContext postponedEvent = postponedEvents.iterator()
-                                                               .next();
+        final Set<Event> postponedEvents = postponedSubscriberDelivery.getPostponedEvents();
+        final Event postponedEvent = postponedEvents.iterator()
+                                                    .next();
         verify(delegateSubscriberExecutor, never()).execute(any(Runnable.class));
 
-        postponingSubscriberExecutor.deliverNow(postponedEvent.message, postponedEvent.context, subscriber.getClass());
+        postponedSubscriberDelivery.deliverNow(postponedEvent, subscriber.getClass());
         assertEquals(event, subscriber.getEventHandled());
         verify(delegateSubscriberExecutor).execute(any(Runnable.class));
     }
@@ -515,17 +509,17 @@ public class EventBusShould {
         }
     }
 
-    private static class PostponingDispatcherEventExecutor extends DispatcherEventExecutor {
+    private static class PostponedDispatcherEventDelivery extends DispatcherEventDelivery {
 
         private final Map<Event, Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
 
-        public PostponingDispatcherEventExecutor(Executor delegate) {
+        public PostponedDispatcherEventDelivery(Executor delegate) {
             super(delegate);
         }
 
         @Override
-        public boolean maybePostponeDispatch(Event event, EventDispatcher dispatcher) {
-            postponedExecutions.put(event, dispatcher.getClass());
+        public boolean shouldPostponeDelivery(Event event, EventDispatcher consumer) {
+            postponedExecutions.put(event, consumer.getClass());
             return true;
         }
 
@@ -542,61 +536,30 @@ public class EventBusShould {
         }
     }
 
-    private static class PostponingSubscriberEventExecutor extends SubscriberEventExecutor {
+    private static class PostponedSubscriberEventDelivery extends SubscriberEventDelivery {
 
-        private final Map<EventWithContext, Class<? extends EventSubscriber>> postponedExecutions = newHashMap();
+        private final Map<Event, Class<? extends EventSubscriber>> postponedExecutions = newHashMap();
 
-        public PostponingSubscriberEventExecutor(Executor delegate) {
+        public PostponedSubscriberEventDelivery(Executor delegate) {
             super(delegate);
         }
 
         @Override
-        protected boolean maybePostponeDelivery(Message event, EventContext context, EventSubscriber subscriber) {
-            final EventWithContext eventWithContext = new EventWithContext(event, context);
-            postponedExecutions.put(eventWithContext, subscriber.getClass());
+        protected boolean shouldPostponeDelivery(Event event, EventSubscriber consumer) {
+            postponedExecutions.put(event, consumer.getClass());
             return true;
-
         }
 
-        private boolean isPostponed(Message event, EventContext context, EventSubscriber subscriber) {
-            final EventWithContext eventWithContext = new EventWithContext(event, context);
-            final Class<? extends EventSubscriber> actualClass = postponedExecutions.get(eventWithContext);
+        private boolean isPostponed(Event event, EventSubscriber subscriber) {
+            final Class<? extends EventSubscriber> actualClass = postponedExecutions.get(event);
             final boolean eventPostponed = actualClass != null;
             final boolean subscriberMatches = eventPostponed && subscriber.getClass()
                                                                           .equals(actualClass);
             return subscriberMatches;
         }
 
-        private Set<EventWithContext> getPostponedEvents() {
+        private Set<Event> getPostponedEvents() {
             return postponedExecutions.keySet();
-        }
-    }
-
-    private static class EventWithContext {
-        private final Message message;
-        private final EventContext context;
-
-        private EventWithContext(Message message, EventContext context) {
-            this.message = message;
-            this.context = context;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof EventWithContext)) {
-                return false;
-            }
-            EventWithContext that = (EventWithContext) o;
-            return Objects.equal(message, that.message) &&
-                    Objects.equal(context, that.context);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(message, context);
         }
     }
 }
