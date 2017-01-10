@@ -355,6 +355,9 @@ public class EventBus implements AutoCloseable {
         /**
          * A {@code StorageFactory} for configuring the {@code EventStore} instance for this {@code EventBus}.
          *
+         * <p>If the {@code EventStore} is passed to this {@code Builder} explicitly
+         * via {@link #setEventStore(EventStore)}, the {@code storageFactory} field value is not used.
+         *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
          * {@code EventBus}.
          */
@@ -363,7 +366,7 @@ public class EventBus implements AutoCloseable {
         /**
          * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
          *
-         * <p>If not set, a default instance will be created by the builder with the help of {@code storageFactory}/
+         * <p>If not set, a default instance will be created by the builder with the help of {@code storageFactory}.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
          * {@code EventBus}.
