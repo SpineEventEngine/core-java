@@ -45,15 +45,16 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(StorageFactory storageFactory) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                .setStorageFactory(storageFactory);
+                                                             .setStorageFactory(storageFactory);
         return builder.build();
     }
 
     public static BoundedContext newBoundedContext(EventEnricher enricher) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(FACTORY)
-                                                             .setEventEnricher(enricher);
-        return builder.build();
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEnricher(enricher)
+                                          .setStorageFactory(FACTORY)
+                                          .build();
+        return newBoundedContext(eventBus);
     }
 
     public static BoundedContext newBoundedContext(EventBus eventBus) {
@@ -87,12 +88,13 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(String name, Stand stand) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setName(name)
-                             .setStorageFactory(FACTORY);
+                                                             .setStand(stand)
+                                                             .setName(name)
+                                                             .setStorageFactory(FACTORY);
 
         return builder.build();
     }
 
-    private TestBoundedContextFactory() {}
+    private TestBoundedContextFactory() {
+    }
 }

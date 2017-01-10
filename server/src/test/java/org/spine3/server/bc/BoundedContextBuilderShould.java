@@ -27,8 +27,6 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
-import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
@@ -103,27 +101,6 @@ public class BoundedContextBuilderShould {
         assertFalse(builder.isMultitenant());
     }
 
-    @Test
-    public void return_EventStore_if_set() {
-        final EventStore mock = mock(EventStore.class);
-        assertEquals(mock, builder.setEventStore(mock)
-                                  .getEventStore());
-    }
-
-    @Test
-    public void return_stream_Executor_for_EventStore_if_set() {
-        final Executor mock = mock(Executor.class);
-        assertEquals(mock, builder.setEventStoreStreamExecutor(mock)
-                                  .getEventStoreStreamExecutor());
-    }
-
-    @Test
-    public void return_EventEnricher_if_set() {
-        final EventEnricher mock = mock(EventEnricher.class);
-        assertEquals(mock, builder.setEventEnricher(mock)
-                                  .getEventEnricher());
-    }
-
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
         builder.setEventBus(Tests.<EventBus>nullRef());
@@ -170,4 +147,10 @@ public class BoundedContextBuilderShould {
         builder.setCommandStore(Tests.<CommandStore>nullRef());
     }
 
+    @Test
+    public void return_StandFunnelExecutor_if_set() {
+        final Executor mock = mock(Executor.class);
+        assertEquals(mock, builder.setStandFunnelExecutor(mock)
+                                  .getStandFunnelExecutor());
+    }
 }

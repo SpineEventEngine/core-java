@@ -19,6 +19,7 @@
  */
 package org.spine3.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
@@ -220,6 +221,11 @@ public abstract class EventStore implements AutoCloseable {
             super.withDefaultLogger();
             return this;
         }
+    }
+
+    @VisibleForTesting
+    Executor getStreamExecutor() {
+        return streamExecutor;
     }
 
     /** A locally running {@code EventStore} implementation. */
