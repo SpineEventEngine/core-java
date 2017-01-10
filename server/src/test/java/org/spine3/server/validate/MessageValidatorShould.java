@@ -169,8 +169,8 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_required_Enum_field_is_set() {
         final RequiredEnumFieldValue invalidMsg = RequiredEnumFieldValue.newBuilder()
-                .setValue(Time.FUTURE)
-                .build();
+                                                                        .setValue(Time.FUTURE)
+                                                                        .build();
         validate(invalidMsg);
         assertIsValid(true);
     }
@@ -181,13 +181,12 @@ public class MessageValidatorShould {
         assertIsValid(true);
     }
 
-
     @Test
     public void find_out_that_repeated_required_field_has_valid_values() {
         final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
-                .addValue(newStringValue())
-                .addValue(newStringValue())
-                .build();
+                                                                                      .addValue(newStringValue())
+                                                                                      .addValue(newStringValue())
+                                                                                      .build();
         validate(invalidMsg);
         assertIsValid(true);
     }
@@ -200,10 +199,11 @@ public class MessageValidatorShould {
 
     @Test
     public void find_out_that_repeated_required_field_has_empty_value() {
-        final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
-                .addValue(newStringValue()) // valid value
-                .addValue(StringValue.getDefaultInstance()) // invalid value
-                .build();
+        final RepeatedRequiredMsgFieldValue invalidMsg =
+                RepeatedRequiredMsgFieldValue.newBuilder()
+                                             .addValue(newStringValue()) // valid value
+                                             .addValue(StringValue.getDefaultInstance()) // invalid value
+                                             .build();
         validate(invalidMsg);
         assertIsValid(false);
     }
@@ -598,7 +598,9 @@ public class MessageValidatorShould {
 
     @Test
     public void find_out_that_string_matches_to_regex_pattern() {
-        final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("valid.email@mail.com").build();
+        final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder()
+                                                                   .setEmail("valid.email@mail.com")
+                                                                   .build();
         validate(msg);
         assertIsValid(true);
     }
@@ -639,9 +641,12 @@ public class MessageValidatorShould {
 
     @Test
     public void find_out_that_enclosed_message_field_is_valid() {
-        final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.newBuilder().setValue(newUuid()).build();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setOuterMsgField(enclosedMsg).build();
-
+        final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.newBuilder()
+                                                                             .setValue(newUuid())
+                                                                             .build();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder()
+                                                                       .setOuterMsgField(enclosedMsg)
+                                                                       .build();
         validate(msg);
 
         assertIsValid(true);
@@ -650,8 +655,9 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_enclosed_message_field_is_NOT_valid() {
         final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setOuterMsgField(enclosedMsg).build();
-
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder()
+                                                                       .setOuterMsgField(enclosedMsg)
+                                                                       .build();
         validate(msg);
 
         assertIsValid(false);
@@ -660,10 +666,10 @@ public class MessageValidatorShould {
     @Test
     public void consider_field_is_valid_if_no_valid_option_set() {
         final RequiredStringFieldValue invalidEnclosedMsg = RequiredStringFieldValue.getDefaultInstance();
-        final EnclosedMessageWithoutAnnotationFieldValue msg = EnclosedMessageWithoutAnnotationFieldValue.newBuilder()
-                .setOuterMsgField(invalidEnclosedMsg)
-                .build();
-
+        final EnclosedMessageWithoutAnnotationFieldValue msg =
+                EnclosedMessageWithoutAnnotationFieldValue.newBuilder()
+                                                          .setOuterMsgField(invalidEnclosedMsg)
+                                                          .build();
         validate(msg);
 
         assertIsValid(true);
@@ -672,8 +678,9 @@ public class MessageValidatorShould {
     @Test
     public void provide_valid_violations_if_enclosed_message_field_is_not_valid() {
         final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setOuterMsgField(enclosedMsg).build();
-
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder()
+                                                                       .setOuterMsgField(enclosedMsg)
+                                                                       .build();
         validate(msg);
 
         assertEquals(1, violations.size());
@@ -722,7 +729,9 @@ public class MessageValidatorShould {
 
     @Test
     public void find_out_that_entity_id_in_command_cannot_be_ByteString() {
-        final EntityIdByteStringFieldValue msg = EntityIdByteStringFieldValue.newBuilder().setValue(newByteString()).build();
+        final EntityIdByteStringFieldValue msg = EntityIdByteStringFieldValue.newBuilder()
+                                                                             .setValue(newByteString())
+                                                                             .build();
         validate(msg);
         assertIsValid(false);
     }

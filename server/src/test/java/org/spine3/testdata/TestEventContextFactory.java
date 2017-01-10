@@ -37,7 +37,6 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.newUserId;
 
-
 /**
  * Creates event contexts for tests.
  *

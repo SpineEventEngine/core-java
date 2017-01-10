@@ -173,15 +173,15 @@ public class CommandServiceShould {
             this.isCompleted = true;
         }
 
-        /* package */ Response getResponseHandled() {
+        Response getResponseHandled() {
             return responseHandled;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return isCompleted;
         }
     }

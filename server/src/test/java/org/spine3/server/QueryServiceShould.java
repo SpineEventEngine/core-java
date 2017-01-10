@@ -208,15 +208,15 @@ public class QueryServiceShould {
             this.isCompleted = true;
         }
 
-        /* package */ QueryResponse getResponseHandled() {
+        QueryResponse getResponseHandled() {
             return responseHandled;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return isCompleted;
         }
     }

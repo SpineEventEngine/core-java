@@ -57,9 +57,9 @@ public class AlternativeFieldValidatorShould {
     @Test
     public void pass_if_combination_defined() {
         final PersonName combinationDefined = PersonName.newBuilder()
-                .setHonorificPrefix("Mr.")
-                .setLastName("Yevsyukov")
-                .build();
+                                                        .setHonorificPrefix("Mr.")
+                                                        .setLastName("Yevsyukov")
+                                                        .build();
         final List<? extends ConstraintViolation> violations = validator.validate(combinationDefined);
         assertTrue(violations.isEmpty());
     }

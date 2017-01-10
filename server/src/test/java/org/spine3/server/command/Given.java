@@ -36,9 +36,9 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-/* package */ class Given {
+class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
@@ -51,7 +51,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
     }
 
-    /* package */ static class Command {
+    static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -107,7 +107,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
     }
 
-    /* package */ static class CommandMessage {
+    static class CommandMessage {
 
         private CommandMessage() {
         }

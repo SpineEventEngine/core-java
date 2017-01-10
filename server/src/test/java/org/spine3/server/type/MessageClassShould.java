@@ -53,7 +53,7 @@ public class MessageClassShould {
     public void return_java_class_name() {
         assertEquals(ClassName.of(MSG_CLASS), testMsgClass.getClassName());
     }
-    
+
     @Test
     public void convert_value_to_string() {
         assertEquals(String.valueOf(MSG_CLASS), testMsgClass.toString());

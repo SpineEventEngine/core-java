@@ -78,14 +78,14 @@ public class EventStoreServiceBuilderShould {
 
     @Test
     public void build_service_definition() {
-        assertNotNull(builder
-                        .setStreamExecutor(newExecutor())
-                        .setStorage(newEventStorage())
-                        .build());
+        assertNotNull(builder.setStreamExecutor(newExecutor())
+                             .setStorage(newEventStorage())
+                             .build());
     }
 
     private static EventStorage newEventStorage() {
-        return InMemoryStorageFactory.getInstance().createEventStorage();
+        return InMemoryStorageFactory.getInstance()
+                                     .createEventStorage();
     }
 
     private static Executor newExecutor() {

@@ -59,11 +59,11 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 @SuppressWarnings("EmptyClass") // This class is a wrapper for enclosed so that we can write Given.EventMessage, etc.
 public class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {}
 
-        /* package */ static ProjectId newProjectId() {
+        static ProjectId newProjectId() {
             final String uuid = newUuid();
             return ProjectId.newBuilder()
                             .setId(uuid)
@@ -71,30 +71,30 @@ public class Given {
         }
     }
 
-    /* package */ static class EventMessage {
+    static class EventMessage {
 
         private EventMessage() {}
 
-        /* package */ static TaskAdded taskAdded(ProjectId id) {
+        static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        /* package */ static ProjectCreated projectCreated(ProjectId id) {
+        static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        /* package */ static ProjectStarted projectStarted(ProjectId id) {
+        static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
     }
 
-    /* package */ static class CommandMessage {
+    static class CommandMessage {
 
         private CommandMessage() {
         }
@@ -106,7 +106,7 @@ public class Given {
         }
     }
 
-    /* package */ static class Command {
+    static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -117,21 +117,21 @@ public class Given {
          * Creates a new {@link Command} with the given command message, userId and timestamp using default
          * {@link Command} instance.
          */
-        /* package */ static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
+        static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.create(command, context);
             return result;
         }
 
-        /* package */ static org.spine3.base.Command createProject() {
+        static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        /* package */ static org.spine3.base.Command createProject(Timestamp when) {
+        static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        /* package */ static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
@@ -140,7 +140,7 @@ public class Given {
         The production code should use more sane approach to generating the IDs. */
         private static int customerNumber = 1;
 
-        /* package */ static org.spine3.base.Command createCustomer() {
+        static org.spine3.base.Command createCustomer() {
             final LocalDate localDate = LocalDates.now();
             final CustomerId customerId = CustomerId.newBuilder()
                                                     .setRegistrationDate(localDate)
@@ -163,11 +163,11 @@ public class Given {
         }
     }
 
-    /* package */ static class Query {
+    static class Query {
 
         private Query() {}
 
-        /* package */ static org.spine3.client.Query readAllProjects() {
+        static org.spine3.client.Query readAllProjects() {
 
             final String typeName = TypeName.of(org.spine3.test.projection.Project.class);
             final Target queryTarget = Target.newBuilder()
@@ -182,8 +182,8 @@ public class Given {
         }
     }
 
-    /* package */ static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
-        /* package */ ProjectAggregateRepository(BoundedContext boundedContext) {
+    static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }

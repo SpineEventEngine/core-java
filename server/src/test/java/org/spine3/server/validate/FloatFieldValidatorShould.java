@@ -39,7 +39,8 @@ public class FloatFieldValidatorShould {
     private static final Float NEGATIVE_VALUE = -0.5F;
 
     private final FloatFieldValidator validator =
-            new FloatFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
+            new FloatFieldValidator(Any.getDescriptor().getFields().get(0),
+                                    ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
 
     @Test
     public void convert_string_to_number() {

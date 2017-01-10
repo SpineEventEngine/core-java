@@ -20,7 +20,6 @@
 
 package org.spine3.server.validate;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import org.junit.Test;
@@ -34,7 +33,8 @@ import static org.junit.Assert.assertFalse;
 public class BooleanFieldValidatorShould {
 
     private final BooleanFieldValidator validator =
-            new BooleanFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(false), FieldPath.getDefaultInstance());
+            new BooleanFieldValidator(Any.getDescriptor().getFields().get(0),
+                                      ImmutableList.of(false), FieldPath.getDefaultInstance());
 
     @Test
     public void convert_string_to_number() {

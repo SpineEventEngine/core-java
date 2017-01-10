@@ -116,12 +116,12 @@ public class CommandBusShould {
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         commandBus = CommandBus.newBuilder()
-                .setCommandStore(commandStore)
-                .setCommandScheduler(scheduler)
-                .setThreadSpawnAllowed(true)
-                .setLog(log)
-                .setAutoReschedule(false)
-                .build();
+                               .setCommandStore(commandStore)
+                               .setCommandScheduler(scheduler)
+                               .setThreadSpawnAllowed(true)
+                               .setLog(log)
+                               .setAutoReschedule(false)
+                               .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -152,7 +152,6 @@ public class CommandBusShould {
         CommandBus.newBuilder()
                   .build();
     }
-
 
     @Test
     public void create_new_instance() {
@@ -645,12 +644,12 @@ public class CommandBusShould {
     @SuppressWarnings({"MethodParameterNamingConvention", "MethodMayBeStatic"})
     private CommandScheduler threadAwareScheduler(final StringBuilder threadNameDestination) {
         return spy(new ExecutorCommandScheduler() {
-                @Override
-                public void schedule(Command command) {
-                    super.schedule(command);
-                    threadNameDestination.append(Thread.currentThread().getName());
-                }
-            });
+            @Override
+            public void schedule(Command command) {
+                super.schedule(command);
+                threadNameDestination.append(Thread.currentThread().getName());
+            }
+        });
     }
 
     @Test
@@ -916,15 +915,15 @@ public class CommandBusShould {
             this.completed = true;
         }
 
-        /* package */ List<Response> getResponses() {
+        List<Response> getResponses() {
             return ImmutableList.copyOf(responses);
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return this.completed;
         }
     }

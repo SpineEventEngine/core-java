@@ -52,9 +52,9 @@ import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-/* package */ class Given {
+class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
@@ -73,7 +73,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventMessage {
+    static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
@@ -117,7 +117,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class CommandMessage {
+    static class CommandMessage {
 
         private CommandMessage() {
         }
@@ -147,7 +147,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Command {
+    static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -198,7 +198,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Event {
+    static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
@@ -233,7 +233,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class AggregateStorageRecord {
+    static class AggregateStorageRecord {
 
         private AggregateStorageRecord() {
         }
@@ -282,7 +282,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventStorageRecord {
+    static class EventStorageRecord {
 
         private EventStorageRecord() {
         }

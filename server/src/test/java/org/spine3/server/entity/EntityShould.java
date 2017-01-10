@@ -135,8 +135,7 @@ public class EntityShould {
         entityNew.incrementVersion();
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entityNew.whenModified()
-                                            .getSeconds());
+        assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
     }
 
     @Test
@@ -159,7 +158,7 @@ public class EntityShould {
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entityNew.whenModified()
-                                            .getSeconds());
+                                               .getSeconds());
     }
 
     @Test
@@ -172,8 +171,8 @@ public class EntityShould {
     @Test
     public void return_id_simple_class_name() {
         final String expected = entityNew.getId()
-                                      .getClass()
-                                      .getSimpleName();
+                                         .getClass()
+                                         .getSimpleName();
         final String actual = entityNew.getShortIdTypeName();
         assertEquals(expected, actual);
     }

@@ -97,7 +97,8 @@ public class AggregateRepositoryShould {
     public void setUp() {
         eventBus = mock(EventBus.class);
         commandStore = mock(CommandStore.class);
-        doReturn(emptyIterator()).when(commandStore).iterator(any(CommandStatus.class)); // to avoid NPE
+        doReturn(emptyIterator()).when(commandStore)
+                                 .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
                                                 .build();
@@ -115,7 +116,8 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void return_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId()).get();
+        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId())
+                                                     .get();
         final Project state = aggregate.getState();
 
         assertTrue(isDefault(state));
@@ -128,7 +130,8 @@ public class AggregateRepositoryShould {
 
         repository.store(expected);
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id).get();
+        final ProjectAggregate actual = repository.load(id)
+                                                  .get();
 
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
@@ -140,11 +143,13 @@ public class AggregateRepositoryShould {
         final ProjectId id = Given.AggregateId.newProjectId();
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
-        repository.setSnapshotTrigger(expected.getUncommittedEvents().size());
+        repository.setSnapshotTrigger(expected.getUncommittedEvents()
+                                              .size());
         repository.store(expected);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id).get();
+        final ProjectAggregate actual = repository.load(id)
+                                                  .get();
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
@@ -154,7 +159,8 @@ public class AggregateRepositoryShould {
     public void store_snapshot_and_set_event_count_to_zero_if_needed() {
         final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
         final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
-        repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents().size());
+        repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents()
+                                                  .size());
 
         repositorySpy.store(aggregate);
 
@@ -217,7 +223,8 @@ public class AggregateRepositoryShould {
 
         final ProjectAggregate aggregate = verifyAggregateStored(repositorySpy);
         assertEquals(id, aggregate.getId());
-        assertEquals(msg.getName(), aggregate.getState().getName());
+        assertEquals(msg.getName(), aggregate.getState()
+                                             .getName());
     }
 
     @Test
@@ -354,14 +361,17 @@ public class AggregateRepositoryShould {
         final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
         final RuntimeException exception = new RuntimeException(cause);
-        doThrow(exception).when(throwingAggregate).dispatch(msg, cmd.getContext());
-        doReturn(throwingAggregate).when(repositorySpy).loadOrCreate(any(ProjectId.class));
+        doThrow(exception).when(throwingAggregate)
+                          .dispatch(msg, cmd.getContext());
+        doReturn(throwingAggregate).when(repositorySpy)
+                                   .loadOrCreate(any(ProjectId.class));
     }
 
     private AggregateStorage<ProjectId> givenAggregateStorageMock() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        doReturn(storage).when(repositorySpy).aggregateStorage();
+        doReturn(storage).when(repositorySpy)
+                         .aggregateStorage();
         return storage;
     }
 
@@ -399,7 +409,8 @@ public class AggregateRepositoryShould {
         /** Needs to be static. */
         private static final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") /** It is required to be public. */
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
+        /** It is required to be public. */
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -443,15 +454,17 @@ public class AggregateRepositoryShould {
         private void apply(ProjectStarted event) {
         }
 
-        /* package */ static void assertHandled(Command expected) {
+        static void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
-            final String cmdName = Commands.getMessage(expected).getClass().getName();
+            final String cmdName = Commands.getMessage(expected)
+                                           .getClass()
+                                           .getName();
             assertNotNull("No such command handled: " + cmdName, actual);
             assertEquals(expected, actual);
         }
 
-        /* package */ static void clearCommandsHandled() {
+        static void clearCommandsHandled() {
             commandsHandled.clear();
         }
     }
