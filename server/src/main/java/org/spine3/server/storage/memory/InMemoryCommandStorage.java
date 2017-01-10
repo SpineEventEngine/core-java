@@ -41,7 +41,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-/* package */ class InMemoryCommandStorage extends CommandStorage {
+class InMemoryCommandStorage extends CommandStorage {
 
     private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
 

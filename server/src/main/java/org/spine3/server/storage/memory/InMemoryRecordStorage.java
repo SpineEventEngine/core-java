@@ -44,7 +44,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus, Alex Tymchenko
  */
-/* package */ class InMemoryRecordStorage<I> extends RecordStorage<I> {
+class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder()

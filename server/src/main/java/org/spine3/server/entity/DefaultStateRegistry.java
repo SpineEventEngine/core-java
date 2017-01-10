@@ -33,7 +33,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class DefaultStateRegistry {
+class DefaultStateRegistry {
 
     /**
      * NOTE: The implementation is not customized with {@link MapMaker#makeMap()} options,
@@ -48,7 +48,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
     @CheckReturnValue
-    /* package */ boolean contains(Class<? extends Entity> entityClass) {
+    boolean contains(Class<? extends Entity> entityClass) {
         final boolean result = defaultStates.containsKey(entityClass);
         return result;
     }
@@ -60,7 +60,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
      * @param state a default state of the entity
      * @throws IllegalArgumentException if the state of this class is already registered
      */
-    /* package */ void put(Class<? extends Entity> entityClass, Message state) {
+    void put(Class<? extends Entity> entityClass, Message state) {
         if (contains(entityClass)) {
             throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
         }
@@ -73,12 +73,12 @@ import static com.google.common.collect.Maps.newConcurrentMap;
      * @param entityClass an entity class
      */
     @CheckReturnValue
-    /* package */ Message get(Class<? extends Entity> entityClass) {
+    Message get(Class<? extends Entity> entityClass) {
         final Message state = defaultStates.get(entityClass);
         return state;
     }
 
-    /* package */ static DefaultStateRegistry getInstance() {
+    static DefaultStateRegistry getInstance() {
         return Singleton.INSTANCE.value;
     }
 

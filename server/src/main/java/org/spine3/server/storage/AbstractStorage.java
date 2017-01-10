@@ -30,7 +30,6 @@ import org.spine3.SPI;
  *
  * @param <I> the type of IDs of storage records
  * @param <R> the type of records kept in the storage
- *
  * @author Alexander Yevsyukov
  */
 @SPI
@@ -64,7 +63,7 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage {
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
-     * @param id the ID for the record
+     * @param id     the ID for the record
      * @param record a record to store
      * @throws IllegalStateException if the storage is closed
      */

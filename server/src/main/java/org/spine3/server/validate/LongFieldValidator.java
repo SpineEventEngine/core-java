@@ -34,16 +34,16 @@ import static org.spine3.protobuf.Values.newLongValue;
  *
  * @author Alexander Litus
  */
-/* package */ class LongFieldValidator extends NumberFieldValidator<Long> {
+class LongFieldValidator extends NumberFieldValidator<Long> {
 
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues, FieldPath rootFieldPath) {
+    LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

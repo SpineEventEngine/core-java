@@ -30,15 +30,15 @@ import org.spine3.validate.ConstraintViolation;
  *
  * @author Alexander Litus
  */
-/* package */ abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
+abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
 
     private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
     protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
@@ -50,10 +50,10 @@ import org.spine3.validate.ConstraintViolation;
     protected void validateEntityId() {
         final V value = getValues().get(0);
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(INVALID_ID_TYPE_MSG)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrap(value))
-                .build();
+                                                                 .setMsgFormat(INVALID_ID_TYPE_MSG)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .setFieldValue(wrap(value))
+                                                                 .build();
         addViolation(violation);
     }
 }

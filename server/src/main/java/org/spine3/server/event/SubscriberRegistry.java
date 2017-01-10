@@ -41,11 +41,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class SubscriberRegistry {
+class SubscriberRegistry {
 
     private final Multimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
 
-    /* package */ void subscribe(EventSubscriber object) {
+    void subscribe(EventSubscriber object) {
         checkNotNull(object);
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unsubscribe(EventSubscriber object) {
+    void unsubscribe(EventSubscriber object) {
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
         checkSubscribersNotEmpty(object, subscribersEmpty);
@@ -66,16 +66,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unsubscribeAll() {
+    void unsubscribeAll() {
         subscribersByEventClass.clear();
         EventBus.log().info("All subscribers cleared.");
     }
 
-    /* package */ Collection<EventSubscriber> getSubscribers(EventClass c) {
+    Collection<EventSubscriber> getSubscribers(EventClass c) {
         return ImmutableList.copyOf(subscribersByEventClass.get(c));
     }
 
-    /* package */ boolean hasSubscribers(EventClass eventClass) {
+    boolean hasSubscribers(EventClass eventClass) {
         final Collection<EventSubscriber> subscribers = getSubscribers(eventClass);
         return !subscribers.isEmpty();
     }

@@ -30,7 +30,7 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
-/* package */ class UrlPrinter {
+class UrlPrinter {
 
     private UrlPrinter() {
     }
@@ -43,7 +43,7 @@ import java.util.List;
      * @param url already valid {@link Url} instance
      * @return String {@link Url} value
      */
-    /* package */ static String printToString(Url url) {
+    static String printToString(Url url) {
         if (url.getValueCase() == Url.ValueCase.RAW) {
             return url.getRaw();
         }

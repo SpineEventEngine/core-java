@@ -302,7 +302,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         private final ProjectionRepository projectionRepository;
 
-        /* package */ EventStreamObserver(ProjectionRepository projectionRepository) {
+        EventStreamObserver(ProjectionRepository projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 

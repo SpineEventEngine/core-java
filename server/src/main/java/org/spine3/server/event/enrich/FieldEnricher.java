@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T> the type of the field in the target enrichment message
  * @author Alexander Yevsyukov
  */
-/* package */ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
+class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
 
     /** A function, which performs the enrichment. */
     private final Function<S, T> function;
@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @param translator           a conversion function
      * @return a new instance
      */
-    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
+    static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
                                                                 Class<T> enrichmentFieldClass,
                                                                 Function<S, T> translator) {
         final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass, enrichmentFieldClass, translator);
@@ -59,7 +59,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
-    /* package */ void validate() {
+    void validate() {
         // Do nothing. Field enrichment relies only on the aggregated function.
     }
 

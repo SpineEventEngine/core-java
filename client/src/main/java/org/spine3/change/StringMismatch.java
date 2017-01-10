@@ -43,9 +43,9 @@ public class StringMismatch {
      * Creates {@code ValueMismatch} for the case of discovering a non-empty value,
      * when an empty string was expected by a command.
      *
-     * @param actual the value discovered instead of the empty string
+     * @param actual   the value discovered instead of the empty string
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedEmpty(String actual, String newValue, int version) {
@@ -59,7 +59,7 @@ public class StringMismatch {
      * that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new ValueMismatch instance
      */
     public static ValueMismatch expectedNotEmpty(String expected, int version) {
@@ -71,9 +71,9 @@ public class StringMismatch {
      * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
-     * @param actual the value discovered instead of the expected string
+     * @param actual   the value discovered instead of the expected string
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {

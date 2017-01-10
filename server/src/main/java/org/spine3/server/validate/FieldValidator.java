@@ -45,7 +45,7 @@ import static org.spine3.base.Commands.isCommandsFile;
  * @param <V> a type of field values
  * @author Alexander Litus
  */
-/* package */ abstract class FieldValidator<V> {
+abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
 
@@ -68,7 +68,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     /**
      * Creates a new validator instance.
      *
-     * @param descr    a descriptor of the field to validate
+     * @param descr         a descriptor of the field to validate
      * @param values        values to validate
      * @param rootFieldPath a path to the root field (if present)
      * @param strict        if {@code true} the validator would assume that the field is required, even
@@ -78,8 +78,8 @@ import static org.spine3.base.Commands.isCommandsFile;
         this.fieldDescriptor = descr;
         this.values = values;
         this.fieldPath = rootFieldPath.toBuilder()
-                .addFieldName(fieldDescriptor.getName())
-                .build();
+                                      .addFieldName(fieldDescriptor.getName())
+                                      .build();
         this.strict = strict;
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isCommandsFile = isCommandsFile(file);
@@ -127,9 +127,9 @@ import static org.spine3.base.Commands.isCommandsFile;
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
             final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                    .setMsgFormat(ENTITY_ID_REPEATED_FIELD_MSG)
-                    .setFieldPath(getFieldPath())
-                    .build();
+                                                                     .setMsgFormat(ENTITY_ID_REPEATED_FIELD_MSG)
+                                                                     .setFieldPath(getFieldPath())
+                                                                     .build();
             addViolation(violation);
             return;
         }
@@ -140,7 +140,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
-     *  Returns {@code true} if the field has required attribute or validation is strict.
+     * Returns {@code true} if the field has required attribute or validation is strict.
      */
     protected boolean isRequiredField() {
         final boolean result = required || strict;
@@ -148,7 +148,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
-     *  Returns {@code true} in case `if_missing` option is set with a non-default error message.
+     * Returns {@code true} in case `if_missing` option is set with a non-default error message.
      */
     private boolean hasCustomMissingMessage() {
         final boolean result = !ifMissingOption.equals(IfMissingOption.getDefaultInstance());
@@ -196,16 +196,16 @@ import static org.spine3.base.Commands.isCommandsFile;
     private ConstraintViolation newViolation(IfMissingOption option) {
         final String msg = getErrorMsgFormat(option, option.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .setFieldPath(getFieldPath())
-                .build();
+                                                                 .setMsgFormat(msg)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .build();
         return violation;
     }
 
     /**
      * Returns a validation error message (a custom one (if present) or the default one).
      *
-     * @param option a validation option used to get the default message
+     * @param option    a validation option used to get the default message
      * @param customMsg a user-defined error message
      */
     protected String getErrorMsgFormat(Message option, String customMsg) {

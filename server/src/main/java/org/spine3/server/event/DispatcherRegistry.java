@@ -35,11 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class DispatcherRegistry {
+class DispatcherRegistry {
 
     private final HashMultimap<EventClass, EventDispatcher> dispatchers = HashMultimap.create();
 
-    /* package */ void register(EventDispatcher dispatcher) {
+    void register(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         final Set<EventClass> eventClasses = dispatcher.getEventClasses();
         checkNotEmpty(dispatcher, eventClasses);
@@ -49,12 +49,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+    Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         final Set<EventDispatcher> result = this.dispatchers.get(eventClass);
         return result;
     }
 
-    /* package */ void unregister(EventDispatcher dispatcher) {
+    void unregister(EventDispatcher dispatcher) {
         final Set<EventClass> eventClasses = dispatcher.getEventClasses();
         checkNotEmpty(dispatcher, eventClasses);
         for (EventClass eventClass : eventClasses) {
@@ -62,11 +62,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unregisterAll() {
+    void unregisterAll() {
         dispatchers.clear();
     }
 
-    /* package */ boolean hasDispatchersFor(EventClass eventClass) {
+    boolean hasDispatchersFor(EventClass eventClass) {
         final Set<EventDispatcher> dispatchers = getDispatchers(eventClass);
         final boolean result = !dispatchers.isEmpty();
         return result;

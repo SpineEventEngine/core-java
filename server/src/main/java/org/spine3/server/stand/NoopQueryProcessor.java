@@ -31,7 +31,7 @@ import org.spine3.client.Query;
  *
  * @author Alex Tymchenko
  */
-/* package */ class NoopQueryProcessor implements QueryProcessor {
+class NoopQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<Any> process(Query query) {
         return ImmutableList.of();

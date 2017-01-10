@@ -30,18 +30,18 @@ import org.spine3.net.Url.Record.Schema;
  *
  * @author Mikhail Mikhaylov
  */
-/* package */ class UrlParser {
+class UrlParser {
 
     private static final char SEMICOLON = ':';
-    /* package */ static final String PROTOCOL_ENDING = "://";
-    /* package */ static final char CREDENTIALS_ENDING = '@';
-    /* package */ static final char CREDENTIALS_SEPARATOR = SEMICOLON;
-    /* package */ static final char HOST_ENDING = '/';
-    /* package */ static final char HOST_PORT_SEPARATOR = SEMICOLON;
+    static final String PROTOCOL_ENDING = "://";
+    static final char CREDENTIALS_ENDING = '@';
+    static final char CREDENTIALS_SEPARATOR = SEMICOLON;
+    static final char HOST_ENDING = '/';
+    static final char HOST_PORT_SEPARATOR = SEMICOLON;
 
-    /* package */ static final char FRAGMENT_START = '#';
-    /* package */ static final char QUERIES_START = '?';
-    /* package */ static final char QUERY_SEPARATOR = '&';
+    static final char FRAGMENT_START = '#';
+    static final char QUERIES_START = '?';
+    static final char QUERY_SEPARATOR = '&';
     private static final Splitter querySplitter = Splitter.on(QUERY_SEPARATOR);
 
     private final String originalUrl;
@@ -54,7 +54,7 @@ import org.spine3.net.Url.Record.Schema;
      *
      * @param url String URL to parse
      */
-    /* package */ UrlParser(String url) {
+    UrlParser(String url) {
         this.originalUrl = url;
     }
 
@@ -63,7 +63,7 @@ import org.spine3.net.Url.Record.Schema;
      *
      * @return {@link Url} instance
      */
-    /* package */ Url parse() {
+    Url parse() {
         setupStartingState();
 
         parseProtocol();

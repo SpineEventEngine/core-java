@@ -94,7 +94,7 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         postEvents(events);
     }
 
-    /* package */ CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
+    CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
         return MethodRegistry.getInstance()
                              .get(getClass(), commandClass, CommandHandlerMethod.factory());
     }

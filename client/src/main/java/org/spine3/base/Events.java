@@ -63,8 +63,11 @@ public class Events {
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
-        final String value = UUID.randomUUID().toString();
-        return EventId.newBuilder().setUuid(value).build();
+        final String value = UUID.randomUUID()
+                                 .toString();
+        return EventId.newBuilder()
+                      .setUuid(value)
+                      .build();
     }
 
     /**
@@ -78,7 +81,8 @@ public class Events {
 
     /** Obtains the timestamp of the event. */
     public static Timestamp getTimestamp(Event event) {
-        final Timestamp result = event.getContext().getTimestamp();
+        final Timestamp result = event.getContext()
+                                      .getTimestamp();
         return result;
     }
 
@@ -92,16 +96,16 @@ public class Events {
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()
-                .setMessage(eventAny)
-                .setContext(context)
-                .build();
+                                  .setMessage(eventAny)
+                                  .setContext(context)
+                                  .build();
         return result;
     }
 
     /**
      * Creates {@code Event} instance for import or integration operations.
      *
-     * @param event the event message
+     * @param event      the event message
      * @param producerId the ID of an entity which is generating the event
      * @return event with data from an external source
      */
@@ -140,13 +144,13 @@ public class Events {
      * {@code <I>} type.
      *
      * @param context the event context to to get the event producer ID
-     * @param <I> the type of the producer ID wrapped in the passed {@code EventContext}
+     * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
      * @return producer ID
      */
     public static <I> I getProducer(EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
         @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
-        final I id = (I)aggregateId;
+        final I id = (I) aggregateId;
         return id;
 
     }
@@ -264,8 +268,8 @@ public class Events {
      * Return a specific enrichment from the context.
      *
      * @param enrichmentClass a class of the event enrichment
-     * @param context a context to get an enrichment from
-     * @param <E> a type of the event enrichment
+     * @param context         a context to get an enrichment from
+     * @param <E>             a type of the event enrichment
      * @return an optional of the enrichment
      */
     public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {

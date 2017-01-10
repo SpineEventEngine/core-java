@@ -60,7 +60,7 @@ public class Messages {
      * @param typeUrl the type URL of the message
      * @return message class
      * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if there is no corresponding class
-     *                          for the given Protobuf message type
+     *                              for the given Protobuf message type
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {

@@ -225,7 +225,7 @@ public class CommandBus implements AutoCloseable {
      *
      * @param command a command to post
      */
-    /* package */ void doPost(Command command) {
+    void doPost(Command command) {
         final Message message = getMessage(command);
         final CommandClass commandClass = CommandClass.of(message);
         final CommandContext commandContext = command.getContext();
@@ -257,7 +257,7 @@ public class CommandBus implements AutoCloseable {
      *      for commands of this type, {@code false} otherwise
      */
     @VisibleForTesting
-    /* package */ boolean isSupportedCommand(CommandClass commandClass) {
+    boolean isSupportedCommand(CommandClass commandClass) {
         final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
         final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
         final boolean isSupported = dispatcherRegistered || handlerRegistered;
@@ -284,29 +284,29 @@ public class CommandBus implements AutoCloseable {
         return commandStatusService;
     }
 
-    /* package */ boolean isMultitenant() {
+    boolean isMultitenant() {
         return isMultitenant;
     }
 
-    /* package */ boolean isThreadSpawnAllowed() {
+    boolean isThreadSpawnAllowed() {
         return isThreadSpawnAllowed;
     }
 
-    /* package */ CommandStore commandStore() {
+    CommandStore commandStore() {
         return commandStore;
     }
 
-    /* package */ Log problemLog() {
+    Log problemLog() {
         return log;
     }
 
     @VisibleForTesting
-    /* package */ Rescheduler rescheduler() {
+    Rescheduler rescheduler() {
         return rescheduler;
     }
 
     @VisibleForTesting
-    /* package */ CommandScheduler scheduler() {
+    CommandScheduler scheduler() {
         return scheduler;
     }
 
@@ -444,13 +444,13 @@ public class CommandBus implements AutoCloseable {
         }
 
         @VisibleForTesting
-        /* package */ Builder setLog(Log log) {
+        Builder setLog(Log log) {
             this.log = log;
             return this;
         }
 
         @VisibleForTesting
-        /* package */ Builder setAutoReschedule(boolean autoReschedule) {
+        Builder setAutoReschedule(boolean autoReschedule) {
             this.autoReschedule = autoReschedule;
             return this;
         }

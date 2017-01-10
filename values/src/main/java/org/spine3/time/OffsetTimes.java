@@ -155,7 +155,7 @@ public class OffsetTimes {
     /**
      * Obtains offset time changed on specified amount of hours.
      *
-     * @param offsetTime  offset time that will be changed
+     * @param offsetTime offset time that will be changed
      * @param hoursDelta a number of hours that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset time with new hours value
      */
@@ -167,7 +167,7 @@ public class OffsetTimes {
     /**
      * Obtains offset time changed on specified amount of minutes.
      *
-     * @param offsetTime    offset time that will be changed
+     * @param offsetTime   offset time that will be changed
      * @param minutesDelta a number of minutes that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset time with new minutes value
      */
@@ -179,7 +179,7 @@ public class OffsetTimes {
     /**
      * Obtains offset time changed on specified amount of seconds.
      *
-     * @param offsetTime    offset time that will be changed
+     * @param offsetTime   offset time that will be changed
      * @param secondsDelta a number of seconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset time with new seconds value
      */
@@ -191,7 +191,7 @@ public class OffsetTimes {
     /**
      * Obtains offset time changed on specified amount of milliseconds.
      *
-     * @param offsetTime   offset time that will be changed
+     * @param offsetTime  offset time that will be changed
      * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset time with new milliseconds value
      */
@@ -203,10 +203,12 @@ public class OffsetTimes {
     /**
      * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetTime add(OffsetTime offsetTime, int calendarField,  int delta) {
+    private static OffsetTime add(OffsetTime offsetTime, int calendarField, int delta) {
         final Calendar cal = Calendars.toCalendar(offsetTime);
         cal.add(calendarField, delta);
-        final LocalTime localTime = toLocalTime(cal).toBuilder().setNanos(offsetTime.getTime().getNanos()).build();
+        final LocalTime localTime = toLocalTime(cal).toBuilder()
+                                                    .setNanos(offsetTime.getTime().getNanos())
+                                                    .build();
         final ZoneOffset zoneOffset = offsetTime.getOffset();
         return OffsetTime.newBuilder()
                          .setTime(localTime)

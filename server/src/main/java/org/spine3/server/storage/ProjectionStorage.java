@@ -50,7 +50,6 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
         return record;
     }
 
-
     @Override
     protected void writeRecord(I id, EntityStorageRecord record) {
         final RecordStorage<I> storage = getRecordStorage();

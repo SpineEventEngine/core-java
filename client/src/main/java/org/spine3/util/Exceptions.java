@@ -44,14 +44,13 @@ public class Exceptions {
      *   }
      * </pre>
      *
-     * @throws UnsupportedOperationException always
      * @param message a message for exception
      * @return nothing ever
+     * @throws UnsupportedOperationException always
      */
     public static UnsupportedOperationException unsupported(String message) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(message);
     }
-
 
     /**
      * Always throws {@code UnsupportedOperationException}.
@@ -67,8 +66,8 @@ public class Exceptions {
      *   }
      * </pre>
      *
-     * @throws UnsupportedOperationException always
      * @return nothing ever
+     * @throws UnsupportedOperationException always
      */
     @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
     public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {

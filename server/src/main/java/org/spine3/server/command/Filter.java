@@ -38,18 +38,18 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class Filter {
+class Filter {
 
     private final CommandBus commandBus;
 
-    /* package */ Filter(CommandBus commandBus) {
+    Filter(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
 
     /**
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
-    /* package */ boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
+    boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final TenantId tenantId = command.getContext()
                                          .getTenantId();
         if (commandBus.isMultitenant() && isDefault(tenantId)) {

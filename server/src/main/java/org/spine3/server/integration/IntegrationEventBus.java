@@ -67,7 +67,7 @@ public class IntegrationEventBus {
     }
 
     @VisibleForTesting
-    /* package */ StreamObserver<Response> getResponseObserver() {
+    StreamObserver<Response> getResponseObserver() {
         return responseObserver;
     }
 

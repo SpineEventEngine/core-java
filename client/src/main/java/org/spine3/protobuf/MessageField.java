@@ -94,7 +94,7 @@ public abstract class MessageField {
     /**
      * Creates an exception for the case of a missing or incompatible field in the passed message.
      *
-     * @param message a message passed for obtaining value
+     * @param message   a message passed for obtaining value
      * @param fieldName a name of the field at the required index
      * @return new exception instance
      */
@@ -132,7 +132,7 @@ public abstract class MessageField {
     /**
      * Obtains a field descriptor for a field in the passed message.
      *
-     * @param msg a message to inspect
+     * @param msg        a message to inspect
      * @param fieldIndex the index of the field
      * @return field descriptor
      */
@@ -143,7 +143,7 @@ public abstract class MessageField {
 
     /** Converts Protobuf field name into Java accessor method name. */
     @VisibleForTesting
-    /* package */ static String toAccessorMethodName(CharSequence fieldName) {
+    static String toAccessorMethodName(CharSequence fieldName) {
         final StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
         out.append(GETTER_METHOD_PREFIX);
         final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));

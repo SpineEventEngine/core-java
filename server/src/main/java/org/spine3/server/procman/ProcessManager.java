@@ -101,7 +101,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
     }
 
     /** The method to inject {@code CommandBus} instance from the repository. */
-    /* package */ void setCommandBus(CommandBus commandBus) {
+    void setCommandBus(CommandBus commandBus) {
         this.commandBus = checkNotNull(commandBus);
     }
 

@@ -47,9 +47,9 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * The first part is the type URL prefix (for example, {@link TypeUrl#GOOGLE_TYPE_URL_PREFIX});
  * the second one is the fully-qualified Protobuf type name.
  *
+ * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
  * @see Descriptors.FileDescriptor#getFullName()
- * @author Alexander Yevsyukov
  */
 public final class TypeUrl extends StringTypeValue {
 
@@ -60,7 +60,7 @@ public final class TypeUrl extends StringTypeValue {
     private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN = Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
 
     @VisibleForTesting
-    /* package */ static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
+    static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
 
     public static final String SPINE_TYPE_URL_PREFIX = "type.spine3.org";
 
@@ -86,7 +86,7 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     @VisibleForTesting
-    /* package */ static String composeTypeUrl(String typeUrlPrefix, String typeName) {
+    static String composeTypeUrl(String typeUrlPrefix, String typeName) {
         final String url = typeUrlPrefix + SEPARATOR + typeName;
         return url;
     }

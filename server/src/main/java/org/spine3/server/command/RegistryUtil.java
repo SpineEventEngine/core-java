@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class RegistryUtil {
+class RegistryUtil {
 
     private RegistryUtil() {}
 

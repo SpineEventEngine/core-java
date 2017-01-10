@@ -135,7 +135,7 @@ public class Stand implements AutoCloseable {
      * @param entityState   the entity state
      * @param entityVersion the version of the entity
      */
-    /* package */ void update(Object id, Any entityState, int entityVersion) {
+    void update(Object id, Any entityState, int entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
