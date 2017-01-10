@@ -63,8 +63,7 @@ public class Events {
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
-        final String value = UUID.randomUUID()
-                                 .toString();
+        final String value = UUID.randomUUID().toString();
         return EventId.newBuilder()
                       .setUuid(value)
                       .build();
@@ -81,8 +80,7 @@ public class Events {
 
     /** Obtains the timestamp of the event. */
     public static Timestamp getTimestamp(Event event) {
-        final Timestamp result = event.getContext()
-                                      .getTimestamp();
+        final Timestamp result = event.getContext().getTimestamp();
         return result;
     }
 

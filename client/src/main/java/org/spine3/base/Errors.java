@@ -36,8 +36,7 @@ public class Errors {
     public static Error fromException(Exception exception) {
         final String message = exception.getMessage();
         final Error result = Error.newBuilder()
-                                  .setType(exception.getClass()
-                                                    .getName())
+                                  .setType(exception.getClass().getName())
                                   .setMessage(message)
                                   .setStacktrace(Throwables.getStackTraceAsString(exception))
                                   .build();
@@ -48,8 +47,7 @@ public class Errors {
     public static Error fromThrowable(Throwable throwable) {
         final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()
-                                  .setType(throwable.getClass()
-                                                    .getName())
+                                  .setType(throwable.getClass().getName())
                                   .setMessage(message)
                                   .setStacktrace(Throwables.getStackTraceAsString(throwable))
                                   .build();

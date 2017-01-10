@@ -41,9 +41,9 @@ class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor>
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /*package*/ EnumFieldValidator(Descriptors.FieldDescriptor descriptor,
-                                   ImmutableList<Descriptors.EnumValueDescriptor> fieldValues,
-                                   FieldPath rootFieldPath) {
+    EnumFieldValidator(Descriptors.FieldDescriptor descriptor,
+                       ImmutableList<Descriptors.EnumValueDescriptor> fieldValues,
+                       FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
     }
 

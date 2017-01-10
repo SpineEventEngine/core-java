@@ -43,7 +43,9 @@ class BooleanFieldValidator extends FieldValidator<Boolean> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /*package*/ BooleanFieldValidator(Descriptors.FieldDescriptor descriptor, ImmutableList<Boolean> fieldValues, FieldPath rootFieldPath) {
+    BooleanFieldValidator(Descriptors.FieldDescriptor descriptor,
+                          ImmutableList<Boolean> fieldValues,
+                          FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
     }
 

@@ -167,8 +167,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final String commandIdString = idToString(commandId);
 
         final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeUrl.of(commandMessage)
-                                          .getSimpleName();
+        final String commandType = TypeUrl.of(commandMessage).getSimpleName();
 
         final Optional targetIdOptional = GetTargetIdFromCommand.asOptional(commandMessage);
         final String targetIdString;
