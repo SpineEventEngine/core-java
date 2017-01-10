@@ -175,4 +175,55 @@ public class EventBusBuilderShould {
                                        .setEnricher(enricher)
                                        .getEnricher());
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_accept_StorageFactory_if_EventStore_already_specified() {
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setEventStore(mock(EventStore.class));
+        builder.setStorageFactory(storageFactory);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_accept_EventStore_if_StorageFactory_already_specified() {
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setStorageFactory(mock(StorageFactory.class));
+        builder.setEventStore(mock(EventStore.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_accept_EventStore_if_EventStoreStreamExecutor_already_specified() {
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setEventStoreStreamExecutor(mock(Executor.class));
+        builder.setEventStore(mock(EventStore.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_accept_EventStoreStreamExecutor_if_EventStore_already_specified() {
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setEventStore(mock(EventStore.class));
+        builder.setEventStoreStreamExecutor(mock(Executor.class));
+    }
+
+    @Test
+    public void use_directExecutor_if_EventStoreStreamExecutor_not_set() {
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setStorageFactory(storageFactory);
+        final EventBus build = builder.build();
+        final Executor streamExecutor = build.getEventStore()
+                                             .getStreamExecutor();
+        ensureExecutorDirect(streamExecutor);
+    }
+
+    private static void ensureExecutorDirect(Executor streamExecutor) {
+        final long mainThreadId = Thread.currentThread()
+                                        .getId();
+        streamExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final long runnableThreadId = Thread.currentThread()
+                                                    .getId();
+                assertEquals(mainThreadId, runnableThreadId);
+            }
+        });
+    }
 }
