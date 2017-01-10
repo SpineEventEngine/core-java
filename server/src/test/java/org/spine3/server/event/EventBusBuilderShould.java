@@ -36,7 +36,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "OptionalGetWithoutIsPresent"})
 public class EventBusBuilderShould {
 
     private StorageFactory storageFactory;
@@ -56,7 +56,8 @@ public class EventBusBuilderShould {
     public void return_set_StorageFactory() {
         assertEquals(storageFactory, EventBus.newBuilder()
                                              .setStorageFactory(storageFactory)
-                                             .getStorageFactory());
+                                             .getStorageFactory()
+                                             .get());
     }
 
     @Test
@@ -64,7 +65,8 @@ public class EventBusBuilderShould {
         final EventStore mock = mock(EventStore.class);
         assertEquals(mock, EventBus.newBuilder()
                                    .setEventStore(mock)
-                                   .getEventStore());
+                                   .getEventStore()
+                                   .get());
     }
 
     @Test
@@ -72,7 +74,8 @@ public class EventBusBuilderShould {
         final Executor mock = mock(Executor.class);
         assertEquals(mock, EventBus.newBuilder()
                                    .setEventStoreStreamExecutor(mock)
-                                   .getEventStoreStreamExecutor());
+                                   .getEventStoreStreamExecutor()
+                                   .get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -91,7 +94,8 @@ public class EventBusBuilderShould {
         };
         assertEquals(delivery, EventBus.newBuilder()
                                        .setSubscriberEventDelivery(delivery)
-                                       .getSubscriberEventDelivery());
+                                       .getSubscriberEventDelivery()
+                                       .get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -105,7 +109,8 @@ public class EventBusBuilderShould {
         final MessageValidator validator = MessageValidator.newInstance();
         assertEquals(validator, EventBus.newBuilder()
                                         .setEventValidator(validator)
-                                        .getEventValidator());
+                                        .getEventValidator()
+                                        .get());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -131,7 +136,8 @@ public class EventBusBuilderShould {
         };
         assertEquals(delivery, EventBus.newBuilder()
                                        .setDispatcherEventDelivery(delivery)
-                                       .getDispatcherEventDelivery());
+                                       .getDispatcherEventDelivery()
+                                       .get());
     }
 
     @Test
@@ -163,7 +169,8 @@ public class EventBusBuilderShould {
     public void accept_null_Enricher() {
         assertNull(EventBus.newBuilder()
                            .setEnricher(Tests.<EventEnricher>nullRef())
-                           .getEnricher());
+                           .getEnricher()
+                           .orNull());
     }
 
     @Test
@@ -173,7 +180,8 @@ public class EventBusBuilderShould {
         assertEquals(enricher, EventBus.newBuilder()
                                        .setStorageFactory(storageFactory)
                                        .setEnricher(enricher)
-                                       .getEnricher());
+                                       .getEnricher()
+                                       .get());
     }
 
     @Test(expected = IllegalStateException.class)

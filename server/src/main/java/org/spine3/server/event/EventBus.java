@@ -21,6 +21,7 @@ package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -361,23 +362,28 @@ public class EventBus implements AutoCloseable {
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
          * {@code EventBus}.
          */
+        @Nullable
         private StorageFactory storageFactory;
 
         /**
          * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
          *
-         * <p>If not set, a default instance will be created by the builder with the help of {@code storageFactory}.
+         * <p>If not set, a default instance will be created by the builder with the help of the {@code StorageFactory}.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
          * {@code EventBus}.
          */
+        @Nullable
         private EventStore eventStore;
 
         /**
-         * Optional {@code Executor} for returning event stream from {@code EventStore}.
+         * Optional {@code Executor} for returning event stream from the {@code EventStore}.
+         *
+         * <p>Used only if the {@code EventStore} is NOT set explicitly.
          *
          * <p>If not set, a default value will be set by the builder.
          */
+        @Nullable
         private Executor eventStoreStreamExecutor;
 
         /**
@@ -385,6 +391,7 @@ public class EventBus implements AutoCloseable {
          *
          * <p>If not set, a default value will be set by the builder.
          */
+        @Nullable
         private SubscriberEventDelivery subscriberEventDelivery;
 
         /**
@@ -392,6 +399,7 @@ public class EventBus implements AutoCloseable {
          *
          * <p>If not set, a default value will be set by the builder.
          */
+        @Nullable
         private DispatcherEventDelivery dispatcherEventDelivery;
 
         /**
@@ -399,8 +407,14 @@ public class EventBus implements AutoCloseable {
          *
          * <p>If not set, a default value will be set by the builder.
          */
+        @Nullable
         private MessageValidator eventValidator;
 
+        /**
+         * Optional enricher for events.
+         *
+         * <p>If not set, the enrichments will NOT be supported in the {@code EventBus} instance built.
+         */
         @Nullable
         private EventEnricher enricher;
 
@@ -423,9 +437,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public StorageFactory getStorageFactory() {
-            return storageFactory;
+        public Optional<StorageFactory> getStorageFactory() {
+            return Optional.fromNullable(storageFactory);
         }
 
         /**
@@ -446,9 +459,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public EventStore getEventStore() {
-            return eventStore;
+        public Optional<EventStore> getEventStore() {
+            return Optional.fromNullable(eventStore);
         }
 
         /**
@@ -470,9 +482,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public Executor getEventStoreStreamExecutor() {
-            return eventStoreStreamExecutor;
+        public Optional<Executor> getEventStoreStreamExecutor() {
+            return Optional.fromNullable(eventStoreStreamExecutor);
         }
 
         /**
@@ -487,9 +498,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public SubscriberEventDelivery getSubscriberEventDelivery() {
-            return subscriberEventDelivery;
+        public Optional<SubscriberEventDelivery> getSubscriberEventDelivery() {
+            return Optional.fromNullable(subscriberEventDelivery);
         }
 
         /**
@@ -504,9 +514,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public DispatcherEventDelivery getDispatcherEventDelivery() {
-            return dispatcherEventDelivery;
+        public Optional<DispatcherEventDelivery> getDispatcherEventDelivery() {
+            return Optional.fromNullable(dispatcherEventDelivery);
         }
 
         public Builder setEventValidator(MessageValidator eventValidator) {
@@ -514,15 +523,15 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public MessageValidator getEventValidator() {
-            return eventValidator;
+        public Optional<MessageValidator> getEventValidator() {
+            return Optional.fromNullable(eventValidator);
         }
 
         /**
          * Sets a custom {@link EventEnricher} for events posted to the {@code EventBus} which is being built.
          *
-         * <p>If the {@code Enricher} is not set, a default instance will be provided.
+         * <p>If the {@code Enricher} is not set, the enrichments will NOT be supported for the {@code EventBus}
+         * instance built.
          *
          * @param enricher the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
@@ -531,9 +540,8 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
-        @Nullable
-        public EventEnricher getEnricher() {
-            return enricher;
+        public Optional<EventEnricher> getEnricher() {
+            return Optional.fromNullable(enricher);
         }
 
         public EventBus build() {

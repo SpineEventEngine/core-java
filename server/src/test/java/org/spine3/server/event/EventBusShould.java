@@ -64,7 +64,6 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EventBusShould {
 
-    private EventStore eventStore;
     private EventBus eventBus;
     private EventBus eventBusWithPosponedExecution;
     private TestResponseObserver responseObserver;
