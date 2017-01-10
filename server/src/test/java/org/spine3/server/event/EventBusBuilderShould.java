@@ -29,11 +29,14 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "OptionalGetWithoutIsPresent"})
@@ -220,6 +223,35 @@ public class EventBusBuilderShould {
         final Executor streamExecutor = build.getEventStore()
                                              .getStreamExecutor();
         ensureExecutorDirect(streamExecutor);
+    }
+
+    @Test
+    public void use_passed_executor() {
+        final CountDownLatch executorUsageLatch = new CountDownLatch(1);
+        final Executor simpleExecutor = new Executor() {
+            @Override
+            public void execute(Runnable command) {
+
+                // Decrease the counter to ensure this method has been called.
+                executorUsageLatch.countDown();
+            }
+        };
+        final EventBus.Builder builder = EventBus.newBuilder()
+                                                 .setStorageFactory(storageFactory)
+                                                 .setEventStoreStreamExecutor(simpleExecutor);
+        final EventBus build = builder.build();
+        final Executor streamExecutor = build.getEventStore()
+                                             .getStreamExecutor();
+        streamExecutor.execute(mock(Runnable.class));
+        try {
+            /**
+             * The executor configured to operate synchronously,
+             * so the latch should already be {@code zero} at this point.
+             **/
+            executorUsageLatch.await(0, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            fail("The specified executor was not used.");
+        }
     }
 
     private static void ensureExecutorDirect(Executor streamExecutor) {
