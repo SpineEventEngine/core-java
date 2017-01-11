@@ -47,7 +47,7 @@ import static com.google.common.collect.Iterators.filter;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-/* package */ class InMemoryEventStorage extends EventStorage {
+class InMemoryEventStorage extends EventStorage {
 
     private static final int INITIAL_CAPACITY = 100;
 

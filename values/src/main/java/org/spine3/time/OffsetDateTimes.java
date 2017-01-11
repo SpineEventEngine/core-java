@@ -284,8 +284,8 @@ public class OffsetDateTimes {
     /**
      * Obtains offset date and time changed on specified amount of milliseconds.
      *
-     * @param dateTime offset date and time that will be changed
-     * @param millisDelta    a number of milliseconds that needs to be added or subtracted that can be either positive or negative
+     * @param dateTime    offset date and time that will be changed
+     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset date and time with new milliseconds value
      */
     private static OffsetDateTime changeMillis(OffsetDateTime dateTime, int millisDelta) {
@@ -314,8 +314,8 @@ public class OffsetDateTimes {
      * Returns a new instance of offset date and time with changed local date or local time parameter.
      *
      * @param offsetDateTime offset date and time that will be changed
-     * @param date      new local date for this offset date and time
-     * @param time      new local time for this offset date and time
+     * @param date           new local date for this offset date and time
+     * @param time           new local time for this offset date and time
      * @return new {@code OffsetDateTime} instance with changed parameter
      */
     private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime, LocalDate date, LocalTime time) {

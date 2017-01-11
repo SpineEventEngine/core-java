@@ -150,7 +150,7 @@ public class GrpcContainer {
     }
 
     @VisibleForTesting
-    /* package */ Server createGrpcServer() {
+    Server createGrpcServer() {
         final ServerBuilder builder = ServerBuilder.forPort(port);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
@@ -160,7 +160,7 @@ public class GrpcContainer {
     }
 
     @VisibleForTesting
-    /* package */ Runnable getOnShutdownCallback() {
+    Runnable getOnShutdownCallback() {
         return new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")

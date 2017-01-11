@@ -117,7 +117,7 @@ public class MessageFieldShould {
             super(index);
         }
 
-        /* package */ void setIsFieldAvailable(boolean isFieldAvailable) {
+        void setIsFieldAvailable(boolean isFieldAvailable) {
             this.isFieldAvailable = isFieldAvailable;
         }
 

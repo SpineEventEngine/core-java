@@ -88,11 +88,11 @@ public class ProjectionRepositoryShould
      */
     private static final IdSetEventFunction<ProjectId, ProjectCreated> idSetForCreateProject =
             new IdSetEventFunction<ProjectId, ProjectCreated>() {
-        @Override
-        public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-            return newHashSet();
-        }
-    };
+                @Override
+                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                    return newHashSet();
+                }
+            };
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
@@ -349,7 +349,7 @@ public class ProjectionRepositoryShould
     }
 
     /** The projection stub used in tests. */
-    /* package */ static class TestProjection extends Projection<ProjectId, Project> {
+    static class TestProjection extends Projection<ProjectId, Project> {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
@@ -362,13 +362,11 @@ public class ProjectionRepositoryShould
             eventMessagesDelivered.put(getState().getId(), eventMessage);
         }
 
-        /* package */
         static boolean processed(Message eventMessage) {
             final boolean result = eventMessagesDelivered.containsValue(eventMessage);
             return result;
         }
 
-        /* package */
         static void clearMessageDeliveryHistory() {
             eventMessagesDelivered.clear();
         }

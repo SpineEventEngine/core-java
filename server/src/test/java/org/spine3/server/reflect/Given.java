@@ -26,9 +26,9 @@ import org.spine3.test.reflect.event.ProjectCreated;
 
 import static org.spine3.base.Identifiers.newUuid;
 
-/* package */ class Given {
+class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
@@ -41,7 +41,7 @@ import static org.spine3.base.Identifiers.newUuid;
         }
     }
 
-    /* package */ static class EventMessage {
+    static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
@@ -60,7 +60,7 @@ import static org.spine3.base.Identifiers.newUuid;
         }
     }
 
-    /* package */ static class CommandMessage {
+    static class CommandMessage {
 
         private CommandMessage() {
         }

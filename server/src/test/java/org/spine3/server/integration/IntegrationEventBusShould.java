@@ -54,7 +54,7 @@ public class IntegrationEventBusShould {
     public void return_instance() {
         assertNotNull(eventBus);
     }
-    
+
     @Test
     public void post_event_and_notify_subscriber() {
         eventBus.post(event);

@@ -186,7 +186,7 @@ public class CommandHandlerShould {
             this(newUuid());
         }
 
-        /* package */ void assertHandled(Command expected) {
+        void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
             final String cmdName = getMessage(expected).getClass().getName();
@@ -194,11 +194,11 @@ public class CommandHandlerShould {
             assertEquals(expected, actual);
         }
 
-        /* package */ void handle(Command cmd) {
+        void handle(Command cmd) {
             handle(getMessage(cmd), cmd.getContext());
         }
 
-        /* package */ ImmutableList<Message> getEventsOnStartProjectCmd() {
+        ImmutableList<Message> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 

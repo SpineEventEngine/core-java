@@ -36,11 +36,11 @@ import org.spine3.server.entity.RecordBasedRepository;
  *
  * @author Alex Tymchenko
  */
-/* package */ class EntityQueryProcessor implements QueryProcessor {
+class EntityQueryProcessor implements QueryProcessor {
 
     private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
-    /* package */ EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
+    EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
         this.repository = repository;
     }
 

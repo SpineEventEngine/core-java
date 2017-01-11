@@ -33,7 +33,7 @@ import java.util.Map;
  * @param <R> stored record type
  * @author Alex Tymchenko
  */
-/* package */ interface BulkStorageOperationsMixin<I, R extends Message> {
+interface BulkStorageOperationsMixin<I, R extends Message> {
 
     /**
      * Reads the records from the storage with the given IDs.
@@ -53,7 +53,6 @@ import java.util.Map;
      */
     @CheckReturnValue
     Iterable<R> readMultiple(Iterable<I> ids);
-
 
     /**
      * Reads all the records from the storage.

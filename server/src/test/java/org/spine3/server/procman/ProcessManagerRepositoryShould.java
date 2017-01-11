@@ -277,11 +277,9 @@ public class ProcessManagerRepositoryShould
             return result;
         }
 
-        /* package */
         static void clearMessageDeliveryHistory() {
             messagesDelivered.clear();
         }
-
 
         @Override // is overridden to make it accessible from tests
         @SuppressWarnings("MethodDoesntCallSuperMethod")

@@ -52,7 +52,7 @@ public class MessageValidator {
      *
      * @param rootFieldPath the path to the message field which is the root for this message
      */
-    /* package */ static MessageValidator newInstance(FieldPath rootFieldPath) {
+    static MessageValidator newInstance(FieldPath rootFieldPath) {
         return new MessageValidator(rootFieldPath);
     }
 

@@ -32,7 +32,7 @@ public class CommandStatusService {
 
     private final CommandStore commandStore;
 
-    /* package */ CommandStatusService(CommandStore commandStore) {
+    CommandStatusService(CommandStore commandStore) {
         this.commandStore = commandStore;
     }
 

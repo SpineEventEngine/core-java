@@ -69,9 +69,9 @@ public class StandFunnelShould {
         final Executor executor = Executors.newSingleThreadExecutor();
 
         final StandFunnel funnel = StandFunnel.newBuilder()
-                                                      .setStand(stand)
-                                                      .setExecutor(executor)
-                                                      .build();
+                                              .setStand(stand)
+                                              .setExecutor(executor)
+                                              .build();
         Assert.assertNotNull(funnel);
     }
 
@@ -103,7 +103,6 @@ public class StandFunnelShould {
         verify(stand).update(id, state, version);
     }
 
-
     @Test
     public void use_executor_from_builder() {
         final Stand stand = spy(TestStandFactory.create());
@@ -127,7 +126,6 @@ public class StandFunnelShould {
 
         verify(executor).execute(any(Runnable.class));
     }
-
 
     // **** Negative scenarios (unit) ****
 
@@ -189,7 +187,6 @@ public class StandFunnelShould {
 
         final BoundedContext boundedContext = spy(Given.boundedContext(stand, executor));
 
-
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
         }
@@ -249,7 +246,6 @@ public class StandFunnelShould {
         };
     }
 
-
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void deliver_updates_through_several_threads() throws InterruptedException {
@@ -267,7 +263,6 @@ public class StandFunnelShould {
                                                    .build();
 
         final ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
-
 
         final Runnable task = new Runnable() {
             @Override

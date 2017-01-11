@@ -46,7 +46,7 @@ public class UnknownTypeException extends RuntimeException {
      * Creates a new instance with the type name and the cause.
      *
      * @param typeName the unknown type
-     * @param cause the exception cause
+     * @param cause    the exception cause
      */
     public UnknownTypeException(String typeName, Throwable cause) {
         super(ERR_MSG + typeName, cause);

@@ -86,14 +86,14 @@ public class HandlerMethodShould {
     public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
         twoParamMethod.invoke(target, StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
 
-        assertTrue(((StubHandler)target).wasOnInvoked());
+        assertTrue(((StubHandler) target).wasOnInvoked());
     }
 
     @Test
     public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
         oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
 
-        assertTrue(((StubHandler)target).wasHandleInvoked());
+        assertTrue(((StubHandler) target).wasHandleInvoked());
     }
 
     @Test
@@ -146,7 +146,7 @@ public class HandlerMethodShould {
             handleInvoked = true;
         }
 
-        /* package */ static Method getTwoParameterMethod() {
+        static Method getTwoParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
@@ -157,7 +157,7 @@ public class HandlerMethodShould {
             return method;
         }
 
-        /* package */ static Method getOneParameterMethod() {
+        static Method getOneParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
@@ -169,11 +169,11 @@ public class HandlerMethodShould {
             return method;
         }
 
-        /* package */ boolean wasOnInvoked() {
+        boolean wasOnInvoked() {
             return onInvoked;
         }
 
-        /* package */ boolean wasHandleInvoked() {
+        boolean wasHandleInvoked() {
             return handleInvoked;
         }
     }

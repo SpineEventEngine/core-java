@@ -135,9 +135,9 @@ public class Changes {
         checkNotEqual(previousValue, newValue);
 
         final OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
-                                                        .setPreviousValue(previousValue)
-                                                        .setNewValue(newValue)
-                                                        .build();
+                                                                .setPreviousValue(previousValue)
+                                                                .setNewValue(newValue)
+                                                                .build();
         return result;
     }
 }

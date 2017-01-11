@@ -137,14 +137,14 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
     /** Converts EventStorageRecords to Events. */
     @VisibleForTesting
-    /* package */ static List<Event> toEventList(List<EventStorageRecord> records) {
+    static List<Event> toEventList(List<EventStorageRecord> records) {
         return Lists.transform(records, TO_EVENT);
     }
 
     /** Converts EventStorageRecords to Events. */
     @SuppressWarnings("OverloadedVarargsMethod")
     @VisibleForTesting
-    /* package */ static List<Event> toEventList(EventStorageRecord... records) {
+    static List<Event> toEventList(EventStorageRecord... records) {
         return toEventList(ImmutableList.copyOf(records));
     }
 
@@ -155,7 +155,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
     /** Creates storage record for the passed {@link Event}. */
     @VisibleForTesting
-    /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
+    static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
         final String eventIdString = checkValid(eventId).getUuid();
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
@@ -322,7 +322,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 if (actualValue instanceof Any) {
                     actualValue = AnyPacker.unpack((Any) actualValue);
                 }
-            } catch  (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
                 // Wrong Message class -> does not satisfy the criteria
                 return false;
             }

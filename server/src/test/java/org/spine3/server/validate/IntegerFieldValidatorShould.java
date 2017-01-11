@@ -39,7 +39,8 @@ public class IntegerFieldValidatorShould {
     private static final Integer NEGATIVE_VALUE = -2;
 
     private final IntegerFieldValidator validator =
-            new IntegerFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
+            new IntegerFieldValidator(Any.getDescriptor().getFields().get(0),
+                                      ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
 
     @Test
     public void convert_string_to_number() {

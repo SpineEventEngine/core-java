@@ -88,7 +88,9 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     protected AggregateEvents newStorageRecord() {
         final List<AggregateStorageRecord> records = Given.AggregateStorageRecord.createSequentialRecords(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
-        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedEvents).build();
+        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder()
+                                                               .addAllEvent(expectedEvents)
+                                                               .build();
         return aggregateEvents;
     }
 
@@ -298,9 +300,9 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder()
-                .setState(Any.getDefaultInstance())
-                .setTimestamp(time)
-                .build();
+                       .setState(Any.getDefaultInstance())
+                       .setTimestamp(time)
+                       .build();
     }
 
     private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {

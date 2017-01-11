@@ -192,8 +192,8 @@ public class Queries {
             return result;
         }
 
-        /* package */ static Target composeTarget(Class<? extends Message> entityClass,
-                                                  @Nullable Set<? extends Message> ids) {
+        static Target composeTarget(Class<? extends Message> entityClass,
+                                    @Nullable Set<? extends Message> ids) {
             final boolean includeAll = (ids == null);
 
             final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();

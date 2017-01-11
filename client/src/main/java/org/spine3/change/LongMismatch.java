@@ -42,9 +42,9 @@ public class LongMismatch {
      * Creates {@code ValueMismatch} for the case of discovering not zero value,
      * when a zero amount was expected by a command.
      *
-     * @param actual the value discovered instead of zero
+     * @param actual   the value discovered instead of zero
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedZero(long actual, long newValue, int version) {
@@ -68,16 +68,16 @@ public class LongMismatch {
      * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
-     * @param actual the value discovered instead of the expected string
+     * @param actual   the value discovered instead of the expected string
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(long expected, long actual, long newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }
-    
+
     /**
      * Creates a new instance of {@code ValueMismatch} with the passed values for a long attribute.
      */

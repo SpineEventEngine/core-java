@@ -57,9 +57,9 @@ public abstract class FailureThrowable extends Throwable {
     /** Converts this instance into {@link Failure} message. */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
-                .setInstance(AnyPacker.pack(this.failure))
-                .setStacktrace(Throwables.getStackTraceAsString(this))
-                .setTimestamp(this.timestamp);
+                                               .setInstance(AnyPacker.pack(this.failure))
+                                               .setStacktrace(Throwables.getStackTraceAsString(this))
+                                               .setTimestamp(this.timestamp);
         return builder.build();
     }
 }

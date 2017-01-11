@@ -163,25 +163,25 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ MessageValidator getEventValidator() {
+    MessageValidator getEventValidator() {
         return eventValidator;
     }
 
     @VisibleForTesting
     @Nullable
-    /* package */ EventEnricher getEnricher() {
+    EventEnricher getEnricher() {
         return enricher;
     }
 
     @VisibleForTesting
     @Nullable
-    /* package */ DispatcherEventDelivery getDispatcherEventDelivery() {
+    DispatcherEventDelivery getDispatcherEventDelivery() {
         return dispatcherEventDelivery;
     }
 
     @VisibleForTesting
     @Nullable
-    /* package */ SubscriberEventDelivery getSubscriberEventDelivery() {
+    SubscriberEventDelivery getSubscriberEventDelivery() {
         return subscriberEventDelivery;
     }
 
@@ -205,19 +205,19 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ boolean hasSubscribers(EventClass eventClass) {
+     boolean hasSubscribers(EventClass eventClass) {
         final boolean result = subscriberRegistry.hasSubscribers(eventClass);
         return result;
     }
 
     @VisibleForTesting
-    /* package */ Collection<EventSubscriber> getSubscribers(EventClass eventClass) {
+     Collection<EventSubscriber> getSubscribers(EventClass eventClass) {
         final Collection<EventSubscriber> result = subscriberRegistry.getSubscribers(eventClass);
         return result;
     }
 
     @VisibleForTesting
-    /* package */ Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+     Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         return dispatcherRegistry.getDispatchers(eventClass);
     }
 

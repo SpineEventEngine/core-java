@@ -29,7 +29,7 @@ import org.spine3.client.Query;
  *
  * @author Alex Tymchenko
  */
-/* package */ interface QueryProcessor {
+interface QueryProcessor {
 
     /**
      * Performs query processing as a part of {@link Stand#execute(Query, StreamObserver)}.

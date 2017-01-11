@@ -49,7 +49,6 @@ public class CommandHandlerMethodShould {
 
     private final EventBus eventBus = TestEventBusFactory.create();
 
-
     @Test
     public void scan_target_for_handlers() {
         final TestCommandHandler handlerObject = new ValidHandlerOneParam();

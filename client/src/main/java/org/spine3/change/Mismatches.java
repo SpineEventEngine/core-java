@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class Mismatches {
+class Mismatches {
 
     private static final String ERR_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
 
@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         // Prevent instantiations.
     }
 
-    /* package */ static void checkNotNullOrEqual(Object expected, Object actual) {
+    static void checkNotNullOrEqual(Object expected, Object actual) {
         checkNotNull(expected);
         checkNotNull(actual);
         checkArgument(!expected.equals(actual), ERR_CANNOT_BE_EQUAL);

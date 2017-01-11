@@ -285,7 +285,6 @@ public class Timestamps {
         }
     }
 
-
     /**
      * The testing assistance utility, which returns a timestamp of the moment
      * of the passed number of minutes from now.

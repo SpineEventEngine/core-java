@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-/* package */ class Schemas {
+class Schemas {
 
     private static final Map<String, Schema> stringSchemas = buildSchemasMap();
 
@@ -44,7 +44,7 @@ import java.util.Map;
      * @param value String schema representation.
      * @return {@link Schema} value
      */
-    /* package */ static Schema parse(String value) {
+    static Schema parse(String value) {
         final String lowercaseValue = value.toLowerCase();
         if (!stringSchemas.containsKey(lowercaseValue)) {
             return Schema.UNDEFINED;
@@ -58,7 +58,7 @@ import java.util.Map;
      * @param schema {@link Schema} value
      * @return String name
      */
-    /* package */ static String getLowerCaseName(Schema schema) {
+    static String getLowerCaseName(Schema schema) {
         return schema.name().toLowerCase();
     }
 

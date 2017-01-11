@@ -34,16 +34,16 @@ import static org.spine3.protobuf.Values.newFloatValue;
  *
  * @author Alexander Litus
  */
-/* package */ class FloatFieldValidator extends FloatFieldValidatorBase<Float> {
+class FloatFieldValidator extends FloatFieldValidatorBase<Float> {
 
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues, FieldPath rootFieldPath) {
+    FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

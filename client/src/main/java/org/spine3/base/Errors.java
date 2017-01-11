@@ -47,10 +47,10 @@ public class Errors {
     public static Error fromThrowable(Throwable throwable) {
         final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()
-                .setType(throwable.getClass().getName())
-                .setMessage(message)
-                .setStacktrace(Throwables.getStackTraceAsString(throwable))
-                .build();
+                                  .setType(throwable.getClass().getName())
+                                  .setMessage(message)
+                                  .setStacktrace(Throwables.getStackTraceAsString(throwable))
+                                  .build();
         return result;
     }
 }

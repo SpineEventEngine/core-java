@@ -33,8 +33,8 @@ public class Responses {
 
     /** The response returned on successful acceptance of a message for processing. */
     private static final Response RESPONSE_OK = Response.newBuilder()
-            .setOk(Empty.getDefaultInstance())
-            .build();
+                                                        .setOk(Empty.getDefaultInstance())
+                                                        .build();
 
     /** Returns the instance of OK {@link Response}. */
     public static Response ok() {

@@ -173,7 +173,7 @@ public class EventEnricher {
         return result;
     }
 
-    /* package */ Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
+    Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
                                                                  Class<?> enrichmentFieldClass) {
         final Optional<EnrichmentFunction<?, ?>> result =
                 FluentIterable.from(functions.values())
@@ -181,12 +181,12 @@ public class EventEnricher {
         return result;
     }
 
-    /* package */ static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
+    static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
 
         private final Class<?> eventFieldClass;
         private final Class<?> enrichmentFieldClass;
 
-        /* package */ static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
+        static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
             return new SupportsFieldConversion(eventFieldClass, enrichmentFieldClass);
         }
 
@@ -268,11 +268,11 @@ public class EventEnricher {
          * @see EnrichmentFunction
          */
         @VisibleForTesting
-        /* package */ static class SameTransition implements Predicate<EnrichmentFunction> {
+        static class SameTransition implements Predicate<EnrichmentFunction> {
 
             private final EnrichmentFunction function;
 
-            /* package */ static SameTransition asFor(EnrichmentFunction function) {
+            static SameTransition asFor(EnrichmentFunction function) {
                 return new SameTransition(function);
             }
 
@@ -307,7 +307,7 @@ public class EventEnricher {
         }
 
         @VisibleForTesting
-        /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
+        Set<EnrichmentFunction<?, ?>> getFunctions() {
             return ImmutableSet.copyOf(functions);
         }
     }

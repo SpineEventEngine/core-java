@@ -39,7 +39,8 @@ public class LongFieldValidatorShould {
     private static final Long NEGATIVE_VALUE = -2L;
 
     private final LongFieldValidator validator =
-            new LongFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
+            new LongFieldValidator(Any.getDescriptor().getFields().get(0),
+                                   ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
 
     @Test
     public void convert_string_to_number() {

@@ -182,7 +182,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    /* package */ static Class<? extends Message> getFirstParamType(Method handler) {
+    static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
         final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;

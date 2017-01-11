@@ -149,7 +149,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable set of command classes
      */
     @CheckReturnValue
-    /* package */ static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
+    static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
         return getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
     }
 
@@ -159,7 +159,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param clazz the class of the aggregate
      * @return immutable set of event classes
      */
-    /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
+    static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
         return getHandledMessageClasses(clazz, EventApplierMethod.PREDICATE);
     }
 
@@ -220,7 +220,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      * @see #dispatchForTest(Message, CommandContext)
      */
-    /* package */ List<? extends Message> dispatch(Message command, CommandContext context) {
+    List<? extends Message> dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
 
@@ -314,7 +314,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
      *                          for the thrown {@code RuntimeException}
      */
-    /* package */ void play(Iterable<Event> events) {
+    void play(Iterable<Event> events) {
         createBuilder();
         try {
             for (Event event : events) {
@@ -399,7 +399,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param snapshot the snapshot with the state to restore
      */
-    /* package */ void restore(Snapshot snapshot) {
+    void restore(Snapshot snapshot) {
         final S stateToRestore = AnyPacker.unpack(snapshot.getState());
 
         // See if we're in the state update cycle.
@@ -422,7 +422,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable view of all uncommitted events
      */
     @CheckReturnValue
-    /* package */ List<Event> getUncommittedEvents() {
+    List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
@@ -431,7 +431,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @return the list of events
      */
-    /* package */ List<Event> commitEvents() {
+    List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
@@ -484,7 +484,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return new snapshot
      */
     @CheckReturnValue
-    /* package */ Snapshot toSnapshot() {
+    Snapshot toSnapshot() {
         final Any state = AnyPacker.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();

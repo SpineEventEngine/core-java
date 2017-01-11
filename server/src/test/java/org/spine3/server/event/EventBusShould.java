@@ -433,7 +433,7 @@ public class EventBusShould {
             this.eventHandled = Events.createEvent(event, context);
         }
 
-        /* package */ Event getEventHandled() {
+        Event getEventHandled() {
             return eventHandled;
         }
     }
@@ -450,7 +450,7 @@ public class EventBusShould {
                                                             FaultySubscriber.class.getSimpleName() + '?');
         }
 
-        /* package */ boolean isMethodCalled() {
+        boolean isMethodCalled() {
             return this.methodCalled;
         }
     }
@@ -470,7 +470,7 @@ public class EventBusShould {
             dispatchCalled = true;
         }
 
-        /* package */ boolean isDispatchCalled() {
+        boolean isDispatchCalled() {
             return dispatchCalled;
         }
     }
@@ -496,15 +496,15 @@ public class EventBusShould {
             this.completed = true;
         }
 
-        /* package */ Response getResponse() {
+        Response getResponse() {
             return response;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return this.completed;
         }
     }

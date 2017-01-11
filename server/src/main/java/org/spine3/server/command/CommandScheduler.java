@@ -113,7 +113,7 @@ public abstract class CommandScheduler {
     }
 
     /** Sets a command bus used to post scheduled commands. */
-    /* package */ void setCommandBus(CommandBus commandBus) {
+    void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
 }

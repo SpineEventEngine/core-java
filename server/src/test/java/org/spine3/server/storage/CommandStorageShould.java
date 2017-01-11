@@ -68,7 +68,7 @@ import static org.spine3.validate.Validate.isNotDefault;
 public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
 
     private static final Error defaultError = Error.getDefaultInstance();
-    private  static final Failure defaultFailure = Failure.getDefaultInstance();
+    private static final Failure defaultFailure = Failure.getDefaultInstance();
 
     private CommandStorage storage;
 
@@ -353,19 +353,19 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     private static Error newError() {
         return Error.newBuilder()
-                .setType("error type 123")
-                .setCode(5)
-                .setMessage("error message 123")
-                .setStacktrace("stacktrace")
-                .build();
+                    .setType("error type 123")
+                    .setCode(5)
+                    .setMessage("error message 123")
+                    .setStacktrace("stacktrace")
+                    .build();
     }
 
     private static Failure newFailure() {
         return Failure.newBuilder()
-                .setInstance(Given.EventMessage.projectCreatedAny())
-                .setStacktrace("failure stacktrace")
-                .setTimestamp(getCurrentTime())
-                .build();
+                      .setInstance(Given.EventMessage.projectCreatedAny())
+                      .setStacktrace("failure stacktrace")
+                      .setTimestamp(getCurrentTime())
+                      .build();
     }
 
     private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {

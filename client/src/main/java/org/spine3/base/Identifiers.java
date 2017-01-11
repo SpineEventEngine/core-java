@@ -84,7 +84,7 @@ public class Identifiers {
      * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
-     *         the passed {@link Message} instance has no fields
+     *                                  the passed {@link Message} instance has no fields
      * @see ConverterRegistry
      */
     public static <I> String idToString(@Nullable I id) {
@@ -296,7 +296,7 @@ public class Identifiers {
             }
         }
 
-        public synchronized  <I> boolean containsConverter(I id) {
+        public synchronized <I> boolean containsConverter(I id) {
             final Class<?> idClass = id.getClass();
             final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
             return contains;

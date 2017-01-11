@@ -37,7 +37,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-/* package */ class FieldValidatorFactory {
+class FieldValidatorFactory {
 
     private FieldValidatorFactory() {
     }
@@ -88,14 +88,12 @@ import static java.lang.String.format;
         }
     }
 
-    /* package */
     static FieldValidator<?> create(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, false);
     }
 
-    /* package */
     static FieldValidator<?> createStrict(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {

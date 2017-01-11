@@ -34,17 +34,17 @@ import java.lang.reflect.Modifier;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplierMethod extends HandlerMethod<Empty> {
+class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    /* package */ static final Predicate<Method> PREDICATE = new FilterPredicate();
+    static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    /* package */ EventApplierMethod(Method method) {
+    EventApplierMethod(Method method) {
         super(method);
     }
 

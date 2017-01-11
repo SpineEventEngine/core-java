@@ -30,9 +30,9 @@ import org.spine3.test.bc.event.TaskAdded;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 
-/* package */ class Given {
+class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
@@ -45,7 +45,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
     }
 
-    /* package */ static class EventMessage {
+    static class EventMessage {
 
         private EventMessage() {
         }
@@ -69,7 +69,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
     }
 
-    /* package */ static class IntegrationEvent {
+    static class IntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
@@ -91,8 +91,8 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
             final ProjectCreated event = EventMessage.projectCreated(projectId);
             final org.spine3.server.integration.IntegrationEvent.Builder builder =
                     org.spine3.server.integration.IntegrationEvent.newBuilder()
-                                    .setContext(eventContext)
-                                    .setMessage(AnyPacker.pack(event));
+                                                                  .setContext(eventContext)
+                                                                  .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
     }

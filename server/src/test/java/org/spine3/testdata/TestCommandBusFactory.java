@@ -20,7 +20,6 @@
 
 package org.spine3.testdata;
 
-
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
