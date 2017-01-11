@@ -406,11 +406,10 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("TypeMayBeWeakened")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        /** Needs to be static. */
+        // Needs to be `static` to share the state updates in scope of the test.
         private static final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        /** It is required to be public. */
+        @SuppressWarnings("PublicConstructorInNonPublicClass")      // Required to be `public`.
         public ProjectAggregate(ProjectId id) {
             super(id);
         }

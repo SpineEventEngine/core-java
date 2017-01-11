@@ -52,7 +52,6 @@ final class SubscriptionRegistry {
      * @param subscription the subscription to activate
      * @param callback     the callback to make active
      */
-
     synchronized void activate(Subscription subscription, Stand.EntityUpdateCallback callback) {
         checkState(subscriptionToAttrs.containsKey(subscription),
                    "Cannot find the subscription in the registry.");
@@ -66,7 +65,6 @@ final class SubscriptionRegistry {
      * @param target the target for a new subscription
      * @return the created subscription
      */
-
     synchronized Subscription addSubscription(Target target) {
         final String subscriptionId = Identifiers.newUuid();
         final String typeAsString = target.getType();
@@ -94,7 +92,6 @@ final class SubscriptionRegistry {
      *
      * @param subscription the subscription to remove
      */
-
     synchronized void removeSubscription(Subscription subscription) {
         if (!subscriptionToAttrs.containsKey(subscription)) {
             return;
@@ -114,7 +111,6 @@ final class SubscriptionRegistry {
      * @param type the type to filter by
      * @return the collection of filtered records
      */
-
     synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
         final Set<SubscriptionRecord> result = typeToAttrs.get(type);
         return result;
@@ -126,7 +122,6 @@ final class SubscriptionRegistry {
      * @param type the type to check records for
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
-
     synchronized boolean hasType(TypeUrl type) {
         final boolean result = typeToAttrs.containsKey(type);
         return result;
