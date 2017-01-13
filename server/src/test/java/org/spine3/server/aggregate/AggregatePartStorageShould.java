@@ -55,11 +55,11 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
+public abstract class AggregatePartStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
 
     private final ProjectId id = Given.AggregateId.newProjectId();
 
-    private AggregateStorage<ProjectId> storage;
+    private AggregatePartStorage<ProjectId> storage;
 
     @Before
     public void setUpAggregateStorageTest() {
@@ -72,7 +72,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Override
-    protected abstract AggregateStorage<ProjectId> getStorage();
+    protected abstract AggregatePartStorage<ProjectId> getStorage();
 
     /**
      * Used to get a storage in tests with different ID types.
@@ -82,7 +82,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
      * @param <Id> the type of aggregate IDs
      * @return an empty storage instance
      */
-    protected abstract <Id> AggregateStorage<Id> getStorage(
+    protected abstract <Id> AggregatePartStorage<Id> getStorage(
             Class<? extends AggregatePart<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
 
     @Override
@@ -139,21 +139,21 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_and_read_event_by_String_id() {
-        final AggregateStorage<String> storage = getStorage(TestAggregatePartWithIdString.class);
+        final AggregatePartStorage<String> storage = getStorage(TestAggregatePartWithIdString.class);
         final String id = newUuid();
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Long_id() {
-        final AggregateStorage<Long> storage = getStorage(TestAggregatePartWithIdLong.class);
+        final AggregatePartStorage<Long> storage = getStorage(TestAggregatePartWithIdLong.class);
         final long id = 10L;
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Integer_id() {
-        final AggregateStorage<Integer> storage = getStorage(TestAggregatePartWithIdInteger.class);
+        final AggregatePartStorage<Integer> storage = getStorage(TestAggregatePartWithIdInteger.class);
         final int id = 10;
         writeAndReadEventTest(id, storage);
     }
@@ -255,7 +255,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         storage.readEventCountAfterLastSnapshot(id);
     }
 
-    protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
+    protected <Id> void writeAndReadEventTest(Id id, AggregatePartStorage<Id> storage) {
         final Event expectedEvent = org.spine3.server.storage.Given.Event.projectCreated();
 
         storage.writeEvent(id, expectedEvent);

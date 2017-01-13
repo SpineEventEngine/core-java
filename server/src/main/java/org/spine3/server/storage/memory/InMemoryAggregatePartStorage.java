@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregatePartStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.io.Serializable;
@@ -40,7 +40,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
 
     private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
             new AggregateStorageKeyComparator<I>(), // key comparator
@@ -49,13 +49,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final Map<I, Integer> eventCountMap = newHashMap();
 
-    protected InMemoryAggregateStorage(boolean multitenant) {
+    protected InMemoryAggregatePartStorage(boolean multitenant) {
         super(multitenant);
     }
 
     /** Creates a new single-tenant storage instance. */
-    protected static <I> InMemoryAggregateStorage<I> newInstance() {
-        return new InMemoryAggregateStorage<>(false);
+    protected static <I> InMemoryAggregatePartStorage<I> newInstance() {
+        return new InMemoryAggregatePartStorage<>(false);
     }
 
     @Override

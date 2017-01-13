@@ -143,9 +143,9 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    protected AggregateStorage<I> aggregateStorage() {
+    protected AggregatePartStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
+        final AggregatePartStorage<I> result = (AggregatePartStorage<I>) getStorage();
         return checkStorage(result);
     }
 
@@ -190,7 +190,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     public void store(A aggregate) {
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
-        final AggregateStorage<I> storage = aggregateStorage();
+        final AggregatePartStorage<I> storage = aggregateStorage();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
         final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
@@ -240,7 +240,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
-        final AggregateStorage<I> aggregateStorage = aggregateStorage();
+        final AggregatePartStorage<I> aggregatePartStorage = aggregateStorage();
         A aggregate;
 
         /**
@@ -265,7 +265,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                                    "Restarting the command dispatching.",
                             getAggregateClass(), aggregateId, command, newEventCount);
             }
-            eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+            eventCountBeforeDispatch = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
             aggregate = loadOrCreate(aggregateId);
 
             try {
@@ -283,7 +283,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                 }
             }
 
-            eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+            eventCountBeforeSave = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
         return aggregate;

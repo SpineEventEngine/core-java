@@ -156,7 +156,7 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void store_snapshot_and_set_event_count_to_zero_if_needed() {
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final AggregatePartStorage<ProjectId> storage = givenAggregateStorageMock();
         final ProjectAggregatePart aggregate = givenAggregateWithUncommittedEvents();
         repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents()
                                                   .size());
@@ -169,7 +169,7 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void not_store_snapshot_if_not_needed() {
-        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final AggregatePartStorage<ProjectId> storage = givenAggregateStorageMock();
         final ProjectAggregatePart aggregate = givenAggregateWithUncommittedEvents();
 
         repositorySpy.store(aggregate);
@@ -305,7 +305,7 @@ public class AggregatePartRepositoryShould {
     @Test
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        final AggregatePartStorage<ProjectId> storage = mock(AggregatePartStorage.class);
         final ProjectId projectId = Given.AggregateId.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
@@ -366,9 +366,9 @@ public class AggregatePartRepositoryShould {
                                    .loadOrCreate(any(ProjectId.class));
     }
 
-    private AggregateStorage<ProjectId> givenAggregateStorageMock() {
+    private AggregatePartStorage<ProjectId> givenAggregateStorageMock() {
         @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        final AggregatePartStorage<ProjectId> storage = mock(AggregatePartStorage.class);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
         return storage;

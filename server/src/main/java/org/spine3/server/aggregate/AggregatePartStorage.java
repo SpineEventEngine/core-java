@@ -43,18 +43,18 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
- * An event-sourced storage of aggregate events and snapshots.
+ * An event-sourced storage of aggregate part events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
+public abstract class AggregatePartStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
                                                              .getName();
 
-    protected AggregateStorage(boolean multitenant) {
+    protected AggregatePartStorage(boolean multitenant) {
         super(multitenant);
     }
 
