@@ -21,15 +21,14 @@
 package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.type.EventClass;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class SubscriberRegistry {
 
-    private final Multimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
+    private final HashMultimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
 
     void subscribe(EventSubscriber object) {
         checkNotNull(object);
@@ -71,12 +70,12 @@ class SubscriberRegistry {
         EventBus.log().info("All subscribers cleared.");
     }
 
-    Collection<EventSubscriber> getSubscribers(EventClass c) {
-        return ImmutableList.copyOf(subscribersByEventClass.get(c));
+    Set<EventSubscriber> getSubscribers(EventClass c) {
+        return ImmutableSet.copyOf(subscribersByEventClass.get(c));
     }
 
     boolean hasSubscribers(EventClass eventClass) {
-        final Collection<EventSubscriber> subscribers = getSubscribers(eventClass);
+        final Set<EventSubscriber> subscribers = getSubscribers(eventClass);
         return !subscribers.isEmpty();
     }
 

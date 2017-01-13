@@ -146,12 +146,12 @@ public class EventBus implements AutoCloseable {
     }
 
     private void injectSubscriberProvider() {
-        subscriberEventDelivery.setConsumerProvider(new Function<EventClass, Collection<EventSubscriber>>() {
+        subscriberEventDelivery.setConsumerProvider(new Function<EventClass, Set<EventSubscriber>>() {
             @Nullable
             @Override
-            public Collection<EventSubscriber> apply(@Nullable EventClass eventClass) {
+            public Set<EventSubscriber> apply(@Nullable EventClass eventClass) {
                 checkNotNull(eventClass);
-                final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
+                final Set<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
                 return subscribers;
             }
         });
@@ -205,19 +205,19 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-     boolean hasSubscribers(EventClass eventClass) {
+    boolean hasSubscribers(EventClass eventClass) {
         final boolean result = subscriberRegistry.hasSubscribers(eventClass);
         return result;
     }
 
     @VisibleForTesting
-     Collection<EventSubscriber> getSubscribers(EventClass eventClass) {
-        final Collection<EventSubscriber> result = subscriberRegistry.getSubscribers(eventClass);
+    Set<EventSubscriber> getSubscribers(EventClass eventClass) {
+        final Set<EventSubscriber> result = subscriberRegistry.getSubscribers(eventClass);
         return result;
     }
 
     @VisibleForTesting
-     Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+    Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         return dispatcherRegistry.getDispatchers(eventClass);
     }
 
@@ -290,7 +290,7 @@ public class EventBus implements AutoCloseable {
      */
     private int invokeSubscribers(Event event) {
         final EventClass eventClass = EventClass.of(event);
-        final Collection<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
+        final Set<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
         subscriberEventDelivery.deliver(event);
         return subscribers.size();
     }

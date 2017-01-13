@@ -94,13 +94,20 @@ class Given {
         return new StandTestProjectionRepository(context);
     }
 
-    static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
+    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo(BoundedContext context) {
         return new StandTestAggregateRepository(context);
     }
 
-    static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
+    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                            .build();
+        return aggregateRepo(boundedContext);
+    }
+
+    static BoundedContext boundedContext(Stand stand, StandUpdateDelivery standUpdateDelivery) {
         return boundedContextBuilder(stand)
-                .setStandFunnelExecutor(standFunnelExecutor)
+                .setStandUpdateDelivery(standUpdateDelivery)
                 .build();
     }
 
@@ -136,7 +143,7 @@ class Given {
         }
     }
 
-    private static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
+    static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
 
         /**
          * Creates a new aggregate instance.

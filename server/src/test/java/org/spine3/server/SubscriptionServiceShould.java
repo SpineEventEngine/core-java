@@ -29,7 +29,7 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -42,9 +42,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
@@ -129,7 +131,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void subscribe_to_topic() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -162,7 +164,7 @@ public class SubscriptionServiceShould {
     @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
     @Test
     public void handle_subscription_process_exceptions_and_call_observer_error_callback() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -178,7 +180,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void activate_subscription() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -205,17 +207,27 @@ public class SubscriptionServiceShould {
                                             .setId(projectId)
                                             .build();
         final int version = 1;
+
+        final Entity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(projectId, AnyPacker.pack(projectState), version);
+                      .post(entity);
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
     }
 
+    private static Entity mockEntity(ProjectId projectId, Message projectState, int version) {
+        final Entity entity = mock(Entity.class);
+        when(entity.getState()).thenReturn(projectState);
+        when(entity.getId()).thenReturn(projectId);
+        when(entity.getVersion()).thenReturn(version);
+        return entity;
+    }
+
     @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
     @Test
     public void handle_activation_process_exceptions_and_call_observer_error_callback() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -231,7 +243,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void cancel_subscription_on_topic() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -262,8 +274,9 @@ public class SubscriptionServiceShould {
                                             .setId(projectId)
                                             .build();
         final int version = 1;
+        final Entity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(projectId, AnyPacker.pack(projectState), version);
+                      .post(entity);
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -272,7 +285,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void handle_cancellation_process_exceptions_and_call_observer_error_callback() {
-        final BoundedContext boundedContext = setupBoundedContextForAggregateRepo();
+        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
         final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
                                                                            .add(boundedContext)
@@ -300,12 +313,10 @@ public class SubscriptionServiceShould {
         assertEquals(observer.throwable.getMessage(), failureMessage);
     }
 
-    private static BoundedContext setupBoundedContextForAggregateRepo() {
+    private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
         final Stand stand = Stand.newBuilder()
                                  .build();
-
         final BoundedContext boundedContext = newBoundedContext(stand);
-
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;

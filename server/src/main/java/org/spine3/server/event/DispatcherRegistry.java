@@ -21,6 +21,7 @@
 package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import org.spine3.server.type.EventClass;
 
 import java.util.Set;
@@ -51,7 +52,7 @@ class DispatcherRegistry {
 
     Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         final Set<EventDispatcher> result = this.dispatchers.get(eventClass);
-        return result;
+        return ImmutableSet.copyOf(result);
     }
 
     void unregister(EventDispatcher dispatcher) {
