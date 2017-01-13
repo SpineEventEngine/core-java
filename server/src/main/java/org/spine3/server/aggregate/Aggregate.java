@@ -137,7 +137,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param id the ID for the new aggregate
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
-    public Aggregate(I id) {
+    protected Aggregate(I id) {
         super(id);
         this.idAsAny = idToAny(id);
     }
