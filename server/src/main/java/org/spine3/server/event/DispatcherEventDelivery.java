@@ -39,6 +39,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
      * Create a dispatcher event delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch events.
+     * @see EventDelivery#EventDelivery(Executor)
      */
     protected DispatcherEventDelivery(Executor delegate) {
         super(delegate);
@@ -46,9 +47,11 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
 
     /**
      * Creates an instance of event executor with a {@link MoreExecutors#directExecutor()} used for event dispatching.
+     *
+     * @see EventDelivery#EventDelivery()
      */
     protected DispatcherEventDelivery() {
-        super(MoreExecutors.directExecutor());
+        super();
     }
 
     @Override

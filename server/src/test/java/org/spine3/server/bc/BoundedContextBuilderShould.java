@@ -27,13 +27,12 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
-
-import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -148,9 +147,9 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_StandFunnelExecutor_if_set() {
-        final Executor mock = mock(Executor.class);
-        assertEquals(mock, builder.setStandFunnelExecutor(mock)
-                                  .getStandFunnelExecutor());
+    public void return_StandUpdateDelivery_if_set() {
+        final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
+        assertEquals(mock, builder.setStandUpdateDelivery(mock)
+                                  .getStandUpdateDelivery());
     }
 }

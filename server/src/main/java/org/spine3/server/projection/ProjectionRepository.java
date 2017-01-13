@@ -21,7 +21,6 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -46,8 +45,6 @@ import org.spine3.server.type.EventClass;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
-
-import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -242,8 +239,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         projection.handle(eventMessage, context);
         store(projection);
         final S state = projection.getState();
-        final Any packedState = pack(state);
-        standFunnel.post(id, packedState, projection.getVersion());
+        standFunnel.post(projection);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);

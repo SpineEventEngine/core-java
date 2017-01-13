@@ -21,7 +21,6 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
@@ -233,9 +231,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final List<Event> events = aggregate.getUncommittedEvents();
         try {
             store(aggregate);
-            final Message state = aggregate.getState();
-            final Any packedAny = AnyPacker.pack(state);
-            standFunnel.post(aggregateId, packedAny, aggregate.getVersion());
+            standFunnel.post(aggregate);
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }

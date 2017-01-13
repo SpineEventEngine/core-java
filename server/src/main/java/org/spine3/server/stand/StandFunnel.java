@@ -19,8 +19,6 @@
  */
 package org.spine3.server.stand;
 
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Any;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
@@ -30,8 +28,6 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.projection.ProjectionRepository;
-
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -53,36 +49,22 @@ import static com.google.common.base.Preconditions.checkState;
 public class StandFunnel {
 
     /**
-     * The instance of {@link Stand} to deliver the {@code Entity} state updates to.
+     * The delivery strategy to propagate the {@code Entity} state to the instance of {@code Stand}.
      */
-    private final Stand stand;
-
-    /**
-     * An {@link Executor} used for execution of data delivery methods.
-     */
-    private final Executor executor;
+    private final StandUpdateDelivery delivery;
 
     private StandFunnel(Builder builder) {
-        this.stand = builder.getStand();
-        this.executor = builder.getExecutor();
+        this.delivery = builder.getDelivery();
+        this.delivery.setStand(builder.getStand());
     }
 
     /**
      * Post the state of an {@link Entity} to an instance of {@link Stand}.
      *
-     * <p>The state data is posted as {@link Any} to allow transferring over the network.
-     *
-     * @param id            the id of an entity
-     * @param entityState   the state of an {@code Entity}
-     * @param entityVersion the version of an {@code Entity}
+     * @param entity the entity which state should be delivered to the {@code Stand}
      */
-    public void post(final Object id, final Any entityState, final int entityVersion) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                stand.update(id, entityState, entityVersion);
-            }
-        });
+    public void post(Entity entity) {
+        delivery.deliver(entity);
     }
 
     /**
@@ -102,11 +84,11 @@ public class StandFunnel {
         private Stand stand;
 
         /**
-         * Optional {@code Executor} for delivering the data to {@code Stand}.
+         * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
          *
-         * <p>If not set, a {@link MoreExecutors#directExecutor()} value will be set by the builder.
+         * <p>If not set, a {@link StandUpdateDelivery#directDelivery()} value will be set by the builder.
          */
-        private Executor executor;
+        private StandUpdateDelivery delivery;
 
         public Stand getStand() {
             return stand;
@@ -125,30 +107,30 @@ public class StandFunnel {
             return this;
         }
 
-        public Executor getExecutor() {
-            return executor;
+        public StandUpdateDelivery getDelivery() {
+            return delivery;
         }
 
         /**
-         * Set the {@code Executor} instance for this {@code StandFunnel}.
+         * Set the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
          *
          * <p>The value must not be {@code null}.
          *
-         * <p> If this method is not used, a {@link MoreExecutors#directExecutor()} value will be used.
+         * <p> If this method is not used, a {@link StandUpdateDelivery#directDelivery()} value will be used.
          *
-         * @param executor the instance of {@code Executor}.
+         * @param delivery the instance of {@code StandUpdateDelivery}.
          * @return {@code this} instance of {@code Builder}
          */
-        public Builder setExecutor(Executor executor) {
-            this.executor = checkNotNull(executor);
+        public Builder setDelivery(StandUpdateDelivery delivery) {
+            this.delivery = checkNotNull(delivery);
             return this;
         }
 
         public StandFunnel build() {
             checkState(stand != null, "Stand must be defined for the funnel");
 
-            if (executor == null) {
-                executor = MoreExecutors.directExecutor();
+            if (delivery == null) {
+                delivery = StandUpdateDelivery.directDelivery();
             }
 
             final StandFunnel result = new StandFunnel(this);

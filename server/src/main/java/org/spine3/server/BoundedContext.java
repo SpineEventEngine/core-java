@@ -44,6 +44,7 @@ import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.validate.Validate;
@@ -263,8 +264,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private EventBus eventBus;
         private boolean multitenant;
         private Stand stand;
+        private StandUpdateDelivery standUpdateDelivery;
         private StandFunnel standFunnel;
-        private Executor standFunnelExecutor;
 
         /**
          * Sets the name for a new bounded context.
@@ -350,12 +351,12 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         @Nullable
-        public Executor getStandFunnelExecutor() {
-            return standFunnelExecutor;
+        public StandUpdateDelivery getStandUpdateDelivery() {
+            return standUpdateDelivery;
         }
 
-        public Builder setStandFunnelExecutor(Executor standFunnelExecutor) {
-            this.standFunnelExecutor = standFunnelExecutor;
+        public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
+            this.standUpdateDelivery = standUpdateDelivery;
             return this;
         }
 
@@ -377,7 +378,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
                 stand = createStand(storageFactory);
             }
 
-            standFunnel = createStandFunnel(standFunnelExecutor);
+            standFunnel = createStandFunnel(standUpdateDelivery);
 
             commandBus.setMultitenant(this.multitenant);
 
@@ -387,15 +388,15 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return result;
         }
 
-        private StandFunnel createStandFunnel(@Nullable Executor standFunnelExecutor) {
+        private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
             StandFunnel standFunnel;
-            if (standFunnelExecutor == null) {
+            if (standUpdateDelivery == null) {
                 standFunnel = StandFunnel.newBuilder()
                                          .setStand(stand)
                                          .build();
             } else {
                 standFunnel = StandFunnel.newBuilder()
-                                         .setExecutor(standFunnelExecutor)
+                                         .setDelivery(standUpdateDelivery)
                                          .setStand(stand)
                                          .build();
             }
