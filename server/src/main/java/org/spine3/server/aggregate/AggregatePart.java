@@ -53,49 +53,61 @@ import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkPositive;
 
-//TODO:2017-01-13:alexander.yevsyukov: Update description
 /**
- * Abstract base for aggregates.
+ * Abstract base for aggregate parts.
  *
- * <p>Aggregate is the main building block of a business model. Aggregates guarantee consistency of data modifications
- * in response to commands they receive. Aggregate is the most common case of {@link CommandHandler}.
+ * <p>An aggregate is the main building block of a business model.
+ * Usually an aggregate consists of several parts. An aggregate part guarantees
+ * consistency of data modifications in response to commands they receive.
  *
- * <p>An aggregate modifies its state in response to a command and produces one or more events.
- * These events are used later to restore the state of the aggregate.
+ * <p>An aggregate part modifies its state in response to a command and produces
+ * one or more events. These events are used later to restore the state of the
+ * aggregate part.
  *
- * <h2>Creating aggregate class</h2>
+ * <h2>Creating an aggregate part class</h2>
  *
- * <p>In order to create a new aggregate class you need to:
+ * <p>In order to create a new aggregate part class you need to:
  * <ol>
- *     <li>Select a type for identifiers of the aggregates. If you select to use a typed identifier
- *     (which is recommended), you need to define a protobuf message for the ID type.
- *     <li>Define aggregate state structure as a protobuf message.
+ *     <li>Select a type for identifiers of the aggregate to which this part belongs.
+ *      All the aggregate parts will have IDs of this type.
+ *      If you select to use a typed identifier (which is recommended),
+ *      you need to define a protobuf message for the ID type.
+ *     <li>Define the structure of the aggregate part state as a protobuf message.
  *     <li>Generate Java code for ID and state types.
- *     <li>Create new aggregate class derived from {@code Aggregate} passing ID and state types.
+ *     <li>Create new Java class derived from {@code AggregatePart} passing ID and
+ *     state types as generic parameters.
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
  *
- * <p>Command handling methods of an aggregate are defined in the same way as described in {@link CommandHandler}.
+ * <p>Command handling methods of an {@code AggregatePart} are defined in
+ * the same way as described in {@link CommandHandler}.
  *
- * <p>Event(s) returned by command handler methods are posted to the {@link EventBus} automatically.
+ * <p>Event(s) returned by command handling methods are posted to
+ * the {@link EventBus} automatically.
  *
  * <h2>Adding event applier methods</h2>
  *
- * <p>Aggregate data is stored as sequence of events it produces. The state of the aggregate
- * is restored by re-playing the history of events and invoking corresponding <em>event applier methods</em>.
+ * <p>Aggregate part data is stored as sequence of events it produces.
+ * The state of the aggregate part is restored by re-playing the history of
+ * events and invoking corresponding <em>event applier methods</em>.
  *
- * <p>An event applier is a method that changes the state of the aggregate in response to an event. The aggregate
- * must have applier methods for <em>all</em> event types it produces. An event applier takes a single parameter
- * of the event message it handles and returns {@code void}.
+ * <p>An event applier is a method that changes the state of the aggregate part
+ * in response to an event. An event applier takes a single parameter of the
+ * event message it handles and returns {@code void}.
  *
- * <p>The modification of the state is done via a builder instance obtained from {@link #getBuilder()}.
+ * <p>The modification of the state is done via a builder instance obtained
+ * from {@link #getBuilder()}.
+ *
+ * <p>An {@code AggregatePart} class must have applier methods for
+ * <em>all</em> types of the events that it produces.
  *
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
  *
  * @author Alexander Yevsyukov
+ * @author Alexander Litus
  * @author Mikhail Melnik
  */
 public abstract class AggregatePart<I, S extends Message, B extends Message.Builder> extends Entity<I, S> {
@@ -103,7 +115,8 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     /**
      * The builder for the aggregate state.
      *
-     * <p>This field is non-null only when the aggregate changes its state during command handling or playing events.
+     * <p>This field is non-null only when the aggregate part changes its state
+     * during command handling or playing events.
      *
      * @see #createBuilder()
      * @see #getBuilder()
@@ -123,20 +136,22 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     private final List<Event> uncommittedEvents = Lists.newLinkedList();
 
     /**
-     * Creates a new aggregate instance.
+     * Creates a new instance.
      *
-     * <p>Constructors of aggregates should have package access level because of the following reasons:
+     * <p>Constructors of derived classes should have package access level
+     * because of the following reasons:
      * <ol>
-     *     <li>Aggregate constructors are not public API of an application. Commands and aggregate IDs are.
+     *     <li>These constructors are not public API of an application.
+     *     Commands and aggregate IDs are.
      *     <li>These constructors need to be accessible from tests in the same package.
      * </ol>
      *
-     * <p>Because of the last reason consider annotating constructors with {@code @VisibleForTesting}.
-     * The package access is needed only for tests. Otherwise aggregate constructors (that are invoked
-     * by {@link AggregatePartRepository} via Reflection) may be left {@code private}.
+     * <p>Because of the last reason consider annotating constructors with
+     * {@code @VisibleForTesting}. The package access is needed only for tests.
+     * Otherwise aggregate constructors (that are invoked by {@link AggregatePartRepository}
+     * via Reflection) may be left {@code private}.
      *
      * @param id the ID for the new aggregate
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
     protected AggregatePart(I id) {
         super(id);
@@ -144,9 +159,9 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Returns the set of the command classes handled by the passed aggregate class.
+     * Returns the set of the command classes handled by the passed class.
      *
-     * @param clazz the class of the aggregate
+     * @param clazz the {@code AggregatePart} class
      * @return immutable set of command classes
      */
     @CheckReturnValue
@@ -155,9 +170,9 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Returns the set of the event classes that comprise the state of the passed aggregate class.
+     * Returns the set of the event classes generated by the passed {@code AggregatePart} class.
      *
-     * @param clazz the class of the aggregate
+     * @param clazz the class of the aggregate part
      * @return immutable set of event classes
      */
     static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends AggregatePart> clazz) {
@@ -209,10 +224,12 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     /**
      * Dispatches the passed command to appropriate handler.
      *
-     * <p>As the result of this method call, the aggregate generates event messages and applies them to the aggregate.
+     * <p>As the result of this method call, the aggregate part generates
+     * event messages and applies them to the compute new state.
      *
-     * <p>The returned list of event messages is used only for testing purposes. An {@link AggregatePartRepository} obtains
-     * events generated by the aggregate via {@link #getUncommittedEvents()}.
+     * <p>The returned list of event messages is used only for testing purposes.
+     * An {@link AggregatePartRepository} obtains events generated by the aggregate
+     * via {@link #getUncommittedEvents()}.
      *
      * @param command the command message to be executed on the aggregate.
      *                If this parameter is passed as {@link Any} the enclosing message will be unwrapped.
@@ -243,9 +260,11 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     private static Message ensureCommandMessage(Message command) {
         Message commandMessage;
         if (command instanceof Any) {
-            // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
-            // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
-            // such a call especially from the testing code.
+            /* It looks that we're getting the result of `command.getMessage()`
+               because the calling code did not bother to unwrap it.
+               Extract the wrapped message (instead of treating this as an error).
+               There may be many occasions of such a call especially from the
+               testing code. */
             final Any any = (Any) command;
             commandMessage = AnyPacker.unpack(any);
         } else {
@@ -255,8 +274,8 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * This method is provided <em>only</em> for the purpose of testing command handling
-     * of an aggregate and must not be called from the production code.
+     * This method is provided <em>only</em> for the purpose of testing command
+     * handling and must not be called from the production code.
      *
      * <p>The production code uses the method {@link #dispatch(Message, CommandContext)},
      * which is called automatically by {@link AggregatePartRepository}.
@@ -267,7 +286,7 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Directs the passed command to the corresponding command handler method of the aggregate.
+     * Directs the passed command to the corresponding command handler method.
      *
      * @param commandMessage the command to be processed
      * @param context the context of the command
@@ -306,14 +325,14 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Plays passed events on the aggregate.
+     * Applies passed events.
      *
-     * <p>The events passed to this method is the aggregates data loaded by a repository and passed
-     * to the aggregate so that it restores its state.
+     * <p>The events passed to this method is the aggregate part data loaded
+     * by a repository and passed to the aggregate part so that it restores its state.
      *
-     * @param events the list of the aggregate events
-     * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
-     *                          for the thrown {@code RuntimeException}
+     * @param events the list of the events
+     * @throws IllegalStateException if applying events caused an exception, which is set as
+     *                               the {@code cause} for the thrown instance
      */
     void play(Iterable<Event> events) {
         createBuilder();
@@ -334,7 +353,7 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Applies event messages to the aggregate.
+     * Applies event messages.
      *
      * @param events the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
@@ -452,7 +471,9 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
      * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(Message event, CommandContext commandContext, Timestamp whenModified) {
+    protected EventContext createEventContext(Message event,
+                                              CommandContext commandContext,
+                                              Timestamp whenModified) {
         checkPositive(whenModified, "Aggregate modification time");
         final EventId eventId = generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -466,16 +487,20 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Adds custom attributes to an event context builder during the creation of the event context.
+     * Adds custom attributes to {@code EventContext.Builder} during
+     * the creation of the event context.
      *
-     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     * <p>Does nothing by default. Override this method if you want to
+     * add custom attributes to the created context.
      *
      * @param event          the event message
      * @param builder        a builder for the event context
      * @see #createEventContext(Message, CommandContext, Timestamp)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void extendEventContext(Message event, EventContext.Builder builder, CommandContext commandContext) {
+    protected void extendEventContext(Message event,
+                                      EventContext.Builder builder,
+                                      CommandContext commandContext) {
         // Do nothing.
     }
 
