@@ -51,6 +51,7 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     }
 
     protected StandUpdateDelivery() {
+        super();
     }
 
     void setStand(Stand stand) {
