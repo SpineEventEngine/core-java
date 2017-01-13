@@ -20,18 +20,14 @@
 package org.spine3.server.event;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.Executor;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Base functionality for the routines delivering the {@link org.spine3.base.Event}s to event consumers,
@@ -43,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 abstract class EventDelivery<C> extends Delivery<Event, C> {
 
-    private Function<EventClass, ? extends Collection<C>> consumerProvider;
+    private Function<EventClass, Set<C>> consumerProvider;
 
     /** {@inheritDoc} */
     EventDelivery(Executor delegate) {
@@ -56,7 +52,7 @@ abstract class EventDelivery<C> extends Delivery<Event, C> {
     }
 
     /** Used by the instance of {@link EventBus} to inject the knowledge about up-to-date consumers for the event */
-    void setConsumerProvider(Function<EventClass, ? extends Collection<C>> consumerProvider) {
+    void setConsumerProvider(Function<EventClass, Set<C>> consumerProvider) {
         this.consumerProvider = consumerProvider;
     }
 
