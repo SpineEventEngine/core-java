@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -29,11 +29,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.aggregate.Snapshot;
+import org.spine3.server.storage.AbstractStorageShould;
+import org.spine3.server.storage.AggregateEvents;
+import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.Tests;
-import org.spine3.test.storage.Project;
-import org.spine3.test.storage.ProjectId;
+import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectId;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -86,7 +87,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Override
     protected AggregateEvents newStorageRecord() {
-        final List<AggregateStorageRecord> records = Given.AggregateStorageRecord.createSequentialRecords(id);
+        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final AggregateEvents aggregateEvents = AggregateEvents.newBuilder()
                                                                .addAllEvent(expectedEvents)
@@ -159,7 +160,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_and_read_one_record() {
-        final AggregateStorageRecord expected = Given.AggregateStorageRecord.create(getCurrentTime());
+        final AggregateStorageRecord expected = Given.StorageRecord.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
 
@@ -172,7 +173,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
-        final List<AggregateStorageRecord> records = Given.AggregateStorageRecord.createSequentialRecords(id);
+        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id);
 
         writeAll(id, records);
 
@@ -207,7 +208,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        storage.writeRecord(id, Given.AggregateStorageRecord.create(time1));
+        storage.writeRecord(id, Given.StorageRecord.create(time1));
         storage.write(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
@@ -255,7 +256,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
-        final Event expectedEvent = Given.Event.projectCreated();
+        final Event expectedEvent = org.spine3.server.storage.Given.Event.projectCreated();
 
         storage.writeEvent(id, expectedEvent);
 
@@ -274,7 +275,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
-        final List<AggregateStorageRecord> records = Given.AggregateStorageRecord.createSequentialRecords(id, firstRecordTime);
+        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 

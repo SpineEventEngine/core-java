@@ -22,9 +22,9 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.storage.ProjectId;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorageShould;
+import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Alexander Litus

@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.io.Serializable;

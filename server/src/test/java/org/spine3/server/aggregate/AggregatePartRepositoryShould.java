@@ -41,7 +41,6 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.AggregateEvents;
-import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;

@@ -18,14 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.aggregate.Snapshot;
+import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.AggregateEvents;
+import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.util.Deque;
 import java.util.Iterator;

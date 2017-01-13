@@ -21,8 +21,8 @@
 package org.spine3.server.storage.memory;
 
 import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.ProjectionStorage;
