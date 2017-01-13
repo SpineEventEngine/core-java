@@ -144,5 +144,4 @@ public abstract class Delivery<D, C> {
             }
         };
     }
-
 }

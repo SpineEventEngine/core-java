@@ -111,5 +111,4 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
             }
         };
     }
-
 }
