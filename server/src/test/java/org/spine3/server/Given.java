@@ -28,8 +28,8 @@ import org.spine3.base.Identifiers;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.TypeName;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregatePartRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.Project;
@@ -182,16 +182,16 @@ public class Given {
         }
     }
 
-    static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
-        ProjectAggregateRepository(BoundedContext boundedContext) {
+    static class ProjectAggregatePartRepository extends AggregatePartRepository<ProjectId, ProjectAggregatePart> {
+        ProjectAggregatePartRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregatePart extends AggregatePart<ProjectId, Project, Project.Builder> {
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
-        public ProjectAggregate(ProjectId id) {
+        public ProjectAggregatePart(ProjectId id) {
             super(id);
         }
 
@@ -232,16 +232,16 @@ public class Given {
         }
     }
 
-    public static class CustomerAggregateRepository extends AggregateRepository<CustomerId, CustomerAggregate> {
-        public CustomerAggregateRepository(BoundedContext boundedContext) {
+    public static class CustomerAggregatePartRepository extends AggregatePartRepository<CustomerId, CustomerAggregatePart> {
+        public CustomerAggregatePartRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
-    public static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
+    public static class CustomerAggregatePart extends AggregatePart<CustomerId, Customer, Customer.Builder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass") // by convention (as it's used by Reflection).
-        public CustomerAggregate(CustomerId id) {
+        public CustomerAggregatePart(CustomerId id) {
             super(id);
         }
 

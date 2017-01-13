@@ -53,7 +53,7 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
+ * {@code AggregateRepository} manages instances of {@link AggregatePart} of the type
  * specified as the generic parameter.
  *
  * <p>This class is made abstract for preserving type information of aggregate ID and
@@ -72,7 +72,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
+public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher {
 
@@ -92,7 +92,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param boundedContext the bounded context to which this repository belongs
      */
-    public AggregateRepository(BoundedContext boundedContext) {
+    public AggregatePartRepository(BoundedContext boundedContext) {
         super(boundedContext);
         this.commandStatusService = boundedContext.getCommandBus().getCommandStatusService();
         this.eventBus = boundedContext.getEventBus();
@@ -112,13 +112,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return the class of the aggregates
      */
-    public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
+    public Class<? extends AggregatePart<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
     }
 
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
+        final Set<CommandClass> result = CommandClass.setOf(AggregatePart.getCommandClasses(getAggregateClass()));
         return result;
     }
 
@@ -249,8 +249,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
          * other actors in the system.
          *
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous concurrent actor changes,
-         * the event count from the last snapshot should remain the same during the {@link AggregateRepository#load(Object)}
-         * and {@link Aggregate#dispatch(Message, CommandContext)}.
+         * the event count from the last snapshot should remain the same during the {@link AggregatePartRepository#load(Object)}
+         * and {@link AggregatePart#dispatch(Message, CommandContext)}.
          *
          * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command} dispatching is repeated
          * from scratch.
@@ -306,7 +306,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(AggregateRepository.class);
+        private final Logger value = LoggerFactory.getLogger(AggregatePartRepository.class);
     }
 
     private static Logger log() {

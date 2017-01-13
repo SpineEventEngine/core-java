@@ -32,8 +32,8 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregatePartRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.IdSetEventFunction;
@@ -49,7 +49,6 @@ import org.spine3.test.projection.event.ProjectCreated;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 /**
  * @author Dmytro Dashenkov
@@ -94,11 +93,11 @@ class Given {
         return new StandTestProjectionRepository(context);
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository(context);
+    static AggregatePartRepository<ProjectId, StandTestAggregatePart> aggregateRepo(BoundedContext context) {
+        return new StandTestAggregatePartRepository(context);
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
+    static AggregatePartRepository<ProjectId, StandTestAggregatePart> aggregateRepo() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
                                                             .build();
@@ -131,19 +130,19 @@ class Given {
         }
     }
 
-    static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+    static class StandTestAggregatePartRepository extends AggregatePartRepository<ProjectId, StandTestAggregatePart> {
 
         /**
          * Creates a new repository instance.
          *
          * @param boundedContext the bounded context to which this repository belongs
          */
-        StandTestAggregateRepository(BoundedContext boundedContext) {
+        StandTestAggregatePartRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
-    static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
+    static class StandTestAggregatePart extends AggregatePart<ProjectId, Any, Any.Builder> {
 
         /**
          * Creates a new aggregate instance.
@@ -151,7 +150,7 @@ class Given {
          * @param id the ID for the new aggregate
          * @throws IllegalArgumentException if the ID is not of one of the supported types
          */
-        public StandTestAggregate(ProjectId id) {
+        public StandTestAggregatePart(ProjectId id) {
             super(id);
         }
 

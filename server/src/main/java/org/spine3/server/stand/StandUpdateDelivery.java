@@ -26,7 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregatePartRepository;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.projection.ProjectionRepository;
@@ -36,7 +36,7 @@ import java.util.concurrent.Executor;
 
 /**
  * A base class for the strategies on delivering the {@code Entity} state updates to the {@code Stand} from the
- * sources such as {@link AggregateRepository} and {@link ProjectionRepository} via {@link StandFunnel}.
+ * sources such as {@link AggregatePartRepository} and {@link ProjectionRepository} via {@link StandFunnel}.
  *
  * @author Alex Tymchenko
  */

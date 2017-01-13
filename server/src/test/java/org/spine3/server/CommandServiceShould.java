@@ -63,13 +63,13 @@ public class CommandServiceShould {
     public void setUp() {
         // Create Projects Bounded Context with one repository.
         projectsContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
+        final Given.ProjectAggregatePartRepository projectRepo = new Given.ProjectAggregatePartRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
         customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
+        final Given.CustomerAggregatePartRepository customerRepo = new Given.CustomerAggregatePartRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 

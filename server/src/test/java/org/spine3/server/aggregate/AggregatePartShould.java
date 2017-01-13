@@ -67,7 +67,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  * @author Alexander Litus
  */
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public class AggregateShould {
+public class AggregatePartShould {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -78,17 +78,17 @@ public class AggregateShould {
     private final AddTask addTask = Given.CommandMessage.addTask(ID);
     private final StartProject startProject = Given.CommandMessage.startProject(ID);
 
-    private TestAggregate aggregate;
+    private TestAggregatePart aggregate;
 
     @Before
     public void setUp() {
-        aggregate = new TestAggregate(ID);
+        aggregate = new TestAggregatePart(ID);
     }
 
     @Test
     public void accept_Message_id_to_constructor() {
         try {
-            final TestAggregate aggregate = new TestAggregate(ID);
+            final TestAggregatePart aggregate = new TestAggregatePart(ID);
             assertEquals(ID, aggregate.getId());
         } catch (Throwable e) {
             fail();
@@ -99,7 +99,7 @@ public class AggregateShould {
     public void accept_String_id_to_constructor() {
         try {
             final String id = "string_id";
-            final TestAggregateWithIdString aggregate = new TestAggregateWithIdString(id);
+            final TestAggregatePartWithIdString aggregate = new TestAggregatePartWithIdString(id);
             assertEquals(id, aggregate.getId());
         } catch (Throwable e) {
             fail();
@@ -110,7 +110,7 @@ public class AggregateShould {
     public void accept_Integer_id_to_constructor() {
         try {
             final Integer id = 12;
-            final TestAggregateWithIdInteger aggregate = new TestAggregateWithIdInteger(id);
+            final TestAggregatePartWithIdInteger aggregate = new TestAggregatePartWithIdInteger(id);
             assertEquals(id, aggregate.getId());
         } catch (Throwable e) {
             fail();
@@ -121,7 +121,7 @@ public class AggregateShould {
     public void accept_Long_id_to_constructor() {
         try {
             final Long id = 12L;
-            final TestAggregateWithIdLong aggregate = new TestAggregateWithIdLong(id);
+            final TestAggregatePartWithIdLong aggregate = new TestAggregatePartWithIdLong(id);
             assertEquals(id, aggregate.getId());
         } catch (Throwable e) {
             fail();
@@ -131,7 +131,7 @@ public class AggregateShould {
     @Test(expected = IllegalArgumentException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void not_accept_to_constructor_id_of_unsupported_type() {
-        new TestAggregateWithIdUnsupported(new UnsupportedClassVersionError());
+        new TestAggregatePartWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
     @Test
@@ -173,16 +173,16 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() {
-        final TestAggregateForCaseMissingHandlerOrApplier aggregate =
-                new TestAggregateForCaseMissingHandlerOrApplier(ID);
+        final TestAggregatePartForCaseMissingHandlerOrApplier aggregate =
+                new TestAggregatePartForCaseMissingHandlerOrApplier(ID);
 
         aggregate.dispatchForTest(addTask, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() {
-        final TestAggregateForCaseMissingHandlerOrApplier aggregate =
-                new TestAggregateForCaseMissingHandlerOrApplier(ID);
+        final TestAggregatePartForCaseMissingHandlerOrApplier aggregate =
+                new TestAggregatePartForCaseMissingHandlerOrApplier(ID);
         try {
             aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
         } catch (IllegalStateException e) { // expected exception
@@ -193,7 +193,7 @@ public class AggregateShould {
 
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(TestAggregate.class);
+        final Set<Class<? extends Message>> classes = AggregatePart.getCommandClasses(TestAggregatePart.class);
 
         assertTrue(classes.size() == 4);
         assertTrue(classes.contains(CreateProject.class));
@@ -204,7 +204,7 @@ public class AggregateShould {
 
     @Test
     public void return_event_classes_which_represent_the_state_of_the_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getEventClasses(TestAggregate.class);
+        final Set<Class<? extends Message>> classes = AggregatePart.getEventClasses(TestAggregatePart.class);
 
         assertContains(classes,
                        ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
@@ -240,7 +240,7 @@ public class AggregateShould {
 
     @Test
     public void return_non_null_time_when_was_last_modified() {
-        final Timestamp creationTime = new TestAggregate(ID).whenModified();
+        final Timestamp creationTime = new TestAggregatePart(ID).whenModified();
         assertNotNull(creationTime);
     }
 
@@ -367,7 +367,7 @@ public class AggregateShould {
     }
 
     @SuppressWarnings("unused")
-    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregatePart extends AggregatePart<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
@@ -377,7 +377,7 @@ public class AggregateShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        public TestAggregate(ProjectId id) {
+        public TestAggregatePart(ProjectId id) {
             super(id);
         }
 
@@ -443,11 +443,11 @@ public class AggregateShould {
     }
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
-    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregatePartForCaseMissingHandlerOrApplier extends AggregatePart<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
-        public TestAggregateForCaseMissingHandlerOrApplier(ProjectId id) {
+        public TestAggregatePartForCaseMissingHandlerOrApplier(ProjectId id) {
             super(id);
         }
 
@@ -459,26 +459,26 @@ public class AggregateShould {
         }
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
-        private TestAggregateWithIdString(String id) {
+    private static class TestAggregatePartWithIdString extends AggregatePart<String, Project, Project.Builder> {
+        private TestAggregatePartWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
-        private TestAggregateWithIdInteger(Integer id) {
+    private static class TestAggregatePartWithIdInteger extends AggregatePart<Integer, Project, Project.Builder> {
+        private TestAggregatePartWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
-        private TestAggregateWithIdLong(Long id) {
+    private static class TestAggregatePartWithIdLong extends AggregatePart<Long, Project, Project.Builder> {
+        private TestAggregatePartWithIdLong(Long id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project, Project.Builder> {
-        private TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
+    private static class TestAggregatePartWithIdUnsupported extends AggregatePart<UnsupportedClassVersionError, Project, Project.Builder> {
+        private TestAggregatePartWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
@@ -511,7 +511,7 @@ public class AggregateShould {
 
     /** The class to check raising and catching exceptions. */
     @SuppressWarnings("unused")
-    private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class FaultyAggregatePart extends AggregatePart<ProjectId, Project, Project.Builder> {
 
         static final String BROKEN_HANDLER = "broken_handler";
         static final String BROKEN_APPLIER = "broken_applier";
@@ -519,7 +519,7 @@ public class AggregateShould {
         private final boolean brokenHandler;
         private final boolean brokenApplier;
 
-        public FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
+        public FaultyAggregatePart(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
             super(id);
             this.brokenHandler = brokenHandler;
             this.brokenApplier = brokenApplier;
@@ -549,7 +549,7 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_handler_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
+        final FaultyAggregatePart faultyAggregate = new FaultyAggregatePart(ID, true, false);
 
         final Command command = Given.Command.createProject();
         try {
@@ -558,13 +558,13 @@ public class AggregateShould {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
-            assertEquals(FaultyAggregate.BROKEN_HANDLER, cause.getMessage());
+            assertEquals(FaultyAggregatePart.BROKEN_HANDLER, cause.getMessage());
         }
     }
 
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregatePart faultyAggregate = new FaultyAggregatePart(ID, false, true);
 
         final Command command = Given.Command.createProject();
         try {
@@ -573,26 +573,26 @@ public class AggregateShould {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
-            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
+            assertEquals(FaultyAggregatePart.BROKEN_APPLIER, cause.getMessage());
         }
     }
 
     @Test
     public void propagate_RuntimeException_when_play_raises_exception() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregatePart faultyAggregate = new FaultyAggregatePart(ID, false, true);
         try {
             faultyAggregate.play(ImmutableList.of(Given.Event.projectCreated()));
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
-            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
+            assertEquals(FaultyAggregatePart.BROKEN_APPLIER, cause.getMessage());
         }
     }
 
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
-        new TestAggregateWithIdInteger(100).getBuilder();
+        new TestAggregatePartWithIdInteger(100).getBuilder();
     }
 
     /*

@@ -20,13 +20,13 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -68,7 +68,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     /** NOTE: the parameter is unused. */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> unused) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends AggregatePart<I, ?, ?>> unused) {
         return new InMemoryAggregateStorage<>(isMultitenant());
     }
 

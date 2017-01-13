@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStore;
@@ -54,7 +54,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>            the type of aggregate IDs
      * @param aggregateClass the class of aggregates to store
      */
-    <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+    <I> AggregateStorage<I> createAggregateStorage(Class<? extends AggregatePart<I, ?, ?>> aggregateClass);
 
     /**
      * Creates a new {@link RecordStorage} instance.

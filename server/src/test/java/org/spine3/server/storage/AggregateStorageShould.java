@@ -29,7 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
@@ -82,7 +82,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
      * @return an empty storage instance
      */
     protected abstract <Id> AggregateStorage<Id> getStorage(
-            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
+            Class<? extends AggregatePart<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
 
     @Override
     protected AggregateEvents newStorageRecord() {
@@ -138,21 +138,21 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_and_read_event_by_String_id() {
-        final AggregateStorage<String> storage = getStorage(TestAggregateWithIdString.class);
+        final AggregateStorage<String> storage = getStorage(TestAggregatePartWithIdString.class);
         final String id = newUuid();
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Long_id() {
-        final AggregateStorage<Long> storage = getStorage(TestAggregateWithIdLong.class);
+        final AggregateStorage<Long> storage = getStorage(TestAggregatePartWithIdLong.class);
         final long id = 10L;
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Integer_id() {
-        final AggregateStorage<Integer> storage = getStorage(TestAggregateWithIdInteger.class);
+        final AggregateStorage<Integer> storage = getStorage(TestAggregatePartWithIdInteger.class);
         final int id = 10;
         writeAndReadEventTest(id, storage);
     }
@@ -305,20 +305,20 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
                        .build();
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
-        private TestAggregateWithIdString(String id) {
+    private static class TestAggregatePartWithIdString extends AggregatePart<String, Project, Project.Builder> {
+        private TestAggregatePartWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
-        private TestAggregateWithIdInteger(Integer id) {
+    private static class TestAggregatePartWithIdInteger extends AggregatePart<Integer, Project, Project.Builder> {
+        private TestAggregatePartWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
-        private TestAggregateWithIdLong(Long id) {
+    private static class TestAggregatePartWithIdLong extends AggregatePart<Long, Project, Project.Builder> {
+        private TestAggregatePartWithIdLong(Long id) {
             super(id);
         }
     }

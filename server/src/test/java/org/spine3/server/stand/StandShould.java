@@ -46,8 +46,8 @@ import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.Given.CustomerAggregate;
-import org.spine3.server.Given.CustomerAggregateRepository;
+import org.spine3.server.Given.CustomerAggregatePart;
+import org.spine3.server.Given.CustomerAggregatePartRepository;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -145,7 +145,7 @@ public class StandShould {
 
         checkTypesEmpty(stand);
 
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregatePartRepository customerAggregateRepo = new CustomerAggregatePartRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
@@ -153,7 +153,7 @@ public class StandShould {
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        final CustomerAggregateRepository anotherCustomerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregatePartRepository anotherCustomerAggregateRepo = new CustomerAggregatePartRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
@@ -193,12 +193,12 @@ public class StandShould {
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregatePartRepository customerAggregateRepo = new CustomerAggregatePartRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final int numericIdValue = 17;
         final CustomerId customerId = customerIdFor(numericIdValue);
-        final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
+        final CustomerAggregatePart customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
         final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
@@ -1050,7 +1050,7 @@ public class StandShould {
         assertNotNull(stand);
 
         final BoundedContext boundedContext = newBoundedContext(stand);
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregatePartRepository customerAggregateRepo = new CustomerAggregatePartRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         return stand;
     }

@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  *     <li>accepts an event derived from {@link Message} as the only parameter.
  * </ul>
  *
- * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.
+ * <p>Typically {@link AggregatePart#getBuilder()} method is used to get and update an aggregate state.
  *
  * @author Alexander Yevsyukov
  */

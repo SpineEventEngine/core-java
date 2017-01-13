@@ -28,7 +28,7 @@ import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregatePartRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -93,11 +93,11 @@ public class StandFunnelShould {
 
     @Test
     public void deliver_updates_to_stand() {
-        final AggregateRepository<ProjectId, Given.StandTestAggregate> repository = Given.aggregateRepo();
+        final AggregatePartRepository<ProjectId, Given.StandTestAggregatePart> repository = Given.aggregateRepo();
         final ProjectId entityId = ProjectId.newBuilder()
                                             .setId("PRJ-001")
                                             .build();
-        final Given.StandTestAggregate entity = repository.create(entityId);
+        final Given.StandTestAggregatePart entity = repository.create(entityId);
         final Any state = entity.getState();
         final Any packedState = AnyPacker.pack(state);
         final int version = entity.getVersion();
@@ -227,7 +227,7 @@ public class StandFunnelShould {
             @Override
             public void perform(BoundedContext context) {
                 // Init repository
-                final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
+                final AggregatePartRepository<?, ?> repository = Given.aggregateRepo(context);
 
                 repository.initStorage(InMemoryStorageFactory.getInstance());
 
@@ -292,8 +292,8 @@ public class StandFunnelShould {
                 final ProjectId enitityId = ProjectId.newBuilder()
                                                      .setId(Identifiers.newUuid())
                                                      .build();
-                final Given.StandTestAggregate entity = Given.aggregateRepo()
-                                                             .create(enitityId);
+                final Given.StandTestAggregatePart entity = Given.aggregateRepo()
+                                                                 .create(enitityId);
                 standFunnel.post(entity);
 
                 threadInvocationRegistry.add(threadName);

@@ -135,14 +135,14 @@ public class EventApplierMethodShould {
 
     @Test
     public void do_not_accept_methods_with_two_parameters() {
-        assertTrue(Aggregate.getEventClasses(AggregateWithTwoMethodsApplier.class)
-                            .isEmpty());
+        assertTrue(AggregatePart.getEventClasses(AggregatePartWithTwoMethodsApplier.class)
+                                .isEmpty());
     }
 
     @Test
     public void accept_non_private_appliers() {
-        final ImmutableSet<Class<? extends Message>> eventClasses = Aggregate.getEventClasses(
-                AggregateWithNonPrivateApplier.class);
+        final ImmutableSet<Class<? extends Message>> eventClasses = AggregatePart.getEventClasses(
+                AggregatePartWithNonPrivateApplier.class);
 
         // The method is counted and the event is present.
         assertContains(ProjectCreated.class, eventClasses);
@@ -231,9 +231,9 @@ public class EventApplierMethodShould {
      * Other
      *********/
 
-    private static class AggregateWithTwoMethodsApplier extends Aggregate<Long, Project, Project.Builder> {
+    private static class AggregatePartWithTwoMethodsApplier extends AggregatePart<Long, Project, Project.Builder> {
 
-        public AggregateWithTwoMethodsApplier(Long id) {
+        public AggregatePartWithTwoMethodsApplier(Long id) {
             super(id);
         }
 
@@ -243,9 +243,9 @@ public class EventApplierMethodShould {
         }
     }
 
-    private static class AggregateWithNonPrivateApplier extends Aggregate<Long, Project, Project.Builder> {
+    private static class AggregatePartWithNonPrivateApplier extends AggregatePart<Long, Project, Project.Builder> {
 
-        public AggregateWithNonPrivateApplier(Long id) {
+        public AggregatePartWithNonPrivateApplier(Long id) {
             super(id);
         }
 

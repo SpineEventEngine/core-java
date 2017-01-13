@@ -31,8 +31,8 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregatePartRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.Repository;
@@ -100,7 +100,7 @@ public class BoundedContextShould {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregatePartRepository repository = new ProjectAggregatePartRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
         boundedContext.getEventBus().subscribe(subscriber);
@@ -119,7 +119,7 @@ public class BoundedContextShould {
 
     @Test
     public void register_AggregateRepository() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregatePartRepository repository = new ProjectAggregatePartRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
@@ -177,14 +177,14 @@ public class BoundedContextShould {
 
     @Test
     public void assign_storage_during_registration_if_repository_does_not_have_storage() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregatePartRepository repository = new ProjectAggregatePartRepository(boundedContext);
         boundedContext.register(repository);
         assertTrue(repository.storageAssigned());
     }
 
     @Test
     public void not_change_storage_during_registration_if_a_repository_has_one() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregatePartRepository repository = new ProjectAggregatePartRepository(boundedContext);
         repository.initStorage(storageFactory);
 
         final Repository spy = spy(repository);
@@ -198,7 +198,7 @@ public class BoundedContextShould {
         final BoundedContext boundedContext = newBoundedContext(stand);
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregatePartRepository repository = new ProjectAggregatePartRepository(boundedContext);
         boundedContext.register(repository);
         verify(stand).registerTypeSupplier(eq(repository));
     }
@@ -232,7 +232,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings({"unused", "TypeMayBeWeakened"})
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregatePart extends AggregatePart<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
@@ -244,7 +244,7 @@ public class BoundedContextShould {
 
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
-        public ProjectAggregate(ProjectId id) {
+        public ProjectAggregatePart(ProjectId id) {
             super(id);
         }
 
@@ -292,8 +292,8 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
-        private ProjectAggregateRepository(BoundedContext boundedContext) {
+    private static class ProjectAggregatePartRepository extends AggregatePartRepository<ProjectId, ProjectAggregatePart> {
+        private ProjectAggregatePartRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
