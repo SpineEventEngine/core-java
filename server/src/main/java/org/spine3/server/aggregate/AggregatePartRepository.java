@@ -52,21 +52,24 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * {@code AggregateRepository} manages instances of {@link AggregatePart} of the type
- * specified as the generic parameter.
+ * The repository which manages instances of {@code AggregatePart}s.
  *
- * <p>This class is made abstract for preserving type information of aggregate ID and
- * aggregate classes used by implementations. A simple repository class looks like this:
+ * <p>This class is made {@code abstract} for preserving type information of aggregate ID and
+ * aggregate part classes used by implementations.
+ *
+ * <p>A repository class may look like this:
  * <pre>
- * public class OrderRepository extends AggregateRepository&lt;OrderId, OrderAggregate&gt; {
- *     public OrderRepository(BoundedContext boundedContext) {
- *         super(boundedContext);
- *     }
+ * {@code
+ *  public class OrderRepository extends AggregatePartRepository<OrderId, OrderAggregate> {
+ *      public OrderRepository(BoundedContext boundedContext) {
+ *          super(boundedContext);
+ *      }
+ *  }
  * }
  * </pre>
  *
  * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by this repository
+ * @param <A> the type of the aggregate parts managed by this repository
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
