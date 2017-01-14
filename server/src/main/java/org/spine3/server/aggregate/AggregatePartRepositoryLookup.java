@@ -39,7 +39,16 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     private final BoundedContext boundedContext;
     private final Class<S> stateClass;
 
-    AggregatePartRepositoryLookup(BoundedContext boundedContext, Class<S> stateClass) {
+    /**
+     * Creates the lookup object for finding the repository that
+     * manages aggregate parts with the passed state class.
+     */
+    static <I, S extends Message> AggregatePartRepositoryLookup<I, S> createLookup(BoundedContext boundedContext,
+                                                                                   Class<S> stateClass) {
+        return new AggregatePartRepositoryLookup<>(boundedContext, stateClass);
+    }
+
+    private AggregatePartRepositoryLookup(BoundedContext boundedContext, Class<S> stateClass) {
         this.boundedContext = boundedContext;
         this.stateClass = stateClass;
     }

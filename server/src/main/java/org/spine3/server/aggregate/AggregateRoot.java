@@ -27,6 +27,7 @@ import org.spine3.server.BoundedContext;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 
 /**
  * A root object for a larger aggregate.
@@ -36,11 +37,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class AggregateRoot<I> {
 
+    /** The map from a part class to a repository which manages corresponding aggregate part*/
+    private static final Map<Class<? extends Message>,
+                             AggregatePartRepository<?, ?>> partsAccess = Maps.newConcurrentMap();
+
     /** The bounded context to which the aggregate belongs. */
     private final BoundedContext boundedContext;
-
-    /** The map from a part class to a repository which manages corresponding aggregate part*/
-    private final Map<Class<? extends Message>, AggregatePartRepository<I, ?>> partsAccess = Maps.newHashMap();
 
     /** The aggregate ID. */
     private final I id;
@@ -94,16 +96,16 @@ public class AggregateRoot<I> {
      * @throws IllegalStateException if a repository was not found
      *                               or the repository does not match expectations of this {@code AggregateRoot}
      */
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as all false branches are exits from the method.
     private <S extends Message> AggregatePartRepository<I, ?> getRepository(Class<S> stateClass) {
-        final AggregatePartRepository<I, ?> cached = partsAccess.get(stateClass);
+        @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
+        final AggregatePartRepository<I, ?> cached = (AggregatePartRepository<I, ?>) partsAccess.get(stateClass);
 
         if (cached != null) {
             return cached;
         }
 
         // We don't have cached instance. Obtain from the `BoundedContext` and cache.
-        final AggregatePartRepositoryLookup<I, S> lookup = new AggregatePartRepositoryLookup<>(getBoundedContext(), stateClass);
+        final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(), stateClass);
         final AggregatePartRepository<I, ?> repo = lookup.find();
 
         partsAccess.put(stateClass, repo);
