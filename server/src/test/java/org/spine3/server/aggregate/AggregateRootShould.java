@@ -49,7 +49,7 @@ public class AggregateRootShould {
                                                             .build();
         boundedContext.register(new ProjectHeaderRepository(boundedContext));
 
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         aggregateRoot = new ProjectRoot(boundedContext, id);
     }
 

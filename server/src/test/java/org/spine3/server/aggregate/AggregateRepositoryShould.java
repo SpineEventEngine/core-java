@@ -91,7 +91,7 @@ public class AggregateRepositoryShould {
     private CommandStore commandStore;
     private EventBus eventBus;
 
-    private final ProjectId projectId = Given.AggregateId.newProjectId();
+    private final ProjectId projectId = Given.newProjectId();
 
     @Before
     public void setUp() {
@@ -116,7 +116,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void return_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId())
+        final ProjectAggregate aggregate = repository.load(Given.newProjectId())
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -125,7 +125,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
@@ -140,7 +140,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void restore_aggregate_using_snapshot() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.getUncommittedEvents()
@@ -186,7 +186,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void dispatch_several_commands() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         assertDispatches(Given.Command.createProject(id));
         assertDispatches(Given.Command.addTask(id));
         assertDispatches(Given.Command.startProject(id));
@@ -215,7 +215,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_aggregate_on_command_dispatching() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final Command cmd = Given.Command.createProject(id);
         final CreateProject msg = Commands.getMessage(cmd);
 
@@ -307,7 +307,7 @@ public class AggregateRepositoryShould {
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        final ProjectId projectId = Given.AggregateId.newProjectId();
+        final ProjectId projectId = Given.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
@@ -334,7 +334,7 @@ public class AggregateRepositoryShould {
      ****************************/
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents() {
-        return givenAggregateWithUncommittedEvents(Given.AggregateId.newProjectId());
+        return givenAggregateWithUncommittedEvents(Given.newProjectId());
     }
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {

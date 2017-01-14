@@ -58,7 +58,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
 
-    private final ProjectId id = Given.AggregateId.newProjectId();
+    private final ProjectId id = Given.newProjectId();
 
     private AggregateStorage<ProjectId> storage;
 
@@ -99,7 +99,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Override
     protected ProjectId newId() {
-        return Given.AggregateId.newProjectId();
+        return Given.newProjectId();
     }
 
     @Test
