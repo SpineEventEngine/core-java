@@ -110,9 +110,11 @@ extend google.protobuf.FieldOptions {
 
     PatternOption pattern = 51108;
 
-    ValidOption valid = 51109;
+    bool valid = 51109;
 
-    GoesOption goes = 51110;
+    IfInvalidOption if_invalid = 51110;
+
+    GoesOption goes = 51111;
 }
 
 // Defines the error handling for `required` field with no value set.
@@ -334,25 +336,20 @@ message PatternOption {
     string msg_format = 3;
 }
 
-// Specifies if the message field value is validated.
+// Specifies the message to show is a validated field happens to be invalid.
 // Is applicable only to messages.
 // Repeated fields are supported.
 //
 // Example:
-//     MyMessage field = 1 [(valid).value = true];
+//     MyMessage field = 1 [(valid) = true, (if_invalid).msg_format = "The field is invalid."];
 //
-message ValidOption {
+message IfInvalidOption {
 
     // The default error message for the field.
     option (default_message) = "Message must have valid properties.";
 
-    // If it is true, the message's fields are validated.
-    //
-    // The default value is false.
-    bool value = 1;
-
     // A user-defined validation error format message.
-    string msg_format = 2;
+    string msg_format = 1;
 }
 
 // Specifies that a message field can be present only if another field is present.
