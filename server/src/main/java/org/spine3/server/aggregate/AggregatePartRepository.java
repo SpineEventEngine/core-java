@@ -79,10 +79,12 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
     private final CommandStatusService commandStatusService;
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
+
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
