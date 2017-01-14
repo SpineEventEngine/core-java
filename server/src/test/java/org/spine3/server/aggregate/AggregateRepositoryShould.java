@@ -400,7 +400,7 @@ public class AggregateRepositoryShould {
     }
 
     /*
-     * Test classes.
+     * Test classes
      ****************************/
 
     @SuppressWarnings("TypeMayBeWeakened")
@@ -418,8 +418,10 @@ public class AggregateRepositoryShould {
         public ProjectCreated handle(CreateProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final ProjectCreated event = Given.EventMessage.projectCreated(msg.getProjectId(), msg.getName());
-            return event;
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .setName(msg.getName())
+                                 .build();
         }
 
         @Apply
@@ -432,8 +434,9 @@ public class AggregateRepositoryShould {
         public TaskAdded handle(AddTask msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final TaskAdded event = Given.EventMessage.taskAdded(msg.getProjectId());
-            return event;
+            return TaskAdded.newBuilder()
+                            .setProjectId(msg.getProjectId())
+                            .build();
         }
 
         @Apply
@@ -445,8 +448,9 @@ public class AggregateRepositoryShould {
         public ProjectStarted handle(StartProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final ProjectStarted event = Given.EventMessage.projectStarted(msg.getProjectId());
-            return event;
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .build();
         }
 
         @Apply

@@ -104,8 +104,13 @@ public class AggregateRoot<I> {
             return cached;
         }
 
-        // We don't have cached instance. Obtain from the `BoundedContext` and cache.
-        final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(), stateClass);
+        // We don't have a cached instance. Obtain from the `BoundedContext` and cache.
+
+        @SuppressWarnings("unchecked") // The type is ensured by getId() result.
+        final Class<I> idClass = (Class<I>) getId().getClass();
+        final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
+                                                                        idClass,
+                                                                        stateClass);
         final AggregatePartRepository<I, ?> repo = lookup.find();
 
         partsAccess.put(stateClass, repo);

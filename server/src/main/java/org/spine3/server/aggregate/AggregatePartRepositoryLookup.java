@@ -23,7 +23,6 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.reflect.Classes;
 
 /**
  * A helper class for finding and checking {@code AggregatePartRepository}.
@@ -37,6 +36,7 @@ import org.spine3.server.reflect.Classes;
 class AggregatePartRepositoryLookup<I, S extends Message> {
 
     private final BoundedContext boundedContext;
+    private final Class<I> idClass;
     private final Class<S> stateClass;
 
     /**
@@ -44,12 +44,14 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      * manages aggregate parts with the passed state class.
      */
     static <I, S extends Message> AggregatePartRepositoryLookup<I, S> createLookup(BoundedContext boundedContext,
+                                                                                   Class<I> idClass,
                                                                                    Class<S> stateClass) {
-        return new AggregatePartRepositoryLookup<>(boundedContext, stateClass);
+        return new AggregatePartRepositoryLookup<>(boundedContext, idClass, stateClass);
     }
 
-    private AggregatePartRepositoryLookup(BoundedContext boundedContext, Class<S> stateClass) {
+    private AggregatePartRepositoryLookup(BoundedContext boundedContext, Class<I> idClass, Class<S> stateClass) {
         this.boundedContext = boundedContext;
+        this.idClass = idClass;
         this.stateClass = stateClass;
     }
 
@@ -98,12 +100,11 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      */
     private AggregatePartRepository<I, ?> checkIdClass(AggregatePartRepository<?, ?> repo) {
         final Class<?> repoIdClass = repo.getIdClass();
-        final Class<I> requiredIdClass = Classes.getGenericParameterType(getClass(), 0);
-        if (!requiredIdClass.equals(repoIdClass)) {
+        if (!idClass.equals(repoIdClass)) {
             final String errMsg = String.format(
                     "The ID class of the aggregate part repository (%s) " +
                             "does not match the ID class of the AggregateRoot (%s)",
-                    repoIdClass, requiredIdClass);
+                    repoIdClass, idClass);
             throw new IllegalStateException(errMsg);
         }
 

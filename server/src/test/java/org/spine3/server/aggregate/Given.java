@@ -50,8 +50,7 @@ import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-@SuppressWarnings("EmptyClass")
-        // OK as we want tests read as DSL.
+@SuppressWarnings("EmptyClass") // OK as we want tests read as DSL.
 class Given {
 
     static class AggregateId {
