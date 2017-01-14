@@ -31,13 +31,13 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.storage.AggregatePartEvents;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -170,10 +170,10 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
-        final Snapshot snapshot = aggregateEvents.getSnapshot();
+        final AggregatePartEvents aggregatePartEvents = aggregateStorage().read(id);
+        final Snapshot snapshot = aggregatePartEvents.getSnapshot();
         final A result = create(id);
-        final List<Event> events = aggregateEvents.getEventList();
+        final List<Event> events = aggregatePartEvents.getEventList();
         if (isNotDefault(snapshot)) {
             result.restore(snapshot);
         }

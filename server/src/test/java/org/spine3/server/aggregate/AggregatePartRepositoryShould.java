@@ -36,11 +36,11 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.storage.AggregatePartEvents;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -312,8 +312,8 @@ public class AggregatePartRepositoryShould {
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage)
                       .readEventCountAfterLastSnapshot(projectId);
-        doReturn(AggregateEvents.getDefaultInstance()).when(storage)
-                                                      .read(projectId);
+        doReturn(AggregatePartEvents.getDefaultInstance()).when(storage)
+                                                          .read(projectId);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
 

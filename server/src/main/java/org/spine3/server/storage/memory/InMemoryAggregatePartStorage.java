@@ -24,7 +24,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.AggregatePartStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.AggregatePartStorageRecord;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -42,7 +42,7 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
 
-    private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
+    private final Multimap<I, AggregatePartStorageRecord> recordMap = TreeMultimap.create(
             new AggregateStorageKeyComparator<I>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
@@ -59,14 +59,14 @@ class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregatePartStorageRecord record) {
         recordMap.put(id, record);
     }
 
     @Override
-    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+    protected Iterator<AggregatePartStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = recordMap.get(id);
+        final Collection<AggregatePartStorageRecord> records = recordMap.get(id);
         return records.iterator();
     }
 
@@ -87,12 +87,12 @@ class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
     }
 
     /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregatePartStorageRecord>,
                                                                             Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override
-        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
+        public int compare(AggregatePartStorageRecord first, AggregatePartStorageRecord second) {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
