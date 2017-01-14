@@ -267,7 +267,7 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void return_aggregate_class() {
-        assertEquals(ProjectAggregatePart.class, repository.getAggregateClass());
+        assertEquals(ProjectAggregatePart.class, repository.getAggregatePartClass());
     }
 
     @Test

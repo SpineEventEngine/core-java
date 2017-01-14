@@ -100,24 +100,24 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     @Override
     protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createAggregatePartStorage(getAggregateClass());
+        final Storage result = factory.createAggregatePartStorage(getAggregatePartClass());
         return result;
     }
 
     /**
-     * Returns the class of aggregates managed by this repository.
+     * Returns the class of aggregate parts managed by this repository.
      *
      * <p>This is convenience method, which redirects to {@link #getEntityClass()}.
      *
      * @return the class of the aggregates
      */
-    public Class<? extends AggregatePart<I, ?, ?>> getAggregateClass() {
+    protected Class<? extends AggregatePart<I, ?, ?>> getAggregatePartClass() {
         return getEntityClass();
     }
 
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandClass.setOf(AggregatePart.getCommandClasses(getAggregateClass()));
+        final Set<CommandClass> result = CommandClass.setOf(AggregatePart.getCommandClasses(getAggregatePartClass()));
         return result;
     }
 
@@ -263,7 +263,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                                    "New events detected while dispatching the command {} " +
                                    "The number of new events is {}. " +
                                    "Restarting the command dispatching.",
-                            getAggregateClass(), aggregateId, command, newEventCount);
+                           getAggregatePartClass(), aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
             aggregate = loadOrCreate(aggregateId);
