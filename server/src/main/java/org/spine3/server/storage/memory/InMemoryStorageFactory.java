@@ -68,7 +68,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     /** NOTE: the parameter is unused. */
     @Override
-    public <I> AggregatePartStorage<I> createAggregateStorage(Class<? extends AggregatePart<I, ?, ?>> unused) {
+    public <I> AggregatePartStorage<I> createAggregatePartStorage(Class<? extends AggregatePart<I, ?, ?>> unused) {
         return new InMemoryAggregatePartStorage<>(isMultitenant());
     }
 

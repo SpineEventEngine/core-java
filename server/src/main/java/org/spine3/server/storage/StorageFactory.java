@@ -55,7 +55,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>            the type of aggregate IDs
      * @param aggregateClass the class of aggregates to store
      */
-    <I> AggregatePartStorage<I> createAggregateStorage(Class<? extends AggregatePart<I, ?, ?>> aggregateClass);
+    <I> AggregatePartStorage<I> createAggregatePartStorage(Class<? extends AggregatePart<I, ?, ?>> aggregateClass);
 
     /**
      * Creates a new {@link RecordStorage} instance.

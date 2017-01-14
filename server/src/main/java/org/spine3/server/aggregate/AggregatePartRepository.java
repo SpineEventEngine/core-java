@@ -100,7 +100,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     @Override
     protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createAggregateStorage(getAggregateClass());
+        final Storage result = factory.createAggregatePartStorage(getAggregateClass());
         return result;
     }
 
