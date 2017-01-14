@@ -38,6 +38,7 @@ import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.reflect.Classes;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -94,7 +95,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param boundedContext the bounded context to which this repository belongs
      */
-    public AggregateRepository(BoundedContext boundedContext) {
+    protected AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
         this.commandStatusService = boundedContext.getCommandBus()
                                                   .getCommandStatusService();
@@ -109,8 +110,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return the class of the aggregates
      */
-    protected Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
+    public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
+    }
+
+    public Class<? extends Message> getAggregateStateClass() {
+        final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
+        final Class<? extends Message> stateClass = Classes.getGenericParameterType(aggregateClass, 1);
+        return stateClass;
     }
 
     @Override

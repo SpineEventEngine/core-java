@@ -19,7 +19,9 @@
  */
 package org.spine3.server;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -30,6 +32,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
@@ -38,7 +41,6 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
@@ -47,17 +49,17 @@ import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.validate.Validate;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
+import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -85,7 +87,14 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     private final Stand stand;
     private final StandFunnel standFunnel;
 
+    /** All the repositories registered with this bounded context */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
+
+    /**
+     * The map from a type of aggregate state to an aggregate repository instance that
+     * manages such aggregates.
+     */
+    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
 
     private BoundedContext(Builder builder) {
         super();
@@ -182,7 +191,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
      * @param <E>        the type of entities or aggregates
      * @see Repository#initStorage(StorageFactory)
      */
-    @SuppressWarnings("ChainOfInstanceofChecks")
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
@@ -192,6 +201,9 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         if (repository instanceof EventDispatcher) {
             eventBus.register((EventDispatcher) repository);
         }
+        if (repository instanceof AggregateRepository) {
+            registerAggregateRepository((AggregateRepository)repository);
+        }
         stand.registerTypeSupplier(repository);
     }
 
@@ -199,6 +211,16 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         if (!repository.storageAssigned()) {
             repository.initStorage(this.storageFactory);
         }
+    }
+
+    private void registerAggregateRepository(AggregateRepository<?, ?> repository) {
+        final Class<? extends Message> stateClass = repository.getAggregateStateClass();
+        final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
+        if (alreadyRegistered != null) {
+            throw new IllegalStateException(
+                    "Repository for aggregates with the state " + stateClass.getName() + " already registered.");
+        }
+        aggregateRepositories.put(stateClass, repository);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") /* We ignore method from super because the default
@@ -250,6 +272,17 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     }
 
     /**
+     * Obtains an {@code AggregateRepository} which manages aggregates with the passed state.
+     *
+     * @param aggregateStateClass the class of the aggregate state
+     * @return repository instance or empty {@code Optional} if not found
+     */
+    public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
+            Class<? extends Message> aggregateStateClass) {
+        final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
+        return Optional.fromNullable(result);
+    }
+    /**
      * A builder for producing {@code BoundedContext} instances.
      *
      * <p>An application can have more than one bounded context. To distinguish
@@ -278,7 +311,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
          * @param name a name for a new bounded context. Cannot be null, empty, or blank
          */
         public Builder setName(String name) {
-            this.name = Validate.checkNotEmptyOrBlank(name, "name");
+            this.name = checkNameNotEmptyOrBlank(name);
             return this;
         }
 
