@@ -56,7 +56,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -407,7 +407,7 @@ public class AggregateRepositoryShould {
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
-        private static final Map<CommandId, Command> commandsHandled = newHashMap();
+        private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")      // Required to be `public`.
         public ProjectAggregate(ProjectId id) {
