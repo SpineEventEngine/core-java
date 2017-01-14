@@ -37,6 +37,9 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class AggregateRootShould {
 
@@ -54,10 +57,22 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void return_part() {
+    public void return_part_state_by_class() {
         final Message part = aggregateRoot.getPart(Project.class);
 
         assertNotNull(part);
+    }
+
+    @Test
+    public void cache_repositories() {
+        final AggregateRoot rootSpy = spy(aggregateRoot);
+        final Class<Project> partClass = Project.class;
+
+        rootSpy.getPart(partClass);
+        rootSpy.getPart(partClass);
+
+        // It may be called once in another test. So here we check for atMost().
+        verify(rootSpy, atMost(1)).lookup(partClass);
     }
 
     /*

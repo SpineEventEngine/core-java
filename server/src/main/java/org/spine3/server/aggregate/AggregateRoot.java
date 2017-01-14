@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
@@ -105,16 +106,21 @@ public class AggregateRoot<I> {
         }
 
         // We don't have a cached instance. Obtain from the `BoundedContext` and cache.
+        final AggregatePartRepository<I, ?> repo = lookup(stateClass);
 
+        partsAccess.put(stateClass, repo);
+
+        return repo;
+    }
+
+    @VisibleForTesting
+    <S extends Message> AggregatePartRepository<I, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         final Class<I> idClass = (Class<I>) getId().getClass();
         final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
                                                                         idClass,
                                                                         stateClass);
-        final AggregatePartRepository<I, ?> repo = lookup.find();
-
-        partsAccess.put(stateClass, repo);
-
-        return repo;
+        final AggregatePartRepository<I, ?> result = lookup.find();
+        return result;
     }
 }
