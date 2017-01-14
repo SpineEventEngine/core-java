@@ -165,6 +165,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Changes the number of events between making aggregate snapshots to the passed value.
      *
+     * <p>The default value is defined in {@link #DEFAULT_SNAPSHOT_TRIGGER}.
+     *
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
     @SuppressWarnings("unused")

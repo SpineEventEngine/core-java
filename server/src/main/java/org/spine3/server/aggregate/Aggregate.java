@@ -58,7 +58,7 @@ import static org.spine3.validate.Validate.checkPositive;
  * Abstract base for aggregates.
  *
  * <p>An aggregate is the main building block of a business model.
- * An aggregate guarantees consistency of data modifications in response to
+ * Aggregates guarantee consistency of data modifications in response to
  * commands they receive.
  *
  * <p>An aggregate modifies its state in response to a command and produces
@@ -88,9 +88,13 @@ import static org.spine3.validate.Validate.checkPositive;
  *
  * <h2>Adding event applier methods</h2>
  *
- * <p>Aggregate data is stored as sequence of events it produces.
+ * <p>Aggregate data is stored as a sequence of events it produces.
  * The state of the aggregate is restored by re-playing the history of
  * events and invoking corresponding <em>event applier methods</em>.
+ *
+ * <p>In order to improve performance of loading aggregates an
+ * {@link AggregateRepository} periodically stores aggregate snapshots.
+ * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
  *
  * <p>An event applier is a method that changes the state of the aggregate
  * in response to an event. An event applier takes a single parameter of the
