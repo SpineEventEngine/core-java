@@ -34,8 +34,8 @@ import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.aggregate.AggregatePartRepository;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
@@ -52,14 +52,14 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A container for storing the lastest {@link AggregatePart} states.
+ * A container for storing the lastest {@link Aggregate} states.
  *
  * <p>Provides an optimal way to access the latest state of published aggregates for read-side services.
  * The aggregate states are delivered to the instance of {@code Stand} through {@link StandFunnel}
- * from {@link AggregatePartRepository} instances.
+ * from {@link AggregateRepository} instances.
  *
  * <p>In order to provide a flexibility in defining data access policies, {@code Stand} contains only the states
- * of published aggregates. Please refer to {@link AggregatePart} for publication description.
+ * of published aggregates. Please refer to {@link Aggregate} for publication description.
  *
  * <p>Each {@link org.spine3.server.BoundedContext} contains the only instance of {@code Stand}.
  *
@@ -68,7 +68,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Stand implements AutoCloseable {
 
     /**
-     * Persistent storage for the latest {@link AggregatePart} states.
+     * Persistent storage for the latest {@link Aggregate} states.
      *
      * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is persisted to this storage.
      */
@@ -91,7 +91,7 @@ public class Stand implements AutoCloseable {
             RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
-     * Stores  known {@link AggregatePart} types in order to distinguish them among all
+     * Stores  known {@link Aggregate} types in order to distinguish them among all
      * instances of {@code TypeUrl}.
      *
      * <p>Once this instance of {@code Stand} receives an update as {@link Any}, the {@code Aggregate} states
@@ -117,7 +117,7 @@ public class Stand implements AutoCloseable {
     /**
      * Update the state of an entity inside of the current instance of {@code Stand}.
      *
-     * <p>In case the entity update represents the new {@link AggregatePart} state,
+     * <p>In case the entity update represents the new {@link Aggregate} state,
      * store the new value for the {@code Aggregate} to each of the configured instances of {@link StandStorage}.
      *
      * <p>Each {@code Aggregate } state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl}
@@ -218,7 +218,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link AggregatePart} entity types exposed for reading
+     * Read all {@link Aggregate} entity types exposed for reading
      * by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose an {@code Aggregate} type.
@@ -281,7 +281,7 @@ public class Stand implements AutoCloseable {
      * Register a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link org.spine3.client.Query}.
      *
-     * <p>In case the supplier is an instance of {@link AggregatePartRepository}, the {@code Repository} is not registered
+     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository} is not registered
      * as type supplier, since the {@code Aggregate} reads are performed by accessing
      * the latest state in the supplied {@code StandStorage}.
      *
@@ -297,7 +297,7 @@ public class Stand implements AutoCloseable {
         if (repository instanceof RecordBasedRepository) {
             typeToRepositoryMap.put(entityType, (RecordBasedRepository<I, E, ? extends Message>) repository);
         }
-        if (repository instanceof AggregatePartRepository) {
+        if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
         }
     }

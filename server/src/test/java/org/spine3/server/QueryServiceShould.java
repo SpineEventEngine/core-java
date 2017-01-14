@@ -69,7 +69,7 @@ public class QueryServiceShould {
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = newBoundedContext(spy(TestStandFactory.create()));
 
-        final Given.ProjectAggregatePartRepository projectRepo = new Given.ProjectAggregatePartRepository(projectsContext);
+        final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository(projectsContext));
         projectsContext.register(projectDetailsRepository);
@@ -78,7 +78,7 @@ public class QueryServiceShould {
 
         // Create Customers Bounded Context with one repository.
         customersContext = newBoundedContext(spy(TestStandFactory.create()));
-        final Given.CustomerAggregatePartRepository customerRepo = new Given.CustomerAggregatePartRepository(customersContext);
+        final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 

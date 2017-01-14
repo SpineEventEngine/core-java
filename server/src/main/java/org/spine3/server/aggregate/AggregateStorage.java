@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.aggregate.storage.AggregatePartEvents;
-import org.spine3.server.aggregate.storage.AggregatePartStorageRecord;
+import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
@@ -49,29 +49,29 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregatePartStorage<I> extends AbstractStorage<I, AggregatePartEvents> {
+public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
                                                              .getName();
 
-    protected AggregatePartStorage(boolean multitenant) {
+    protected AggregateStorage(boolean multitenant) {
         super(multitenant);
     }
 
     @Override
-    public AggregatePartEvents read(I aggregateId) {
+    public AggregateEvents read(I aggregateId) {
         checkNotClosed();
         checkNotNull(aggregateId);
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
-        final Iterator<AggregatePartStorageRecord> historyBackward = historyBackward(aggregateId);
+        final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
 
         while (historyBackward.hasNext()
                 && snapshot == null) {
 
-            final AggregatePartStorageRecord record = historyBackward.next();
+            final AggregateStorageRecord record = historyBackward.next();
 
             switch (record.getKindCase()) {
                 case EVENT:
@@ -87,7 +87,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
             }
         }
 
-        final AggregatePartEvents.Builder builder = AggregatePartEvents.newBuilder();
+        final AggregateEvents.Builder builder = AggregateEvents.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
@@ -107,7 +107,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
-    public void write(I id, AggregatePartEvents events) throws IllegalStateException, IllegalArgumentException {
+    public void write(I id, AggregateEvents events) throws IllegalStateException, IllegalArgumentException {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(events);
@@ -115,7 +115,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (final Event event : eventList) {
-            final AggregatePartStorageRecord record = toStorageRecord(event);
+            final AggregateStorageRecord record = toStorageRecord(event);
             writeRecord(id, record);
         }
     }
@@ -132,7 +132,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
         checkNotNull(id);
         checkNotNull(event);
 
-        final AggregatePartStorageRecord record = toStorageRecord(event);
+        final AggregateStorageRecord record = toStorageRecord(event);
         writeRecord(id, record);
     }
 
@@ -149,14 +149,14 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
         checkNotNull(snapshot);
         final Timestamp timestamp = checkPositive(snapshot.getTimestamp(), "Snapshot timestamp");
 
-        final AggregatePartStorageRecord record =
-                AggregatePartStorageRecord.newBuilder()
-                                          .setTimestamp(timestamp)
-                                          .setEventType(SNAPSHOT_TYPE_NAME)
-                                          .setEventId("") // No event ID for snapshots because it's not a domain event.
-                                          .setVersion(snapshot.getVersion())
-                                          .setSnapshot(snapshot)
-                                          .build();
+        final AggregateStorageRecord record =
+                AggregateStorageRecord.newBuilder()
+                                      .setTimestamp(timestamp)
+                                      .setEventType(SNAPSHOT_TYPE_NAME)
+                                      .setEventId("") // No event ID for snapshots because it's not a domain event.
+                                      .setVersion(snapshot.getVersion())
+                                      .setSnapshot(snapshot)
+                                      .build();
         writeRecord(aggregateId, record);
     }
 
@@ -180,7 +180,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
      */
     protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
-    private static AggregatePartStorageRecord toStorageRecord(Event event) {
+    private static AggregateStorageRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
@@ -195,12 +195,12 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
 
         final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
 
-        final AggregatePartStorageRecord.Builder builder = AggregatePartStorageRecord.newBuilder()
-                                                                                     .setEvent(event)
-                                                                                     .setTimestamp(timestamp)
-                                                                                     .setEventId(eventIdStr)
-                                                                                     .setEventType(eventType)
-                                                                                     .setVersion(context.getVersion());
+        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+                                                                             .setEvent(event)
+                                                                             .setTimestamp(timestamp)
+                                                                             .setEventId(eventIdStr)
+                                                                             .setEventType(eventType)
+                                                                             .setVersion(context.getVersion());
         return builder.build();
     }
 
@@ -212,7 +212,7 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
      * @param id     the aggregate ID
      * @param record the record to write
      */
-    protected abstract void writeRecord(I id, AggregatePartStorageRecord record);
+    protected abstract void writeRecord(I id, AggregateStorageRecord record);
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
@@ -221,5 +221,5 @@ public abstract class AggregatePartStorage<I> extends AbstractStorage<I, Aggrega
      * @param id aggregate ID
      * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
      */
-    protected abstract Iterator<AggregatePartStorageRecord> historyBackward(I id);
+    protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 }

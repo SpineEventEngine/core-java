@@ -21,9 +21,9 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
-import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.aggregate.AggregatePartStorage;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePartStorageShould;
+import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.test.aggregate.ProjectId;
 
 /**
@@ -32,13 +32,13 @@ import org.spine3.test.aggregate.ProjectId;
 public class InMemoryAggregatePartStorageShould extends AggregatePartStorageShould {
 
     @Override
-    protected AggregatePartStorage<ProjectId> getStorage() {
-        return InMemoryAggregatePartStorage.newInstance();
+    protected AggregateStorage<ProjectId> getStorage() {
+        return InMemoryAggregateStorage.newInstance();
     }
 
     @Override
-    protected <Id> AggregatePartStorage<Id> getStorage(
-            Class<? extends AggregatePart<Id, ? extends Message, ? extends Message.Builder>> aggregateClass) {
-        return InMemoryAggregatePartStorage.newInstance();
+    protected <Id> AggregateStorage<Id> getStorage(
+            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass) {
+        return InMemoryAggregateStorage.newInstance();
     }
 }

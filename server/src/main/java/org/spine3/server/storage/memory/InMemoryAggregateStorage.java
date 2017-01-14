@@ -23,8 +23,8 @@ package org.spine3.server.storage.memory;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.aggregate.AggregatePartStorage;
-import org.spine3.server.aggregate.storage.AggregatePartStorageRecord;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -40,33 +40,33 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
+class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<I, AggregatePartStorageRecord> recordMap = TreeMultimap.create(
+    private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
             new AggregateStorageKeyComparator<I>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
     private final Map<I, Integer> eventCountMap = newHashMap();
 
-    protected InMemoryAggregatePartStorage(boolean multitenant) {
+    protected InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
     }
 
     /** Creates a new single-tenant storage instance. */
-    protected static <I> InMemoryAggregatePartStorage<I> newInstance() {
-        return new InMemoryAggregatePartStorage<>(false);
+    protected static <I> InMemoryAggregateStorage<I> newInstance() {
+        return new InMemoryAggregateStorage<>(false);
     }
 
     @Override
-    protected void writeRecord(I id, AggregatePartStorageRecord record) {
+    protected void writeRecord(I id, AggregateStorageRecord record) {
         recordMap.put(id, record);
     }
 
     @Override
-    protected Iterator<AggregatePartStorageRecord> historyBackward(I id) {
+    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregatePartStorageRecord> records = recordMap.get(id);
+        final Collection<AggregateStorageRecord> records = recordMap.get(id);
         return records.iterator();
     }
 
@@ -87,12 +87,12 @@ class InMemoryAggregatePartStorage<I> extends AggregatePartStorage<I> {
     }
 
     /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregatePartStorageRecord>,
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
                                                                             Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override
-        public int compare(AggregatePartStorageRecord first, AggregatePartStorageRecord second) {
+        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }

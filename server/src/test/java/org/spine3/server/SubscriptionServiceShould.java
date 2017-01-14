@@ -317,7 +317,7 @@ public class SubscriptionServiceShould {
         final Stand stand = Stand.newBuilder()
                                  .build();
         final BoundedContext boundedContext = newBoundedContext(stand);
-        stand.registerTypeSupplier(new Given.ProjectAggregatePartRepository(boundedContext));
+        stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;
     }

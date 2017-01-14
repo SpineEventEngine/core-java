@@ -22,12 +22,12 @@ package org.spine3.server.stand;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.Aggregate;
 
 import javax.annotation.CheckReturnValue;
 
 /**
- * An identifier for the state of a certain {@link AggregatePart}.
+ * An identifier for the state of a certain {@link Aggregate}.
  *
  * <p>{@code Aggregate} state is defined by {@link org.spine3.protobuf.TypeUrl}.
  *
@@ -47,7 +47,7 @@ public final class AggregateStateId<I> {
 
     @CheckReturnValue
     public static <I> AggregateStateId of(I aggregateId, TypeUrl stateType) {
-        return new AggregateStateId<I>(aggregateId, stateType);
+        return new AggregateStateId<>(aggregateId, stateType);
     }
 
     public I getAggregateId() {

@@ -22,7 +22,7 @@ package org.spine3.server.reflect;
 
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.command.Assign;
 import org.spine3.test.reflect.Project;
 import org.spine3.test.reflect.command.CreateProject;
@@ -34,9 +34,9 @@ import static org.junit.Assert.assertFalse;
 public class MethodMapShould {
 
     /** Test aggregate in which methods are scanned. */
-    private static final class TestAggregatePart extends AggregatePart<Long, Project, Project.Builder> {
+    private static final class TestAggregate extends Aggregate<Long, Project, Project.Builder> {
 
-        public TestAggregatePart(Long id) {
+        public TestAggregate(Long id) {
             super(id);
         }
 
@@ -48,7 +48,7 @@ public class MethodMapShould {
 
     @Test
     public void expose_key_set() {
-        final MethodMap methodMap = MethodMap.create(TestAggregatePart.class, CommandHandlerMethod.factory());
+        final MethodMap methodMap = MethodMap.create(TestAggregate.class, CommandHandlerMethod.factory());
         assertFalse(methodMap.keySet().isEmpty());
     }
 }

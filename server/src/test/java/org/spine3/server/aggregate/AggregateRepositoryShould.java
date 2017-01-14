@@ -36,7 +36,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregatePartEvents;
+import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
@@ -80,12 +80,12 @@ import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
-public class AggregatePartRepositoryShould {
+public class AggregateRepositoryShould {
 
-    private AggregatePartRepository<ProjectId, ProjectAggregatePart> repository;
+    private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
-    private AggregatePartRepository<ProjectId, ProjectAggregatePart> repositorySpy;
+    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
     private CommandStore commandStore;
     private EventBus eventBus;
@@ -102,21 +102,21 @@ public class AggregatePartRepositoryShould {
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
-        repository = new TestAggregatePartRepository(boundedContext);
+        repository = new TestAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
     }
 
     @After
     public void tearDown() throws Exception {
-        ProjectAggregatePart.clearCommandsHandled();
+        ProjectAggregate.clearCommandsHandled();
         repository.close();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void return_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregatePart aggregate = repository.load(Given.AggregateId.newProjectId())
-                                                         .get();
+        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId())
+                                                     .get();
         final Project state = aggregate.getState();
 
         assertTrue(isDefault(state));
@@ -125,12 +125,12 @@ public class AggregatePartRepositoryShould {
     @Test
     public void store_and_load_aggregate() {
         final ProjectId id = Given.AggregateId.newProjectId();
-        final ProjectAggregatePart expected = givenAggregateWithUncommittedEvents(id);
+        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregatePart actual = repository.load(id)
-                                                      .get();
+        final ProjectAggregate actual = repository.load(id)
+                                                  .get();
 
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
@@ -140,15 +140,15 @@ public class AggregatePartRepositoryShould {
     @Test
     public void restore_aggregate_using_snapshot() {
         final ProjectId id = Given.AggregateId.newProjectId();
-        final ProjectAggregatePart expected = givenAggregateWithUncommittedEvents(id);
+        final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.getUncommittedEvents()
                                               .size());
         repository.store(expected);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregatePart actual = repository.load(id)
-                                                      .get();
+        final ProjectAggregate actual = repository.load(id)
+                                                  .get();
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
@@ -156,8 +156,8 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void store_snapshot_and_set_event_count_to_zero_if_needed() {
-        final AggregatePartStorage<ProjectId> storage = givenAggregateStorageMock();
-        final ProjectAggregatePart aggregate = givenAggregateWithUncommittedEvents();
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
         repositorySpy.setSnapshotTrigger(aggregate.getUncommittedEvents()
                                                   .size());
 
@@ -169,8 +169,8 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void not_store_snapshot_if_not_needed() {
-        final AggregatePartStorage<ProjectId> storage = givenAggregateStorageMock();
-        final ProjectAggregatePart aggregate = givenAggregateWithUncommittedEvents();
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents();
 
         repositorySpy.store(aggregate);
 
@@ -220,7 +220,7 @@ public class AggregatePartRepositoryShould {
 
         repositorySpy.dispatch(cmd);
 
-        final ProjectAggregatePart aggregate = verifyAggregateStored(repositorySpy);
+        final ProjectAggregate aggregate = verifyAggregateStored(repositorySpy);
         assertEquals(id, aggregate.getId());
         assertEquals(msg.getName(), aggregate.getState()
                                              .getName());
@@ -231,7 +231,7 @@ public class AggregatePartRepositoryShould {
         final Command cmd = Given.Command.createProject();
         final RuntimeException exception = new RuntimeException(newUuid());
         doThrow(exception).when(repositorySpy)
-                          .store(any(ProjectAggregatePart.class));
+                          .store(any(ProjectAggregate.class));
 
         repositorySpy.dispatch(cmd);
 
@@ -267,12 +267,12 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void return_aggregate_class() {
-        assertEquals(ProjectAggregatePart.class, repository.getAggregatePartClass());
+        assertEquals(ProjectAggregate.class, repository.getAggregateClass());
     }
 
     @Test
     public void have_default_value_for_snapshot_trigger() {
-        assertEquals(AggregatePartRepository.DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
+        assertEquals(AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER, repository.getSnapshotTrigger());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -296,7 +296,7 @@ public class AggregatePartRepositoryShould {
 
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
-        final Set<CommandClass> aggregateCommands = CommandClass.setOf(AggregatePart.getCommandClasses(ProjectAggregatePart.class));
+        final Set<CommandClass> aggregateCommands = CommandClass.setOf(Aggregate.getCommandClasses(ProjectAggregate.class));
         final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
@@ -305,15 +305,15 @@ public class AggregatePartRepositoryShould {
     @Test
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
-        final AggregatePartStorage<ProjectId> storage = mock(AggregatePartStorage.class);
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
         final ProjectId projectId = Given.AggregateId.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage)
                       .readEventCountAfterLastSnapshot(projectId);
-        doReturn(AggregatePartEvents.getDefaultInstance()).when(storage)
-                                                          .read(projectId);
+        doReturn(AggregateEvents.getDefaultInstance()).when(storage)
+                                                      .read(projectId);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
 
@@ -332,12 +332,12 @@ public class AggregatePartRepositoryShould {
      * Utility methods.
      ****************************/
 
-    private static ProjectAggregatePart givenAggregateWithUncommittedEvents() {
+    private static ProjectAggregate givenAggregateWithUncommittedEvents() {
         return givenAggregateWithUncommittedEvents(Given.AggregateId.newProjectId());
     }
 
-    private static ProjectAggregatePart givenAggregateWithUncommittedEvents(ProjectId id) {
-        final ProjectAggregatePart aggregate = new ProjectAggregatePart(id);
+    private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
+        final ProjectAggregate aggregate = new ProjectAggregate(id);
         final CommandContext context = createCommandContext();
         aggregate.dispatchForTest(Given.CommandMessage.createProject(id), context);
         aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
@@ -356,8 +356,8 @@ public class AggregatePartRepositoryShould {
     private static void givenThrowingAggregate(
             Throwable cause,
             Command cmd,
-            AggregatePartRepository<ProjectId, ProjectAggregatePart> repositorySpy) {
-        final ProjectAggregatePart throwingAggregate = mock(ProjectAggregatePart.class);
+            AggregateRepository<ProjectId, ProjectAggregate> repositorySpy) {
+        final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
         final RuntimeException exception = new RuntimeException(cause);
         doThrow(exception).when(throwingAggregate)
@@ -366,9 +366,9 @@ public class AggregatePartRepositoryShould {
                                    .loadOrCreate(any(ProjectId.class));
     }
 
-    private AggregatePartStorage<ProjectId> givenAggregateStorageMock() {
+    private AggregateStorage<ProjectId> givenAggregateStorageMock() {
         @SuppressWarnings("unchecked")
-        final AggregatePartStorage<ProjectId> storage = mock(AggregatePartStorage.class);
+        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
         return storage;
@@ -376,7 +376,7 @@ public class AggregatePartRepositoryShould {
 
     private void assertDispatches(Command cmd) {
         repository.dispatch(cmd);
-        ProjectAggregatePart.assertHandled(cmd);
+        ProjectAggregate.assertHandled(cmd);
     }
 
     private Event verifyEventPosted() {
@@ -385,14 +385,14 @@ public class AggregatePartRepositoryShould {
         return eventCaptor.getValue();
     }
 
-    private static ProjectAggregatePart verifyAggregateStored(AggregatePartRepository<ProjectId, ProjectAggregatePart> repository) {
-        final ArgumentCaptor<ProjectAggregatePart> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregatePart.class);
+    private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId, ProjectAggregate> repository) {
+        final ArgumentCaptor<ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }
 
-    private static class TestAggregatePartRepository extends AggregatePartRepository<ProjectId, ProjectAggregatePart> {
-        protected TestAggregatePartRepository(BoundedContext boundedContext) {
+    private static class TestAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        protected TestAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(InMemoryStorageFactory.getInstance());
         }
@@ -403,13 +403,13 @@ public class AggregatePartRepositoryShould {
      ****************************/
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private static class ProjectAggregatePart extends AggregatePart<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final Map<CommandId, Command> commandsHandled = newHashMap();
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")      // Required to be `public`.
-        public ProjectAggregatePart(ProjectId id) {
+        public ProjectAggregate(ProjectId id) {
             super(id);
         }
 

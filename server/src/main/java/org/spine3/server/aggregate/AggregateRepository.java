@@ -31,7 +31,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregatePartEvents;
+import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
@@ -52,15 +52,15 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * The repository which manages instances of {@code AggregatePart}s.
+ * The repository which manages instances of {@code Aggregate}s.
  *
  * <p>This class is made {@code abstract} for preserving type information of aggregate ID and
- * aggregate part classes used by implementations.
+ * aggregate classes used by implementations.
  *
  * <p>A repository class may look like this:
  * <pre>
  * {@code
- *  public class OrderRepository extends AggregatePartRepository<OrderId, OrderAggregate> {
+ *  public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
  *      public OrderRepository(BoundedContext boundedContext) {
  *          super(boundedContext);
  *      }
@@ -69,11 +69,11 @@ import static org.spine3.validate.Validate.isNotDefault;
  * </pre>
  *
  * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregate parts managed by this repository
+ * @param <A> the type of the aggregates managed by this repository
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>>
+public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher {
 
@@ -93,7 +93,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
      *
      * @param boundedContext the bounded context to which this repository belongs
      */
-    public AggregatePartRepository(BoundedContext boundedContext) {
+    public AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
         this.commandStatusService = boundedContext.getCommandBus()
                                                   .getCommandStatusService();
@@ -102,19 +102,19 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     }
 
     /**
-     * Returns the class of aggregate parts managed by this repository.
+     * Returns the class of aggregates managed by this repository.
      *
      * <p>This is convenience method, which redirects to {@link #getEntityClass()}.
      *
      * @return the class of the aggregates
      */
-    protected Class<? extends AggregatePart<I, ?, ?>> getAggregatePartClass() {
+    protected Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
     }
 
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandClass.setOf(AggregatePart.getCommandClasses(getAggregatePartClass()));
+        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
         return result;
     }
 
@@ -172,9 +172,9 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    protected AggregatePartStorage<I> aggregateStorage() {
+    protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        final AggregatePartStorage<I> result = (AggregatePartStorage<I>) getStorage();
+        final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return checkStorage(result);
     }
 
@@ -186,10 +186,10 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        final AggregatePartEvents aggregatePartEvents = aggregateStorage().read(id);
-        final Snapshot snapshot = aggregatePartEvents.getSnapshot();
+        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
+        final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
-        final List<Event> events = aggregatePartEvents.getEventList();
+        final List<Event> events = aggregateEvents.getEventList();
         if (isNotDefault(snapshot)) {
             result.restore(snapshot);
         }
@@ -206,7 +206,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     public void store(A aggregate) {
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
-        final AggregatePartStorage<I> storage = aggregateStorage();
+        final AggregateStorage<I> storage = aggregateStorage();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
         final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
@@ -237,28 +237,28 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     @Override
     protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createAggregatePartStorage(getAggregatePartClass());
+        final Storage result = factory.createAggregateStorage(getAggregateClass());
         return result;
     }
 
     /**
-     * Loads an aggregate part and dispatches the command to it.
+     * Loads an aggregate and dispatches the command to it.
      *
      * <p>During the command dispatching and event applying, the original list of events may
      * have been changed by other actors in the system.
      *
-     * <p>To ensure the resulting {@code AggregatePart} state is consistent with the numerous
+     * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
      * concurrent actor changes, the event count from the last snapshot should remain the same
-     * during the {@link AggregatePartRepository#load(Object)}
-     * and {@link AggregatePart#dispatch(Message, CommandContext)}.
+     * during the {@link AggregateRepository#load(Object)}
+     * and {@link Aggregate#dispatch(Message, CommandContext)}.
      *
-     * <p>In case the new events are detected, {@code AggregatePart} loading and {@code Command}
+     * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command}
      * dispatching is repeated from scratch.
      */
     @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
-        final AggregatePartStorage<I> aggregatePartStorage = aggregateStorage();
-        A aggregatePart;
+        final AggregateStorage<I> aggregateStorage = aggregateStorage();
+        A aggregate;
 
         Integer eventCountBeforeSave = null;
         int eventCountBeforeDispatch = 0;
@@ -269,13 +269,13 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                                    "New events detected while dispatching the command {} " +
                                    "The number of new events is {}. " +
                                    "Restarting the command dispatching.",
-                           getAggregatePartClass(), aggregateId, command, newEventCount);
+                           getAggregateClass(), aggregateId, command, newEventCount);
             }
-            eventCountBeforeDispatch = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
-            aggregatePart = loadOrCreate(aggregateId);
+            eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+            aggregate = loadOrCreate(aggregateId);
 
             try {
-                aggregatePart.dispatch(command, context);
+                aggregate.dispatch(command, context);
             } catch (RuntimeException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof Exception) {
@@ -289,10 +289,10 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                 }
             }
 
-            eventCountBeforeSave = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
+            eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
-        return aggregatePart;
+        return aggregate;
     }
 
     /** Posts passed events to {@link EventBus}. */
@@ -311,7 +311,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(AggregatePartRepository.class);
+        private final Logger value = LoggerFactory.getLogger(AggregateRepository.class);
     }
 
     private static Logger log() {

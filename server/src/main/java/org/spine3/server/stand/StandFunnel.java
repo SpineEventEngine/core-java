@@ -23,7 +23,7 @@ import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregatePartRepository;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
@@ -36,13 +36,13 @@ import static com.google.common.base.Preconditions.checkState;
  * Delivers the latest {@link Entity} states from the entity repositories to the {@link Stand}.
  *
  * <p>Note: Unlike {@link EventBus} and {@link CommandBus}, which assume many publishers and many subscribers,
- * the funnel may have zero or more publishers (typically, instances of {@link AggregatePartRepository} or
+ * the funnel may have zero or more publishers (typically, instances of {@link AggregateRepository} or
  * {@link ProjectionRepository}), but the only subscriber, the instance of {@code Stand}.
  *
  * <p>In scope of a single {@link BoundedContext} there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
- * @see AggregatePartRepository#dispatch(Command)
+ * @see AggregateRepository#dispatch(Command)
  * @see ProjectionRepository#dispatch(Event)
  */
 @Internal

@@ -32,7 +32,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
-import org.spine3.server.aggregate.AggregatePartRepository;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
@@ -67,7 +67,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <h2>Posting Events</h2>
  * <p>Events are posted to an EventBus using {@link #post(Event)} method. Normally this
- * is done by an {@link AggregatePartRepository} in the process of handling a command, or by a {@link ProcessManager}.
+ * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with the {@code EventBus}
  * <strong>before</strong> it is passed to subscribers.

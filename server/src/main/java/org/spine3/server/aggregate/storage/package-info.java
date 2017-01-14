@@ -20,7 +20,7 @@
 
 /**
  * This package contains generated classes for storing
- * {@link org.spine3.server.aggregate.AggregatePart}s.
+ * {@link org.spine3.server.aggregate.Aggregate}s.
  */
 
 @SPI
