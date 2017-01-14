@@ -217,8 +217,9 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         final Class<? extends Message> stateClass = repository.getAggregateStateClass();
         final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
         if (alreadyRegistered != null) {
-            throw new IllegalStateException(
-                    "Repository for aggregates with the state " + stateClass.getName() + " already registered.");
+            final String errMsg = String.format("Repository for aggregates with the state %s already registered: %s",
+                                                stateClass, alreadyRegistered);
+            throw new IllegalStateException(errMsg);
         }
         aggregateRepositories.put(stateClass, repository);
     }
