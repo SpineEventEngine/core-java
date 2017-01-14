@@ -77,12 +77,12 @@ public class AggregateRoot<I> {
     /**
      * Obtains a part state by its class.
      *
-     * @param partClass the class of the part
+     * @param partStateClass the class of the state of the part
      * @param <S> the type of the part state
      * @return the state of the part or a default state if the state was not found
      */
-    protected <S extends Message> S getPart(Class<S> partClass) {
-        final AggregatePartRepository<I, ?> repo = getRepository(partClass);
+    protected <S extends Message> S getPart(Class<S> partStateClass) {
+        final AggregatePartRepository<I, ?> repo = getRepository(partStateClass);
         //noinspection TestOnlyProblems
         final AggregatePart<I, ?, ?> aggregatePart = repo.loadOrCreate(getId());
         @SuppressWarnings("unchecked") // We ensure type when we cache the repository.
