@@ -70,7 +70,6 @@ import static org.spine3.validate.Validate.isNotDefault;
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregate parts managed by this repository
- *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -80,14 +79,12 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
-
-    /** The number of events to store between snapshots. */
-    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
     private final CommandStatusService commandStatusService;
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
+    /** The number of events to store between snapshots. */
+    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
     /**
      * Creates a new repository instance.
@@ -96,15 +93,10 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
      */
     public AggregatePartRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.commandStatusService = boundedContext.getCommandBus().getCommandStatusService();
+        this.commandStatusService = boundedContext.getCommandBus()
+                                                  .getCommandStatusService();
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-    }
-
-    @Override
-    protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createAggregatePartStorage(getAggregatePartClass());
-        return result;
     }
 
     /**
@@ -122,6 +114,38 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     public Set<CommandClass> getCommandClasses() {
         final Set<CommandClass> result = CommandClass.setOf(AggregatePart.getCommandClasses(getAggregatePartClass()));
         return result;
+    }
+
+    /**
+     * Processes the command by dispatching it to a method of an aggregate.
+     *
+     * <p>The aggregate ID is obtained from the passed command.
+     *
+     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
+     * if there is no aggregate with such ID.
+     *
+     * @param request the request to dispatch
+     * @throws IllegalStateException if storage for the repository was not initialized
+     */
+    @SuppressWarnings("OverlyBroadCatchBlock")      // the exception handling is the same for all exception types.
+    @Override
+    @CheckReturnValue
+    public void dispatch(Command request) throws IllegalStateException {
+        final Message command = getMessage(checkNotNull(request));
+        final CommandContext context = request.getContext();
+        final CommandId commandId = context.getCommandId();
+        final I aggregateId = getAggregateId(command);
+        A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
+
+        final List<Event> events = aggregate.getUncommittedEvents();
+        try {
+            store(aggregate);
+            standFunnel.post(aggregate);
+        } catch (Exception e) {
+            commandStatusService.setToError(commandId, e);
+        }
+        postEvents(events);
+        commandStatusService.setOk(commandId);
     }
 
     /**
@@ -150,19 +174,6 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregatePartStorage<I> result = (AggregatePartStorage<I>) getStorage();
         return checkStorage(result);
-    }
-
-    /**
-     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
-     *
-     * @param id the ID of the aggregate to load
-     * @return the loaded object
-     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
-     */
-    @Override
-    public Optional<A> load(I id) throws IllegalStateException {
-        A result = loadOrCreate(id);
-        return Optional.of(result);
     }
 
     /**
@@ -210,53 +221,43 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     }
 
     /**
-     * Processes the command by dispatching it to a method of an aggregate.
+     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
      *
-     * <p>The aggregate ID is obtained from the passed command.
-     *
-     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
-     * if there is no aggregate with such ID.
-     *
-     * @param request the request to dispatch
-     * @throws IllegalStateException if storage for the repository was not initialized
+     * @param id the ID of the aggregate to load
+     * @return the loaded object
+     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")      // the exception handling is the same for all exception types.
     @Override
-    @CheckReturnValue
-    public void dispatch(Command request) throws IllegalStateException {
-        final Message command = getMessage(checkNotNull(request));
-        final CommandContext context = request.getContext();
-        final CommandId commandId = context.getCommandId();
-        final I aggregateId = getAggregateId(command);
-        A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
-
-        final List<Event> events = aggregate.getUncommittedEvents();
-        try {
-            store(aggregate);
-            standFunnel.post(aggregate);
-        } catch (Exception e) {
-            commandStatusService.setToError(commandId, e);
-        }
-        postEvents(events);
-        commandStatusService.setOk(commandId);
+    public Optional<A> load(I id) throws IllegalStateException {
+        A result = loadOrCreate(id);
+        return Optional.of(result);
     }
 
+    @Override
+    protected Storage createStorage(StorageFactory factory) {
+        final Storage result = factory.createAggregatePartStorage(getAggregatePartClass());
+        return result;
+    }
+
+    /**
+     * Loads an aggregate part and dispatches the command to it.
+     *
+     * <p>During the command dispatching and event applying, the original list of events may
+     * have been changed by other actors in the system.
+     *
+     * <p>To ensure the resulting {@code AggregatePart} state is consistent with the numerous
+     * concurrent actor changes, the event count from the last snapshot should remain the same
+     * during the {@link AggregatePartRepository#load(Object)}
+     * and {@link AggregatePart#dispatch(Message, CommandContext)}.
+     *
+     * <p>In case the new events are detected, {@code AggregatePart} loading and {@code Command}
+     * dispatching is repeated from scratch.
+     */
     @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
         final AggregatePartStorage<I> aggregatePartStorage = aggregateStorage();
-        A aggregate;
+        A aggregatePart;
 
-        /**
-         * During the command dispatching and event applying, the original list of events may have been changed by
-         * other actors in the system.
-         *
-         * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous concurrent actor changes,
-         * the event count from the last snapshot should remain the same during the {@link AggregatePartRepository#load(Object)}
-         * and {@link AggregatePart#dispatch(Message, CommandContext)}.
-         *
-         * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command} dispatching is repeated
-         * from scratch.
-         */
         Integer eventCountBeforeSave = null;
         int eventCountBeforeDispatch = 0;
         do {
@@ -269,10 +270,10 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                            getAggregatePartClass(), aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
-            aggregate = loadOrCreate(aggregateId);
+            aggregatePart = loadOrCreate(aggregateId);
 
             try {
-                aggregate.dispatch(command, context);
+                aggregatePart.dispatch(command, context);
             } catch (RuntimeException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof Exception) {
@@ -289,7 +290,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
             eventCountBeforeSave = aggregatePartStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
-        return aggregate;
+        return aggregatePart;
     }
 
     /** Posts passed events to {@link EventBus}. */
