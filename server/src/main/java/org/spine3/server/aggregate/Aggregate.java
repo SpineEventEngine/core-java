@@ -32,6 +32,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;

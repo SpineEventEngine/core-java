@@ -22,14 +22,14 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregatePartStorageShould;
 import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorageShould;
 import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Alexander Litus
  */
-public class InMemoryAggregatePartStorageShould extends AggregatePartStorageShould {
+public class InMemoryAggregateStorageShould extends AggregateStorageShould {
 
     @Override
     protected AggregateStorage<ProjectId> getStorage() {

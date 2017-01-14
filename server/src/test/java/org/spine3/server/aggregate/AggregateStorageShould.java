@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
@@ -55,7 +56,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AggregatePartStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
+public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
 
     private final ProjectId id = Given.AggregateId.newProjectId();
 

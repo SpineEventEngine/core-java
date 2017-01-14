@@ -35,6 +35,8 @@ import "spine/annotations.proto";
 
 // Used to store entities in the record storage.
 message EntityStorageRecord {
+    option (SPI_type) = true;
+
     // The timestamp of the last entity modification.
     google.protobuf.Timestamp when_modified = 1;
 

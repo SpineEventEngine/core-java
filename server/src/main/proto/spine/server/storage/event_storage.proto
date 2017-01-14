@@ -38,6 +38,8 @@ import "spine/base/event.proto";
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message EventStorageRecord {
+    option (SPI_type) = true;
+
     // A moment of time when the event occurred.
     google.protobuf.Timestamp timestamp = 1;
 

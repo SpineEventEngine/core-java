@@ -27,6 +27,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
