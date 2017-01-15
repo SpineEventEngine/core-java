@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.command.CommandStorage;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStore;

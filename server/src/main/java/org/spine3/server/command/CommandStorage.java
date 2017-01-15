@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -34,9 +34,9 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
+import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.CommandStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
