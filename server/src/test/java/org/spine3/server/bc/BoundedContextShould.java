@@ -242,9 +242,7 @@ public class BoundedContextShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        // an aggregate constructor must be public because it is used via reflection
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        public ProjectAggregate(ProjectId id) {
+        private ProjectAggregate(ProjectId id) {
             super(id);
         }
 
