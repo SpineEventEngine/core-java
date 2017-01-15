@@ -71,7 +71,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    public int readEventCountAfterLastSnapshot(I id) {
+    protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
         final Integer count = eventCountMap.get(id);
         if (count == null) {
@@ -81,7 +81,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
+    protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
         eventCountMap.put(id, eventCount);
     }
