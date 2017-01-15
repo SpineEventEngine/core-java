@@ -269,39 +269,70 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             this.contextFieldFilters = filter.getContextFieldFilterList();
         }
 
-        @SuppressWarnings("MethodWithMoreThanThreeNegations")
+        @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want tracability of exits.
         @Override
         public boolean apply(@Nullable Event event) {
             if (event == null) {
                 return false;
             }
+
             final Message message = Events.getMessage(event);
-            final TypeUrl actualTypeUrl = TypeUrl.of(message);
-            if (eventTypeUrl != null && !actualTypeUrl.equals(eventTypeUrl)) {
-                return false;
-            }
             final EventContext context = event.getContext();
-            final Any aggregateId = context.getProducerId();
-            if (aggregateIds != null && !aggregateIds.contains(aggregateId)) {
+
+            if (!checkEventType(message)) {
                 return false;
             }
 
-            // Check event fields
-            for (FieldFilter filter : eventFieldFilters) {
-                final boolean matchesFilter = checkFields(message, filter);
-                if (!matchesFilter) {
-                    return false;
-                }
+            if (!checkAggregateIds(context)) {
+                return false;
             }
 
-            // Check context fields
+            if (!checkEventFields(message)) {
+                return false;
+            }
+
+            if (!checkContextFields(context)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        private boolean checkAggregateIds(EventContext context) {
+            if (aggregateIds == null) {
+                return true;
+            }
+            final Any aggregateId = context.getProducerId();
+            final boolean result = aggregateIds.contains(aggregateId);
+            return result;
+        }
+
+        private boolean checkEventType(Message message) {
+            final TypeUrl actualTypeUrl = TypeUrl.of(message);
+            if (eventTypeUrl == null) {
+                return true;
+            }
+            final boolean result = actualTypeUrl.equals(eventTypeUrl);
+            return result;
+        }
+
+        private boolean checkContextFields(EventContext context) {
             for (FieldFilter filter : contextFieldFilters) {
                 final boolean matchesFilter = checkFields(context, filter);
                 if (!matchesFilter) {
                     return false;
                 }
             }
+            return true;
+        }
 
+        private boolean checkEventFields(Message message) {
+            for (FieldFilter filter : eventFieldFilters) {
+                final boolean matchesFilter = checkFields(message, filter);
+                if (!matchesFilter) {
+                    return false;
+                }
+            }
             return true;
         }
 
