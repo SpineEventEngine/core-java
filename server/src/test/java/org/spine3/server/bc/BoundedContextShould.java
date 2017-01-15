@@ -124,6 +124,30 @@ public class BoundedContextShould {
         boundedContext.register(repository);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+        boundedContext.register(repository);
+
+        final AnotherProjectAggregateRepository anotherRepo = new AnotherProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+        boundedContext.register(anotherRepo);
+    }
+
+    private static class AnotherProjectAggregate
+                   extends Aggregate<ProjectId, Project, Project.Builder> {
+        protected AnotherProjectAggregate(ProjectId id) {
+            super(id);
+        }
+    }
+    private static class AnotherProjectAggregateRepository
+                   extends AggregateRepository<ProjectId, AnotherProjectAggregate> {
+        private AnotherProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
     @Test
     public void register_ProcessManagerRepository() {
         final ProjectPmRepo repository = new ProjectPmRepo(boundedContext);
