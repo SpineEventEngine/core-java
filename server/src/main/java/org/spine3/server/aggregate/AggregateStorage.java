@@ -128,7 +128,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param event the event to write
      * @throws IllegalStateException if the storage is closed
      */
-    public void writeEvent(I id, Event event) {
+    protected void writeEvent(I id, Event event) {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(event);
@@ -144,7 +144,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param snapshot    the snapshot of the aggregate
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(I aggregateId, Snapshot snapshot) {
+    protected void write(I aggregateId, Snapshot snapshot) {
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
