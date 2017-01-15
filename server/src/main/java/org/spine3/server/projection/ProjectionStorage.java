@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 @SPI
 public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
-    public ProjectionStorage(boolean multitenant) {
+    protected ProjectionStorage(boolean multitenant) {
         super(multitenant);
     }
 
@@ -62,7 +62,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
      *
      * @param time the time of the event
      */
-    public abstract void writeLastHandledEventTime(Timestamp time);
+    protected abstract void writeLastHandledEventTime(Timestamp time);
 
     /**
      * Reads the time of the last handled event from the storage.
@@ -70,8 +70,8 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
      * @return the time of the last event or {@code null} if there is no event in the storage
      */
     @Nullable
-    public abstract Timestamp readLastHandledEventTime();
+    protected abstract Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
-    public abstract RecordStorage<I> getRecordStorage();
+    protected abstract RecordStorage<I> getRecordStorage();
 }
