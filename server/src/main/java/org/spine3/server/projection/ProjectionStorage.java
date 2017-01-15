@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.projection;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.server.projection.Projection;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
 
