@@ -116,11 +116,8 @@ class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        if (!checkContextFields(context)) {
-            return false;
-        }
-
-        return true;
+        final boolean result = checkContextFields(context);
+        return result;
     }
 
     private boolean checkAggregateIds(EventContext context) {
