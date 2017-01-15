@@ -8,7 +8,7 @@
 !/.idea/codeStyleSettings.xml
 
 # Gradle interim configs
-.gradle/*
+.gradle/
 
 # Maven deployment build directory
 /core-java/target
