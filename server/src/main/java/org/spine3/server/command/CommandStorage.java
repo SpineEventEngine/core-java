@@ -70,7 +70,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param command a complete command to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command) {
+    protected void store(Command command) {
         store(command, RECEIVED);
     }
 
@@ -81,7 +81,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param status  a command status
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, CommandStatus status) {
+    protected void store(Command command, CommandStatus status) {
         checkNotClosed();
 
         final CommandStorageRecord record = newRecordBuilder(command, status).build();
@@ -98,7 +98,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param error   an error occurred
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, Error error) {
+    protected void store(Command command, Error error) {
         checkNotClosed();
         checkNotDefault(error);
 
@@ -120,7 +120,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @return commands with the given status
      * @throws IllegalStateException if the storage is closed
      */
-    public Iterator<Command> iterator(CommandStatus status) {
+    protected Iterator<Command> iterator(CommandStatus status) {
         checkNotClosed();
         final Iterator<CommandStorageRecord> recordIterator = read(status);
         final Iterator<Command> commandIterator = toCommandIterator(recordIterator);
@@ -136,13 +136,13 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     protected abstract Iterator<CommandStorageRecord> read(CommandStatus status);
 
     /** Updates the status of the command to {@link CommandStatus#OK}. */
-    public abstract void setOkStatus(CommandId commandId);
+    protected abstract void setOkStatus(CommandId commandId);
 
     /** Updates the status of the command with the error. */
-    public abstract void updateStatus(CommandId commandId, Error error);
+    protected abstract void updateStatus(CommandId commandId, Error error);
 
     /** Updates the status of the command with the business failure. */
-    public abstract void updateStatus(CommandId commandId, Failure failure);
+    protected abstract void updateStatus(CommandId commandId, Failure failure);
 
     /**
      * Creates a command storage record builder passed on the passed parameters.
