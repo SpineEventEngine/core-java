@@ -26,8 +26,8 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorage;
 
 import javax.annotation.Nullable;
 import java.util.Map;

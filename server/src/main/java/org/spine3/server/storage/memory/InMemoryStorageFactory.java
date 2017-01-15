@@ -26,8 +26,8 @@ import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 
 /**

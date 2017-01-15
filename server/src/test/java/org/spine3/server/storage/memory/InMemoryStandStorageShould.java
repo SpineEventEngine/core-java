@@ -21,9 +21,9 @@
 package org.spine3.server.storage.memory;
 
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.stand.StandStorageShould;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorageShould;
 
 /**
  * @author Dmytro Dashenkov

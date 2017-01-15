@@ -46,8 +46,8 @@ import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
-import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;

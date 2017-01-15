@@ -29,6 +29,7 @@ import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.Stand;
+import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,

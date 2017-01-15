@@ -40,7 +40,6 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.memory.InMemoryStandStorage;
 
 import javax.annotation.CheckReturnValue;

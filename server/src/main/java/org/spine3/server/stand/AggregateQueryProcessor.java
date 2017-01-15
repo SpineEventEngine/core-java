@@ -37,7 +37,6 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorage;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
