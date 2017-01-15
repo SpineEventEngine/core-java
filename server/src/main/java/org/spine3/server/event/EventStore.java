@@ -29,7 +29,6 @@ import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.grpc.EventStoreGrpc;
-import org.spine3.server.storage.EventStorage;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

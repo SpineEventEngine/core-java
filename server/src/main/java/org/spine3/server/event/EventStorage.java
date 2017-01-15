@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -40,10 +40,9 @@ import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.event.EventFilter;
-import org.spine3.server.event.EventStore;
-import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.EventStorageRecord;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

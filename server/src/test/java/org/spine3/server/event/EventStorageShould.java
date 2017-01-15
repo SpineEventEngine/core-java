@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
@@ -38,8 +38,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.event.EventFilter;
-import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.storage.AbstractStorageShould;
+import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
 
@@ -57,8 +57,8 @@ import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Durations.nanos;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.server.storage.EventStorage.toEvent;
-import static org.spine3.server.storage.EventStorage.toEventList;
+import static org.spine3.server.event.EventStorage.toEvent;
+import static org.spine3.server.event.EventStorage.toEventList;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
@@ -102,7 +102,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Override
     protected Event newStorageRecord() {
-        return Given.Event.projectCreated();
+        return org.spine3.server.storage.Given.Event.projectCreated();
     }
 
     @Override
@@ -119,7 +119,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Test
     public void writeInternal_and_read_one_event() {
-        final EventStorageRecord recordToStore = Given.EventStorageRecord.projectCreated();
+        final EventStorageRecord recordToStore = org.spine3.server.storage.Given.EventStorageRecord.projectCreated();
         final EventId id = EventId.newBuilder()
                                   .setUuid(recordToStore.getEventId())
                                   .build();
@@ -170,7 +170,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = idToAny(Given.AggregateId.newProjectId(record1.getProducerId()));
+        final Any id = idToAny(org.spine3.server.storage.Given.AggregateId.newProjectId(record1.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder()
                                               .addAggregateId(id)
                                               .build();
@@ -190,7 +190,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final ProjectId uid = ProjectId.newBuilder()
                                        .setId(Identifiers.newUuid())
                                        .build();
-        final ProjectCreated projectCreated = Given.EventMessage.projectCreated(uid);
+        final ProjectCreated projectCreated = org.spine3.server.storage.Given.EventMessage.projectCreated(uid);
         final Any projectCreatedAny = AnyPacker.pack(projectCreated);
         final EventId eventId = EventId.newBuilder()
                                        .setUuid(Identifiers.newUuid())
@@ -525,7 +525,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     private static EventFilter newEventFilterFor(EventStorageRecord record) {
         final String typeName = record.getEventType();
-        final Any id = idToAny(Given.AggregateId.newProjectId(record.getProducerId()));
+        final Any id = idToAny(org.spine3.server.storage.Given.AggregateId.newProjectId(record.getProducerId()));
         return EventFilter.newBuilder()
                           .setEventType(typeName)
                           .addAggregateId(id)
@@ -567,11 +567,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         time1 = getCurrentTime().toBuilder()
                                 .setNanos(POSITIVE_DELTA * 10)
                                 .build(); // to be sure that nanos are bigger than delta
-        record1 = Given.EventStorageRecord.projectCreated(time1);
+        record1 = org.spine3.server.storage.Given.EventStorageRecord.projectCreated(time1);
         time2 = add(time1, delta);
-        record2 = Given.EventStorageRecord.taskAdded(time2);
+        record2 = org.spine3.server.storage.Given.EventStorageRecord.taskAdded(time2);
         time3 = add(time2, delta);
-        record3 = Given.EventStorageRecord.projectStarted(time3);
+        record3 = org.spine3.server.storage.Given.EventStorageRecord.projectStarted(time3);
 
         writeAll(record1, record2, record3);
     }
