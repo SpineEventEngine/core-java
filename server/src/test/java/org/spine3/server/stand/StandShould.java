@@ -51,7 +51,7 @@ import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.memory.InMemoryStandStorage;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
@@ -470,8 +470,7 @@ public class StandShould {
 
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
-                                                                              .build());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final int stateVersion = 1;
@@ -572,8 +571,7 @@ public class StandShould {
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void select_entity_singleton_by_id_and_apply_field_masks() {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
-                                                                              .build());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
@@ -613,8 +611,7 @@ public class StandShould {
     @Test
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
-                                                                              .build());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final int stateVersion = 1;
@@ -648,6 +645,10 @@ public class StandShould {
         stand.execute(customerQuery, observer);
 
         verifyObserver(observer);
+    }
+
+    private static StandStorage createStandStorage() {
+        return InMemoryStorageFactory.getInstance().createStandStorage();
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
@@ -693,8 +694,7 @@ public class StandShould {
     }
 
     private static void requestSampleCustomer(int[] fieldIndexes, final MemoizeQueryResponseObserver observer) {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
-                                                                              .build());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final int stateVersion = 1;
@@ -759,8 +759,7 @@ public class StandShould {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private static void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
-        final Stand stand = prepareStandWithAggregateRepo(InMemoryStandStorage.newBuilder()
-                                                                              .build());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final int querySize = 2;
 

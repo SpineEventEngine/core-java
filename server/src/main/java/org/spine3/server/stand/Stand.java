@@ -40,7 +40,7 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.memory.InMemoryStandStorage;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -364,7 +364,8 @@ public class Stand implements AutoCloseable {
         /**
          * Set an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
          *
-         * <p>If no {@code storage} is assigned, the {@link InMemoryStandStorage} is be set by default.
+         * <p>If no {@code storage} is assigned, the result of {@link InMemoryStorageFactory#createStandStorage()}
+         * will be set by default.
          *
          * @param storage an instance of {@code StandStorage}
          * @return this instance of {@code Builder}
@@ -402,8 +403,8 @@ public class Stand implements AutoCloseable {
          */
         public Stand build() {
             if (storage == null) {
-                storage = InMemoryStandStorage.newBuilder()
-                                              .build();
+                storage = InMemoryStorageFactory.getInstance()
+                                                .createStandStorage();
             }
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();
