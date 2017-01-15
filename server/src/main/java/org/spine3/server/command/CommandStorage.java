@@ -84,12 +84,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     public void store(Command command, CommandStatus status) {
         checkNotClosed();
 
-        //TODO:2016-12-25:alexander.yevsyukov: Why do we need to check the command?
-        // The command can only be stored from CommandBus, which checks the command anyway.
-        // If we don't do this, we can make the CommandValidator class package-access.
-
-        CommandValidator.checkCommand(command);
-
         final CommandStorageRecord record = newRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
