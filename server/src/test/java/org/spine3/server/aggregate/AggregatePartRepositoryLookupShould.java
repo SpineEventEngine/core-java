@@ -51,14 +51,8 @@ public class AggregatePartRepositoryLookupShould {
         boundedContext = BoundedContext.newBuilder()
                                        .setStorageFactory(storageFactory)
                                        .build();
-
-        final ProjectPartRepository repo = new ProjectPartRepository(boundedContext);
-        repo.initStorage(storageFactory);
-        boundedContext.register(repo);
-
-        final TaskAggregateRepository taskRepo = new TaskAggregateRepository(boundedContext);
-        taskRepo.initStorage(storageFactory);
-        boundedContext.register(taskRepo);
+        boundedContext.register(new ProjectPartRepository(boundedContext));
+        boundedContext.register(new TaskAggregateRepository(boundedContext));
     }
 
     @Test
