@@ -28,6 +28,7 @@ import org.spine3.base.EventId;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.event.MatchesStreamQuery;
 import org.spine3.server.storage.EventStorageRecord;
 
 import javax.annotation.Nullable;
