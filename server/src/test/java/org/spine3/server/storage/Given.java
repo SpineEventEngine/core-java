@@ -231,11 +231,11 @@ public class Given {
         private EventStorageRecord() {
         }
 
-        public static org.spine3.server.storage.EventStorageRecord projectCreated() {
+        public static org.spine3.server.event.storage.EventStorageRecord projectCreated() {
             final Timestamp time = getCurrentTime();
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.storage.EventStorageRecord.Builder builder =
-                    org.spine3.server.storage.EventStorageRecord
+            final org.spine3.server.event.storage.EventStorageRecord.Builder builder =
+                    org.spine3.server.event.storage.EventStorageRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(time)
@@ -246,10 +246,10 @@ public class Given {
             return builder.build();
         }
 
-        public static org.spine3.server.storage.EventStorageRecord projectCreated(Timestamp when) {
+        public static org.spine3.server.event.storage.EventStorageRecord projectCreated(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.storage.EventStorageRecord
+            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
+                    org.spine3.server.event.storage.EventStorageRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(when)
@@ -260,10 +260,10 @@ public class Given {
             return result.build();
         }
 
-        public static org.spine3.server.storage.EventStorageRecord taskAdded(Timestamp when) {
+        public static org.spine3.server.event.storage.EventStorageRecord taskAdded(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.storage.EventStorageRecord
+            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
+                    org.spine3.server.event.storage.EventStorageRecord
                             .newBuilder()
                             .setMessage(EventMessage.taskAddedAny())
                             .setTimestamp(when)
@@ -274,10 +274,10 @@ public class Given {
             return result.build();
         }
 
-        public static org.spine3.server.storage.EventStorageRecord projectStarted(Timestamp when) {
+        public static org.spine3.server.event.storage.EventStorageRecord projectStarted(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.storage.EventStorageRecord
+            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
+                    org.spine3.server.event.storage.EventStorageRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectStartedAny())
                             .setTimestamp(when)

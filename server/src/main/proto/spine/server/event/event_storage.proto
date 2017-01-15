@@ -19,11 +19,11 @@
 //
 syntax = "proto3";
 
-package spine.server.storage;
+package spine.event.storage;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.storage";
+option java_package = "org.spine3.server.event.storage";
 option java_multiple_files = true;
 option java_outer_classname = "EventStorageProto";
 option java_generate_equals_and_hash = true;

@@ -32,8 +32,8 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.storage.AbstractStorage;
-import org.spine3.server.storage.EventStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

@@ -38,8 +38,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.storage.AbstractStorageShould;
-import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
 
