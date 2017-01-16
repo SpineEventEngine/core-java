@@ -148,7 +148,7 @@ message PatternStringFieldValue {
 // Messages for "validated" option tests.
 
 message EnclosedMessageFieldValue {
-    RequiredStringFieldValue outer_msg_field = 1 [(validated) = true];
+    RequiredStringFieldValue outer_msg_field = 1 [(valid) = true];
 }
 
 message EnclosedMessageWithoutAnnotationFieldValue {

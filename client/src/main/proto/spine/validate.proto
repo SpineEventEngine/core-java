@@ -116,7 +116,7 @@ extend google.protobuf.FieldOptions {
     //
     // Default value is false.
     //
-    bool validated = 51109;
+    bool valid = 51109;
 
     IfInvalidOption if_invalid = 51110;
 

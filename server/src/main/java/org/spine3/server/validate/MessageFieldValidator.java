@@ -68,7 +68,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
                           FieldPath rootFieldPath, boolean strict) {
         super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
-        this.validateOption = getFieldOption(ValidationProto.validated);
+        this.validateOption = getFieldOption(ValidationProto.valid);
         this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);
         this.isFieldTimestamp = isTimestamp();
     }
