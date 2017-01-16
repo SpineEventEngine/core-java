@@ -24,12 +24,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.internal.IfInvalidOption;
 import org.spine3.validate.internal.Time;
 import org.spine3.validate.internal.TimeOption;
-import org.spine3.validate.internal.ValidOption;
 import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
@@ -48,7 +50,8 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 class MessageFieldValidator extends FieldValidator<Message> {
 
     private final TimeOption timeOption;
-    private final ValidOption validOption;
+    private final boolean validOption;
+    private final IfInvalidOption ifInvalidOption;
     private final boolean isFieldTimestamp;
 
     /**
@@ -66,6 +69,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
         super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validOption = getFieldOption(ValidationProto.valid);
+        this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);
         this.isFieldTimestamp = isTimestamp();
     }
 
@@ -89,7 +93,10 @@ class MessageFieldValidator extends FieldValidator<Message> {
     }
 
     private void validateFieldsOfMessageIfNeeded() {
-        if (!validOption.getValue()) {
+        if (!validOption) {
+            if (hasCustomInvalidMessage()) {
+                log().warn("'if_invalid' option is set without '(valid) = true'");
+            }
             return;
         }
         for (Message value : getValues()) {
@@ -99,6 +106,11 @@ class MessageFieldValidator extends FieldValidator<Message> {
                 addViolation(newValidViolation(value, violations));
             }
         }
+    }
+
+    private boolean hasCustomInvalidMessage() {
+        final boolean result = isDefault(ifInvalidOption);
+        return result;
     }
 
     private boolean isTimestamp() {
@@ -154,7 +166,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
     }
 
     private ConstraintViolation newValidViolation(Message fieldValue, Iterable<ConstraintViolation> violations) {
-        final String msg = getErrorMsgFormat(validOption, validOption.getMsgFormat());
+        final String msg = getErrorMsgFormat(ifInvalidOption, ifInvalidOption.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                                                                  .setMsgFormat(msg)
                                                                  .setFieldPath(getFieldPath())
@@ -162,5 +174,15 @@ class MessageFieldValidator extends FieldValidator<Message> {
                                                                  .addAllViolation(violations)
                                                                  .build();
         return violation;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(MessageFieldValidator.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }
