@@ -82,11 +82,10 @@ public class AggregateRoot<I> {
      * @param <S> the type of the part state
      * @return the state of the part or a default state if the state was not found
      */
-    protected <S extends Message> S getPart(Class<S> partStateClass) {
-        final AggregatePartRepository<I, ?> repo = getRepository(partStateClass);
-        final AggregatePart<I, ?, ?> aggregatePart = repo.loadOrCreate(getId());
-        @SuppressWarnings("unchecked") // We ensure type when we cache the repository.
-        final S partState = (S) aggregatePart.getState();
+    protected <S extends Message, A extends AggregatePart<I, S, ?>> S getPart(Class<S> partStateClass) {
+        final AggregatePartRepository<I, A> repo = getRepository(partStateClass);
+        final AggregatePart<I, S, ?> aggregatePart = repo.loadOrCreate(getId());
+        final S partState = aggregatePart.getState();
         return partState;
     }
 
@@ -96,16 +95,16 @@ public class AggregateRoot<I> {
      * @throws IllegalStateException if a repository was not found
      *                               or the repository does not match expectations of this {@code AggregateRoot}
      */
-    private <S extends Message> AggregatePartRepository<I, ?> getRepository(Class<S> stateClass) {
+    private <S extends Message, A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> getRepository(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-        final AggregatePartRepository<I, ?> cached = (AggregatePartRepository<I, ?>) partsAccess.get(stateClass);
+        final AggregatePartRepository<I, A> cached = (AggregatePartRepository<I, A>) partsAccess.get(stateClass);
 
         if (cached != null) {
             return cached;
         }
 
         // We don't have a cached instance. Obtain from the `BoundedContext` and cache.
-        final AggregatePartRepository<I, ?> repo = lookup(stateClass);
+        final AggregatePartRepository<I, A> repo = lookup(stateClass);
 
         partsAccess.put(stateClass, repo);
 
@@ -113,13 +112,13 @@ public class AggregateRoot<I> {
     }
 
     @VisibleForTesting
-    <S extends Message> AggregatePartRepository<I, ?> lookup(Class<S> stateClass) {
+    <S extends Message, A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         final Class<I> idClass = (Class<I>) getId().getClass();
         final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
                                                                         idClass,
                                                                         stateClass);
-        final AggregatePartRepository<I, ?> result = lookup.find();
+        final AggregatePartRepository<I, A> result = lookup.find();
         return result;
     }
 }
