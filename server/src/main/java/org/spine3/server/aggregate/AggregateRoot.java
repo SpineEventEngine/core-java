@@ -84,7 +84,6 @@ public class AggregateRoot<I> {
      */
     protected <S extends Message> S getPart(Class<S> partStateClass) {
         final AggregatePartRepository<I, ?> repo = getRepository(partStateClass);
-        //noinspection TestOnlyProblems
         final AggregatePart<I, ?, ?> aggregatePart = repo.loadOrCreate(getId());
         @SuppressWarnings("unchecked") // We ensure type when we cache the repository.
         final S partState = (S) aggregatePart.getState();
