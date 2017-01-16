@@ -27,6 +27,8 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Properties;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
@@ -50,7 +52,8 @@ class EventEnrichmentsMap {
 
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
-    private EventEnrichmentsMap() {}
+    private EventEnrichmentsMap() {
+    }
 
     /** Returns the immutable map instance. */
     static ImmutableMultimap<String, String> getInstance() {
@@ -65,6 +68,8 @@ class EventEnrichmentsMap {
     }
 
     private static class Builder {
+
+        private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
 
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<String, String> builder;
@@ -86,7 +91,12 @@ class EventEnrichmentsMap {
             for (String enrichmentType : enrichmentTypes) {
                 final String eventTypesStr = props.getProperty(enrichmentType);
                 final Iterable<String> eventTypes = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
-                put(enrichmentType, eventTypes);
+
+                if (isPackage(eventTypesStr)) {
+                    putAll(eventTypesStr, eventTypes);
+                } else {
+                    put(enrichmentType, eventTypes);
+                }
             }
         }
 
@@ -94,6 +104,21 @@ class EventEnrichmentsMap {
             for (String eventType : eventTypes) {
                 builder.put(enrichmentType, eventType);
             }
+        }
+
+        private void putAll(String packageQualifier, Iterable<String> eventTypes) {
+
+        }
+
+        private static boolean isPackage(String qualifier) {
+            checkNotNull(qualifier);
+            checkArgument(!qualifier.isEmpty());
+
+            final int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
+            final int qualifierLength = qualifier.length();
+
+            final boolean result = indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length() - 1);
+            return result;
         }
     }
 }

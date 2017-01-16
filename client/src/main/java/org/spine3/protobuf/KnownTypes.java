@@ -64,6 +64,8 @@ import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -159,6 +161,10 @@ public class KnownTypes {
     public static TypeUrl getTypeUrl(String typeName) {
         final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
         return typeUrl;
+    }
+
+    public static Collection<TypeUrl> getTypesFromPackage(String pakageName) {
+        return Collections.emptyList(); // TODO:16-01-17:dmytro.dashenkov: Implement.
     }
 
     private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {
