@@ -68,7 +68,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
                           FieldPath rootFieldPath, boolean strict) {
         super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
-        this.validateOption = getFieldOption(ValidationProto.validate);
+        this.validateOption = getFieldOption(ValidationProto.validated);
         this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);
         this.isFieldTimestamp = isTimestamp();
     }
@@ -95,7 +95,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
     private void validateFieldsOfMessageIfNeeded() {
         if (!validateOption) {
             if (hasCustomInvalidMessage()) {
-                log().warn("'if_invalid' option is set without '(valid) = true'");
+                log().warn("'if_invalid' option is set without '(validate) = true'");
             }
             return;
         }
