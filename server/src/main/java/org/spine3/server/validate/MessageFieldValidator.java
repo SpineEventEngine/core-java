@@ -50,7 +50,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 class MessageFieldValidator extends FieldValidator<Message> {
 
     private final TimeOption timeOption;
-    private final boolean validOption;
+    private final boolean validateOption;
     private final IfInvalidOption ifInvalidOption;
     private final boolean isFieldTimestamp;
 
@@ -68,7 +68,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
                           FieldPath rootFieldPath, boolean strict) {
         super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
-        this.validOption = getFieldOption(ValidationProto.valid);
+        this.validateOption = getFieldOption(ValidationProto.validate);
         this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);
         this.isFieldTimestamp = isTimestamp();
     }
@@ -93,7 +93,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
     }
 
     private void validateFieldsOfMessageIfNeeded() {
-        if (!validOption) {
+        if (!validateOption) {
             if (hasCustomInvalidMessage()) {
                 log().warn("'if_invalid' option is set without '(valid) = true'");
             }
