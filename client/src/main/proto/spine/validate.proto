@@ -336,7 +336,7 @@ message PatternOption {
     string msg_format = 3;
 }
 
-// Specifies the message to show is a validated field happens to be invalid.
+// Specifies the message to show if a validated field happens to be invalid.
 // Is applicable only to messages.
 // Repeated fields are supported.
 //
