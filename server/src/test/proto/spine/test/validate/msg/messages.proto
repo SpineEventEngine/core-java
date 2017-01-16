@@ -148,9 +148,17 @@ message PatternStringFieldValue {
 // Messages for "valid" option tests.
 
 message EnclosedMessageFieldValue {
-    RequiredStringFieldValue outer_msg_field = 1 [(valid).value = true];
+    RequiredStringFieldValue outer_msg_field = 1 [(valid) = true];
 }
 
 message EnclosedMessageWithoutAnnotationFieldValue {
     RequiredStringFieldValue outer_msg_field = 1;
+}
+
+message EnclosedMessageFieldValueWithCustomInvalidMessage {
+    RequiredStringFieldValue outer_msg_field = 1 [(valid) = true, (if_invalid).msg_format = "Custom error"];
+}
+
+message EnclosedMessageFieldValueWithoutAnnotationFieldValueWithCustomInvalidMessage {
+    RequiredStringFieldValue outer_msg_field = 1 [(if_invalid).msg_format = "Custom error is redundant in this case"];
 }
