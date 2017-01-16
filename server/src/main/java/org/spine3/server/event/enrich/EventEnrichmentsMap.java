@@ -23,7 +23,10 @@ package org.spine3.server.event.enrich;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeUrl;
 
+import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 
@@ -91,23 +94,26 @@ class EventEnrichmentsMap {
             for (String enrichmentType : enrichmentTypes) {
                 final String eventTypesStr = props.getProperty(enrichmentType);
                 final Iterable<String> eventTypes = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
-
-                if (isPackage(eventTypesStr)) {
-                    putAll(eventTypesStr, eventTypes);
-                } else {
-                    put(enrichmentType, eventTypes);
-                }
+                put(enrichmentType, eventTypes);
             }
         }
 
         private void put(String enrichmentType, Iterable<String> eventTypes) {
             for (String eventType : eventTypes) {
-                builder.put(enrichmentType, eventType);
+                if (isPackage(eventType)) {
+                    putAll(enrichmentType, eventType);
+                } else {
+                    builder.put(enrichmentType, eventType);
+                }
             }
         }
 
-        private void putAll(String packageQualifier, Iterable<String> eventTypes) {
-
+        private void putAll(String enrichmentType, String eventsPackage) {
+            final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(eventsPackage);
+            for (TypeUrl type : eventTypes) {
+                final String typeQualifier = type.getTypeName();
+                builder.put(enrichmentType, typeQualifier);
+            }
         }
 
         private static boolean isPackage(String qualifier) {
