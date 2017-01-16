@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -47,10 +47,10 @@ public class Errors {
     public static Error fromThrowable(Throwable throwable) {
         final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()
-                .setType(throwable.getClass().getName())
-                .setMessage(message)
-                .setStacktrace(Throwables.getStackTraceAsString(throwable))
-                .build();
+                                  .setType(throwable.getClass().getName())
+                                  .setMessage(message)
+                                  .setStacktrace(Throwables.getStackTraceAsString(throwable))
+                                  .build();
         return result;
     }
 }

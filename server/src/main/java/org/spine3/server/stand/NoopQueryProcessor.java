@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,7 @@ import org.spine3.client.Query;
  *
  * @author Alex Tymchenko
  */
-/* package */ class NoopQueryProcessor implements QueryProcessor {
+class NoopQueryProcessor implements QueryProcessor {
     @Override
     public ImmutableCollection<Any> process(Query query) {
         return ImmutableList.of();

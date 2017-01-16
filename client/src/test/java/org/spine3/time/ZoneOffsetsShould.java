@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,6 @@
 package org.spine3.time;
 
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -60,17 +59,17 @@ public class ZoneOffsetsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_18_hours() {
-        ZoneOffsets.ofHours(19);
+        ZoneOffsets.ofHours(15);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_18_hours_by_abs() {
-        ZoneOffsets.ofHours(-19);
+        ZoneOffsets.ofHours(-12);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(11, 61);
+        ZoneOffsets.ofHoursMinutes(10, 61);
     }
 
     @Test(expected = IllegalArgumentException.class)

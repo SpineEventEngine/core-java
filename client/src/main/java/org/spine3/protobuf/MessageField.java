@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,6 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract base for classes working with message fields.
@@ -88,14 +87,14 @@ public abstract class MessageField {
             final Object result = method.invoke(message);
             return result;
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
     }
 
     /**
      * Creates an exception for the case of a missing or incompatible field in the passed message.
      *
-     * @param message a message passed for obtaining value
+     * @param message   a message passed for obtaining value
      * @param fieldName a name of the field at the required index
      * @return new exception instance
      */
@@ -123,7 +122,7 @@ public abstract class MessageField {
                 method.setAccessible(true);
                 accessors.put(messageClass, method);
             } catch (NoSuchMethodException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
         }
 
@@ -133,7 +132,7 @@ public abstract class MessageField {
     /**
      * Obtains a field descriptor for a field in the passed message.
      *
-     * @param msg a message to inspect
+     * @param msg        a message to inspect
      * @param fieldIndex the index of the field
      * @return field descriptor
      */
@@ -144,7 +143,7 @@ public abstract class MessageField {
 
     /** Converts Protobuf field name into Java accessor method name. */
     @VisibleForTesting
-    /* package */ static String toAccessorMethodName(CharSequence fieldName) {
+    static String toAccessorMethodName(CharSequence fieldName) {
         final StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
         out.append(GETTER_METHOD_PREFIX);
         final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));

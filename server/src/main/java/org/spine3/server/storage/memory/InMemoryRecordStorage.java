@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,7 +44,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus, Alex Tymchenko
  */
-/* package */ class InMemoryRecordStorage<I> extends RecordStorage<I> {
+class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder()

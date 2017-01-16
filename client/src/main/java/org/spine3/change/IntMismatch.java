@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,11 @@
 
 package org.spine3.change;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Int32Value;
+
+import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
 
 /**
@@ -34,13 +39,47 @@ public class IntMismatch {
     }
 
     /**
-     * Creates a ValueMismatch instance for a integer attribute.
+     * Creates {@code ValueMismatch} for the case of discovering not zero value,
+     * when a zero amount was expected by a command.
      *
-     * @param expected the value expected by a command
-     * @param actual   the value actual in an entity
-     * @param newValue the value from a command, which we wanted to set instead of {@code expected}
-     * @param version  the current version of the entity
-     * @return new ValueMismatch instance
+     * @param actual   the value discovered instead of zero
+     * @param newValue the new value requested in the command
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedZero(int actual, int newValue, int version) {
+        return of(0, actual, newValue, version);
+    }
+
+    /**
+     * Creates {@code ValueMismatch} for the case of discovering zero value,
+     * when a non zero amount was expected by a command.
+     *
+     * @param expected the value of the field that the command wanted to clear
+     * @param newValue the new value requested in the command
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedNonZero(int expected, int newValue, int version) {
+        return of(expected, 0, newValue, version);
+    }
+
+    /**
+     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     *
+     * @param expected the value expected by the command
+     * @param actual   the value discovered instead of the expected string
+     * @param newValue the new value requested in the command
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch unexpectedValue(int expected, int actual, int newValue, int version) {
+        checkNotNullOrEqual(expected, actual);
+        return of(expected, actual, newValue, version);
+    }
+
+    /**
+     * Creates a new instance of {@code ValueMismatch} with the passed values for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
@@ -51,5 +90,38 @@ public class IntMismatch {
         return builder.build();
     }
 
-    //TODO:2016-12-22:alexander.yevsyukov: Add extraction of previous, actual, and newValue.
+    private static int unpacked(Any any) {
+        final Int32Value unpacked = unpack(any, Int32Value.class);
+        return unpacked.getValue();
+    }
+
+    /**
+     * Obtains expected int value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-int values
+     */
+    public static int unpackExpected(ValueMismatch mismatch) {
+        final Any expected = mismatch.getExpected();
+        return unpacked(expected);
+    }
+
+    /**
+     * Obtains actual int value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-int values
+     */
+    public static int unpackActual(ValueMismatch mismatch) {
+        final Any actual = mismatch.getActual();
+        return unpacked(actual);
+    }
+
+    /**
+     * Obtains new int value from the passed mismatch.
+     *
+     * @throws RuntimeException if the passed instance represent a mismatch of non-int values
+     */
+    public static int unpackNewValue(ValueMismatch mismatch) {
+        final Any newValue = mismatch.getNewValue();
+        return unpacked(newValue);
+    }
 }

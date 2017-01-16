@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,17 +34,17 @@ import java.lang.reflect.Modifier;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplierMethod extends HandlerMethod<Empty> {
+class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    /* package */ static final Predicate<Method> PREDICATE = new FilterPredicate();
+    static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    /* package */ EventApplierMethod(Method method) {
+    EventApplierMethod(Method method) {
         super(method);
     }
 
@@ -55,17 +55,6 @@ import java.lang.reflect.Modifier;
     protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
         return super.invoke(aggregate, message, Empty.getDefaultInstance());
-    }
-
-    /**
-     * This method is deprecated because event appliers do not have context parameter.
-     *
-     * <p>Please use {@link EventApplierMethod#invoke(Object, Message)} instead.
-     */
-    @Deprecated
-    @Override
-    public <R> R invoke(Object target, Message message, Empty context) throws InvocationTargetException {
-        return super.invoke(target, message, Empty.getDefaultInstance());
     }
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ public class TestEntityStorageRecordFactory {
     private TestEntityStorageRecordFactory() {
     }
 
-    /**  Creates a new record with all fields set. */
+    /** Creates a new record with all fields set. */
     public static EntityStorageRecord newEntityStorageRecord() {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                 .setState(AnyPacker.pack(newStringValue(newUuid())))

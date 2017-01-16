@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,13 +28,14 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.validate.Validate.checkBounds;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ValidateShould {
@@ -57,6 +58,11 @@ public class ValidateShould {
         assertFalse(Validate.isNotDefault(StringValue.getDefaultInstance()));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_value_out_of_bounds() {
+        checkBounds(10, "value", -5, 9);
+    }
+
     @Test
     public void verify_that_message_is_in_default_state() {
         final Message nonDefault = newStringValue("check_if_message_is_in_default_state");
@@ -75,7 +81,7 @@ public class ValidateShould {
     public void check_if_message_is_in_default_state_throwing_exception_with_parameterized_error_message() {
         final StringValue nonDefault = newStringValue("check_if_message_is_in_default_state_with_template");
         Validate.checkDefault(nonDefault,
-            "Message value: %s, Type name: %s", nonDefault, TypeUrl.of(nonDefault).getTypeName());
+                              "Message value: %s, Type name: %s", nonDefault, TypeName.of(nonDefault));
     }
 
     @Test
@@ -172,11 +178,11 @@ public class ValidateShould {
     @Test
     public void format_message_from_constraint_violation() {
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat("test %s test %s")
-                .addParam("1")
-                .addParam("2")
-                .build();
-        final String formatted = Validate.toText(violation);
+                                                                 .setMsgFormat("test %s test %s")
+                                                                 .addParam("1")
+                                                                 .addParam("2")
+                                                                 .build();
+        final String formatted = ConstraintViolations.toText(violation);
 
         assertEquals("test 1 test 2", formatted);
     }
@@ -184,10 +190,10 @@ public class ValidateShould {
     @Test
     public void format_message_using_params_from_constraint_violation() {
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .addParam("1")
-                .addParam("2")
-                .build();
-        final String formatted = Validate.toText("abc %s abc %s", violation);
+                                                                 .addParam("1")
+                                                                 .addParam("2")
+                                                                 .build();
+        final String formatted = ConstraintViolations.toText("abc %s abc %s", violation);
 
         assertEquals("abc 1 abc 2", formatted);
     }

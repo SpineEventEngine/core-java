@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,7 +54,7 @@ public class IntegrationEventBusShould {
     public void return_instance() {
         assertNotNull(eventBus);
     }
-    
+
     @Test
     public void post_event_and_notify_subscriber() {
         eventBus.post(event);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract storage tests.
@@ -78,7 +77,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
             try {
                 storage.close();
             } catch (Exception e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
         }
     }

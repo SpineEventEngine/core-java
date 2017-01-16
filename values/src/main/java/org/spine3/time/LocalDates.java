@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,9 +27,11 @@ import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
-import static org.spine3.time.Calendars.createDate;
 import static org.spine3.time.Calendars.getDay;
+import static org.spine3.time.Calendars.getMonthOfYear;
 import static org.spine3.time.Calendars.getYear;
+import static org.spine3.time.Calendars.toCalendar;
+import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -48,11 +50,7 @@ public class LocalDates {
      */
     public static LocalDate now() {
         final Calendar cal = getInstance();
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(getYear(cal))
-                                          .setMonth(Calendars.getMonthOfYear(cal))
-                                          .setDay(getDay(cal))
-                                          .build();
+        final LocalDate result = toLocalDate(cal);
         return result;
     }
 
@@ -139,15 +137,7 @@ public class LocalDates {
      * @return copy of this local date with new years value
      */
     private static LocalDate changeYear(LocalDate localDate, int yearsDelta) {
-        final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(YEAR, yearsDelta);
-
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(getYear(cal))
-                                          .setMonth(Calendars.getMonthOfYear(cal))
-                                          .setDay(getDay(cal))
-                                          .build();
-        return result;
+        return add(localDate, YEAR, yearsDelta);
     }
 
     /**
@@ -158,15 +148,7 @@ public class LocalDates {
      * @return copy of this local date with new months value
      */
     private static LocalDate changeMonth(LocalDate localDate, int monthDelta) {
-        final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(MONTH, monthDelta);
-
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(getYear(cal))
-                                          .setMonth(Calendars.getMonthOfYear(cal))
-                                          .setDay(getDay(cal))
-                                          .build();
-        return result;
+        return add(localDate, MONTH, monthDelta);
     }
 
     /**
@@ -177,14 +159,15 @@ public class LocalDates {
      * @return copy of this local date with new days value
      */
     private static LocalDate changeDays(LocalDate localDate, int daysDelta) {
-        final Calendar cal = createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
-        cal.add(DAY_OF_MONTH, daysDelta);
+        return add(localDate, DAY_OF_MONTH, daysDelta);
+    }
 
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(getYear(cal))
-                                          .setMonth(Calendars.getMonthOfYear(cal))
-                                          .setDay(getDay(cal))
-                                          .build();
-        return result;
+    /**
+     * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
+     */
+    private static LocalDate add(LocalDate localDate, int calendarField, int delta) {
+        final Calendar cal = toCalendar(localDate);
+        cal.add(calendarField, delta);
+        return toLocalDate(cal);
     }
 }

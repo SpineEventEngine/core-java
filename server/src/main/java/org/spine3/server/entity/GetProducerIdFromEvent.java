@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
  * Obtains an event producer ID based on an event {@link Message} and context.
@@ -35,7 +34,7 @@ import org.spine3.server.entity.GetIdByFieldIndex;
  * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-public class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
+class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
     private GetProducerIdFromEvent(int idIndex) {
         super(idIndex);
@@ -44,9 +43,9 @@ public class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIn
     /**
      * Creates a new instance.
      *
-     * @param idIndex a zero-based index of an ID field in this type of messages
+     * @param index a zero-based index of an ID field in this type of messages
      */
-    public static<I, M extends Message> GetProducerIdFromEvent<I, M> newInstance(int idIndex) {
-        return new GetProducerIdFromEvent<>(idIndex);
+    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
+        return new GetProducerIdFromEvent<>(index);
     }
 }

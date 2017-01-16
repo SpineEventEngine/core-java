@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -59,7 +59,6 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * @author Alexander Litus
@@ -187,7 +186,7 @@ public class CommandHandlerShould {
             this(newUuid());
         }
 
-        /* package */ void assertHandled(Command expected) {
+        void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
             final String cmdName = getMessage(expected).getClass().getName();
@@ -195,11 +194,11 @@ public class CommandHandlerShould {
             assertEquals(expected, actual);
         }
 
-        /* package */ void handle(Command cmd) {
+        void handle(Command cmd) {
             handle(getMessage(cmd), cmd.getContext());
         }
 
-        /* package */ ImmutableList<Message> getEventsOnStartProjectCmd() {
+        ImmutableList<Message> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 
@@ -208,7 +207,7 @@ public class CommandHandlerShould {
             try {
                 super.handle(commandMessage, context);
             } catch (InvocationTargetException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
         }
 

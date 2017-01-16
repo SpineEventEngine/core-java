@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,12 +22,11 @@ package org.spine3.base;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -38,8 +37,8 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps.isBetween;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -65,7 +64,9 @@ public class Events {
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
         final String value = UUID.randomUUID().toString();
-        return EventId.newBuilder().setUuid(value).build();
+        return EventId.newBuilder()
+                      .setUuid(value)
+                      .build();
     }
 
     /**
@@ -93,16 +94,16 @@ public class Events {
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()
-                .setMessage(eventAny)
-                .setContext(context)
-                .build();
+                                  .setMessage(eventAny)
+                                  .setContext(context)
+                                  .build();
         return result;
     }
 
     /**
      * Creates {@code Event} instance for import or integration operations.
      *
-     * @param event the event message
+     * @param event      the event message
      * @param producerId the ID of an entity which is generating the event
      * @return event with data from an external source
      */
@@ -119,7 +120,7 @@ public class Events {
      */
     public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final M result = AnyPacker.unpack(any);
+        final M result = unpack(any);
         return result;
     }
 
@@ -141,13 +142,13 @@ public class Events {
      * {@code <I>} type.
      *
      * @param context the event context to to get the event producer ID
-     * @param <I> the type of the producer ID wrapped in the passed {@code EventContext}
+     * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
      * @return producer ID
      */
     public static <I> I getProducer(EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
         @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
-        final I id = (I)aggregateId;
+        final I id = (I) aggregateId;
         return id;
 
     }
@@ -265,8 +266,8 @@ public class Events {
      * Return a specific enrichment from the context.
      *
      * @param enrichmentClass a class of the event enrichment
-     * @param context a context to get an enrichment from
-     * @param <E> a type of the event enrichment
+     * @param context         a context to get an enrichment from
+     * @param <E>             a type of the event enrichment
      * @return an optional of the enrichment
      */
     public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
@@ -275,24 +276,13 @@ public class Events {
             return Optional.absent();
         }
         final Enrichments enrichments = value.get();
-        final String typeName = TypeUrl.of(enrichmentClass)
-                                       .getTypeName();
+        final String typeName = TypeName.of(enrichmentClass);
         final Any any = enrichments.getMapMap()
                                    .get(typeName);
         if (any == null) {
             return Optional.absent();
         }
-        final E result = unpack(enrichmentClass, any);
+        final E result = unpack(any);
         return Optional.fromNullable(result);
-    }
-
-    private static <T extends Message> T unpack(Class<T> clazz, Any any) {
-        final T result;
-        try {
-            result = any.unpack(clazz);
-            return result;
-        } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
-        }
     }
 }

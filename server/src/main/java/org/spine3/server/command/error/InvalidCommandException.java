@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,7 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 
@@ -96,10 +96,8 @@ public class InvalidCommandException extends CommandException {
         final String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to multitenant Command Bus, " +
                 "but has no `tenant_id` attribute in the context.",
-                TypeUrl.of(commandMessage)
-                       .getTypeName(),
-                CommandClass.of(commandMessage)
-                            .value(),
+                TypeName.of(commandMessage),
+                CommandClass.valueOf(commandMessage),
                 idToString(context.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);

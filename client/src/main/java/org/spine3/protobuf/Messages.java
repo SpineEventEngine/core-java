@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.GenericDescriptor;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -61,7 +60,7 @@ public class Messages {
      * @param typeUrl the type URL of the message
      * @return message class
      * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if there is no corresponding class
-     *                          for the given Protobuf message type
+     *                              for the given Protobuf message type
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
@@ -99,7 +98,7 @@ public class Messages {
         try {
             result = JsonPrinter.instance().print(message);
         } catch (InvalidProtocolBufferException e) {
-            throw wrapped(e);
+            throw new UnknownTypeException(e);
         }
         checkState(result != null);
         return result;
@@ -177,7 +176,7 @@ public class Messages {
                 final Class<? extends Message> enumClass = toMessageClass(TypeUrl.of(enumTypeName));
                 return enumClass;
             case MESSAGE:
-                final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
+                final TypeUrl typeUrl = TypeUrl.from(field.getMessageType());
                 final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
             default:

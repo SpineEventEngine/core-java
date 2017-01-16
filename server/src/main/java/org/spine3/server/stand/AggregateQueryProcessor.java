@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -48,12 +48,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-/* package */ class AggregateQueryProcessor implements QueryProcessor {
+class AggregateQueryProcessor implements QueryProcessor {
 
     private final StandStorage standStorage;
     private final TypeUrl type;
 
-    /* package */ AggregateQueryProcessor(StandStorage standStorage, TypeUrl type) {
+    AggregateQueryProcessor(StandStorage standStorage, TypeUrl type) {
         this.standStorage = standStorage;
         this.type = type;
     }

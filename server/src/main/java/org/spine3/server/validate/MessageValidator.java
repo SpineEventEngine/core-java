@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -52,7 +52,7 @@ public class MessageValidator {
      *
      * @param rootFieldPath the path to the message field which is the root for this message
      */
-    /* package */ static MessageValidator newInstance(FieldPath rootFieldPath) {
+    static MessageValidator newInstance(FieldPath rootFieldPath) {
         return new MessageValidator(rootFieldPath);
     }
 

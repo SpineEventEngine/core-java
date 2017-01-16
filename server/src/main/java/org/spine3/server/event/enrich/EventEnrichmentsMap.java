@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  *
  * @author Alexander Litus
  */
-/* package */ class EventEnrichmentsMap {
+class EventEnrichmentsMap {
 
     /**
      * A path to the file which contains enrichment and event Protobuf type names.
@@ -53,7 +53,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
     private EventEnrichmentsMap() {}
 
     /** Returns the immutable map instance. */
-    /* package */ static ImmutableMultimap<String, String> getInstance() {
+    static ImmutableMultimap<String, String> getInstance() {
         return enrichmentsMap;
     }
 
@@ -69,12 +69,12 @@ import static org.spine3.io.IoUtil.loadAllProperties;
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<String, String> builder;
 
-        /* package */ Builder(Iterable<Properties> properties) {
+        Builder(Iterable<Properties> properties) {
             this.properties = properties;
             this.builder = ImmutableMultimap.builder();
         }
 
-        /* package */ ImmutableMultimap<String, String> build() {
+        ImmutableMultimap<String, String> build() {
             for (Properties props : this.properties) {
                 put(props);
             }

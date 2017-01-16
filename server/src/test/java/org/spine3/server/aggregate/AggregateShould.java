@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -346,7 +346,8 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState()
+                                                      .getStatus());
 
         aggregate.restore(snapshotNewProject);
         assertEquals(Project.Status.CREATED, aggregate.getState()
@@ -510,10 +511,10 @@ public class AggregateShould {
 
     /** The class to check raising and catching exceptions. */
     @SuppressWarnings("unused")
-    private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder>  {
+    private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        /* package */ static final String BROKEN_HANDLER = "broken_handler";
-        /* package */ static final String BROKEN_APPLIER = "broken_applier";
+        static final String BROKEN_HANDLER = "broken_handler";
+        static final String BROKEN_APPLIER = "broken_applier";
 
         private final boolean brokenHandler;
         private final boolean brokenApplier;
@@ -612,7 +613,7 @@ public class AggregateShould {
     }
 
     private static void assertContains(Collection<Class<? extends Message>> actualClasses,
-            Class... expectedClasses) {
+                                       Class... expectedClasses) {
         assertTrue(actualClasses.containsAll(newArrayList(expectedClasses)));
         assertEquals(expectedClasses.length, actualClasses.size());
     }

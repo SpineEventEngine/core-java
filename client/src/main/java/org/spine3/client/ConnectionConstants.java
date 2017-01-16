@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,9 +25,14 @@ package org.spine3.client;
  *
  * @author Alexander Yevsyukov
  */
-public interface ConnectionConstants {
+public class ConnectionConstants {
 
-    /** The default port number on which a client server runs. */
-    int DEFAULT_CLIENT_SERVICE_PORT = 50051;
+    /**
+     * The default port number on which a client server runs.
+     */
+    public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
 
+    private ConnectionConstants() {
+        // Prevent instantiation.
+    }
 }

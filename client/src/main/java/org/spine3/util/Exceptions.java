@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,14 +44,13 @@ public class Exceptions {
      *   }
      * </pre>
      *
-     * @throws UnsupportedOperationException always
      * @param message a message for exception
      * @return nothing ever
+     * @throws UnsupportedOperationException always
      */
     public static UnsupportedOperationException unsupported(String message) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(message);
     }
-
 
     /**
      * Always throws {@code UnsupportedOperationException}.
@@ -67,8 +66,8 @@ public class Exceptions {
      *   }
      * </pre>
      *
-     * @throws UnsupportedOperationException always
      * @return nothing ever
+     * @throws UnsupportedOperationException always
      */
     @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
     public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {
@@ -76,22 +75,12 @@ public class Exceptions {
     }
 
     /**
-     * Sets a throwable as the cause of a {@link RuntimeException} and throws it.
+     * Sets a throwable's cause as the cause of a {@link IllegalStateException} and throws it.
      *
      * @param throwable to wrap
      * @return always throws an exception, the return type is for convenience
      */
-    public static RuntimeException wrapped(Throwable throwable) {
-        throw new RuntimeException(throwable);
-    }
-
-    /**
-     * Sets a throwable's cause as the cause of a {@link RuntimeException} and throws it.
-     *
-     * @param throwable to wrap
-     * @return always throws an exception, the return type is for convenience
-     */
-    public static RuntimeException wrappedCause(Throwable throwable) {
-        throw wrapped(throwable.getCause());
+    public static IllegalStateException wrappedCause(Throwable throwable) {
+        throw new IllegalStateException(throwable.getCause());
     }
 }

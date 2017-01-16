@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,7 @@ package org.spine3.server.event.error;
 import com.google.protobuf.Message;
 import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.type.EventClass;
 
 /**
@@ -41,7 +41,7 @@ public class UnsupportedEventException extends EventException {
 
     private static String messageFormat(Message eventMsg) {
         final EventClass eventClass = EventClass.of(eventMsg);
-        final String typeName = TypeUrl.of(eventMsg).getTypeName();
+        final String typeName = TypeName.of(eventMsg);
         final String result = String.format(
                 "There is no registered handler or dispatcher for the event of class: `%s`. Protobuf type: `%s`",
                 eventClass, typeName);

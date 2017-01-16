@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -45,6 +44,7 @@ import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.validate.Validate;
@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
@@ -89,6 +88,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private BoundedContext(Builder builder) {
+        super();
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = builder.storageFactory;
@@ -201,8 +201,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
     }
 
-    @SuppressWarnings("RefusedBequest") /* We ignore method from super because the default
-                                         implementation sets unimplemented status. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") /* We ignore method from super because the default
+                                                        implementation sets unimplemented status. */
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         final Message eventMsg = unpack(integrationEvent.getMessage());
@@ -261,14 +261,11 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         private StorageFactory storageFactory;
         private CommandStore commandStore;
         private CommandBus commandBus;
-        private EventStore eventStore;
-        private Executor eventStoreStreamExecutor;
         private EventBus eventBus;
         private boolean multitenant;
-        private EventEnricher eventEnricher;
         private Stand stand;
+        private StandUpdateDelivery standUpdateDelivery;
         private StandFunnel standFunnel;
-        private Executor standFunnelExecutor;
 
         /**
          * Sets the name for a new bounded context.
@@ -332,49 +329,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return commandBus;
         }
 
-        /**
-         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
-         *
-         * <p>This method can be called if {@link #setEventStoreStreamExecutor(Executor)}
-         * was not called before.
-         *
-         * @see #setEventStoreStreamExecutor(Executor)
-         */
-        @SuppressWarnings("unused")
-        public Builder setEventStore(EventStore eventStore) {
-            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
-            this.eventStore = checkNotNull(eventStore);
-            return this;
-        }
-
-        @Nullable
-        public EventStore getEventStore() {
-            return eventStore;
-        }
-
-        /**
-         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
-         *
-         * <p>This {@code Executor} instance will be used for creating
-         * new {@code EventStore} instance when building {@code BoundedContext}, <em>if</em>
-         * {@code EventStore} was not explicitly set in the builder.
-         *
-         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
-         * will be used.
-         *
-         * @see #setEventStore(EventStore)
-         */
-        @SuppressWarnings("MethodParameterNamingConvention")
-        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
-            checkState(eventStore == null, "EventStore is already configured.");
-            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
-            return this;
-        }
-
-        @Nullable
-        public Executor getEventStoreStreamExecutor() {
-            return eventStoreStreamExecutor;
-        }
 
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
@@ -384,16 +338,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         @Nullable
         public EventBus getEventBus() {
             return eventBus;
-        }
-
-        public Builder setEventEnricher(EventEnricher eventEnricher) {
-            this.eventEnricher = eventEnricher;
-            return this;
-        }
-
-        @Nullable
-        public EventEnricher getEventEnricher() {
-            return eventEnricher;
         }
 
         public Builder setStand(Stand stand) {
@@ -407,12 +351,12 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         @Nullable
-        public Executor getStandFunnelExecutor() {
-            return standFunnelExecutor;
+        public StandUpdateDelivery getStandUpdateDelivery() {
+            return standUpdateDelivery;
         }
 
-        public Builder setStandFunnelExecutor(Executor standFunnelExecutor) {
-            this.standFunnelExecutor = standFunnelExecutor;
+        public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
+            this.standUpdateDelivery = standUpdateDelivery;
             return this;
         }
 
@@ -426,9 +370,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             if (commandBus == null) {
                 commandBus = createCommandBus();
             }
-            if (eventStore == null) {
-                eventStore = createEventStore();
-            }
             if (eventBus == null) {
                 eventBus = createEventBus();
             }
@@ -437,7 +378,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
                 stand = createStand(storageFactory);
             }
 
-            standFunnel = createStandFunnel(standFunnelExecutor);
+            standFunnel = createStandFunnel(standUpdateDelivery);
 
             commandBus.setMultitenant(this.multitenant);
 
@@ -447,15 +388,15 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return result;
         }
 
-        private StandFunnel createStandFunnel(@Nullable Executor standFunnelExecutor) {
+        private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
             StandFunnel standFunnel;
-            if (standFunnelExecutor == null) {
+            if (standUpdateDelivery == null) {
                 standFunnel = StandFunnel.newBuilder()
                                          .setStand(stand)
                                          .build();
             } else {
                 standFunnel = StandFunnel.newBuilder()
-                                         .setExecutor(standFunnelExecutor)
+                                         .setDelivery(standUpdateDelivery)
                                          .setStand(stand)
                                          .build();
             }
@@ -464,19 +405,6 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
 
         private CommandStore createCommandStore() {
             final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
-            return result;
-        }
-
-        private EventStore createEventStore() {
-            if (eventStoreStreamExecutor == null) {
-                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
-            }
-
-            final EventStore result = EventStore.newBuilder()
-                                                .setStreamExecutor(eventStoreStreamExecutor)
-                                                .setStorage(storageFactory.createEventStorage())
-                                                .setLogger(EventStore.log())
-                                                .build();
             return result;
         }
 
@@ -491,12 +419,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         private EventBus createEventBus() {
-            if (eventStore == null) {
-                this.eventStore = createEventStore();
-            }
             final EventBus result = EventBus.newBuilder()
-                                            .setEventStore(eventStore)
-                                            .setEnricher(eventEnricher)
+                                            .setStorageFactory(storageFactory)
                                             .build();
             return result;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import static org.spine3.protobuf.Values.newStringValue;
  *
  * @author Alexander Litus
  */
-/* package */ class StringFieldValidator extends FieldValidator<String> {
+class StringFieldValidator extends FieldValidator<String> {
 
     private final PatternOption patternOption;
     private final String regex;
@@ -51,7 +51,7 @@ import static org.spine3.protobuf.Values.newStringValue;
      * @param strict        if {@code true} the validator would assume that the field is required even
      *                      if the corresponding option is not set
      */
-    /* package */ StringFieldValidator(FieldDescriptor descriptor,
+    StringFieldValidator(FieldDescriptor descriptor,
                          ImmutableList<String> fieldValues,
                          FieldPath rootFieldPath,
                          boolean strict) {

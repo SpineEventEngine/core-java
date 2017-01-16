@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.type.CommandClass;
 
 import static java.lang.String.format;
@@ -46,7 +46,7 @@ public class CommandExpiredException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeUrl.ofCommand(command).getTypeName();
+        final String typeName = TypeName.ofCommand(command);
         final String result = format("A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
                                      commandClass, typeName);
         return result;

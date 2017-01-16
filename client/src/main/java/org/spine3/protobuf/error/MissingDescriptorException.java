@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,10 +28,9 @@ import com.google.protobuf.Message;
  */
 public class MissingDescriptorException extends RuntimeException {
 
+    private static final long serialVersionUID = 0L;
+
     public MissingDescriptorException(Class<? extends Message> clazz, Throwable cause) {
         super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
     }
-
-    private static final long serialVersionUID = 0L;
-
 }

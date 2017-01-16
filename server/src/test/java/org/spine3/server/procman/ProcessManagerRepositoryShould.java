@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package org.spine3.server.procman;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
@@ -39,10 +40,8 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.IdFunction;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -59,9 +58,7 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -88,6 +85,44 @@ public class ProcessManagerRepositoryShould
     private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
     private EventBus eventBus;
+
+    // Configuration of the test suite
+    //---------------------------------
+
+    @Override
+    protected ProjectId createId(int value) {
+        return ProjectId.newBuilder()
+                        .setId(String.format("procman-number-%s", value))
+                        .build();
+    }
+
+    @Override
+    protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
+                TestBoundedContextFactory.newBoundedContext());
+        repo.initStorage(InMemoryStorageFactory.getInstance());
+        return repo;
+    }
+
+    @Override
+    protected TestProcessManager createEntity() {
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId("123-id")
+                                      .build();
+        return new TestProcessManager(id);
+    }
+
+    @Override
+    protected List<TestProcessManager> createEntities(int count) {
+        final List<TestProcessManager> procmans = Lists.newArrayList();
+
+        for (int i = 0; i < count; i++) {
+            final ProjectId id = createId(i);
+
+            procmans.add(new TestProcessManager(id));
+        }
+        return procmans;
+    }
 
     @Before
     public void setUp() {
@@ -118,9 +153,13 @@ public class ProcessManagerRepositoryShould
         boundedContext.close();
     }
 
+    // Tests
+    //----------------------------
+
     @Test
     public void load_empty_manager_by_default() {
-        final TestProcessManager manager = repository.load(ID);
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure because PM is created.
+        final TestProcessManager manager = repository.load(ID).get();
         assertEquals(manager.getDefaultState(), manager.getState());
     }
 
@@ -175,12 +214,6 @@ public class ProcessManagerRepositoryShould
         assertEquals(ID, message.getProjectId());
     }
 
-    @Test
-    public void return_id_function_for_event_class() {
-        final IdFunction function = repository.getIdFunction(EventClass.of(ProjectCreated.class));
-        assertNotNull(function);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
@@ -211,46 +244,11 @@ public class ProcessManagerRepositoryShould
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
     }
 
-    @Override
-    protected EntityRepository<ProjectId, TestProcessManager, Project> repository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
-                TestBoundedContextFactory.newBoundedContext());
-        repo.initStorage(InMemoryStorageFactory.getInstance());
-        return repo;
-    }
-
-    @Override
-    protected TestProcessManager entity() {
-        final ProjectId id = ProjectId.newBuilder()
-                                      .setId("123-id")
-                                      .build();
-        return new TestProcessManager(id);
-    }
-
-    @Override
-    protected List<TestProcessManager> entities(int count) {
-        final List<TestProcessManager> procmans = new ArrayList<>(count);
-
-        for (int i = 0; i < count; i++) {
-            final ProjectId id = ProjectId.newBuilder()
-                                          .setId(String.format("procman-number-%s", i))
-                                          .build();
-
-            procmans.add(new TestProcessManager(id));
-        }
-        return procmans;
-    }
-
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
-            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 
@@ -279,14 +277,12 @@ public class ProcessManagerRepositoryShould
             return result;
         }
 
-        /* package */
         static void clearMessageDeliveryHistory() {
             messagesDelivered.clear();
         }
 
-        // is overridden to make it accessible from tests
-        @Override
-        @SuppressWarnings("RefusedBequest")
+        @Override // is overridden to make it accessible from tests
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }

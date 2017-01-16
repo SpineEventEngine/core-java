@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
@@ -87,10 +88,10 @@ public class RepositoryShould {
         @Override
         public void store(EntityWithPrivateConstructor obj) {
         }
-        @Nullable
+
         @Override
-        public EntityWithPrivateConstructor load(ProjectId id) {
-            return null;
+        public Optional<EntityWithPrivateConstructor> load(ProjectId id) {
+            return Optional.absent();
         }
     }
 
@@ -124,10 +125,10 @@ public class RepositoryShould {
         @Override
         public void store(EntityWithProtectedConstructor obj) {
         }
-        @Nullable
+
         @Override
-        public EntityWithProtectedConstructor load(ProjectId id) {
-            return null;
+        public Optional<EntityWithProtectedConstructor> load(ProjectId id) {
+            return Optional.absent();
         }
     }
 
@@ -161,10 +162,10 @@ public class RepositoryShould {
         @Override
         public void store(EntityWithoutRequiredConstructor obj) {
         }
-        @Nullable
+
         @Override
-        public EntityWithoutRequiredConstructor load(ProjectId id) {
-            return null;
+        public Optional<EntityWithoutRequiredConstructor> load(ProjectId id) {
+            return Optional.absent();
         }
     }
 
@@ -187,10 +188,9 @@ public class RepositoryShould {
         @Override
         protected void store(ProjectEntity obj) {}
 
-        @Nullable
         @Override
-        protected ProjectEntity load(ProjectId id) {
-            return null;
+        protected Optional<ProjectEntity> load(ProjectId id) {
+            return Optional.absent();
         }
 
         @Override
@@ -275,9 +275,10 @@ public class RepositoryShould {
         protected void store(FailingEntity obj) {
         }
 
+        @SuppressWarnings("ReturnOfNull") // It's the purpose of the test.
         @Nullable
         @Override
-        protected FailingEntity load(ProjectId id) {
+        protected Optional<FailingEntity> load(ProjectId id) {
             return null;
         }
 

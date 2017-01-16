@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T> a type of the target enrichment
  * @author Alexander Yevsyukov
  */
-/* package */ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
+abstract class EnrichmentFunction<S, T> implements Function<S, T> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
@@ -53,26 +53,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
     private final Class<T> enrichmentClass;
     private EventContext context;
 
-    /* package */ EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
+    EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
         this.eventClass = checkNotNull(eventClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
         checkArgument(!eventClass.equals(enrichmentClass),
                       "Event and enrichment class must not be equal. Passed two values of %", eventClass);
     }
 
-    /* package */ Class<S> getEventClass() {
+    Class<S> getEventClass() {
         return eventClass;
     }
 
-    /* package */ Class<T> getEnrichmentClass() {
+    Class<T> getEnrichmentClass() {
         return enrichmentClass;
     }
 
-    /* package */ EventContext getContext() {
+    EventContext getContext() {
         return context;
     }
 
-    /* package */ void setContext(EventContext context) {
+    void setContext(EventContext context) {
         this.context = context;
     }
 
@@ -84,7 +84,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @throws IllegalStateException if the function cannot perform the conversion in its current state
      * or because of the state of its environment
      */
-    /* package */ abstract void validate();
+    abstract void validate();
 
     @Override
     public int hashCode() {

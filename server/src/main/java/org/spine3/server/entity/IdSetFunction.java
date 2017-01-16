@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,14 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.change;
+package org.spine3.server.entity;
+
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
+
+import java.util.Set;
 
 /**
- * Error messages common for all mismatch types.
+ * Obtains a set of entity IDs based on an event/command message and its context.
  *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
  * @author Alexander Yevsyukov
  */
-/* package */ interface ErrorMessage {
+public interface IdSetFunction<I, M extends Message, C extends Message> {
 
-    String EXPECTED_AND_ACTUAL_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
+    /**
+     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     *
+     * @param message an event or a command message
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return a set of entity identifiers
+     */
+    Set<I> apply(M message, C context);
 }

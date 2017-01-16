@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -53,7 +53,7 @@ public class MessageClassShould {
     public void return_java_class_name() {
         assertEquals(ClassName.of(MSG_CLASS), testMsgClass.getClassName());
     }
-    
+
     @Test
     public void convert_value_to_string() {
         assertEquals(String.valueOf(MSG_CLASS), testMsgClass.toString());

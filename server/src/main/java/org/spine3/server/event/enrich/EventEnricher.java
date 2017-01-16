@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,6 +36,7 @@ import org.spine3.base.Enrichments;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
@@ -152,8 +153,7 @@ public class EventEnricher {
             final Message enriched = apply(function, eventMessage);
             checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
                                     function, eventMessage);
-            final String typeName = TypeUrl.of(enriched)
-                                           .getTypeName();
+            final String typeName = TypeName.of(enriched);
             enrichments.put(typeName, AnyPacker.pack(enriched));
         }
         final EventContext enrichedContext = event.getContext()
@@ -173,7 +173,7 @@ public class EventEnricher {
         return result;
     }
 
-    /* package */ Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
+    Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
                                                                  Class<?> enrichmentFieldClass) {
         final Optional<EnrichmentFunction<?, ?>> result =
                 FluentIterable.from(functions.values())
@@ -181,12 +181,12 @@ public class EventEnricher {
         return result;
     }
 
-    /* package */ static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
+    static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
 
         private final Class<?> eventFieldClass;
         private final Class<?> enrichmentFieldClass;
 
-        /* package */ static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
+        static SupportsFieldConversion of(Class<?> eventFieldClass, Class<?> enrichmentFieldClass) {
             return new SupportsFieldConversion(eventFieldClass, enrichmentFieldClass);
         }
 
@@ -268,11 +268,11 @@ public class EventEnricher {
          * @see EnrichmentFunction
          */
         @VisibleForTesting
-        /* package */ static class SameTransition implements Predicate<EnrichmentFunction> {
+        static class SameTransition implements Predicate<EnrichmentFunction> {
 
             private final EnrichmentFunction function;
 
-            /* package */ static SameTransition asFor(EnrichmentFunction function) {
+            static SameTransition asFor(EnrichmentFunction function) {
                 return new SameTransition(function);
             }
 
@@ -307,7 +307,7 @@ public class EventEnricher {
         }
 
         @VisibleForTesting
-        /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
+        Set<EnrichmentFunction<?, ?>> getFunctions() {
             return ImmutableSet.copyOf(functions);
         }
     }

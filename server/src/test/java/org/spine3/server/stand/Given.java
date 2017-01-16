@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,7 @@
 
 package org.spine3.server.stand;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
@@ -36,6 +36,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -45,48 +46,104 @@ import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * @author Dmytro Dashenkov
  */
-/*package*/ class Given {
+class Given {
 
-    /*package*/ static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
-    /*package*/ static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
-
+    static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
+    static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
+    static final int AWAIT_SECONDS = 6;
     private static final String PROJECT_UUID = Identifiers.newUuid();
-    /*package*/ static final int AWAIT_SECONDS = 6;
 
     private Given() {
     }
 
-    /*package*/ static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
-        /*package*/ StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
+    static Event validEvent() {
+        return Event.newBuilder()
+                    .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
+                                                             .setProjectId(ProjectId.newBuilder()
+                                                                                    .setId("12345AD0"))
+                                                             .build())
+                                         .toBuilder()
+                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' + ProjectCreated.getDescriptor()
+                                                                                                         .getFullName())
+                                         .build())
+                    .setContext(EventContext.newBuilder()
+                                            .setDoNotEnrich(true)
+                                            .setCommandContext(CommandContext.getDefaultInstance())
+                                            .setEventId(EventId.newBuilder()
+                                                               .setUuid(Identifiers.newUuid())
+                                                               .build()))
+                    .build();
+    }
 
-        @Override
-        protected ProjectId getEntityId(Message event, EventContext context) {
-            return ProjectId.newBuilder().setId(PROJECT_UUID).build();
+    static Command validCommand() {
+        return Command.newBuilder()
+                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
+                      .setContext(CommandContext.getDefaultInstance())
+                      .build();
+    }
+
+    static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
+        return new StandTestProjectionRepository(context);
+    }
+
+    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo(BoundedContext context) {
+        return new StandTestAggregateRepository(context);
+    }
+
+    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                            .build();
+        return aggregateRepo(boundedContext);
+    }
+
+    static BoundedContext boundedContext(Stand stand, StandUpdateDelivery standUpdateDelivery) {
+        return boundedContextBuilder(stand)
+                .setStandUpdateDelivery(standUpdateDelivery)
+                .build();
+    }
+
+    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
+        return BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setStorageFactory(InMemoryStorageFactory.getInstance());
+    }
+
+    static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+        StandTestProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+            addIdSetFunction(ProjectCreated.class, new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                @Override
+                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                    return ImmutableSet.of(ProjectId.newBuilder()
+                                                    .setId(PROJECT_UUID)
+                                                    .build());
+                }
+            });
         }
     }
 
-    /*package*/ static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+    static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
 
         /**
          * Creates a new repository instance.
          *
          * @param boundedContext the bounded context to which this repository belongs
          */
-        /*package*/ StandTestAggregateRepository(BoundedContext boundedContext) {
+        StandTestAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
-    private static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
+    static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
 
         /**
          * Creates a new aggregate instance.
@@ -99,8 +156,9 @@ import java.util.concurrent.Executors;
         }
 
         @Assign
-        public List<? extends Event> handle(CreateProject createProject, CommandContext context) {
-            return null;
+        public List<? extends Message> handle(CreateProject createProject, CommandContext context) {
+            // In real life we would return a list with at least one element populated with real data.
+            return Collections.emptyList();
         }
 
         @Apply
@@ -109,75 +167,16 @@ import java.util.concurrent.Executors;
         }
     }
 
-    /*package*/ static class StandTestProjection extends Projection<ProjectId, Project> {
-        /**
-         * Creates a new instance.
-         *
-         * Required to be public.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
+    static class StandTestProjection extends Projection<ProjectId, Project> {
+
         public StandTestProjection(ProjectId id) {
             super(id);
         }
 
+        @SuppressWarnings("unused") // OK for test class.
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
             // Do nothing
         }
-    }
-
-    /*package*/ static Event validEvent() {
-        return Event.newBuilder()
-                    .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
-                                                             .setProjectId(ProjectId.newBuilder().setId("12345AD0"))
-                                                             .build())
-                                         .toBuilder()
-                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + "/" + ProjectCreated.getDescriptor().getFullName())
-                                         .build())
-                    .setContext(EventContext.newBuilder()
-                                            .setDoNotEnrich(true)
-                                            .setCommandContext(CommandContext.getDefaultInstance())
-                                            .setEventId(EventId.newBuilder()
-                                                               .setUuid(Identifiers.newUuid())
-                                                               .build()))
-                    .build();
-    }
-
-    /*package*/ static Command validCommand() {
-        return Command.newBuilder()
-                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
-                      .setContext(CommandContext.getDefaultInstance())
-                      .build();
-    }
-
-    /*package*/ static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {
-        return new StandTestProjectionRepository(context);
-    }
-
-    /*package*/ static AggregateRepository<?, ?> aggregateRepo(BoundedContext context) {
-        return new StandTestAggregateRepository(context);
-    }
-
-    /*package*/ static BoundedContext boundedContext(Stand stand, int concurrentThreads) {
-        final Executor executor = concurrentThreads > 0 ? Executors.newFixedThreadPool(concurrentThreads) :
-                                  MoreExecutors.directExecutor();
-
-        return boundedContextBuilder(stand)
-                             .setStandFunnelExecutor(executor)
-                             .build();
-    }
-
-    /*package*/ static BoundedContext boundedContext(Stand stand, Executor standFunnelExecutor) {
-        return boundedContextBuilder(stand)
-                .setStandFunnelExecutor(standFunnelExecutor)
-                .build();
-    }
-
-    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
-        return BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -39,9 +39,20 @@ import java.util.Map;
  */
 public abstract class EventException extends RuntimeException {
 
-    /** Use {@link GeneratedMessageV3} because it is {@link Serializable}. */
+    private static final long serialVersionUID = 0L;
+
+    public static final String ATTR_EVENT_TYPE_NAME = "eventType";
+
+    /**
+     * The event message or the message packed into {@link Any}.
+     *
+     * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because it is {@link Serializable}.
+     */
     private final GeneratedMessageV3 eventMessage;
 
+    /**
+     * The error passed with the exception.
+     */
     private final Error error;
 
     /**
@@ -68,11 +79,11 @@ public abstract class EventException extends RuntimeException {
      * @param eventMessage an event message to get the type from
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
-        final String type = TypeUrl.of(eventMessage).getTypeName();
+        final String type = TypeName.of(eventMessage);
         final Value value = Value.newBuilder()
                                  .setStringValue(type)
                                  .build();
-        final Map<String, Value> result = ImmutableMap.of(Attribute.EVENT_TYPE_NAME, value);
+        final Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
         return result;
     }
 
@@ -94,13 +105,4 @@ public abstract class EventException extends RuntimeException {
     public Error getError() {
         return error;
     }
-
-    /**
-     * Attribute names for event-related business failures.
-     */
-    public interface Attribute {
-        String EVENT_TYPE_NAME = "eventType";
-    }
-
-    private static final long serialVersionUID = 0L;
 }

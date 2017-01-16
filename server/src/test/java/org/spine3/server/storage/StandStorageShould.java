@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -109,10 +109,11 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         checkByTypeRead(mask);
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops") // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
         final StandStorage storage = getStorage();
-        final TypeUrl type = TypeUrl.of(Project.getDescriptor());
+        final TypeUrl type = TypeUrl.from(Project.getDescriptor());
 
         final int projectsCount = 4;
         final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
@@ -122,7 +123,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             final TaskId genericId = TaskId.newBuilder()
                                            .setId(i)
                                            .build();
-            final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.of(Task.getDescriptor()));
+            final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
             final Task task = Task.newBuilder()
                                   .setTaskId(genericId)
                                   .setTitle("Test task")
@@ -134,8 +135,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
         final ImmutableCollection<EntityStorageRecord> readRecords
                 = withFieldMask
-                  ? storage.readAllByType(TypeUrl.of(Project.getDescriptor()), fieldMask)
-                  : storage.readAllByType(TypeUrl.of(Project.getDescriptor()));
+                  ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
+                  : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
         final Set<EntityStorageRecord> readDistinct = Sets.newHashSet(readRecords);
         assertSize(projectsCount, readDistinct);
 

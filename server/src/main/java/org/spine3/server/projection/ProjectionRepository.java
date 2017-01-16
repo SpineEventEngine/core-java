@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,31 +21,29 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.event.EventDispatcher;
+import org.spine3.server.entity.DefaultIdSetEventFunction;
+import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -53,11 +51,11 @@ import java.util.Set;
  *
  * @param <I> the type of IDs of projections
  * @param <P> the type of projections
- * @param <M> the type of projection state messages
+ * @param <S> the type of projection state messages
  * @author Alexander Yevsyukov
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
-        extends EntityRepository<I, P, M> implements EventDispatcher {
+public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
+                extends EventDispatchingRepository<I, P, S> {
 
     /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
     protected enum Status {
@@ -91,9 +89,37 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     /** An instance of {@link StandFunnel} to be informed about state updates */
     private final StandFunnel standFunnel;
 
+    /** If {@code true} the projection will {@link #catchUp()} after initialization. */
+    private final boolean catchUpAfterStorageInit;
+
+    /**
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
+     * after the storage initialization.
+     *
+     * <p>NOTE: The {@link #catchUp()} will be called automatically after the {@link #initStorage(StorageFactory)} call
+     * is performed. To override this behavior, please use
+     * {@link ProjectionRepository#ProjectionRepository(BoundedContext, boolean)} constructor.
+     *
+     * @param boundedContext the target {@code BoundedContext}
+     */
     protected ProjectionRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+        this(boundedContext, true);
+    }
+
+    /**
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
+     *
+     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
+     * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     *
+     * @param boundedContext the target {@code BoundedContext}
+     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
+     */
+    @SuppressWarnings("MethodParameterNamingConvention")
+    protected ProjectionRepository(BoundedContext boundedContext, boolean catchUpAfterStorageInit) {
+        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromContext());
         this.standFunnel = boundedContext.getStandFunnel();
+        this.catchUpAfterStorageInit = catchUpAfterStorageInit;
     }
 
     protected Status getStatus() {
@@ -109,8 +135,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest") /* We do not call super.createStorage() because we create a specific
-                                           type of a storage, not regular entity storage created in the parent. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
+                       we create a specific type of a storage, not a regular entity storage created in the parent. */)
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
@@ -123,6 +149,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     public void initStorage(StorageFactory factory) {
         super.initStorage(factory);
         setStatus(Status.STORAGE_ASSIGNED);
+
+        if(catchUpAfterStorageInit) {
+            log().debug("Storage assigned. {} is starting to catch-up", getClass());
+            catchUp();
+        }
     }
 
     /** {@inheritDoc} */
@@ -140,7 +171,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @Override
     @Nonnull
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     protected RecordStorage<I> recordStorage() {
         return checkStorage(recordStorage);
     }
@@ -168,39 +199,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Obtains the ID of the event producer from the passed event context and
-     * casts it to the type of index used by this repository.
-     *
-     * @param event the event message. This parameter is not used by default implementation.
-     *              Override to provide custom logic of ID generation.
-     * @param context the event context
-     */
-    @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
-    protected I getEntityId(Message event, EventContext context) {
-        final I id = Events.getProducer(context);
-        return id;
-    }
-
-    /**
-     * Loads or creates a projection by the passed ID.
-     *
-     * <p>The projection is created if there was no projection with such ID stored before.
-     *
-     * @param id the ID of the projection to load
-     * @return loaded or created projection instance
-     */
-    @Nonnull
-    @Override
-    public P load(I id) {
-        P projection = super.load(id);
-        if (projection == null) {
-            projection = create(id);
-        }
-        return projection;
-    }
-
-    /**
-     * Dispatches the passed event to corresponding {@link Projection} if the repository is
+     * Dispatches the passed event to corresponding {@link Projection}s if the repository is
      * in {@link Status#ONLINE}.
      *
      * <p>If the repository in another status the event is not dispatched. This is needed to
@@ -216,12 +215,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
     @Override
     public void dispatch(Event event) {
         if (!isOnline()) {
-            if (log().isTraceEnabled()) {
-                log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
-            }
+            log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
             return;
         }
 
@@ -229,38 +227,36 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Dispatches event to a projection without checking the status of the repository.
-     *
-     * <p>Also posts an update to the {@code StandFunnel} instance for this repository.
-     *
-     * @param event the event to dispatch
+     * Dispatches the passed event to projections without checking the status.
      */
-    @Internal
-    /* package */ void internalDispatch(Event event) {
-        final Message eventMessage = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        final I id = getEntityId(eventMessage, context);
-        final P projection = load(id);
+    private void internalDispatch(Event event) {
+        super.dispatch(event);
+    }
+
+    @Override
+    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
+        final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
         store(projection);
-        final M state = projection.getState();
-        final Any packedState = AnyPacker.pack(state);
-        standFunnel.post(id, packedState, projection.getVersion());
+        final S state = projection.getState();
+        standFunnel.post(projection);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);
     }
 
-    /** Updates projections from the event stream obtained from {@code EventStore}. */
+    /**
+     * Updates projections from the event stream obtained from {@code EventStore}.
+     */
     public void catchUp() {
         // Get the timestamp of the last event. This also ensures we have the storage.
-        final Timestamp timestamp = projectionStorage().readLastHandledEventTime();
+        final Timestamp timestamp = nullToDefault(projectionStorage().readLastHandledEventTime());
         final EventStore eventStore = getBoundedContext().getEventBus().getEventStore();
 
         final Set<EventFilter> eventFilters = getEventFilters();
 
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-               .setAfter(timestamp == null ? Timestamp.getDefaultInstance() : timestamp)
+               .setAfter(timestamp)
                .addAllFilter(eventFilters)
                .build();
 
@@ -268,43 +264,41 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         eventStore.read(query, new EventStreamObserver(this));
     }
 
-    /** Obtains event filters for event classes handled by projections of this repository. */
+    private static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
+        return timestamp == null ? Timestamp.getDefaultInstance() : timestamp;
+    }
+
+    /**
+     * Obtains event filters for event classes handled by projections of this repository.
+     */
     private Set<EventFilter> getEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getEventClasses();
         for (EventClass eventClass : eventClasses) {
+            final String typeName = TypeName.of(eventClass.value());
             builder.add(EventFilter.newBuilder()
-                                   .setEventType(eventClass.toTypeUrl().getTypeName())
+                                   .setEventType(typeName)
                                    .build());
         }
         return builder.build();
     }
 
-    /** Sets the repository online bypassing the catch-up from the {@code EventStore}. */
+    /**
+     * Sets the repository online bypassing the catch-up from the {@code EventStore}.
+     */
     public void setOnline() {
         setStatus(Status.ONLINE);
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    /**
-     * The stream observer passed to Event Store, which passes obtained events
-     * to the associated Projection Repository.
+   /**
+     * The stream observer which redirects events from {@code EventStore} to
+     * the associated {@code ProjectionRepository}.
      */
     private static class EventStreamObserver implements StreamObserver<Event> {
 
         private final ProjectionRepository projectionRepository;
 
-        /* package */ EventStreamObserver(ProjectionRepository projectionRepository) {
+        EventStreamObserver(ProjectionRepository projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 
@@ -326,5 +320,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
                 log().info("{} catch-up complete", repositoryClass.getName());
             }
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

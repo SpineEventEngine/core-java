@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -309,7 +309,7 @@ public class KnownTypes {
         }
 
         private void putEnum(EnumDescriptor desc, Class<? extends EnumLite> enumClass) {
-            final TypeUrl typeUrl = TypeUrl.of(desc);
+            final TypeUrl typeUrl = TypeUrl.from(desc);
             final ClassName className = ClassName.of(enumClass);
             put(typeUrl, className);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
@@ -31,10 +32,13 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.IdSetEventFunction;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
+import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.projection.Project;
@@ -47,14 +51,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
+import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -62,7 +71,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
         extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
@@ -70,20 +79,91 @@ public class ProjectionRepositoryShould
 
     private BoundedContext boundedContext;
 
-    private ProjectionRepository<ProjectId, TestProjection, Project> repository;
+    private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
+        return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
+    }
+
+    /**
+     * {@code IdSetFunction} used for testing add/get/remove.
+     */
+    private static final IdSetEventFunction<ProjectId, ProjectCreated> idSetForCreateProject =
+            new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                @Override
+                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                    return newHashSet();
+                }
+            };
+
+    @Override
+    protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
+        boundedContext = newBoundedContext();
+        return new TestProjectionRepository(boundedContext);
+    }
+
+    @Override
+    protected TestProjection createEntity() {
+        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
+                                                                      .setId("single-test-projection")
+                                                                      .build());
+        return projection;
+    }
+
+    @Override
+    protected List<TestProjection> createEntities(int count) {
+        final List<TestProjection> projections = new LinkedList<>();
+
+        for (int i = 0; i < count; i++) {
+            final TestProjection projection = new TestProjection(createId(i));
+
+            projections.add(projection);
+        }
+
+        return projections;
+    }
+
+    @Override
+    protected ProjectId createId(int i) {
+        return ProjectId.newBuilder()
+                        .setId(String.format("test-projection-%s", i))
+                        .build();
+    }
 
     @Before
     public void setUp() {
-        boundedContext = newBoundedContext();
-        repository = new TestProjectionRepository(boundedContext);
+        initRepository();
         repository.initStorage(InMemoryStorageFactory.getInstance());
-        repository.setOnline();
         TestProjection.clearMessageDeliveryHistory();
+    }
+
+    // Tests
+    //-------------------------
+
+    /**
+     * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in {@link #setUp()},
+     * the catch-up should be automatically triggered.
+     *
+     * <p>The repository should become {@code ONLINE} after the catch-up.
+     **/
+    @Test
+    public void become_online_automatically_after_init_storage() {
+        assertTrue(repository().isOnline());
+    }
+
+    /**
+     * As long as {@code ManualCatchupProjectionRepository} has automatic catch-up disabled, it does not become online
+     * automatically after {@link ManualCatchupProjectionRepository#initStorage(StorageFactory)} is called.
+     **/
+    @Test
+    public void not_become_online_automatically_after_init_storage_if_auto_catch_up_disabled() {
+        final ManualCatchupProjectionRepository repo = repoWithManualCatchup();
+        assertEquals(STORAGE_ASSIGNED, repo.getStatus());
+        assertFalse(repo.isOnline());
     }
 
     @Test
     public void load_empty_projection_by_default() {
-        final TestProjection projection = repository.load(ID);
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // we're sure because load either loads or creates.
+        final TestProjection projection = repository.load(ID).get();
         assertEquals(Project.getDefaultInstance(), projection.getState());
     }
 
@@ -94,7 +174,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void not_dispatch_event_if_is_not_online() {
-        for (ProjectionRepository.Status status : ProjectionRepository.Status.values()) {
+        for (Status status : Status.values()) {
             if (status != ONLINE) {
                 checkDoesNotDispatchEventWith(status);
             }
@@ -110,16 +190,16 @@ public class ProjectionRepositoryShould
 
     private void checkDispatchesEvent(Message eventMessage) {
         final Event event = Events.createEvent(eventMessage, createEventContext(ID));
-        repository.dispatch(event);
+        repository().dispatch(event);
         assertTrue(TestProjection.processed(eventMessage));
     }
 
-    private void checkDoesNotDispatchEventWith(ProjectionRepository.Status status) {
-        repository.setStatus(status);
+    private void checkDoesNotDispatchEventWith(Status status) {
+        repository().setStatus(status);
         final ProjectCreated eventMsg = Given.EventMessage.projectCreated(ID);
         final Event event = Events.createEvent(eventMsg, createEventContext(ID));
 
-        repository.dispatch(event);
+        repository().dispatch(event);
 
         assertFalse(TestProjection.processed(eventMsg));
     }
@@ -130,12 +210,12 @@ public class ProjectionRepositoryShould
 
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
 
-        repository.dispatch(event);
+        repository().dispatch(event);
     }
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository.getEventClasses();
+        final Set<EventClass> eventClasses = repository().getEventClasses();
         assertContainsAll(eventClasses,
                           EventClass.of(ProjectCreated.class),
                           EventClass.of(TaskAdded.class),
@@ -143,14 +223,8 @@ public class ProjectionRepositoryShould
     }
 
     @Test
-    public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
-        assertEquals(ID, actual);
-    }
-
-    @Test
     public void return_entity_storage() {
-        final RecordStorage<ProjectId> recordStorage = repository.recordStorage();
+        final RecordStorage<ProjectId> recordStorage = repository().recordStorage();
         assertNotNull(recordStorage);
     }
 
@@ -163,35 +237,48 @@ public class ProjectionRepositoryShould
 
     @Test
     public void update_status() {
-        final ProjectionRepository.Status status = CATCHING_UP;
+        final Status status = CATCHING_UP;
 
-        repository.setStatus(status);
+        repository().setStatus(status);
 
-        assertEquals(status, repository.getStatus());
+        assertEquals(status, repository().getStatus());
     }
 
     @Test
     public void updates_status_to_CLOSED_on_close() throws Exception {
         repository.close();
 
-        assertEquals(CLOSED, repository.getStatus());
-    }
-
-    @Test
-    public void return_true_if_status_is_ONLINE() {
-        /** ONLINE status is set in the {@link ProjectionRepositoryShould#setUp()} method. */
-        assertTrue(repository.isOnline());
+        assertEquals(CLOSED, repository().getStatus());
     }
 
     @Test
     public void return_false_if_status_is_not_ONLINE() {
-        repository.setStatus(CLOSED);
+        repository().setStatus(CLOSED);
 
-        assertFalse(repository.isOnline());
+        assertFalse(repository().isOnline());
+    }
+
+    @Test
+    public void return_true_if_explicitly_set_ONLINE() {
+        repository().setStatus(CLOSED);
+        repository().setOnline();
+        assertTrue(repository().isOnline());
     }
 
     @Test
     public void catches_up_from_EventStorage() {
+        ensureCatchesUpFromEventStorage(repository());
+    }
+
+    @Test
+    public void catches_up_from_EventStorage_even_if_automatic_catchup_disabled() {
+        final ManualCatchupProjectionRepository repo = repoWithManualCatchup();
+        repo.setOnline();
+
+        ensureCatchesUpFromEventStorage(repo);
+    }
+
+    private void ensureCatchesUpFromEventStorage(ProjectionRepository<ProjectId, TestProjection, Project> repo) {
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
 
@@ -205,44 +292,64 @@ public class ProjectionRepositoryShould
         final Event projectStartedEvent = Given.Event.projectStarted(ID);
         eventStore.append(projectStartedEvent);
 
-        repository.catchUp();
+        repo.catchUp();
 
         assertTrue(TestProjection.processed(Events.getMessage(projectCreatedEvent)));
         assertTrue(TestProjection.processed(Events.getMessage(taskAddedEvent)));
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
-    @Override
-    protected EntityRepository<ProjectId, TestProjection, Project> repository() {
-        return repository;
+    @Test
+    public void use_id_set_function() {
+        final IdSetEventFunction<ProjectId, ProjectCreated> delegateFn =
+                new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                    @Override
+                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                        return newHashSet();
+                    }
+                };
+
+        final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
+        repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
+
+        final Event event = Given.Event.projectCreated(ID);
+        repository().dispatch(event);
+
+        final ProjectCreated expectedEventMessage = Events.getMessage(event);
+        final EventContext context = event.getContext();
+        verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
     }
 
-    @Override
-    protected TestProjection entity() {
-        final TestProjection projection = new TestProjection(ProjectId.newBuilder()
-                                                                      .setId("single-test-projection")
-                                                                      .build());
-        return projection;
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // because the test checks that the function is present.
+    @Test
+    public void obtain_id_set_function_after_put() {
+        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> func =
+                repository().getIdSetFunction(ProjectCreated.class);
+
+        assertTrue(func.isPresent());
+        assertEquals(idSetForCreateProject, func.get());
     }
 
-    @Override
-    protected List<TestProjection> entities(int count) {
-        final List<TestProjection> projections = new LinkedList<>();
+    @Test
+    public void remove_id_set_function_after_put() {
+        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
-        for (int i = 0; i < count; i++) {
-            final TestProjection projection = new TestProjection(
-                    ProjectId.newBuilder()
-                             .setId(String.format("test-projection-%s", i))
-                             .build());
+        repository().removeIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository().getIdSetFunction(ProjectCreated.class);
 
-            projections.add(projection);
-        }
+        assertFalse(out.isPresent());
+    }
 
-        return projections;
+    private ManualCatchupProjectionRepository repoWithManualCatchup() {
+        final ManualCatchupProjectionRepository repo = new ManualCatchupProjectionRepository(boundedContext);
+        repo.initStorage(InMemoryStorageFactory.getInstance());
+        return repo;
     }
 
     /** The projection stub used in tests. */
-    /* package */ static class TestProjection extends Projection<ProjectId, Project> {
+    static class TestProjection extends Projection<ProjectId, Project> {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
@@ -255,13 +362,11 @@ public class ProjectionRepositoryShould
             eventMessagesDelivered.put(getState().getId(), eventMessage);
         }
 
-        /* package */
         static boolean processed(Message eventMessage) {
             final boolean result = eventMessagesDelivered.containsValue(eventMessage);
             return result;
         }
 
-        /* package */
         static void clearMessageDeliveryHistory() {
             eventMessagesDelivered.clear();
         }
@@ -304,4 +409,12 @@ public class ProjectionRepositoryShould
             super(boundedContext);
         }
     }
+
+    /** Stub projection repository with the disabled automatic catch-up */
+    private static class ManualCatchupProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
+        protected ManualCatchupProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext, false);
+        }
+    }
+
 }

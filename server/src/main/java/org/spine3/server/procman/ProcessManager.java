@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -59,7 +59,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -102,7 +101,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
     }
 
     /** The method to inject {@code CommandBus} instance from the repository. */
-    /* package */ void setCommandBus(CommandBus commandBus) {
+    void setCommandBus(CommandBus commandBus) {
         this.commandBus = checkNotNull(commandBus);
     }
 
@@ -331,7 +330,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
                 try {
                     finishFuture.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    throw wrapped(e);
+                    throw new IllegalArgumentException(e);
                 }
                 result.addProduced(command);
             }

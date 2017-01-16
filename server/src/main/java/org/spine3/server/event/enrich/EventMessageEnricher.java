@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -46,7 +46,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventMessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
+class EventMessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
 
     /** A parent instance holding this instance and its siblings. */
     private final EventEnricher enricher;
@@ -60,7 +60,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
-    /* package */ static <S extends Message, T extends Message> EventMessageEnricher<S, T> newInstance(
+    static <S extends Message, T extends Message> EventMessageEnricher<S, T> newInstance(
             EventEnricher enricher,
             Class<S> eventClass,
             Class<T> enrichmentClass) {
@@ -78,7 +78,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     }
 
     @Override
-    /* package */ void validate() {
+    void validate() {
         final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
                                                                              getEventClass(),
                                                                              getEnrichmentClass());

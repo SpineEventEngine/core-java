@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,13 +54,13 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
      *
      * @param commandMessage a message to get ID from
      * @return an {@link Optional} of the ID or {@link Optional#absent()}
-     * if {@link GetTargetIdFromCommand#getId(Message, Message)} throws an exception
+     * if {@link GetTargetIdFromCommand#apply(Message, Message)} throws an exception
      * (in the case if the command is not for an entity)
      */
     public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
             final GetTargetIdFromCommand<I, Message> function = newInstance();
-            final I id = function.getId(commandMessage, CommandContext.getDefaultInstance());
+            final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
         } catch (MissingEntityIdException | ClassCastException ignored) {
             return Optional.absent();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,6 +19,8 @@
  */
 package org.spine3.protobuf.error;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 /**
  * Exception that is thrown when unsupported message is obtained
  * or in case when there is no class for given Protobuf message.
@@ -32,7 +34,7 @@ public class UnknownTypeException extends RuntimeException {
     private static final String ERR_MSG = "No Java class found for the Protobuf message of type: ";
 
     /**
-     * Creates a new instance.
+     * Creates a new instance with the type name.
      *
      * @param typeName the unknown type
      */
@@ -41,12 +43,22 @@ public class UnknownTypeException extends RuntimeException {
     }
 
     /**
-     * Creates a new instance.
+     * Creates a new instance with the type name and the cause.
      *
      * @param typeName the unknown type
-     * @param cause the exception cause
+     * @param cause    the exception cause
      */
     public UnknownTypeException(String typeName, Throwable cause) {
         super(ERR_MSG + typeName, cause);
+    }
+
+    /**
+     * Creates a new instance when only the cause is known.
+     *
+     * <p>Use this constructor when propagating {@link InvalidProtocolBufferException}
+     * without knowing which type caused the exception (e.g. when calling {@code JsonFormat.print()}.
+     */
+    public UnknownTypeException(Throwable cause) {
+        super(cause);
     }
 }

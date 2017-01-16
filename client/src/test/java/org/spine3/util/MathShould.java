@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -52,5 +52,15 @@ public class MathShould {
     @Test
     public void quickly_return_same_value_when_multiplying_by_one() {
         assertEquals(8, Math.safeMultiply(8, 1));
+    }
+
+    @Test(expected = ArithmeticException.class)
+    public void not_allow_multiply_LongMinValue_by_negative_amount() {
+        Math.safeMultiply(Long.MIN_VALUE, -1);
+    }
+
+    @Test(expected = ArithmeticException.class)
+    public void not_allow_multiply_LongMaxValue_by_any_amount_except_zero_one_and_minus_one() {
+        Math.safeMultiply(Long.MAX_VALUE, -2);
     }
 }

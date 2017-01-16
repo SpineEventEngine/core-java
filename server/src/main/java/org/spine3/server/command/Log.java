@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,7 @@ import static org.spine3.base.Commands.formatMessageTypeAndId;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class Log {
+class Log {
 
     private enum LogSingleton {
         INSTANCE;
@@ -44,34 +44,34 @@ import static org.spine3.base.Commands.formatMessageTypeAndId;
     }
 
     /** The logger instance used by {@code CommandBus}. */
-    /* package */ static Logger log() {
+    static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
 
-    /* package */ void errorDispatching(Exception exception, Command command) {
+    void errorDispatching(Exception exception, Command command) {
         final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
         log().error(msg, exception);
     }
 
-    /* package */ void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
+    void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId("Exception while handling command `%s` (ID: `%s`)",
                                                   commandMessage, commandId);
         log().error(msg, exception);
     }
 
-    /* package */ void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
+    void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId("Business failure occurred when handling command `%s` (ID: `%s`)",
                                                   commandMessage, commandId);
         log().warn(msg, flr);
     }
 
-    /* package */ void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
+    void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
                                                   commandMessage, commandId);
         log().error(msg, throwable);
     }
 
-    /* package */ void errorExpiredCommand(Message commandMsg, CommandId id) {
+    void errorExpiredCommand(Message commandMsg, CommandId id) {
         final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
         log().error(msg);
     }

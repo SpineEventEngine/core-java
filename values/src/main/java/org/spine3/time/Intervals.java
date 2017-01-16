@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,21 +35,22 @@ import static org.spine3.protobuf.Timestamps.isLaterThan;
  */
 public class Intervals {
 
-    private Intervals() {}
+    private Intervals() {
+    }
 
     /**
      * Returns an interval between two timestamps.
      *
      * @param start the first point in time
-     * @param end the second point in time
+     * @param end   the second point in time
      * @return an interval between {@code start} and {@code end}
      * @throws IllegalArgumentException if the {@code end} is before the {@code start}
      */
     public static Interval between(Timestamp start, Timestamp end) {
         checkArgument(isLaterThan(end, /*than*/ start), "The end must be after the start of the interval.");
         final Interval.Builder interval = Interval.newBuilder()
-                .setStart(start)
-                .setEnd(end);
+                                                  .setStart(start)
+                                                  .setEnd(end);
         return interval.build();
     }
 
@@ -68,8 +69,8 @@ public class Intervals {
         final long secondsBetween = end.getSeconds() - start.getSeconds();
         final int nanosBetween = end.getNanos() - start.getNanos();
         final Duration.Builder duration = Duration.newBuilder()
-                .setSeconds(abs(secondsBetween))
-                .setNanos(abs(nanosBetween));
+                                                  .setSeconds(abs(secondsBetween))
+                                                  .setNanos(abs(nanosBetween));
         return duration.build();
     }
 }

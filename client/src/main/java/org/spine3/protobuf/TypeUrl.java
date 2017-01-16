@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,6 @@ import org.spine3.type.StringTypeValue;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -48,9 +47,9 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * The first part is the type URL prefix (for example, {@link TypeUrl#GOOGLE_TYPE_URL_PREFIX});
  * the second one is the fully-qualified Protobuf type name.
  *
+ * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
  * @see Descriptors.FileDescriptor#getFullName()
- * @author Alexander Yevsyukov
  */
 public final class TypeUrl extends StringTypeValue {
 
@@ -61,7 +60,7 @@ public final class TypeUrl extends StringTypeValue {
     private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN = Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
 
     @VisibleForTesting
-    /* package */ static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
+    static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
 
     public static final String SPINE_TYPE_URL_PREFIX = "type.spine3.org";
 
@@ -79,8 +78,15 @@ public final class TypeUrl extends StringTypeValue {
         this.typeName = checkNotEmptyOrBlank(typeName, "typeName");
     }
 
+    /**
+     * Create new {@code TypeUrl}.
+     */
+    private static TypeUrl create(String prefix, String typeName) {
+        return new TypeUrl(prefix, typeName);
+    }
+
     @VisibleForTesting
-    /* package */ static String composeTypeUrl(String typeUrlPrefix, String typeName) {
+    static String composeTypeUrl(String typeUrlPrefix, String typeName) {
         final String url = typeUrlPrefix + SEPARATOR + typeName;
         return url;
     }
@@ -91,7 +97,7 @@ public final class TypeUrl extends StringTypeValue {
      * @param msg an instance to get the type URL from
      */
     public static TypeUrl of(Message msg) {
-        return of(msg.getDescriptorForType());
+        return from(msg.getDescriptorForType());
     }
 
     /**
@@ -99,9 +105,9 @@ public final class TypeUrl extends StringTypeValue {
      *
      * @param descriptor the descriptor of the type
      */
-    public static TypeUrl of(Descriptor descriptor) {
+    public static TypeUrl from(Descriptor descriptor) {
         final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
-        return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
+        return create(typeUrlPrefix, descriptor.getFullName());
     }
 
     /**
@@ -109,9 +115,9 @@ public final class TypeUrl extends StringTypeValue {
      *
      * @param descriptor the descriptor of the type
      */
-    public static TypeUrl of(EnumDescriptor descriptor) {
+    public static TypeUrl from(EnumDescriptor descriptor) {
         final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
-        return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
+        return create(typeUrlPrefix, descriptor.getFullName());
     }
 
     /**
@@ -135,9 +141,10 @@ public final class TypeUrl extends StringTypeValue {
     private static TypeUrl ofTypeUrl(String typeUrl) {
         final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
         if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            throw wrapped(new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
+            throw new IllegalArgumentException(
+                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
         }
-        return new TypeUrl(parts[0], parts[1]);
+        return create(parts[0], parts[1]);
     }
 
     private static TypeUrl ofTypeName(String typeName) {

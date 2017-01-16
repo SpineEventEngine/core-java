@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -71,7 +71,7 @@ public class OffsetDateTimesShould {
         assertEquals(getMinutes(cal), time.getMinutes());
         assertEquals(getSeconds(cal), time.getSeconds());
         assertEquals(getZoneOffset(cal), now.getOffset()
-                                              .getAmountSeconds());
+                                            .getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
@@ -80,17 +80,18 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
 
         final LocalDate date = offsetDateTime.getDate();
-        assertTrue(year == date.getYear());
-        assertTrue(month == date.getMonth());
-        assertTrue(day == date.getDay());
+        assertEquals(year, date.getYear());
+        assertEquals(month, date.getMonth());
+        assertEquals(day, date.getDay());
 
         final LocalTime time = offsetDateTime.getTime();
-        assertTrue(hours == time.getHours());
-        assertTrue(minutes == time.getMinutes());
-        assertTrue(seconds == time.getSeconds());
-        assertTrue(millis == time.getMillis());
-        assertTrue(nanos == time.getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == offsetDateTime.getOffset().getAmountSeconds());
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offsetDateTime.getOffset()
+                                                                   .getAmountSeconds());
     }
 
     @Test
@@ -100,17 +101,18 @@ public class OffsetDateTimesShould {
         final OffsetDateTime minusYears = OffsetDateTimes.minusYears(offsetDateTime, yearsToSubtract);
 
         final LocalDate date = minusYears.getDate();
-        assertTrue(year - yearsToSubtract == date.getYear());
-        assertTrue(month == date.getMonth());
-        assertTrue(day == date.getDay());
+        assertEquals(year - yearsToSubtract, date.getYear());
+        assertEquals(month, date.getMonth());
+        assertEquals(day, date.getDay());
 
         final LocalTime time = minusYears.getTime();
-        assertTrue(hours == time.getHours());
-        assertTrue(minutes == time.getMinutes());
-        assertTrue(seconds == time.getSeconds());
-        assertTrue(millis == time.getMillis());
-        assertTrue(nanos == time.getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusYears.getOffset().getAmountSeconds());
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), minusYears.getOffset()
+                                                               .getAmountSeconds());
     }
 
     @Test
@@ -120,17 +122,19 @@ public class OffsetDateTimesShould {
         final OffsetDateTime minusYears = OffsetDateTimes.minusMonths(offsetDateTime, monthsToSubtract);
 
         final LocalDate date = minusYears.getDate();
-        assertTrue(year == date.getYear());
-        assertTrue(month.getNumber() - monthsToSubtract == date.getMonth().getNumber());
-        assertTrue(day == date.getDay());
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber() - monthsToSubtract, date.getMonth()
+                                                               .getNumber());
+        assertEquals(day, date.getDay());
 
         final LocalTime time = minusYears.getTime();
-        assertTrue(hours == time.getHours());
-        assertTrue(minutes == time.getMinutes());
-        assertTrue(seconds == time.getSeconds());
-        assertTrue(millis == time.getMillis());
-        assertTrue(nanos == time.getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusYears.getOffset().getAmountSeconds());
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), minusYears.getOffset()
+                                                               .getAmountSeconds());
     }
 
     @Test
@@ -139,15 +143,20 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusYears = OffsetDateTimes.minusDays(offsetDateTime, daysToSubtract);
 
-        assertTrue(year == minusYears.getDate().getYear());
-        assertTrue(month == minusYears.getDate().getMonth());
-        assertTrue(day - daysToSubtract== minusYears.getDate().getDay());
-        assertTrue(hours == minusYears.getTime().getHours());
-        assertTrue(minutes == minusYears.getTime().getMinutes());
-        assertTrue(seconds == minusYears.getTime().getSeconds());
-        assertTrue(millis == minusYears.getTime().getMillis());
-        assertTrue(nanos == minusYears.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusYears.getOffset().getAmountSeconds());
+        final LocalDate date = minusYears.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month, date.getMonth());
+        assertEquals(day - daysToSubtract, date.getDay());
+
+        final LocalTime time = minusYears.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = minusYears.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -156,15 +165,20 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime plusYears = OffsetDateTimes.plusYears(offsetDateTime, yearsToAdd);
 
-        assertTrue(year + yearsToAdd == plusYears.getDate().getYear());
-        assertTrue(month == plusYears.getDate().getMonth());
-        assertTrue(day == plusYears.getDate().getDay());
-        assertTrue(hours == plusYears.getTime().getHours());
-        assertTrue(minutes == plusYears.getTime().getMinutes());
-        assertTrue(seconds == plusYears.getTime().getSeconds());
-        assertTrue(millis == plusYears.getTime().getMillis());
-        assertTrue(nanos == plusYears.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusYears.getOffset().getAmountSeconds());
+        final LocalDate date = plusYears.getDate();
+        assertEquals(year + yearsToAdd, date.getYear());
+        assertEquals(month, date.getMonth());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusYears.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusYears.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -173,15 +187,21 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime plusYears = OffsetDateTimes.plusMonths(offsetDateTime, monthsToAdd);
 
-        assertTrue(year == plusYears.getDate().getYear());
-        assertTrue(month.getNumber() + monthsToAdd == plusYears.getDate().getMonth().getNumber());
-        assertTrue(day == plusYears.getDate().getDay());
-        assertTrue(hours == plusYears.getTime().getHours());
-        assertTrue(minutes == plusYears.getTime().getMinutes());
-        assertTrue(seconds == plusYears.getTime().getSeconds());
-        assertTrue(millis == plusYears.getTime().getMillis());
-        assertTrue(nanos == plusYears.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusYears.getOffset().getAmountSeconds());
+        final LocalDate date = plusYears.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber() + monthsToAdd, date.getMonth()
+                                                          .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusYears.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusYears.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -190,15 +210,20 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime plusYears = OffsetDateTimes.plusDays(offsetDateTime, daysToAdd);
 
-        assertTrue(year == plusYears.getDate().getYear());
-        assertTrue(month == plusYears.getDate().getMonth());
-        assertTrue(day + daysToAdd== plusYears.getDate().getDay());
-        assertTrue(hours == plusYears.getTime().getHours());
-        assertTrue(minutes == plusYears.getTime().getMinutes());
-        assertTrue(seconds == plusYears.getTime().getSeconds());
-        assertTrue(millis == plusYears.getTime().getMillis());
-        assertTrue(nanos == plusYears.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusYears.getOffset().getAmountSeconds());
+        final LocalDate date = plusYears.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month, date.getMonth());
+        assertEquals(day + daysToAdd, date.getDay());
+
+        final LocalTime time = plusYears.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusYears.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -207,32 +232,44 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusHours = OffsetDateTimes.minusHours(offsetDateTime, hoursToSubtract);
 
-        assertTrue(year == minusHours.getDate().getYear());
-        assertTrue(month.getNumber() == minusHours.getDate().getMonth().getNumber());
-        assertTrue(day == minusHours.getDate().getDay());
-        assertTrue(hours - hoursToSubtract== minusHours.getTime().getHours());
-        assertTrue(minutes == minusHours.getTime().getMinutes());
-        assertTrue(seconds == minusHours.getTime().getSeconds());
-        assertTrue(millis == minusHours.getTime().getMillis());
-        assertTrue(nanos == minusHours.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusHours.getOffset().getAmountSeconds());
+        final LocalDate date = minusHours.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = minusHours.getTime();
+        assertEquals(hours - hoursToSubtract, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = minusHours.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
     public void obtain_date_and_time_in_past_before_specified_number_of_minutes() {
         final int minutesToSubtract = 11;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusMinutes= OffsetDateTimes.minusMinutes(offsetDateTime, minutesToSubtract);
+        final OffsetDateTime minusMinutes = OffsetDateTimes.minusMinutes(offsetDateTime, minutesToSubtract);
 
-        assertTrue(year == minusMinutes.getDate().getYear());
-        assertTrue(month.getNumber() == minusMinutes.getDate().getMonth().getNumber());
-        assertTrue(day == minusMinutes.getDate().getDay());
-        assertTrue(hours == minusMinutes.getTime().getHours());
-        assertTrue(minutes - minutesToSubtract == minusMinutes.getTime().getMinutes());
-        assertTrue(seconds == minusMinutes.getTime().getSeconds());
-        assertTrue(millis == minusMinutes.getTime().getMillis());
-        assertTrue(nanos == minusMinutes.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusMinutes.getOffset().getAmountSeconds());
+        final LocalDate date = minusMinutes.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = minusMinutes.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes - minutesToSubtract, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = minusMinutes.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -241,15 +278,22 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusSeconds = OffsetDateTimes.minusSeconds(offsetDateTime, secondsToSubtract);
 
-        assertTrue(year == minusSeconds.getDate().getYear());
-        assertTrue(month.getNumber() == minusSeconds.getDate().getMonth().getNumber());
-        assertTrue(day == minusSeconds.getDate().getDay());
-        assertTrue(hours == minusSeconds.getTime().getHours());
-        assertTrue(minutes == minusSeconds.getTime().getMinutes());
-        assertTrue(seconds - secondsToSubtract== minusSeconds.getTime().getSeconds());
-        assertTrue(millis == minusSeconds.getTime().getMillis());
-        assertTrue(nanos == minusSeconds.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusSeconds.getOffset().getAmountSeconds());
+        final LocalDate date = minusSeconds.getDate();
+
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = minusSeconds.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds - secondsToSubtract, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = minusSeconds.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -258,49 +302,66 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime minusMillis = OffsetDateTimes.minusMillis(offsetDateTime, millisToSubtract);
 
-        assertTrue(year == minusMillis.getDate().getYear());
-        assertTrue(month.getNumber() == minusMillis.getDate().getMonth().getNumber());
-        assertTrue(day == minusMillis.getDate().getDay());
-        assertTrue(hours == minusMillis.getTime().getHours());
-        assertTrue(minutes == minusMillis.getTime().getMinutes());
-        assertTrue(seconds == minusMillis.getTime().getSeconds());
-        assertTrue(millis - millisToSubtract == minusMillis.getTime().getMillis());
-        assertTrue(nanos == minusMillis.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == minusMillis.getOffset().getAmountSeconds());
+        final LocalDate date = minusMillis.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = minusMillis.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis - millisToSubtract, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = minusMillis.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
     public void obtain_date_and_time_in_future_after_specified_number_of_hours() {
-        final int hoursToAdd = 2;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
+        final int hoursToAdd = 2;
         final OffsetDateTime plusHours = OffsetDateTimes.plusHours(offsetDateTime, hoursToAdd);
 
-        assertTrue(year == plusHours.getDate().getYear());
-        assertTrue(month.getNumber() == plusHours.getDate().getMonth().getNumber());
-        assertTrue(day == plusHours.getDate().getDay());
-        assertTrue(hours + hoursToAdd== plusHours.getTime().getHours());
-        assertTrue(minutes == plusHours.getTime().getMinutes());
-        assertTrue(seconds == plusHours.getTime().getSeconds());
-        assertTrue(millis == plusHours.getTime().getMillis());
-        assertTrue(nanos == plusHours.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusHours.getOffset().getAmountSeconds());
+        final LocalDate date = plusHours.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusHours.getTime();
+        assertEquals(hours + hoursToAdd, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), plusHours.getOffset()
+                                                              .getAmountSeconds());
     }
 
     @Test
     public void obtain_date_and_time_in_future_after_specified_number_of_minutes() {
         final int minutesToAdd = 11;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime plusMinutes= OffsetDateTimes.plusMinutes(offsetDateTime, minutesToAdd);
+        final OffsetDateTime plusMinutes = OffsetDateTimes.plusMinutes(offsetDateTime, minutesToAdd);
 
-        assertTrue(year == plusMinutes.getDate().getYear());
-        assertTrue(month.getNumber() == plusMinutes.getDate().getMonth().getNumber());
-        assertTrue(day == plusMinutes.getDate().getDay());
-        assertTrue(hours == plusMinutes.getTime().getHours());
-        assertTrue(minutes + minutesToAdd == plusMinutes.getTime().getMinutes());
-        assertTrue(seconds == plusMinutes.getTime().getSeconds());
-        assertTrue(millis == plusMinutes.getTime().getMillis());
-        assertTrue(nanos == plusMinutes.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusMinutes.getOffset().getAmountSeconds());
+        final LocalDate date = plusMinutes.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusMinutes.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes + minutesToAdd, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusMinutes.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -309,15 +370,21 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime plusSeconds = OffsetDateTimes.plusSeconds(offsetDateTime, secondsToAdd);
 
-        assertTrue(year == plusSeconds.getDate().getYear());
-        assertTrue(month.getNumber() == plusSeconds.getDate().getMonth().getNumber());
-        assertTrue(day == plusSeconds.getDate().getDay());
-        assertTrue(hours == plusSeconds.getTime().getHours());
-        assertTrue(minutes == plusSeconds.getTime().getMinutes());
-        assertTrue(seconds + secondsToAdd== plusSeconds.getTime().getSeconds());
-        assertTrue(millis == plusSeconds.getTime().getMillis());
-        assertTrue(nanos == plusSeconds.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusSeconds.getOffset().getAmountSeconds());
+        final LocalDate date = plusSeconds.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusSeconds.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds + secondsToAdd, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusSeconds.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 
     @Test
@@ -326,14 +393,20 @@ public class OffsetDateTimesShould {
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
         final OffsetDateTime plusMillis = OffsetDateTimes.plusMillis(offsetDateTime, millisToAdd);
 
-        assertTrue(year == plusMillis.getDate().getYear());
-        assertTrue(month.getNumber() == plusMillis.getDate().getMonth().getNumber());
-        assertTrue(day == plusMillis.getDate().getDay());
-        assertTrue(hours == plusMillis.getTime().getHours());
-        assertTrue(minutes == plusMillis.getTime().getMinutes());
-        assertTrue(seconds == plusMillis.getTime().getSeconds());
-        assertTrue(millis + millisToAdd == plusMillis.getTime().getMillis());
-        assertTrue(nanos == plusMillis.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == plusMillis.getOffset().getAmountSeconds());
+        final LocalDate date = plusMillis.getDate();
+        assertEquals(year, date.getYear());
+        assertEquals(month.getNumber(), date.getMonth()
+                                            .getNumber());
+        assertEquals(day, date.getDay());
+
+        final LocalTime time = plusMillis.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis + millisToAdd, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+
+        final ZoneOffset offset = plusMillis.getOffset();
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
     }
 }

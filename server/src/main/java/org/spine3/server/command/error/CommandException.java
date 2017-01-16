@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Command;
 import org.spine3.base.Error;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 
 import java.util.Map;
 
@@ -35,6 +35,14 @@ import java.util.Map;
  * @author Alexander Yevsyukov
  */
 public abstract class CommandException extends RuntimeException {
+
+    /**
+     * The name of the attribute of the command type reported in an error.
+     *
+     * @see #commandTypeAttribute(Message)
+     * @see Error
+     */
+    public static final String ATTR_COMMAND_TYPE_NAME = "commandType";
 
     private static final long serialVersionUID = 0L;
 
@@ -60,11 +68,11 @@ public abstract class CommandException extends RuntimeException {
      * @param commandMessage a command message to get the type from
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
-        final String commandType = TypeUrl.of(commandMessage).getTypeName();
+        final String commandType = TypeName.of(commandMessage);
         final Value value = Value.newBuilder()
                                  .setStringValue(commandType)
                                  .build();
-        return ImmutableMap.of(Attribute.COMMAND_TYPE_NAME, value);
+        return ImmutableMap.of(ATTR_COMMAND_TYPE_NAME, value);
     }
 
     /** Returns a related command. */
@@ -75,10 +83,5 @@ public abstract class CommandException extends RuntimeException {
     /** Returns an error occurred. */
     public Error getError() {
         return error;
-    }
-
-    /** Attribute names for command-related business failures. */
-    public interface Attribute {
-        String COMMAND_TYPE_NAME = "commandType";
     }
 }

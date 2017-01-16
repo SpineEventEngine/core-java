@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,6 +31,8 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
 
 /**
@@ -120,7 +122,7 @@ public class Timestamps {
      * @return current system time
      */
     public static Timestamp systemTime() {
-        return com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+        return fromMillis(System.currentTimeMillis());
     }
 
     /**
@@ -162,7 +164,7 @@ public class Timestamps {
     private static class SystemTimeProvider implements Provider {
         @Override
         public Timestamp getCurrentTime() {
-            final Timestamp result = com.google.protobuf.util.Timestamps.fromMillis(System.currentTimeMillis());
+            final Timestamp result = fromMillis(System.currentTimeMillis());
             return result;
         }
     }
@@ -274,14 +276,14 @@ public class Timestamps {
     }
 
     private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
+
+        private static final long serialVersionUID = 0;
+
         @Override
         public int compare(Timestamp t1, Timestamp t2) {
             return Timestamps.compare(t1, t2);
         }
-
-        private static final long serialVersionUID = 0;
     }
-
 
     /**
      * The testing assistance utility, which returns a timestamp of the moment
@@ -313,7 +315,9 @@ public class Timestamps {
     }
 
     private static void checkPositive(long value) {
-        checkArgument(value > 0, "value must be positive");
+        if (value <= 0) {
+            throw new IllegalArgumentException(String.format("value must be positive. Passed: %d", value));
+        }
     }
 
     /**
@@ -326,7 +330,7 @@ public class Timestamps {
     public static Timestamp secondsFromNow(int seconds) {
         checkPositive(seconds);
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = com.google.protobuf.util.Timestamps.add(currentTime, Durations.ofSeconds(seconds));
+        final Timestamp result = add(currentTime, Durations.ofSeconds(seconds));
         return result;
     }
 }

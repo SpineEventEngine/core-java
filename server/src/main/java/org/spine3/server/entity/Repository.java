@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -37,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Abstract base class for repositories.
@@ -106,13 +106,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         if (!isPublic(modifiers)) {
             final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
             final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
-            throw wrapped(new IllegalAccessException(message));
+            throw new IllegalStateException(new IllegalAccessException(message));
         }
     }
 
     private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
         final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return wrapped(new NoSuchMethodException(message));
+        return new IllegalStateException(new NoSuchMethodException(message));
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -162,7 +162,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             result.setDefault();
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -181,11 +181,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param id the id of the entity to load
-     * @return the entity or {@code null} if there's no entity with such id
+     * @return the entity or empty {@code Optional} if there's no entity with such id
      */
     @CheckReturnValue
-    @Nullable
-    protected abstract E load(I id);
+    protected abstract Optional<E> load(I id);
 
     /** Returns the storage assigned to this repository or {@code null} if the storage is not assigned yet. */
     @CheckReturnValue

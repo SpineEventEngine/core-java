@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -891,7 +892,8 @@ public class StandShould {
         final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.load(eq(projectId))).thenReturn(new StandTestProjection(projectId));
+            when(projectionRepository.load(eq(projectId)))
+                    .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
@@ -1083,7 +1085,7 @@ public class StandShould {
 
         final TypeUrl actualTypeUrl = availableTypes.iterator()
                                                     .next();
-        final TypeUrl expectedTypeUrl = TypeUrl.of(expectedType);
+        final TypeUrl expectedTypeUrl = TypeUrl.from(expectedType);
         assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
     }
 

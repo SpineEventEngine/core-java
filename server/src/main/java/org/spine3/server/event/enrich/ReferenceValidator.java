@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -42,7 +42,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class ReferenceValidator {
+class ReferenceValidator {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
@@ -57,7 +57,7 @@ import static java.lang.String.format;
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
 
-    /* package */ ReferenceValidator(EventEnricher enricher,
+    ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> eventClass,
             Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
@@ -68,12 +68,12 @@ import static java.lang.String.format;
     }
 
     @Nullable
-    /* package */ ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
+    ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
         return sourceToTargetMap;
     }
 
     /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
-    /* package */ List<EnrichmentFunction<?, ?>> validate() {
+    List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {

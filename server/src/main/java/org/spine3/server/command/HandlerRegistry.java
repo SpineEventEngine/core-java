@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -42,11 +42,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class HandlerRegistry {
+class HandlerRegistry {
 
     private final Map<CommandClass, CommandHandler> handlers = Maps.newConcurrentMap();
 
-    /* package */ void register(CommandHandler object) {
+    void register(CommandHandler object) {
         checkNotNull(object);
 
         final MethodMap<CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
@@ -58,14 +58,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
         registerMap(object, handlers);
     }
 
-    /* package */ void unregister(CommandHandler object) {
+    void unregister(CommandHandler object) {
         checkNotNull(object);
 
         final MethodMap<CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
         unregisterMap(handlers);
     }
 
-    /* package */ Set<CommandClass> getCommandClasses() {
+    Set<CommandClass> getCommandClasses() {
         return handlers.keySet();
     }
 
@@ -111,11 +111,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @CheckReturnValue
-    /* package */ boolean handlerRegistered(CommandClass cls) {
+    boolean handlerRegistered(CommandClass cls) {
         return handlers.containsKey(cls);
     }
 
-    /* package */ CommandHandler getHandler(CommandClass cls) {
+    CommandHandler getHandler(CommandClass cls) {
         return handlers.get(cls);
     }
 
@@ -125,7 +125,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unregisterAll() {
+    void unregisterAll() {
         for (CommandClass commandClass : handlers.keySet()) {
             removeFor(commandClass);
         }
@@ -138,7 +138,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @throws IllegalArgumentException if one or more classes have registered handlers
      */
     @SuppressWarnings("InstanceMethodNamingConvention") // prefer longer name here for clarity.
-    /* package */ void checkNoHandlersRegisteredForCommandsOf(CommandDispatcher dispatcher) {
+    void checkNoHandlersRegisteredForCommandsOf(CommandDispatcher dispatcher) {
         final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
         final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
         for (CommandClass commandClass : commandClasses) {

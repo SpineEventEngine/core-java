@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,6 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 
@@ -46,25 +45,5 @@ public class ExceptionsShould {
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
         Exceptions.unsupported(newUuid());
-    }
-
-    @Test
-    public void wrap_exception_and_throw() {
-        final RuntimeException exception = new RuntimeException(newUuid());
-        try {
-            Exceptions.wrapped(exception);
-        } catch (Exception e) {
-            assertEquals(exception, e.getCause());
-        }
-    }
-
-    @Test
-    public void wrap_exception_cause_and_throw() {
-        final RuntimeException cause = new RuntimeException(newUuid());
-        try {
-            Exceptions.wrappedCause(new RuntimeException(cause));
-        } catch (Exception e) {
-            assertEquals(cause, e.getCause());
-        }
     }
 }

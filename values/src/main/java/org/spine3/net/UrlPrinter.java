@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,7 +30,7 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
-/* package */ class UrlPrinter {
+class UrlPrinter {
 
     private UrlPrinter() {
     }
@@ -43,7 +43,7 @@ import java.util.List;
      * @param url already valid {@link Url} instance
      * @return String {@link Url} value
      */
-    /* package */ static String printToString(Url url) {
+    static String printToString(Url url) {
         if (url.getValueCase() == Url.ValueCase.RAW) {
             return url.getRaw();
         }
@@ -140,7 +140,7 @@ import java.util.List;
             final String stringQuery = QueryParameters.toString(queryList.get(i));
             sb.append(stringQuery);
             if (i != queriesSize - 1) {
-                sb.append(UrlParser.QUERIES_SEPARATOR);
+                sb.append(UrlParser.QUERY_SEPARATOR);
             }
         }
     }

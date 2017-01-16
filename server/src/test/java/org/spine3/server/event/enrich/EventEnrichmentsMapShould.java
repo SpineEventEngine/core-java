@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.test.event.EnrichmentByContextFields;
 import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
@@ -106,11 +106,10 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual = EventEnrichmentsMap.getInstance()
-                                                                       .get(TypeUrl.of(enrichmentClass)
-                                                                                    .getTypeName());
+                                                                       .get(TypeName.of(enrichmentClass));
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
-            final String expectedTypeName = TypeUrl.of(expectedClass).getTypeName();
+            final String expectedTypeName = TypeName.of(expectedClass);
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }
     }

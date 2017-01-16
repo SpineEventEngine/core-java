@@ -17,18 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
 
 /**
- * This exception is thrown if a handler method is defined with wrong access level modifier.
- *
- * @author Alexander Yevsyukov
+ * This package contains the base classes for delivery strategies.
  */
-public class AccessLevelException extends RuntimeException {
+@ParametersAreNonnullByDefault
+package org.spine3.server.delivery;
 
-    private static final long serialVersionUID = 0L;
-
-    public AccessLevelException(String message) {
-        super(message);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,9 +43,9 @@ public class MessageMismatch {
      * Creates {@code ValueMismatch} for the case of discovering a non-default value,
      * when the default value was expected by a command.
      *
-     * @param actual the value discovered instead of the default value
+     * @param actual   the value discovered instead of the default value
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedDefault(Message actual, Message newValue, int version) {
@@ -56,11 +56,11 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates a mismatch for a command that wanted to clear a value, but discovered 
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a value, but discovered
      * that the field already has the default value.
-     * 
+     *
      * @param expected the value of the field that the command wanted to clear
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch expectedNotDefault(Message expected, int version) {
@@ -73,9 +73,9 @@ public class MessageMismatch {
      * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
      *
      * @param expected the value expected by the command
-     * @param actual the value discovered instead of the expected value
+     * @param actual   the value discovered instead of the expected value
      * @param newValue the new value requested in the command
-     * @param version the version of the entity in which the mismatch is discovered
+     * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue, int version) {

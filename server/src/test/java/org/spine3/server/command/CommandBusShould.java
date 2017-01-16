@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,7 +36,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
-import org.spine3.base.EventContext;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
@@ -46,14 +45,11 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.procman.ProcessManagerRepositoryShould;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.type.EventClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
@@ -100,7 +96,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
-import static org.spine3.util.Exceptions.wrapped;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {
@@ -121,12 +116,12 @@ public class CommandBusShould {
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         commandBus = CommandBus.newBuilder()
-                .setCommandStore(commandStore)
-                .setCommandScheduler(scheduler)
-                .setThreadSpawnAllowed(true)
-                .setLog(log)
-                .setAutoReschedule(false)
-                .build();
+                               .setCommandStore(commandStore)
+                               .setCommandScheduler(scheduler)
+                               .setThreadSpawnAllowed(true)
+                               .setLog(log)
+                               .setAutoReschedule(false)
+                               .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -157,7 +152,6 @@ public class CommandBusShould {
         CommandBus.newBuilder()
                   .build();
     }
-
 
     @Test
     public void create_new_instance() {
@@ -601,7 +595,7 @@ public class CommandBusShould {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
 
         // Ensure the scheduler has been called for a single command,
@@ -650,12 +644,12 @@ public class CommandBusShould {
     @SuppressWarnings({"MethodParameterNamingConvention", "MethodMayBeStatic"})
     private CommandScheduler threadAwareScheduler(final StringBuilder threadNameDestination) {
         return spy(new ExecutorCommandScheduler() {
-                @Override
-                public void schedule(Command command) {
-                    super.schedule(command);
-                    threadNameDestination.append(Thread.currentThread().getName());
-                }
-            });
+            @Override
+            public void schedule(Command command) {
+                super.schedule(command);
+                threadNameDestination.append(Thread.currentThread().getName());
+            }
+        });
     }
 
     @Test
@@ -755,15 +749,10 @@ public class CommandBusShould {
         }
 
         // Always return an empty set of command classes forwarded by this repository.
-        @SuppressWarnings("RefusedBequest")
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         public Set<CommandClass> getCommandClasses() {
             return newHashSet();
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(@Nonnull EventClass eventClass) {
-            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 
@@ -880,17 +869,17 @@ public class CommandBusShould {
      */
     private class ThrowingCreateProjectHandler extends CommandHandler {
 
+        @Nonnull
         private final Throwable throwable;
 
-        protected ThrowingCreateProjectHandler(Throwable throwable) {
+        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
             super(newUuid(), eventBus);
             this.throwable = throwable;
         }
 
         @Assign
-        @SuppressWarnings("unused")
+        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
         public ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
-            //noinspection ProhibitedExceptionThrown
             throw throwable;
         }
     }
@@ -926,15 +915,15 @@ public class CommandBusShould {
             this.completed = true;
         }
 
-        /* package */ List<Response> getResponses() {
+        List<Response> getResponses() {
             return ImmutableList.copyOf(responses);
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return this.completed;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,7 +19,6 @@
  */
 
 package org.spine3.testdata;
-
 
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;

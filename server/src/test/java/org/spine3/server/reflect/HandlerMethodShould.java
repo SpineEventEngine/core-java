@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.util.Exceptions.wrapped;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class HandlerMethodShould {
@@ -87,14 +86,14 @@ public class HandlerMethodShould {
     public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
         twoParamMethod.invoke(target, StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
 
-        assertTrue(((StubHandler)target).wasOnInvoked());
+        assertTrue(((StubHandler) target).wasOnInvoked());
     }
 
     @Test
     public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
         oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
 
-        assertTrue(((StubHandler)target).wasHandleInvoked());
+        assertTrue(((StubHandler) target).wasHandleInvoked());
     }
 
     @Test
@@ -147,34 +146,34 @@ public class HandlerMethodShould {
             handleInvoked = true;
         }
 
-        /* package */ static Method getTwoParameterMethod() {
+        static Method getTwoParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
                 method = clazz.getMethod("on", StringValue.class, EventContext.class);
             } catch (NoSuchMethodException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
             return method;
         }
 
-        /* package */ static Method getOneParameterMethod() {
+        static Method getOneParameterMethod() {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
                 //noinspection DuplicateStringLiteralInspection
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
             } catch (NoSuchMethodException e) {
-                throw wrapped(e);
+                throw new IllegalStateException(e);
             }
             return method;
         }
 
-        /* package */ boolean wasOnInvoked() {
+        boolean wasOnInvoked() {
             return onInvoked;
         }
 
-        /* package */ boolean wasHandleInvoked() {
+        boolean wasHandleInvoked() {
             return handleInvoked;
         }
     }

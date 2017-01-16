@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -68,6 +68,13 @@ public final class CommandClass extends MessageClass {
         }
         final CommandClass result = of(command.getClass());
         return result;
+    }
+
+    /**
+     * Obtains Java class of the command message or a {@link Command} instance containing the message of interest.
+     */
+    public static Class<? extends Message> valueOf(Message command) {
+        return of(command).value();
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */

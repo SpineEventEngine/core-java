@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -76,7 +76,7 @@ public class CommandServiceShould {
         // Expose two Bounded Contexts via an instance of {@code CommandService}.
         final CommandService.Builder builder = CommandService.newBuilder();
         for (BoundedContext context : boundedContexts) {
-            builder.addBoundedContext(context);
+            builder.add(context);
         }
         service = spy(builder.build());
     }
@@ -97,17 +97,15 @@ public class CommandServiceShould {
     @Test
     public void never_retrieve_removed_bounded_contexts_from_builder() {
         final CommandService.Builder builder = CommandService.newBuilder()
-                                                             .addBoundedContext(projectsContext)
-                                                             .addBoundedContext(customersContext)
-                                                             .removeBoundedContext(projectsContext);
+                                                             .add(projectsContext)
+                                                             .add(customersContext)
+                                                             .remove(projectsContext);
 
         final CommandService service = builder.build(); // Creates BoundedContext map
         assertNotNull(service);
 
-        assertTrue(builder.getBoundedContextMap()
-                          .containsValue(customersContext));
-        assertFalse(builder.getBoundedContextMap()
-                           .containsValue(projectsContext));
+        assertTrue(builder.contains(customersContext));
+        assertFalse(builder.contains(projectsContext));
     }
 
     private void verifyPostsCommand(Command cmd, CommandBus commandBus) {
@@ -175,15 +173,15 @@ public class CommandServiceShould {
             this.isCompleted = true;
         }
 
-        /* package */ Response getResponseHandled() {
+        Response getResponseHandled() {
             return responseHandled;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return isCompleted;
         }
     }

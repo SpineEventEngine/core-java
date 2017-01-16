@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -78,7 +78,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * Stores a command with the given status by a command ID from a command context.
      *
      * @param command a complete command to store
-     * @param status a command status
+     * @param status  a command status
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, CommandStatus status) {
@@ -90,7 +90,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
 
         CommandValidator.checkCommand(command);
 
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
+        final CommandStorageRecord record = newRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
     }
@@ -101,17 +101,18 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * <p>If there is no ID, a new one is generated is used.
      *
      * @param command a command to store
-     * @param error an error occurred
+     * @param error   an error occurred
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, Error error) {
         checkNotClosed();
         checkNotDefault(error);
+
         CommandId id = getId(command);
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, ERROR)
+        final CommandStorageRecord record = newRecordBuilder(command, ERROR)
                 .setError(error)
                 .setCommandId(idToString(id))
                 .build();
@@ -155,12 +156,11 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * <p>{@code targetId} and {@code targetIdType} are set to empty strings if the command is not for an entity.
      *
      * @param command a command to convert to a record
-     * @param status a command status to set to a record
+     * @param status  a command status to set to a record
      * @return a storage record
      */
     @VisibleForTesting
-    /* package */ static CommandStorageRecord.Builder newCommandStorageRecordBuilder(Command command,
-                                                                                     CommandStatus status) {
+    static CommandStorageRecord.Builder newRecordBuilder(Command command, CommandStatus status) {
         final CommandContext context = command.getContext();
 
         final CommandId commandId = context.getCommandId();
@@ -175,27 +175,28 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         if (targetIdOptional.isPresent()) {
             final Object targetId = targetIdOptional.get();
             targetIdString = idToString(targetId);
-            targetIdType = targetId.getClass().getName();
+            targetIdType = targetId.getClass()
+                                   .getName();
         } else { // the command is not for an entity
             targetIdString = "";
             targetIdType = "";
         }
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setMessage(command.getMessage())
-                .setTimestamp(getCurrentTime())
-                .setCommandType(commandType)
-                .setCommandId(commandIdString)
-                .setStatus(status)
-                .setTargetIdType(targetIdType)
-                .setTargetId(targetIdString)
-                .setContext(context);
+                                                                         .setMessage(command.getMessage())
+                                                                         .setTimestamp(getCurrentTime())
+                                                                         .setCommandType(commandType)
+                                                                         .setCommandId(commandIdString)
+                                                                         .setStatus(status)
+                                                                         .setTargetIdType(targetIdType)
+                                                                         .setTargetId(targetIdString)
+                                                                         .setContext(context);
         return builder;
     }
 
     /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
     @VisibleForTesting
-    /* package */ static Iterator<Command> toCommandIterator(Iterator<CommandStorageRecord> records) {
+    static Iterator<Command> toCommandIterator(Iterator<CommandStorageRecord> records) {
         return Iterators.transform(records, TO_COMMAND);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.protobuf.TypeName;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -52,9 +52,9 @@ import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-/* package */ class Given {
+class Given {
 
-    /* package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
@@ -73,7 +73,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventMessage {
+    static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
@@ -117,7 +117,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class CommandMessage {
+    static class CommandMessage {
 
         private CommandMessage() {
         }
@@ -147,7 +147,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Command {
+    static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -198,7 +198,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Event {
+    static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
@@ -233,7 +233,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class AggregateStorageRecord {
+    static class AggregateStorageRecord {
 
         private AggregateStorageRecord() {
         }
@@ -282,7 +282,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventStorageRecord {
+    static class EventStorageRecord {
 
         private EventStorageRecord() {
         }
@@ -296,8 +296,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(time)
                             .setEventId("project_created")
-                            .setEventType(TypeUrl.of(ProjectCreated.getDescriptor())
-                                                 .getTypeName())
+                            .setEventType(TypeName.from(ProjectCreated.getDescriptor()))
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, time));
             return builder.build();
@@ -311,8 +310,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(when)
                             .setEventId("project_created_" + when.getSeconds())
-                            .setEventType(TypeUrl.of(ProjectCreated.getDescriptor())
-                                                 .getTypeName())
+                            .setEventType(TypeName.from(ProjectCreated.getDescriptor()))
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -326,8 +324,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.taskAddedAny())
                             .setTimestamp(when)
                             .setEventId("task_added_" + when.getSeconds())
-                            .setEventType(TypeUrl.of(TaskAdded.getDescriptor())
-                                                 .getTypeName())
+                            .setEventType(TypeName.from(TaskAdded.getDescriptor()))
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -341,8 +338,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setMessage(EventMessage.projectStartedAny())
                             .setTimestamp(when)
                             .setEventId("project_started_" + when.getSeconds())
-                            .setEventType(TypeUrl.of(ProjectStarted.getDescriptor())
-                                                 .getTypeName())
+                            .setEventType(TypeName.from(ProjectStarted.getDescriptor()))
                             .setProducerId(projectId.getId())
                             .setContext(createEventContext(projectId, when));
             return result.build();

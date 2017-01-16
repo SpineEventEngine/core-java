@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,6 +40,7 @@ public abstract class FailureThrowable extends Throwable {
     private final Timestamp timestamp;
 
     protected FailureThrowable(GeneratedMessageV3 failure) {
+        super();
         this.failure = failure;
         this.timestamp = getCurrentTime();
     }
@@ -56,9 +57,9 @@ public abstract class FailureThrowable extends Throwable {
     /** Converts this instance into {@link Failure} message. */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
-                .setInstance(AnyPacker.pack(this.failure))
-                .setStacktrace(Throwables.getStackTraceAsString(this))
-                .setTimestamp(this.timestamp);
+                                               .setInstance(AnyPacker.pack(this.failure))
+                                               .setStacktrace(Throwables.getStackTraceAsString(this))
+                                               .setTimestamp(this.timestamp);
         return builder.build();
     }
 }

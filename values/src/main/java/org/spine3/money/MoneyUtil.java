@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -41,8 +41,8 @@ public class MoneyUtil {
      */
     public static Money newMoney(long amount, Currency currency) {
         final Money.Builder result = Money.newBuilder()
-                .setAmount(amount)
-                .setCurrency(currency);
+                                          .setAmount(amount)
+                                          .setCurrency(currency);
         return result.build();
     }
 }

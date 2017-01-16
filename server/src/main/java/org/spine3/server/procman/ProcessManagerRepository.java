@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,15 +32,14 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.entity.EntityEventDispatcher;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.DefaultIdSetEventFunction;
+import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
 
-import javax.annotation.Nonnull;
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -57,10 +56,11 @@ import static org.spine3.base.Commands.getMessage;
  * @param <S> the type of process manager state messages
  * @see ProcessManager
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>, S extends Message>
-                          extends EntityRepository<I, P, S>
-                          implements CommandDispatcher, EntityEventDispatcher<I> {
+                extends EventDispatchingRepository<I, P, S>
+                implements CommandDispatcher {
 
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
 
@@ -72,7 +72,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromFirstMessageField());
     }
 
     @Override
@@ -116,8 +116,8 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(commandMessage);
         checkCommandClass(commandClass);
-        final I id = getIdFromCommandMessage.getId(commandMessage, context);
-        final P manager = load(id);
+        final I id = getIdFromCommandMessage.apply(commandMessage, context);
+        final P manager = loadOrCreate(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         postEvents(events);
@@ -143,17 +143,16 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      */
     @Override
     public void dispatch(Event event) throws IllegalArgumentException {
-        final Message message = Events.getMessage(event);
-        final EventContext context = event.getContext();
-        final EventClass eventClass = EventClass.of(message);
-        checkEventClass(eventClass);
-        final IdFunction idFunction = getIdFunction(eventClass);
-        // All ID functions are supposed to return IDs of this type.
-        @SuppressWarnings("unchecked")
-        final I id = (I) idFunction.getId(message, context);
-        final P manager = load(id);
+        checkEventClass(event);
+
+        super.dispatch(event);
+    }
+
+    @Override
+    protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
+        final P manager = loadOrCreate(id);
         try {
-            manager.dispatchEvent(message, context);
+            manager.dispatchEvent(eventMessage, context);
             store(manager);
         } catch (InvocationTargetException e) {
             log().error("Error during dispatching event", e);
@@ -171,13 +170,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * @param id the ID of the process manager to load
      * @return loaded or created process manager instance
      */
-    @Nonnull
     @Override
-    public P load(I id) {
-        P result = super.load(id);
-        if (result == null) {
-            result = create(id);
-        }
+    @CheckReturnValue
+    protected P loadOrCreate(I id) {
+        final P result = super.loadOrCreate(id);
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
@@ -192,7 +188,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         }
     }
 
-    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
+    private void checkEventClass(Event event) throws IllegalArgumentException {
+        final Message eventMessage = Events.getMessage(event);
+        final EventClass eventClass = EventClass.of(eventMessage);
+
         final Set<EventClass> classes = getEventClasses();
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()

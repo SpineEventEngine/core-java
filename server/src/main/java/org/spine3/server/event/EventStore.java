@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,6 +19,7 @@
  */
 package org.spine3.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
@@ -72,6 +73,7 @@ public abstract class EventStore implements AutoCloseable {
      * @param logger         debug logger instance
      */
     protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
+        super();
         this.streamExecutor = streamExecutor;
         this.logger = logger;
     }
@@ -221,6 +223,11 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
+    @VisibleForTesting
+    Executor getStreamExecutor() {
+        return streamExecutor;
+    }
+
     /** A locally running {@code EventStore} implementation. */
     private static class LocalImpl extends EventStore {
 
@@ -293,16 +300,20 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    /** gRPC service over the locally running implementation. */
+    /**
+     * gRPC service over the locally running implementation.
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        /* as we override default implementation with `unimplemented` status. */
     private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
         private final LocalImpl eventStore;
 
         private GrpcService(LocalImpl eventStore) {
+            super();
             this.eventStore = eventStore;
         }
 
-        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void append(Event request, StreamObserver<Response> responseObserver) {
             try {
@@ -314,7 +325,6 @@ public abstract class EventStore implements AutoCloseable {
             }
         }
 
-        @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
         @Override
         public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
             eventStore.read(request, responseObserver);

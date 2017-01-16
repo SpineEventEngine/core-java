@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,16 +34,16 @@ import static org.spine3.protobuf.Values.newIntegerValue;
  *
  * @author Alexander Litus
  */
-/* package */ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
+class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
+    IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

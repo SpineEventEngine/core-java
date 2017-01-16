@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,7 +20,6 @@
 
 package org.spine3.server.validate;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import org.junit.Test;
@@ -34,7 +33,8 @@ import static org.junit.Assert.assertFalse;
 public class BooleanFieldValidatorShould {
 
     private final BooleanFieldValidator validator =
-            new BooleanFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(false), FieldPath.getDefaultInstance());
+            new BooleanFieldValidator(Any.getDescriptor().getFields().get(0),
+                                      ImmutableList.of(false), FieldPath.getDefaultInstance());
 
     @Test
     public void convert_string_to_number() {

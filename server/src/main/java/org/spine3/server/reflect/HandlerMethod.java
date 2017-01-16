@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,6 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -112,13 +111,7 @@ public abstract class HandlerMethod<C extends Message> {
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
-            throw wrapped(e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
-                throw (Error) e.getCause();
-            }
-            throw e;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -189,7 +182,7 @@ public abstract class HandlerMethod<C extends Message> {
      * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
-    /* package */ static Class<? extends Message> getFirstParamType(Method handler) {
+    static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
         final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;

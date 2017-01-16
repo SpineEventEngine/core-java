@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import java.util.List;
  *
  * @see SubscriptionRegistry
  */
-/* package */ final class SubscriptionRecord {
+final class SubscriptionRecord {
     private final Subscription subscription;
     private final Target target;
     private final TypeUrl type;
@@ -51,7 +51,7 @@ import java.util.List;
     @Nullable
     private Stand.EntityUpdateCallback callback = null;
 
-    /* package */ SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
+    SubscriptionRecord(Subscription subscription, Target target, TypeUrl type) {
         this.subscription = subscription;
         this.target = target;
         this.type = type;
@@ -62,14 +62,14 @@ import java.util.List;
      *
      * @param callback the callback to attach
      */
-    /* package */ void activate(Stand.EntityUpdateCallback callback) {
+    void activate(Stand.EntityUpdateCallback callback) {
         this.callback = callback;
     }
 
     /**
      * Checks whether this record has a callback attached.
      */
-    /* package */ boolean isActive() {
+    boolean isActive() {
         final boolean result = this.callback != null;
         return result;
     }
@@ -82,10 +82,10 @@ import java.util.List;
      * @param entityState the entity state to match
      * @return {@code true} if this record matches all the given parameters, {@code false} otherwise.
      */
-    /* package */ boolean matches(TypeUrl type,
-                                  Object id,
-                                  // entityState will be later used for more advanced filtering
-                                  @SuppressWarnings("UnusedParameters") Any entityState) {
+    boolean matches(TypeUrl type,
+                    Object id,
+                    // entityState will be later used for more advanced filtering
+                    @SuppressWarnings("UnusedParameters") Any entityState) {
         final boolean result;
 
         final boolean typeMatches = this.type.equals(type);
@@ -117,11 +117,11 @@ import java.util.List;
         return result;
     }
 
-    /* package */ TypeUrl getType() {
+    TypeUrl getType() {
         return type;
     }
 
-    /* package */ Stand.EntityUpdateCallback getCallback() {
+    Stand.EntityUpdateCallback getCallback() {
         return callback;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,7 +43,7 @@ import static org.spine3.server.command.Log.log;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class DispatcherRegistry {
+class DispatcherRegistry {
 
     private final Map<CommandClass, CommandDispatcher> dispatchers = Maps.newHashMap();
 
@@ -82,7 +82,7 @@ import static org.spine3.server.command.Log.log;
             registeredDispatcher, dispatcher, commandClass, dispatcher);
     }
 
-    /* package */ void register(CommandDispatcher dispatcher) {
+    void register(CommandDispatcher dispatcher) {
         checkNotNull(dispatcher);
         final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
         checkNotEmpty(dispatcher, commandClasses);
@@ -93,7 +93,7 @@ import static org.spine3.server.command.Log.log;
         }
     }
 
-    /* package */ Set<CommandClass> getCommandClasses() {
+    Set<CommandClass> getCommandClasses() {
         return dispatchers.keySet();
     }
 
@@ -118,7 +118,7 @@ import static org.spine3.server.command.Log.log;
            "Cannot register dispatcher %s for command classes (%s) which already have registered dispatcher(s).");
     }
 
-    /* package */ void unregister(CommandDispatcher dispatcher) {
+    void unregister(CommandDispatcher dispatcher) {
         checkNotNull(dispatcher);
         final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
         checkNotEmpty(dispatcher, commandClasses);
@@ -133,16 +133,16 @@ import static org.spine3.server.command.Log.log;
         }
     }
 
-    /* package */ boolean hasDispatcherFor(CommandClass commandClass) {
+    boolean hasDispatcherFor(CommandClass commandClass) {
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         return dispatcher != null;
     }
 
-    /* package */ void unregisterAll() {
+    void unregisterAll() {
         dispatchers.clear();
     }
 
-    /* package */ CommandDispatcher getDispatcher(CommandClass commandClass) {
+    CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatchers.get(commandClass);
     }
 
@@ -152,9 +152,8 @@ import static org.spine3.server.command.Log.log;
      * @param handler the command handler to check
      * @throws IllegalArgumentException if one ore more command classes already have registered dispatchers
      */
-    @SuppressWarnings("InstanceMethodNamingConvention")
-    // prefer longer name here for clarity.
-    /* package */ void checkNoDispatchersRegisteredForCommandsOf(CommandHandler handler) {
+    @SuppressWarnings("InstanceMethodNamingConvention")         // prefer longer name here for clarity.
+    void checkNoDispatchersRegisteredForCommandsOf(CommandHandler handler) {
         final ImmutableSet<Class<? extends Message>> handledMessageClasses = Classes.getHandledMessageClasses(
                 handler.getClass(), CommandHandlerMethod.PREDICATE);
 

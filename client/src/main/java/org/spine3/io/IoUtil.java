@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,17 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * A utility class working with I/O: streams, resources, etc.
@@ -46,9 +41,9 @@ import static org.spine3.util.Exceptions.wrapped;
 @Internal
 public class IoUtil {
 
-    private static final String ERROR_MESSAGE = "Exception while closing:";
-
-    private IoUtil() {}
+    private IoUtil() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Loads all data from {@code .properties} file(s) into memory.
@@ -92,7 +87,7 @@ public class IoUtil {
             properties.load(inputStream);
         } catch (IOException e) {
             if (log().isWarnEnabled()) {
-                log().warn("Failed to load properties file.", e);
+                log().warn("Failed to load properties file from: " + resourceUrl, e);
             }
         } finally {
             close(inputStream);
@@ -128,91 +123,9 @@ public class IoUtil {
             }
         } catch (IOException e) {
             if (log().isErrorEnabled()) {
-                log().error(ERROR_MESSAGE, e);
+                log().error("Exception while closing", e);
             }
         }
-    }
-
-    /**
-     * Closes passed closeables one by one.
-     *
-     * <p>Logs each {@link Exception} if it occurs.
-     */
-    public static void closeAll(AutoCloseable... closeables) {
-        closeAll(FluentIterable.from(closeables));
-    }
-
-    /**
-     * Closes passed auto-closeables one by one.
-     *
-     * <p>Logs each {@link Exception} if it occurs.
-     */
-    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
-    public static <T extends AutoCloseable> void closeAll(Iterable<T> closeables) {
-        try {
-            for (T c : closeables) {
-                if (c != null) {
-                    c.close();
-                }
-            }
-        } catch (Exception e) {
-            if (log().isErrorEnabled()) {
-                log().error(ERROR_MESSAGE, e);
-            }
-        }
-    }
-
-    /**
-     * Flushes passed streams one by one.
-     *
-     * <p>Logs each {@link IOException} if it occurs.
-     */
-    public static void flushAll(@Nullable Flushable... flushables) {
-        try {
-            flush(flushables);
-        } catch (IOException e) {
-            if (log().isErrorEnabled()) {
-                log().error("Exception while flushing stream", e);
-            }
-        }
-    }
-
-    /**
-     * Flushes streams in turn.
-     *
-     * @throws RuntimeException if {@link IOException} occurs
-     */
-    public static void tryToFlush(@Nullable Flushable... flushables) {
-        try {
-            flush(flushables);
-        } catch (IOException e) {
-            throw wrapped(e);
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
-    private static void flush(@Nullable Flushable[] flushables) throws IOException {
-        if (flushables == null) {
-            return;
-        }
-        for (Flushable f : flushables) {
-            if (f != null) {
-                f.flush();
-            }
-        }
-    }
-
-    /**
-     * Flushes and closes output streams in turn silently.
-     *
-     * <p>Logs each {@link IOException} if it occurs.
-     */
-    public static void flushAndCloseAll(@Nullable OutputStream... streams) {
-        if (streams == null) {
-            return;
-        }
-        flushAll(streams);
-        close(streams);
     }
 
     private static Logger log() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -47,15 +47,15 @@ import static org.spine3.time.Intervals.toDuration;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class Rescheduler {
+class Rescheduler {
 
     private final CommandBus commandBus;
 
-    /* package */ Rescheduler(CommandBus commandBus) {
+    Rescheduler(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
 
-    /* package */ void rescheduleCommands() {
+    void rescheduleCommands() {
         final Runnable reschedulingAction = new Runnable() {
             @Override
             public void run() {
@@ -72,7 +72,7 @@ import static org.spine3.time.Intervals.toDuration;
     }
 
     @VisibleForTesting
-    /* package */ void doRescheduleCommands() {
+    void doRescheduleCommands() {
         final Iterator<Command> commands = commandBus.commandStore().iterator(SCHEDULED);
         while (commands.hasNext()) {
             final Command command = commands.next();

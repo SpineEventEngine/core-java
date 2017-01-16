@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,8 +33,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * This class allows to set a tenant when handling a command or a query
  * in a multitenant application.
  *
- * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
  * @author Alexander Yevsyukov
+ * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
  */
 @SPI
 public class CurrentTenant {

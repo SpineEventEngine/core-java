@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,12 +20,16 @@
 
 package org.spine3.change;
 
-import com.google.protobuf.BoolValue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.change.BooleanMismatch.expectedFalse;
+import static org.spine3.change.BooleanMismatch.expectedTrue;
+import static org.spine3.change.BooleanMismatch.unpackActual;
+import static org.spine3.change.BooleanMismatch.unpackExpected;
+import static org.spine3.change.BooleanMismatch.unpackNewValue;
+import static org.spine3.change.IntMismatch.of;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 public class BooleanMismatchShould {
@@ -38,15 +42,46 @@ public class BooleanMismatchShould {
     }
 
     @Test
-    public void return_mismatch_object_with_boolean_values() {
+    public void create_ValueMismatch_instance_for_expectedFalse_case() {
+        final boolean expected = false;
+        final boolean actual = true;
+        final boolean newValue = true;
+        final ValueMismatch mismatch = expectedFalse(VERSION);
+
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_ValueMismatch_instance_for_expectedTrue_case() {
         final boolean expected = true;
         final boolean actual = false;
         final boolean newValue = false;
-        final ValueMismatch mismatch = BooleanMismatch.of(expected, actual, newValue, VERSION);
-        final BoolValue expectedWrapped = unpack(mismatch.getExpected());
-        final BoolValue actualWrapped = unpack(mismatch.getActual());
+        final ValueMismatch mismatch = expectedTrue(VERSION);
 
-        assertEquals(expected, expectedWrapped.getValue());
-        assertEquals(actual, actualWrapped.getValue());
+        assertEquals(expected, unpackExpected(mismatch));
+        assertEquals(actual, unpackActual(mismatch));
+        assertEquals(newValue, unpackNewValue(mismatch));
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackExpected_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackExpected(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackActual_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackActual(mismatch);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
+        final ValueMismatch mismatch = of(1, 2, 3, VERSION);
+        BooleanMismatch.unpackNewValue(mismatch);
     }
 }

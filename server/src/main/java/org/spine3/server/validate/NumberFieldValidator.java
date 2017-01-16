@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  * @param <V> the type of the field value
  * @author Alexander Litus
  */
-/* package */ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
+abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
 
@@ -62,8 +62,8 @@ import java.util.regex.Pattern;
     /**
      * Creates a new validator instance.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues values to validate
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
     protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
@@ -109,12 +109,12 @@ import java.util.regex.Pattern;
         if (notFitToDecimalMin(value)) {
             addViolation(
                     newDecimalViolation(value, minDecimalOpt, minDecimalOpt.getMsgFormat(),
-                            minDecimalOpt.getInclusive(), minDecimalOpt.getValue()));
+                                        minDecimalOpt.getInclusive(), minDecimalOpt.getValue()));
         }
         if (notFitToDecimalMax(value)) {
             addViolation(
                     newDecimalViolation(value, maxDecimalOpt, maxDecimalOpt.getMsgFormat(),
-                            maxDecimalOpt.getInclusive(), maxDecimalOpt.getValue()));
+                                        maxDecimalOpt.getInclusive(), maxDecimalOpt.getValue()));
         }
         if (notFitToMin(value)) {
             addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsgFormat(), minOption.getValue()));

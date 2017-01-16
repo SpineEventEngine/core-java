@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,6 +28,7 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.queries.TestEntity;
 import org.spine3.test.queries.TestEntityId;
@@ -235,8 +236,7 @@ public class QueriesShould {
         final Target entityTarget = query.getTarget();
         assertNotNull(entityTarget);
 
-        final String expectedTypeName = TypeUrl.of(targetEntityClass)
-                                               .getTypeName();
+        final String expectedTypeName = TypeName.of(targetEntityClass);
         assertEquals(expectedTypeName, entityTarget.getType());
         return entityTarget;
     }

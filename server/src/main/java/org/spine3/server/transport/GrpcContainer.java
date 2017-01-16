@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * Wrapping container for gRPC server.
@@ -97,7 +96,7 @@ public class GrpcContainer {
         try {
             grpcServer.awaitTermination();
         } catch (InterruptedException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -151,7 +150,7 @@ public class GrpcContainer {
     }
 
     @VisibleForTesting
-    /* package */ Server createGrpcServer() {
+    Server createGrpcServer() {
         final ServerBuilder builder = ServerBuilder.forPort(port);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
@@ -161,7 +160,7 @@ public class GrpcContainer {
     }
 
     @VisibleForTesting
-    /* package */ Runnable getOnShutdownCallback() {
+    Runnable getOnShutdownCallback() {
         return new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")

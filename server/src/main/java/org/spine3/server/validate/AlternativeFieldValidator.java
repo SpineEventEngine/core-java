@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class AlternativeFieldValidator {
+class AlternativeFieldValidator {
 
     /**
      * The name of the message option field.
@@ -80,12 +80,12 @@ import java.util.regex.Pattern;
      */
     private final ImmutableList.Builder<ConstraintViolation> violations = ImmutableList.builder();
 
-    /* package */ AlternativeFieldValidator(Descriptor messageDescriptor, FieldPath rootFieldPath) {
+    AlternativeFieldValidator(Descriptor messageDescriptor, FieldPath rootFieldPath) {
         this.messageDescriptor = messageDescriptor;
         this.rootFieldPath = rootFieldPath;
     }
 
-    /* package */ List<? extends ConstraintViolation> validate(Message message) {
+    List<? extends ConstraintViolation> validate(Message message) {
         final Map<FieldDescriptor, Object> options = messageDescriptor.getOptions()
                                                                       .getAllFields();
         for (FieldDescriptor optionDescriptor : options.keySet()) {
@@ -128,8 +128,8 @@ import java.util.regex.Pattern;
     private boolean alternativeFound(Message message, Iterable<RequiredFieldOption> fieldOptions) {
         for (RequiredFieldOption option : fieldOptions) {
             boolean found = option.isCombination()
-                    ? checkCombination(message, option.getFieldNames())
-                    : checkField(message, option.getFieldName());
+                            ? checkCombination(message, option.getFieldNames())
+                            : checkField(message, option.getFieldName());
             if (found) {
                 return true;
             }
@@ -141,9 +141,9 @@ import java.util.regex.Pattern;
         final FieldDescriptor field = messageDescriptor.findFieldByName(fieldName);
         if (field == null) {
             ConstraintViolation notFound = ConstraintViolation.newBuilder()
-                    .setMsgFormat("Field %s not found")
-                    .addParam(fieldName)
-                    .build();
+                                                              .setMsgFormat("Field %s not found")
+                                                              .addParam(fieldName)
+                                                              .build();
             violations.add(notFound);
             return false;
         }
@@ -189,37 +189,37 @@ import java.util.regex.Pattern;
             this.fieldNames = ImmutableList.copyOf(fieldNames);
         }
 
-        /* package */ static RequiredFieldOption ofField(String fieldName) {
+        static RequiredFieldOption ofField(String fieldName) {
             return new RequiredFieldOption(fieldName);
         }
 
-        /* package */ static RequiredFieldOption ofCombination(Iterable<String> fieldNames) {
+        static RequiredFieldOption ofCombination(Iterable<String> fieldNames) {
             return new RequiredFieldOption(fieldNames);
         }
 
-        /* package */ static RequiredFieldOption ofCombination(CharSequence expression) {
+        static RequiredFieldOption ofCombination(CharSequence expression) {
             final Iterable<String> parts = Splitter.on(AMPERSAND)
                                                    .split(expression);
             return ofCombination(parts);
         }
 
-        /* package */ boolean isField() {
+        boolean isField() {
             return fieldName != null;
         }
 
-        /* package */ boolean isCombination() {
+        boolean isCombination() {
             return fieldNames != null;
         }
 
-        /* package */ String getFieldName() {
+        String getFieldName() {
             if (fieldName == null) {
                 throw new IllegalStateException("The option is not a field but a combination of fields.");
             }
             return fieldName;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // It is OK to suppress as we're using ImmutableList.
-        /* package */ ImmutableList<String> getFieldNames() {
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // It is OK to suppress as we're using ImmutableList.
+        ImmutableList<String> getFieldNames() {
             if (fieldNames == null) {
                 throw new IllegalStateException("The option is not a combination, but a single field.");
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -67,6 +67,9 @@ import static org.spine3.validate.Validate.isNotDefault;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
 
+    private static final Error defaultError = Error.getDefaultInstance();
+    private static final Failure defaultFailure = Failure.getDefaultInstance();
+
     private CommandStorage storage;
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -84,6 +87,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         close(storage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected abstract CommandStorage getStorage();
 
@@ -228,7 +232,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         final Command command = Given.Command.createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandStorageRecord record = CommandStorage.newCommandStorageRecordBuilder(command, status).build();
+        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, status).build();
 
         checkRecord(record, command, status);
     }
@@ -237,7 +241,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
         final StringValue message = StringValue.getDefaultInstance();
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
-        final CommandStorageRecord record = CommandStorage.newCommandStorageRecordBuilder(command, RECEIVED).build();
+        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
 
         assertEquals("", record.getTargetId());
         assertEquals("", record.getTargetIdType());
@@ -259,12 +263,12 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_error_status_by_null_ID() {
-        storage.updateStatus(Tests.<CommandId>nullRef(), Error.getDefaultInstance());
+        storage.updateStatus(Tests.<CommandId>nullRef(), defaultError);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
-        storage.updateStatus(Tests.<CommandId>nullRef(), Failure.getDefaultInstance());
+        storage.updateStatus(Tests.<CommandId>nullRef(), defaultFailure);
     }
 
     /*
@@ -349,19 +353,19 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     private static Error newError() {
         return Error.newBuilder()
-                .setType("error type 123")
-                .setCode(5)
-                .setMessage("error message 123")
-                .setStacktrace("stacktrace")
-                .build();
+                    .setType("error type 123")
+                    .setCode(5)
+                    .setMessage("error message 123")
+                    .setStacktrace("stacktrace")
+                    .build();
     }
 
     private static Failure newFailure() {
         return Failure.newBuilder()
-                .setInstance(Given.EventMessage.projectCreatedAny())
-                .setStacktrace("failure stacktrace")
-                .setTimestamp(getCurrentTime())
-                .build();
+                      .setInstance(Given.EventMessage.projectCreatedAny())
+                      .setStacktrace("failure stacktrace")
+                      .setTimestamp(getCurrentTime())
+                      .build();
     }
 
     private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {

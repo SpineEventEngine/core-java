@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -256,6 +256,9 @@ public class LocalTimes {
         return add(localTime, MILLISECOND, millisDelta);
     }
 
+    /**
+     * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
+     */
     private static LocalTime add(LocalTime value, int calendarField, int delta) {
         final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);

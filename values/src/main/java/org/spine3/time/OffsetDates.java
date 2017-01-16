@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -153,17 +153,11 @@ public class OffsetDates {
         return result;
     }
 
-    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
-        return offsetDate.toBuilder()
-                         .setDate(localDate)
-                         .build();
-    }
-
     /**
      * Obtains offset date changed on specified amount of days.
      *
      * @param offsetDate offset date that will be changed
-     * @param daysDelta a number of days that needs to be added or subtracted that can be either positive or negative
+     * @param daysDelta  a number of days that needs to be added or subtracted that can be either positive or negative
      * @return copy of this offset date with new days value
      */
     private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {
@@ -171,10 +165,25 @@ public class OffsetDates {
         return result;
     }
 
+    /**
+     * Returns a new instance of offset date with changed local time parameter.
+     *
+     * @param offsetDate offset date that will be changed
+     * @param localDate  new local date for this offset date
+     * @return new {@code OffsetDate} instance with changed parameter
+     */
+    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
+        return offsetDate.toBuilder()
+                         .setDate(localDate)
+                         .build();
+    }
+
+    /**
+     * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
+     */
     private static OffsetDate add(OffsetDate offsetDate, int calendarField, int delta) {
         final Calendar cal = toCalendar(offsetDate);
         cal.add(calendarField, delta);
-
         final LocalDate localDate = toLocalDate(cal);
         final OffsetDate result = withDate(offsetDate, localDate);
         return result;

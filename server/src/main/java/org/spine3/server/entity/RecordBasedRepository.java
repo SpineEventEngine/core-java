@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
@@ -32,6 +32,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -48,23 +49,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
- * The base class for repositories managing entities.
+ * The base class for repositories that store entities as records.
+ *
+ * <p>Such a repository is backed by {@link RecordStorage}.
+ * Entity states are stored as {@link EntityStorageRecord}s.
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
- * @param <M> the type of entity state messages
+ * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
+public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
+                extends Repository<I, E> {
 
-    public EntityRepository(BoundedContext boundedContext) {
+    protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -97,31 +102,51 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /** {@inheritDoc} */
-    @Nullable
     @Override
-    public E load(I id) {
+    @CheckReturnValue
+    public Optional<E> load(I id) {
         final RecordStorage<I> storage = recordStorage();
         final EntityStorageRecord record = storage.read(id);
         if (isDefault(record)) {
-            return null;
+            return Optional.absent();
         }
         final E entity = toEntity(id, record);
-        return entity;
+        return Optional.of(entity);
     }
 
     /**
-     * Loads all the entities in this repository with IDs, contained within the passed {@code ids} values.
+     * Loads an entity by the passed ID or creates a new one, if the entity was not found.
+     */
+    @CheckReturnValue
+    protected E loadOrCreate(I id) {
+        final Optional<E> loaded = load(id);
+
+        if (!loaded.isPresent()) {
+            final E result = create(id);
+            return result;
+        }
+
+        final E result = loaded.get();
+        return result;
+    }
+
+    /**
+     * Loads all the entities in this repository with IDs,
+     * contained within the passed {@code ids} values.
      *
-     * <p>Provides a convenience wrapper around multiple invocations of {@link #load(Object)}. Descendants may
-     * optimize the execution of this method, choosing the most suitable way for the particular storage engine used.
+     * <p>Provides a convenience wrapper around multiple invocations of
+     * {@link #load(Object)}. Descendants may optimize the execution of this
+     * method, choosing the most suitable way for the particular storage engine used.
      *
-     * <p>The result only contains those entities which IDs are contained inside the passed {@code ids}.
-     * The resulting collection is always returned with no {@code null} values.
+     * <p>The result only contains those entities which IDs are contained inside
+     * the passed {@code ids}. The resulting collection is always returned
+     * with no {@code null} values.
      *
-     * <p>The order of objects in the result is not guaranteed to be the same as the order of IDs passed as argument.
+     * <p>The order of objects in the result is not guaranteed to be the same
+     * as the order of IDs passed as argument.
      *
-     * <p>In case IDs contain duplicates, the result may also contain duplicates, depending on particular
-     * implementation.
+     * <p>In case IDs contain duplicates, the result may also contain duplicates,
+     * depending on particular implementation.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
@@ -134,12 +159,16 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Loads all the entities in this repository by their IDs and applies the {@link FieldMask} to each of them.
+     * Loads all the entities in this repository by their IDs and
+     * applies the {@link FieldMask} to each of them.
      *
-     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with the {@code FieldMask} applied to the results.
+     * <p>Acts in the same way as {@link #loadAll(Iterable)}, with
+     * the {@code FieldMask} applied to the results.
      *
      * <p>Field mask is applied according to
-     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     * <a
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
+     * >FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
@@ -161,8 +190,8 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             final I id = idIterator.next();
             final EntityStorageRecord record = recordIterator.next();
 
-            if (record == null) { /*    Record is nullable here since {@code RecordStorage#findBulk}    *
-                                   *    returns an {@code Iterable} that may contain nulls.             */
+            if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
+                                   *    returns an `Iterable` that may contain nulls.             */
                 continue;
             }
 
@@ -194,14 +223,19 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     /**
-     * Finds all the entities passing the given filters and applies the given {@link FieldMask} to the results.
+     * Finds all the entities passing the given filters and
+     * applies the given {@link FieldMask} to the results.
      *
      * <p>Field mask is applied according to
-     * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask>FieldMask specs</a>.
+     * <a
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
+     * >FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported. All other filters are ignored.
+     * <p>At this point only {@link EntityIdFilter} is supported.
+     * All other filters are ignored.
      *
-     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed in the same way as by {@link #loadAll(Iterable)}.
+     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed
+     * in the same way as by {@link #loadAll(Iterable)}.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
@@ -219,15 +253,12 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             @Nullable
             @Override
             public I apply(@Nullable EntityId input) {
-                Preconditions.checkNotNull(input);
+                checkNotNull(input);
                 final Any idAsAny = input.getId();
 
                 final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
                 final Class messageClass = toMessageClass(typeUrl);
-
-                final boolean classIsSame = expectedIdClass.equals(messageClass);
-                checkState(classIsSame,
-                           "Unexpected ID of type " + messageClass + " encountered. " + "Expected: " + expectedIdClass);
+                checkIdClass(messageClass);
 
                 final Message idAsMessage = unpack(idAsAny);
 
@@ -235,6 +266,15 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 @SuppressWarnings("unchecked")
                 final I id = (I) idAsMessage;
                 return id;
+            }
+
+            private void checkIdClass(Class messageClass) {
+                final boolean classIsSame = expectedIdClass.equals(messageClass);
+                if (!classIsSame) {
+                    final String errMsg = String.format("Unexpected ID class encountered: %s. Expected: %s",
+                                                        messageClass, expectedIdClass);
+                    throw new IllegalStateException(errMsg);
+                }
             }
         });
 
@@ -248,14 +288,16 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
 
     private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
         final E entity = create(id);
+        final Message unpacked = unpack(record.getState());
+        final TypeUrl entityStateType = getEntityStateType();
         @SuppressWarnings("unchecked")
-        final M state = (M) FieldMasks.applyMask(fieldMask, unpack(record.getState()), getEntityStateType());
+        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
 
     private EntityStorageRecord toEntityRecord(E entity) {
-        final M state = entity.getState();
+        final S state = entity.getState();
         final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();
@@ -271,7 +313,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
             @Nullable
             @Override
             public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
-                Preconditions.checkNotNull(input);
+                checkNotNull(input);
                 final E result = toEntity(input.getKey(), input.getValue());
                 return result;
             }

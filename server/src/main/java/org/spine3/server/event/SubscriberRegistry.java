@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,15 +21,14 @@
 package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.type.EventClass;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,11 +40,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class SubscriberRegistry {
+class SubscriberRegistry {
 
-    private final Multimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
+    private final HashMultimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
 
-    /* package */ void subscribe(EventSubscriber object) {
+    void subscribe(EventSubscriber object) {
         checkNotNull(object);
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
@@ -55,7 +54,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unsubscribe(EventSubscriber object) {
+    void unsubscribe(EventSubscriber object) {
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
         checkSubscribersNotEmpty(object, subscribersEmpty);
@@ -66,17 +65,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void unsubscribeAll() {
+    void unsubscribeAll() {
         subscribersByEventClass.clear();
         EventBus.log().info("All subscribers cleared.");
     }
 
-    /* package */ Collection<EventSubscriber> getSubscribers(EventClass c) {
-        return ImmutableList.copyOf(subscribersByEventClass.get(c));
+    Set<EventSubscriber> getSubscribers(EventClass c) {
+        return ImmutableSet.copyOf(subscribersByEventClass.get(c));
     }
 
-    /* package */ boolean hasSubscribers(EventClass eventClass) {
-        final Collection<EventSubscriber> subscribers = getSubscribers(eventClass);
+    boolean hasSubscribers(EventClass eventClass) {
+        final Set<EventSubscriber> subscribers = getSubscribers(eventClass);
         return !subscribers.isEmpty();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,6 @@ import org.spine3.server.reflect.MethodRegistry;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
-import static org.spine3.util.Exceptions.wrapped;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -65,15 +64,15 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
     private void dispatch(Message event, EventContext ctx) {
         final Class<? extends Message> eventClass = event.getClass();
-        final EventSubscriberMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(), eventClass, EventSubscriberMethod.factory());
+        final MethodRegistry registry = MethodRegistry.getInstance();
+        final EventSubscriberMethod method = registry.get(getClass(), eventClass, EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
         try {
             method.invoke(this, event, ctx);
         } catch (InvocationTargetException e) {
-            throw wrapped(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -88,8 +87,9 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        return new IllegalStateException(String.format("Missing event handler for event class %s in the stream projection class %s",
-                eventClass, this.getClass()));
+        final String msg = String.format("Missing event handler for event class %s in the stream projection class %s",
+                                         eventClass, this.getClass());
+        return new IllegalStateException(msg);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -43,9 +43,12 @@ import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -58,12 +61,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EventBusShould {
 
-    private EventStore eventStore;
     private EventBus eventBus;
+    private EventBus eventBusWithPosponedExecution;
     private TestResponseObserver responseObserver;
+    private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
+    private PostponedSubscriberEventDelivery postponedSubscriberDelivery;
+    private Executor delegateDispatcherExecutor;
+    private Executor delegateSubscriberExecutor;
+    private StorageFactory storageFactory;
 
     @Before
     public void setUp() {
@@ -71,19 +79,48 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final EventStore.Builder storeBuilder = EventStore.newBuilder()
-                .setStreamExecutor(MoreExecutors.directExecutor())
-                .setStorage(storageFactory.createEventStorage())
-                .setLogger(EventStore.log());
-        this.eventStore = spy(storeBuilder.build());
+        this.storageFactory = InMemoryStorageFactory.getInstance();
+        /**
+         * Cannot use {@link MoreExecutors#directExecutor()} because it's impossible to spy on {@code final} classes.
+         */
+        this.delegateDispatcherExecutor = spy(directExecutor());
+        this.delegateSubscriberExecutor = spy(directExecutor());
+        this.postponedDispatcherDelivery = new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
+        this.postponedSubscriberDelivery = new PostponedSubscriberEventDelivery(delegateSubscriberExecutor);
+        buildEventBus(enricher);
+        buildEventBusWithPostponedExecution(enricher);
+        this.responseObserver = new TestResponseObserver();
+    }
+
+    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
+    private Executor directExecutor() {
+        return new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
+    }
+
+    private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
         final EventBus.Builder busBuilder = EventBus.newBuilder()
-                .setEventStore(eventStore);
+                                                    .setStorageFactory(storageFactory)
+                                                    .setDispatcherEventDelivery(postponedDispatcherDelivery)
+                                                    .setSubscriberEventDelivery(postponedSubscriberDelivery);
+
+        if (enricher != null) {
+            busBuilder.setEnricher(enricher);
+        }
+        this.eventBusWithPosponedExecution = busBuilder.build();
+    }
+
+    private void buildEventBus(@Nullable EventEnricher enricher) {
+        final EventBus.Builder busBuilder = EventBus.newBuilder()
+                                                    .setStorageFactory(storageFactory);
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
         }
         this.eventBus = busBuilder.build();
-        this.responseObserver = new TestResponseObserver();
     }
 
     @Test
@@ -93,16 +130,19 @@ public class EventBusShould {
 
     @Test
     public void return_associated_EventStore() {
-        final EventBus result = EventBus.newBuilder().setEventStore(eventStore)
+        final EventStore eventStore = mock(EventStore.class);
+        final EventBus result = EventBus.newBuilder()
+                                        .setEventStore(eventStore)
                                         .build();
-        assertNotNull(result.getEventStore());
+        assertEquals(eventStore, result.getEventStore());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
         // Pass just String instance.
         //noinspection EmptyClass
-        eventBus.subscribe(new EventSubscriber() {});
+        eventBus.subscribe(new EventSubscriber() {
+        });
     }
 
     @Test
@@ -161,7 +201,8 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class)).contains(dispatcher));
+        assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
+                           .contains(dispatcher));
     }
 
     @Test
@@ -173,6 +214,67 @@ public class EventBusShould {
         eventBus.post(Given.Event.projectCreated());
 
         assertTrue(dispatcher.isDispatchCalled());
+    }
+
+    @Test
+    public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        eventBusWithPosponedExecution.register(dispatcher);
+
+        final Event event = Given.Event.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        assertFalse(dispatcher.isDispatchCalled());
+
+        final boolean eventPostponed = postponedDispatcherDelivery.isPostponed(event, dispatcher);
+        assertTrue(eventPostponed);
+    }
+
+    @Test
+    public void not_invoke_subscribers_if_subscriber_event_execution_postponed() {
+        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+        final Event event = Given.Event.projectCreated();
+        eventBusWithPosponedExecution.subscribe(subscriber);
+
+        eventBusWithPosponedExecution.post(event);
+        assertNull(subscriber.getEventHandled());
+
+        final boolean eventPostponed = postponedSubscriberDelivery.isPostponed(event, subscriber);
+        assertTrue(eventPostponed);
+    }
+
+    @Test
+    public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        eventBusWithPosponedExecution.register(dispatcher);
+
+        final Event event = Given.Event.projectCreated();
+        eventBusWithPosponedExecution.post(event);
+        final Set<Event> postponedEvents = postponedDispatcherDelivery.getPostponedEvents();
+        final Event postponedEvent = postponedEvents.iterator()
+                                                    .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDispatcherDelivery.deliverNow(postponedEvent, dispatcher.getClass());
+        assertTrue(dispatcher.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void deliver_postponed_event_to_subscriber_using_configured_executor() {
+        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+        final Event event = Given.Event.projectCreated();
+        eventBusWithPosponedExecution.subscribe(subscriber);
+
+        eventBusWithPosponedExecution.post(event);
+        final Set<Event> postponedEvents = postponedSubscriberDelivery.getPostponedEvents();
+        final Event postponedEvent = postponedEvents.iterator()
+                                                    .next();
+        verify(delegateSubscriberExecutor, never()).execute(any(Runnable.class));
+
+        postponedSubscriberDelivery.deliverNow(postponedEvent, subscriber.getClass());
+        assertEquals(event, subscriber.getEventHandled());
+        verify(delegateSubscriberExecutor).execute(any(Runnable.class));
     }
 
     @Test
@@ -231,7 +333,7 @@ public class EventBusShould {
                 .validate(any(Message.class));
 
         final EventBus eventBus = EventBus.newBuilder()
-                                          .setEventStore(eventStore)
+                                          .setStorageFactory(storageFactory)
                                           .setEventValidator(validator)
                                           .build();
         eventBus.subscribe(new ProjectCreatedSubscriber());
@@ -252,14 +354,20 @@ public class EventBusShould {
 
     @Test
     public void unregister_registries_on_close() throws Exception {
+        final EventStore eventStore = spy(mock(EventStore.class));
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(eventStore)
+                                          .build();
         eventBus.register(new BareDispatcher());
         eventBus.subscribe(new ProjectCreatedSubscriber());
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
 
         eventBus.close();
 
-        assertTrue(eventBus.getDispatchers(eventClass).isEmpty());
-        assertTrue(eventBus.getSubscribers(eventClass).isEmpty());
+        assertTrue(eventBus.getDispatchers(eventClass)
+                           .isEmpty());
+        assertTrue(eventBus.getSubscribers(eventClass)
+                           .isEmpty());
         verify(eventStore).close();
     }
 
@@ -277,8 +385,10 @@ public class EventBusShould {
     public void enrich_event_if_it_can_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
         final Event event = Given.Event.projectCreated();
-        doReturn(true).when(enricher).canBeEnriched(any(Event.class));
-        doReturn(event).when(enricher).enrich(any(Event.class));
+        doReturn(true).when(enricher)
+                      .canBeEnriched(any(Event.class));
+        doReturn(event).when(enricher)
+                       .enrich(any(Event.class));
         setUp(enricher);
         eventBus.subscribe(new ProjectCreatedSubscriber());
 
@@ -290,7 +400,8 @@ public class EventBusShould {
     @Test
     public void do_not_enrich_event_if_it_cannot_be_enriched() {
         final EventEnricher enricher = mock(EventEnricher.class);
-        doReturn(false).when(enricher).canBeEnriched(any(Event.class));
+        doReturn(false).when(enricher)
+                       .canBeEnriched(any(Event.class));
         setUp(enricher);
         eventBus.subscribe(new ProjectCreatedSubscriber());
 
@@ -307,7 +418,8 @@ public class EventBusShould {
 
     private static void assertReturnedExceptionAndNoResponse(Class<? extends Exception> exceptionClass,
                                                              TestResponseObserver responseObserver) {
-        final Throwable cause = responseObserver.getThrowable().getCause();
+        final Throwable cause = responseObserver.getThrowable()
+                                                .getCause();
         assertEquals(exceptionClass, cause.getClass());
         assertNull(responseObserver.getResponse());
     }
@@ -321,7 +433,7 @@ public class EventBusShould {
             this.eventHandled = Events.createEvent(event, context);
         }
 
-        /* package */ Event getEventHandled() {
+        Event getEventHandled() {
             return eventHandled;
         }
     }
@@ -338,7 +450,7 @@ public class EventBusShould {
                                                             FaultySubscriber.class.getSimpleName() + '?');
         }
 
-        /* package */ boolean isMethodCalled() {
+        boolean isMethodCalled() {
             return this.methodCalled;
         }
     }
@@ -358,7 +470,7 @@ public class EventBusShould {
             dispatchCalled = true;
         }
 
-        /* package */ boolean isDispatchCalled() {
+        boolean isDispatchCalled() {
             return dispatchCalled;
         }
     }
@@ -384,16 +496,70 @@ public class EventBusShould {
             this.completed = true;
         }
 
-        /* package */ Response getResponse() {
+        Response getResponse() {
             return response;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return this.completed;
+        }
+    }
+
+    private static class PostponedDispatcherEventDelivery extends DispatcherEventDelivery {
+
+        private final Map<Event, Class<? extends EventDispatcher>> postponedExecutions = newHashMap();
+
+        private PostponedDispatcherEventDelivery(Executor delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public boolean shouldPostponeDelivery(Event event, EventDispatcher consumer) {
+            postponedExecutions.put(event, consumer.getClass());
+            return true;
+        }
+
+        private boolean isPostponed(Event event, EventDispatcher dispatcher) {
+            final Class<? extends EventDispatcher> actualClass = postponedExecutions.get(event);
+            final boolean eventPostponed = actualClass != null;
+            final boolean dispatcherMatches = eventPostponed && dispatcher.getClass()
+                                                                          .equals(actualClass);
+            return dispatcherMatches;
+        }
+
+        private Set<Event> getPostponedEvents() {
+            return postponedExecutions.keySet();
+        }
+    }
+
+    private static class PostponedSubscriberEventDelivery extends SubscriberEventDelivery {
+
+        private final Map<Event, Class<? extends EventSubscriber>> postponedExecutions = newHashMap();
+
+        private PostponedSubscriberEventDelivery(Executor delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected boolean shouldPostponeDelivery(Event event, EventSubscriber consumer) {
+            postponedExecutions.put(event, consumer.getClass());
+            return true;
+        }
+
+        private boolean isPostponed(Event event, EventSubscriber subscriber) {
+            final Class<? extends EventSubscriber> actualClass = postponedExecutions.get(event);
+            final boolean eventPostponed = actualClass != null;
+            final boolean subscriberMatches = eventPostponed && subscriber.getClass()
+                                                                          .equals(actualClass);
+            return subscriberMatches;
+        }
+
+        private Set<Event> getPostponedEvents() {
+            return postponedExecutions.keySet();
         }
     }
 }

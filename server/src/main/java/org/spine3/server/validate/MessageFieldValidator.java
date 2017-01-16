@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -45,7 +45,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
  *
  * @author Alexander Litus
  */
-/* package */ class MessageFieldValidator extends FieldValidator<Message> {
+class MessageFieldValidator extends FieldValidator<Message> {
 
     private final TimeOption timeOption;
     private final ValidOption validOption;
@@ -60,9 +60,9 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
      * @param strict        if {@code true} the validator would assume that the field is required even
      *                      if the corresponding field option is not present
      */
-    /* package */ MessageFieldValidator(FieldDescriptor descriptor,
-            ImmutableList<Message> fieldValues,
-            FieldPath rootFieldPath, boolean strict) {
+    MessageFieldValidator(FieldDescriptor descriptor,
+                          ImmutableList<Message> fieldValues,
+                          FieldPath rootFieldPath, boolean strict) {
         super(descriptor, fieldValues, rootFieldPath, strict);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validOption = getFieldOption(ValidationProto.valid);
@@ -126,9 +126,9 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
     /**
      * Checks the time.
      *
-     * @param timeToCheck a timestamp to check
+     * @param timeToCheck  a timestamp to check
      * @param whenExpected the time when the checked timestamp should be
-     * @param now the current moment
+     * @param now          the current moment
      * @return {@code true} if the time is valid according to {@code whenExpected} parameter, {@code false} otherwise
      */
     private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
@@ -141,24 +141,26 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 
     private ConstraintViolation newTimeViolation(Timestamp fieldValue) {
         final String msg = getErrorMsgFormat(timeOption, timeOption.getMsgFormat());
-        final String when = timeOption.getIn().toString().toLowerCase();
+        final String when = timeOption.getIn()
+                                      .toString()
+                                      .toLowerCase();
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(when)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.pack(fieldValue))
-                .build();
+                                                                 .setMsgFormat(msg)
+                                                                 .addParam(when)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .setFieldValue(AnyPacker.pack(fieldValue))
+                                                                 .build();
         return violation;
     }
 
     private ConstraintViolation newValidViolation(Message fieldValue, Iterable<ConstraintViolation> violations) {
         final String msg = getErrorMsgFormat(validOption, validOption.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.pack(fieldValue))
-                .addAllViolation(violations)
-                .build();
+                                                                 .setMsgFormat(msg)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .setFieldValue(AnyPacker.pack(fieldValue))
+                                                                 .addAllViolation(violations)
+                                                                 .build();
         return violation;
     }
 }

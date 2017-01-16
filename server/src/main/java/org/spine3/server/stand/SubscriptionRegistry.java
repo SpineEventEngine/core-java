@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,7 +40,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alex Tymchenko
  */
-/* package */ final class SubscriptionRegistry {
+final class SubscriptionRegistry {
     private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
     private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
@@ -52,7 +52,6 @@ import static com.google.common.collect.Maps.newHashMap;
      * @param subscription the subscription to activate
      * @param callback     the callback to make active
      */
-    /* package */
     synchronized void activate(Subscription subscription, Stand.EntityUpdateCallback callback) {
         checkState(subscriptionToAttrs.containsKey(subscription),
                    "Cannot find the subscription in the registry.");
@@ -66,7 +65,6 @@ import static com.google.common.collect.Maps.newHashMap;
      * @param target the target for a new subscription
      * @return the created subscription
      */
-    /* package */
     synchronized Subscription addSubscription(Target target) {
         final String subscriptionId = Identifiers.newUuid();
         final String typeAsString = target.getType();
@@ -94,7 +92,6 @@ import static com.google.common.collect.Maps.newHashMap;
      *
      * @param subscription the subscription to remove
      */
-    /* package */
     synchronized void removeSubscription(Subscription subscription) {
         if (!subscriptionToAttrs.containsKey(subscription)) {
             return;
@@ -114,7 +111,6 @@ import static com.google.common.collect.Maps.newHashMap;
      * @param type the type to filter by
      * @return the collection of filtered records
      */
-    /* package */
     synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
         final Set<SubscriptionRecord> result = typeToAttrs.get(type);
         return result;
@@ -126,7 +122,6 @@ import static com.google.common.collect.Maps.newHashMap;
      * @param type the type to check records for
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
-    /* package */
     synchronized boolean hasType(TypeUrl type) {
         final boolean result = typeToAttrs.containsKey(type);
         return result;

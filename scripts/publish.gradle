@@ -1,5 +1,5 @@
 //
-// Copyright 2016, TeamDev Ltd. All rights reserved.
+// Copyright 2017, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -59,11 +59,31 @@ projectsToPublish.each {
     project(":$it") { final currentProject ->
         apply plugin: 'maven-publish'
 
+        // Artifact IDs are composed as "spine-<project.name>-core". Example:
+        //
+        //      "spine-server-core"
+        //
+        // That helps to distinguish resulting JARs in the final assembly, such as WAR package.
+        // In addition, "-core" suffix serves as a type marker, helping to identify them among similar modules.
+        //
+        // Example:
+        //
+        //      "spine-server-core" (core Spine functionality for back-end)
+        //  vs.
+        //      "spine-server-gae" (Google AppEngine-based functionality for back-end)
+        //
+        // However, the artifact IDs for "users" and "values" domains do not have "-core" suffix,
+        // as they do not require any additional identification.
+        //
+        final boolean shouldAddSuffix = !currentProject.name.equals("users") && !currentProject.name.equals("values")
+        final String artifactIdSuffix = shouldAddSuffix ? "-core" : ""
+        final String artifactIdForPublishing = "spine-${currentProject.name}" + artifactIdSuffix
+
         publishing {
             publications {
                 mavenJava(MavenPublication) {
                     groupId = "${group}"
-                    artifactId = "${currentProject.name}"
+                    artifactId = "${artifactIdForPublishing}"
                     version = "${currentProject.version}"
 
                     from components.java

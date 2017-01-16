@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -53,9 +53,10 @@ public class OffsetTimesShould {
         final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         final Calendar cal = Calendars.nowAt(ZONE_OFFSET);
 
-        assertEquals(getHours(cal), now.getTime().getHours());
-        assertEquals(getMinutes(cal), now.getTime().getMinutes());
-        assertEquals(getSeconds(cal), now.getTime().getSeconds());
+        final LocalTime time = now.getTime();
+        assertEquals(getHours(cal), time.getHours());
+        assertEquals(getMinutes(cal), time.getMinutes());
+        assertEquals(getSeconds(cal), time.getSeconds());
         assertEquals(getZoneOffset(cal), now.getOffset().getAmountSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
@@ -64,12 +65,13 @@ public class OffsetTimesShould {
     public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
         final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, ZONE_OFFSET);
 
-        assertTrue(hours == localTimeInDelhi.getTime().getHours());
-        assertTrue(minutes == localTimeInDelhi.getTime().getMinutes());
-        assertTrue(seconds == localTimeInDelhi.getTime().getSeconds());
-        assertTrue(millis == localTimeInDelhi.getTime().getMillis());
-        assertTrue(nanos == localTimeInDelhi.getTime().getNanos());
-        assertTrue(ZONE_OFFSET.getAmountSeconds() == localTimeInDelhi.getOffset().getAmountSeconds());
+        final LocalTime time = localTimeInDelhi.getTime();
+        assertEquals(hours, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(), localTimeInDelhi.getOffset().getAmountSeconds());
     }
 
     @Test
@@ -78,11 +80,12 @@ public class OffsetTimesShould {
         final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
         final OffsetTime inFewHours = OffsetTimes.plusHours(offsetTime, hoursToAdd);
 
-        assertTrue(hours + hoursToAdd == inFewHours.getTime().getHours());
-        assertTrue(minutes == inFewHours.getTime().getMinutes());
-        assertTrue(seconds == inFewHours.getTime().getSeconds());
-        assertTrue(millis == inFewHours.getTime().getMillis());
-        assertTrue(nanos == inFewHours.getTime().getNanos());
+        final LocalTime time = inFewHours.getTime();
+        assertEquals(hours + hoursToAdd, time.getHours());
+        assertEquals(minutes, time.getMinutes());
+        assertEquals(seconds, time.getSeconds());
+        assertEquals(millis, time.getMillis());
+        assertEquals(nanos, time.getNanos());
     }
 
     @Test
@@ -274,6 +277,4 @@ public class OffsetTimesShould {
         final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
         OffsetTimes.minusSeconds(now, secondsToSubtract);
     }
-
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,7 +31,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
-import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -39,11 +38,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.util.Collections.synchronizedMap;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
@@ -85,7 +84,7 @@ public class Identifiers {
      * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
-     *         the passed {@link Message} instance has no fields
+     *                                  the passed {@link Message} instance has no fields
      * @see ConverterRegistry
      */
     public static <I> String idToString(@Nullable I id) {
@@ -176,16 +175,20 @@ public class Identifiers {
         //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
         if (id instanceof Message) {
             final Message message = (Message) id;
-            anyId = AnyPacker.pack(message);
+            anyId = pack(message);
         } else if (id instanceof String) {
             final String strValue = (String) id;
-            anyId = AnyPacker.pack(newStringValue(strValue));
+            anyId = pack(newStringValue(strValue));
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
-            anyId = AnyPacker.pack(UInt32Value.newBuilder().setValue(intValue).build());
+            anyId = pack(UInt32Value.newBuilder()
+                                    .setValue(intValue)
+                                    .build());
         } else if (id instanceof Long) {
             final Long longValue = (Long) id;
-            anyId = AnyPacker.pack(UInt64Value.newBuilder().setValue(longValue).build());
+            anyId = pack(UInt64Value.newBuilder()
+                                    .setValue(longValue)
+                                    .build());
         } else {
             throw unsupportedIdType(id);
         }
@@ -289,11 +292,11 @@ public class Identifiers {
 
         private static <I> void checkNotClass(I id) {
             if (id instanceof Class) {
-                checkArgument(false, "Class instance passed instead of value: " + id.toString());
+                throw new IllegalArgumentException("Class instance passed instead of value: " + id.toString());
             }
         }
 
-        public synchronized  <I> boolean containsConverter(I id) {
+        public synchronized <I> boolean containsConverter(I id) {
             final Class<?> idClass = id.getClass();
             final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
             return contains;

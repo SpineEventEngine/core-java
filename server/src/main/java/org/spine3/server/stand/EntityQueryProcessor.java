@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,18 +29,18 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.entity.RecordBasedRepository;
 
 /**
  * Processes the queries targeting {@link org.spine3.server.entity.Entity} objects.
  *
  * @author Alex Tymchenko
  */
-/* package */ class EntityQueryProcessor implements QueryProcessor {
+class EntityQueryProcessor implements QueryProcessor {
 
-    private final EntityRepository<?, ? extends Entity, ? extends Message> repository;
+    private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
-    /* package */ EntityQueryProcessor(EntityRepository<?, ? extends Entity, ? extends Message> repository) {
+    EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
         this.repository = repository;
     }
 

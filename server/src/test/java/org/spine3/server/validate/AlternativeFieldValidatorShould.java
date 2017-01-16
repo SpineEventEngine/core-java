@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,9 +57,9 @@ public class AlternativeFieldValidatorShould {
     @Test
     public void pass_if_combination_defined() {
         final PersonName combinationDefined = PersonName.newBuilder()
-                .setHonorificPrefix("Mr.")
-                .setLastName("Yevsyukov")
-                .build();
+                                                        .setHonorificPrefix("Mr.")
+                                                        .setLastName("Yevsyukov")
+                                                        .build();
         final List<? extends ConstraintViolation> violations = validator.validate(combinationDefined);
         assertTrue(violations.isEmpty());
     }

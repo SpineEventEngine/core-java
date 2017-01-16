@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -85,7 +85,7 @@ public class QueryServiceShould {
         final QueryService.Builder builder = QueryService.newBuilder();
 
         for (BoundedContext context : boundedContexts) {
-            builder.addBoundedContext(context);
+            builder.add(context);
         }
 
         service = spy(builder.build());
@@ -122,8 +122,8 @@ public class QueryServiceShould {
         final BoundedContext boundedContext = newBoundedContext(TestStandFactory.create());
 
         final QueryService.Builder builder = QueryService.newBuilder();
-        builder.addBoundedContext(boundedContext)
-               .removeBoundedContext(boundedContext)
+        builder.add(boundedContext)
+               .remove(boundedContext)
                .build();
     }
 
@@ -208,15 +208,15 @@ public class QueryServiceShould {
             this.isCompleted = true;
         }
 
-        /* package */ QueryResponse getResponseHandled() {
+        QueryResponse getResponseHandled() {
             return responseHandled;
         }
 
-        /* package */ Throwable getThrowable() {
+        Throwable getThrowable() {
             return throwable;
         }
 
-        /* package */ boolean isCompleted() {
+        boolean isCompleted() {
             return isCompleted;
         }
     }

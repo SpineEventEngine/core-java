@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -94,7 +94,7 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         postEvents(events);
     }
 
-    /* package */ CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
+    CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
         return MethodRegistry.getInstance()
                              .get(getClass(), commandClass, CommandHandlerMethod.factory());
     }

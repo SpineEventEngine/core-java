@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,7 +30,9 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.stand.Stand;
 
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,15 +48,17 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
 
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-    private QueryService(Builder builder) {
-        this.typeToContextMap = builder.getBoundedContextMap();
+    private QueryService(Map<TypeUrl, BoundedContext> map) {
+        super();
+        this.typeToContextMap = ImmutableMap.copyOf(map);
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    @SuppressWarnings("RefusedBequest") // as we override default implementation with `unimplemented` status.
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        // as we override default implementation with `unimplemented` status.
     @Override
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
         log().debug("Incoming query: {}", query);
@@ -63,9 +67,9 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         checkNotNull(type, "Unknown type for query target");
 
         final BoundedContext boundedContext = typeToContextMap.get(type);
+        final Stand stand = boundedContext.getStand();
         try {
-            boundedContext.getStand()
-                          .execute(query, responseObserver);
+            stand.execute(query, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing query", e);
             responseObserver.onError(e);
@@ -74,22 +78,20 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
 
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-        private ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
-        public Builder addBoundedContext(BoundedContext boundedContext) {
+        public Builder add(BoundedContext boundedContext) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             boundedContexts.add(boundedContext);
             return this;
         }
 
-        public Builder removeBoundedContext(BoundedContext boundedContext) {
+        public Builder remove(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // the collection returned is immutable
-        public ImmutableMap<TypeUrl, BoundedContext> getBoundedContextMap() {
-            return typeToContextMap;
+        public boolean contains(BoundedContext boundedContext) {
+            return boundedContexts.contains(boundedContext);
         }
 
         /**
@@ -99,26 +101,26 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
          */
         public QueryService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
-                throw new IllegalStateException("Query service must have at least one bounded context.");
+                throw new IllegalStateException("Query service must have at least one `BoundedContext`.");
             }
-            this.typeToContextMap = createBoundedContextMap();
-            final QueryService result = new QueryService(this);
+            final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
+            final QueryService result = new QueryService(map);
             return result;
         }
 
-        private ImmutableMap<TypeUrl, BoundedContext> createBoundedContextMap() {
+        private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             final ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
-                addBoundedContext(builder, boundedContext);
+                putIntoMap(boundedContext, builder);
             }
             return builder.build();
         }
 
-        private static void addBoundedContext(ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder,
-                                              BoundedContext boundedContext) {
+        private static void putIntoMap(BoundedContext boundedContext,
+                                       ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
 
-            final ImmutableSet<TypeUrl> exposedTypes = boundedContext.getStand()
-                                                                       .getExposedTypes();
+            final Stand stand = boundedContext.getStand();
+            final ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
 
             for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);
@@ -135,5 +137,4 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(QueryService.class);
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, TeamDev Ltd. All rights reserved.
+ * Copyright 2017, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,6 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.AggregateStorage;
@@ -41,10 +40,10 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-/* package */ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
-            Ordering.arbitrary(), // key comparator
+            new AggregateStorageKeyComparator<I>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
@@ -95,6 +94,27 @@ import static com.google.common.collect.Maps.newHashMap;
         @Override
         public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
+            return result;
+        }
+    }
+
+    /** Used for sorting keys by the key hash codes. */
+    private static class AggregateStorageKeyComparator<K> implements Comparator<K>, Serializable {
+
+        private static final long serialVersionUID = 0L;
+
+        @Override
+        public int compare(K first, K second) {
+            int result = 0;
+            if (first.equals(second)) {
+                return result;
+            }
+
+            // To define an order:
+            final int firstHashCode = first.hashCode();
+            final int secondHashCode = second.hashCode();
+
+            result = Integer.compare(firstHashCode, secondHashCode);
             return result;
         }
     }
