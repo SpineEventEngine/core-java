@@ -95,7 +95,8 @@ public class AggregateRoot<I> {
      * @throws IllegalStateException if a repository was not found
      *                               or the repository does not match expectations of this {@code AggregateRoot}
      */
-    private <S extends Message, A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> getRepository(Class<S> stateClass) {
+    private <S extends Message, A extends AggregatePart<I, S, ?>>
+            AggregatePartRepository<I, A> getRepository(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
         final AggregatePartRepository<I, A> cached = (AggregatePartRepository<I, A>) partsAccess.get(stateClass);
 
@@ -112,7 +113,8 @@ public class AggregateRoot<I> {
     }
 
     @VisibleForTesting
-    <S extends Message, A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> lookup(Class<S> stateClass) {
+    <S extends Message, A extends AggregatePart<I, S, ?>>
+    AggregatePartRepository<I, A> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         final Class<I> idClass = (Class<I>) getId().getClass();
         final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
