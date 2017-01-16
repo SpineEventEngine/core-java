@@ -17,18 +17,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.storage;
+package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.stand.AggregateStateId;
-import org.spine3.server.stand.Stand;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 
 /**
- * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
+ * Serves as a storage for the latest {@link Aggregate} states.
  *
  * <p>Used by an instance of {@link Stand} to optimize the {@code Aggregate} state fetch performance.
  *

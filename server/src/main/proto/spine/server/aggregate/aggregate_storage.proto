@@ -19,25 +19,51 @@
 //
 syntax = "proto3";
 
-package spine.server.storage;
+package spine.server.aggregate;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.storage";
+option java_package = "org.spine3.server.aggregate.storage";
+    // Put Java classes into sub-package so that we can annotate the whole package with @SPI via `package-info.java`.
 option java_outer_classname = "AggregateStorageProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
-import "spine/server/aggregate/snapshot.proto";
 import "spine/base/event.proto";
+
+// Built-in event type for storing aggregate snapshots.
+message Snapshot {
+    option (SPI_type) = true;
+
+    // The state of the aggregate.
+    google.protobuf.Any state = 1;
+
+    // Time when the stored state of the aggregate was modified.
+    //
+    // This value is copied to the aggregated when the snapshot is restored.
+    google.protobuf.Timestamp when_modified = 2;
+
+    // The version of the aggregate at which the snapshot was made.
+    int32 version = 3;
+
+    // The moment the snapshot was created.
+    //
+    // This value should normally be after the time the aggregate was modified (and timestamp of the
+    // corresponding event), and before the time of the next event in the aggregate history.
+    google.protobuf.Timestamp timestamp = 4;
+}
 
 // A record in the storage of events and snapshots of an aggregate type.
 //
 // Different types of aggregates are managed by different storages.
+//
 message AggregateStorageRecord {
+    option (SPI_type) = true;
+
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
@@ -63,9 +89,12 @@ message AggregateStorageRecord {
 
 // Event data for an aggregate returned by a storage managing the aggregate.
 message AggregateEvents {
-    // If the `snapshot` field is populated, it contains the last snapshot in the history of the aggregate.
-    // This value will be used for restoring the aggregate state before playing events that occurred
-    // after this snapshot was made.
+    option (SPI_type) = true;
+
+    // If the `snapshot` field is populated, it contains the last snapshot in the history
+    // of the aggregate.
+    // This value will be used for restoring the aggregate state before playing
+    // events that occurred after this snapshot was made.
     server.aggregate.Snapshot snapshot = 1;
 
     // Events of the aggregate.

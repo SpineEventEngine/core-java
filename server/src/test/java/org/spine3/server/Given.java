@@ -56,19 +56,16 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-@SuppressWarnings("EmptyClass") // This class is a wrapper for enclosed so that we can write Given.EventMessage, etc.
 public class Given {
 
-    static class AggregateId {
+    private Given() {
+    }
 
-        private AggregateId() {}
-
-        static ProjectId newProjectId() {
-            final String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
+    static ProjectId newProjectId() {
+        final String uuid = newUuid();
+        return ProjectId.newBuilder()
+                        .setId(uuid)
+                        .build();
     }
 
     static class EventMessage {
@@ -109,7 +106,7 @@ public class Given {
     static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = newProjectId();
 
         private Command() {}
 

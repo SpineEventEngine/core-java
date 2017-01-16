@@ -36,8 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.reflect.Modifier.isPrivate;
-import static java.lang.reflect.Modifier.isPublic;
 
 /**
  * Abstract base class for repositories.
@@ -95,18 +93,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         final Class<I> idClass = getIdClass();
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            checkConstructorAccessModifier(result.getModifiers(), entityClass.getName());
             return result;
         } catch (NoSuchMethodException ignored) {
             throw noSuchConstructorException(entityClass.getName(), idClass.getName());
-        }
-    }
-
-    private static void checkConstructorAccessModifier(int modifiers, String entityClass) {
-        if (!isPublic(modifiers)) {
-            final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
-            final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
-            throw new IllegalStateException(new IllegalAccessException(message));
         }
     }
 

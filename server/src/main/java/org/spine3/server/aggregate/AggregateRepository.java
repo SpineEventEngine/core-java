@@ -31,14 +31,14 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.AggregateEvents;
-import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -50,25 +50,29 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
+import static org.spine3.server.entity.Entity.STATE_CLASS_GENERIC_INDEX;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
- * specified as the generic parameter.
+ * The repository which manages instances of {@code Aggregate}s.
  *
- * <p>This class is made abstract for preserving type information of aggregate ID and
- * aggregate classes used by implementations. A simple repository class looks like this:
+ * <p>This class is made {@code abstract} for preserving type information of aggregate ID and
+ * aggregate classes used by implementations.
+ *
+ * <p>A repository class may look like this:
  * <pre>
- * public class OrderRepository extends AggregateRepository&lt;OrderId, OrderAggregate&gt; {
- *     public OrderRepository(BoundedContext boundedContext) {
- *         super(boundedContext);
- *     }
+ * {@code
+ *  public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
+ *      public OrderRepository(BoundedContext boundedContext) {
+ *          super(boundedContext);
+ *      }
+ *  }
  * }
  * </pre>
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates managed by this repository
- *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -79,30 +83,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
-    /** The number of events to store between snapshots. */
-    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
-
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
     private final CommandStatusService commandStatusService;
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
+
+    /** The number of events to store between snapshots. */
+    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
     /**
      * Creates a new repository instance.
      *
      * @param boundedContext the bounded context to which this repository belongs
      */
-    public AggregateRepository(BoundedContext boundedContext) {
+    protected AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.commandStatusService = boundedContext.getCommandBus().getCommandStatusService();
+        this.commandStatusService = boundedContext.getCommandBus()
+                                                  .getCommandStatusService();
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-    }
-
-    @Override
-    protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createAggregateStorage(getAggregateClass());
-        return result;
     }
 
     /**
@@ -116,10 +115,48 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return getEntityClass();
     }
 
+    public Class<? extends Message> getAggregateStateClass() {
+        final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
+        final Class<? extends Message> stateClass = getGenericParameterType(aggregateClass, STATE_CLASS_GENERIC_INDEX);
+        return stateClass;
+    }
+
     @Override
     public Set<CommandClass> getCommandClasses() {
         final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
         return result;
+    }
+
+    /**
+     * Processes the command by dispatching it to a method of an aggregate.
+     *
+     * <p>The aggregate ID is obtained from the passed command.
+     *
+     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
+     * if there is no aggregate with such ID.
+     *
+     * @param request the request to dispatch
+     * @throws IllegalStateException if storage for the repository was not initialized
+     */
+    @SuppressWarnings("OverlyBroadCatchBlock")      // the exception handling is the same for all exception types.
+    @Override
+    @CheckReturnValue
+    public void dispatch(Command request) throws IllegalStateException {
+        final Message command = getMessage(checkNotNull(request));
+        final CommandContext context = request.getContext();
+        final CommandId commandId = context.getCommandId();
+        final I aggregateId = getAggregateId(command);
+        A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
+
+        final List<Event> events = aggregate.getUncommittedEvents();
+        try {
+            store(aggregate);
+            standFunnel.post(aggregate);
+        } catch (Exception e) {
+            commandStatusService.setToError(commandId, e);
+        }
+        postEvents(events);
+        commandStatusService.setOk(commandId);
     }
 
     /**
@@ -136,6 +173,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Changes the number of events between making aggregate snapshots to the passed value.
      *
+     * <p>The default value is defined in {@link #DEFAULT_SNAPSHOT_TRIGGER}.
+     *
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
     @SuppressWarnings("unused")
@@ -148,19 +187,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return checkStorage(result);
-    }
-
-    /**
-     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
-     *
-     * @param id the ID of the aggregate to load
-     * @return the loaded object
-     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
-     */
-    @Override
-    public Optional<A> load(I id) throws IllegalStateException {
-        A result = loadOrCreate(id);
-        return Optional.of(result);
     }
 
     /**
@@ -208,53 +234,43 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Processes the command by dispatching it to a method of an aggregate.
+     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
      *
-     * <p>The aggregate ID is obtained from the passed command.
-     *
-     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
-     * if there is no aggregate with such ID.
-     *
-     * @param request the request to dispatch
-     * @throws IllegalStateException if storage for the repository was not initialized
+     * @param id the ID of the aggregate to load
+     * @return the loaded object
+     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")      // the exception handling is the same for all exception types.
     @Override
-    @CheckReturnValue
-    public void dispatch(Command request) throws IllegalStateException {
-        final Message command = getMessage(checkNotNull(request));
-        final CommandContext context = request.getContext();
-        final CommandId commandId = context.getCommandId();
-        final I aggregateId = getAggregateId(command);
-        A aggregate = loadAndDispatch(aggregateId, commandId, command, context);
-
-        final List<Event> events = aggregate.getUncommittedEvents();
-        try {
-            store(aggregate);
-            standFunnel.post(aggregate);
-        } catch (Exception e) {
-            commandStatusService.setToError(commandId, e);
-        }
-        postEvents(events);
-        commandStatusService.setOk(commandId);
+    public Optional<A> load(I id) throws IllegalStateException {
+        A result = loadOrCreate(id);
+        return Optional.of(result);
     }
 
+    @Override
+    protected Storage createStorage(StorageFactory factory) {
+        final Storage result = factory.createAggregateStorage(getAggregateClass());
+        return result;
+    }
+
+    /**
+     * Loads an aggregate and dispatches the command to it.
+     *
+     * <p>During the command dispatching and event applying, the original list of events may
+     * have been changed by other actors in the system.
+     *
+     * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
+     * concurrent actor changes, the event count from the last snapshot should remain the same
+     * during the {@link AggregateRepository#load(Object)}
+     * and {@link Aggregate#dispatch(Message, CommandContext)}.
+     *
+     * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command}
+     * dispatching is repeated from scratch.
+     */
     @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
         final AggregateStorage<I> aggregateStorage = aggregateStorage();
         A aggregate;
 
-        /**
-         * During the command dispatching and event applying, the original list of events may have been changed by
-         * other actors in the system.
-         *
-         * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous concurrent actor changes,
-         * the event count from the last snapshot should remain the same during the {@link AggregateRepository#load(Object)}
-         * and {@link Aggregate#dispatch(Message, CommandContext)}.
-         *
-         * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command} dispatching is repeated
-         * from scratch.
-         */
         Integer eventCountBeforeSave = null;
         int eventCountBeforeDispatch = 0;
         do {
@@ -264,7 +280,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                                    "New events detected while dispatching the command {} " +
                                    "The number of new events is {}. " +
                                    "Restarting the command dispatching.",
-                            getAggregateClass(), aggregateId, command, newEventCount);
+                           getAggregateClass(), aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
             aggregate = loadOrCreate(aggregateId);

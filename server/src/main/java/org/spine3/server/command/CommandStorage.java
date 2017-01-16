@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -34,9 +34,9 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.CommandValidator;
+import org.spine3.server.command.storage.CommandStorageRecord;
 import org.spine3.server.entity.GetTargetIdFromCommand;
+import org.spine3.server.storage.AbstractStorage;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -70,7 +70,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param command a complete command to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command) {
+    protected void store(Command command) {
         store(command, RECEIVED);
     }
 
@@ -81,14 +81,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param status  a command status
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, CommandStatus status) {
+    protected void store(Command command, CommandStatus status) {
         checkNotClosed();
-
-        //TODO:2016-12-25:alexander.yevsyukov: Why do we need to check the command?
-        // The command can only be stored from CommandBus, which checks the command anyway.
-        // If we don't do this, we can make the CommandValidator class package-access.
-
-        CommandValidator.checkCommand(command);
 
         final CommandStorageRecord record = newRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
@@ -104,7 +98,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param error   an error occurred
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, Error error) {
+    protected void store(Command command, Error error) {
         checkNotClosed();
         checkNotDefault(error);
 
@@ -126,7 +120,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @return commands with the given status
      * @throws IllegalStateException if the storage is closed
      */
-    public Iterator<Command> iterator(CommandStatus status) {
+    protected Iterator<Command> iterator(CommandStatus status) {
         checkNotClosed();
         final Iterator<CommandStorageRecord> recordIterator = read(status);
         final Iterator<Command> commandIterator = toCommandIterator(recordIterator);
@@ -142,13 +136,13 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     protected abstract Iterator<CommandStorageRecord> read(CommandStatus status);
 
     /** Updates the status of the command to {@link CommandStatus#OK}. */
-    public abstract void setOkStatus(CommandId commandId);
+    protected abstract void setOkStatus(CommandId commandId);
 
     /** Updates the status of the command with the error. */
-    public abstract void updateStatus(CommandId commandId, Error error);
+    protected abstract void updateStatus(CommandId commandId, Error error);
 
     /** Updates the status of the command with the business failure. */
-    public abstract void updateStatus(CommandId commandId, Failure failure);
+    protected abstract void updateStatus(CommandId commandId, Failure failure);
 
     /**
      * Creates a command storage record builder passed on the passed parameters.

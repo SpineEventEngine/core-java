@@ -49,7 +49,6 @@ import org.spine3.test.projection.event.ProjectCreated;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 /**
  * @author Dmytro Dashenkov

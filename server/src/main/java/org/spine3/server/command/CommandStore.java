@@ -27,7 +27,6 @@ import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.server.command.error.CommandException;
-import org.spine3.server.storage.CommandStorage;
 
 import java.util.Iterator;
 

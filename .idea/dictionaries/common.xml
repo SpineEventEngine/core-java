@@ -27,6 +27,7 @@
       <w>millisecs</w>
       <w>multitenancy</w>
       <w>multitenant</w>
+      <w>nullable</w>
       <w>onclose</w>
       <w>oneof</w>
       <w>onmessage</w>

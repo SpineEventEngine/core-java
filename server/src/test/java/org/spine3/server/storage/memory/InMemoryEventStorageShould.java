@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStorageShould;
+import org.spine3.server.event.EventStorage;
+import org.spine3.server.event.EventStorageShould;
 
 /**
  * In-memory implementation of {@link EventStorage} tests.

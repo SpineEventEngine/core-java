@@ -32,6 +32,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -69,7 +70,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private static final ProjectId ID = Given.AggregateId.newProjectId();
+    private static final ProjectId ID = Given.newProjectId();
 
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);

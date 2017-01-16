@@ -63,13 +63,12 @@ public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, En
 
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final RecordStorage storage = (RecordStorage) getStorage();
-
         final FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                      .addPaths("invalid-path")
                                                      .build();
-
+        final RecordStorage storage = getStorage();
         final Map empty = storage.readAll(nonEmptyFieldMask);
+
         assertNotNull(empty);
         assertEmpty(empty);
     }
