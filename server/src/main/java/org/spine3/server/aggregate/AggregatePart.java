@@ -39,12 +39,16 @@ import com.google.protobuf.Message;
  *
  * <p>In order to access parts of the aggregate {@link AggregateRoot} should be used.
  *
+ * <p>If your business logic cannot be split into parts that can be modified separately,
+ * consider extending {@link Aggregate} instead of several {@code AggregatePart}s.
+ *
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate part
  * @param <B> the type of the aggregate part state builder
  * @author Alexander Yevsyukov
+ * @see Aggregate
  */
-public class AggregatePart<I, S extends Message, B extends Message.Builder> extends Aggregate<I, S, B> {
+public abstract class AggregatePart<I, S extends Message, B extends Message.Builder> extends Aggregate<I, S, B> {
 
     /**
      * {@inheritDoc}
