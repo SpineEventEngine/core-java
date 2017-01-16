@@ -21,7 +21,9 @@
 package org.spine3.protobuf;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
 import com.google.common.collect.BiMap;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -65,7 +67,6 @@ import org.spine3.type.ClassName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -163,8 +164,21 @@ public class KnownTypes {
         return typeUrl;
     }
 
-    public static Collection<TypeUrl> getTypesFromPackage(String pakageName) {
-        return Collections.emptyList(); // TODO:16-01-17:dmytro.dashenkov: Implement.
+    public static Collection<TypeUrl> getTypesFromPackage(final String pakageName) {
+        final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
+        final Collection<TypeUrl> result = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
+            @Override
+            public boolean apply(@Nullable TypeUrl input) {
+                if (input == null) {
+                    return false;
+                }
+
+                final boolean inPackage = input.getTypeName().startsWith(pakageName);
+                return inPackage;
+            }
+        });
+
+        return result;
     }
 
     private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {

@@ -109,7 +109,10 @@ class EventEnrichmentsMap {
         }
 
         private void putAll(String enrichmentType, String eventsPackage) {
-            final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(eventsPackage);
+            // TODO:16-01-17:dmytro.dashenkov: Refactor next line.
+            final String packageName = enrichmentType.substring(0, eventsPackage.length() - 2);
+
+            final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 final String typeQualifier = type.getTypeName();
                 builder.put(enrichmentType, typeQualifier);
