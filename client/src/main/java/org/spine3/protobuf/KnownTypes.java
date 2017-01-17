@@ -164,7 +164,7 @@ public class KnownTypes {
         return typeUrl;
     }
 
-    public static Collection<TypeUrl> getTypesFromPackage(final String pakageName) {
+    public static Collection<TypeUrl> getTypesFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
         final Collection<TypeUrl> result = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
             @Override
@@ -173,7 +173,7 @@ public class KnownTypes {
                     return false;
                 }
 
-                final boolean inPackage = input.getTypeName().startsWith(pakageName);
+                final boolean inPackage = input.getTypeName().startsWith(packageName);
                 return inPackage;
             }
         });
