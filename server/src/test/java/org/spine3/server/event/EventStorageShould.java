@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Durations.nanos;
@@ -297,10 +298,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
                                                              .addFilter(eventFilter)
                                                              .build();
         final Iterator<Event> read = storage.iterator(streamQuery);
-        // Some of th Iterator implementations restrict usage of {@link Iterator#next()} without
-        // calling {@link Iterator#hasNext()} before
-        read.hasNext();
-        read.next(); // Invoke all lazy operations
+        if (read.hasNext()) {
+            read.next(); // Invoke all lazy operations
+        } else {
+            fail("Iterator hadn't invoked the #next() method and the lazy operations might not had been executed.");
+        }
     }
 
     @Test
