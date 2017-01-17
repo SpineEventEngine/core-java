@@ -31,6 +31,7 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.TaskAdded;
+import org.spine3.test.event.enrichment.GranterEventsEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
@@ -122,6 +123,12 @@ public class EventEnrichmentsMapShould {
         assertEventTypeByEnrichmentType(UserPackageEventsEnrichment.class,
                                         PermissionRevokedEvent.class,
                                         PermissionGrantedEvent.class);
+    }
+
+    @Test
+    public void contain_only_events_with_target_field_if_declared_though_package() {
+        assertOnlyEventTypeByEnrichmentType(GranterEventsEnrichment.class,
+                                            PermissionGrantedEvent.class);
     }
 
     @SafeVarargs

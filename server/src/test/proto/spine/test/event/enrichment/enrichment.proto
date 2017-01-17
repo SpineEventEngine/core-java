@@ -28,6 +28,7 @@ option java_multiple_files = true;
 import "spine/annotations.proto";
 import "spine/enrichment_annotations.proto";
 import "spine/time/zone_offset.proto";
+import "spine/people/person_name.proto";
 
 message ProjectCreatedEnrichmentAnotherPackage {
     option (enrichment_for) = "spine.test.event.ProjectCreated";
@@ -51,4 +52,10 @@ message UserPackageEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.*";
 
     spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
+}
+
+message GranterEventsEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permission.*";
+
+    spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
 }

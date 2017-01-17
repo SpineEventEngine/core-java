@@ -32,6 +32,9 @@ message PermissionGrantedEvent {
 
     string user_uid = 1;
     string permission_id = 2;
+
+    // ID of the user who granted the permission
+    string granter_uid = 3;
 }
 
 message PermissionRevokedEvent {
