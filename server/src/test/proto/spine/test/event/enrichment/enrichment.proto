@@ -55,7 +55,7 @@ message UserPackageEventsEnrichment {
 }
 
 message GranterEventsEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permission.*";
+    option (enrichment_for) = "spine.test.event.user.permissions.*";
 
     spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
 }
