@@ -29,6 +29,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -44,8 +45,18 @@ class Identifier<I> {
     static <I> Identifier<I> from(I value) {
         checkNotNull(value);
         final Type type = Type.getType(value);
-        final Identifier<I> result = new Identifier<>(type, value);
+        final Identifier<I> result = create(type, value);
         return result;
+    }
+
+    static Identifier<Message> fromMessage(Message value) {
+        checkNotNull(value);
+        final Identifier<Message> result = create(Type.MESSAGE, value);
+        return result;
+    }
+
+    private static <I> Identifier<I> create(Type type, I value) {
+        return new Identifier<>(type, value);
     }
 
     static <I> I getDefaultValue(Class<I> idClass) {
@@ -80,6 +91,34 @@ class Identifier<I> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        String result;
+
+        switch (type) {
+            case INTEGER:
+            case LONG:
+                result = value.toString();
+                break;
+
+            case STRING:
+                result = value.toString().trim();
+                break;
+
+            case MESSAGE:
+                result = Identifiers.idMessageToString((Message)value);
+                result = result.trim();
+                break;
+            default:
+                throw new IllegalStateException("toString() is not supported for type: " + type);
+        }
+
+        if (result.isEmpty()) {
+            result = EMPTY_ID;
+        }
+
+        return result;
+    }
 
     /**
      * Supported types of identifiers.

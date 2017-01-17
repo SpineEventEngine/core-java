@@ -30,6 +30,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
+import org.spine3.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -88,32 +89,20 @@ public class Identifiers {
         if (id == null) {
             return NULL_ID;
         }
-        String result;
-        if (isStringOrNumber(id)) {
-            result = id.toString();
-        } else if (id instanceof Any) {
-            final Message messageFromAny = unpack((Any) id);
-            result = idMessageToString(messageFromAny);
-        } else if (id instanceof Message) {
-            result = idMessageToString((Message) id);
+
+        final Identifier<?> identifier;
+        if (id instanceof Any) {
+            final Message unpacked = unpack((Any) id);
+            identifier = Identifier.fromMessage(unpacked);
         } else {
-            throw Identifier.Type.unsupported(id);
+            identifier = Identifier.from(id);
         }
-        result = result.trim();
-        if (result.isEmpty()) {
-            result = EMPTY_ID;
-        }
+
+        final String result = identifier.toString();
         return result;
     }
 
-    private static <I> boolean isStringOrNumber(I id) {
-        final boolean result = id instanceof String
-                || id instanceof Integer
-                || id instanceof Long;
-        return result;
-    }
-
-    private static String idMessageToString(Message message) {
+    static String idMessageToString(Message message) {
         final String result;
         final ConverterRegistry registry = ConverterRegistry.getInstance();
         if (registry.containsConverter(message)) {
@@ -216,6 +205,10 @@ public class Identifiers {
         return id;
     }
 
+    /**
+     * Obtains a default value for an identifier of the passed class.
+     */
+    @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
         return Identifier.getDefaultValue(idClass);
     }
