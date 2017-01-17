@@ -164,9 +164,9 @@ public class KnownTypes {
         return typeUrl;
     }
 
-    public static Collection<TypeUrl> getTypesFromPackage(final String packageName) {
+    public static Set<TypeUrl> getTypesFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
-        final Collection<TypeUrl> result = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
+        final Collection<TypeUrl> resultCollection = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
             @Override
             public boolean apply(@Nullable TypeUrl input) {
                 if (input == null) {
@@ -178,7 +178,8 @@ public class KnownTypes {
             }
         });
 
-        return result;
+        final Set<TypeUrl> resultSet = ImmutableSet.copyOf(resultCollection);
+        return resultSet;
     }
 
     private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {
