@@ -97,6 +97,8 @@ public class KnownTypes {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String DESCRIPTOR_GETTER_NAME = "getDescriptor";
 
+    private static final char PACKAGE_SEPARATOR = '.';
+
     /**
      * A map from Protobuf type URL to Java class name.
      *
@@ -179,8 +181,9 @@ public class KnownTypes {
                     return false;
                 }
 
-                final boolean inPackage = input.getTypeName()
-                                               .startsWith(packageName);
+                final String typeName = input.getTypeName();
+                final boolean inPackage = typeName.startsWith(packageName)
+                        && typeName.charAt(packageName.length()) == PACKAGE_SEPARATOR;
                 return inPackage;
             }
         });

@@ -143,6 +143,14 @@ public class KnownTypesShould {
     }
 
     @Test
+    public void do_not_return_types_of_package_by_package_prefix() {
+        final String prefix = "spine.test.ty"; // "spine.test.types" is a valid package
+
+        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(prefix);
+        assertTrue(packageTypes.isEmpty());
+    }
+
+    @Test
     public void have_all_valid_java_class_names() {
         final Set<ClassName> classes = KnownTypes.getJavaClasses();
         assertFalse(classes.isEmpty());
