@@ -41,6 +41,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},{@code proto.type.SecondEvent}
  *
  * @author Alexander Litus
+ * @author Dmytro Dashenkov
  */
 class EventEnrichmentsMap {
 
@@ -72,6 +73,9 @@ class EventEnrichmentsMap {
 
     private static class Builder {
 
+        /**
+         * Constant indicating a package qualifier.
+         */
         private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
 
         private final Iterable<Properties> properties;
@@ -93,22 +97,28 @@ class EventEnrichmentsMap {
             final Set<String> enrichmentTypes = props.stringPropertyNames();
             for (String enrichmentType : enrichmentTypes) {
                 final String eventTypesStr = props.getProperty(enrichmentType);
-                final Iterable<String> eventTypes = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
-                put(enrichmentType, eventTypes);
+                final Iterable<String> eventQualifier = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
+                put(enrichmentType, eventQualifier);
             }
         }
 
-        private void put(String enrichmentType, Iterable<String> eventTypes) {
-            for (String eventType : eventTypes) {
-                if (isPackage(eventType)) {
-                    putAll(enrichmentType, eventType);
+        private void put(String enrichmentType, Iterable<String> eventQualifiers) {
+            for (String eventQualifier : eventQualifiers) {
+                if (isPackage(eventQualifier)) {
+                    putAllTypesFromPackage(enrichmentType, eventQualifier);
                 } else {
-                    builder.put(enrichmentType, eventType);
+                    builder.put(enrichmentType, eventQualifier);
                 }
             }
         }
 
-        private void putAll(String enrichmentType, String eventsPackage) {
+        /**
+         * Puts all the events from the given package into the map to match the given enrichment type.
+         *
+         * @param enrichmentType type of the enrichment for the given events
+         * @param eventsPackage  package qualifier representing the protobuf package containing the event to enrich
+         */
+        private void putAllTypesFromPackage(String enrichmentType, String eventsPackage) {
             final int lastSignificantCharPos = eventsPackage.length() - PACKAGE_WILDCARD_INDICATOR.length();
             final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
@@ -118,6 +128,10 @@ class EventEnrichmentsMap {
             }
         }
 
+        /**
+         * @return {@code true} if the given qualifier is a package according to the contract
+         * of {@code "enrichment_for") option notation
+         */
         private static boolean isPackage(String qualifier) {
             checkNotNull(qualifier);
             checkArgument(!qualifier.isEmpty());
