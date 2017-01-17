@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.reflect.Classes;
 
 import javax.annotation.CheckReturnValue;
@@ -97,12 +98,55 @@ public abstract class Entity<I, S extends Message> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
-    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
-    public Entity(I id) {
-        // We make the constructor public in the abstract class to avoid having protected constructors in derived
-        // classes. We require that entity constructors be public as they are called by repositories.
+    protected Entity(I id) {
         checkIdType(id);
         this.id = id;
+    }
+
+    /**
+     * Obtains constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass the class of entity identifiers
+     * @param <E> the entity type
+     * @param <I> the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+        try {
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
+        }
+    }
+
+    private static IllegalStateException noSuchConstructorException(String entityClass, String idClass) {
+        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
+        return new IllegalStateException(new NoSuchMethodException(message));
+    }
+
+    /**
+     * Creates new entity and sets it to the default state.
+     *
+     * @param constructor the constructor to use
+     * @param id the ID of the entity
+     * @param <I> the type of entity IDs
+     * @param <E> the type of the entity
+     * @return new entity
+     */
+    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
+        try {
+            final E result = constructor.newInstance(id);
+            result.setDefault();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -125,20 +169,15 @@ public abstract class Entity<I, S extends Message> {
 
     private S createDefaultState() {
         final Class<S> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
-        try {
-            final Constructor<S> constructor = stateClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            final S state = constructor.newInstance();
-            return state;
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        final S result = Messages.newInstance(stateClass);
+        return result;
     }
 
     /**
      * Obtains the entity state.
      *
-     * @return the current state object or the value produced by {@link #getDefaultState()} if the state wasn't set
+     * @return the current state object or the value produced by {@link #getDefaultState()}
+     *         if the state wasn't set
      */
     @CheckReturnValue
     public S getState() {
