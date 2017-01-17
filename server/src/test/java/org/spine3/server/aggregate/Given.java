@@ -20,12 +20,15 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
+import org.spine3.base.Identifiers;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -35,8 +38,13 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.users.UserId;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -44,41 +52,40 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 class Given {
 
-    static class AggregateId {
+    private Given() {
+    }
 
-        private AggregateId() {}
-
-        public static ProjectId newProjectId() {
-            final String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
+    static ProjectId newProjectId() {
+        final String uuid = newUuid();
+        return ProjectId.newBuilder()
+                        .setId(uuid)
+                        .build();
     }
 
     static class EventMessage {
 
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
-        public static ProjectCreated projectCreated() {
-            final ProjectId id = AggregateId.newProjectId();
+        static ProjectCreated projectCreated() {
+            final ProjectId id = newProjectId();
             return projectCreated(id, newUuid());
         }
 
-        public static ProjectCreated projectCreated(ProjectId id, String projectName) {
+        static ProjectCreated projectCreated(ProjectId id, String projectName) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .setName(projectName)
                                  .build();
         }
 
-        public static TaskAdded taskAdded(ProjectId id) {
+        static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectStarted projectStarted(ProjectId id) {
+        static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
@@ -87,33 +94,34 @@ class Given {
 
     static class Event {
 
-        private Event() {}
-
-        public static org.spine3.base.Event projectCreated() {
-            return projectCreated(AggregateId.newProjectId());
+        private Event() {
         }
 
-        public static org.spine3.base.Event projectCreated(ProjectId projectId) {
+        static org.spine3.base.Event projectCreated() {
+            return projectCreated(newProjectId());
+        }
+
+        static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
+        static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId, newUuid());
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        public static org.spine3.base.Event taskAdded(ProjectId projectId) {
+        static org.spine3.base.Event taskAdded(ProjectId projectId) {
             return taskAdded(projectId, createEventContext(projectId));
         }
 
-        public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {
+        static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {
             final TaskAdded msg = EventMessage.taskAdded(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext context) {
+        static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext context) {
             final ProjectStarted msg = EventMessage.projectStarted(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
@@ -123,33 +131,34 @@ class Given {
     static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = newProjectId();
 
-        private Command() {}
+        private Command() {
+        }
 
-        public static org.spine3.base.Command createProject() {
+        static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        public static org.spine3.base.Command createProject(ProjectId id) {
+        static org.spine3.base.Command createProject(ProjectId id) {
             return createProject(USER_ID, id, getCurrentTime());
         }
 
-        public static org.spine3.base.Command createProject(Timestamp when) {
+        static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
-        public static org.spine3.base.Command addTask(ProjectId id) {
+        static org.spine3.base.Command addTask(ProjectId id) {
             final AddTask command = CommandMessage.addTask(id);
             return create(command, USER_ID, getCurrentTime());
         }
 
-        public static org.spine3.base.Command startProject(ProjectId id) {
+        static org.spine3.base.Command startProject(ProjectId id) {
             final StartProject command = CommandMessage.startProject(id);
             return create(command, USER_ID, getCurrentTime());
         }
@@ -158,7 +167,7 @@ class Given {
          * Creates a new {@link Command} with the given command message, userId and timestamp using default
          * {@link CommandId} instance.
          */
-        public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
+        static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.create(command, context);
             return result;
@@ -167,25 +176,81 @@ class Given {
 
     static class CommandMessage {
 
-        private CommandMessage() {}
+        private CommandMessage() {
+        }
 
-        public static CreateProject createProject(ProjectId id) {
+        static CreateProject createProject(ProjectId id) {
             final CreateProject.Builder builder = CreateProject.newBuilder()
                                                                .setProjectId(id)
                                                                .setName("Project_" + id.getId());
             return builder.build();
         }
 
-        public static AddTask addTask(ProjectId id) {
+        static AddTask addTask(ProjectId id) {
             final AddTask.Builder builder = AddTask.newBuilder()
                                                    .setProjectId(id);
             return builder.build();
         }
 
-        public static StartProject startProject(ProjectId id) {
+        static StartProject startProject(ProjectId id) {
             final StartProject.Builder builder = StartProject.newBuilder()
                                                              .setProjectId(id);
             return builder.build();
+        }
+    }
+
+    static class StorageRecord {
+
+        private StorageRecord() {
+        }
+
+        static AggregateStorageRecord create(Timestamp timestamp) {
+            final AggregateStorageRecord.Builder builder
+                    = AggregateStorageRecord.newBuilder()
+                                            .setEventId(Identifiers.newUuid())
+                                            .setTimestamp(timestamp);
+            return builder.build();
+        }
+
+        static AggregateStorageRecord create(Timestamp timestamp, org.spine3.base.Event event) {
+            final AggregateStorageRecord.Builder builder = create(timestamp)
+                    .toBuilder()
+                    .setEvent(event);
+            return builder.build();
+        }
+    }
+
+    static class StorageRecords {
+
+        private StorageRecords() {
+        }
+
+        /**
+         * Returns several records sorted by timestamp ascending.
+         * First record's timestamp is the current time.
+         */
+        static List<AggregateStorageRecord> sequenceFor(ProjectId id) {
+            return sequenceFor(id, getCurrentTime());
+        }
+
+        /**
+         * Returns several records sorted by timestamp ascending.
+         *
+         * @param timestamp1 the timestamp of first record.
+         */
+        static List<AggregateStorageRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
+            final Duration delta = seconds(10);
+            final Timestamp timestamp2 = add(timestamp1, delta);
+            final Timestamp timestamp3 = add(timestamp2, delta);
+
+            final AggregateStorageRecord record1 = StorageRecord.create(timestamp1,
+                                                                        Event.projectCreated(id, createEventContext(timestamp1)));
+            final AggregateStorageRecord record2 = StorageRecord.create(timestamp2,
+                                                                        Event.taskAdded(id, createEventContext(timestamp2)));
+            final AggregateStorageRecord record3 = StorageRecord.create(timestamp3,
+                                                                        Event.projectStarted(id, createEventContext(timestamp3)));
+
+            return newArrayList(record1, record2, record3);
         }
     }
 }

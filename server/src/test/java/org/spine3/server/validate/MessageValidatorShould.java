@@ -43,6 +43,8 @@ import org.spine3.test.validate.msg.DecimalMinIncNumberFieldValue;
 import org.spine3.test.validate.msg.DecimalMinNotIncNumberFieldValue;
 import org.spine3.test.validate.msg.DigitsCountNumberFieldValue;
 import org.spine3.test.validate.msg.EnclosedMessageFieldValue;
+import org.spine3.test.validate.msg.EnclosedMessageFieldValueWithCustomInvalidMessage;
+import org.spine3.test.validate.msg.EnclosedMessageFieldValueWithoutAnnotationFieldValueWithCustomInvalidMessage;
 import org.spine3.test.validate.msg.EnclosedMessageWithoutAnnotationFieldValue;
 import org.spine3.test.validate.msg.EntityIdByteStringFieldValue;
 import org.spine3.test.validate.msg.EntityIdDoubleFieldValue;
@@ -78,6 +80,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Alexander Litus
@@ -786,6 +789,21 @@ public class MessageValidatorShould {
         assertEquals(NO_VALUE_MSG, violation.getMsgFormat());
         assertFieldPathIs(violation, VALUE);
         assertTrue(violation.getViolationList().isEmpty());
+    }
+
+    @Test
+    public void provide_custom_invalid_field_message_if_specified() {
+        validate(EnclosedMessageFieldValueWithCustomInvalidMessage.getDefaultInstance());
+
+        assertSize(1, violations);
+        final ConstraintViolation violation = firstViolation();
+        assertEquals("Custom error", violation.getMsgFormat());
+    }
+
+    @Test
+    public void ignore_custom_invalid_field_message_if_validation_is_disabled() {
+        validate(EnclosedMessageFieldValueWithoutAnnotationFieldValueWithCustomInvalidMessage.getDefaultInstance());
+        assertIsValid(true);
     }
 
     /*

@@ -18,27 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
-
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.projection.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
-
 /**
- * @author Alexander Litus
+ * This package contains generated classes and interfaces for storing
+ * {@link org.spine3.server.aggregate.Aggregate}s.
+ *
+ * @see org.spine3.server.aggregate.AggregateStorage
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage, false);
-        return storage;
-    }
+@SPI
+@ParametersAreNonnullByDefault
+package org.spine3.server.aggregate.storage;
 
-    @Override
-    protected String newId() {
-        return newUuid();
-    }
-}
+import org.spine3.SPI;
+
+import javax.annotation.ParametersAreNonnullByDefault;

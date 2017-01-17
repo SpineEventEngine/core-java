@@ -35,8 +35,8 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorage;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -44,7 +44,7 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Processes the queries targeting {@link org.spine3.server.aggregate.Aggregate} state.
+ * Processes the queries targeting {@link Aggregate} state.
  *
  * @author Alex Tymchenko
  */

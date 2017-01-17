@@ -36,12 +36,12 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.AggregateEvents;
-import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -56,7 +56,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -91,7 +91,7 @@ public class AggregateRepositoryShould {
     private CommandStore commandStore;
     private EventBus eventBus;
 
-    private final ProjectId projectId = Given.AggregateId.newProjectId();
+    private final ProjectId projectId = Given.newProjectId();
 
     @Before
     public void setUp() {
@@ -116,7 +116,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void return_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId())
+        final ProjectAggregate aggregate = repository.load(Given.newProjectId())
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -125,7 +125,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
@@ -140,7 +140,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void restore_aggregate_using_snapshot() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.getUncommittedEvents()
@@ -186,7 +186,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void dispatch_several_commands() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         assertDispatches(Given.Command.createProject(id));
         assertDispatches(Given.Command.addTask(id));
         assertDispatches(Given.Command.startProject(id));
@@ -215,7 +215,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_aggregate_on_command_dispatching() {
-        final ProjectId id = Given.AggregateId.newProjectId();
+        final ProjectId id = Given.newProjectId();
         final Command cmd = Given.Command.createProject(id);
         final CreateProject msg = Commands.getMessage(cmd);
 
@@ -307,7 +307,7 @@ public class AggregateRepositoryShould {
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        final ProjectId projectId = Given.AggregateId.newProjectId();
+        final ProjectId projectId = Given.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
@@ -334,7 +334,7 @@ public class AggregateRepositoryShould {
      ****************************/
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents() {
-        return givenAggregateWithUncommittedEvents(Given.AggregateId.newProjectId());
+        return givenAggregateWithUncommittedEvents(Given.newProjectId());
     }
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
@@ -400,14 +400,14 @@ public class AggregateRepositoryShould {
     }
 
     /*
-     * Test classes.
+     * Test classes
      ****************************/
 
     @SuppressWarnings("TypeMayBeWeakened")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
-        private static final Map<CommandId, Command> commandsHandled = newHashMap();
+        private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")      // Required to be `public`.
         public ProjectAggregate(ProjectId id) {
@@ -418,8 +418,10 @@ public class AggregateRepositoryShould {
         public ProjectCreated handle(CreateProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final ProjectCreated event = Given.EventMessage.projectCreated(msg.getProjectId(), msg.getName());
-            return event;
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .setName(msg.getName())
+                                 .build();
         }
 
         @Apply
@@ -432,8 +434,9 @@ public class AggregateRepositoryShould {
         public TaskAdded handle(AddTask msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final TaskAdded event = Given.EventMessage.taskAdded(msg.getProjectId());
-            return event;
+            return TaskAdded.newBuilder()
+                            .setProjectId(msg.getProjectId())
+                            .build();
         }
 
         @Apply
@@ -445,8 +448,9 @@ public class AggregateRepositoryShould {
         public ProjectStarted handle(StartProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
-            final ProjectStarted event = Given.EventMessage.projectStarted(msg.getProjectId());
-            return event;
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .build();
         }
 
         @Apply
