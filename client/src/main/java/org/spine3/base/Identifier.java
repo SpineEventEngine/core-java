@@ -38,11 +38,13 @@ import static org.spine3.protobuf.Values.newStringValue;
  */
 class Identifier<I> {
 
-    private final I value;
     private final Type type;
+    private final I value;
 
     static <I> Identifier<I> from(I value) {
-        final Identifier<I> result = new Identifier<>(checkNotNull(value));
+        checkNotNull(value);
+        final Type type = Type.getType(value);
+        final Identifier<I> result = new Identifier<>(type, value);
         return result;
     }
 
@@ -52,9 +54,9 @@ class Identifier<I> {
         return result;
     }
 
-    private Identifier(I value) {
+    private Identifier(Type type, I value) {
         this.value = value;
-        this.type = Type.getType(value);
+        this.type = type;
     }
 
     boolean isString() {
