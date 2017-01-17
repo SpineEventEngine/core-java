@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Durations.nanos;
@@ -297,7 +298,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
                                                              .addFilter(eventFilter)
                                                              .build();
         final Iterator<Event> read = storage.iterator(streamQuery);
-        read.next(); // Invoke all lazy operations
+        if (read.hasNext()) {
+            read.next(); // Invoke all lazy operations
+        } else {
+            fail("Cannot ensure the element presence in the Event iterator.");
+        }
     }
 
     @Test
