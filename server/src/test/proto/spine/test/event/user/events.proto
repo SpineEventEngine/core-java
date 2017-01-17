@@ -19,28 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.test.event.enrichment.otherpackage;
+package spine.test.event.user;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.event.enrichment.otherpackage";
+option java_package="org.spine3.test.event.user";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/enrichment_annotations.proto";
 
-message ProjectCreatedEvent {
+message UserLoggedInEvent {
 
-    string project_uid = 1;
+    string user_uid = 1;
 }
 
-message ProjectModifiedEvent {
+message UserMentionedEvent {
 
-    string project_uid = 1;
+    string user_uid = 1;
     string title = 2;
 }
 
-message ProjectDeletedEvent {
+message UserLoggedOutEvent {
 
-    string project_uid = 1;
+    string user_uid = 1;
     string owner_email = 2;
 }

@@ -46,7 +46,7 @@ message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
 }
 
 message ProjectPackageEventsEnrichment {
-    option (enrichment_for) = "spine.test.event.enrichment.otherpackage.*";
+    option (enrichment_for) = "spine.test.event.user.*";
 
-    spine.time.ZoneOffset time_zone = 1 [(by) = "*.project_uid"];
+    spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
 }

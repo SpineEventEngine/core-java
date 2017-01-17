@@ -19,6 +19,7 @@
 //
 syntax = "proto3";
 
+// Used to find following messages by their package in `KnownTypes`.
 package spine.test.types;
 
 option (type_url_prefix) = "type.spine3.org";
