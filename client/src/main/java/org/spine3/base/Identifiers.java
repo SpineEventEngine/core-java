@@ -213,8 +213,6 @@ public class Identifiers {
         return Identifier.getDefaultValue(idClass);
     }
 
-    //TODO:2017-01-17:alexander.yevsyukov: Rename to IdToStringRegistry and move to the top.
-
     /** The registry of converters of ID types to string representations. */
     public static class ConverterRegistry {
 
