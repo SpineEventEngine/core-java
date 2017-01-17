@@ -35,9 +35,9 @@ import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
 import org.spine3.test.event.enrichment.ProjectPackageEventsEnrichment;
-import org.spine3.test.event.enrichment.innerpackage.ProjectCreatedEvent;
-import org.spine3.test.event.enrichment.innerpackage.ProjectDeletedEvent;
-import org.spine3.test.event.enrichment.innerpackage.ProjectModifiedEvent;
+import org.spine3.test.event.enrichment.otherpackage.ProjectCreatedEvent;
+import org.spine3.test.event.enrichment.otherpackage.ProjectDeletedEvent;
+import org.spine3.test.event.enrichment.otherpackage.ProjectModifiedEvent;
 
 import java.util.Collection;
 
@@ -49,7 +49,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"}) // Over-coupling is OK for test classes
 public class EventEnrichmentsMapShould {
 
     @Test
