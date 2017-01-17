@@ -33,6 +33,7 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.time.ZoneOffset;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -152,7 +153,8 @@ public class Given {
                     .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
                     .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
                     .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING);
+                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING)
+                    .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET);
             return builder.build();
         }
 
@@ -230,6 +232,17 @@ public class Given {
                     @Override
                     public String apply(@Nullable EventContext.Attributes input) {
                         return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
+                new Function<String, ZoneOffset>() {
+                    @Nullable
+                    @Override
+                    public ZoneOffset apply(@Nullable String input) {
+                        return input == null
+                               ? ZoneOffset.getDefaultInstance()
+                               : ZoneOffset.newBuilder().setId(input).build();
                     }
                 };
     }

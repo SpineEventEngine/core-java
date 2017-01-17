@@ -34,6 +34,10 @@ import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
+import org.spine3.test.event.enrichment.ProjectPackageEventsEnrichment;
+import org.spine3.test.event.enrichment.innerpackage.ProjectCreatedEvent;
+import org.spine3.test.event.enrichment.innerpackage.ProjectDeletedEvent;
+import org.spine3.test.event.enrichment.innerpackage.ProjectModifiedEvent;
 
 import java.util.Collection;
 
@@ -99,6 +103,14 @@ public class EventEnrichmentsMapShould {
     @Test
     public void contain_ProjectCreated_by_EnrichmentByContextFields_type() {
         assertEventTypeByEnrichmentType(EnrichmentByContextFields.class, ProjectCreated.class);
+    }
+
+    @Test
+    public void contain_all_events_from_package_by_one_enrichment() {
+        assertEventTypeByEnrichmentType(ProjectPackageEventsEnrichment.class,
+                                        ProjectCreatedEvent.class,
+                                        ProjectModifiedEvent.class,
+                                        ProjectDeletedEvent.class);
     }
 
     @SafeVarargs
