@@ -109,7 +109,7 @@ class EventEnrichmentsMap {
         }
 
         private void putAll(String enrichmentType, String eventsPackage) {
-            final int lastSignificantCharPos = eventsPackage.length() - 2;
+            final int lastSignificantCharPos = eventsPackage.length() - PACKAGE_WILDCARD_INDICATOR.length();
             final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
