@@ -19,7 +19,6 @@
 //
 syntax = "proto3";
 
-// Used to find following messages by their package in `KnownTypes`.
 package spine.test.types;
 
 option (type_url_prefix) = "type.spine3.org";
@@ -27,6 +26,11 @@ option java_package="org.spine3.test.types";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
+
+// The types declared below are used to test the `KnownTypes#getTypesFromPackage`.
+//
+// See `KnownTypesShould` for the unit test code.
+//
 
 message TaskId {
     string value = 1;

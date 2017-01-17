@@ -46,14 +46,21 @@ message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
     string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
 }
 
-// Enrichment for all the event in the "spine.test.event.user" package.
-// See {@code EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment} test.
+// The enrichment for all the events declared in the "spine.test.event.user" package.
+//
+// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+//
 message UserPackageEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.*";
 
     spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
 }
 
+// The enrichment for all the event declared in "spine.test.event.user.permissions" package and referencing user who
+// is able to grant permissions.
+//
+// See `EventEnrichmentsMapShould#contain_only_events_with_target_field_if_declared_though_package` test for details.
+//
 message GranterEventsEnrichment {
     option (enrichment_for) = "spine.test.event.user.permissions.*";
 
