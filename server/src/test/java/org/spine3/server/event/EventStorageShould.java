@@ -301,7 +301,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         if (read.hasNext()) {
             read.next(); // Invoke all lazy operations
         } else {
-            fail("Iterator hadn't invoked the #next() method and the lazy operations might not had been executed.");
+            fail("Cannot ensure the element presence in the Event iterator.");
         }
     }
 
