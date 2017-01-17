@@ -34,10 +34,10 @@ import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
-import org.spine3.test.event.enrichment.ProjectPackageEventsEnrichment;
-import org.spine3.test.event.enrichment.otherpackage.ProjectCreatedEvent;
-import org.spine3.test.event.enrichment.otherpackage.ProjectDeletedEvent;
-import org.spine3.test.event.enrichment.otherpackage.ProjectModifiedEvent;
+import org.spine3.test.event.enrichment.UserPackageEventsEnrichment;
+import org.spine3.test.event.user.UserLoggedInEvent;
+import org.spine3.test.event.user.UserLoggedOutEvent;
+import org.spine3.test.event.user.UserMentionedEvent;
 
 import java.util.Collection;
 
@@ -107,10 +107,10 @@ public class EventEnrichmentsMapShould {
 
     @Test
     public void contain_all_events_from_package_by_one_enrichment() {
-        assertEventTypeByEnrichmentType(ProjectPackageEventsEnrichment.class,
-                                        ProjectCreatedEvent.class,
-                                        ProjectModifiedEvent.class,
-                                        ProjectDeletedEvent.class);
+        assertEventTypeByEnrichmentType(UserPackageEventsEnrichment.class,
+                                        UserLoggedInEvent.class,
+                                        UserMentionedEvent.class,
+                                        UserLoggedOutEvent.class);
     }
 
     @SafeVarargs

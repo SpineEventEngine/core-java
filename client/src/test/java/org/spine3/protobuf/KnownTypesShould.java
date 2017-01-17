@@ -33,9 +33,9 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.test.wildcard.Task;
-import org.spine3.test.wildcard.TaskId;
-import org.spine3.test.wildcard.TaskName;
+import org.spine3.test.types.Task;
+import org.spine3.test.types.TaskId;
+import org.spine3.test.types.TaskName;
 import org.spine3.type.ClassName;
 
 import java.util.Arrays;
