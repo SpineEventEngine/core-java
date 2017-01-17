@@ -23,8 +23,8 @@ package org.spine3.server.storage.memory;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -71,7 +71,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    public int readEventCountAfterLastSnapshot(I id) {
+    protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
         final Integer count = eventCountMap.get(id);
         if (count == null) {
@@ -81,7 +81,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
+    protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
         eventCountMap.put(id, eventCount);
     }

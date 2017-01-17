@@ -289,4 +289,16 @@ public class Validate {
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
+
+    /**
+     * Ensures that the passed name is not empty or blank.
+     *
+     * @param name the name to check
+     * @return the passed value
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value.
+    public static String checkNameNotEmptyOrBlank(String name) {
+        return checkNotEmptyOrBlank(name, "name");
+    }
 }

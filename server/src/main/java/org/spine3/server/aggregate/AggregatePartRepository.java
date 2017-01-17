@@ -18,27 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.aggregate;
 
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.projection.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
+import org.spine3.server.BoundedContext;
 
 /**
- * @author Alexander Litus
+ * Common abstract base for repositories that manage {@code AggregatePart}s.
+ *
+ * @author Alexander Yevsyukov
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+public class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage, false);
-        return storage;
+    /**
+     * {@inheritDoc}
+     */
+    protected AggregatePartRepository(BoundedContext boundedContext) {
+        super(boundedContext);
     }
 
-    @Override
-    protected String newId() {
-        return newUuid();
+    /**
+     * {@inheritDoc}
+     */
+    @Override // to expose this method in the same package.
+    protected Class<I> getIdClass() {
+        return super.getIdClass();
     }
 }

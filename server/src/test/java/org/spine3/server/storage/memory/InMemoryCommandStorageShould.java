@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageShould;
+import org.spine3.server.command.CommandStorage;
+import org.spine3.server.command.CommandStorageShould;
 
 public class InMemoryCommandStorageShould extends CommandStorageShould {
 

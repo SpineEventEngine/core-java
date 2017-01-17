@@ -44,7 +44,7 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandValidator {
+class CommandValidator {
 
     private static final String COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK =
             "Command target entity ID cannot be empty or blank.";

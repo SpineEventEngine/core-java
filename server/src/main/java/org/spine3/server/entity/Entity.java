@@ -74,7 +74,7 @@ public abstract class Entity<I, S extends Message> {
     private static final int ID_CLASS_GENERIC_INDEX = 0;
 
     /** The index of the declaration of the generic parameter type {@code S} in this class. */
-    protected static final int STATE_CLASS_GENERIC_INDEX = 1;
+    public static final int STATE_CLASS_GENERIC_INDEX = 1;
 
     /** Supported ID types except {@link Message}s. */
     private static final ImmutableSet<Class<?>> SUPPORTED_SIMPLE_ID_TYPES = ImmutableSet.<Class<?>>builder()

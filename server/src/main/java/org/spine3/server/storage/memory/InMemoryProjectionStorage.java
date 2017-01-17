@@ -22,8 +22,8 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Map;

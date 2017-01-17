@@ -26,8 +26,8 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.StandStorage;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Alex Tymchenko
  */
-public class InMemoryStandStorage extends StandStorage {
+class InMemoryStandStorage extends StandStorage {
 
     private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN
             = "The typeUrl of the record (%s) does not correspond to id (for type %s)";

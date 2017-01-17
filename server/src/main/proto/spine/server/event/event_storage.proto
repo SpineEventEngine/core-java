@@ -19,37 +19,44 @@
 //
 syntax = "proto3";
 
-package spine.server.aggregate;
+package spine.event.storage;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_generate_equals_and_hash = true;
+option (SPI_all) = true;
+option java_package = "org.spine3.server.event.storage";
 option java_multiple_files = true;
-option java_outer_classname = "SnapshotProto";
-option java_package = "org.spine3.server.aggregate";
+option java_outer_classname = "EventStorageProto";
+option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
+import "spine/base/event.proto";
 
-// Built-in event type for storing aggregate snapshots.
-message Snapshot {
+// This type defines the way events are stored in event storage.
+// Some of the fields are defined as string representation of corresponding message types
+// so that these fields are available for querying.
+message EventStorageRecord {
     option (SPI_type) = true;
 
-    // The state of the aggregate.
-    google.protobuf.Any state = 1;
+    // A moment of time when the event occurred.
+    google.protobuf.Timestamp timestamp = 1;
 
-    // Time when the stored state of the aggregate was modified.
-    //
-    // This value is copied to the aggregated when the snapshot is restored.
-    google.protobuf.Timestamp when_modified = 2;
+    // A short name of Protobuf type of the event.
+    string event_type = 2;
 
-    // The version of the aggregate at which the snapshot was made.
-    int32 version = 3;
+    // String representation of ID of the aggregate or another entity, which generated the event.
+    string producer_id = 3;
 
-    // The moment the snapshot was created.
-    //
-    // This value should normally be after the time the aggregate was modified (and timestamp of the
-    // corresponding event), and before the time of the next event in the aggregate history.
-    google.protobuf.Timestamp timestamp = 4;
+    // String representation of `EventId`.
+    string event_id = 4;
+
+    reserved 5 to 19;
+
+    // Event instance.
+    google.protobuf.Any message = 20;
+
+    // Event context.
+    base.EventContext context = 21;
 }

@@ -18,14 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.aggregate.Snapshot;
+import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.Snapshot;
+import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -41,7 +44,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
- * An event-sourced storage of aggregate events and snapshots.
+ * An event-sourced storage of aggregate part events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
@@ -125,7 +128,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param event the event to write
      * @throws IllegalStateException if the storage is closed
      */
-    public void writeEvent(I id, Event event) {
+    protected void writeEvent(I id, Event event) {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(event);
@@ -141,7 +144,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param snapshot    the snapshot of the aggregate
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(I aggregateId, Snapshot snapshot) {
+    protected void write(I aggregateId, Snapshot snapshot) {
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
@@ -166,8 +169,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @return an even count after the last snapshot
      * @throws IllegalStateException if the storage is closed
      */
-    // TODO[alex.tymchenko]: make it `protected` after this Storage is moved to `aggregate` package.
-    public abstract int readEventCountAfterLastSnapshot(I id);
+    protected abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
      * Reads a count of events which were saved to the storage after the last snapshot was created,
@@ -177,8 +179,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param eventCount an even count after the last snapshot
      * @throws IllegalStateException if the storage is closed
      */
-    // TODO[alex.tymchenko]: make it `protected` after this Storage is moved to `aggregate` package.
-    public abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
+    protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");

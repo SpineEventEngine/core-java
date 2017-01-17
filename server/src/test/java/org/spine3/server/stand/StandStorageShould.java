@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.stand;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
@@ -34,7 +34,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
