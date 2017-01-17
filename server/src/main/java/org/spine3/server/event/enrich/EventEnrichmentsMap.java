@@ -110,7 +110,7 @@ class EventEnrichmentsMap {
 
         private void putAll(String enrichmentType, String eventsPackage) {
             final int lastSignificantCharPos = eventsPackage.length() - 2;
-            final String packageName = enrichmentType.substring(0, lastSignificantCharPos);
+            final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 final String typeQualifier = type.getTypeName();
@@ -125,7 +125,7 @@ class EventEnrichmentsMap {
             final int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
             final int qualifierLength = qualifier.length();
 
-            final boolean result = indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length() - 1);
+            final boolean result = indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length());
             return result;
         }
     }
