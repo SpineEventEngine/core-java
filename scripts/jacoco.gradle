@@ -42,8 +42,6 @@ String parseClassName(final File file, final String sourceFolderName, final Stri
 
 //TODO:alex.tymchenko: deal with generated `grpc`-related content.
 LinkedList<String> getGeneratedClassNames() {
-//    final File destinationDir = new File(project.rootDir, ".generated-jacoco");
-
     final def sourceFiles = files(subprojects.sourceSets.main.java.srcDirs);
     final def generatedSourceFiles = filterOnlyGenerated(sourceFiles);
 
@@ -53,8 +51,14 @@ LinkedList<String> getGeneratedClassNames() {
             folder.eachFileRecurse(FileType.FILES) { final aFile ->
                 final def name = parseClassName(aFile, "java/", ".java")
                 if(name != null) {
-//                    println("${aFile.getAbsolutePath()} parsed into: ${name}")
+                    println("${aFile.getAbsolutePath()} parsed into: ${name}")
                     generatedClassNames.add(name)
+                } else {
+                    println("${aFile.getAbsolutePath()} cannot be parsed. Potentially, it's a gRPC-generated: ${name}")
+                    generatedByGrpc = parseClassName(aFile, "main/grpc/", ".java")
+                    if(generatedByGrpc != null) {
+                        generatedClassNames.add(generatedByGrpc)
+                    }
                 }
             }
         }
@@ -83,13 +87,10 @@ LinkedList<String> getGeneratedFilePaths() {
     return generatedClassNames;
 }
 
-
 task filterTest {
-
     final def generatedClassNames = getGeneratedClassNames();
 
     final def collected = subprojects.sourceSets.main.output.collect {
-        println("Collecting: ${it.getClassesDir()}")
         final def tree = fileTree(dir: it.getClassesDir(), exclude: { final details ->
             final def file = details.file
             println file.getClass()
@@ -103,44 +104,44 @@ task filterTest {
     }
 }
 
+task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
+        additionalSourceDirs = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
+        sourceDirectories = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
+        classDirectories = files(subprojects.sourceSets.main.output)
+        executionData = files(subprojects.jacocoTestReport.executionData)
+        reports {
+            html.enabled = true
+            xml.enabled = true
+            csv.enabled = false
+        }
+        onlyIf = {
+            true
+        }
+        doFirst {
+            // In case some modules do not have the JaCoCo execution data files.
+            executionData = files(executionData.findAll {
+                it.exists()
+            })
 
+            println("Starting to compose an aggregate coverage report across modules.")
 
-task jacocoRootReport(type: JacocoReport) {
-    dependsOn = subprojects.test
+            final def generatedClassNames = getGeneratedClassNames();
+            final def nonGeneratedClassTree = subprojects.sourceSets.main.output.collect {
+                println("Filtering out the generated classes for ${it.getClassesDir()}")
 
-    final def generatedClassNames = getGeneratedClassNames();
-    final def nonGeneratedClassTree = subprojects.sourceSets.main.output.collect {
-        println("Collecting: ${it.getClassesDir()}")
-        final def tree = fileTree(dir: it.getClassesDir(), exclude: { final details ->
-            final def file = details.file
-            def className = parseClassName(file, "main/", ".class")
-            if(className != null && className.contains('$')) {
-                //assuming there cannot be more that a single `$`.
-                className = className.split('\\$')[0]
+                // return the filtered `fileTree` as a collected result.
+                fileTree(dir: it.getClassesDir(), exclude: { final details ->
+                    final def file = details.file
+                    def className = parseClassName(file, "main/", ".class")
+                    if (className != null && className.contains('$')) {
+                        //assuming there cannot be more that a single `$`.
+                        className = className.split('\\$')[0]
+                    }
+                    generatedClassNames.contains(className)
+                })
             }
-            generatedClassNames.contains(className)
-        })
-    }
-
-
-    additionalSourceDirs = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
-    sourceDirectories = filterOutGenerated(files(subprojects.sourceSets.main.java.srcDirs))
-    classDirectories = files(nonGeneratedClassTree)
-
-    executionData = files(subprojects.jacocoTestReport.executionData)
-    reports {
-        html.enabled = true
-        xml.enabled = true
-        csv.enabled = false
-    }
-    onlyIf = {
-        true
-    }
-    doFirst {
-        executionData = files(executionData.findAll {
-            it.exists()
-        })
-    }
+            classDirectories = files(nonGeneratedClassTree)
+        }
 }
 
 check.dependsOn jacocoRootReport
