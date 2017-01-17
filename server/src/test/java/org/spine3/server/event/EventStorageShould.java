@@ -298,7 +298,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
                                                              .build();
         final Iterator<Event> read = storage.iterator(streamQuery);
         // Some of th Iterator implementations restrict usage of {@link Iterator#next()} without
-        // calling {@link Iterator#next()} before
+        // calling {@link Iterator#hasNext()} before
         read.hasNext();
         read.next(); // Invoke all lazy operations
     }
