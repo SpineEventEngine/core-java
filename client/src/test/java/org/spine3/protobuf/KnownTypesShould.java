@@ -33,16 +33,23 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.error.UnknownTypeException;
+import org.spine3.test.wildcard.Task;
+import org.spine3.test.wildcard.TaskId;
+import org.spine3.test.wildcard.TaskName;
 import org.spine3.type.ClassName;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Alexander Litus
@@ -112,6 +119,27 @@ public class KnownTypesShould {
         final TypeUrl typeUrlActual = KnownTypes.getTypeUrl(typeUrlExpected.getTypeName());
 
         assertEquals(typeUrlExpected, typeUrlActual);
+    }
+
+    @Test
+    public void return_all_types_under_certain_package() {
+        final TypeUrl taskId = TypeUrl.from(TaskId.getDescriptor());
+        final TypeUrl taskName = TypeUrl.from(TaskName.getDescriptor());
+        final TypeUrl task = TypeUrl.from(Task.getDescriptor());
+
+        final String packageName = "spine.test.wildcard";
+
+        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(packageName);
+        assertSize(3, packageTypes);
+        assertTrue(packageTypes.containsAll(Arrays.asList(taskId, taskName, task)));
+    }
+
+    @Test
+    public void return_empty_collection_if_package_is_empty_or_invalid() {
+        final String packageName = "com.foo.invalid.package";
+        final Collection<?> emptyTypesCollection = KnownTypes.getTypesFromPackage(packageName);
+        assertNotNull(emptyTypesCollection);
+        assertTrue(emptyTypesCollection.isEmpty());
     }
 
     @Test
