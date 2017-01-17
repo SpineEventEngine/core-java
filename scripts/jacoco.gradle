@@ -40,7 +40,6 @@ String parseClassName(final File file, final String sourceFolderName, final Stri
     }
 }
 
-//TODO:alex.tymchenko: deal with generated `grpc`-related content.
 LinkedList<String> getGeneratedClassNames() {
     final def sourceFiles = files(subprojects.sourceSets.main.java.srcDirs);
     final def generatedSourceFiles = filterOnlyGenerated(sourceFiles);
@@ -49,13 +48,12 @@ LinkedList<String> getGeneratedClassNames() {
     generatedSourceFiles.each {final folder ->
         if(folder.exists() && folder.isDirectory()) {
             folder.eachFileRecurse(FileType.FILES) { final aFile ->
-                final def name = parseClassName(aFile, "java/", ".java")
+                final def name = parseClassName(aFile, "/java/", ".java")
                 if(name != null) {
-                    println("${aFile.getAbsolutePath()} parsed into: ${name}")
                     generatedClassNames.add(name)
                 } else {
-                    println("${aFile.getAbsolutePath()} cannot be parsed. Potentially, it's a gRPC-generated: ${name}")
-                    generatedByGrpc = parseClassName(aFile, "main/grpc/", ".java")
+                    // try another folder prefix; perhaps this file is generated out of a gRPC service.
+                    final def generatedByGrpc = parseClassName(aFile, "/main/grpc/", ".java")
                     if(generatedByGrpc != null) {
                         generatedClassNames.add(generatedByGrpc)
                     }
@@ -65,43 +63,6 @@ LinkedList<String> getGeneratedClassNames() {
     }
 
     return generatedClassNames;
-}
-
-LinkedList<String> getGeneratedFilePaths() {
-
-    final def sourceFiles = files(subprojects.sourceSets.main.java.srcDirs);
-    final def generatedSourceFiles = filterOnlyGenerated(sourceFiles);
-
-    final def generatedClassNames = new LinkedList<String>()
-    generatedSourceFiles.each {final folder ->
-        if(folder.exists() && folder.isDirectory()) {
-            folder.eachFileRecurse(FileType.FILES) { final aFile ->
-                final def name = parseClassName(aFile, "java/", ".java")
-                if(name != null) {
-                    generatedClassNames.add(aFile.getAbsolutePath())
-                }
-            }
-        }
-    }
-
-    return generatedClassNames;
-}
-
-task filterTest {
-    final def generatedClassNames = getGeneratedClassNames();
-
-    final def collected = subprojects.sourceSets.main.output.collect {
-        final def tree = fileTree(dir: it.getClassesDir(), exclude: { final details ->
-            final def file = details.file
-            println file.getClass()
-            def className = parseClassName(file, "main/", ".class")
-            if(className != null && className.contains('$')) {
-                //assuming there cannot be more that a single `$`.
-                className = className.split('\\$')[0]
-            }
-            generatedClassNames.contains(className)
-        })
-    }
 }
 
 task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
@@ -125,6 +86,13 @@ task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
 
             println("Starting to compose an aggregate coverage report across modules.")
 
+            println(" - Available source dirs: ")
+            final def srcDirs = files(subprojects.sourceSets.main.java.srcDirs)
+            srcDirs.each {
+                println " --- ${it}"
+            }
+
+
             final def generatedClassNames = getGeneratedClassNames();
             final def nonGeneratedClassTree = subprojects.sourceSets.main.output.collect {
                 println("Filtering out the generated classes for ${it.getClassesDir()}")
@@ -132,7 +100,7 @@ task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
                 // return the filtered `fileTree` as a collected result.
                 fileTree(dir: it.getClassesDir(), exclude: { final details ->
                     final def file = details.file
-                    def className = parseClassName(file, "main/", ".class")
+                    def className = parseClassName(file, "/main/", ".class")
                     if (className != null && className.contains('$')) {
                         //assuming there cannot be more that a single `$`.
                         className = className.split('\\$')[0]
