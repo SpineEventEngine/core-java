@@ -127,7 +127,7 @@ public class KnownTypesShould {
         final TypeUrl taskName = TypeUrl.from(TaskName.getDescriptor());
         final TypeUrl task = TypeUrl.from(Task.getDescriptor());
 
-        final String packageName = "spine.test.wildcard";
+        final String packageName = "spine.test.types";
 
         final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(packageName);
         assertSize(3, packageTypes);
