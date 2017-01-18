@@ -22,10 +22,12 @@ package org.spine3.test;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
 import org.junit.Test;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
 
@@ -60,6 +62,17 @@ public class GivenShould {
 
     private static class AnAggregatePart extends AggregatePart<Long, Timestamp, Timestamp.Builder> {
         protected AnAggregatePart(Long id) {
+            super(id);
+        }
+    }
+
+    @Test
+    public void create_projection_builder() {
+        assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class).getResultClass());
+    }
+
+    private static class AProjection extends Projection<String, UInt32Value> {
+        protected AProjection(String id) {
             super(id);
         }
     }

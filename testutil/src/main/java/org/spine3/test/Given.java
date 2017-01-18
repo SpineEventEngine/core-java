@@ -27,6 +27,8 @@ import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregatePartBuilder;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityBuilder;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionBuilder;
 
 /**
  * Utility class for building test objects.
@@ -68,4 +70,12 @@ public class Given {
         result.setClass(partClass);
         return result;
     }
+
+    public static <P extends Projection<I, S>, I, S extends Message>
+           ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
+        final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
+        result.setClass(projectionClass);
+        return result;
+    }
+
 }
