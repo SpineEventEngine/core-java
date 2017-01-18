@@ -33,8 +33,10 @@ import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.NULL_ID;
@@ -213,6 +215,11 @@ public class StringifiersShould {
         assertEquals(NULL_ID, registry.get(Timestamp.class).get().apply(null));
         assertEquals(NULL_ID, registry.get(EventId.class).get().apply(null));
         assertEquals(NULL_ID, registry.get(CommandId.class).get().apply(null));
+    }
+
+    @Test
+    public void return_false_on_attempt_to_find_unregistered_type() {
+        assertFalse(StringifierRegistry.getInstance().hasStringiferFor(Random.class));
     }
 
     @Test

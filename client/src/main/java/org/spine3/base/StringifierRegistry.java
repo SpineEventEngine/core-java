@@ -77,7 +77,7 @@ class StringifierRegistry {
     }
 
     public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {
-        final boolean contains = entries.containsKey(valueClass) && (entries.get(valueClass) != null);
+        final boolean contains = entries.containsKey(valueClass);
         return contains;
     }
 
