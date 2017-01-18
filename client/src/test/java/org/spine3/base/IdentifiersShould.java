@@ -44,7 +44,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.NULL_ID;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.base.Stringifiers.timestampToIdString;
+import static org.spine3.base.Stringifiers.toIdString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntegerValue;
 import static org.spine3.protobuf.Values.newLongValue;
@@ -157,7 +157,7 @@ public class IdentifiersShould {
     public void convert_to_string_message_id_with_timestamp_field() {
         final Timestamp currentTime = getCurrentTime();
         final TimestampFieldId id = TimestampFieldId.newBuilder().setId(currentTime).build();
-        final String expected = timestampToIdString(currentTime);
+        final String expected = toIdString(currentTime);
 
         final String actual = idToString(id);
 

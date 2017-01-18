@@ -43,6 +43,7 @@ public class Stringifiers {
 
     /** A {@code null} ID string representation. */
     public static final String NULL_ID = "NULL";
+
     /** An empty ID string representation. */
     public static final String EMPTY_ID = "EMPTY";
 
@@ -61,7 +62,7 @@ public class Stringifiers {
      * @param timestamp the value to convert
      * @return string representation of timestamp-based ID
      */
-    public static String timestampToIdString(Timestamp timestamp) {
+    public static String toIdString(Timestamp timestamp) {
         String result = Timestamps.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
@@ -143,7 +144,7 @@ public class Stringifiers {
             if (timestamp == null) {
                 return NULL_ID;
             }
-            final String result = timestampToIdString(timestamp);
+            final String result = toIdString(timestamp);
             return result;
         }
     }
