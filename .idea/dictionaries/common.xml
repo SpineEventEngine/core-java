@@ -39,6 +39,8 @@
       <w>protos</w>
       <w>sfixed</w>
       <w>stderr</w>
+      <w>stringifier</w>
+      <w>stringifiers</w>
       <w>testutil</w>
       <w>threeten</w>
       <w>unregistering</w>

@@ -39,12 +39,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.CommandIdToStringConverter;
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.NULL_ID;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Identifiers.timestampToIdString;
+import static org.spine3.base.Stringifiers.EMPTY_ID;
+import static org.spine3.base.Stringifiers.NULL_ID;
+import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Stringifiers.timestampToIdString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntegerValue;
 import static org.spine3.protobuf.Values.newLongValue;
@@ -261,7 +261,7 @@ public class IdentifiersShould {
     @Test
     public void convert_event_id_to_string() {
         final EventId id = Events.generateId();
-        final String actual = new Identifiers.EventIdToStringConverter().apply(id);
+        final String actual = new Stringifiers.EventIdToStringConverter().apply(id);
 
         assertEquals(idToString(id), actual);
     }

@@ -37,7 +37,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 

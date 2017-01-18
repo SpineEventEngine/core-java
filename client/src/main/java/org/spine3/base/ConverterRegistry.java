@@ -37,8 +37,8 @@ public class ConverterRegistry {
     private final Map<Class<?>, Function<?, String>> entries = synchronizedMap(
             newHashMap(
                     ImmutableMap.<Class<?>, Function<?, String>>builder()
-                            .put(Timestamp.class, new Identifiers.TimestampToStringConverter())
-                            .put(EventId.class, new Identifiers.EventIdToStringConverter())
+                            .put(Timestamp.class, new Stringifiers.TimestampToStringConverter())
+                            .put(EventId.class, new Stringifiers.EventIdToStringConverter())
                             .put(CommandId.class, new Identifiers.CommandIdToStringConverter())
                             .build()
             )
