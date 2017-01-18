@@ -24,15 +24,24 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.GivenEntity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for building aggregates for tests.
  *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class GivenAggregate<I, S extends Message, A extends Aggregate<I, S, ?>> extends GivenEntity<I, S, A> {
+public class GivenAggregate<I, S extends Message, A extends Aggregate<I, S, ?>> extends GivenEntity<A, I, S> {
+
+    public static <A extends Aggregate<I, S, ?>, I, S extends Message>
+        GivenAggregate<I, S, A> whichIs(Class<A> entityClass) {
+        GivenAggregate<I, S, A> result = new GivenAggregate<>(checkNotNull(entityClass));
+        result.setIdClass();
+        return result;
+    }
 
     protected GivenAggregate(Class<A> aggregateClass) {
-        super(aggregateClass);
+        super();
     }
 }

@@ -36,13 +36,13 @@ public class GivenEntityShould {
     /**
      * Convenience method that mimics the way tests would call creation of an entity.
      */
-    private static GivenEntity<Long, StringValue, TestEntity> givenEntity() {
-        return GivenEntity.ofClass(TestEntity.class);
+    private static GivenEntity<TestEntity, Long, StringValue> givenEntity() {
+        return GivenEntity.<TestEntity, Long, StringValue>whichIs().ofClass(TestEntity.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_class() {
-        GivenEntity.ofClass(null);
+        GivenEntity.whichIs().ofClass(null);
     }
 
     @Test(expected = NullPointerException.class)

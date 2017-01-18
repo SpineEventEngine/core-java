@@ -28,11 +28,15 @@ package org.spine3.test;
 public abstract class GivenBuilder<T> {
 
     /** The class of the object we create. */
-    private final Class<T> resultClass;
+    private Class<T> resultClass;
 
     /** Creates the instance associated with the passed class. */
-    protected GivenBuilder(Class<T> resultClass) {
+    protected GivenBuilder() {
+    }
+
+    protected GivenBuilder<T> setResultClass(Class<T> resultClass) {
         this.resultClass = resultClass;
+        return this;
     }
 
     /**

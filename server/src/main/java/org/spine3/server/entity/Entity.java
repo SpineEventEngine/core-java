@@ -286,6 +286,7 @@ public abstract class Entity<I, S extends Message> {
      * @return the entity ID class
      */
     public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        checkNotNull(entityClass);
         final Class<I> idClass = getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
     }

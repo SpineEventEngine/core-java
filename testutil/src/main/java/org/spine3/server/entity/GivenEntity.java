@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class GivenEntity<I, S extends Message, E extends Entity<I, S>> extends GivenBuilder<E> {
+public class GivenEntity<E extends Entity<I, S>, I, S extends Message> extends GivenBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -58,37 +58,42 @@ public class GivenEntity<I, S extends Message, E extends Entity<I, S>> extends G
     @Nullable
     private Timestamp whenModified;
 
-    protected GivenEntity(Class<E> resultClass) {
-        super(resultClass);
+    protected GivenEntity() {
+        super();
     }
 
-    public static <I, S extends Message, E extends Entity<I, S>>
-           GivenEntity<I, S, E> ofClass(Class<E> aggregateClass) {
-        GivenEntity<I, S, E> result = new GivenEntity<>(checkNotNull(aggregateClass));
-        result.setIdClass();
+    public static <E extends Entity<I, S>, I, S extends Message> GivenEntity<E, I, S> whichIs() {
+        final GivenEntity<E, I, S> result = new GivenEntity<>();
         return result;
     }
 
-    protected void setIdClass() {
-        this.idClass = getIdClass();
+    public GivenEntity<E, I, S> ofClass(Class<E> entityClass) {
+        this.setResultClass(entityClass);
+        this.setIdClass();
+        return this;
     }
 
-    public GivenEntity<I, S, E> withId(I id) {
+    public GivenEntity<E, I, S> setIdClass() {
+        this.idClass = getIdClass();
+        return this;
+    }
+
+    public GivenEntity<E, I, S> withId(I id) {
         this.id = checkNotNull(id);
         return this;
     }
 
-    public GivenEntity<I, S, E> withState(S state) {
+    public GivenEntity<E, I, S> withState(S state) {
         this.state = checkNotNull(state);
         return this;
     }
 
-    public GivenEntity<I, S, E> withVersion(int version) {
+    public GivenEntity<E, I, S> withVersion(int version) {
         this.version = version;
         return this;
     }
 
-    public GivenEntity<I, S, E> modifiedOn(Timestamp whenModified) {
+    public GivenEntity<E, I, S> modifiedOn(Timestamp whenModified) {
         this.whenModified = checkNotNull(whenModified);
         return this;
     }
