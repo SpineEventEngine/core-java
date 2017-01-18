@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.test;
+package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.entity.GivenEntity;
 
 /**
@@ -33,7 +32,7 @@ import org.spine3.server.entity.GivenEntity;
 @VisibleForTesting
 public class GivenAggregate<I, S extends Message, A extends Aggregate<I, S, ?>> extends GivenEntity<I, S, A> {
 
-    protected GivenAggregate() {
+    protected GivenAggregate(Class<A> aggregateClass) {
+        super(aggregateClass);
     }
-
 }

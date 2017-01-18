@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
-import org.spine3.server.reflect.Classes;
+import org.spine3.test.GivenBuilder;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -38,16 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class GivenEntity<I, S extends Message, E extends Entity<I, S>> {
-
-    /** The index of the declaration of the generic type {@code I} in this class. */
-    private static final int ID_CLASS_GENERIC_INDEX = 0;
-
-    /** The index of the declaration of the generic parameter type {@code S} in this class. */
-    private static final int STATE_CLASS_GENERIC_INDEX = 1;
-
-    /** The class of the entity we create. */
-    private Class<E> entityClass;
+public class GivenEntity<I, S extends Message, E extends Entity<I, S>> extends GivenBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -67,10 +58,19 @@ public class GivenEntity<I, S extends Message, E extends Entity<I, S>> {
     @Nullable
     private Timestamp whenModified;
 
-    public GivenEntity<I, S, E> ofClass(Class<E> aggregateClass) {
-        this.entityClass = checkNotNull(aggregateClass);
+    protected GivenEntity(Class<E> resultClass) {
+        super(resultClass);
+    }
+
+    public static <I, S extends Message, E extends Entity<I, S>>
+           GivenEntity<I, S, E> ofClass(Class<E> aggregateClass) {
+        GivenEntity<I, S, E> result = new GivenEntity<>(checkNotNull(aggregateClass));
+        result.setIdClass();
+        return result;
+    }
+
+    protected void setIdClass() {
         this.idClass = getIdClass();
-        return this;
     }
 
     public GivenEntity<I, S, E> withId(I id) {
@@ -93,35 +93,63 @@ public class GivenEntity<I, S extends Message, E extends Entity<I, S>> {
         return this;
     }
 
-    /** Returns the class of IDs used by aggregates. */
+    /** Returns the class of IDs used by entities. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
+        final Class<E> resultClass = getResultClass();
+        final Class<I> idClass = Entity.getIdClass(resultClass);
+        return idClass;
     }
 
     private I createDefaultId() {
         return Identifiers.getDefaultValue(idClass);
     }
 
+    @Override
     public E build() {
-        final Constructor<E> constructor = Entity.getConstructor(entityClass, idClass);
-        constructor.setAccessible(true);
-
-        final I id = this.id != null
-                     ? this.id
-                     : createDefaultId();
-
-        final E result = Entity.createEntity(constructor, id);
-
-        final S state = this.state != null
-                        ? this.state
-                        : result.getDefaultState();
-
-        final Timestamp timestamp = this.whenModified != null
-                                    ? this.whenModified
-                                    : Timestamp.getDefaultInstance();
+        final I id = id();
+        final E result = createEntity(id);
+        final S state = state(result);
+        final Timestamp timestamp = timestamp();
 
         result.setState(state, version, timestamp);
+        return result;
+    }
+
+    /**
+     * Returns ID if it was previously set or default value if it was not.
+     */
+    protected I id() {
+        return this.id != null
+               ? this.id
+               : createDefaultId();
+    }
+
+    /**
+     * Returns state if it was set or the default value if it was not.
+     */
+    protected S state(E result) {
+        return this.state != null
+               ? this.state
+               : result.getDefaultState();
+    }
+
+    /**
+     * Returns timestamp if it was set or the default value if it was not.
+     */
+    protected Timestamp timestamp() {
+        return this.whenModified != null
+                                    ? this.whenModified
+                                    : Timestamp.getDefaultInstance();
+    }
+
+    /**
+     * Creates new entity.
+     */
+    protected E createEntity(I id) {
+        final Constructor<E> constructor = Entity.getConstructor(getResultClass(), idClass);
+        constructor.setAccessible(true);
+        final E result = Entity.createEntity(constructor, id);
         return result;
     }
 }

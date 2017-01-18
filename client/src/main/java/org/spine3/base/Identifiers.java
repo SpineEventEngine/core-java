@@ -71,6 +71,17 @@ public class Identifiers {
     private Identifiers() {}
 
     /**
+     * Verifies if the passed class of identifiers is supported.
+     *
+     * @param <I> the type of the ID
+     * @param idClass the class of IDs
+     * @throws IllegalArgumentException if the class of IDs is not supported
+     */
+    public static <I> void checkSupported(Class<I> idClass) {
+        Identifier.Type.getType(idClass);
+    }
+
+    /**
      * Converts the passed ID value into the string representation.
      *
      * @param id  the value to convert

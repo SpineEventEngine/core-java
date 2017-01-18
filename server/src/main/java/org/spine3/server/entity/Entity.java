@@ -20,25 +20,20 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.reflect.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * A server-side object with an identity.
@@ -77,13 +72,6 @@ public abstract class Entity<I, S extends Message> {
     /** The index of the declaration of the generic parameter type {@code S} in this class. */
     public static final int STATE_CLASS_GENERIC_INDEX = 1;
 
-    /** Supported ID types except {@link Message}s. */
-    private static final ImmutableSet<Class<?>> SUPPORTED_SIMPLE_ID_TYPES = ImmutableSet.<Class<?>>builder()
-            .add(String.class)
-            .add(Long.class)
-            .add(Integer.class)
-            .build();
-
     private final I id;
 
     private S state;
@@ -99,7 +87,7 @@ public abstract class Entity<I, S extends Message> {
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
     protected Entity(I id) {
-        checkIdType(id);
+        Identifiers.checkSupported(id.getClass());
         this.id = id;
     }
 
@@ -168,7 +156,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     private S createDefaultState() {
-        final Class<S> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
+        final Class<S> stateClass = getStateClass();
         final S result = Messages.newInstance(stateClass);
         return result;
     }
@@ -293,29 +281,33 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Retrieves the ID class of the entities of the given class using reflection.
      *
-     * @param entityClass the class of entities to check
+     * @param entityClass the entity class to inspect
+     * @param <I> the entity ID type
      * @return the entity ID class
      */
     public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
+        final Class<I> idClass = getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
     }
 
     /**
-     * Ensures that the type of the {@code entityId} is supported.
-     *
-     * @param entityId the ID of the entity to check
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * Obtains the class of the entity state.
      */
-    public static <I> void checkIdType(I entityId) {
-        final Class<?> idClass = entityId.getClass();
-        if (SUPPORTED_SIMPLE_ID_TYPES.contains(idClass)) {
-            return;
-        }
-        final boolean isMessage = entityId instanceof Message;
-        if (!isMessage){
-            throw unsupportedIdType(idClass);
-        }
+    protected Class<S> getStateClass() {
+        final Class<? extends Entity> clazz = getClass();
+        return getStateClass(clazz);
+    }
+
+    /**
+     * Retrieves the state class of the passed entity class.
+     *
+     * @param entityClass the entity class to inspect
+     * @param <S> the entity state type
+     * @return the entity state class
+     */
+    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+        final Class<S> result = getGenericParameterType(entityClass, STATE_CLASS_GENERIC_INDEX);
+        return result;
     }
 
     /**
@@ -338,26 +330,6 @@ public abstract class Entity<I, S extends Message> {
             final String result = id.getClass().getSimpleName();
             return result;
         }
-    }
-
-    private static IllegalArgumentException unsupportedIdType(Class<?> idClass) {
-        final String message = "Expected one of the following ID types: " + supportedTypesToString() +
-                "; found: " + idClass.getName();
-        throw new IllegalArgumentException(message);
-    }
-
-    private static String supportedTypesToString() {
-        final List<Class<?>> supportedIdTypes = newLinkedList(SUPPORTED_SIMPLE_ID_TYPES);
-        supportedIdTypes.add(Message.class); // add Message only for string representation
-        final Iterable<String> classStrings = transform(supportedIdTypes, new Function<Class<?>, String>() {
-            @Override
-            @SuppressWarnings("NullableProblems") // OK in this case
-            public String apply(Class<?> clazz) {
-                return clazz.getSimpleName();
-            }
-        });
-        final String result = Joiner.on(", ").join(classStrings);
-        return result;
     }
 
     @Override
