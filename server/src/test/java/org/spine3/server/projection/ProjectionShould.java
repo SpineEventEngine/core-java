@@ -33,7 +33,7 @@ import org.spine3.server.event.Subscribe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -55,7 +55,7 @@ public class ProjectionShould {
                              .contains(stringValue));
 
         final Integer integerValue = 1024;
-        projection.handle(newIntegerValue(integerValue), EventContext.getDefaultInstance());
+        projection.handle(newIntValue(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
