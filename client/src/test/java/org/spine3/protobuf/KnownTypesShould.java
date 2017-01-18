@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -161,6 +162,20 @@ public class KnownTypesShould {
                 fail("Invalid Java class name in the '.properties' file: " + name.value());
             }
         }
+    }
+
+    @Test
+    public void provide_proto_descriptor_by_type_name() {
+        final String typeName = "spine.test.types.Task";
+        final Descriptors.Descriptor typeDescriptor = KnownTypes.getDescriptorForType(typeName);
+        assertNotNull(typeDescriptor);
+        assertEquals(typeName, typeDescriptor.getFullName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_find_invalid_type_descriptor() {
+        final String invalidTypeName = "no.such.package.InvalidType";
+        KnownTypes.getDescriptorForType(invalidTypeName);
     }
 
     @Test(expected = IllegalStateException.class)

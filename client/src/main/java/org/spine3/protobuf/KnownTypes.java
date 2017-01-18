@@ -73,7 +73,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
@@ -204,11 +204,11 @@ public class KnownTypes {
      * @param typeName <b>valid</b> name of the desired type
      * @return {@link Descriptors proto descriptor} for given type
      * @see TypeName
-     * @throws RuntimeException if the name does not correspond to any known type
+     * @throws IllegalArgumentException if the name does not correspond to any known type
      */
     public static Descriptors.Descriptor getDescriptorForType(String typeName) {
         final TypeUrl typeUrl = getTypeUrl(typeName);
-        checkNotNull(typeUrl);
+        checkArgument(typeUrl != null, "Given type name is invalid");
 
         final ClassName className = getClassName(typeUrl);
         final Class<?> clazz;
