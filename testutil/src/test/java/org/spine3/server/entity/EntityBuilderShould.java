@@ -31,18 +31,14 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
                    "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})
-public class GivenEntityShould {
+public class EntityBuilderShould {
 
     /**
      * Convenience method that mimics the way tests would call creation of an entity.
      */
-    private static GivenEntity<TestEntity, Long, StringValue> givenEntity() {
-        return GivenEntity.<TestEntity, Long, StringValue>whichIs().ofClass(TestEntity.class);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_class() {
-        GivenEntity.whichIs().ofClass(null);
+    private static EntityBuilder<TestEntity, Long, StringValue> givenEntity() {
+        final EntityBuilder<TestEntity, Long, StringValue> builder = new EntityBuilder<>();
+        return builder.setClass(TestEntity.class);
     }
 
     @Test(expected = NullPointerException.class)

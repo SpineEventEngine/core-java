@@ -23,6 +23,7 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -35,7 +36,12 @@ import java.lang.reflect.Type;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@Internal
 public class Classes {
+
+    private Classes() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Returns a class of the generic type of the passed class.
@@ -43,13 +49,16 @@ public class Classes {
      * <p>Two restrictions apply to the passed class:
      * <ol>
      *     <li>The passed class must have a generic superclass.
-     *     <li>The number of generic parameters in the passed class and its superclass must be the same.
+     *     <li>This generic superclass must have the number of generic
+     *        parameters greater than value passed in {@code paramNumber}.
+     *     <li>The generic parameter must not be a type variable.
      * </ol>
      *
      * @param clazz the class to check
      * @param paramNumber a zero-based index of the generic parameter in the class declaration
      * @param <T> the generic type
      * @return the class reference for the generic type
+     * @throws ClassCastException if the passed class does not have a generic parameter of the expected class
      */
     @CheckReturnValue
     public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
@@ -57,8 +66,12 @@ public class Classes {
         final ParameterizedType genericSuperclass = (ParameterizedType) clazz.getGenericSuperclass();
 
         final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
-        @SuppressWarnings("unchecked")
-        final Class<T> result = (Class<T>) typeArguments[paramNumber];
+        final Type typeArgument = typeArguments[paramNumber];
+
+        @SuppressWarnings("unchecked") /* The cast is the purpose of this method.
+            Correctness of the cast must be ensured in the calling code by passing the class,
+            which meets the requirements described in the Javadoc. */
+        final Class<T> result = (Class<T>) typeArgument;
         return result;
     }
 
@@ -100,6 +113,4 @@ public class Classes {
         final Method fieldGetter = clazz.getMethod(fieldGetterName);
         return fieldGetter;
     }
-
-    private Classes() {}
 }

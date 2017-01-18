@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
-import org.spine3.test.GivenBuilder;
+import org.spine3.test.ReflectiveBuilder;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -35,10 +35,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Utility class for building entities for tests.
  *
+ * @param <E> the type of the entity to build
+ * @param <I> the type of the entity identifier
+ * @param <S> the type of the entity state
+ *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class GivenEntity<E extends Entity<I, S>, I, S extends Message> extends GivenBuilder<E> {
+public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
+       extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -58,42 +63,35 @@ public class GivenEntity<E extends Entity<I, S>, I, S extends Message> extends G
     @Nullable
     private Timestamp whenModified;
 
-    protected GivenEntity() {
-        super();
+    /**
+     * Creates new instance of the builder.
+     */
+    public static <E extends Entity<I, S>, I, S extends Message> EntityBuilder<E, I, S> newInstance() {
+        return new EntityBuilder<>();
     }
 
-    public static <E extends Entity<I, S>, I, S extends Message> GivenEntity<E, I, S> whichIs() {
-        final GivenEntity<E, I, S> result = new GivenEntity<>();
-        return result;
-    }
-
-    public GivenEntity<E, I, S> ofClass(Class<E> entityClass) {
+    public EntityBuilder<E, I, S> setClass(Class<E> entityClass) {
         this.setResultClass(entityClass);
-        this.setIdClass();
-        return this;
-    }
-
-    public GivenEntity<E, I, S> setIdClass() {
         this.idClass = getIdClass();
         return this;
     }
 
-    public GivenEntity<E, I, S> withId(I id) {
+    public EntityBuilder<E, I, S> withId(I id) {
         this.id = checkNotNull(id);
         return this;
     }
 
-    public GivenEntity<E, I, S> withState(S state) {
+    public EntityBuilder<E, I, S> withState(S state) {
         this.state = checkNotNull(state);
         return this;
     }
 
-    public GivenEntity<E, I, S> withVersion(int version) {
+    public EntityBuilder<E, I, S> withVersion(int version) {
         this.version = version;
         return this;
     }
 
-    public GivenEntity<E, I, S> modifiedOn(Timestamp whenModified) {
+    public EntityBuilder<E, I, S> modifiedOn(Timestamp whenModified) {
         this.whenModified = checkNotNull(whenModified);
         return this;
     }
@@ -148,12 +146,18 @@ public class GivenEntity<E extends Entity<I, S>, I, S extends Message> extends G
                                     : Timestamp.getDefaultInstance();
     }
 
-    /**
-     * Creates new entity.
-     */
-    protected E createEntity(I id) {
+    @Override
+    protected Constructor<E> getConstructor() {
         final Constructor<E> constructor = Entity.getConstructor(getResultClass(), idClass);
         constructor.setAccessible(true);
+        return constructor;
+    }
+
+    /**
+     * Creates an empty entity instance.
+     */
+    protected E createEntity(I id) {
+        final Constructor<E> constructor = getConstructor();
         final E result = Entity.createEntity(constructor, id);
         return result;
     }
