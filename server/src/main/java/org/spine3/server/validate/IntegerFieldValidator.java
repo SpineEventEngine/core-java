@@ -27,7 +27,7 @@ import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newIntValue;
 
 /**
  * Validates fields of {@link Integer} types.
@@ -61,7 +61,7 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     @Override
     protected Any wrap(Integer value) {
-        final Any any = AnyPacker.pack(newIntegerValue(value));
+        final Any any = AnyPacker.pack(newIntValue(value));
         return any;
     }
 }

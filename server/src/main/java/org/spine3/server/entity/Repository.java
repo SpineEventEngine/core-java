@@ -32,7 +32,6 @@ import org.spine3.type.ClassName;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -91,17 +90,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
-        try {
-            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            return result;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
-        }
-    }
-
-    private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
-        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return new IllegalStateException(new NoSuchMethodException(message));
+        final Constructor<E> result = Entity.getConstructor(entityClass, idClass);
+        return result;
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -146,13 +136,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @CheckReturnValue
     public E create(I id) {
-        try {
-            final E result = entityConstructor.newInstance(id);
-            result.setDefault();
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
+        return Entity.createEntity(this.entityConstructor, id);
     }
 
     /**

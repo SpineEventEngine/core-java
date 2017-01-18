@@ -47,7 +47,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Identifiers.timestampToIdString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -126,7 +126,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_integer_id_wrapped_into_message() {
         final Integer value = 1024;
-        final Int32Value id = newIntegerValue(value);
+        final Int32Value id = newIntValue(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);

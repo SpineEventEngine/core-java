@@ -26,11 +26,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.StringValueOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
+import org.spine3.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -42,9 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.util.Collections.synchronizedMap;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * This class manages conversion of identifies to/from string.
@@ -73,6 +71,17 @@ public class Identifiers {
     private Identifiers() {}
 
     /**
+     * Verifies if the passed class of identifiers is supported.
+     *
+     * @param <I> the type of the ID
+     * @param idClass the class of IDs
+     * @throws IllegalArgumentException if the class of IDs is not supported
+     */
+    public static <I> void checkSupported(Class<I> idClass) {
+        Identifier.Type.getType(idClass);
+    }
+
+    /**
      * Converts the passed ID value into the string representation.
      *
      * @param id  the value to convert
@@ -91,32 +100,20 @@ public class Identifiers {
         if (id == null) {
             return NULL_ID;
         }
-        String result;
-        if (isStringOrNumber(id)) {
-            result = id.toString();
-        } else if (id instanceof Any) {
-            final Message messageFromAny = unpack((Any) id);
-            result = idMessageToString(messageFromAny);
-        } else if (id instanceof Message) {
-            result = idMessageToString((Message) id);
+
+        final Identifier<?> identifier;
+        if (id instanceof Any) {
+            final Message unpacked = unpack((Any) id);
+            identifier = Identifier.fromMessage(unpacked);
         } else {
-            throw unsupportedIdType(id);
+            identifier = Identifier.from(id);
         }
-        result = result.trim();
-        if (result.isEmpty()) {
-            result = EMPTY_ID;
-        }
+
+        final String result = identifier.toString();
         return result;
     }
 
-    private static <I> boolean isStringOrNumber(I id) {
-        final boolean result = id instanceof String
-                || id instanceof Integer
-                || id instanceof Long;
-        return result;
-    }
-
-    private static String idMessageToString(Message message) {
+    static String idMessageToString(Message message) {
         final String result;
         final ConverterRegistry registry = ConverterRegistry.getInstance();
         if (registry.containsConverter(message)) {
@@ -153,78 +150,45 @@ public class Identifiers {
     }
 
     /**
-     * Wraps the passed ID value into an instance of {@link com.google.protobuf.Any}.
+     * Wraps the passed ID value into an instance of {@link Any}.
      *
      * <p>The passed value must be of one of the supported types listed below.
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     *      <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
-     *      <li>For {@code String} — {@link com.google.protobuf.StringValue}
-     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
-     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
+     *      <li>For classes implementing {@link Message} — the value of the message itself
+     *      <li>For {@code String} — {@link StringValue}
+     *      <li>For {@code Long} — {@link UInt64Value}
+     *      <li>For {@code Integer} — {@link UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
      * @param <I> the type of the value
-     * @return instance of {@link com.google.protobuf.Any} with the passed value
+     * @return instance of {@link Any} with the passed value
      * @throws IllegalArgumentException if the passed value is not of the supported type
      */
     public static <I> Any idToAny(I id) {
-        final Any anyId;
-        //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
-        if (id instanceof Message) {
-            final Message message = (Message) id;
-            anyId = pack(message);
-        } else if (id instanceof String) {
-            final String strValue = (String) id;
-            anyId = pack(newStringValue(strValue));
-        } else if (id instanceof Integer) {
-            final Integer intValue = (Integer) id;
-            anyId = pack(UInt32Value.newBuilder()
-                                    .setValue(intValue)
-                                    .build());
-        } else if (id instanceof Long) {
-            final Long longValue = (Long) id;
-            anyId = pack(UInt64Value.newBuilder()
-                                    .setValue(longValue)
-                                    .build());
-        } else {
-            throw unsupportedIdType(id);
-        }
+        final Identifier<I> identifier = Identifier.from(id);
+        final Any anyId = identifier.pack();
         return anyId;
     }
 
     /**
-     * Extracts ID object from the passed {@link com.google.protobuf.Any} instance.
+     * Extracts ID object from the passed {@link Any} instance.
      *
      * <p>Returned type depends on the type of the message wrapped into {@code Any}.
      *
-     * @param idInAny the ID value wrapped into {@code Any}
+     * @param any the ID value wrapped into {@code Any}
      * @return <ul>
-     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped
-     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped
-     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped
+     * <li>{@code String} value if {@link StringValue} is unwrapped
+     * <li>{@code Integer} value if {@link UInt32Value} is unwrapped
+     * <li>{@code Long} value if {@link UInt64Value} is unwrapped
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      */
-    public static Object idFromAny(Any idInAny) {
-        final Message extracted = unpack(idInAny);
-
-        //noinspection ChainOfInstanceofChecks
-        if (extracted instanceof StringValue) {
-            final StringValueOrBuilder stringValue = (StringValue) extracted;
-            return stringValue.getValue();
-        }
-        if (extracted instanceof UInt32Value) {
-            final UInt32Value uInt32Value = (UInt32Value) extracted;
-            return uInt32Value.getValue();
-        }
-        if (extracted instanceof UInt64Value) {
-            final UInt64Value uInt64Value = (UInt64Value) extracted;
-            return uInt64Value.getValue();
-        }
-        return extracted;
+    public static Object idFromAny(Any any) {
+        final Object result = Identifier.Type.unpack(any);
+        return result;
     }
 
     /**
@@ -252,8 +216,12 @@ public class Identifiers {
         return id;
     }
 
-    private static <I> IllegalArgumentException unsupportedIdType(I id) {
-        return new IllegalArgumentException("ID of unsupported type encountered: " + id);
+    /**
+     * Obtains a default value for an identifier of the passed class.
+     */
+    @Internal
+    public static <I> I getDefaultValue(Class<I> idClass) {
+        return Identifier.getDefaultValue(idClass);
     }
 
     /** The registry of converters of ID types to string representations. */

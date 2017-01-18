@@ -30,6 +30,7 @@ import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -121,6 +122,28 @@ public class Messages {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * Creates a new instance of a {@code Message} by its class.
+     *
+     * <p>This factory method obtains parameterless constructor {@code Message} via
+     * Reflection and then invokes it.
+     *
+     * @return new instance
+     */
+    public static <M extends Message> M newInstance(Class<M> messageClass) {
+        try {
+            final Constructor<M> constructor = messageClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            final M state = constructor.newInstance();
+            return state;
+        } catch (NoSuchMethodException
+                 | InstantiationException
+                 | IllegalAccessException
+                 | InvocationTargetException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private enum JsonPrinter {
