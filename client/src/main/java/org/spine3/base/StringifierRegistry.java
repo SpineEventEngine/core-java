@@ -58,27 +58,25 @@ public class StringifierRegistry {
         entries.put(idClass, converter);
     }
 
-    public <I> Function<I, String> getConverter(I id) {
-        checkNotNull(id);
-        checkNotClass(id);
+    /**
+     * Obtains a {@code Stringifier} for the passed type.
+     *
+     * @param <I> the type of the values to convert
+     * @return
+     */
+    public <I> Stringifier<I> get(Class<I> valueClass) {
+        checkNotNull(valueClass);
 
-        final Function<?, String> func = entries.get(id.getClass());
+        final Stringifier<?> func = entries.get(valueClass);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
             @see #register(Class, Function) */
-        final Function<I, String> result = (Function<I, String>) func;
+        final Stringifier<I> result = (Stringifier<I>) func;
         return result;
     }
 
-    private static <I> void checkNotClass(I id) {
-        if (id instanceof Class) {
-            throw new IllegalArgumentException("Class instance passed instead of value: " + id.toString());
-        }
-    }
-
-    public synchronized <I> boolean containsConverter(I id) {
-        final Class<?> idClass = id.getClass();
-        final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
+    public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {
+        final boolean contains = entries.containsKey(valueClass) && (entries.get(valueClass) != null);
         return contains;
     }
 

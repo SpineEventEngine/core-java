@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
@@ -102,12 +101,14 @@ public class Stringifiers {
         return result;
     }
 
+    @SuppressWarnings("unchecked") // OK to cast to String as output type of Stringifier.
     static String idMessageToString(Message message) {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
-        if (registry.containsConverter(message)) {
-            final Function<Message, String> converter = registry.getConverter(message);
-            result = converter.apply(message);
+        final Class<? extends Message> msgClass = message.getClass();
+        if (registry.hasStringiferFor(msgClass)) {
+            final Stringifier converter = registry.get(msgClass);
+            result = (String) converter.apply(message);
         } else {
             result = convert(message);
         }

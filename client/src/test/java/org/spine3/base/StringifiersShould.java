@@ -41,7 +41,7 @@ import static org.spine3.base.Stringifiers.NULL_ID;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.base.Stringifiers.toIdString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -103,7 +103,7 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_integer_id_wrapped_into_message() {
         final Integer value = 1024;
-        final Int32Value id = newIntegerValue(value);
+        final Int32Value id = newIntValue(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -208,9 +208,9 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertEquals(NULL_ID, registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
-        assertEquals(NULL_ID, registry.getConverter(EventId.getDefaultInstance()).apply(null));
-        assertEquals(NULL_ID, registry.getConverter(CommandId.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID, registry.get(Timestamp.class).apply(null));
+        assertEquals(NULL_ID, registry.get(EventId.class).apply(null));
+        assertEquals(NULL_ID, registry.get(CommandId.class).apply(null));
     }
 
     @Test
