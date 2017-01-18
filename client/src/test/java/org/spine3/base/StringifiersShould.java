@@ -184,7 +184,8 @@ public class StringifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER = new Stringifier<IdWithPrimitiveFields>() {
+    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
+            new Stringifier<IdWithPrimitiveFields>() {
         @Override
         public String apply(@Nullable IdWithPrimitiveFields id) {
             if (id == null) {
