@@ -25,7 +25,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
 
 import java.util.Map;
 
@@ -38,8 +37,7 @@ import static java.util.Collections.synchronizedMap;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-public class StringifierRegistry {
+class StringifierRegistry {
 
     private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
