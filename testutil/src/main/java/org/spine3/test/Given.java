@@ -23,8 +23,14 @@ package org.spine3.test;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateBuilder;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregatePartBuilder;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityBuilder;
+import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.procman.ProcessManagerBuilder;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionBuilder;
 
 /**
  * Utility class for building test objects.
@@ -37,6 +43,9 @@ public class Given {
         // Prevent instantiation of this utility class.
     }
 
+    /**
+     * Creates a builder for an {@code Entity}.
+     */
     public static <E extends Entity<I, S>, I, S extends Message>
     EntityBuilder<E, I, S> entityOfClass(Class<E> entityClass) {
         final EntityBuilder<E, I, S> result = new EntityBuilder<>();
@@ -44,10 +53,43 @@ public class Given {
         return result;
     }
 
+    /**
+     * Creates dynamic builder for building an {@code Aggregate}.
+     */
     public static <A extends Aggregate<I, S, ?>, I, S extends Message>
            AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
         final AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
         result.setResultClass(aggregateClass);
+        return result;
+    }
+
+    /**
+     * Creates a builder for an {@code AggregatePart}.
+     */
+    public static <A extends AggregatePart<I, S, ?>, I, S extends Message>
+           AggregatePartBuilder<A, I, S> aggregatePartOfClass(Class<A> partClass) {
+        final AggregatePartBuilder<A, I, S> result = new AggregatePartBuilder<>();
+        result.setClass(partClass);
+        return result;
+    }
+
+    /**
+     * Creates a builder for a {@code Projection}.
+     */
+    public static <P extends Projection<I, S>, I, S extends Message>
+           ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
+        final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
+        result.setClass(projectionClass);
+        return result;
+    }
+
+    /**
+     * Creates a builder for a {@code ProcessManager}.
+     */
+    public static <P extends ProcessManager<I, S>, I, S extends Message>
+           ProcessManagerBuilder<P, I, S> processManagerOfClass(Class<P> pmClass) {
+        final ProcessManagerBuilder<P, I, S> result = new ProcessManagerBuilder<>();
+        result.setClass(pmClass);
         return result;
     }
 }

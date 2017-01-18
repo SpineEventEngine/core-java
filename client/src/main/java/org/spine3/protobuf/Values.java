@@ -27,6 +27,8 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 
 /**
  * Utility class for working with {@link Message} value wrapper objects.
@@ -35,7 +37,8 @@ import com.google.protobuf.StringValue;
  */
 public class Values {
 
-    private Values() {}
+    private Values() {
+    }
 
     /**
      * Creates a new {@code StringValue} wrapping the passed string.
@@ -100,16 +103,29 @@ public class Values {
      * @param value the value to wrap
      * @return a new Int32Value instance
      */
-    public static Int32Value newIntegerValue(int value) {
+    public static Int32Value newIntValue(int value) {
         final Int32Value result = Int32Value.newBuilder()
                                             .setValue(value)
                                             .build();
         return result;
     }
 
+    /**
+     * Creates a new {@code UInt32Value} wrapping the passed number.
+     *
+     * @param value the value to wrap
+     * @return a new UInt32Value instance
+     */
+    public static UInt32Value newUIntValue(int value) {
+        final UInt32Value result = UInt32Value.newBuilder()
+                                              .setValue(value)
+                                              .build();
+        return result;
+    }
+
     /** Packs the passed value into {@link Any}. */
     public static Any pack(int value) {
-        final Any result = AnyPacker.pack(newIntegerValue(value));
+        final Any result = AnyPacker.pack(newIntValue(value));
         return result;
     }
 
@@ -123,6 +139,19 @@ public class Values {
         final Int64Value result = Int64Value.newBuilder()
                                             .setValue(value)
                                             .build();
+        return result;
+    }
+
+    /**
+     * Creates a new {@code UInt64Value} wrapping the passed number.
+     *
+     * @param value the value to wrap
+     * @return a new Int64Value instance
+     */
+    public static UInt64Value newUInt64Value(long value) {
+        final UInt64Value result = UInt64Value.newBuilder()
+                                              .setValue(value)
+                                              .build();
         return result;
     }
 
