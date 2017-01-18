@@ -21,13 +21,16 @@
 package org.spine3.base;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Identifier.Type;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.protobuf.Values.newUInt64Value;
@@ -58,6 +61,10 @@ public class IdentifierShould {
         assertTrue(Type.LONG.matchMessage(newUInt64Value(1020L)));
         assertTrue(Type.STRING.matchMessage(newStringValue("")));
         assertTrue(Type.MESSAGE.matchMessage(Timestamp.getDefaultInstance()));
+
+        assertFalse(Type.MESSAGE.matchMessage(StringValue.getDefaultInstance()));
+        assertFalse(Type.MESSAGE.matchMessage(UInt32Value.getDefaultInstance()));
+        assertFalse(Type.MESSAGE.matchMessage(UInt64Value.getDefaultInstance()));
     }
 
     @Test

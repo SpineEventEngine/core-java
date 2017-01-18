@@ -232,6 +232,12 @@ class Identifier<I> {
                 return id instanceof Message;
             }
 
+            /**
+             * Verifies if the passed message is not an instance of a wrapper for
+             * simple types that are used for packing simple Java types into {@code Any}.
+             *
+             * @return {@code true} if the message is not {@code StringValue}, or {@code UInt32Value}, or {@code UInt64Value}
+             */
             @Override
             boolean matchMessage(Message message) {
                 return !(message instanceof StringValue
