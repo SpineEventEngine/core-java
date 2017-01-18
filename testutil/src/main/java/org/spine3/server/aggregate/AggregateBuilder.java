@@ -18,36 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.test;
+package org.spine3.server.aggregate;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
+import org.spine3.server.entity.EntityBuilder;
 
 /**
- * The abstract base for test object builders.
+ * Utility class for building aggregates for tests.
+ *
+ * @param <A> the type of the aggregate to build
+ * @param <I> the type of aggregate IDs
+ * @param <S> the type of the aggregate state
  *
  * @author Alexander Yevsyukov
  */
-public abstract class GivenBuilder<T> {
+@VisibleForTesting
+public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message>
+       extends EntityBuilder<A, I, S> {
 
-    /** The class of the object we create. */
-    private Class<T> resultClass;
-
-    /** Creates new instance. */
-    protected GivenBuilder() {
-    }
-
-    protected GivenBuilder<T> setResultClass(Class<T> resultClass) {
-        this.resultClass = resultClass;
+    @Override
+    public AggregateBuilder<A, I, S> setClass(Class<A> entityClass) {
+        super.setClass(entityClass);
         return this;
     }
-
-    /**
-     * Obtains the class of the object to build.
-     */
-    protected Class<T> getResultClass() {
-        return this.resultClass;
-    }
-
-    /**
-     * Creates the object being built.
-     */
-    public abstract T build();
 }

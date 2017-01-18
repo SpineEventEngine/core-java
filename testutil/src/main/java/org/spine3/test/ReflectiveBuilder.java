@@ -18,30 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.test;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
-import org.spine3.server.entity.GivenEntity;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.lang.reflect.Constructor;
 
 /**
- * Utility class for building aggregates for tests.
+ * The abstract base for test object builders.
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public class GivenAggregate<I, S extends Message, A extends Aggregate<I, S, ?>> extends GivenEntity<A, I, S> {
+public abstract class ReflectiveBuilder<T> {
 
-    public static <A extends Aggregate<I, S, ?>, I, S extends Message>
-        GivenAggregate<I, S, A> whichIs(Class<A> entityClass) {
-        GivenAggregate<I, S, A> result = new GivenAggregate<>(checkNotNull(entityClass));
-        result.setIdClass();
-        return result;
+    /** The class of the object we create. */
+    private Class<T> resultClass;
+
+    /**
+     * Obtains constructor for the result object.
+     */
+    protected abstract Constructor<T> getConstructor();
+
+    /**
+     * Obtains the class of the object to build.
+     */
+    protected Class<T> getResultClass() {
+        return this.resultClass;
     }
 
-    protected GivenAggregate(Class<A> aggregateClass) {
-        super();
+    /**
+     * Sets the class of the object to build.
+     */
+    protected void setResultClass(Class<T> resultClass) {
+        this.resultClass = resultClass;
     }
+
+    /**
+     * Creates the object being built.
+     */
+    public abstract T build();
 }
