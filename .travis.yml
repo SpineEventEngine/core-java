@@ -1,11 +1,24 @@
 language: java
 
+env:
+  global:
+    # Encrypted `CODACY_PROJECT_TOKEN` variable according to:
+    # https://docs.travis-ci.com/user/environment-variables/#Encrypting-environment-variables
+    - secure: RVrbSK76Ui1JcnfAq8mV11FDkntu/BaJwOiMWIezAEZAenrwtVlnGaP2hZPRvvFV0c/jRnEv6Q1YuhB9rQ0Ldac2TWpTMomfTLzChZmhuev5Ee7bL4cCJ/gROA0cnYrixYLxpLk3yYMiZuJviDuvACzUXkll37lBIOjpXzoKB5xPN1xuw+vtMQ7L+BQLvBJkWgEDGrUMpOXNIph1fBVcANX28AAmlzZuruNdh6jyi97CfIzE5gn1HnKInn8mW1iG5C5kU6uxShVNTav1Moo9mYJTJt0WfTiDPhb6+11uDNtGjmATd73wjccpLKX7QJAqkH2i/jxPFlqB5pgmklmxCgaL/+NqRsN5Ow84bZ8uMH1j8LhdA3o79rYjeCyQ3BOnloGo2t5StXs/v/IZU1KCgCYvh4H26Bw768VsChtWtFVo+FxFoKub/AaVUmUtBTB63VKgr0iFIJSpSzMpXMFuvVBJ2y54UsOvZw1XL9IM+SYkgVBDd1fAwPT3nfNDUYfDbECzd7FbLhg0vvzhagOZCz/jbN8FEyauPFXQ4xwLoI6kKLoQSkF8qOr+dLbyXEKHSXxAt8lnIeGAJrSEmPiOv69JBirjSR0OMfaT/KL+cfQ2AJ6Hhc5XNmFQjIELP42Jmd+tmTBD2nfwY76vrU132C/nzoAGXkUME2hGbnvlrRg=
+
 before_install:
   - chmod +x gradlew
+  # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
+  - curl -sL https://github.com/jpm4j/jpm4j.installers/raw/master/dist/biz.aQute.jpm.run.jar >jpm4j.jar
+  - java -jar jpm4j.jar -u init
+  - ~/jpm/bin/jpm install com.codacy:codacy-coverage-reporter:assembly
+  # END of Codacy setup.
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
+  # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
+  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 
