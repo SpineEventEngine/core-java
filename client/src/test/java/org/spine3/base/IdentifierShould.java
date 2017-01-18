@@ -20,12 +20,14 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Identifier.Type;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.protobuf.Values.newUInt64Value;
@@ -47,7 +49,6 @@ public class IdentifierShould {
         assertTrue(Identifier.from("").isString());
         assertTrue(Identifier.from(0).isInteger());
         assertTrue(Identifier.from(0L).isLong());
-        assertTrue(Identifier.from(0L).isLong());
         assertTrue(Identifier.from(newIntValue(300)).isMessage());
     }
 
@@ -62,5 +63,17 @@ public class IdentifierShould {
         assertTrue(Type.LONG.matchMessage(newUInt64Value(1020L)));
         assertTrue(Type.STRING.matchMessage(newStringValue("")));
         assertTrue(Type.MESSAGE.matchMessage(Timestamp.getDefaultInstance()));
+    }
+
+    @Test
+    public void create_values_depending_from_message_type() {
+        assertEquals(10, Type.INTEGER.fromMessage(newUIntValue(10)));
+        assertEquals(1024L, Type.LONG.fromMessage(newUInt64Value(1024L)));
+        assertEquals("", Type.STRING.fromMessage(newStringValue("")));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_unpack_usupported_types () {
+        Identifier.Type.unpack(Any.getDefaultInstance());
     }
 }
