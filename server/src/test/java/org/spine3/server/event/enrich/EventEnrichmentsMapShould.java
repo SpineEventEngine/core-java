@@ -155,7 +155,7 @@ public class EventEnrichmentsMapShould {
     }
 
     @SafeVarargs
-    private static void assertEventTypeByEnrichmentType
+    private static void assertEventTypeByEnrichmentType(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual = EventEnrichmentsMap.getInstance()
