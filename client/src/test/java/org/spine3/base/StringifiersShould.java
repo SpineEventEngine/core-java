@@ -225,7 +225,7 @@ public class StringifiersShould {
     @Test
     public void convert_command_id_to_string() {
         final CommandId id = Commands.generateId();
-        final String actual = new Identifiers.CommandIdStringifier().apply(id);
+        final String actual = new Stringifiers.CommandIdStringifier().apply(id);
 
         assertEquals(idToString(id), actual);
     }

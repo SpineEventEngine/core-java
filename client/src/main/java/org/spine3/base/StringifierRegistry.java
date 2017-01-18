@@ -44,7 +44,7 @@ class StringifierRegistry {
                     ImmutableMap.<Class<?>, Stringifier<?>>builder()
                             .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
                             .put(EventId.class, new Stringifiers.EventIdStringifier())
-                            .put(CommandId.class, new Identifiers.CommandIdStringifier())
+                            .put(CommandId.class, new Stringifiers.CommandIdStringifier())
                             .build()
             )
     );

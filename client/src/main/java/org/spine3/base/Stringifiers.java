@@ -160,4 +160,14 @@ public class Stringifiers {
             return eventId.getUuid();
         }
     }
+
+    static class CommandIdStringifier implements Stringifier<CommandId> {
+        @Override
+        public String apply(@Nullable CommandId commandId) {
+            if (commandId == null) {
+                return NULL_ID;
+            }
+            return commandId.getUuid();
+        }
+    }
 }

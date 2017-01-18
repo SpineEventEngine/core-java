@@ -27,14 +27,10 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.spine3.Internal;
 
-import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
- * This class manages conversion of identifies to/from string.
- *
- * <p>In addition to utility methods for the conversion, it provides {@link StringifierRegistry}
- * which allows to provide custom conversion logic for user-defined types of identifies.
+ * Utility class for working with identifiers.
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
@@ -118,15 +114,5 @@ public class Identifiers {
     @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
         return Identifier.getDefaultValue(idClass);
-    }
-
-    static class CommandIdStringifier implements Stringifier<CommandId> {
-        @Override
-        public String apply(@Nullable CommandId commandId) {
-            if (commandId == null) {
-                return Stringifiers.NULL_ID;
-            }
-            return commandId.getUuid();
-        }
     }
 }
