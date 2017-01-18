@@ -21,7 +21,6 @@
 package org.spine3.base;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
@@ -34,14 +33,10 @@ import org.spine3.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static java.util.Collections.synchronizedMap;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
@@ -224,65 +219,7 @@ public class Identifiers {
         return Identifier.getDefaultValue(idClass);
     }
 
-    /** The registry of converters of ID types to string representations. */
-    public static class ConverterRegistry {
-
-        private final Map<Class<?>, Function<?, String>> entries = synchronizedMap(
-                newHashMap(
-                        ImmutableMap.<Class<?>, Function<?, String>>builder()
-                                .put(Timestamp.class, new TimestampToStringConverter())
-                                .put(EventId.class, new EventIdToStringConverter())
-                                .put(CommandId.class, new CommandIdToStringConverter())
-                                .build()
-                )
-        );
-
-        private ConverterRegistry() {
-        }
-
-        public <I extends Message> void register(Class<I> idClass, Function<I, String> converter) {
-            checkNotNull(idClass);
-            checkNotNull(converter);
-            entries.put(idClass, converter);
-        }
-
-        public <I> Function<I, String> getConverter(I id) {
-            checkNotNull(id);
-            checkNotClass(id);
-
-            final Function<?, String> func = entries.get(id.getClass());
-
-            @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-                @see #register(Class, com.google.common.base.Function) */
-            final Function<I, String> result = (Function<I, String>) func;
-            return result;
-        }
-
-        private static <I> void checkNotClass(I id) {
-            if (id instanceof Class) {
-                throw new IllegalArgumentException("Class instance passed instead of value: " + id.toString());
-            }
-        }
-
-        public synchronized <I> boolean containsConverter(I id) {
-            final Class<?> idClass = id.getClass();
-            final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
-            return contains;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final ConverterRegistry value = new ConverterRegistry();
-        }
-
-        public static ConverterRegistry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-    }
-
-    private static class TimestampToStringConverter implements Function<Timestamp, String> {
+    static class TimestampToStringConverter implements Function<Timestamp, String> {
         @Override
         public String apply(@Nullable Timestamp timestamp) {
             if (timestamp == null) {
