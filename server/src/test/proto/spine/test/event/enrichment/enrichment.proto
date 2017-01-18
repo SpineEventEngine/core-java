@@ -67,12 +67,22 @@ message GranterEventsEnrichment {
     spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
 }
 
+// The enrichment for all the events declared in the "spine.test.event.user" package and
+// for spine.test.event.user.UserLoggedInEvent.
+//
+// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+//
 message SelectiveComplexEnrichment {
     option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.UserLoggedInEvent";
 
     int32 security_warn = 1 [(by) = "*.user_uid"];
 }
 
+// The enrichment for all the events declared in the "spine.test.event.user" and
+// "spine.test.event.user.connections" packages.
+//
+// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+//
 message MultiplePackageEnrichment {
     option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.connections.*";
 
