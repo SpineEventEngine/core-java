@@ -62,7 +62,7 @@ message UserPackageEventsEnrichment {
 // See `EventEnrichmentsMapShould#contain_only_events_with_target_field_if_declared_though_package` test for details.
 //
 message GranterEventsEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permissions.*";
+    option (enrichment_for) = "spine.test.event.user.permission.*";
 
     spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
 }
@@ -70,21 +70,21 @@ message GranterEventsEnrichment {
 // The enrichment for all the events declared in the "spine.test.event.user" package and
 // for spine.test.event.user.UserLoggedInEvent.
 //
-// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+// See `EventEnrichmentsMapShould#contain_events_from_package_and_standalone_event` test for details.
 //
 message SelectiveComplexEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.UserLoggedInEvent";
+    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.UserLoggedInEvent";
 
     int32 security_warn = 1 [(by) = "*.user_uid"];
 }
 
-// The enrichment for all the events declared in the "spine.test.event.user" and
-// "spine.test.event.user.connections" packages.
+// The enrichment for all the events declared in the "spine.test.event.user.permission" and
+// "spine.test.event.user.sharing" packages.
 //
-// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+// See `EventEnrichmentsMapShould#contain_events_from_multiple_packages` test for details.
 //
 message MultiplePackageEnrichment {
-    option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.connections.*";
+    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.sharing.*";
 
-    int32 connection_type = 1[(by) = "*.user_uid"];
+    int32 sharing_type = 1[(by) = "*.user_uid"];
 }

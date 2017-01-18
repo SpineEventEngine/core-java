@@ -19,23 +19,27 @@
 //
 syntax = "proto3";
 
-package spine.test.event.user.connections;
+package spine.test.event.user.permission;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.event.user.connections";
+option java_package="org.spine3.test.event.user.permission";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/enrichment_annotations.proto";
 
-message UserConnectionEstablished {
+message PermissionGrantedEvent {
 
     string user_uid = 1;
-    string second_user_uid = 2;
+    string permission_id = 2;
+
+    // ID of the user who granted the permission
+    string granter_uid = 3;
 }
 
-message UserConnectionDeleted {
+message PermissionRevokedEvent {
 
     string user_uid = 1;
-    string second_user_uid = 2;
+    string permission_id = 2;
+    string cause = 3;
 }

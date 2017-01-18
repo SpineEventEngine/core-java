@@ -31,7 +31,6 @@ import "spine/annotations.proto";
 //
 // See `KnownTypesShould` for the unit test code.
 //
-
 message TaskId {
     string value = 1;
 }

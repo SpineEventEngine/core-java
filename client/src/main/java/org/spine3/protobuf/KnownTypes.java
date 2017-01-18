@@ -172,6 +172,12 @@ public class KnownTypes {
         return typeUrl;
     }
 
+    /**
+     * Retrieves all the types that belong to the given package or it's subpackages.
+     *
+     * @param packageName protobuf-style package
+     * @return set of {@link TypeUrl TypeUrls} for types that belong to the given package
+     */
     public static Set<TypeUrl> getTypesFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
         final Collection<TypeUrl> resultCollection = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
@@ -192,6 +198,14 @@ public class KnownTypes {
         return resultSet;
     }
 
+    /**
+     * Retrieve {@link Descriptors proto descriptor} from the type name.
+     *
+     * @param typeName <b>valid</b> name of the desired type
+     * @return {@link Descriptors proto descriptor} for given type
+     * @see TypeName
+     * @throws RuntimeException if the name does not correspond to any known type
+     */
     public static Descriptors.Descriptor getDescriptorForType(String typeName) {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkNotNull(typeUrl);

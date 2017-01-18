@@ -19,27 +19,23 @@
 //
 syntax = "proto3";
 
-package spine.test.event.user.permissions;
+package spine.test.event.user.sharing;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.event.user.permissions";
+option java_package="org.spine3.test.event.user.sharing";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/enrichment_annotations.proto";
 
-message PermissionGrantedEvent {
+message SharingRequestSent {
 
     string user_uid = 1;
-    string permission_id = 2;
-
-    // ID of the user who granted the permission
-    string granter_uid = 3;
+    string second_user_uid = 2;
 }
 
-message PermissionRevokedEvent {
+message SharingRequestApproved {
 
     string user_uid = 1;
-    string permission_id = 2;
-    string cause = 3;
+    string second_user_uid = 2;
 }

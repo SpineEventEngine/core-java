@@ -41,10 +41,10 @@ import org.spine3.test.event.enrichment.UserPackageEventsEnrichment;
 import org.spine3.test.event.user.UserLoggedInEvent;
 import org.spine3.test.event.user.UserLoggedOutEvent;
 import org.spine3.test.event.user.UserMentionedEvent;
-import org.spine3.test.event.user.connections.UserConnectionDeleted;
-import org.spine3.test.event.user.connections.UserConnectionEstablished;
-import org.spine3.test.event.user.permissions.PermissionGrantedEvent;
-import org.spine3.test.event.user.permissions.PermissionRevokedEvent;
+import org.spine3.test.event.user.permission.PermissionGrantedEvent;
+import org.spine3.test.event.user.permission.PermissionRevokedEvent;
+import org.spine3.test.event.user.sharing.SharingRequestApproved;
+import org.spine3.test.event.user.sharing.SharingRequestSent;
 
 import java.util.Collection;
 
@@ -120,8 +120,8 @@ public class EventEnrichmentsMapShould {
                                             UserLoggedOutEvent.class,
                                             PermissionGrantedEvent.class,
                                             PermissionRevokedEvent.class,
-                                            UserConnectionEstablished.class,
-                                            UserConnectionDeleted.class);
+                                            SharingRequestSent.class,
+                                            SharingRequestApproved.class);
     }
 
     @Test
@@ -150,12 +150,12 @@ public class EventEnrichmentsMapShould {
         assertOnlyEventTypeByEnrichmentType(MultiplePackageEnrichment.class,
                                             PermissionGrantedEvent.class,
                                             PermissionRevokedEvent.class,
-                                            UserConnectionEstablished.class,
-                                            UserConnectionDeleted.class);
+                                            SharingRequestSent.class,
+                                            SharingRequestApproved.class);
     }
 
     @SafeVarargs
-    private static void assertEventTypeByEnrichmentType(
+    private static void assertEventTypeByEnrichmentType
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual = EventEnrichmentsMap.getInstance()

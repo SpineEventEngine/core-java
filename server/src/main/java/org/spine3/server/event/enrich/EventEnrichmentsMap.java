@@ -83,10 +83,17 @@ class EventEnrichmentsMap {
 
         /**
          * Constant indicating a package qualifier.
+         *
+         * <p>Must be a postfix of the qualifier.
          */
         private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
 
-        private static final String WILDCARD_TYPE_UPON_FIELD_INDICATOR = "*.";
+        /**
+         * Constant indicating a field qualifier with a wildcard type.
+         *
+         * <p>Must be a prefix of the qualifier.
+         */
+        private static final String WILDCARD_TYPE_INDICATOR = "*.";
 
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<String, String> builder;
@@ -148,10 +155,9 @@ class EventEnrichmentsMap {
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 final String extension = field.getOptions()
                                               .getExtension(EventAnnotationsProto.by);
-                final String fieldName = extension.substring(WILDCARD_TYPE_UPON_FIELD_INDICATOR.length());
+                final String fieldName = extension.substring(WILDCARD_TYPE_INDICATOR.length());
                 result.add(fieldName);
             }
-
             return result;
         }
 
