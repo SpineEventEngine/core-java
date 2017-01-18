@@ -52,11 +52,6 @@ public class IdentifierShould {
         assertTrue(Identifier.from(newIntValue(300)).isMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_values_of_unsupported_types() {
-        Identifier.from(0.0).toString();
-    }
-
     @Test
     public void recognize_type_by_supported_message_type() {
         assertTrue(Type.INTEGER.matchMessage(newUIntValue(10)));
@@ -73,7 +68,7 @@ public class IdentifierShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_unpack_usupported_types () {
+    public void not_unpack_unsupported_types () {
         Identifier.Type.unpack(Any.getDefaultInstance());
     }
 }
