@@ -66,3 +66,15 @@ message GranterEventsEnrichment {
 
     spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
 }
+
+message SelectiveComplexEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.UserLoggedInEvent";
+
+    int32 security_warn = 1 [(by) = "*.user_uid"];
+}
+
+message MultiplePackageEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permissions.*,spine.test.event.user.connections.*";
+
+    int32 connection_type = 1[(by) = "*.user_uid"];
+}

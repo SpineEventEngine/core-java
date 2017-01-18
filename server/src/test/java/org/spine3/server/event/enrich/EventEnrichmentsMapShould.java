@@ -32,13 +32,17 @@ import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.GranterEventsEnrichment;
+import org.spine3.test.event.enrichment.MultiplePackageEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
+import org.spine3.test.event.enrichment.SelectiveComplexEnrichment;
 import org.spine3.test.event.enrichment.UserPackageEventsEnrichment;
 import org.spine3.test.event.user.UserLoggedInEvent;
 import org.spine3.test.event.user.UserLoggedOutEvent;
 import org.spine3.test.event.user.UserMentionedEvent;
+import org.spine3.test.event.user.connections.UserConnectionDeleted;
+import org.spine3.test.event.user.connections.UserConnectionEstablished;
 import org.spine3.test.event.user.permissions.PermissionGrantedEvent;
 import org.spine3.test.event.user.permissions.PermissionRevokedEvent;
 
@@ -115,7 +119,9 @@ public class EventEnrichmentsMapShould {
                                             UserMentionedEvent.class,
                                             UserLoggedOutEvent.class,
                                             PermissionGrantedEvent.class,
-                                            PermissionRevokedEvent.class);
+                                            PermissionRevokedEvent.class,
+                                            UserConnectionEstablished.class,
+                                            UserConnectionDeleted.class);
     }
 
     @Test
@@ -129,6 +135,23 @@ public class EventEnrichmentsMapShould {
     public void contain_only_events_with_target_field_if_declared_though_package() {
         assertOnlyEventTypeByEnrichmentType(GranterEventsEnrichment.class,
                                             PermissionGrantedEvent.class);
+    }
+
+    @Test
+    public void contain_events_from_package_and_standalone_event() {
+        assertOnlyEventTypeByEnrichmentType(SelectiveComplexEnrichment.class,
+                                            PermissionGrantedEvent.class,
+                                            PermissionRevokedEvent.class,
+                                            UserLoggedInEvent.class);
+    }
+
+    @Test
+    public void contain_events_from_multiple_packages() {
+        assertOnlyEventTypeByEnrichmentType(MultiplePackageEnrichment.class,
+                                            PermissionGrantedEvent.class,
+                                            PermissionRevokedEvent.class,
+                                            UserConnectionEstablished.class,
+                                            UserConnectionDeleted.class);
     }
 
     @SafeVarargs

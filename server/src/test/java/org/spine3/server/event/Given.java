@@ -156,7 +156,8 @@ public class Given {
                     .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
                     .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING)
                     .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                    .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME);
+                    .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                    .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
@@ -256,6 +257,15 @@ public class Given {
                         return input == null
                                ? PersonName.getDefaultInstance()
                                : PersonName.newBuilder().setFamilyName(input).build();
+                    }
+                };
+
+        private static final Function<String, Integer> STRING_TO_INT =
+                new Function<String, Integer>() {
+                    @Nullable
+                    @Override
+                    public Integer apply(@Nullable String input) {
+                        return 0;
                     }
                 };
     }
