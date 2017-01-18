@@ -83,7 +83,7 @@ public class Stringifiers {
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *                                  the passed {@link Message} instance has no fields
-     * @see ConverterRegistry
+     * @see StringifierRegistry
      */
     public static <I> String idToString(@Nullable I id) {
         if (id == null) {
@@ -104,7 +104,7 @@ public class Stringifiers {
 
     static String idMessageToString(Message message) {
         final String result;
-        final ConverterRegistry registry = ConverterRegistry.getInstance();
+        final StringifierRegistry registry = StringifierRegistry.getInstance();
         if (registry.containsConverter(message)) {
             final Function<Message, String> converter = registry.getConverter(message);
             result = converter.apply(message);
@@ -138,7 +138,7 @@ public class Stringifiers {
         return result;
     }
 
-    static class TimestampToStringConverter implements Function<Timestamp, String> {
+    static class TimestampIdStringifer implements Stringifier<Timestamp> {
         @Override
         public String apply(@Nullable Timestamp timestamp) {
             if (timestamp == null) {
@@ -149,7 +149,7 @@ public class Stringifiers {
         }
     }
 
-    public static class EventIdToStringConverter implements Function<EventId, String> {
+    static class EventIdStringifier implements Stringifier<EventId> {
         @Override
         public String apply(@Nullable EventId eventId) {
             if (eventId == null) {
@@ -157,6 +157,5 @@ public class Stringifiers {
             }
             return eventId.getUuid();
         }
-
     }
 }

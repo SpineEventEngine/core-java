@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -34,7 +33,7 @@ import java.util.UUID;
 /**
  * This class manages conversion of identifies to/from string.
  *
- * <p>In addition to utility methods for the conversion, it provides {@link ConverterRegistry}
+ * <p>In addition to utility methods for the conversion, it provides {@link StringifierRegistry}
  * which allows to provide custom conversion logic for user-defined types of identifies.
  *
  * @author Alexander Litus
@@ -45,7 +44,9 @@ public class Identifiers {
     /** The suffix of ID fields. */
     public static final String ID_PROPERTY_SUFFIX = "id";
 
-    private Identifiers() {}
+    private Identifiers() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Verifies if the passed class of identifiers is supported.
@@ -119,7 +120,7 @@ public class Identifiers {
         return Identifier.getDefaultValue(idClass);
     }
 
-    public static class CommandIdToStringConverter implements Function<CommandId, String> {
+    static class CommandIdStringifier implements Stringifier<CommandId> {
         @Override
         public String apply(@Nullable CommandId commandId) {
             if (commandId == null) {

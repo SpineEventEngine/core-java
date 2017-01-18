@@ -31,23 +31,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.synchronizedMap;
 
-/** The registry of converters of ID types to string representations. */
-public class ConverterRegistry {
+/**
+ * The registry of converters of types to their string representations.
+ *
+ * @author Alexander Yevsyukov
+ */
+public class StringifierRegistry {
 
-    private final Map<Class<?>, Function<?, String>> entries = synchronizedMap(
+    private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<Class<?>, Function<?, String>>builder()
-                            .put(Timestamp.class, new Stringifiers.TimestampToStringConverter())
-                            .put(EventId.class, new Stringifiers.EventIdToStringConverter())
-                            .put(CommandId.class, new Identifiers.CommandIdToStringConverter())
+                    ImmutableMap.<Class<?>, Stringifier<?>>builder()
+                            .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
+                            .put(EventId.class, new Stringifiers.EventIdStringifier())
+                            .put(CommandId.class, new Identifiers.CommandIdStringifier())
                             .build()
             )
     );
 
-    private ConverterRegistry() {
+    private StringifierRegistry() {
+        // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> idClass, Function<I, String> converter) {
+    public <I extends Message> void register(Class<I> idClass, Stringifier<I> converter) {
         checkNotNull(idClass);
         checkNotNull(converter);
         entries.put(idClass, converter);
@@ -80,11 +85,10 @@ public class ConverterRegistry {
     private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final ConverterRegistry value = new ConverterRegistry();
+        private final StringifierRegistry value = new StringifierRegistry();
     }
 
-    public static ConverterRegistry getInstance() {
+    public static StringifierRegistry getInstance() {
         return Singleton.INSTANCE.value;
     }
-
 }
