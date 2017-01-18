@@ -21,9 +21,11 @@
 package org.spine3.base;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 
 import java.util.Map;
 
@@ -36,6 +38,7 @@ import static java.util.Collections.synchronizedMap;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public class StringifierRegistry {
 
     private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
@@ -52,19 +55,19 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> idClass, Stringifier<I> converter) {
-        checkNotNull(idClass);
+    public <I extends Message> void register(Class<I> valueClass, Stringifier<I> converter) {
+        checkNotNull(valueClass);
         checkNotNull(converter);
-        entries.put(idClass, converter);
+        entries.put(valueClass, converter);
     }
 
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
      * @param <I> the type of the values to convert
-     * @return
+     * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Stringifier<I> get(Class<I> valueClass) {
+    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
         checkNotNull(valueClass);
 
         final Stringifier<?> func = entries.get(valueClass);
@@ -72,7 +75,7 @@ public class StringifierRegistry {
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
             @see #register(Class, Function) */
         final Stringifier<I> result = (Stringifier<I>) func;
-        return result;
+        return Optional.fromNullable(result);
     }
 
     public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {

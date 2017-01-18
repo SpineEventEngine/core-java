@@ -107,7 +107,8 @@ public class Stringifiers {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
         if (registry.hasStringiferFor(msgClass)) {
-            final Stringifier converter = registry.get(msgClass);
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
+            final Stringifier converter = registry.get(msgClass).get();
             result = (String) converter.apply(message);
         } else {
             result = convert(message);

@@ -204,13 +204,14 @@ public class StringifiersShould {
         assertEquals(TEST_ID, result);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as these are standard Stringifiers we add ourselves.
     @Test
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertEquals(NULL_ID, registry.get(Timestamp.class).apply(null));
-        assertEquals(NULL_ID, registry.get(EventId.class).apply(null));
-        assertEquals(NULL_ID, registry.get(CommandId.class).apply(null));
+        assertEquals(NULL_ID, registry.get(Timestamp.class).get().apply(null));
+        assertEquals(NULL_ID, registry.get(EventId.class).get().apply(null));
+        assertEquals(NULL_ID, registry.get(CommandId.class).get().apply(null));
     }
 
     @Test
