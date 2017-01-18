@@ -95,8 +95,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @param id an ID for the new instance
      * @throws IllegalArgumentException if the ID type is unsupported
      */
-    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
-    public ProcessManager(I id) {
+    protected ProcessManager(I id) {
         super(id);
     }
 

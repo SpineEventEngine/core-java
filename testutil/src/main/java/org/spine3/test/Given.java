@@ -27,6 +27,8 @@ import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregatePartBuilder;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityBuilder;
+import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.procman.ProcessManagerBuilder;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionBuilder;
 
@@ -71,6 +73,9 @@ public class Given {
         return result;
     }
 
+    /**
+     * Creates a builder for a {@code Projection}.
+     */
     public static <P extends Projection<I, S>, I, S extends Message>
            ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
         final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
@@ -78,4 +83,13 @@ public class Given {
         return result;
     }
 
+    /**
+     * Creates a builder for a {@code ProcessManager}.
+     */
+    public static <P extends ProcessManager<I, S>, I, S extends Message>
+           ProcessManagerBuilder<P, I, S> processManagerOfClass(Class<P> pmClass) {
+        final ProcessManagerBuilder<P, I, S> result = new ProcessManagerBuilder<>();
+        result.setClass(pmClass);
+        return result;
+    }
 }

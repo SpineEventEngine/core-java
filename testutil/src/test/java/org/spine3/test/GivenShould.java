@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
@@ -73,6 +74,17 @@ public class GivenShould {
 
     private static class AProjection extends Projection<String, UInt32Value> {
         protected AProjection(String id) {
+            super(id);
+        }
+    }
+
+    @Test
+    public void create_builder_for_process_managers() {
+        assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class).getResultClass());
+    }
+
+    private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {
+        protected AProcessManager(Timestamp id) {
             super(id);
         }
     }
