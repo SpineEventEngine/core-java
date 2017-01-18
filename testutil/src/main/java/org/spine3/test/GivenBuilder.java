@@ -30,7 +30,7 @@ public abstract class GivenBuilder<T> {
     /** The class of the object we create. */
     private Class<T> resultClass;
 
-    /** Creates the instance associated with the passed class. */
+    /** Creates new instance. */
     protected GivenBuilder() {
     }
 
