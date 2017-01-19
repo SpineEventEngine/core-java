@@ -33,8 +33,8 @@ import org.spine3.validate.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.EMPTY_ID;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkValid;
 import static org.spine3.validate.Validate.isDefault;

@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkPositive;

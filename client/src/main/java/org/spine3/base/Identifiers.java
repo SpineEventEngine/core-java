@@ -20,55 +20,29 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import com.google.protobuf.util.Timestamps;
 import org.spine3.Internal;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static java.util.Collections.synchronizedMap;
-import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
- * This class manages conversion of identifies to/from string.
- *
- * <p>In addition to utility methods for the conversion, it provides {@link ConverterRegistry}
- * which allows to provide custom conversion logic for user-defined types of identifies.
+ * Utility class for working with identifiers.
  *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public class Identifiers {
-
-    /** A {@code null} ID string representation. */
-    public static final String NULL_ID = "NULL";
-
-    /** An empty ID string representation. */
-    public static final String EMPTY_ID = "EMPTY";
 
     /** The suffix of ID fields. */
     public static final String ID_PROPERTY_SUFFIX = "id";
 
-    private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
-    private static final Pattern PATTERN_COLON = Pattern.compile(":");
-    private static final Pattern PATTERN_T = Pattern.compile("T");
-    private static final String EQUAL_SIGN = "=";
-
-    private Identifiers() {}
+    private Identifiers() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Verifies if the passed class of identifiers is supported.
@@ -79,74 +53,6 @@ public class Identifiers {
      */
     public static <I> void checkSupported(Class<I> idClass) {
         Identifier.Type.getType(idClass);
-    }
-
-    /**
-     * Converts the passed ID value into the string representation.
-     *
-     * @param id  the value to convert
-     * @param <I> the type of the ID
-     * @return <ul>
-     * <li>for classes implementing {@link Message} &mdash; a Json form;
-     * <li>for {@code String}, {@code Long}, {@code Integer} &mdash; the result of {@link Object#toString()};
-     * <li>for {@code null} ID &mdash; the {@link #NULL_ID};
-     * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
-     * </ul>
-     * @throws IllegalArgumentException if the passed type isn't one of the above or
-     *                                  the passed {@link Message} instance has no fields
-     * @see ConverterRegistry
-     */
-    public static <I> String idToString(@Nullable I id) {
-        if (id == null) {
-            return NULL_ID;
-        }
-
-        final Identifier<?> identifier;
-        if (id instanceof Any) {
-            final Message unpacked = unpack((Any) id);
-            identifier = Identifier.fromMessage(unpacked);
-        } else {
-            identifier = Identifier.from(id);
-        }
-
-        final String result = identifier.toString();
-        return result;
-    }
-
-    static String idMessageToString(Message message) {
-        final String result;
-        final ConverterRegistry registry = ConverterRegistry.getInstance();
-        if (registry.containsConverter(message)) {
-            final Function<Message, String> converter = registry.getConverter(message);
-            result = converter.apply(message);
-        } else {
-            result = convert(message);
-        }
-        return result;
-    }
-
-    private static String convert(Message message) {
-        final Collection<Object> values = message.getAllFields().values();
-        final String result;
-        if (values.isEmpty()) {
-            result = EMPTY_ID;
-        } else if (values.size() == 1) {
-            final Object object = values.iterator().next();
-            if (object instanceof Message) {
-                result = idMessageToString((Message) object);
-            } else {
-                result = object.toString();
-            }
-        } else {
-            result = messageWithMultipleFieldsToString(message);
-        }
-        return result;
-    }
-
-    private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
-        String result = shortDebugString(message);
-        result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
-        return result;
     }
 
     /**
@@ -192,20 +98,6 @@ public class Identifiers {
     }
 
     /**
-     * Converts the passed timestamp to the string, which will serve as ID.
-     *
-     * @param timestamp the value to convert
-     * @return string representation of timestamp-based ID
-     */
-    public static String timestampToIdString(Timestamp timestamp) {
-        String result = Timestamps.toString(timestamp);
-        result = PATTERN_COLON.matcher(result).replaceAll("-");
-        result = PATTERN_T.matcher(result).replaceAll("_T");
-
-        return result;
-    }
-
-    /**
      * Generates a new random UUID.
      *
      * @return the generated value
@@ -222,95 +114,5 @@ public class Identifiers {
     @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
         return Identifier.getDefaultValue(idClass);
-    }
-
-    /** The registry of converters of ID types to string representations. */
-    public static class ConverterRegistry {
-
-        private final Map<Class<?>, Function<?, String>> entries = synchronizedMap(
-                newHashMap(
-                        ImmutableMap.<Class<?>, Function<?, String>>builder()
-                                .put(Timestamp.class, new TimestampToStringConverter())
-                                .put(EventId.class, new EventIdToStringConverter())
-                                .put(CommandId.class, new CommandIdToStringConverter())
-                                .build()
-                )
-        );
-
-        private ConverterRegistry() {
-        }
-
-        public <I extends Message> void register(Class<I> idClass, Function<I, String> converter) {
-            checkNotNull(idClass);
-            checkNotNull(converter);
-            entries.put(idClass, converter);
-        }
-
-        public <I> Function<I, String> getConverter(I id) {
-            checkNotNull(id);
-            checkNotClass(id);
-
-            final Function<?, String> func = entries.get(id.getClass());
-
-            @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-                @see #register(Class, com.google.common.base.Function) */
-            final Function<I, String> result = (Function<I, String>) func;
-            return result;
-        }
-
-        private static <I> void checkNotClass(I id) {
-            if (id instanceof Class) {
-                throw new IllegalArgumentException("Class instance passed instead of value: " + id.toString());
-            }
-        }
-
-        public synchronized <I> boolean containsConverter(I id) {
-            final Class<?> idClass = id.getClass();
-            final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
-            return contains;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final ConverterRegistry value = new ConverterRegistry();
-        }
-
-        public static ConverterRegistry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-    }
-
-    private static class TimestampToStringConverter implements Function<Timestamp, String> {
-        @Override
-        public String apply(@Nullable Timestamp timestamp) {
-            if (timestamp == null) {
-                return NULL_ID;
-            }
-            final String result = timestampToIdString(timestamp);
-            return result;
-        }
-    }
-
-    public static class EventIdToStringConverter implements Function<EventId, String> {
-        @Override
-        public String apply(@Nullable EventId eventId) {
-            if (eventId == null) {
-                return NULL_ID;
-            }
-            return eventId.getUuid();
-        }
-
-    }
-
-    public static class CommandIdToStringConverter implements Function<CommandId, String> {
-        @Override
-        public String apply(@Nullable CommandId commandId) {
-            if (commandId == null) {
-                return NULL_ID;
-            }
-            return commandId.getUuid();
-        }
     }
 }
