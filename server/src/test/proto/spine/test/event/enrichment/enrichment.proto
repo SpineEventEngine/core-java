@@ -27,6 +27,8 @@ option java_multiple_files = true;
 
 import "spine/annotations.proto";
 import "spine/enrichment_annotations.proto";
+import "spine/time/zone_offset.proto";
+import "spine/people/person_name.proto";
 
 message ProjectCreatedEnrichmentAnotherPackage {
     option (enrichment_for) = "spine.test.event.ProjectCreated";
@@ -42,4 +44,47 @@ message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
     option (enrichment_for) = "spine.test.event.ProjectCreated";
 
     string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+}
+
+// The enrichment for all the events declared in the "spine.test.event.user" package.
+//
+// See `EventEnrichmentsMapShould#contain_all_events_from_package_by_one_enrichment` test for details.
+//
+message UserPackageEventsEnrichment {
+    option (enrichment_for) = "spine.test.event.user.*";
+
+    spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
+}
+
+// The enrichment for all the event declared in "spine.test.event.user.permission" package and referencing user who
+// is able to grant permissions.
+//
+// See `EventEnrichmentsMapShould#contain_only_events_with_target_field_if_declared_though_package` test for details.
+//
+message GranterEventsEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permission.*";
+
+    spine.people.PersonName granter_name = 1 [(by) = "*.granter_uid"];
+}
+
+// The enrichment for all the events declared in the "spine.test.event.user" package and
+// for spine.test.event.user.UserLoggedInEvent.
+//
+// See `EventEnrichmentsMapShould#contain_events_from_package_and_standalone_event` test for details.
+//
+message SelectiveComplexEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.UserLoggedInEvent";
+
+    int32 security_warn = 1 [(by) = "*.user_uid"];
+}
+
+// The enrichment for all the events declared in the "spine.test.event.user.permission" and
+// "spine.test.event.user.sharing" packages.
+//
+// See `EventEnrichmentsMapShould#contain_events_from_multiple_packages` test for details.
+//
+message MultiplePackageEnrichment {
+    option (enrichment_for) = "spine.test.event.user.permission.*,spine.test.event.user.sharing.*";
+
+    int32 sharing_type = 1[(by) = "*.user_uid"];
 }

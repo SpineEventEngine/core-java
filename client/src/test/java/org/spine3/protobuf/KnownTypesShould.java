@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -33,16 +34,23 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.error.UnknownTypeException;
+import org.spine3.test.types.Task;
+import org.spine3.test.types.TaskId;
+import org.spine3.test.types.TaskName;
 import org.spine3.type.ClassName;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Alexander Litus
@@ -115,6 +123,35 @@ public class KnownTypesShould {
     }
 
     @Test
+    public void return_all_types_under_certain_package() {
+        final TypeUrl taskId = TypeUrl.from(TaskId.getDescriptor());
+        final TypeUrl taskName = TypeUrl.from(TaskName.getDescriptor());
+        final TypeUrl task = TypeUrl.from(Task.getDescriptor());
+
+        final String packageName = "spine.test.types";
+
+        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(packageName);
+        assertSize(3, packageTypes);
+        assertTrue(packageTypes.containsAll(Arrays.asList(taskId, taskName, task)));
+    }
+
+    @Test
+    public void return_empty_collection_if_package_is_empty_or_invalid() {
+        final String packageName = "com.foo.invalid.package";
+        final Collection<?> emptyTypesCollection = KnownTypes.getTypesFromPackage(packageName);
+        assertNotNull(emptyTypesCollection);
+        assertTrue(emptyTypesCollection.isEmpty());
+    }
+
+    @Test
+    public void do_not_return_types_of_package_by_package_prefix() {
+        final String prefix = "spine.test.ty"; // "spine.test.types" is a valid package
+
+        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(prefix);
+        assertTrue(packageTypes.isEmpty());
+    }
+
+    @Test
     public void have_all_valid_java_class_names() {
         final Set<ClassName> classes = KnownTypes.getJavaClasses();
         assertFalse(classes.isEmpty());
@@ -125,6 +162,20 @@ public class KnownTypesShould {
                 fail("Invalid Java class name in the '.properties' file: " + name.value());
             }
         }
+    }
+
+    @Test
+    public void provide_proto_descriptor_by_type_name() {
+        final String typeName = "spine.test.types.Task";
+        final Descriptors.Descriptor typeDescriptor = KnownTypes.getDescriptorForType(typeName);
+        assertNotNull(typeDescriptor);
+        assertEquals(typeName, typeDescriptor.getFullName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_find_invalid_type_descriptor() {
+        final String invalidTypeName = "no.such.package.InvalidType";
+        KnownTypes.getDescriptorForType(invalidTypeName);
     }
 
     @Test(expected = IllegalStateException.class)
