@@ -193,6 +193,21 @@ public class EventEnricher {
             }
         }
 
+        /**
+         * Applies the passed function to the message.
+         *
+         * <p>We suppress the {@code "unchecked"} because we ensure types when we...
+         * <ol>
+         *      <li>create enrichments,
+         *      <li>put them into {@link #functions} by their event message class.
+         * </ol>
+         */
+        @SuppressWarnings("unchecked")
+        private static Message apply(EnrichmentFunction function, Message input) {
+            final Message result = (Message) function.apply(input);
+            return result;
+        }
+
         private void checkResult(Message enriched, EnrichmentFunction function) {
             checkNotNull(enriched,
                          "EnrichmentFunction %s produced `null` from event message %s",
@@ -213,14 +228,6 @@ public class EventEnricher {
 
     private static void checkEnabled(Event event) {
         checkArgument(isEnrichmentEnabled(event), "Enrichment is disabled for the event %s", event);
-    }
-
-    private static Message apply(EnrichmentFunction function, Message input) {
-        @SuppressWarnings("unchecked") /** It is OK to suppress because we ensure types when we...
-         (a) create enrichments,
-         (b) put them into {@link #functions} by their event message class. **/
-        final Message result = (Message) function.apply(input);
-        return result;
     }
 
     /**
