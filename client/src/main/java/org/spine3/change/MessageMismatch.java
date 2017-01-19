@@ -56,8 +56,8 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates a {@code ValueMismatch} for a command that wanted to clear a value, but discovered
-     * that the field already has the default value.
+     * Creates a {@code ValueMismatch} for a command that wanted to <em>clear</em> a value,
+     * but discovered that the field already has the default value.
      *
      * @param expected the value of the field that the command wanted to clear
      * @param version  the version of the entity in which the mismatch is discovered
@@ -67,6 +67,22 @@ public class MessageMismatch {
         checkNotNull(expected);
         final Message defaultValue = expected.getDefaultInstanceForType();
         return of(expected, defaultValue, defaultValue, version);
+    }
+
+    /**
+     * Creates a {@code ValueMismatch} for a command that wanted to <em>change</em> a field value,
+     * but discovered that the field has the default value.
+     *
+     * @param expected the value expected by the command
+     * @param newValue the value the command wanted to set
+     * @param version  the version of the entity in which the mismatch is discovered
+     * @return new {@code ValueMismatch} instance
+     */
+    public static ValueMismatch expectedNotDefault(Message expected, Message newValue, int version) {
+        checkNotNull(expected);
+        checkNotNull(newValue);
+        final Message defaultValue = expected.getDefaultInstanceForType();
+        return of(expected, defaultValue, newValue, version);
     }
 
     /**
