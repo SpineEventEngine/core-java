@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -60,7 +59,7 @@ class ReferenceValidator {
     private static final String PROTO_FQN_SEPARATOR = ".";
 
     private static final String PIPE_SEPARATOR = "|";
-    private static final Pattern PATTERN_PIPE_SEPARATOR = Pattern.compile(PIPE_SEPARATOR);
+    private static final Pattern PATTERN_PIPE_SEPARATOR = Pattern.compile("\\|");
 
     /** The reference to the event context used in the `by` field option. */
     private static final String CONTEXT_REFERENCE = "context";
@@ -118,18 +117,19 @@ class ReferenceValidator {
         checkNotNull(byOptionArgument);
         final int pipeSeparatorIndex = byOptionArgument.indexOf(PIPE_SEPARATOR);
         if (pipeSeparatorIndex < 0) {
-            return Collections.singleton(findSourceFieldByName(byOptionArgument, enrichmentField));
+            return Collections.singleton(findSourceFieldByName(byOptionArgument, enrichmentField, true));
         } else {
             final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionArgument);
             return findSourceFieldsByNames(targetFieldNames, enrichmentField);
         }
     }
 
-    private FieldDescriptor findSourceFieldByName(String name, FieldDescriptor enrichmentField) {
+    // TODO:19-01-17:dmytro.dashenkov: Javadoc.
+    private FieldDescriptor findSourceFieldByName(String name, FieldDescriptor enrichmentField, boolean strict) {
         checkSourceFieldName(name, enrichmentField);
         final Descriptor srcMessage = getSrcMessage(name);
         final FieldDescriptor field = findField(name, srcMessage);
-        if (field == null) {
+        if (field == null && strict) {
             throw noFieldException(name, srcMessage, enrichmentField);
         }
         return field;
@@ -139,13 +139,17 @@ class ReferenceValidator {
         checkArgument(names.length > 0, "Names may not be empty");
         checkArgument(names.length > 1,
                       "Enrichment target field names may not be a singleton array. Use findSourceFieldByName.");
-        final Set<FieldDescriptor> result = new HashSet<>(names.length);
+        final Collection<FieldDescriptor> result = new HashSet<>(names.length);
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
         for (String name : names) {
-            final FieldDescriptor field = findSourceFieldByName(name, enrichmentField);
-            checkState(field != null);
+            final FieldDescriptor field = findSourceFieldByName(name, enrichmentField, false);
+            if (field == null) {
+                // We don't know at this stage the type of the event
+                // The enrichment is to be included anyway, but by other {@code ReferenceValidator} instance
+                continue;
+            }
 
             if (basicType == null) { // Get type of the first field
                 basicType = field.getType();
