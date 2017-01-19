@@ -45,6 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
 import static java.lang.String.format;
 
 /**
@@ -139,9 +140,25 @@ class ReferenceValidator {
         checkArgument(names.length > 1,
                       "Enrichment target field names may not be a singleton array. Use findSourceFieldByName.");
         final Set<FieldDescriptor> result = new HashSet<>(names.length);
+
+        FieldDescriptor.Type basicType = null;
+        Descriptor messageType = null;
         for (String name : names) {
             final FieldDescriptor field = findSourceFieldByName(name, enrichmentField);
             checkState(field != null);
+
+            if (basicType == null) { // Get type of the first field
+                basicType = field.getType();
+                if (basicType == MESSAGE) {
+                    messageType = field.getMessageType();
+                }
+            } else { // Compare the type with each of the next
+                checkState(basicType == field.getType(), differentTypesErrorMessage(enrichmentField));
+                if (basicType == MESSAGE) {
+                    checkState(messageType.equals(field.getMessageType()), differentTypesErrorMessage(enrichmentField));
+                }
+            }
+
             final boolean noDuplicateFiled = result.add(field);
             checkState(
                     noDuplicateFiled,
@@ -149,6 +166,10 @@ class ReferenceValidator {
             );
         }
         return result;
+    }
+
+    private static String differentTypesErrorMessage(FieldDescriptor enrichmentField) {
+        return String.format("Enrichment field %s targets fields of different types", enrichmentField);
     }
 
     private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
