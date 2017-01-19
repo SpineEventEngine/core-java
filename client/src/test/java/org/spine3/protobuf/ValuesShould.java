@@ -96,7 +96,7 @@ public class ValuesShould {
     @Test
     public void create_new_Int32Value() {
         final int value = 2;
-        final Int32Value msg = Values.newIntegerValue(value);
+        final Int32Value msg = Values.newIntValue(value);
         assertEquals(value, msg.getValue());
     }
 
