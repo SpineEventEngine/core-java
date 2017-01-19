@@ -24,4 +24,7 @@ dependencies {
 
     // Depend on the client module that contains `Timestamps` and other utility classes.
     compile project(path: ':client')
+
+    // Depend on `org.spine3.server.entity` and other packages for the GivenXxx classes.
+    compile project(path: ':server')
 }

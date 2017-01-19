@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkPositive;
