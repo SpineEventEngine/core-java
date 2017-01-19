@@ -95,7 +95,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
     private void validateFieldsOfMessageIfNeeded() {
         if (!validateOption) {
             if (hasCustomInvalidMessage()) {
-                log().warn("'if_invalid' option is set without '(validate) = true'");
+                log().warn("'if_invalid' option is set without '(valid) = true'");
             }
             return;
         }
