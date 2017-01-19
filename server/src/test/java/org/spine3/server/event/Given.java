@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.people.PersonName;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectCompleted;
@@ -33,6 +34,7 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.time.ZoneOffset;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -152,7 +154,10 @@ public class Given {
                     .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
                     .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
                     .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING);
+                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING)
+                    .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
+                    .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                    .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
@@ -230,6 +235,37 @@ public class Given {
                     @Override
                     public String apply(@Nullable EventContext.Attributes input) {
                         return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
+                new Function<String, ZoneOffset>() {
+                    @Nullable
+                    @Override
+                    public ZoneOffset apply(@Nullable String input) {
+                        return input == null
+                               ? ZoneOffset.getDefaultInstance()
+                               : ZoneOffset.newBuilder().setId(input).build();
+                    }
+                };
+
+        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
+                new Function<String, PersonName>() {
+                    @Nullable
+                    @Override
+                    public PersonName apply(@Nullable String input) {
+                        return input == null
+                               ? PersonName.getDefaultInstance()
+                               : PersonName.newBuilder().setFamilyName(input).build();
+                    }
+                };
+
+        private static final Function<String, Integer> STRING_TO_INT =
+                new Function<String, Integer>() {
+                    @Nullable
+                    @Override
+                    public Integer apply(@Nullable String input) {
+                        return 0;
                     }
                 };
     }
