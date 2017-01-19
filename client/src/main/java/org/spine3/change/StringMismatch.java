@@ -55,8 +55,8 @@ public class StringMismatch {
     }
 
     /**
-     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value, but discovered
-     * that the field is already empty.
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value,
+     * but discovered that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear
      * @param version  the version of the entity in which the mismatch is discovered
@@ -68,7 +68,8 @@ public class StringMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than expected by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
