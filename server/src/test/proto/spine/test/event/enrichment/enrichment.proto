@@ -56,7 +56,7 @@ message UserPackageEventsEnrichment {
     spine.time.ZoneOffset time_zone = 1 [(by) = "*.user_uid"];
 }
 
-// The enrichment for all the event declared in "spine.test.event.user.permissions" package and referencing user who
+// The enrichment for all the event declared in "spine.test.event.user.permission" package and referencing user who
 // is able to grant permissions.
 //
 // See `EventEnrichmentsMapShould#contain_only_events_with_target_field_if_declared_though_package` test for details.
