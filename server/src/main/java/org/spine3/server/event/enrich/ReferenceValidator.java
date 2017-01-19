@@ -23,6 +23,8 @@ package org.spine3.server.event.enrich;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.spine3.annotations.EventAnnotationsProto;
@@ -30,8 +32,17 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static java.lang.String.format;
@@ -46,6 +57,9 @@ class ReferenceValidator {
 
     /** The separator used in Protobuf fully-qualified names. */
     private static final String PROTO_FQN_SEPARATOR = ".";
+
+    private static final String PIPE_SEPARATOR = "|";
+    private static final Pattern PATTERN_PIPE_SEPARATOR = Pattern.compile(PIPE_SEPARATOR);
 
     /** The reference to the event context used in the `by` field option. */
     private static final String CONTEXT_REFERENCE = "context";
@@ -74,28 +88,67 @@ class ReferenceValidator {
 
     /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
     List<EnrichmentFunction<?, ?>> validate() {
-        final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
-        final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
+        final List<EnrichmentFunction<?, ?>> functions = new LinkedList<>();
+        final Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            final FieldDescriptor sourceField = findSourceField(enrichmentField);
+            final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
+            putEnrichmentsByField(functions, fields, enrichmentField, sourceFields);
+        }
+        this.sourceToTargetMap = ImmutableMultimap.copyOf(fields);
+        final ImmutableList<EnrichmentFunction<?, ?>> result = ImmutableList.copyOf(functions);
+        return result;
+    }
+
+    private void putEnrichmentsByField(List<EnrichmentFunction<?, ?>> functions,
+                                       Multimap<FieldDescriptor, FieldDescriptor> fields,
+                                       FieldDescriptor enrichmentField,
+                                       Iterable<FieldDescriptor> sourceFields) {
+        for (FieldDescriptor sourceField : sourceFields) {
             final EnrichmentFunction<?, ?> function = getEnrichmentFunction(sourceField, enrichmentField);
             functions.add(function);
             fields.put(sourceField, enrichmentField);
         }
-        this.sourceToTargetMap = fields.build();
-        return functions.build();
     }
 
     /** Searches for the event/context field with the name parsed from the enrichment field `by` option. */
-    private FieldDescriptor findSourceField(FieldDescriptor enrichmentField) {
-        final String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
-        checkSourceFieldName(fieldName, enrichmentField);
-        final Descriptor srcMessage = getSrcMessage(fieldName);
-        final FieldDescriptor field = findField(fieldName, srcMessage);
+    private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
+        final String byOptionArgument = enrichmentField.getOptions()
+                                                       .getExtension(EventAnnotationsProto.by);
+        checkNotNull(byOptionArgument);
+        final int pipeSeparatorIndex = byOptionArgument.indexOf(PIPE_SEPARATOR);
+        if (pipeSeparatorIndex < 0) {
+            return Collections.singleton(findSourceFieldByName(byOptionArgument, enrichmentField));
+        } else {
+            final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionArgument);
+            return findSourceFieldsByNames(targetFieldNames, enrichmentField);
+        }
+    }
+
+    private FieldDescriptor findSourceFieldByName(String name, FieldDescriptor enrichmentField) {
+        checkSourceFieldName(name, enrichmentField);
+        final Descriptor srcMessage = getSrcMessage(name);
+        final FieldDescriptor field = findField(name, srcMessage);
         if (field == null) {
-            throw noFieldException(fieldName, srcMessage, enrichmentField);
+            throw noFieldException(name, srcMessage, enrichmentField);
         }
         return field;
+    }
+
+    private Collection<FieldDescriptor> findSourceFieldsByNames(String[] names, FieldDescriptor enrichmentField) {
+        checkArgument(names.length > 0, "Names may not be empty");
+        checkArgument(names.length > 1,
+                      "Enrichment target field names may not be a singleton array. Use findSourceFieldByName.");
+        final Set<FieldDescriptor> result = new HashSet<>(names.length);
+        for (String name : names) {
+            final FieldDescriptor field = findSourceFieldByName(name, enrichmentField);
+            checkState(field != null);
+            final boolean noDuplicateFiled = result.add(field);
+            checkState(
+                    noDuplicateFiled,
+                    "Enrichment target field names may contain no duplicates. Found duplicate field " + name
+            );
+        }
+        return result;
     }
 
     private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
