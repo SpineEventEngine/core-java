@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +61,7 @@ import static org.junit.Assert.fail;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.currentTimeSeconds;
+import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -597,6 +599,34 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new TestAggregateWithIdInteger(100).getBuilder();
+    }
+
+    @Test
+    public void set_version_when_creating_mismatches() {
+        final int version = aggregate.getVersion();
+
+        assertEquals(version, aggregate.expectedDefault(msg(), msg()).getVersion());
+        assertEquals(version, aggregate.expectedNotDefault(msg()).getVersion());
+        assertEquals(version, aggregate.expectedNotDefault(msg(), msg()).getVersion());
+        assertEquals(version, aggregate.unexpectedValue(msg(), msg(), msg()).getVersion());
+
+        assertEquals(version, aggregate.expectedEmpty(str(), str()).getVersion());
+        assertEquals(version, aggregate.expectedNotEmpty(str()).getVersion());
+        assertEquals(version, aggregate.unexpectedValue(str(), str(), str()).getVersion());
+    }
+
+    /**
+     * @return generated {@code StringValue} based on generated UUID
+     */
+    private static StringValue msg() {
+        return newUuidValue();
+    }
+
+    /**
+     * @return generated {@code String} based on generated UUID
+     */
+    private static String str() {
+        return msg().getValue();
     }
 
     /*
