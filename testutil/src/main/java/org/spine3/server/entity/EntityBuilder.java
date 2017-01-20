@@ -70,8 +70,9 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
         return new EntityBuilder<>();
     }
 
-    public EntityBuilder<E, I, S> setClass(Class<E> entityClass) {
-        this.setResultClass(entityClass);
+    @Override
+    public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
+        super.setResultClass(entityClass);
         this.idClass = getIdClass();
         return this;
     }

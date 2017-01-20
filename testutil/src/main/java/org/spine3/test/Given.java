@@ -69,7 +69,7 @@ public class Given {
     public static <A extends AggregatePart<I, S, ?>, I, S extends Message>
            AggregatePartBuilder<A, I, S> aggregatePartOfClass(Class<A> partClass) {
         final AggregatePartBuilder<A, I, S> result = new AggregatePartBuilder<>();
-        result.setClass(partClass);
+        result.setResultClass(partClass);
         return result;
     }
 
@@ -79,7 +79,7 @@ public class Given {
     public static <P extends Projection<I, S>, I, S extends Message>
            ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
         final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
-        result.setClass(projectionClass);
+        result.setResultClass(projectionClass);
         return result;
     }
 
@@ -89,7 +89,7 @@ public class Given {
     public static <P extends ProcessManager<I, S>, I, S extends Message>
            ProcessManagerBuilder<P, I, S> processManagerOfClass(Class<P> pmClass) {
         final ProcessManagerBuilder<P, I, S> result = new ProcessManagerBuilder<>();
-        result.setClass(pmClass);
+        result.setResultClass(pmClass);
         return result;
     }
 }

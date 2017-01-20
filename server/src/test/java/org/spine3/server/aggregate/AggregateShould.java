@@ -83,7 +83,10 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
-        aggregate = new TestAggregate(ID);
+        aggregate = org.spine3.test.Given.aggregateOfClass(TestAggregate.class)
+                         .withId(ID)
+                         .withVersion(100)
+                         .build();
     }
 
     @Test
@@ -378,7 +381,7 @@ public class AggregateShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        public TestAggregate(ProjectId id) {
+        protected TestAggregate(ProjectId id) {
             super(id);
         }
 

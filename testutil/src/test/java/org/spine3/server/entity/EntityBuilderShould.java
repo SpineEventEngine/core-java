@@ -38,7 +38,7 @@ public class EntityBuilderShould {
      */
     private static EntityBuilder<TestEntity, Long, StringValue> givenEntity() {
         final EntityBuilder<TestEntity, Long, StringValue> builder = new EntityBuilder<>();
-        return builder.setClass(TestEntity.class);
+        return builder.setResultClass(TestEntity.class);
     }
 
     @Test(expected = NullPointerException.class)

@@ -36,8 +36,8 @@ public class ProjectionBuilder<P extends Projection<I, S>, I, S extends Message>
        extends EntityBuilder<P, I, S> {
 
     @Override
-    public ProjectionBuilder<P, I, S> setClass(Class<P> entityClass) {
-        super.setClass(entityClass);
+    public ProjectionBuilder<P, I, S> setResultClass(Class<P> entityClass) {
+        super.setResultClass(entityClass);
         return this;
     }
 }

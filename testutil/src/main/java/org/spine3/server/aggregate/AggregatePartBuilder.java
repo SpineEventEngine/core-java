@@ -31,8 +31,8 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
        extends AggregateBuilder<A, I, S> {
 
     @Override
-    public AggregatePartBuilder<A, I, S> setClass(Class<A> entityClass) {
-        super.setClass(entityClass);
+    public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
+        super.setResultClass(entityClass);
         return this;
     }
 }
