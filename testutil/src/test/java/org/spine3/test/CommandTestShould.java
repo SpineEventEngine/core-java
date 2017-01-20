@@ -42,7 +42,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  */
 public class CommandTestShould {
 
-    CommandTest<StringValue> commandTest;
+    private CommandTest<StringValue> commandTest;
 
     @Before
     public void setUp() {
