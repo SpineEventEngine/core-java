@@ -557,7 +557,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param newValue the new value requested in the command
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch expectedDefault(Message actual, Message newValue) {
         return MessageMismatch.expectedDefault(actual, newValue, getVersion());
     }
@@ -569,7 +568,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param expected the value of the field that the command wanted to clear
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch expectedNotDefault(Message expected) {
         return MessageMismatch.expectedNotDefault(expected, getVersion());
     }
@@ -582,7 +580,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param newValue the value the command wanted to set
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch expectedNotDefault(Message expected, Message newValue) {
         return MessageMismatch.expectedNotDefault(expected, newValue, getVersion());
     }
@@ -595,7 +592,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param newValue the new value requested in the command
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue) {
         return MessageMismatch.unexpectedValue(expected, actual, newValue, getVersion());
     }
@@ -608,7 +604,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param newValue the new value requested in the command
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch expectedEmpty(String actual, String newValue) {
         return StringMismatch.expectedEmpty(actual, newValue, getVersion());
     }
@@ -620,7 +615,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param expected the value of the field that the command wanted to clear
      * @return new ValueMismatch instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch expectedNotEmpty(String expected) {
         return StringMismatch.expectedNotEmpty(expected, getVersion());
     }
@@ -634,7 +628,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param newValue the new value requested in the command
      * @return new {@code ValueMismatch} instance
      */
-    @SuppressWarnings("unused") // part of API
     protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
         return StringMismatch.unexpectedValue(expected, actual, newValue, getVersion());
     }
