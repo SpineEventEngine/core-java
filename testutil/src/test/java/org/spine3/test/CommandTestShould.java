@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -130,5 +131,19 @@ public class CommandTestShould {
         protected TestCommandTest() {
             super();
         }
+    }
+
+    @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_command_on_createOtherCommand() {
+        commandTest.createAnotherCommand(null);
+    }
+
+    @Test
+    public void create_other_command() {
+        final Message anotherCommandMsg = Timestamps.getCurrentTime();
+        final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg);
+
+        assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
     }
 }

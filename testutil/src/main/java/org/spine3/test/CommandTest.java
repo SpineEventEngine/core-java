@@ -79,6 +79,10 @@ public abstract class CommandTest<C extends Message> {
         return this.command;
     }
 
+    protected Command createAnotherCommand(Message commandMessage) {
+        return commandFactory.create(checkNotNull(commandMessage));
+    }
+
     /**
      * Creates a command with the passed message and timestamp and remembers it.
      *
