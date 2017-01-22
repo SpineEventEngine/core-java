@@ -140,7 +140,7 @@ public class CommandTestShould {
     }
 
     @Test
-    public void create_other_command() {
+    public void create_another_command() {
         final Message anotherCommandMsg = Timestamps.getCurrentTime();
         final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg);
 
