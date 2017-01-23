@@ -88,7 +88,7 @@ public abstract class CommandTest<C extends Message> {
      * @param commandMessage the message of the command to create
      * @return new command instance
      */
-    protected Command createAnotherCommand(Message commandMessage) {
+    protected Command createDifferentCommand(Message commandMessage) {
         return commandFactory.create(checkNotNull(commandMessage));
     }
 
@@ -102,8 +102,8 @@ public abstract class CommandTest<C extends Message> {
      * @param timestamp the moment in time at which the command was created
      * @return new command instance
      */
-    protected Command createAnotherCommand(Message commandMessage, Timestamp timestamp) {
-        return adjustTimestamp(createAnotherCommand(commandMessage), timestamp);
+    protected Command createDifferentCommand(Message commandMessage, Timestamp timestamp) {
+        return adjustTimestamp(createDifferentCommand(commandMessage), timestamp);
     }
 
     /**

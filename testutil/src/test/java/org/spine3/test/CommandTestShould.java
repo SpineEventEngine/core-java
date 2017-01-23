@@ -128,23 +128,23 @@ public class CommandTestShould {
 
     @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_command_on_createOtherCommand() {
-        commandTest.createAnotherCommand(null);
+    public void do_not_accept_null_command_message_for_different_command() {
+        commandTest.createDifferentCommand(null);
     }
 
     @Test
-    public void create_another_command() {
+    public void create_different_command() {
         final Message anotherCommandMsg = Timestamps.getCurrentTime();
-        final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg);
+        final Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
     }
 
     @Test
-    public void create_another_command_with_timestamp() {
+    public void create_different_command_with_timestamp() {
         final Message anotherCommandMsg = Timestamps.getCurrentTime();
         final Timestamp timestamp = Timestamps.minutesAgo(30);
-        final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg, timestamp);
+        final Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
         assertEquals(timestamp, anotherCommand.getContext().getTimestamp());
