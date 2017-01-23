@@ -45,16 +45,6 @@ public class CommandTestShould {
 
     private CommandTest<StringValue> commandTest;
 
-    @Before
-    public void setUp() {
-        commandTest = new TestCommandTest();
-    }
-
-    @Test
-    public void initialize_with_default_CommandFactory_and_produce_commands() {
-        createAndAssertCommand(commandTest);
-    }
-
     /**
      * Creates a new command and checks its content.
      *
@@ -70,8 +60,18 @@ public class CommandTestShould {
         checkNotDefault(command.getContext());
     }
 
+    @Before
+    public void setUp() {
+        commandTest = new TestCommandTest();
+    }
+
+    @Test
+    public void initialize_with_default_CommandFactory_and_produce_commands() {
+        createAndAssertCommand(commandTest);
+    }
+
     @SuppressWarnings({"ConstantConditions" /* Passing `null` is the purpose of this test. */,
-                       "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
+            "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
     @Test(expected = NullPointerException.class)
     public void do_not_allow_null_CommandFacotry() {
         new TestCommandTest(null);
@@ -94,11 +94,13 @@ public class CommandTestShould {
 
     @Test
     public void have_empty_state_before_command_creation() {
-        assertFalse(commandTest.commandMessage().isPresent());
-        assertFalse(commandTest.commandContext().isPresent());
-        assertFalse(commandTest.command().isPresent());
+        assertFalse(commandTest.commandMessage()
+                               .isPresent());
+        assertFalse(commandTest.commandContext()
+                               .isPresent());
+        assertFalse(commandTest.command()
+                               .isPresent());
     }
-
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals are initialized.
     @Test
@@ -106,9 +108,12 @@ public class CommandTestShould {
         final StringValue commandMessage = newUuidValue();
         final Command command = commandTest.createCommand(commandMessage);
 
-        assertEquals(commandMessage, commandTest.commandMessage().get());
-        assertEquals(command.getContext(), commandTest.commandContext().get());
-        assertEquals(command, commandTest.command().get());
+        assertEquals(commandMessage, commandTest.commandMessage()
+                                                .get());
+        assertEquals(command.getContext(), commandTest.commandContext()
+                                                      .get());
+        assertEquals(command, commandTest.command()
+                                         .get());
     }
 
     @Test
@@ -117,20 +122,8 @@ public class CommandTestShould {
         final Timestamp timestamp = Timestamps.minutesAgo(5);
         final Command command = commandTest.createCommand(commandMessage, timestamp);
 
-        assertEquals(timestamp, command.getContext().getTimestamp());
-    }
-
-    /**
-     * The test class for verifying the behaviour of the abstract parent.
-     */
-    private static class TestCommandTest extends CommandTest<StringValue> {
-        protected TestCommandTest(CommandFactory commandFactory) {
-            super(commandFactory);
-        }
-
-        protected TestCommandTest() {
-            super();
-        }
+        assertEquals(timestamp, command.getContext()
+                                       .getTimestamp());
     }
 
     @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
@@ -145,5 +138,28 @@ public class CommandTestShould {
         final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
+    }
+
+    @Test
+    public void create_another_command_with_timestamp() {
+        final Message anotherCommandMsg = Timestamps.getCurrentTime();
+        final Timestamp timestamp = Timestamps.minutesAgo(30);
+        final Command anotherCommand = commandTest.createAnotherCommand(anotherCommandMsg, timestamp);
+
+        assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
+        assertEquals(timestamp, anotherCommand.getContext().getTimestamp());
+    }
+
+    /**
+     * The test class for verifying the behaviour of the abstract parent.
+     */
+    private static class TestCommandTest extends CommandTest<StringValue> {
+        protected TestCommandTest(CommandFactory commandFactory) {
+            super(commandFactory);
+        }
+
+        protected TestCommandTest() {
+            super();
+        }
     }
 }

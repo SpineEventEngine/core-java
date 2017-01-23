@@ -79,8 +79,31 @@ public abstract class CommandTest<C extends Message> {
         return this.command;
     }
 
+    /**
+     * Creates a command with the passed message.
+     *
+     * <p>Use this method for creating commands of types different than
+     * one which is the subject of the test suite (defined by the generic type {@code <C>}.
+     *
+     * @param commandMessage the message of the command to create
+     * @return new command instance
+     */
     protected Command createAnotherCommand(Message commandMessage) {
         return commandFactory.create(checkNotNull(commandMessage));
+    }
+
+    /**
+     * Creates a command with the passed message with the given timestamp.
+     *
+     * <p>Use this method for creating commands of types different than
+     * one which is the subject of the test suite (defined by the generic type {@code <C>}.
+     *
+     * @param commandMessage the message of the command to create
+     * @param timestamp the moment in time at which the command was created
+     * @return new command instance
+     */
+    protected Command createAnotherCommand(Message commandMessage, Timestamp timestamp) {
+        return adjustTimestamp(createAnotherCommand(commandMessage), timestamp);
     }
 
     /**
