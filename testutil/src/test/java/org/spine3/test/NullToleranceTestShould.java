@@ -38,35 +38,38 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_false_when_check_class_with_method_without_check_not_null() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(UtilityClassWithReferenceParameters.class)
-                                                                     .build();
+    public void return_false_when_check_class_with_method_without_not_null_check() {
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(UtilityClassWithReferenceParameters.class)
+                                 .build();
         final boolean isPassed = nullToleranceTest.check();
         assertFalse(isPassed);
     }
 
     @Test
     public void return_true_when_check_class_when_method_without_check_is_ignored() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(UtilityClassWithReferenceParameters.class)
-                                                                     .excludeMethod("methodWithoutCheck")
-                                                                     .build();
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(UtilityClassWithReferenceParameters.class)
+                                 .excludeMethod("methodWithoutCheck")
+                                 .build();
         final boolean isPassed = nullToleranceTest.check();
         assertTrue(isPassed);
     }
 
     @Test
     public void return_true_when_check_class_with_methods_with_primitive_parameters() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(UtilityClassWithPrimitiveParameters.class)
-                                                                     .build();
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(UtilityClassWithPrimitiveParameters.class)
+                                 .build();
         final boolean isPassed = nullToleranceTest.check();
         assertTrue(isPassed);
     }
 
     @Test
-    public void return_false_when_check_class_with_method_with_reference_and_primitive_types_without_check() {
+    public void return_false_when_check_class_with_method_with_reference_and_primitive_parameters_without_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(UtilityClassWithMixedParameters.class)
                                                                      .addDefaultValue(long.class, 0L)
@@ -77,7 +80,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_true_when_check_clkass_with_method_with_reference_and_primitive_types_with_check() {
+    public void return_true_when_check_class_with_method_with_reference_and_primitive_types_with_check() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithMixedParameters.class)
@@ -105,7 +108,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void not_throw_exception_when_non_util_method_is_excluded() {
+    public void return_true_and_not_throw_exception_when_non_util_method_is_excluded() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNonUtilMethod.class)
                                                                      .excludeMethod("nonUtilMethod")
