@@ -220,21 +220,21 @@ public class NullToleranceTest {
     private boolean isExpectedStackTraceElements(String methodName, Throwable cause) {
         final StackTraceElement[] stackTraceElements = cause.getStackTrace();
         final StackTraceElement preconditionsElement = stackTraceElements[0];
-        final boolean isPreconditionsClass = Preconditions.class.getName()
-                                                                .equals(preconditionsElement.getClassName());
-        if (!isPreconditionsClass) {
+        final boolean preconditionClass = Preconditions.class.getName()
+                                                             .equals(preconditionsElement.getClassName());
+        if (!preconditionClass) {
             return false;
         }
 
         final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
-        final boolean isCorrectMethod = isCorrectMethodName(methodName, expectedUtilClassElement);
-        if (!isCorrectMethod) {
+        final boolean correct = isCorrectMethodName(methodName, expectedUtilClassElement);
+        if (!correct) {
             return false;
         }
 
-        final boolean isUtilClass = targetClass.getName()
-                                               .equals(expectedUtilClassElement.getClassName());
-        return isUtilClass;
+        final boolean correctClass = targetClass.getName()
+                                                .equals(expectedUtilClassElement.getClassName());
+        return correctClass;
     }
 
     private boolean isCorrectMethodName(String methodName, StackTraceElement expectedUtilClassElement) {
