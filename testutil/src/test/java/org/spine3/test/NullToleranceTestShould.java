@@ -20,8 +20,8 @@
 
 package org.spine3.test;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.spine3.change.Changes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static junit.framework.TestCase.assertFalse;
@@ -32,13 +32,8 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class NullToleranceTestShould {
 
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
     @Test
-    public void return_false_when_check_class_with_method_without_not_null_check() {
+    public void return_false_when_check_class_with_methods_accept_non_declared_null_parameters() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
@@ -99,19 +94,10 @@ public class NullToleranceTestShould {
         nullToleranceTest.check();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_when_invoke_non_util_method() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(ClassWithNonUtilMethod.class)
-                                                                     .build();
-        nullToleranceTest.check();
-    }
-
     @Test
-    public void return_true_and_not_throw_exception_when_non_util_method_is_excluded() {
+    public void return_true_when_check_class_with_util_and_non_util_method() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNonUtilMethod.class)
-                                                                     .excludeMethod("nonUtilMethod")
                                                                      .build();
         final boolean isPassed = nullToleranceTest.check();
         assertTrue(isPassed);
@@ -130,7 +116,7 @@ public class NullToleranceTestShould {
      * Test utility classes
      ******************************/
 
-    @SuppressWarnings("unused") //invoke methods via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class UtilityClassWithReferenceParameters {
 
         public static void methodWithoutCheck(Object param) {
@@ -142,14 +128,14 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") //invoke method via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class UtilityClassWithPrimitiveParameters {
 
         public static void methodWithPrimitiveParams(int first, double second) {
         }
     }
 
-    @SuppressWarnings("unused") //invoke methods via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class UtilityClassWithMixedParameters {
 
         public static void methodWithMixedParameterTypesWithoutCheck(long first, Object second) {
@@ -160,7 +146,7 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") //invoke method via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class UtilityClassWithException {
 
         public static void methodWhichThrowsException(Object param) {
@@ -168,7 +154,7 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") //invoke methods via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class ClassWithNonUtilMethod {
         public void nonUtilMethod(Object param) {
         }
@@ -178,7 +164,7 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") //invoke methods via reflection
+    @SuppressWarnings("unused") // accessed via reflection
     private static class UtilityClassWithPrivateMethod {
 
         private static void privateMethod(Object first, Object second) {

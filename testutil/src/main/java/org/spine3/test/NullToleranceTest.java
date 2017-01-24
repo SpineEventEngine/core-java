@@ -21,46 +21,73 @@
 package org.spine3.test;
 
 import com.google.common.base.Preconditions;
+import com.google.common.reflect.Invokable;
+import com.google.common.reflect.TypeToken;
 import org.spine3.util.Exceptions;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.primitives.Primitives.allPrimitiveTypes;
 
 /**
- * Provides the method to check the utility classes for the not-null check
- * the non-primitive method parameters.
+ * Serves as a helper to ensure that none of the methods of the target utility
+ * class accept {@code null}s as argument values.
+ *
+ * <p> The helper checks the methods with access modifiers:
+ * <ul>
+ *     <li> the {@code public};
+ *     <li> the {@code protected};
+ *     <li> the {@code default}.
+ * </ul>
+ *
+ * <p> The helper does not checks the methods:
+ * <ul>
+ *     <li> with the {@code private} modifier;
+ *     <li> without the {@code static} modifier;
+ *     <li> with only the primitive parameters.
+ * </ul>
+ *
+ * <p> The examples of the methods which will be checked:
+ * <ul>
+ *     <li> public static void method(Object obj);
+ *     <li> protected static void method(Object first, long second);
+ *     <li> static void method(Object first, Object second).
+ * </ul>
+ *
+ * <p> The examples of the methods which will be ignored:
+ * <ul>
+ *     <li> public void method(Object obj);
+ *     <li> private static void method(Object obj);
+ *     <li> protected static void method(int first, float second).
+ * </ul>
  *
  * @author Illia Shepilov
  */
 public class NullToleranceTest {
 
-    private final Class utilClass;
+    private final Class targetClass;
     private final Set<String> excludedMethods;
-    private final Map defaultValuesMap;
-    private final Set<Class> primitiveValues;
+    private final Map<?, ?> defaultValuesMap;
 
     private NullToleranceTest(Builder builder) {
-        this.utilClass = builder.utilClass;
+        this.targetClass = builder.targetClass;
         this.excludedMethods = builder.excludedMethods;
         this.defaultValuesMap = builder.defaultValues;
-        primitiveValues = newHashSet();
-        initPrimitiveValuesSet();
     }
 
     /**
-     * Checks the all non-private methods in the {@code utilClass}.
+     * Checks the all non-private methods in the {@code targetClass}.
      *
-     * <p> Check is successful if each the non-primitive method parameter has the not-null check.
+     * <p> Check is successful if each of the non-primitive method parameters is ensured to be non-null.
      *
      * @return {@code true} if all methods have not-null check
      * for the input reference type parameters, {@code false} otherwise
@@ -70,17 +97,17 @@ public class NullToleranceTest {
         for (Method method : accessibleMethods) {
             final Class[] parameterTypes = method.getParameterTypes();
             final String methodName = method.getName();
-            final boolean isExcluded = excludedMethods.contains(methodName);
-            final boolean arePrimitives = primitiveValues.containsAll(Arrays.asList(parameterTypes));
-            final boolean skipIteration = isExcluded || parameterTypes.length == 0 || arePrimitives;
+            final boolean excluded = excludedMethods.contains(methodName);
+            final boolean arePrimitives = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
+            final boolean skipIteration = excluded || parameterTypes.length == 0 || arePrimitives;
             if (skipIteration) {
                 continue;
             }
 
             final Object[] parameterValues = getParameterValues(parameterTypes);
 
-            final boolean isCorrect = invokeAndCheck(method, parameterValues, parameterTypes);
-            if (!isCorrect) {
+            final boolean correct = invokeAndCheck(method, parameterValues, parameterTypes);
+            if (!correct) {
                 return false;
             }
 
@@ -89,12 +116,14 @@ public class NullToleranceTest {
     }
 
     private Method[] getAccessibleMethods() {
-        final Method[] declaredMethods = utilClass.getDeclaredMethods();
+        final Method[] declaredMethods = targetClass.getDeclaredMethods();
         final List<Method> methodList = newLinkedList();
 
         for (Method method : declaredMethods) {
-            final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
-            if (!isPrivate) {
+            final Invokable<?, Object> invokable = Invokable.from(method);
+            final boolean privateMethod = invokable.isPrivate();
+            final boolean staticMethod = invokable.isStatic();
+            if (!privateMethod && staticMethod) {
                 methodList.add(method);
             }
         }
@@ -115,14 +144,15 @@ public class NullToleranceTest {
     private boolean invokeAndCheck(Method method, Object[] parameterValues, Class[] parameterTypes) {
         for (int i = 0; i < parameterValues.length; i++) {
             Object[] copiedParametersArray = Arrays.copyOf(parameterValues, parameterValues.length);
-            final boolean isPrimitive = primitiveValues.contains(parameterTypes[i]);
-            if (!isPrimitive) {
+            final boolean primitive = TypeToken.of(parameterTypes[i])
+                                               .isPrimitive();
+            if (!primitive) {
                 copiedParametersArray[i] = null;
             }
 
-            final boolean isCorrect = invokeAndCheck(method, copiedParametersArray);
+            final boolean correct = invokeAndCheck(method, copiedParametersArray);
 
-            if (!isCorrect) {
+            if (!correct) {
                 return false;
             }
         }
@@ -133,8 +163,8 @@ public class NullToleranceTest {
         try {
             method.invoke(null, params);
         } catch (InvocationTargetException ex) {
-            boolean isValid = validateException(method.getName(), ex);
-            return isValid;
+            boolean valid = validateException(method.getName(), ex);
+            return valid;
         } catch (IllegalAccessException e) {
             throw Exceptions.wrappedCause(e);
         }
@@ -144,18 +174,34 @@ public class NullToleranceTest {
     private boolean validateException(String methodName, InvocationTargetException ex) {
         final Throwable cause = ex.getCause();
         checkException(cause);
-        final boolean result = isCorrectStackTraceElements(methodName, cause);
+        final boolean result = isExpectedStackTraceElements(methodName, cause);
         return result;
     }
 
     private void checkException(Throwable cause) {
-        final boolean isCorrectException = cause instanceof NullPointerException;
-        if (!isCorrectException) {
+        final boolean correctException = cause instanceof NullPointerException;
+        if (!correctException) {
             throw Exceptions.wrappedCause(cause);
         }
     }
 
-    private boolean isCorrectStackTraceElements(String methodName, Throwable cause) {
+    /**
+     * Checks the stack trace elements.
+     *
+     * <p> According to the business rules the not-null check should to be in the each utility method.
+     * So the usage of the {@link Preconditions} should allocated there.
+     *
+     * <p> The first {@code StackTraceElement} have to contains
+     * the information about the {@code Preconditions} method.
+     *
+     * <p> The second {@code StackTraceElement} should contains information
+     * about the method from the {@code targetClass}.
+     *
+     * @param methodName the name of the invokable method
+     * @param cause      the {@code Throwable}
+     * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
+     */
+    private boolean isExpectedStackTraceElements(String methodName, Throwable cause) {
         final StackTraceElement[] stackTraceElements = cause.getStackTrace();
         final StackTraceElement preconditionsElement = stackTraceElements[0];
         final boolean isPreconditionsClass = Preconditions.class.getName()
@@ -170,14 +216,14 @@ public class NullToleranceTest {
             return false;
         }
 
-        final boolean isUtilClass = utilClass.getName()
-                                             .equals(expectedUtilClassElement.getClassName());
+        final boolean isUtilClass = targetClass.getName()
+                                               .equals(expectedUtilClassElement.getClassName());
         return isUtilClass;
     }
 
     private boolean isCorrectMethodName(String methodName, StackTraceElement expectedUtilClassElement) {
-        final boolean isCorrectMethodName = methodName.equals(expectedUtilClassElement.getMethodName());
-        return isCorrectMethodName;
+        final boolean correct = methodName.equals(expectedUtilClassElement.getMethodName());
+        return correct;
     }
 
     /**
@@ -189,25 +235,15 @@ public class NullToleranceTest {
         return new Builder();
     }
 
-    private void initPrimitiveValuesSet() {
-        primitiveValues.add(boolean.class);
-        primitiveValues.add(byte.class);
-        primitiveValues.add(short.class);
-        primitiveValues.add(int.class);
-        primitiveValues.add(long.class);
-        primitiveValues.add(char.class);
-        primitiveValues.add(float.class);
-        primitiveValues.add(double.class);
-    }
-
     /**
      * A builder for producing the {@link NullToleranceTest} instance.
      */
     public static class Builder {
 
-        private Class utilClass;
+        @Nonnull
+        private Class targetClass;
         private Set<String> excludedMethods;
-        private Map defaultValues;
+        private Map<? super Class, ? super Object> defaultValues;
 
         private Builder() {
             defaultValues = newHashMap();
@@ -220,8 +256,8 @@ public class NullToleranceTest {
          * @param utilClass the utility {@link Class}
          * @return the {@code Builder}
          */
-        public Builder setClass(Class utilClass) {
-            this.utilClass = utilClass;
+        public Builder setClass(@Nonnull Class utilClass) {
+            this.targetClass = utilClass;
             return this;
         }
 
@@ -243,10 +279,36 @@ public class NullToleranceTest {
          * @param value the default value for the class
          * @return the {@code Builder}
          */
-        @SuppressWarnings("unchecked") // check on the method level.
         public <I> Builder addDefaultValue(Class<I> clazz, I value) {
             defaultValues.put(clazz, value);
             return this;
+        }
+
+        /**
+         * Returns the {@code targetClass}.
+         *
+         * @return the target class
+         */
+        Class getTargetClass() {
+            return targetClass;
+        }
+
+        /**
+         * Return the {@code Set} of the excluded method name.
+         *
+         * @return the {@code Set}
+         */
+        Set<String> getExcludedMethods() {
+            return excludedMethods;
+        }
+
+        /**
+         * Return the {@code Map} of the default values for the classes.
+         *
+         * @return the {@code Map}
+         */
+        Map<? super Class, ? super Object> getDefaultValues() {
+            return defaultValues;
         }
 
         /**
@@ -255,7 +317,6 @@ public class NullToleranceTest {
          * @return the {@code nullToleranceTest} instance.
          */
         public NullToleranceTest build() {
-            checkNotNull(utilClass);
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
         }
