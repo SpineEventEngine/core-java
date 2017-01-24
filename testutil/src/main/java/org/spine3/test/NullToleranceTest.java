@@ -20,12 +20,12 @@
 
 package org.spine3.test;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import org.spine3.util.Exceptions;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -44,30 +45,30 @@ import static com.google.common.primitives.Primitives.allPrimitiveTypes;
  *
  * <p> The helper checks the methods with access modifiers:
  * <ul>
- *     <li> the {@code public};
- *     <li> the {@code protected};
- *     <li> the {@code default}.
+ * <li> the {@code public};
+ * <li> the {@code protected};
+ * <li> the {@code default}.
  * </ul>
  *
  * <p> The helper does not checks the methods:
  * <ul>
- *     <li> with the {@code private} modifier;
- *     <li> without the {@code static} modifier;
- *     <li> with only the primitive parameters.
+ * <li> with the {@code private} modifier;
+ * <li> without the {@code static} modifier;
+ * <li> with only the primitive parameters.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
  * <ul>
- *     <li> public static void method(Object obj);
- *     <li> protected static void method(Object first, long second);
- *     <li> static void method(Object first, Object second).
+ * <li> public static void method(Object obj);
+ * <li> protected static void method(Object first, long second);
+ * <li> static void method(Object first, Object second).
  * </ul>
  *
  * <p> The examples of the methods which will be ignored:
  * <ul>
- *     <li> public void method(Object obj);
- *     <li> private static void method(Object obj);
- *     <li> protected static void method(int first, float second).
+ * <li> public void method(Object obj);
+ * <li> private static void method(Object obj);
+ * <li> protected static void method(int first, float second).
  * </ul>
  *
  * @author Illia Shepilov
@@ -185,6 +186,21 @@ public class NullToleranceTest {
         }
     }
 
+    @VisibleForTesting
+    Class getTargetClass() {
+        return targetClass;
+    }
+
+    @VisibleForTesting
+    public Set<String> getExcludedMethods() {
+        return excludedMethods;
+    }
+
+    @VisibleForTesting
+    public Map<?, ?> getDefaultValuesMap() {
+        return defaultValuesMap;
+    }
+
     /**
      * Checks the stack trace elements.
      *
@@ -240,7 +256,6 @@ public class NullToleranceTest {
      */
     public static class Builder {
 
-        @Nonnull
         private Class targetClass;
         private Set<String> excludedMethods;
         private Map<? super Class, ? super Object> defaultValues;
@@ -256,8 +271,8 @@ public class NullToleranceTest {
          * @param utilClass the utility {@link Class}
          * @return the {@code Builder}
          */
-        public Builder setClass(@Nonnull Class utilClass) {
-            this.targetClass = utilClass;
+        public Builder setClass(Class utilClass) {
+            this.targetClass = checkNotNull(utilClass);
             return this;
         }
 
@@ -289,6 +304,7 @@ public class NullToleranceTest {
          *
          * @return the target class
          */
+        @VisibleForTesting
         Class getTargetClass() {
             return targetClass;
         }
@@ -298,6 +314,7 @@ public class NullToleranceTest {
          *
          * @return the {@code Set}
          */
+        @VisibleForTesting
         Set<String> getExcludedMethods() {
             return excludedMethods;
         }
@@ -307,6 +324,7 @@ public class NullToleranceTest {
          *
          * @return the {@code Map}
          */
+        @VisibleForTesting
         Map<? super Class, ? super Object> getDefaultValues() {
             return defaultValues;
         }
@@ -317,6 +335,7 @@ public class NullToleranceTest {
          * @return the {@code nullToleranceTest} instance.
          */
         public NullToleranceTest build() {
+            checkNotNull(targetClass);
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
         }
