@@ -41,6 +41,32 @@ public class NullToleranceTestBuilderShould {
                          .setClass(null);
     }
 
+    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions") // Need to test the builder.
+    public void throw_exception_when_pass_null_as_excluded_method_name() {
+        NullToleranceTest.newBuilder()
+                         .excludeMethod(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions") // Need to test the builder.
+    public void throw_exception_when_pass_null_as_default_value() {
+        NullToleranceTest.newBuilder()
+                         .addDefaultValue(null);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_pass_empty_string_as_excluded_method_name(){
+        NullToleranceTest.newBuilder()
+                         .excludeMethod("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_pass_invalid_excluded_method_name(){
+        NullToleranceTest.newBuilder()
+                         .excludeMethod("incorrect method name");
+    }
+
+
     @Test
     public void return_target_class() {
         final Class<?> targetClass = NullToleranceTest.newBuilder()
@@ -58,16 +84,16 @@ public class NullToleranceTestBuilderShould {
                                 .size();
         assertEquals(expectedSize, actualSize);
 
-        builder.addDefaultValue(int.class, 0);
-        builder.addDefaultValue(char.class, '\u000f');
+        builder.addDefaultValue(0);
+        builder.addDefaultValue('\u000f');
         expectedSize = 2;
         actualSize = builder.getDefaultValues()
                             .size();
         assertEquals(expectedSize, actualSize);
 
         final Map<? super Class, ? super Object> expectedMap = newHashMap();
-        expectedMap.put(int.class, 0);
-        expectedMap.put(char.class, '\u000f');
+        expectedMap.put(Integer.class, 0);
+        expectedMap.put(Character.class, '\u000f');
         assertEquals(expectedMap, builder.getDefaultValues());
     }
 
@@ -105,11 +131,18 @@ public class NullToleranceTestBuilderShould {
         final String excludedMethodName = "excludedMethod";
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(NullToleranceTestBuilderShould.class)
-                                                                     .addDefaultValue(long.class, 0L)
+                                                                     .addDefaultValue(0L)
                                                                      .excludeMethod(excludedMethodName)
                                                                      .build();
         final Map<? super Class, ? super Object> expectedMap = newHashMap();
+        expectedMap.put(boolean.class, false);
+        expectedMap.put(byte.class, (byte) 0);
+        expectedMap.put(short.class, (short) 0);
+        expectedMap.put(int.class, 0);
         expectedMap.put(long.class, 0L);
+        expectedMap.put(float.class, 0.0f);
+        expectedMap.put(double.class, 0.0d);
+        expectedMap.put(Long.class, 0L);
         assertEquals(NullToleranceTestBuilderShould.class, nullToleranceTest.getTargetClass());
         assertEquals(newHashSet(excludedMethodName), nullToleranceTest.getExcludedMethods());
         assertEquals(expectedMap, nullToleranceTest.getDefaultValuesMap());
