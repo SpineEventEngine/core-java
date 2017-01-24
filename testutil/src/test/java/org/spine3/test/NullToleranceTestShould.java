@@ -21,7 +21,6 @@
 package org.spine3.test;
 
 import org.junit.Test;
-import org.spine3.change.Changes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static junit.framework.TestCase.assertFalse;
