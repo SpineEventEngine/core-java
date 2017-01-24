@@ -20,15 +20,19 @@
 
 package org.spine3.test;
 
+import com.google.common.base.Preconditions;
 import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -37,80 +41,86 @@ import static com.google.common.collect.Sets.newHashSet;
  */
 public class NullToleranceTest {
 
-    private static final String CHECK_NOT_NULL_METHOD = "checkNotNull";
     private final Class utilClass;
     private final Set<String> excludedMethods;
     private final Map defaultValuesMap;
-    private final Map<Class, Object> primitiveValues;
+    private final Set<Class> primitiveValues;
 
     private NullToleranceTest(Builder builder) {
         this.utilClass = builder.utilClass;
         this.excludedMethods = builder.excludedMethods;
         this.defaultValuesMap = builder.defaultValues;
-        primitiveValues = newHashMap();
-        initializePrimitiveValuesMap();
+        primitiveValues = newHashSet();
+        initPrimitiveValuesSet();
     }
 
     public boolean check() {
-        final Method[] methods = utilClass.getDeclaredMethods();
-        for (Method method : methods) {
+        final Method[] accessibleMethods = getAccessibleMethods();
+        for (Method method : accessibleMethods) {
+            final Class[] parameterTypes = method.getParameterTypes();
             final String methodName = method.getName();
             final boolean isExcluded = excludedMethods.contains(methodName);
-            final Class[] parameterTypes = method.getParameterTypes();
-            final Object[] parameterValues = new Object[parameterTypes.length];
-            if (isExcluded || parameterTypes.length == 0) {
+            final boolean arePrimitives = primitiveValues.containsAll(Arrays.asList(parameterTypes));
+            final boolean skipIteration = isExcluded || parameterTypes.length == 0 || arePrimitives;
+            if (skipIteration) {
                 continue;
             }
 
-            wrapPrimitives(parameterTypes, parameterValues);
-            setDefaultValues(parameterTypes, parameterValues);
+            final Object[] parameterValues = getParameterValues(parameterTypes);
 
-            for (int i = 0; i < parameterValues.length; i++) {
-                Object[] copiedArray = Arrays.copyOf(parameterValues, parameterValues.length);
-                final boolean isPrimitive = primitiveValues.keySet()
-                                                           .contains(parameterTypes[i]);
-                if (!isPrimitive) {
-                    copiedArray[i] = null;
-                }
-
-                final boolean isPrimitives = primitiveValues.keySet()
-                                                            .containsAll(Arrays.asList(parameterTypes));
-                final boolean isCorrect = invokeAndCheck(method, copiedArray, isPrimitives);
-
-                if (!isCorrect) {
-                    return false;
-                }
+            final boolean isCorrect = invokeAndCheck(method, parameterValues, parameterTypes);
+            if (!isCorrect) {
+                return false;
             }
 
         }
         return true;
     }
 
-    private void setDefaultValues(Class[] parameterTypes, Object[] parameterValues) {
-        for (int i = 0; i < parameterTypes.length; i++) {
-            final Object defaultValue = defaultValuesMap.get(parameterTypes[i]);
-            if (defaultValue != null) {
-                parameterValues[i] = defaultValue;
-                return;
+    private Method[] getAccessibleMethods() {
+        final Method[] declaredMethods = utilClass.getDeclaredMethods();
+        final List<Method> methodList = newLinkedList();
+
+        for (Method method : declaredMethods) {
+            final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
+            if (!isPrivate) {
+                methodList.add(method);
             }
         }
+
+        final Method[] result = methodList.toArray(new Method[methodList.size()]);
+        return result;
     }
 
-    private void wrapPrimitives(Class[] parameterTypes, Object[] parameterValues) {
+    private Object[] getParameterValues(Class[] parameterTypes) {
+        final Object[] parameterValues = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-            final Object wrappedPrimitive = primitiveValues.get(parameterTypes[i]);
-            if (wrappedPrimitive != null) {
-                parameterValues[i] = wrappedPrimitive;
+            final Class type = parameterTypes[i];
+            parameterValues[i] = defaultValuesMap.get(type);
+        }
+        return parameterValues;
+    }
+
+    private boolean invokeAndCheck(Method method, Object[] parameterValues, Class[] parameterTypes) {
+        for (int i = 0; i < parameterValues.length; i++) {
+            Object[] copiedParametersArray = Arrays.copyOf(parameterValues, parameterValues.length);
+            final boolean isPrimitive = primitiveValues.contains(parameterTypes[i]);
+            if (!isPrimitive) {
+                copiedParametersArray[i] = null;
+            }
+
+            final boolean isCorrect = invokeAndCheck(method, copiedParametersArray);
+
+            if (!isCorrect) {
+                return false;
             }
         }
+        return true;
     }
 
-    private boolean invokeAndCheck(Method method, Object[] params, boolean isPrimitives) {
+    private boolean invokeAndCheck(Method method, Object[] params) {
         try {
             method.invoke(null, params);
-            if (isPrimitives) {
-                return true;
-            }
         } catch (InvocationTargetException ex) {
             boolean isValid = validateException(method.getName(), ex);
             return isValid;
@@ -122,52 +132,61 @@ public class NullToleranceTest {
 
     private boolean validateException(String methodName, InvocationTargetException ex) {
         final Throwable cause = ex.getCause();
-        final boolean isCorrectEx = isCorrectException(cause);
-        if (!isCorrectEx) {
-            return true;
-        }
-
-        final boolean isCorrect = isCorrectStackTraceElements(methodName, cause);
-        return isCorrect;
+        checkException(cause);
+        final boolean result = isCorrectStackTraceElements(methodName, cause);
+        return result;
     }
 
-    private boolean isCorrectException(Throwable cause) {
+    private void checkException(Throwable cause) {
         final boolean isCorrectException = cause instanceof NullPointerException;
-        return isCorrectException;
+        if (!isCorrectException) {
+            throw Exceptions.wrappedCause(cause);
+        }
     }
 
     private boolean isCorrectStackTraceElements(String methodName, Throwable cause) {
         final StackTraceElement[] stackTraceElements = cause.getStackTrace();
         final StackTraceElement preconditionsElement = stackTraceElements[0];
-        final boolean isPreconditionsMethod = CHECK_NOT_NULL_METHOD.equals(preconditionsElement.getMethodName());
-        if (!isPreconditionsMethod) {
+        final boolean isPreconditionsClass = Preconditions.class.getName()
+                                                                .equals(preconditionsElement.getClassName());
+        if (!isPreconditionsClass) {
             return false;
         }
 
         final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
-        final boolean isCorrectMethodName = methodName.equals(expectedUtilClassElement.getMethodName());
-        if (!isCorrectMethodName) {
+        final boolean isCorrectMethod = isCorrectMethodName(methodName, expectedUtilClassElement);
+        if (!isCorrectMethod) {
             return false;
         }
 
-        final boolean isCorrectClassName = utilClass.getName()
-                                                    .equals(expectedUtilClassElement.getClassName());
-        return isCorrectClassName;
+        final boolean isUtilClass = utilClass.getName()
+                                             .equals(expectedUtilClassElement.getClassName());
+        return isUtilClass;
     }
 
+    private boolean isCorrectMethodName(String methodName, StackTraceElement expectedUtilClassElement) {
+        final boolean isCorrectMethodName = methodName.equals(expectedUtilClassElement.getMethodName());
+        return isCorrectMethodName;
+    }
+
+    /**
+     * Creates a new builder for the {@code NullToleranceTest}.
+     *
+     * @return the {@code Builder}
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    private void initializePrimitiveValuesMap() {
-        primitiveValues.put(boolean.class, false);
-        primitiveValues.put(byte.class, (byte) 0);
-        primitiveValues.put(short.class, (short) 0);
-        primitiveValues.put(int.class, 0);
-        primitiveValues.put(long.class, 0L);
-        primitiveValues.put(char.class, '\u0000');
-        primitiveValues.put(float.class, 0.0f);
-        primitiveValues.put(double.class, 0.0d);
+    private void initPrimitiveValuesSet() {
+        primitiveValues.add(boolean.class);
+        primitiveValues.add(byte.class);
+        primitiveValues.add(short.class);
+        primitiveValues.add(int.class);
+        primitiveValues.add(long.class);
+        primitiveValues.add(char.class);
+        primitiveValues.add(float.class);
+        primitiveValues.add(double.class);
     }
 
     /**
