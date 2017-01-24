@@ -232,6 +232,7 @@ public class NullToleranceTest {
          * @param value the default value for the class
          * @return the {@code Builder}
          */
+        @SuppressWarnings("unchecked") // check on the method level.
         public <I> Builder addDefaultValue(Class<I> clazz, I value) {
             defaultValues.put(clazz, value);
             return this;
