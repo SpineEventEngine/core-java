@@ -45,30 +45,30 @@ import static com.google.common.primitives.Primitives.allPrimitiveTypes;
  *
  * <p> The helper checks the methods with access modifiers:
  * <ul>
- * <li> the {@code public};
- * <li> the {@code protected};
- * <li> the {@code default}.
+ *     <li> the {@code public};
+ *     <li> the {@code protected};
+ *     <li> the {@code default}.
  * </ul>
  *
  * <p> The helper does not checks the methods:
  * <ul>
- * <li> with the {@code private} modifier;
- * <li> without the {@code static} modifier;
- * <li> with only the primitive parameters.
+ *     <li> with the {@code private} modifier;
+ *     <li> without the {@code static} modifier;
+ *     <li> with only the primitive parameters.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
  * <ul>
- * <li> public static void method(Object obj);
- * <li> protected static void method(Object first, long second);
- * <li> static void method(Object first, Object second).
+ *     <li> public static void method(Object obj);
+ *     <li> protected static void method(Object first, long second);
+ *     <li> static void method(Object first, Object second).
  * </ul>
  *
  * <p> The examples of the methods which will be ignored:
  * <ul>
- * <li> public void method(Object obj);
- * <li> private static void method(Object obj);
- * <li> protected static void method(int first, float second).
+ *     <li> public void method(Object obj);
+ *     <li> private static void method(Object obj);
+ *     <li> protected static void method(int first, float second).
  * </ul>
  *
  * @author Illia Shepilov
