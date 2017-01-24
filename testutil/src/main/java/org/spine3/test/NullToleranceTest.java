@@ -277,7 +277,7 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the method name in the {@code excludedMethods} set.
+         * Adds the method name which will be excluded during the check.
          *
          * @param methodName the name of the excluded method
          * @return the {@code Builder}
@@ -288,7 +288,7 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the default value for the class in the {@code defaultValues} map.
+         * Adds the default value for the class which will be used during the the check.
          *
          * @param clazz the class for which will be added default value
          * @param value the default value for the class
@@ -300,9 +300,9 @@ public class NullToleranceTest {
         }
 
         /**
-         * Returns the {@code targetClass}.
+         * Returns the target class.
          *
-         * @return the target class
+         * @return the {@link Class}
          */
         @VisibleForTesting
         Class getTargetClass() {
