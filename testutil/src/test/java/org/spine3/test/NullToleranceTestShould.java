@@ -40,58 +40,97 @@ public class NullToleranceTestShould {
     @Test
     public void return_false_when_check_class_with_method_without_check_not_null() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(FirstTestUtilityClass.class)
+                                                                     .setClass(UtilityClassWithReferenceParameters.class)
                                                                      .build();
-        final boolean isValid = nullToleranceTest.check();
-        assertFalse(isValid);
+        final boolean isPassed = nullToleranceTest.check();
+        assertFalse(isPassed);
     }
 
     @Test
     public void return_true_when_check_class_when_method_without_check_is_ignored() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(FirstTestUtilityClass.class)
+                                                                     .setClass(UtilityClassWithReferenceParameters.class)
                                                                      .excludeMethod("methodWithoutCheck")
                                                                      .build();
-        final boolean isValid = nullToleranceTest.check();
-        assertTrue(isValid);
+        final boolean isPassed = nullToleranceTest.check();
+        assertTrue(isPassed);
     }
 
     @Test
     public void return_true_when_check_class_with_methods_with_primitive_parameters() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(SecondTestUtilityClass.class)
+                                                                     .setClass(UtilityClassWithPrimitiveParameters.class)
                                                                      .build();
-        final boolean isValid = nullToleranceTest.check();
-        assertTrue(isValid);
+        final boolean isPassed = nullToleranceTest.check();
+        assertTrue(isPassed);
     }
 
     @Test
     public void return_false_when_check_class_with_method_with_reference_and_primitive_types_without_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(ThirdTestUtilityClass.class)
+                                                                     .setClass(UtilityClassWithMixedParameters.class)
+                                                                     .addDefaultValue(long.class, 0L)
+                                                                     .addDefaultValue(float.class, 0.0f)
                                                                      .build();
-        final boolean isValid = nullToleranceTest.check();
-        assertFalse(isValid);
+        final boolean isPassed = nullToleranceTest.check();
+        assertFalse(isPassed);
     }
 
     @Test
     public void return_true_when_check_clkass_with_method_with_reference_and_primitive_types_with_check() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
-                                 .setClass(ThirdTestUtilityClass.class)
+                                 .setClass(UtilityClassWithMixedParameters.class)
                                  .excludeMethod("methodWithMixedParameterTypesWithoutCheck")
+                                 .addDefaultValue(float.class, 0.0f)
                                  .build();
-        final boolean isValid = nullToleranceTest.check();
-        assertTrue(isValid);
+        final boolean isPassed = nullToleranceTest.check();
+        assertTrue(isPassed);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void throw_exception_when_invoke_method_which_throws_exception() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(UtilityClassWithException.class)
+                                                                     .build();
+        nullToleranceTest.check();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_when_invoke_non_util_method() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithNonUtilMethod.class)
+                                                                     .build();
+        nullToleranceTest.check();
+    }
+
+    @Test
+    public void not_throw_exception_when_non_util_method_is_excluded() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithNonUtilMethod.class)
+                                                                     .excludeMethod("nonUtilMethod")
+                                                                     .build();
+        final boolean isPassed = nullToleranceTest.check();
+        assertTrue(isPassed);
+    }
+
+    @Test
+    public void pass_the_check_when_invoke_method_with_private_modifier() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(UtilityClassWithPrivateMethod.class)
+                                                                     .build();
+        final boolean isPassed = nullToleranceTest.check();
+        assertTrue(isPassed);
     }
 
     /*
      * Test utility classes
      ******************************/
 
-    private static class FirstTestUtilityClass {
+    @SuppressWarnings("unused") //invoke methods via reflection
+    private static class UtilityClassWithReferenceParameters {
 
-        public static void methodWithoutCheck(Object obj) {
+        public static void methodWithoutCheck(Object param) {
         }
 
         public static void methodWithCheck(Object first, Object second) {
@@ -100,18 +139,50 @@ public class NullToleranceTestShould {
         }
     }
 
-    private static class SecondTestUtilityClass {
+    @SuppressWarnings("unused") //invoke method via reflection
+    private static class UtilityClassWithPrimitiveParameters {
 
         public static void methodWithPrimitiveParams(int first, double second) {
         }
     }
 
-    private static class ThirdTestUtilityClass {
+    @SuppressWarnings("unused") //invoke methods via reflection
+    private static class UtilityClassWithMixedParameters {
 
         public static void methodWithMixedParameterTypesWithoutCheck(long first, Object second) {
         }
 
         public static void methodWithMixedParameterTypes_withCheck(float first, Object second) {
+            checkNotNull(second);
+        }
+    }
+
+    @SuppressWarnings("unused") //invoke method via reflection
+    private static class UtilityClassWithException {
+
+        public static void methodWhichThrowsException(Object param) {
+            throw new RuntimeException();
+        }
+    }
+
+    @SuppressWarnings("unused") //invoke methods via reflection
+    private static class ClassWithNonUtilMethod {
+        public void nonUtilMethod(Object param) {
+        }
+
+        public static void utilMethod(Object param) {
+            checkNotNull(param);
+        }
+    }
+
+    @SuppressWarnings("unused") //invoke methods via reflection
+    private static class UtilityClassWithPrivateMethod {
+
+        private static void privateMethod(Object first, Object second) {
+        }
+
+        public static void nonPrivateMethod(Object first, Object second) {
+            checkNotNull(first);
             checkNotNull(second);
         }
     }
