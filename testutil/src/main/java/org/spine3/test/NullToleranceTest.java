@@ -41,6 +41,8 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
@@ -182,7 +184,7 @@ public class NullToleranceTest {
         return result;
     }
 
-    private void checkException(Throwable cause) {
+    private static void checkException(Throwable cause) {
         final boolean correctException = cause instanceof NullPointerException;
         if (!correctException) {
             throw Exceptions.wrappedCause(cause);
@@ -195,13 +197,13 @@ public class NullToleranceTest {
     }
 
     @VisibleForTesting
-    public Set<String> getExcludedMethods() {
-        return excludedMethods;
+    Set<String> getExcludedMethods() {
+        return unmodifiableSet(excludedMethods);
     }
 
     @VisibleForTesting
-    public Map<?, ?> getDefaultValuesMap() {
-        return defaultValuesMap;
+    Map<?, ?> getDefaultValuesMap() {
+        return unmodifiableMap(defaultValuesMap);
     }
 
     /**
@@ -240,8 +242,8 @@ public class NullToleranceTest {
         return correctClass;
     }
 
-    private boolean isCorrectMethodName(String methodName, StackTraceElement expectedUtilClassElement) {
-        final boolean correct = methodName.equals(expectedUtilClassElement.getMethodName());
+    private static boolean isCorrectMethodName(String methodName, StackTraceElement expectedClassElement) {
+        final boolean correct = methodName.equals(expectedClassElement.getMethodName());
         return correct;
     }
 
@@ -288,6 +290,7 @@ public class NullToleranceTest {
          * @param methodName the name of the excluded method
          * @return the {@code Builder}
          */
+        @SuppressWarnings("WeakerAccess") // Will be used outside the package
         public Builder excludeMethod(String methodName) {
             checkNotNull(methodName);
             final Matcher matcher = pattern.matcher(methodName);
@@ -303,6 +306,7 @@ public class NullToleranceTest {
          * @param value the default value for the class
          * @return the {@code Builder}
          */
+        @SuppressWarnings("WeakerAccess") // Will be used outside the package
         public <I> Builder addDefaultValue(I value) {
             checkNotNull(value);
             defaultValues.put(value.getClass(), value);
@@ -326,7 +330,7 @@ public class NullToleranceTest {
          */
         @VisibleForTesting
         Set<String> getExcludedMethods() {
-            return excludedMethods;
+            return unmodifiableSet(excludedMethods);
         }
 
         /**
