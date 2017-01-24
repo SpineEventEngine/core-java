@@ -66,8 +66,6 @@ public class NullToleranceTestShould {
     public void return_false_when_check_class_with_method_with_reference_and_primitive_parameters_without_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(UtilityClassWithMixedParameters.class)
-                                                                     .addDefaultValue(long.class, 0L)
-                                                                     .addDefaultValue(float.class, 0.0f)
                                                                      .build();
         final boolean isPassed = nullToleranceTest.check();
         assertFalse(isPassed);
@@ -79,7 +77,6 @@ public class NullToleranceTestShould {
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithMixedParameters.class)
                                  .excludeMethod("methodWithMixedParameterTypesWithoutCheck")
-                                 .addDefaultValue(float.class, 0.0f)
                                  .build();
         final boolean isPassed = nullToleranceTest.check();
         assertTrue(isPassed);
