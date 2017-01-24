@@ -32,15 +32,9 @@ import javax.annotation.Nullable;
  *
  * @param <C> the type of the command message that we test in the suite
  * @param <P> the type of the aggregate that handles the command
- * @param <I> the type of the IDs of the aggregate
- * @param <S> the type of the aggregate state
- * @param <B> the type of the aggregate state builder
  */
 public abstract class AggregatePartCommandTest<C extends Message,
-                                               P extends AggregatePart<I, S, B>,
-                                               I,
-                                               S extends Message,
-                                               B extends Message.Builder> extends CommandTest<C> {
+                                               P extends AggregatePart> extends CommandTest<C> {
     /** The object under the test. */
     @Nullable
     private P aggregatePart;
@@ -63,19 +57,6 @@ public abstract class AggregatePartCommandTest<C extends Message,
      * Creates new test object.
      */
     protected abstract P createAggregatePart();
-
-    /**
-     * Obtains the ID of the aggregate to which the part we test belongs.
-     *
-     * @return the ID wrapped into {@code Optional} or
-     *         {@code Optional#absent()} if the aggregate part was not yet initialized
-     */
-    protected Optional<I> aggregateId() {
-        if (aggregatePart != null) {
-            return Optional.of(aggregatePart.getId());
-        }
-        return Optional.absent();
-    }
 
     /**
      * Obtains aggregate part being tested or {@code Optional#absent()} if
