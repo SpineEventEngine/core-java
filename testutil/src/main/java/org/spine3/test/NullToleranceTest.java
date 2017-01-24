@@ -283,7 +283,7 @@ public class NullToleranceTest {
          * @return the {@code Builder}
          */
         public Builder excludeMethod(String methodName) {
-            excludedMethods.add(methodName);
+            excludedMethods.add(checkNotNull(methodName));
             return this;
         }
 
@@ -295,7 +295,7 @@ public class NullToleranceTest {
          * @return the {@code Builder}
          */
         public <I> Builder addDefaultValue(Class<I> clazz, I value) {
-            defaultValues.put(clazz, value);
+            defaultValues.put(checkNotNull(clazz), checkNotNull(value));
             return this;
         }
 
