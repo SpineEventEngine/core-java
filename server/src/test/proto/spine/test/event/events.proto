@@ -48,6 +48,12 @@ message ProjectCreatedSeparateEnrichment {
     string project_name = 1 [(by) = "project_id"];
 }
 
+message ProjectCreatedDynamicallyConfiguredEnrichment {
+    option (enrichment_for) = "ProjectCreated";
+
+    int32 max_members_count = 1 [(by) = "project_id"];
+}
+
 message TaskAdded {
     ProjectId project_id = 1;
 

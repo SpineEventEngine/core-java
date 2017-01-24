@@ -86,6 +86,8 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      */
     abstract void validate();
 
+    //TODO:24-Jan-2017:alex.tymchenko: think of creating `isValid` instead or in addition.
+
     @Override
     public int hashCode() {
         return Objects.hash(eventClass, enrichmentClass);

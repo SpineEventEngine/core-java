@@ -110,7 +110,7 @@ public class EventBus implements AutoCloseable {
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
-    private final EventEnricher enricher;
+    private EventEnricher enricher;
 
     /**
      * Creates new instance by the passed builder.
@@ -327,6 +327,30 @@ public class EventBus implements AutoCloseable {
         responseObserver.onNext(Responses.ok());
         responseObserver.onCompleted();
         return true;
+    }
+
+    /**
+     * Add a new field enrichment translation function.
+     *
+     * @param eventFieldClass      a class of the field in the event message
+     * @param enrichmentFieldClass a class of the field in the enrichment message
+     * @param function             a function which converts fields
+     * @see EventEnricher
+     */
+    public <S, T> void addFieldEnrichment(Class<S> eventFieldClass,
+                                          Class<T> enrichmentFieldClass,
+                                          Function<S, T> function) {
+        checkNotNull(eventFieldClass);
+        checkNotNull(enrichmentFieldClass);
+        checkNotNull(function);
+
+        if (enricher == null) {
+            enricher = EventEnricher.newBuilder()
+                                    .addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function)
+                                    .build();
+        } else {
+            enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
+        }
     }
 
     private boolean isUnsupportedEvent(EventClass eventClass) {
@@ -575,7 +599,6 @@ public class EventBus implements AutoCloseable {
             final EventBus result = new EventBus(this);
             return result;
         }
-
     }
 
     private enum LogSingleton {

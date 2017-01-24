@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
@@ -72,15 +74,18 @@ class ReferenceValidator {
         return sourceToTargetMap;
     }
 
+    //TODO:24-Jan-2017:alex.tymchenko: fix the description.
     /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
     List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             final FieldDescriptor sourceField = findSourceField(enrichmentField);
-            final EnrichmentFunction<?, ?> function = getEnrichmentFunction(sourceField, enrichmentField);
-            functions.add(function);
-            fields.put(sourceField, enrichmentField);
+            final Optional<EnrichmentFunction<?, ?>> function = getEnrichmentFunction(sourceField, enrichmentField);
+            if(function.isPresent()) {
+                functions.add(function.get());
+                fields.put(sourceField, enrichmentField);
+            }
         }
         this.sourceToTargetMap = fields.build();
         return functions.build();
@@ -119,14 +124,14 @@ class ReferenceValidator {
         return msg;
     }
 
-    private EnrichmentFunction<?, ?> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
+    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
         final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
-            throw noFunction(sourceFieldClass, targetFieldClass);
+            warnNoFunction(sourceFieldClass, targetFieldClass);
         }
-        return func.get();
+        return func;
     }
 
     /** Checks if the source field name (from event or context) is not empty. */
@@ -151,11 +156,20 @@ class ReferenceValidator {
         throw new IllegalStateException(msg);
     }
 
-    private static IllegalStateException noFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        final String msg = format(
-                "There is no enrichment function for translating %s to %s",
-                sourceFieldClass,
-                targetFieldClass);
-        throw new IllegalStateException(msg);
+    private static void warnNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+        // Using `DEBUG` level to avoid polluting the `stderr`.
+        if (log().isDebugEnabled()) {
+            log().debug("There is no enrichment function for translating {} to {}", sourceFieldClass, targetFieldClass);
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ReferenceValidator.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

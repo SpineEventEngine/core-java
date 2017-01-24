@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
 import org.spine3.server.event.Given;
-import org.spine3.server.event.enrich.EventEnricher.Builder.SameTransition;
+import org.spine3.server.event.enrich.EventEnricher.SameTransition;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectId;
 import org.spine3.users.UserId;
@@ -120,17 +120,19 @@ public class EventEnricherBuilderShould {
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_enrichment_functions_registered() {
-        EventEnricher.newBuilder()
-                     .build();
+    @Test
+    public void allow_registering_no_functions() {
+        final EventEnricher enricher = EventEnricher.newBuilder()
+                                                 .build();
+        assertNotNull(enricher);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_not_all_needed_functions_registered() {
+    @Test
+    public void allow_registering_just_some_of_expected_functions() {
         builder.addFieldEnrichment(ProjectId.class, UserId.class, new Given.Enrichment.GetProjectOwnerId());
         builder.addFieldEnrichment(ProjectId.class, String.class, new Given.Enrichment.GetProjectName());
-        builder.build();
+        final EventEnricher enricher = builder.build();
+        assertNotNull(enricher);
     }
 
     @Test

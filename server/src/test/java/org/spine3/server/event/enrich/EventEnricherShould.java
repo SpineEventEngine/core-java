@@ -21,6 +21,7 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
@@ -36,6 +37,7 @@ import org.spine3.server.event.Given;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
@@ -138,6 +140,21 @@ public class EventEnricherShould {
     }
 
     @Test
+    public void enrich_event_if_function_added_at_runtime() {
+        final Given.Enrichment.GetProjectMaxMembersCount function = new Given.Enrichment.GetProjectMaxMembersCount();
+        enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
+
+        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectId projectId = msg.getProjectId();
+
+        eventBus.post(createEvent(msg));
+
+        @SuppressWarnings("ConstantConditions")     // the `function` was specially implemented to return non-null ints.
+        final int expectedValue = function.apply(projectId);
+        assertEquals(expectedValue, subscriber.projectCreatedDynamicEnrichment.getMaxMembersCount());
+    }
+
+    @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
         assertTrue(enricher.canBeEnriched(Given.Event.projectStarted()));
     }
@@ -174,6 +191,7 @@ public class EventEnricherShould {
         private ProjectCreated.Enrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
         private ProjectStarted.Enrichment projectStartedEnrichment;
+        private ProjectCreatedDynamicallyConfiguredEnrichment projectCreatedDynamicEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
 
@@ -189,6 +207,8 @@ public class EventEnricherShould {
                     getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
             this.projectCreatedAnotherPackEnrichment =
                     getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
+            this.projectCreatedDynamicEnrichment =
+                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context).get();
         }
 
         @SuppressWarnings("UnusedParameters")
