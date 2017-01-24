@@ -32,7 +32,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -257,12 +260,15 @@ public class NullToleranceTest {
     public static class Builder {
 
         private Class targetClass;
-        private Set<String> excludedMethods;
-        private Map<? super Class, ? super Object> defaultValues;
+        private final Set<String> excludedMethods;
+        private final Map<? super Class, ? super Object> defaultValues;
+        private final Pattern pattern;
+        private static final String REGEX = "^[a-zA-Z]+$";
 
         private Builder() {
             defaultValues = newHashMap();
             excludedMethods = newHashSet();
+            pattern = Pattern.compile(REGEX);
         }
 
         /**
@@ -283,19 +289,23 @@ public class NullToleranceTest {
          * @return the {@code Builder}
          */
         public Builder excludeMethod(String methodName) {
-            excludedMethods.add(checkNotNull(methodName));
+            checkNotNull(methodName);
+            final Matcher matcher = pattern.matcher(methodName);
+            checkArgument(matcher.matches());
+
+            excludedMethods.add(methodName);
             return this;
         }
 
         /**
          * Adds the default value for the class which will be used during the the check.
          *
-         * @param clazz the class for which will be added default value
          * @param value the default value for the class
          * @return the {@code Builder}
          */
-        public <I> Builder addDefaultValue(Class<I> clazz, I value) {
-            defaultValues.put(checkNotNull(clazz), checkNotNull(value));
+        public <I> Builder addDefaultValue(I value) {
+            checkNotNull(value);
+            defaultValues.put(value.getClass(), value);
             return this;
         }
 
@@ -336,8 +346,19 @@ public class NullToleranceTest {
          */
         public NullToleranceTest build() {
             checkNotNull(targetClass);
+            putPrimitiveDefaultValues();
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
+        }
+
+        private void putPrimitiveDefaultValues() {
+            defaultValues.put(boolean.class, false);
+            defaultValues.put(byte.class, (byte) 0);
+            defaultValues.put(short.class, (short) 0);
+            defaultValues.put(int.class, 0);
+            defaultValues.put(long.class, 0L);
+            defaultValues.put(float.class, 0.0f);
+            defaultValues.put(double.class, 0.0d);
         }
     }
 }
