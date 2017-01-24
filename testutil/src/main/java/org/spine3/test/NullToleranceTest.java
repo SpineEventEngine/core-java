@@ -37,6 +37,9 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
+ * Provides the method to check the utility classes for the not-null check
+ * the non-primitive method parameters.
+ *
  * @author Illia Shepilov
  */
 public class NullToleranceTest {
@@ -54,6 +57,14 @@ public class NullToleranceTest {
         initPrimitiveValuesSet();
     }
 
+    /**
+     * Checks the all non-private methods in the {@code utilClass}.
+     *
+     * <p> Check is successful if each the non-primitive method parameter has the not-null check.
+     *
+     * @return {@code true} if all methods have not-null check
+     * for input reference type parameters, {@code false} otherwise
+     */
     public boolean check() {
         final Method[] accessibleMethods = getAccessibleMethods();
         for (Method method : accessibleMethods) {
