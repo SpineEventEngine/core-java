@@ -63,7 +63,7 @@ public class NullToleranceTest {
      * <p> Check is successful if each the non-primitive method parameter has the not-null check.
      *
      * @return {@code true} if all methods have not-null check
-     * for input reference type parameters, {@code false} otherwise
+     * for the input reference type parameters, {@code false} otherwise
      */
     public boolean check() {
         final Method[] accessibleMethods = getAccessibleMethods();
