@@ -140,7 +140,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_function_added_at_runtime() {
-        final Given.Enrichment.GetProjectMaxMembersCount function = new Given.Enrichment.GetProjectMaxMembersCount();
+        final Given.Enrichment.GetProjectMaxMemberCount function = new Given.Enrichment.GetProjectMaxMemberCount();
         enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
 
         final ProjectCreated msg = Given.EventMessage.projectCreated();
@@ -150,7 +150,7 @@ public class EventEnricherShould {
 
         @SuppressWarnings("ConstantConditions")     // the `function` was specially implemented to return non-null ints.
         final int expectedValue = function.apply(projectId);
-        assertEquals(expectedValue, subscriber.projectCreatedDynamicEnrichment.getMaxMembersCount());
+        assertEquals(expectedValue, subscriber.projectCreatedDynamicEnrichment.getMaxMemberCount());
     }
 
     @Test

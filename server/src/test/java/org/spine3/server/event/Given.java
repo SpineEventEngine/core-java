@@ -184,7 +184,7 @@ public class Given {
             }
         }
 
-        public static class GetProjectMaxMembersCount implements Function<ProjectId, Integer> {
+        public static class GetProjectMaxMemberCount implements Function<ProjectId, Integer> {
             @Nullable
             @Override
             public Integer apply(@Nullable ProjectId input) {
