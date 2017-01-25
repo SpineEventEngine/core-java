@@ -23,58 +23,56 @@ package org.spine3.test;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.client.CommandFactory;
-import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.Aggregate;
 
 import javax.annotation.Nullable;
 
 /**
- * An abstract base for test suites testing aggregate part commands.
+ * An abstract base for test suites testing aggregate commands.
  *
  * @param <C> the type of the command message that we test in the suite
- * @param <P> the type of the aggregate part that handles the command
+ * @param <A> the type of the aggregate that handles the command
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartCommandTest<C extends Message,
-                                               P extends AggregatePart> extends CommandHandlingTest<C> {
+public abstract class AggregateCommandTest<C extends Message, A extends Aggregate>
+        extends CommandHandlingTest<C> {
+
     /** The object under the test. */
     @Nullable
-    private P aggregatePart;
+    private A aggregate;
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartCommandTest(CommandFactory commandFactory) {
+    protected AggregateCommandTest(CommandFactory commandFactory) {
         super(commandFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartCommandTest() {
+    protected AggregateCommandTest() {
         super();
+    }
+
+    /**
+     * Obtains the aggregate being tested or {@code Optional#absent()} if
+     * the test object has not been created yet.
+     */
+    protected Optional<A> aggregate() {
+        return Optional.fromNullable(aggregate);
     }
 
     /**
      * Creates new test object.
      */
-    protected abstract P createAggregatePart();
+    protected abstract A createAggregate();
 
     /**
-     * Obtains the aggregate part being tested or {@code Optional#absent()} if
-     * the test object has not been created yet.
-     */
-    protected Optional<P> aggregatePart() {
-        return Optional.fromNullable(aggregatePart);
-    }
-
-    /**
-     * Initialized a test suite with a newly created {@code AggregatePart}.
-     *
-     * <p>This method must be called in derived test suites in methods
-     * annotated with {@code @Before} (JUnit 4) or {@code @BeforeEach} (JUnit 5).
+     * {@inheritDoc}
      */
     @Override
     protected void setUp() {
-        this.aggregatePart = createAggregatePart();
+        this.aggregate = createAggregate();
     }
 }
