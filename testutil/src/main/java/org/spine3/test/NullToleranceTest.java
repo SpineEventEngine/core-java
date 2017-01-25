@@ -314,9 +314,9 @@ public class NullToleranceTest {
      */
     public static class Builder {
 
-        private Class targetClass;
         private final Set<String> excludedMethods;
         private final Map<? super Class, ? super Object> defaultValues;
+        private Class targetClass;
 
         private Builder() {
             defaultValues = newHashMap();
