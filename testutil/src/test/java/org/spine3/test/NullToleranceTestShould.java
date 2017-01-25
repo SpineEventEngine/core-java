@@ -22,6 +22,8 @@ package org.spine3.test;
 
 import org.junit.Test;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -31,14 +33,17 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class NullToleranceTestShould {
 
+    private static final Object DEFAULT_VALUE = new Object();
+
     @Test
     public void return_false_when_check_class_with_methods_accept_non_declared_null_parameters() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
+                                 .addDefaultValue(new Object())
                                  .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertFalse(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertFalse(passed);
     }
 
     @Test
@@ -47,9 +52,10 @@ public class NullToleranceTestShould {
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
                                  .excludeMethod("methodWithoutCheck")
+                                 .addDefaultValue(DEFAULT_VALUE)
                                  .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertTrue(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     @Test
@@ -58,17 +64,18 @@ public class NullToleranceTestShould {
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithPrimitiveParameters.class)
                                  .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertTrue(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     @Test
     public void return_false_when_check_class_with_method_with_reference_and_primitive_parameters_without_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(UtilityClassWithMixedParameters.class)
+                                                                     .addDefaultValue(DEFAULT_VALUE)
                                                                      .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertFalse(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertFalse(passed);
     }
 
     @Test
@@ -77,9 +84,10 @@ public class NullToleranceTestShould {
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithMixedParameters.class)
                                  .excludeMethod("methodWithMixedParameterTypesWithoutCheck")
+                                 .addDefaultValue(new Object())
                                  .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertTrue(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     @Test(expected = RuntimeException.class)
@@ -95,18 +103,49 @@ public class NullToleranceTestShould {
     public void return_true_when_check_class_with_util_and_non_util_method() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNonUtilMethod.class)
+                                                                     .addDefaultValue(DEFAULT_VALUE)
                                                                      .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertTrue(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     @Test
     public void pass_the_check_when_invoke_method_with_private_modifier() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(UtilityClassWithPrivateMethod.class)
+                                                                     .addDefaultValue(DEFAULT_VALUE)
                                                                      .build();
-        final boolean isPassed = nullToleranceTest.check();
-        assertTrue(isPassed);
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
+
+    @Test
+    public void skip_the_method_with_nullable_parameters() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithNullableMethodParameters.class)
+                                                                     .excludeMethod("methodWithMixedParameters")
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
+
+    @Test
+    public void pass_the_check_when_method_contains_nullable_and_not_nullable_parameters() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithNullableMethodParameters.class)
+                                                                     .addDefaultValue("default value")
+                                                                     .addDefaultValue(DEFAULT_VALUE)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_when_parameter_of_invokable_method_does_not_have_default_value() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithNullableMethodParameters.class)
+                                                                     .build();
+        nullToleranceTest.check();
     }
 
     /*
@@ -138,7 +177,7 @@ public class NullToleranceTestShould {
         public static void methodWithMixedParameterTypesWithoutCheck(long first, Object second) {
         }
 
-        public static void methodWithMixedParameterTypes_withCheck(float first, Object second) {
+        public static void methodWithMixedParameterTypesWithCheck(float first, Object second) {
             checkNotNull(second);
         }
     }
@@ -169,6 +208,17 @@ public class NullToleranceTestShould {
 
         public static void nonPrivateMethod(Object first, Object second) {
             checkNotNull(first);
+            checkNotNull(second);
+        }
+    }
+
+    @SuppressWarnings("unused") // accessed via reflection
+    private static class ClassWithNullableMethodParameters {
+
+        public static void nullableParamsMethod(@Nullable Object first, @Nullable Object second) {
+        }
+
+        public static void methodWithMixedParameters(@Nullable Object first, String second) {
             checkNotNull(second);
         }
     }
