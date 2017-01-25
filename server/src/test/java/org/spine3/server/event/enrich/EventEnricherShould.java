@@ -21,7 +21,6 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
