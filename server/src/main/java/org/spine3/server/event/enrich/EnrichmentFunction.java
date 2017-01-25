@@ -84,7 +84,15 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      *
      * <p>During the activation the internal state of the function may be adjusted.
      *
+     * <p>A typical example of such an adjustment would be parsing and validation of the relations
+     * between {@code eventClass} and {@code enrichmentClass} from the corresponding {@code .proto}
+     * definitions. The function internal state in this case is appended with the parsed data, which
+     * is later used at runtime.
+     *
      * <p>After the function is activated successfully, the {@link #isActive()} returns {@code true}.
+     *
+     * <p>If an activation cannot be performed flawlessly, the {@code IllegalStateException}
+     * should be thrown. In this case {@link #isActive()} should return {@code false}.
      *
      * @throws IllegalStateException if the function cannot perform the conversion in its current state
      * or because of the state of its environment
