@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregatePartCommandTest<C extends Message,
-                                               P extends AggregatePart> extends CommandHandlingTest<C> {
+                                               P extends AggregatePart> extends CommandTest<C> {
     /** The object under the test. */
     @Nullable
     private P aggregatePart;

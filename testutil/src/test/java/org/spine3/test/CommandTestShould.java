@@ -161,5 +161,10 @@ public class CommandTestShould {
         protected TestCommandTest() {
             super();
         }
+
+        @Override
+        protected void setUp() {
+            // We don't have an object under test for this test harness class.
+        }
     }
 }
