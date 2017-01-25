@@ -26,6 +26,7 @@ import org.spine3.server.event.Given;
 import org.spine3.test.event.ProjectCreated;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Litus
@@ -43,14 +44,19 @@ public class EventMessageEnricherShould {
                 ProjectCreated.Enrichment.class);
     }
 
+    @Test
+    public void be_inactive_when_created() {
+        assertFalse(enricher.isActive());
+    }
+
     @Test(expected = NullPointerException.class)
     public void throw_NPE_if_pass_null() {
         enricher.activate();
         enricher.apply(null);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_if_validate_not_called_before_apply() {
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_if_activate_not_called_before_apply() {
         enricher.apply(ProjectCreated.getDefaultInstance());
     }
 

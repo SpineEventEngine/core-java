@@ -104,6 +104,8 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
 
     @Override
     public T apply(@Nullable S eventMsg) {
+        ensureActive();
+
         checkNotNull(eventMsg);
         verifyOwnState();
 
