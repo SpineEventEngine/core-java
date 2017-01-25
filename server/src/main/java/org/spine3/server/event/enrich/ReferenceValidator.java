@@ -71,9 +71,9 @@ class ReferenceValidator {
     /**
      * Returns those fields and functions, that may be used for the enrichment at the moment.
      *
-     * @return a {@link Result} data transfer object, containing the valid fields and functions.
+     * @return a {@code ValidationResult} data transfer object, containing the valid fields and functions.
      */
-    Result validate() {
+    ValidationResult validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
@@ -86,7 +86,7 @@ class ReferenceValidator {
         }
         final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap = fields.build();
         final ImmutableList<EnrichmentFunction<?, ?>> functionList = functions.build();
-        final Result result = new Result(functionList, fieldMap);
+        final ValidationResult result = new ValidationResult(functionList, fieldMap);
         return result;
     }
 
@@ -168,12 +168,12 @@ class ReferenceValidator {
     /**
      * A wrapper DTO for the validation result.
      */
-    static class Result {
+    static class ValidationResult {
         private final ImmutableList<EnrichmentFunction<?, ?>> functions;
         private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-        private Result(ImmutableList<EnrichmentFunction<?, ?>> functions,
-                       ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
+        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?>> functions,
+                                 ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
             this.functions = functions;
             this.fieldMap = fieldMap;
         }

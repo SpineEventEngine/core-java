@@ -86,7 +86,7 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
                                                                              getEventClass(),
                                                                              getEnrichmentClass());
         final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map = ImmutableMultimap.builder();
-        final ReferenceValidator.Result validationResult = referenceValidator.validate();
+        final ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
         final List<EnrichmentFunction<?, ?>> fieldFunctions = validationResult.getFunctions();
         for (EnrichmentFunction<?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getEventClass(), fieldFunction);
