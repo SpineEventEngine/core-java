@@ -20,60 +20,40 @@
 
 package org.spine3.test;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.client.CommandFactory;
-import org.spine3.server.aggregate.AggregatePart;
-
-import javax.annotation.Nullable;
+import org.spine3.server.aggregate.Aggregate;
 
 /**
- * An abstract base for test suites testing aggregate commands.
+ * The abstract base for command tests of {@code Aggregate}s and {@code AggregatePart}s.
  *
  * @param <C> the type of the command message that we test in the suite
- * @param <P> the type of the aggregate that handles the command
+ * @param <A> the type of the aggregate or the aggregate part that handles the command
+ * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartCommandTest<C extends Message,
-                                               P extends AggregatePart> extends AbstractAggregateCommandTest<C, P> {
-    /** The object under the test. */
-    @Nullable
-    private P aggregatePart;
+abstract class AbstractAggregateCommandTest<C extends Message, A extends Aggregate> extends CommandTest<C> {
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartCommandTest(CommandFactory commandFactory) {
+    protected AbstractAggregateCommandTest(CommandFactory commandFactory) {
         super(commandFactory);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartCommandTest() {
+    protected AbstractAggregateCommandTest() {
         super();
     }
 
     /**
-     * Creates new test object.
-     */
-    protected abstract P createAggregatePart();
-
-    /**
-     * Obtains aggregate part being tested or {@code Optional#absent()} if
-     * the test object has not been created yet.
-     */
-    protected Optional<P> aggregatePart() {
-        return Optional.fromNullable(aggregatePart);
-    }
-
-    /**
-     * Initialized a test suite with a newly created {@code AggregatePart}.
+     * Implement this method to create and store the reference to the object
+     * ({@code Aggregate} or {@code AggregatePart}) which is going to be used
+     * in the test suite.
      *
      * <p>This method must be called in derived test suites in methods
      * annotated with {@code @Before} (JUnit 4) or {@code @BeforeEach} (JUnit 5).
      */
-    @Override
-    protected void setUp() {
-        this.aggregatePart = createAggregatePart();
-    }
+    protected abstract void setUp();
 }
