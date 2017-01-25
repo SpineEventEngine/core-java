@@ -38,7 +38,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static java.lang.String.format;
 
 /**
- * Performs validation analzing which of fields annotated in the enrichment message
+ * Performs validation analyzing which of fields annotated in the enrichment message
  * can be initialized with the translation functions supplied in the parent enricher.
  *
  * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
