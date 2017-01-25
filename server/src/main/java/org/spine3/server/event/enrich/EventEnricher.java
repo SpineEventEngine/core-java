@@ -250,9 +250,9 @@ public class EventEnricher {
      */
     Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
                                                    Class<?> enrichmentFieldClass) {
-        final Optional<EnrichmentFunction<?, ?>> result =
-                from(functions.values())
-                        .firstMatch(SupportsFieldConversion.of(eventFieldClass, enrichmentFieldClass));
+        final Optional<EnrichmentFunction<?, ?>> result = from(functions.values())
+                                                         .firstMatch(SupportsFieldConversion.of(eventFieldClass,
+                                                                                                enrichmentFieldClass));
         return result;
     }
 
