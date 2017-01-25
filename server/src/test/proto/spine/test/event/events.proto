@@ -51,7 +51,7 @@ message ProjectCreatedSeparateEnrichment {
 message ProjectCreatedDynamicallyConfiguredEnrichment {
     option (enrichment_for) = "ProjectCreated";
 
-    int32 max_members_count = 1 [(by) = "project_id"];
+    int32 max_member_count = 1 [(by) = "project_id"];
 }
 
 message TaskAdded {
