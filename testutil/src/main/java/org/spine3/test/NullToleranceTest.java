@@ -43,6 +43,10 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
+import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.checkException;
+import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.getAccessibleMethods;
+import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.getParameterValues;
+import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.isCorrectMethodName;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
@@ -99,18 +103,18 @@ public class NullToleranceTest {
      * for the input reference type parameters, {@code false} otherwise
      */
     public boolean check() {
-        final Method[] accessibleMethods = getAccessibleMethods();
+        final Method[] accessibleMethods = getAccessibleMethods(targetClass);
         for (Method method : accessibleMethods) {
             final Class[] parameterTypes = method.getParameterTypes();
             final String methodName = method.getName();
             final boolean excluded = excludedMethods.contains(methodName);
-            final boolean arePrimitives = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
-            final boolean skipIteration = excluded || parameterTypes.length == 0 || arePrimitives;
-            if (skipIteration) {
+            final boolean primitives = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
+            final boolean skipMethod = excluded || parameterTypes.length == 0 || primitives;
+            if (skipMethod) {
                 continue;
             }
 
-            final Object[] parameterValues = getParameterValues(parameterTypes);
+            final Object[] parameterValues = getParameterValues(parameterTypes, defaultValuesMap);
 
             final boolean correct = invokeAndCheck(method, parameterValues, parameterTypes);
             if (!correct) {
@@ -119,32 +123,6 @@ public class NullToleranceTest {
 
         }
         return true;
-    }
-
-    private Method[] getAccessibleMethods() {
-        final Method[] declaredMethods = targetClass.getDeclaredMethods();
-        final List<Method> methodList = newLinkedList();
-
-        for (Method method : declaredMethods) {
-            final Invokable<?, Object> invokable = Invokable.from(method);
-            final boolean privateMethod = invokable.isPrivate();
-            final boolean staticMethod = invokable.isStatic();
-            if (!privateMethod && staticMethod) {
-                methodList.add(method);
-            }
-        }
-
-        final Method[] result = methodList.toArray(new Method[methodList.size()]);
-        return result;
-    }
-
-    private Object[] getParameterValues(Class[] parameterTypes) {
-        final Object[] parameterValues = new Object[parameterTypes.length];
-        for (int i = 0; i < parameterTypes.length; i++) {
-            final Class type = parameterTypes[i];
-            parameterValues[i] = defaultValuesMap.get(type);
-        }
-        return parameterValues;
     }
 
     private boolean invokeAndCheck(Method method, Object[] parameterValues, Class[] parameterTypes) {
@@ -184,28 +162,6 @@ public class NullToleranceTest {
         return result;
     }
 
-    private static void checkException(Throwable cause) {
-        final boolean correctException = cause instanceof NullPointerException;
-        if (!correctException) {
-            throw Exceptions.wrappedCause(cause);
-        }
-    }
-
-    @VisibleForTesting
-    Class getTargetClass() {
-        return targetClass;
-    }
-
-    @VisibleForTesting
-    Set<String> getExcludedMethods() {
-        return unmodifiableSet(excludedMethods);
-    }
-
-    @VisibleForTesting
-    Map<?, ?> getDefaultValuesMap() {
-        return unmodifiableMap(defaultValuesMap);
-    }
-
     /**
      * Checks the stack trace elements.
      *
@@ -232,7 +188,7 @@ public class NullToleranceTest {
         }
 
         final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
-        final boolean correct = isCorrectMethodName(methodName, expectedUtilClassElement);
+        final boolean correct = isCorrectMethodName(methodName, expectedUtilClassElement.getMethodName());
         if (!correct) {
             return false;
         }
@@ -242,11 +198,6 @@ public class NullToleranceTest {
         return correctClass;
     }
 
-    private static boolean isCorrectMethodName(String methodName, StackTraceElement expectedClassElement) {
-        final boolean correct = methodName.equals(expectedClassElement.getMethodName());
-        return correct;
-    }
-
     /**
      * Creates a new builder for the {@code NullToleranceTest}.
      *
@@ -254,6 +205,97 @@ public class NullToleranceTest {
      */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    @VisibleForTesting
+    Class getTargetClass() {
+        return targetClass;
+    }
+
+    @VisibleForTesting
+    Set<String> getExcludedMethods() {
+        return unmodifiableSet(excludedMethods);
+    }
+
+    @VisibleForTesting
+    Map<?, ?> getDefaultValuesMap() {
+        return unmodifiableMap(defaultValuesMap);
+    }
+
+    /**
+     * Utility class for working with the {@code NullToleranceTest} class.
+     */
+    static class NullToleranceTestsUtil {
+
+        private NullToleranceTestsUtil() {
+        }
+
+        /**
+         * Checks the equality of the method names.
+         *
+         * @param expectedMethodName the expected method name
+         * @param actualMethodName   the actual method name
+         * @return {@code true} if methods are equal, {@code false} otherwise
+         */
+        static boolean isCorrectMethodName(String expectedMethodName, String actualMethodName) {
+            final boolean correct = expectedMethodName.equals(actualMethodName);
+            return correct;
+        }
+
+        /**
+         * Checks the exception.
+         *
+         * <p> Throws the wrapped exception, if exception
+         * is not the instance of the {@code NullPointerException}.
+         *
+         * @param cause the {@code Throwable}
+         */
+        static void checkException(Throwable cause) {
+            final boolean correctException = cause instanceof NullPointerException;
+            if (!correctException) {
+                throw Exceptions.wrappedCause(cause);
+            }
+        }
+
+        /**
+         * Returns the array of the declared {@code Method}s
+         * in the {@code Class} which are static and non-private.
+         *
+         * @param targetClass the target class
+         * @return the array of the {@code Method}
+         */
+        static Method[] getAccessibleMethods(Class targetClass) {
+            final Method[] declaredMethods = targetClass.getDeclaredMethods();
+            final List<Method> methodList = newLinkedList();
+
+            for (Method method : declaredMethods) {
+                final Invokable<?, Object> invokable = Invokable.from(method);
+                final boolean privateMethod = invokable.isPrivate();
+                final boolean staticMethod = invokable.isStatic();
+                if (!privateMethod && staticMethod) {
+                    methodList.add(method);
+                }
+            }
+
+            final Method[] result = methodList.toArray(new Method[methodList.size()]);
+            return result;
+        }
+
+        /**
+         * Returns the array of values for the method parameters.
+         *
+         * @param parameterTypes   the parameter types
+         * @param defaultValuesMap the {@code Map} with default values for the types
+         * @return the parameter values array
+         */
+        static Object[] getParameterValues(Class[] parameterTypes, Map<?, ?> defaultValuesMap) {
+            final Object[] parameterValues = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                final Class type = parameterTypes[i];
+                parameterValues[i] = defaultValuesMap.get(type);
+            }
+            return parameterValues;
+        }
     }
 
     /**
@@ -301,7 +343,7 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the default value for the class which will be used during the the check.
+         * Adds the default value for the class which will be used during the check.
          *
          * @param value the default value for the class
          * @return the {@code Builder}
@@ -339,8 +381,8 @@ public class NullToleranceTest {
          * @return the {@code Map}
          */
         @VisibleForTesting
-        Map<? super Class, ? super Object> getDefaultValues() {
-            return defaultValues;
+        Map<?, ?> getDefaultValues() {
+            return unmodifiableMap(defaultValues);
         }
 
         /**
