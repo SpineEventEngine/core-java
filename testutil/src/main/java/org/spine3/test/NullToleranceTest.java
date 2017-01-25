@@ -59,7 +59,7 @@ import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.isCorrect
  *     <li> the {@code default}.
  * </ul>
  *
- * <p> The helper does not checks the methods:
+ * <p> The helper does not check the methods:
  * <ul>
  *     <li> with the {@code private} modifier;
  *     <li> without the {@code static} modifier;
