@@ -31,7 +31,6 @@ import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.protobuf.Descriptors.Descriptor;
@@ -39,8 +38,11 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static java.lang.String.format;
 
 /**
- * Performs validation checking that all fields annotated in the enrichment message
+ * Performs validation analzing which of fields annotated in the enrichment message
  * can be initialized with the translation functions supplied in the parent enricher.
+ *
+ * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
+ * the validation result will vary for the same enricher depending on its actual state.
  *
  * @author Alexander Yevsyukov
  */
@@ -56,9 +58,6 @@ class ReferenceValidator {
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    @Nullable
-    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
-
     ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> eventClass,
             Class<? extends Message> enrichmentClass) {
@@ -69,31 +68,32 @@ class ReferenceValidator {
                                             .getDescriptorForType();
     }
 
-    @Nullable
-    ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
-        return sourceToTargetMap;
-    }
-
-    //TODO:24-Jan-2017:alex.tymchenko: fix the description.
-    /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
-    List<EnrichmentFunction<?, ?>> validate() {
+    /**
+     * Returns those fields and functions, that may be used for the enrichment at the moment.
+     *
+     * @return a {@link Result} data transfer object, containing the valid fields and functions.
+     */
+    Result validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
             final FieldDescriptor sourceField = findSourceField(enrichmentField);
             final Optional<EnrichmentFunction<?, ?>> function = getEnrichmentFunction(sourceField, enrichmentField);
-            if(function.isPresent()) {
+            if (function.isPresent()) {
                 functions.add(function.get());
                 fields.put(sourceField, enrichmentField);
             }
         }
-        this.sourceToTargetMap = fields.build();
-        return functions.build();
+        final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap = fields.build();
+        final ImmutableList<EnrichmentFunction<?, ?>> functionList = functions.build();
+        final Result result = new Result(functionList, fieldMap);
+        return result;
     }
 
     /** Searches for the event/context field with the name parsed from the enrichment field `by` option. */
     private FieldDescriptor findSourceField(FieldDescriptor enrichmentField) {
-        final String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
+        final String fieldName = enrichmentField.getOptions()
+                                                .getExtension(EventAnnotationsProto.by);
         checkSourceFieldName(fieldName, enrichmentField);
         final Descriptor srcMessage = getSrcMessage(fieldName);
         final FieldDescriptor field = findField(fieldName, srcMessage);
@@ -124,12 +124,13 @@ class ReferenceValidator {
         return msg;
     }
 
-    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
+    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
+                                                                     FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
         final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
-            warnNoFunction(sourceFieldClass, targetFieldClass);
+            logNoFunction(sourceFieldClass, targetFieldClass);
         }
         return func;
     }
@@ -156,10 +157,41 @@ class ReferenceValidator {
         throw new IllegalStateException(msg);
     }
 
-    private static void warnNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+    private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
         // Using `DEBUG` level to avoid polluting the `stderr`.
         if (log().isDebugEnabled()) {
-            log().debug("There is no enrichment function for translating {} to {}", sourceFieldClass, targetFieldClass);
+            log().debug("There is no enrichment function for translating {} into {}", sourceFieldClass, targetFieldClass);
+        }
+    }
+
+    /**
+     * A wrapper DTO for the validation result.
+     */
+    static class Result {
+        private final ImmutableList<EnrichmentFunction<?, ?>> functions;
+        private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+
+        private Result(ImmutableList<EnrichmentFunction<?, ?>> functions,
+                       ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
+            this.functions = functions;
+            this.fieldMap = fieldMap;
+        }
+
+        /**
+         * Returns the validated list of {@code EnrichmentFunction}s that may be used for the conversion
+         * in scope of the validated {@code EventEnricher}.
+         */
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // OK, since an `ImmutableList` is returned.
+        List<EnrichmentFunction<?, ?>> getFunctions() {
+            return functions;
+        }
+
+        /**
+         * Returns a map from source event/context field to target enrichment field descriptors,
+         * which is valid in scope of the target {@code EventEnricher}.
+         */
+        ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
+            return fieldMap;
         }
     }
 
