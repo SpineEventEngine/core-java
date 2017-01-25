@@ -73,23 +73,36 @@ public class CommandTestShould {
     @SuppressWarnings({"ConstantConditions" /* Passing `null` is the purpose of this test. */,
             "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
     @Test(expected = NullPointerException.class)
-    public void do_not_allow_null_CommandFacotry() {
+    public void do_not_allow_null_CommandFactory() {
         new TestCommandTest(null);
     }
 
     @Test
     public void accept_custom_CommandFactory() {
-        final CommandTest<StringValue> commandTestWithFactory = new TestCommandTest(
-                CommandFactory.newBuilder()
-                              .setActor(newUserUuid())
-                              .setZoneOffset(ZoneOffsets.UTC)
-                              .setTenantId(TenantId.newBuilder()
-                                                   .setValue(getClass().getSimpleName())
-                                                   .build())
-                              .build()
-        );
+        final Class<? extends CommandTestShould> clazz = getClass();
+        final CommandTest<StringValue> commandTestWithFactory = new TestCommandTest(newCommandFactory(clazz));
 
         createAndAssertCommand(commandTestWithFactory);
+    }
+
+    /**
+     * Creates a test instance of {@code CommandFactory}.
+     *
+     * <p>The factory gets:
+     * <ul>
+     *     <li>generated {@code UserId} for the actor.
+     *     <li>UTC zone offset
+     *     <li>{@code TenantId} based on the simple name of the passed class.
+     * </ul>
+     */
+    static CommandFactory newCommandFactory(Class<?> clazz) {
+        return CommandFactory.newBuilder()
+                             .setActor(newUserUuid())
+                             .setZoneOffset(ZoneOffsets.UTC)
+                             .setTenantId(TenantId.newBuilder()
+                                                  .setValue(clazz.getSimpleName())
+                                                  .build())
+                             .build();
     }
 
     @Test

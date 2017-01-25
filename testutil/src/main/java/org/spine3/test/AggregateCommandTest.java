@@ -34,8 +34,7 @@ import javax.annotation.Nullable;
  * @param <A> the type of the aggregate that handles the command
  * @author Alexander Yevsyukov
  */
-public abstract class AggregateCommandTest<C extends Message, A extends Aggregate>
-        extends CommandTest<C> {
+public abstract class AggregateCommandTest<C extends Message, A extends Aggregate> extends CommandTest<C> {
 
     /** The object under the test. */
     @Nullable
