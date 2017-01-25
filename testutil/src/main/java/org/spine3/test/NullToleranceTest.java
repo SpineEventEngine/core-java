@@ -386,7 +386,7 @@ public class NullToleranceTest {
         }
 
         /**
-         * Returns the constructed the {@link NullToleranceTest}.
+         * Returns the constructed {@link NullToleranceTest}.
          *
          * @return the {@code nullToleranceTest} instance.
          */
