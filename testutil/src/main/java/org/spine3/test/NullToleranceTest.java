@@ -43,10 +43,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
-import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.checkException;
-import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.getAccessibleMethods;
-import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.getParameterValues;
-import static org.spine3.test.NullToleranceTest.NullToleranceTestsUtil.isCorrectMethodName;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
@@ -104,6 +100,7 @@ public class NullToleranceTest {
      */
     public boolean check() {
         final Method[] accessibleMethods = getAccessibleMethods(targetClass);
+        final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
             final Class[] parameterTypes = method.getParameterTypes();
             final String methodName = method.getName();
@@ -114,88 +111,39 @@ public class NullToleranceTest {
                 continue;
             }
 
-            final Object[] parameterValues = getParameterValues(parameterTypes, defaultValuesMap);
-
-            final boolean correct = invokeAndCheck(method, parameterValues, parameterTypes);
+            final NullToleranceMethodTest nullToleranceMethodTest =
+                    new NullToleranceMethodTest(method, targetClassName, defaultValuesMap);
+            final boolean correct = nullToleranceMethodTest.check();
             if (!correct) {
                 return false;
             }
 
         }
         return true;
-    }
-
-    private boolean invokeAndCheck(Method method, Object[] parameterValues, Class[] parameterTypes) {
-        for (int i = 0; i < parameterValues.length; i++) {
-            Object[] copiedParametersArray = Arrays.copyOf(parameterValues, parameterValues.length);
-            final boolean primitive = TypeToken.of(parameterTypes[i])
-                                               .isPrimitive();
-            if (!primitive) {
-                copiedParametersArray[i] = null;
-            }
-
-            final boolean correct = invokeAndCheck(method, copiedParametersArray);
-
-            if (!correct) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean invokeAndCheck(Method method, Object[] params) {
-        try {
-            method.invoke(null, params);
-        } catch (InvocationTargetException ex) {
-            boolean valid = validateException(method.getName(), ex);
-            return valid;
-        } catch (IllegalAccessException e) {
-            throw Exceptions.wrappedCause(e);
-        }
-        return false;
-    }
-
-    private boolean validateException(String methodName, InvocationTargetException ex) {
-        final Throwable cause = ex.getCause();
-        checkException(cause);
-        final boolean result = isExpectedStackTraceElements(methodName, cause);
-        return result;
     }
 
     /**
-     * Checks the stack trace elements.
+     * Returns the array of the declared {@code Method}s
+     * in the {@code Class} which are static and non-private.
      *
-     * <p> According to the business rules the not-null check should to be in the each utility method.
-     * So the usage of the {@link Preconditions} should allocated there.
-     *
-     * <p> The first {@code StackTraceElement} have to contains
-     * the information about the {@code Preconditions} method.
-     *
-     * <p> The second {@code StackTraceElement} should contains information
-     * about the method from the {@code targetClass}.
-     *
-     * @param methodName the name of the invokable method
-     * @param cause      the {@code Throwable}
-     * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
+     * @param targetClass the target class
+     * @return the array of the {@code Method}
      */
-    private boolean isExpectedStackTraceElements(String methodName, Throwable cause) {
-        final StackTraceElement[] stackTraceElements = cause.getStackTrace();
-        final StackTraceElement preconditionsElement = stackTraceElements[0];
-        final boolean preconditionClass = Preconditions.class.getName()
-                                                             .equals(preconditionsElement.getClassName());
-        if (!preconditionClass) {
-            return false;
+    private static Method[] getAccessibleMethods(Class targetClass) {
+        final Method[] declaredMethods = targetClass.getDeclaredMethods();
+        final List<Method> methodList = newLinkedList();
+
+        for (Method method : declaredMethods) {
+            final Invokable<?, Object> invokable = Invokable.from(method);
+            final boolean privateMethod = invokable.isPrivate();
+            final boolean staticMethod = invokable.isStatic();
+            if (!privateMethod && staticMethod) {
+                methodList.add(method);
+            }
         }
 
-        final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
-        final boolean correct = isCorrectMethodName(methodName, expectedUtilClassElement.getMethodName());
-        if (!correct) {
-            return false;
-        }
-
-        final boolean correctClass = targetClass.getName()
-                                                .equals(expectedUtilClassElement.getClassName());
-        return correctClass;
+        final Method[] result = methodList.toArray(new Method[methodList.size()]);
+        return result;
     }
 
     /**
@@ -223,34 +171,70 @@ public class NullToleranceTest {
     }
 
     /**
-     * Utility class for working with the {@code NullToleranceTest} class.
+     * Serves as a helper to ensure that method does not accept {@code null}s as argument values.
      */
-    static class NullToleranceTestsUtil {
+    private static class NullToleranceMethodTest {
 
-        private NullToleranceTestsUtil() {
+        private final Method method;
+        private final String targetClassName;
+        private final Map<?, ?> defaultValuesMap;
+
+        private NullToleranceMethodTest(Method method, String targetClassName, Map<?, ?> defaultValuesMap) {
+            this.method = method;
+            this.targetClassName = targetClassName;
+            this.defaultValuesMap = defaultValuesMap;
         }
 
-        /**
-         * Checks the equality of the method names.
-         *
-         * @param expectedMethodName the expected method name
-         * @param actualMethodName   the actual method name
-         * @return {@code true} if methods are equal, {@code false} otherwise
-         */
-        static boolean isCorrectMethodName(String expectedMethodName, String actualMethodName) {
-            final boolean correct = expectedMethodName.equals(actualMethodName);
-            return correct;
+        private boolean check() {
+            final Class[] parameterTypes = method.getParameterTypes();
+            final Object[] parameterValues = getParameterValues(parameterTypes);
+
+            for (int i = 0; i < parameterValues.length; i++) {
+                Object[] copiedParametersArray = Arrays.copyOf(parameterValues, parameterValues.length);
+                final boolean primitive = TypeToken.of(parameterTypes[i])
+                                                   .isPrimitive();
+                if (!primitive) {
+                    copiedParametersArray[i] = null;
+                }
+
+                final boolean correct = invokeAndCheck(copiedParametersArray);
+
+                if (!correct) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        /**
-         * Checks the exception.
-         *
-         * <p> Throws the wrapped exception, if exception
-         * is not the instance of the {@code NullPointerException}.
-         *
-         * @param cause the {@code Throwable}
-         */
-        static void checkException(Throwable cause) {
+        private Object[] getParameterValues(Class[] parameterTypes) {
+            final Object[] parameterValues = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                final Class type = parameterTypes[i];
+                parameterValues[i] = defaultValuesMap.get(type);
+            }
+            return parameterValues;
+        }
+
+        private boolean invokeAndCheck(Object[] params) {
+            try {
+                method.invoke(null, params);
+            } catch (InvocationTargetException ex) {
+                boolean valid = validateException(ex);
+                return valid;
+            } catch (IllegalAccessException e) {
+                throw Exceptions.wrappedCause(e);
+            }
+            return false;
+        }
+
+        private boolean validateException(InvocationTargetException ex) {
+            final Throwable cause = ex.getCause();
+            checkException(cause);
+            final boolean result = isExpectedStackTraceElements(cause);
+            return result;
+        }
+
+        private static void checkException(Throwable cause) {
             final boolean correctException = cause instanceof NullPointerException;
             if (!correctException) {
                 throw Exceptions.wrappedCause(cause);
@@ -258,43 +242,42 @@ public class NullToleranceTest {
         }
 
         /**
-         * Returns the array of the declared {@code Method}s
-         * in the {@code Class} which are static and non-private.
+         * Checks the stack trace elements.
          *
-         * @param targetClass the target class
-         * @return the array of the {@code Method}
+         * <p> According to the business rules the not-null check should to be in the each utility method.
+         * So the usage of the {@link Preconditions} should allocated there.
+         *
+         * <p> The first {@code StackTraceElement} have to contains
+         * the information about the {@code Preconditions} method.
+         *
+         * <p> The second {@code StackTraceElement} should contains information
+         * about the method from the {@code targetClass}.
+         *
+         * @param cause the {@code Throwable}
+         * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
          */
-        static Method[] getAccessibleMethods(Class targetClass) {
-            final Method[] declaredMethods = targetClass.getDeclaredMethods();
-            final List<Method> methodList = newLinkedList();
-
-            for (Method method : declaredMethods) {
-                final Invokable<?, Object> invokable = Invokable.from(method);
-                final boolean privateMethod = invokable.isPrivate();
-                final boolean staticMethod = invokable.isStatic();
-                if (!privateMethod && staticMethod) {
-                    methodList.add(method);
-                }
+        private boolean isExpectedStackTraceElements(Throwable cause) {
+            final StackTraceElement[] stackTraceElements = cause.getStackTrace();
+            final StackTraceElement preconditionsElement = stackTraceElements[0];
+            final boolean preconditionClass = Preconditions.class.getName()
+                                                                 .equals(preconditionsElement.getClassName());
+            if (!preconditionClass) {
+                return false;
             }
 
-            final Method[] result = methodList.toArray(new Method[methodList.size()]);
-            return result;
+            final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
+            final boolean correct = isCorrectMethodName(method.getName(), expectedUtilClassElement.getMethodName());
+            if (!correct) {
+                return false;
+            }
+
+            final boolean correctClass = targetClassName.equals(expectedUtilClassElement.getClassName());
+            return correctClass;
         }
 
-        /**
-         * Returns the array of values for the method parameters.
-         *
-         * @param parameterTypes   the parameter types
-         * @param defaultValuesMap the {@code Map} with default values for the types
-         * @return the parameter values array
-         */
-        static Object[] getParameterValues(Class[] parameterTypes, Map<?, ?> defaultValuesMap) {
-            final Object[] parameterValues = new Object[parameterTypes.length];
-            for (int i = 0; i < parameterTypes.length; i++) {
-                final Class type = parameterTypes[i];
-                parameterValues[i] = defaultValuesMap.get(type);
-            }
-            return parameterValues;
+        private static boolean isCorrectMethodName(String expectedMethodName, String actualMethodName) {
+            final boolean correct = expectedMethodName.equals(actualMethodName);
+            return correct;
         }
     }
 
