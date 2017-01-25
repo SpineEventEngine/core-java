@@ -22,10 +22,13 @@ package org.spine3.test;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.Invokable;
+import com.google.common.reflect.Parameter;
 import com.google.common.reflect.TypeToken;
 import org.spine3.util.Exceptions;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -105,16 +108,16 @@ public class NullToleranceTest {
             final Class[] parameterTypes = method.getParameterTypes();
             final String methodName = method.getName();
             final boolean excluded = excludedMethods.contains(methodName);
-            final boolean primitives = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
-            final boolean skipMethod = excluded || parameterTypes.length == 0 || primitives;
+            final boolean primitivesOnly = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
+            final boolean skipMethod = excluded || parameterTypes.length == 0 || primitivesOnly;
             if (skipMethod) {
                 continue;
             }
 
             final NullToleranceMethodTest nullToleranceMethodTest =
                     new NullToleranceMethodTest(method, targetClassName, defaultValuesMap);
-            final boolean correct = nullToleranceMethodTest.check();
-            if (!correct) {
+            final boolean passed = nullToleranceMethodTest.check();
+            if (!passed) {
                 return false;
             }
 
@@ -186,20 +189,41 @@ public class NullToleranceTest {
         }
 
         private boolean check() {
+            final boolean nullableOnly = isNullableParameters();
+            if (nullableOnly) {
+                return true;
+            }
             final Class[] parameterTypes = method.getParameterTypes();
             final Object[] parameterValues = getParameterValues(parameterTypes);
-
+            final ImmutableList<Parameter> parameters = Invokable.from(method)
+                                                                 .getParameters();
             for (int i = 0; i < parameterValues.length; i++) {
                 Object[] copiedParametersArray = Arrays.copyOf(parameterValues, parameterValues.length);
                 final boolean primitive = TypeToken.of(parameterTypes[i])
                                                    .isPrimitive();
-                if (!primitive) {
-                    copiedParametersArray[i] = null;
+
+                final boolean nullableParameter = parameters.get(i)
+                                                            .isAnnotationPresent(Nullable.class);
+                if (primitive || nullableParameter) {
+                    continue;
                 }
 
+                copiedParametersArray[i] = null;
                 final boolean correct = invokeAndCheck(copiedParametersArray);
 
                 if (!correct) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean isNullableParameters() {
+            final ImmutableList<Parameter> parameters = Invokable.from(method)
+                                                                 .getParameters();
+            for (Parameter parameter : parameters) {
+                final boolean present = parameter.isAnnotationPresent(Nullable.class);
+                if (!present) {
                     return false;
                 }
             }
@@ -210,7 +234,9 @@ public class NullToleranceTest {
             final Object[] parameterValues = new Object[parameterTypes.length];
             for (int i = 0; i < parameterTypes.length; i++) {
                 final Class type = parameterTypes[i];
-                parameterValues[i] = defaultValuesMap.get(type);
+                final Object defaultValue = defaultValuesMap.get(type);
+                checkNotNull(defaultValue);
+                parameterValues[i] = defaultValue;
             }
             return parameterValues;
         }
