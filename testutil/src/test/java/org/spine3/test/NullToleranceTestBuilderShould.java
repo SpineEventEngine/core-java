@@ -35,21 +35,21 @@ import static org.junit.Assert.assertEquals;
 public class NullToleranceTestBuilderShould {
 
     @Test(expected = NullPointerException.class)
-    @SuppressWarnings("ConstantConditions") // Need to test the builder.
+    @SuppressWarnings("ConstantConditions") // The builder methods are tested with {@code null} argument values.
     public void not_accept_null_target_class() {
         NullToleranceTest.newBuilder()
                          .setClass(null);
     }
 
     @Test(expected = NullPointerException.class)
-    @SuppressWarnings("ConstantConditions") // Need to test the builder.
+    @SuppressWarnings("ConstantConditions") // The builder methods are tested with {@code null} argument values.
     public void throw_exception_when_pass_null_as_excluded_method_name() {
         NullToleranceTest.newBuilder()
                          .excludeMethod(null);
     }
 
     @Test(expected = NullPointerException.class)
-    @SuppressWarnings("ConstantConditions") // Need to test the builder.
+    @SuppressWarnings("ConstantConditions") // The builder methods are tested with {@code null} argument values.
     public void throw_exception_when_pass_null_as_default_value() {
         NullToleranceTest.newBuilder()
                          .addDefaultValue(null);
@@ -84,7 +84,8 @@ public class NullToleranceTestBuilderShould {
                                 .size();
         assertEquals(expectedSize, actualSize);
 
-        builder.addDefaultValue(0);
+        final int integerDefaultValue = 0;
+        builder.addDefaultValue(integerDefaultValue);
         builder.addDefaultValue('\u000f');
         expectedSize = 2;
         actualSize = builder.getDefaultValues()
@@ -92,7 +93,7 @@ public class NullToleranceTestBuilderShould {
         assertEquals(expectedSize, actualSize);
 
         final Map<? super Class, ? super Object> expectedMap = newHashMap();
-        expectedMap.put(Integer.class, 0);
+        expectedMap.put(Integer.class, integerDefaultValue);
         expectedMap.put(Character.class, '\u000f');
         assertEquals(expectedMap, builder.getDefaultValues());
     }
