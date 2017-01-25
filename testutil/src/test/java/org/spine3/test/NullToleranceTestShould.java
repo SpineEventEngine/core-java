@@ -36,7 +36,7 @@ public class NullToleranceTestShould {
     private static final Object DEFAULT_VALUE = new Object();
 
     @Test
-    public void return_false_when_check_class_with_methods_accept_non_declared_null_parameters() {
+    public void return_false_for_class_with_methods_accepting_non_declared_null_parameters() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
@@ -47,7 +47,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_true_when_check_class_when_method_without_check_is_ignored() {
+    public void return_true_when_for_class_when_method_without_check_is_ignored() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
@@ -59,7 +59,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_true_when_check_class_with_methods_with_primitive_parameters() {
+    public void return_true_for_class_with_methods_with_primitive_parameters() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithPrimitiveParameters.class)

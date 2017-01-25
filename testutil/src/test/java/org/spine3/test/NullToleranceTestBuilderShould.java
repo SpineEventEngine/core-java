@@ -122,13 +122,13 @@ public class NullToleranceTestBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_build_null_tolerance_instance_without_target_class() {
+    public void require_target_class_to_build_instance() {
         NullToleranceTest.newBuilder()
                          .build();
     }
 
     @Test
-    public void build_null_tolerance_class_instance() {
+    public void build_instance_when_all_required_fields_are_set() {
         final String excludedMethodName = "excludedMethod";
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(NullToleranceTestBuilderShould.class)
