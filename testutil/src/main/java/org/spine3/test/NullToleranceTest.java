@@ -35,8 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,6 +44,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
+import static javax.lang.model.SourceVersion.isName;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
@@ -318,13 +317,10 @@ public class NullToleranceTest {
         private Class targetClass;
         private final Set<String> excludedMethods;
         private final Map<? super Class, ? super Object> defaultValues;
-        private final Pattern pattern;
-        private static final String REGEX = "^[a-zA-Z]+$";
 
         private Builder() {
             defaultValues = newHashMap();
             excludedMethods = newHashSet();
-            pattern = Pattern.compile(REGEX);
         }
 
         /**
@@ -347,8 +343,8 @@ public class NullToleranceTest {
         @SuppressWarnings("WeakerAccess") // Will be used outside the package
         public Builder excludeMethod(String methodName) {
             checkNotNull(methodName);
-            final Matcher matcher = pattern.matcher(methodName);
-            checkArgument(matcher.matches());
+            final boolean validName = isName(methodName);
+            checkArgument(validName);
 
             excludedMethods.add(methodName);
             return this;
