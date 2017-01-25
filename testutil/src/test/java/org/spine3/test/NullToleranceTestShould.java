@@ -47,7 +47,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_true_when_for_class_when_method_without_check_is_ignored() {
+    public void return_true_for_class_with_ignored_method_without_check() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
@@ -69,7 +69,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_false_when_check_class_with_method_with_reference_and_primitive_parameters_without_check() {
+    public void return_false_for_class_with_method_with_primitive_and_reference_parameters_without_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(UtilityClassWithMixedParameters.class)
                                                                      .addDefaultValue(DEFAULT_VALUE)
@@ -79,7 +79,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void return_true_when_check_class_with_method_with_reference_and_primitive_types_with_check() {
+    public void return_true_for_class_with_method_with_primitive_and_reference_types_with_check() {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithMixedParameters.class)
@@ -120,7 +120,7 @@ public class NullToleranceTestShould {
     }
 
     @Test
-    public void skip_the_method_with_nullable_parameters() {
+    public void ignore_the_method_with_nullable_parameters() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNullableMethodParameters.class)
                                                                      .excludeMethod("methodWithMixedParameters")
