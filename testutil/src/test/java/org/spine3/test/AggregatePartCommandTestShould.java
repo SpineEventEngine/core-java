@@ -20,13 +20,12 @@
 
 package org.spine3.test;
 
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
+import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.CommandFactory;
-import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 
@@ -37,26 +36,26 @@ import static org.spine3.test.CommandTestShould.newCommandFactory;
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateCommandTestShould {
+public class AggregatePartCommandTestShould {
 
-    private AggregateCommandTest<Timestamp, TimePrinter> aggregateCommandTest;
+    private AggregatePartCommandTest<Timestamp, TimerCounter> aggregatePartCommandTest;
 
     @Before
     public void setUp() {
-        aggregateCommandTest = new TimePrintingTest();
+        aggregatePartCommandTest = new TimerCountingTest();
     }
 
     @Test
-    public void create_an_aggregate_in_setUp() {
-        assertFalse(aggregateCommandTest.aggregate().isPresent());
+    public void create_an_aggregate_part_in_setUp() {
+        assertFalse(aggregatePartCommandTest.aggregatePart().isPresent());
 
-        aggregateCommandTest.setUp();
+        aggregatePartCommandTest.setUp();
 
-        assertTrue(aggregateCommandTest.aggregate().isPresent());
+        assertTrue(aggregatePartCommandTest.aggregatePart().isPresent());
     }
 
     /**
-     * Ensures existence of the constructor in {@link AggregateCommandTest} class.
+     * Ensures existence of the constructor in {@link AggregatePartCommandTest} class.
      *
      * <p>We do this by simply invoking the constructor in the derived class.
      * We do not perform checks because they are done in the test suite that checks
@@ -65,16 +64,14 @@ public class AggregateCommandTestShould {
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we don't need the result.
     @Test
     public void has_constructor_with_CommandFactory() {
-        new TimePrintingTest(newCommandFactory(getClass()));
+        new TimerCountingTest(newCommandFactory(getClass()));
     }
 
     /**
-     * A dummy aggregate that accepts a {@code Timestamp} as a command message
-     * and prints it into its state.
+     * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
-    private static final class TimePrinter extends Aggregate<Long, StringValue, StringValue.Builder> {
-
-        TimePrinter(Long id) {
+    private static final class TimerCounter extends AggregatePart<String, UInt32Value, UInt32Value.Builder> {
+        private TimerCounter(String id) {
             super(id);
         }
 
@@ -85,26 +82,26 @@ public class AggregateCommandTestShould {
 
         @Apply
         private void on(Timestamp timestamp) {
-            getBuilder().setValue(Timestamps.toString(timestamp));
+            getBuilder().setValue(getState().getValue() + 1);
         }
     }
 
     /**
-     * The test harness class that tests how {@code TimePrinter} handles its command.
+     * The test harness class that tests how {@code TimerCounterPart} handles its command.
      */
-    private static class TimePrintingTest extends AggregateCommandTest<Timestamp, TimePrinter> {
+    private static class TimerCountingTest extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
-        private TimePrintingTest(CommandFactory commandFactory) {
+        protected TimerCountingTest(CommandFactory commandFactory) {
             super(commandFactory);
         }
 
-        private TimePrintingTest() {
+        protected TimerCountingTest() {
             super();
         }
 
         @Override
-        protected TimePrinter createAggregate() {
-            return new TimePrinter(1L);
+        protected TimerCounter createAggregatePart() {
+            return new TimerCounter(getClass().getSimpleName());
         }
     }
 }
