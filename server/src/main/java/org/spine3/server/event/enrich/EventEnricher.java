@@ -51,6 +51,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
@@ -181,8 +182,10 @@ public class EventEnricher {
         private Action(EventEnricher parent, Message eventMessage, EventContext eventContext) {
             this.eventMessage = eventMessage;
             this.eventContext = eventContext;
-            this.availableFunctions = parent.functions.get(EventClass.of(eventMessage)
-                                                                     .value());
+            final Class<? extends Message> eventClass = EventClass.of(eventMessage)
+                                                             .value();
+            final Collection<EnrichmentFunction<?, ?>> functionsPerClass = parent.functions.get(eventClass);
+            this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
         }
 
         private Event perform() {
@@ -436,7 +439,7 @@ public class EventEnricher {
     /** Performs validation by validating its functions. */
     private static void validate(Multimap<Class<?>, EnrichmentFunction<?, ?>> fnRegistry) {
         for (EnrichmentFunction<?, ?> func : fnRegistry.values()) {
-            func.validate();
+            func.activate();
         }
     }
 }

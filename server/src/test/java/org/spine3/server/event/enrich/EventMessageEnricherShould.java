@@ -45,7 +45,7 @@ public class EventMessageEnricherShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_if_pass_null() {
-        enricher.validate();
+        enricher.activate();
         enricher.apply(null);
     }
 

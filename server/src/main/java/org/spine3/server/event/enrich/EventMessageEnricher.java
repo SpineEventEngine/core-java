@@ -51,6 +51,9 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
     /** A parent instance holding this instance and its siblings. */
     private final EventEnricher enricher;
 
+    /** Tells, whether this instance is active or not. */
+    private boolean active = false;
+
     /** A map from source event field class to enrichment functions. */
     @Nullable
     private ImmutableMultimap<Class<?>, EnrichmentFunction> fieldFunctions;
@@ -78,7 +81,7 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
     }
 
     @Override
-    void validate() {
+    void activate() {
         final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
                                                                              getEventClass(),
                                                                              getEnrichmentClass());
@@ -89,21 +92,42 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
         }
         this.fieldFunctions = map.build();
         this.fieldMap = referenceValidator.fieldMap();
+
+        markActive();
+    }
+
+    @Override
+    boolean isActive() {
+        return active;
     }
 
     @Override
     public T apply(@Nullable S eventMsg) {
         checkNotNull(eventMsg);
-        checkNotNull(fieldMap, "fieldMap");
-        checkNotNull(fieldFunctions, "fieldFunctions");
-        checkState(!fieldMap.isEmpty(), "fieldMap is empty");
-        checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
+        verifyOwnState();
+
         final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
         final Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, eventMsg);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
         final T result = (T) builder.build();
         return result;
+    }
+
+    private void markActive() {
+        try {
+            verifyOwnState();
+            active = true;
+        } catch (RuntimeException ignored) {
+            active = false;
+        }
+    }
+
+    private void verifyOwnState() {
+        checkNotNull(fieldMap, "fieldMap");
+        checkNotNull(fieldFunctions, "fieldFunctions");
+        checkState(!fieldMap.isEmpty(), "fieldMap is empty");
+        checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
     }
 
     @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that collections are not null
@@ -116,7 +140,8 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
             for (FieldDescriptor targetField : targetFields) {
                 final Optional<EnrichmentFunction> function = FluentIterable.from(functions)
                         .firstMatch(SupportsFieldConversion.of(sourceFieldClass, Messages.getFieldClass(targetField)));
-                @SuppressWarnings("unchecked") // types are checked during the initialization and validation
+                @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"}) // the model is checked during
+                                                                                // the initialization and activation
                 final Object targetValue = function.get().apply(srcFieldValue);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);

@@ -22,6 +22,7 @@ package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
 
@@ -79,14 +80,37 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
     protected abstract Function<S, T> getFunction();
 
     /**
-     * Validates the instance.
+     * Activates the function.
+     *
+     * <p>During the activation the internal state of the function may be adjusted.
+     *
+     * <p>After the function is activated successfully, the {@link #isActive()} returns {@code true}.
      *
      * @throws IllegalStateException if the function cannot perform the conversion in its current state
      * or because of the state of its environment
      */
-    abstract void validate();
+    abstract void activate();
 
-    //TODO:24-Jan-2017:alex.tymchenko: think of creating `isValid` instead or in addition.
+    /**
+     * Checks whether this instance of {@code EnrichmentFunction} is active
+     * and available to use for the conversion.
+     *
+     * @return {@code true} if the function is eligible for the conversion, {@code false} otherwise.
+     */
+    abstract boolean isActive();
+
+    /**
+     * A helper predicate to filter the active functions only.
+     */
+    static Predicate<EnrichmentFunction<?, ?>> activeOnly() {
+        return new Predicate<EnrichmentFunction<?, ?>>() {
+            @Override
+            public boolean apply(@Nullable EnrichmentFunction<?, ?> input) {
+                checkNotNull(input);
+                return input.isActive();
+            }
+        };
+    }
 
     @Override
     public int hashCode() {
@@ -112,5 +136,17 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
                           .add("eventClass", eventClass)
                           .add("enrichmentClass", enrichmentClass)
                           .toString();
+    }
+
+    /**
+     * Checks whether this instance of {@code EnrichmentFunction} is active.
+     *
+     * <p>Throws {@link IllegalStateException} if the instance is not active.
+     */
+    protected void ensureActive() {
+        if(!isActive()) {
+            throw new IllegalStateException("The given instance of " + getClass() + " is not active at the moment. " +
+                                                    "Please use `#activate()` first.");
+        }
     }
 }

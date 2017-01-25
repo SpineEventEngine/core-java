@@ -431,7 +431,7 @@ public class EventBusShould {
         };
         eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
         final EventEnricher enricher = eventBus.getEnricher();
-        assertNull(enricher);
+        assertNotNull(enricher);
     }
 
     @Test
