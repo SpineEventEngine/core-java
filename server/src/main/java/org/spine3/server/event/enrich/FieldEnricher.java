@@ -58,14 +58,18 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
         return result;
     }
 
+    /**
+     * Do nothing. Field enrichment relies only on the aggregated function.
+     */
     @Override
-    void activate() {
-        // Do nothing. Field enrichment relies only on the aggregated function.
-    }
+    void activate() {}
 
+    /**
+     * The instances of {@code FieldEnricher} are always active,
+     * as no special actions are required for the activation.
+     */
     @Override
     boolean isActive() {
-        // It is always active, as no special actions are required to activate.
         return true;
     }
 
