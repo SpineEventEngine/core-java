@@ -84,9 +84,10 @@ public class NullToleranceTestShould {
 
     @Test(expected = RuntimeException.class)
     public void throw_exception_when_invoke_method_which_throws_exception() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(UtilityClassWithException.class)
-                                                                     .build();
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(UtilityClassWithThrownExceptionInTheMethod.class)
+                                 .build();
         nullToleranceTest.check();
     }
 
@@ -143,10 +144,10 @@ public class NullToleranceTestShould {
     }
 
     @SuppressWarnings("unused") // accessed via reflection
-    private static class UtilityClassWithException {
+    private static class UtilityClassWithThrownExceptionInTheMethod {
 
         public static void methodWhichThrowsException(Object param) {
-            throw new RuntimeException();
+            throw new RuntimeException("Occurred exception.");
         }
     }
 

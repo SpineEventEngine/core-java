@@ -54,6 +54,7 @@ public class NullToleranceTestBuilderShould {
         NullToleranceTest.newBuilder()
                          .addDefaultValue(null);
     }
+
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_pass_empty_string_as_excluded_method_name(){
         NullToleranceTest.newBuilder()
@@ -65,7 +66,6 @@ public class NullToleranceTestBuilderShould {
         NullToleranceTest.newBuilder()
                          .excludeMethod("incorrect method name");
     }
-
 
     @Test
     public void return_target_class() {
