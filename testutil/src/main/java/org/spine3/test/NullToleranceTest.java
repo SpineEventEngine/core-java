@@ -62,13 +62,15 @@ import static java.util.Collections.unmodifiableSet;
  * <ul>
  *     <li> with the {@code private} modifier;
  *     <li> without the {@code static} modifier;
- *     <li> with only the primitive parameters.
+ *     <li> with only the primitive parameters;
+ *     <li> with only parameters marked as {@code Nullable}.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
  * <ul>
  *     <li> public static void method(Object obj);
  *     <li> protected static void method(Object first, long second);
+ *     <li> public static void method(@Nullable Object first, Object second);
  *     <li> static void method(Object first, Object second).
  * </ul>
  *
@@ -76,6 +78,7 @@ import static java.util.Collections.unmodifiableSet;
  * <ul>
  *     <li> public void method(Object obj);
  *     <li> private static void method(Object obj);
+ *     <li> public static void method(@Nullable Object obj);
  *     <li> protected static void method(int first, float second).
  * </ul>
  *
