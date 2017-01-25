@@ -154,7 +154,7 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
     protected void ensureActive() {
         if(!isActive()) {
             throw new IllegalStateException("The given instance of " + getClass() + " is not active at the moment. " +
-                                                    "Please use `#activate()` first.");
+                                                    "Please use `activate()` first.");
         }
     }
 }
