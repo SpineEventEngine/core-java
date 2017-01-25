@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
@@ -39,6 +40,8 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectId;
+import org.spine3.test.projection.Project;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -47,6 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
@@ -54,6 +58,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -61,7 +66,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored", "ClassWithTooManyMethods"})
 public class EventBusShould {
 
     private EventBus eventBus;
@@ -140,7 +145,6 @@ public class EventBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
         // Pass just String instance.
-        //noinspection EmptyClass
         eventBus.subscribe(new EventSubscriber() {
         });
     }
@@ -408,6 +412,65 @@ public class EventBusShould {
         eventBus.post(Given.Event.projectCreated());
 
         verify(enricher, never()).enrich(any(Event.class));
+    }
+
+    @Test
+    public void allow_enrichment_configuration_at_runtime_if_enricher_not_set_previously() {
+        setUp(null);
+        assertNull(eventBus.getEnricher());
+
+        final Class<ProjectId> eventFieldClass = ProjectId.class;
+        final Class<String> enrichmentFieldClass = String.class;
+        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable ProjectId input) {
+                checkNotNull(input);
+                return input.toString();
+            }
+        };
+        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
+        final EventEnricher enricher = eventBus.getEnricher();
+        assertNotNull(enricher);
+    }
+
+    @Test
+    public void allow_enrichment_configuration_at_runtime_if_enricher_previously_set() {
+        final EventEnricher enricher = mock(EventEnricher.class);
+        setUp(enricher);
+
+        final Class<ProjectId> eventFieldClass = ProjectId.class;
+        final Class<String> enrichmentFieldClass = String.class;
+        final Function<ProjectId, String> function = new Function<ProjectId, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable ProjectId input) {
+                checkNotNull(input);
+                return input.toString();
+            }
+        };
+        eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
+        verify(enricher).registerFieldEnrichment(eq(eventFieldClass), eq(enrichmentFieldClass), eq(function));
+    }
+
+
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_eventFieldClass_passed_as_field_enrichment_configuration_param() {
+        eventBus.addFieldEnrichment(null, String.class, mock(Function.class));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_enrichmentFieldClass_passed_as_field_enrichment_configuration_param() {
+        eventBus.addFieldEnrichment(ProjectId.class, null, mock(Function.class));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
+        eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
     }
 
     private static void assertResponseIsOk(TestResponseObserver responseObserver) {
