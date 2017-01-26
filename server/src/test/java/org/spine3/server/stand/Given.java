@@ -155,7 +155,7 @@ class Given {
         }
 
         @Assign
-        public List<? extends Message> handle(CreateProject createProject, CommandContext context) {
+        List<? extends Message> handle(CreateProject createProject, CommandContext context) {
             // In real life we would return a list with at least one element populated with real data.
             return Collections.emptyList();
         }
