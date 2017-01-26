@@ -89,4 +89,80 @@ public class VerifyShould {
         }
     }
 
+    @Test(expected = AssertionError.class)
+    public void fail_if_float_values_are_same_types_of_infinity() {
+        final float anyDeltaAcceptable = 0.0f;
+        Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
+        Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_float_values_are_NaN() {
+        final float anyDeltaAcceptable = 0.0f;
+        Verify.assertNotEquals(Float.NaN, Float.NaN, anyDeltaAcceptable);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_float_values_are_equal() {
+        final float positiveValue = 5.0f;
+        final float negativeValue = - positiveValue;
+        final float equalToValuesDifference = positiveValue - negativeValue;
+        Verify.assertNotEquals(positiveValue, negativeValue, equalToValuesDifference);
+    }
+
+    @Test
+    public void pass_if_float_values_are_different_types_of_infinity() {
+        final float anyDeltaAcceptable = 0.0f;
+        Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
+        Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
+    }
+
+    @Test
+    public void pass_if_float_values_are_not_equal() {
+        final float expected = 0.0f;
+        final float actual = 1.0f;
+        final float lessThanValuesDifference = Math.abs(expected - actual) - 0.1f;
+        Verify.assertNotEquals(expected, actual, lessThanValuesDifference);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_bool_values_are_equal() {
+        Verify.assertNotEquals(true, true);
+    }
+
+    @Test
+    public void pass_if_bool_values_are_not_equal() {
+        Verify.assertNotEquals(true, false);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_byte_values_are_equal() {
+        Verify.assertNotEquals((byte) 0, (byte) 0);
+    }
+
+    @Test
+    public void pass_if_byte_values_are_not_equal() {
+        Verify.assertNotEquals((byte) 0, (byte) 1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_char_values_are_equal() {
+        Verify.assertNotEquals('a', 'a');
+    }
+
+    @Test
+    public void pass_if_char_values_are_not_equal() {
+        Verify.assertNotEquals('a', 'b');
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_short_values_are_equal() {
+        Verify.assertNotEquals((short) 0, (short) 0);
+    }
+
+    @Test
+    public void pass_if_short_values_are_not_equal() {
+        Verify.assertNotEquals((short) 0, (short) 1);
+    }
+
 }
