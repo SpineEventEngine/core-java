@@ -32,13 +32,13 @@ import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class GivenShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Given.class));
+        assertTrue(hasPrivateParameterlessCtor(Given.class));
     }
 
     @Test
