@@ -827,7 +827,7 @@ public class CommandBusShould {
 
         @Assign
         @SuppressWarnings("unused")
-        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+        ProjectCreated handle(CreateProject command, CommandContext ctx) {
             handlerInvoked = true;
             return ProjectCreated.getDefaultInstance();
         }
@@ -845,17 +845,17 @@ public class CommandBusShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+        ProjectCreated handle(CreateProject command, CommandContext ctx) {
             return ProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        public TaskAdded handle(AddTask command) {
+        TaskAdded handle(AddTask command) {
             return TaskAdded.getDefaultInstance();
         }
 
         @Assign
-        public ProjectStarted handle(StartProject command) {
+        ProjectStarted handle(StartProject command) {
             return ProjectStarted.getDefaultInstance();
         }
     }
@@ -879,7 +879,7 @@ public class CommandBusShould {
 
         @Assign
         @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
-        public ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
+        ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
             throw throwable;
         }
     }
