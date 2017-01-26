@@ -23,6 +23,7 @@ package org.spine3.util;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import org.spine3.SPI;
 
 import javax.annotation.Nullable;
 
@@ -32,6 +33,7 @@ import javax.annotation.Nullable;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SPI
 @SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
 public final class Environment {
 
@@ -51,8 +53,8 @@ public final class Environment {
     @Nullable
     private static final String appEngineRuntimeVersion = System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
-    @VisibleForTesting
-    static final String VAL_TRUE = "true";
+    private static final String VAL_TRUE = "true";
+    private static final String VAL_FALSE = "false";
 
     /** If set tells if the code runs from a testing framework. */
     @Nullable
@@ -62,9 +64,33 @@ public final class Environment {
         // Prevent instantiation of this singleton class from outside.
     }
 
+    private Environment(Environment copy) {
+        this.tests = copy.tests;
+    }
+
     /** Returns the singleton instance. */
     public static Environment getInstance() {
         return Singleton.INSTANCE.value;
+    }
+
+    /**
+     * Creates a copy of the instance so that it can be later
+     * restored via {@link #restoreFrom(Environment)} by cleanup in tests.
+     */
+    @VisibleForTesting
+    public Environment createCopy() {
+        return new Environment(this);
+    }
+
+    /**
+     * Restores the state from the instance created by {@link #createCopy()}.
+     *
+     * <p>Call this method when cleaning up tests that modify {@code Environment}.
+     */
+    @VisibleForTesting
+    public void restoreFrom(Environment copy) {
+        // Make sure this matches the set of fields copied in the copy constructor.
+        this.tests = copy.tests;
     }
 
     /**
@@ -109,11 +135,9 @@ public final class Environment {
         String testProp = System.getProperty(ENV_KEY_TESTS);
         if (testProp != null) {
             testProp = testProp.replaceAll("\"' ", "");
-            if (testProp.equalsIgnoreCase(VAL_TRUE)
-                    || testProp.equals("1")) {
-                this.tests = true;
-                return true;
-            }
+            this.tests = (testProp.equalsIgnoreCase(VAL_TRUE)
+                                                || testProp.equals("1"));
+            return this.tests;
         }
 
         // Check stacktrace for known frameworks.
@@ -126,6 +150,33 @@ public final class Environment {
 
         this.tests = false;
         return false;
+    }
+
+    /**
+     * Turns the environment into tests mode.
+     */
+    @VisibleForTesting
+    public void setToTests() {
+        this.tests = true;
+        System.setProperty(ENV_KEY_TESTS, VAL_TRUE);
+    }
+
+    /**
+     * Turns the environment into the production mode.
+     */
+    @VisibleForTesting
+    public void setToProduction() {
+        this.tests = false;
+        System.setProperty(ENV_KEY_TESTS, VAL_FALSE);
+    }
+
+    /**
+     * Resets the instance and clears the {@link #ENV_KEY_TESTS} variable.
+     */
+    @VisibleForTesting
+    public void reset() {
+        this.tests = null;
+        System.clearProperty(ENV_KEY_TESTS);
     }
 
     private enum Singleton {

@@ -29,8 +29,26 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * The {@code Supplier} of {@code StorageFactory} that takes into account
+ * if the code runs under tests.
+ *
+ * <h2>Test mode</h2>
+ * <p>Under tests  this class returns {@link InMemoryStorageFactory} if
+ * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
+ *
+ * <h2>Production mode</h2>
+ * <p>In production mode this class obtains the instance obtained
+ * by the {@code Supplier} passed via {@link #init(Supplier, Supplier)}.
+ * If the production {@code Supplier} was not initialized {@code IllegalStateException}
+ * will be thrown.
+ *
+ * <h2>Remembering {@code StorageFactory} obtained from suppliers</h2>
+ * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}
+ * will be stored. This means that a call to {@link Supplier#get()} method of
+ * the suppliers passed via {@link #init(Supplier, Supplier)} will be made only once.
  *
  * @author Alexander Yevsyukov
+ * @see Environment#isTests()
  */
 public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
@@ -47,36 +65,50 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
         // Prevent construction of this singleton from outside code.
     }
 
+    /**
+     * Obtains the singleton instance.
+     */
     public static StorageFactorySwitch instance() {
         return Singleton.INSTANCE.value;
     }
 
+    /**
+     * Initializes the switch with the suppliers of {@code StorageFactor}ies.
+     *
+     * @param productionSupplier the supplier for the production mode
+     * @param testsSupplier the supplier for the tests mode.
+     *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
+     */
     public void init(Supplier<StorageFactory> productionSupplier,
                      @Nullable Supplier<StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);
         this.testsSupplier = testsSupplier;
     }
 
+    /**
+     * Obtains {@code StorageFactory} for the current execution mode.
+     *
+     * @return {@code StorageFactory} instance
+     * @throws IllegalStateException if production {@code Supplier} was not set via {@link #init(Supplier, Supplier)}
+     */
     @Override
     public StorageFactory get() {
-        if (storageFactory == null) {
+        if (storageFactory != null) {
+            return storageFactory;
+        }
 
-            if (Environment.getInstance().isTests()) {
-                if (testsSupplier != null) {
-                    storageFactory = testsSupplier.get();
-                } else {
-                    storageFactory = InMemoryStorageFactory.getInstance();
-                }
-            } else {
-                if (productionSupplier == null) {
-                    throw new IllegalStateException(
-                            "A supplier of a production StorageFactory is not set " +
-                                    "but the code runs in the production mode. " +
-                            "Please call StorageFactorySwitch.init().");
-                }
-
-                storageFactory = productionSupplier.get();
+        if (Environment.getInstance().isTests()) {
+            storageFactory = testsSupplier != null
+                             ? testsSupplier.get()
+                             : InMemoryStorageFactory.getInstance();
+        } else {
+            if (productionSupplier == null) {
+                throw new IllegalStateException(
+                        "A supplier of a production StorageFactory is not set " +
+                                "but the code runs in the production mode. " +
+                        "Please call " + getClass().getSimpleName() + ".init().");
             }
+            storageFactory = productionSupplier.get();
         }
 
         return storageFactory;
@@ -88,6 +120,4 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final StorageFactorySwitch value = new StorageFactorySwitch();
     }
-
-
 }

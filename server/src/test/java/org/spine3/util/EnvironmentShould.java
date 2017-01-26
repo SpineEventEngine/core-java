@@ -21,11 +21,13 @@
 package org.spine3.util;
 
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -35,12 +37,38 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("AccessOfSystemProperties")
 public class EnvironmentShould {
 
+    private Environment environment;
+
+    /*
+     * Environment protection START
+     *
+     * We remember the state and restore it after this test suite is complete because other tests
+     * may initialize the environment.
+     */
+    @SuppressWarnings("StaticVariableMayNotBeInitialized")
+    private static Environment storedEnvironment;
+
+    @BeforeClass
+    public static void storeEnvironment() {
+        storedEnvironment = Environment.getInstance().createCopy();
+    }
+
+    @SuppressWarnings("StaticVariableUsedBeforeInitialization")
+    @AfterClass
+    public static void restoreEnvironment() {
+        Environment.getInstance().restoreFrom(storedEnvironment);
+    }
+
+    /* Environment protection END */
+
+    @Before
+    public void setUp() {
+        environment = Environment.getInstance();
+    }
+
     @After
     public void cleanUp() throws NoSuchFieldException, IllegalAccessException {
-        // Clean the value of `Environment.tests` field so that the next test would run on a clean Environment.
-        Field tests = Environment.class.getDeclaredField("tests");
-        tests.setAccessible(true);
-        tests.set(Environment.getInstance(), null);
+        Environment.getInstance().reset();
     }
 
     @Test
@@ -51,42 +79,61 @@ public class EnvironmentShould {
     @Test
     public void tell_when_not_running_under_AppEngine() {
         // Tests are not run by AppEngine by default.
-        assertFalse(Environment.getInstance().isAppEngine());
+        assertFalse(environment.isAppEngine());
     }
 
     @Test
     public void obtain_AppEngine_version_as_optional_string() {
         // By default we're not running under AppEngine.
-        assertFalse(Environment.getInstance().appEngineVersion().isPresent());
+        assertFalse(environment.appEngineVersion()
+                               .isPresent());
     }
 
     @Test
     public void tell_that_we_are_under_tests_if_env_var_set_to_true() throws Exception {
-        try {
-            System.setProperty(Environment.ENV_KEY_TESTS, Environment.VAL_TRUE);
+        Environment.getInstance().setToTests();
 
-            assertTrue(Environment.getInstance().isTests());
-
-        } finally {
-            System.clearProperty(Environment.ENV_KEY_TESTS);
-        }
+        assertTrue(environment.isTests());
     }
 
     @Test
     public void tell_that_we_are_under_tests_if_env_var_set_to_1() throws Exception {
-        try {
-            System.setProperty(Environment.ENV_KEY_TESTS, "1");
+        System.setProperty(Environment.ENV_KEY_TESTS, "1");
 
-            assertTrue(Environment.getInstance().isTests());
-
-        } finally {
-            System.clearProperty(Environment.ENV_KEY_TESTS);
-        }
+        assertTrue(environment.isTests());
     }
 
     @Test
     public void tell_that_we_are_under_tests_if_run_under_known_framework() {
         // As we run this from under JUnit...
-        assertTrue(Environment.getInstance().isTests());
+        assertTrue(environment.isTests());
+    }
+
+    @Test
+    public void tell_that_we_are_not_under_tests_if_env_set_to_something_else() {
+        System.setProperty(Environment.ENV_KEY_TESTS, "neitherTrueNor1");
+
+        assertFalse(environment.isTests());
+    }
+
+    @Test
+    public void turn_into_tests_mode() {
+        environment.setToTests();
+
+        assertTrue(environment.isTests());
+    }
+
+    @Test
+    public void turn_into_production_mode() {
+        environment.setToProduction();
+
+        assertFalse(environment.isTests());
+    }
+
+    @Test
+    public void clear_environment_var_on_reset() {
+        environment.reset();
+
+        assertNull(System.getProperty(Environment.ENV_KEY_TESTS));
     }
 }
