@@ -203,14 +203,14 @@ public class StandFunnelShould {
                                   MoreExecutors.directExecutor();
         final StandUpdateDelivery delivery = StandUpdateDelivery.immediateDeliveryWithExecutor(executor);
 
-        final BoundedContext boundedContext = spy(Given.boundedContext(stand, delivery));
+        final BoundedContext boundedContext = Given.boundedContext(stand, delivery);
 
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
+        verify(stand, times(dispatchActions.length)).update(any(Object.class), any(Any.class), anyInt());
 
         if (isConcurrent) {
             try {
