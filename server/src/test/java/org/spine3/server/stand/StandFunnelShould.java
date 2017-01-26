@@ -170,7 +170,7 @@ public class StandFunnelShould {
     }
 
     @Test
-    public void deliver_updates_form_aggregate_repository() {
+    public void deliver_updates_from_aggregate_repository() {
         checkUpdatesDelivery(false, aggregateRepositoryDispatch());
     }
 
@@ -201,16 +201,16 @@ public class StandFunnelShould {
         final Executor executor = isConcurrent ?
                                   Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR) :
                                   MoreExecutors.directExecutor();
-        final StandUpdateDelivery delivery = StandUpdateDelivery.immediateDeliveryWithExecutor(executor);
+        final StandUpdateDelivery delivery = spy(new SpyableStandUpdateDelivery(executor));
 
-        final BoundedContext boundedContext = spy(Given.boundedContext(stand, delivery));
+        final BoundedContext boundedContext = Given.boundedContext(stand, delivery);
 
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(boundedContext, times(dispatchActions.length)).getStandFunnel();
+        verify(delivery, times(dispatchActions.length)).deliver(any(Entity.class));
 
         if (isConcurrent) {
             try {
@@ -314,4 +314,18 @@ public class StandFunnelShould {
         void perform(BoundedContext context);
     }
 
+    /**
+     * A custom {@code StandUpdateDelivery}, which is suitable for {@link org.mockito.Mockito#spy(Object)}.
+     */
+    private static class SpyableStandUpdateDelivery extends StandUpdateDelivery {
+
+        public SpyableStandUpdateDelivery(Executor delegate) {
+            super(delegate);
+        }
+
+        @Override
+        protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+            return false;
+        }
+    }
 }

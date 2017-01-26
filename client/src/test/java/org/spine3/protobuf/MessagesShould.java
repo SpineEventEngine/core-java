@@ -50,7 +50,7 @@ public class MessagesShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Messages.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(Messages.class));
     }
 
     @Test(expected = NullPointerException.class)

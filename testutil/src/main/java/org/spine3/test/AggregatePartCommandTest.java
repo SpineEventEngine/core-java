@@ -68,7 +68,7 @@ public abstract class AggregatePartCommandTest<C extends Message,
     }
 
     /**
-     * Initialized a test suite with a newly created {@code AggregatePart}.
+     * Initializes a test suite with a newly created {@code AggregatePart}.
      *
      * <p>This method must be called in derived test suites in methods
      * annotated with {@code @Before} (JUnit 4) or {@code @BeforeEach} (JUnit 5).

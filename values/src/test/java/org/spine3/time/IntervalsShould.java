@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
@@ -35,7 +35,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 public class IntervalsShould {
 
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Intervals.class));
+        assertTrue(hasPrivateParameterlessCtor(Intervals.class));
     }
 
     @Test

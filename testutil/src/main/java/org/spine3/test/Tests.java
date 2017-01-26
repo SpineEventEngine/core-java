@@ -51,21 +51,24 @@ public class Tests {
      * Verifies if the passed class has private parameter-less constructor and invokes it
      * using Reflection.
      *
-     * <p>Use this method to add utility constructor into covered code:
+     * <p>Typically this method is used to add a constructor of a utility class into
+     * the covered code.
+     *
+     * <p>Example:
      * <pre>
      * public class MyUtilityShould
      *     ...
      *     {@literal @}Test
      *     public void have_private_utility_ctor() {
-     *         assertTrue(hasPrivateUtilityConstructor(MyUtility.class));
+     *         assertTrue(hasPrivateParameterlessCtor(MyUtility.class));
      *     }
      * </pre>
      * @return true if the class has private parameter-less constructor
      */
-    public static boolean hasPrivateUtilityConstructor(Class<?> utilityClass) {
+    public static boolean hasPrivateParameterlessCtor(Class<?> targetClass) {
         final Constructor constructor;
         try {
-            constructor = utilityClass.getDeclaredConstructor();
+            constructor = targetClass.getDeclaredConstructor();
         } catch (NoSuchMethodException ignored) {
             return false;
         }
@@ -80,8 +83,9 @@ public class Tests {
         try {
             // Call the constructor to include it into the coverage.
 
-            // Some of the coding conventions may encourage throwing AssertionError to prevent the instantiation
-            // of the utility class from within the class.
+            // Some of the coding conventions may encourage throwing AssertionError
+            // to prevent the instantiation of the target class,
+            // if it is designed as a utility class.
             constructor.newInstance();
         } catch (Exception ignored) {
             return true;
