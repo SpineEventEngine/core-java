@@ -67,7 +67,7 @@ import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
+public final class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
