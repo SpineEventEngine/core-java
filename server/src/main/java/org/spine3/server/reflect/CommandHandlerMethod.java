@@ -130,8 +130,12 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         public void checkAccessModifier(Method method) {
-            if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
+            final int modifiers = method.getModifiers();
+            final boolean nonDefaultModifier =
+                    Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers);
+            if (nonDefaultModifier) {
+                warnOnWrongModifier("Command handler method {} should be declared with the default access modifier.",
+                                    method);
             }
         }
 
