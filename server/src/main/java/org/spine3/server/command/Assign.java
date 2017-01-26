@@ -35,7 +35,7 @@ import java.util.List;
  * <p>A command handler method:
  * <ul>
  *     <li>is annotated with {@link Assign};
- *     <li>is {@code public};
+ *     <li>has default access modifier;
  *     <li>returns an event derived from {@link Message} or a {@link List} of messages;
  *     <li>accepts a command derived from {@link Message} as a first parameter;
  *     <li>(optional) accepts a {@link CommandContext} as the second parameter.
