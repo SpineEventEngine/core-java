@@ -62,7 +62,7 @@ import static javax.lang.model.SourceVersion.isName;
  *     <li> with the {@code private} modifier;
  *     <li> without the {@code static} modifier;
  *     <li> with only the primitive parameters;
- *     <li> with only parameters marked as {@code Nullable}.
+ *     <li> if all the parameters are marked as {@code Nullable}.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
@@ -100,7 +100,7 @@ public class NullToleranceTest {
      *
      * <p> Check is successful if each of the non-primitive method parameters is ensured to be non-null.
      *
-     * @return {@code true} if all methods have not-null check
+     * @return {@code true} if all methods have non-null check
      * for the input reference type parameters, {@code false} otherwise
      */
     public boolean check() {
@@ -116,9 +116,8 @@ public class NullToleranceTest {
                 continue;
             }
 
-            final NullToleranceMethodTest nullToleranceMethodTest =
-                    new NullToleranceMethodTest(method, targetClassName, defaultValuesMap);
-            final boolean passed = nullToleranceMethodTest.check();
+            final MethodChecker methodChecker = new MethodChecker(method, targetClassName, defaultValuesMap);
+            final boolean passed = methodChecker.check();
             if (!passed) {
                 return false;
             }
@@ -178,20 +177,20 @@ public class NullToleranceTest {
     /**
      * Serves as a helper to ensure that method does not accept {@code null}s as argument values.
      */
-    private static class NullToleranceMethodTest {
+    private static class MethodChecker {
 
         private final Method method;
         private final String targetClassName;
         private final Map<?, ?> defaultValuesMap;
 
-        private NullToleranceMethodTest(Method method, String targetClassName, Map<?, ?> defaultValuesMap) {
+        private MethodChecker(Method method, String targetClassName, Map<?, ?> defaultValuesMap) {
             this.method = method;
             this.targetClassName = targetClassName;
             this.defaultValuesMap = defaultValuesMap;
         }
 
         private boolean check() {
-            final boolean nullableOnly = isNullableParameters();
+            final boolean nullableOnly = hasOnlyNullableArgs();
             if (nullableOnly) {
                 return true;
             }
@@ -220,7 +219,7 @@ public class NullToleranceTest {
             return true;
         }
 
-        private boolean isNullableParameters() {
+        private boolean hasOnlyNullableArgs() {
             final ImmutableList<Parameter> parameters = Invokable.from(method)
                                                                  .getParameters();
             for (Parameter parameter : parameters) {
@@ -272,14 +271,18 @@ public class NullToleranceTest {
         /**
          * Checks the stack trace elements.
          *
-         * <p> According to the business rules the not-null check should to be in the each utility method.
-         * So the usage of the {@link Preconditions} should allocated there.
+         * <p> According to the business rules the non-null check should be in the each utility method.
+         * So the usage of the {@link Preconditions}#checkNotNull method should allocated there.
          *
-         * <p> The first {@code StackTraceElement} have to contains
-         * the information about the {@code Preconditions} method.
+         * <p> The first {@code StackTraceElement} has to contains
+         * the information about the {@code Preconditions} class.
+         * The allocated class name in the first {@code StackTraceElement}
+         * should be the {@code Preconditions} name.
          *
          * <p> The second {@code StackTraceElement} should contains information
          * about the method from the {@code targetClass}.
+         * The allocated class name and the method name in the second {@code StackTraceElement}
+         * should be the class name and the method name which are checking.
          *
          * @param cause the {@code Throwable}
          * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
@@ -324,7 +327,7 @@ public class NullToleranceTest {
         }
 
         /**
-         * Sets the utility class.
+         * Sets the target class.
          *
          * @param utilClass the utility {@link Class}
          * @return the {@code Builder}
@@ -335,12 +338,12 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the method name which will be excluded during the check.
+         * Adds the method name which will be excluded from the check.
          *
-         * @param methodName the name of the excluded method
+         * @param methodName the name of the method to exclude
          * @return the {@code Builder}
          */
-        @SuppressWarnings("WeakerAccess") // Will be used outside the package
+        @SuppressWarnings("WeakerAccess") // it is a public API.
         public Builder excludeMethod(String methodName) {
             checkNotNull(methodName);
             final boolean validName = isName(methodName);
@@ -351,43 +354,33 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the default value for the class which will be used during the check.
+         * Adds the default value for the method argument.
+         *
+         * <p> For example, if will be added the text line,
+         * that line will be passed as the method argument for the {@code String} parameter type.
+         * During the check that default value will be passed as the method argument every time,
+         * when the particular argument is not checking.
          *
          * @param value the default value for the class
          * @return the {@code Builder}
          */
-        @SuppressWarnings("WeakerAccess") // Will be used outside the package
+        @SuppressWarnings("WeakerAccess") // it is a public API.
         public <I> Builder addDefaultValue(I value) {
             checkNotNull(value);
             defaultValues.put(value.getClass(), value);
             return this;
         }
 
-        /**
-         * Returns the target class.
-         *
-         * @return the {@link Class}
-         */
         @VisibleForTesting
         Class getTargetClass() {
             return targetClass;
         }
 
-        /**
-         * Return the {@code Set} of the excluded method name.
-         *
-         * @return the {@code Set}
-         */
         @VisibleForTesting
         Set<String> getExcludedMethods() {
             return unmodifiableSet(excludedMethods);
         }
 
-        /**
-         * Return the {@code Map} of the default values for the classes.
-         *
-         * @return the {@code Map}
-         */
         @VisibleForTesting
         Map<?, ?> getDefaultValues() {
             return unmodifiableMap(defaultValues);
