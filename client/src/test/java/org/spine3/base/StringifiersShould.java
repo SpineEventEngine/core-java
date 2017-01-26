@@ -46,7 +46,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class StringifiersShould {
 
@@ -54,7 +54,7 @@ public class StringifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Stringifiers.class));
+        assertTrue(hasPrivateParameterlessCtor(Stringifiers.class));
     }
 
     @Test

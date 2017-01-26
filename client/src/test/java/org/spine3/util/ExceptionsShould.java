@@ -34,7 +34,7 @@ public class ExceptionsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Exceptions.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(Exceptions.class));
     }
 
     @Test(expected = UnsupportedOperationException.class)
