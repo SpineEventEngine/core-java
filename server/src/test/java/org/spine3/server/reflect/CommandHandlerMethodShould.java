@@ -61,7 +61,7 @@ public class CommandHandlerMethodShould {
     }
 
     @Test
-    public void log_warning_if_not_public_handler_found() {
+    public void log_warning_if_not_default_handler_found() {
         final TestCommandHandler handlerObject = new ValidHandlerButPrivate();
         final Method handlerMethod = handlerObject.getHandler();
 
