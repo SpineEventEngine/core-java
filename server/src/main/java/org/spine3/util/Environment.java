@@ -20,23 +20,43 @@
 
 package org.spine3.util;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
+
 import javax.annotation.Nullable;
 
 /**
  * Provides information about the environment (current platform used, etc).
  *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public class Environment {
+@SuppressWarnings("AccessOfSystemProperties") // OK as we need system properties for this class.
+public final class Environment {
+
+    /**
+     * The key name of the system property which tells if a code runs under a testing framework.
+     *
+     * <p>If your testing framework is not among supported by {@link #isTests()},
+     * set this property to {@code true} before running tests.
+     */
+    public static final String ENV_KEY_TESTS = "org.spine3.tests";
 
     /** The key of the Google AppEngine runtime version system property. */
-    private static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
+    @VisibleForTesting
+    static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
 
-    @SuppressWarnings("AccessOfSystemProperties")
+    /** If set contains the version of AppEngine obtained from the system property. */
     @Nullable
-    private static final String appEngineRuntimeVersion = System.getProperty(APP_ENGINE_RUNTIME_VERSION_KEY);
+    private static final String appEngineRuntimeVersion = System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
-    protected Environment() {}
+    /** If set tells if the code runs from a testing framework. */
+    @Nullable
+    private Boolean tests;
+
+    private Environment() {
+        // Prevent instantiation of this singleton class from outside.
+    }
 
     /** Returns the singleton instance. */
     public static Environment getInstance() {
@@ -53,6 +73,7 @@ public class Environment {
         return isVersionPresent;
     }
 
+    //TODO:2017-01-26:alexander.yevsyukov: Transform to Optional
     /**
      * Returns the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
@@ -60,6 +81,49 @@ public class Environment {
     @Nullable
     public String getAppEngineVersion() {
         return appEngineRuntimeVersion;
+    }
+
+    /**
+     * Verifies if the code currently runs under a unit testing framework.
+     *
+     * <p>The method returns {@code true} if the following packages are discovered
+     * in the stacktrace:
+     * <ul>
+     *     <li>{@code org.junit}
+     *     <li>{@code org.testng}
+     * </ul>
+     *
+     * @return {@code true} if the code runs under a testing framework, {@code false} otherwise
+     */
+    @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern") // OK as we cache the result
+    public boolean isTests() {
+        // If we cached the value before, return it.
+        if (tests != null) {
+            return tests;
+        }
+
+        // Check the environment variable. We may run under unknown testing framework or
+        // tests may require production-like mode, which they simulate by setting the property to `false`.
+        String testProp = System.getProperty(ENV_KEY_TESTS);
+        if (testProp != null) {
+            testProp = testProp.replaceAll("\"' ", "");
+            if (testProp.equalsIgnoreCase("true")
+                    || testProp.equals("1")) {
+                this.tests = true;
+                return true;
+            }
+        }
+
+        // Check stacktrace for known frameworks.
+        final String stacktrace = Throwables.getStackTraceAsString(new RuntimeException(""));
+        if (stacktrace.contains("org.junit")
+                || stacktrace.contains("org.testng")) {
+            this.tests = true;
+            return true;
+        }
+
+        this.tests = false;
+        return false;
     }
 
     private enum Singleton {
