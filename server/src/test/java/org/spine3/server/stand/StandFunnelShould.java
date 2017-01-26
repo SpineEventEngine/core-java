@@ -201,7 +201,7 @@ public class StandFunnelShould {
         final Executor executor = isConcurrent ?
                                   Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR) :
                                   MoreExecutors.directExecutor();
-        final StandUpdateDelivery delivery = StandUpdateDelivery.immediateDeliveryWithExecutor(executor);
+        final StandUpdateDelivery delivery = spy(StandUpdateDelivery.immediateDeliveryWithExecutor(executor));
 
         final BoundedContext boundedContext = Given.boundedContext(stand, delivery);
 
@@ -210,7 +210,7 @@ public class StandFunnelShould {
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(stand, times(dispatchActions.length)).update(any(Object.class), any(Any.class), anyInt());
+        verify(delivery, times(dispatchActions.length)).deliver(any(Entity.class));
 
         if (isConcurrent) {
             try {
