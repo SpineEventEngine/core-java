@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Parameter;
 import com.google.common.reflect.TypeToken;
+import com.google.protobuf.GeneratedMessageV3;
 import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
@@ -105,6 +106,7 @@ public class NullToleranceTest {
      * for the input reference type parameters, {@code false} otherwise
      */
     public boolean check() {
+        final DefaultValuesProvider valuesProvider = new DefaultValuesProvider(defaultValuesMap);
         final Method[] accessibleMethods = getAccessibleMethods(targetClass);
         final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
@@ -117,7 +119,7 @@ public class NullToleranceTest {
                 continue;
             }
 
-            final MethodChecker methodChecker = new MethodChecker(method, targetClassName, defaultValuesMap);
+            final MethodChecker methodChecker = new MethodChecker(method, targetClassName, valuesProvider);
             final boolean passed = methodChecker.check();
             if (!passed) {
                 return false;
@@ -182,12 +184,12 @@ public class NullToleranceTest {
 
         private final Method method;
         private final String targetClassName;
-        private final Map<?, ?> defaultValuesMap;
+        private final DefaultValuesProvider valuesProvider;
 
-        private MethodChecker(Method method, String targetClassName, Map<?, ?> defaultValuesMap) {
+        private MethodChecker(Method method, String targetClassName, DefaultValuesProvider valuesProvider) {
             this.method = method;
             this.targetClassName = targetClassName;
-            this.defaultValuesMap = defaultValuesMap;
+            this.valuesProvider = valuesProvider;
         }
 
         private boolean check() {
@@ -236,8 +238,7 @@ public class NullToleranceTest {
             final Object[] parameterValues = new Object[parameterTypes.length];
             for (int i = 0; i < parameterTypes.length; i++) {
                 final Class type = parameterTypes[i];
-                final Object defaultValue = defaultValuesMap.get(type);
-                checkState(defaultValue != null);
+                final Object defaultValue = valuesProvider.getDefaultValue(type);
                 parameterValues[i] = defaultValue;
             }
             return parameterValues;
@@ -304,6 +305,50 @@ public class NullToleranceTest {
     }
 
     /**
+     * Provides the default values for the method arguments.
+     */
+    private static class DefaultValuesProvider {
+
+        private static final Class[] EMPTY_PARAMETER_TYPES = {};
+        private static final Object[] EMPTY_ARGUMENTS = {};
+        private static final String METHOD_NAME = "getDefaultInstance";
+        private final Map<?, ?> defaultValues;
+
+        private DefaultValuesProvider(Map<?, ?> defaultValues) {
+            this.defaultValues = defaultValues;
+        }
+
+        private Object getDefaultValue(Class<?> key) {
+            final Class messageClass = GeneratedMessageV3.class;
+            final boolean messageParent = messageClass.equals(key.getSuperclass());
+            Object result = defaultValues.get(key);
+            if (result == null && messageParent) {
+                result = getDefaultMessageInstance(key);
+            }
+
+            checkState(result != null);
+            return result;
+        }
+
+        /**
+         * Returns the default value for the method argument by the method argument type.
+         * If default value does not provide, throws {@link IllegalStateException} otherwise.
+         *
+         * @param key the {@code Class} of the method argument
+         * @return the default value
+         */
+        private static Object getDefaultMessageInstance(Class<?> key) {
+            try {
+                final Method method = key.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
+                final Object defaultInstance = method.invoke(null, EMPTY_ARGUMENTS);
+                return defaultInstance;
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw Exceptions.wrappedCause(e);
+            }
+        }
+    }
+
+    /**
      * A builder for producing the {@link NullToleranceTest} instance.
      */
     public static class Builder {
@@ -347,10 +392,42 @@ public class NullToleranceTest {
         /**
          * Adds the default value for the method argument.
          *
-         * <p> For example, if will be added the text line,
-         * that line will be passed as the method argument for the {@code String} parameter type.
-         * During the check that default value will be passed as the method argument every time,
-         * when the particular argument is not checking.
+         * <p> Since the some classes have no value by default, that method serves to add it.
+         *
+         * <p> The list of the classes and their default values:
+         * <ul>
+         *     <li> the {@code 0} for the {@code Byte};
+         *     <li> the {@code 0} for the {@code Short};
+         *     <li> the {@code 0} for the {@code Integer};
+         *     <li> the {@code 0} for the {@code Long};
+         *     <li> the {@code '\u0000'} for the {@code Character};
+         *     <li> the {@code 0.0} for the {@code Float};
+         *     <li> the {@code 0.0} for the {@code Double};
+         *     <li> the {@code false} for the {@code Boolean};
+         *     <li> the {@code 0} for the {@code byte};
+         *     <li> the {@code 0} for the {@code short};
+         *     <li> the {@code 0} for the {@code int};
+         *     <li> the {@code 0} for the {@code long};
+         *     <li> the {@code '\u0000'} for the {@code char};
+         *     <li> the {@code 0.0} for the {@code float};
+         *     <li> the {@code 0.0} for the {@code double};
+         *     <li> the {@code false} for the {@code boolean};
+         *     <li> the instance provided by the {@code getDefaultInstance} method
+         *     will be the default instance for the {@code GeneratedMessageV3};
+         * </ul>
+         *
+         * <p> For example:
+         * {@code public static void method(GeneratedMessageV3 message, int primitive, CustomType obj)}.
+         * That method will be executed two times (each execution for the non-primitive and non-nullable argument).
+         * The first time instead of the {@code message} will be set the null,
+         * instead of the other values will be set the default values.
+         * The second time instead of the {@code obj} will be set the default value,
+         * provided through that method.
+         *
+         * <p> In that example default value for the message will be instance,
+         * returned by the {@code getDefaultInstance} method;
+         * for the {@code primitive} is zero; for the {@code obj} need to provide default value,
+         * {@code IllegalStateException} will be thrown otherwise.
          *
          * @param value the default value for the class
          * @return the {@code Builder}
@@ -395,6 +472,7 @@ public class NullToleranceTest {
             defaultValues.put(short.class, (short) 0);
             defaultValues.put(int.class, 0);
             defaultValues.put(long.class, 0L);
+            defaultValues.put(char.class, '\u0000');
             defaultValues.put(float.class, 0.0f);
             defaultValues.put(double.class, 0.0d);
         }
