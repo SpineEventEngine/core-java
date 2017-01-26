@@ -20,5 +20,73 @@
 
 package org.spine3.test;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.lang.reflect.Type;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public class VerifyShould {
+
+    @Test
+    public void extend_Assert_class() {
+        final Type expectedSuperclass = Assert.class;
+        final Type actualSuperclass = Verify.class.getGenericSuperclass();
+        assertEquals(expectedSuperclass, actualSuperclass);
+    }
+
+    @Test
+    public void have_private_ctor() {
+        assertTrue(Tests.hasPrivateUtilityConstructor(Verify.class));
+    }
+
+    @SuppressWarnings({"ThrowCaughtLocally", "ErrorNotRethrown"})
+    @Test
+    public void mangle_assertion_error() {
+        final AssertionError sourceError = new AssertionError();
+        final int framesBefore = sourceError.getStackTrace().length;
+
+        try {
+            throw Verify.mangledException(sourceError);
+        } catch (AssertionError e) {
+            final int framesAfter = e.getStackTrace().length;
+
+            assertEquals(framesBefore - 1, framesAfter);
+        }
+    }
+
+    @SuppressWarnings({"ThrowCaughtLocally", "ErrorNotRethrown"})
+    @Test
+    public void mangle_assertion_error_for_specified_frame_count() {
+        final AssertionError sourceError = new AssertionError();
+        final int framesBefore = sourceError.getStackTrace().length;
+        final int framesToPop = 3;
+
+        try {
+            throw Verify.mangledException(sourceError, framesToPop);
+        } catch (AssertionError e) {
+            final int framesAfter = e.getStackTrace().length;
+
+            assertEquals(framesBefore - framesToPop + 1, framesAfter);
+        }
+    }
+
+    @SuppressWarnings("ErrorNotRethrown")
+    @Test
+    public void fail_with_specified_message_and_cause() {
+        final String message = "Test failed";
+        final Throwable cause = new Error();
+
+        try {
+            Verify.fail(message, cause);
+            fail("Error was not thrown");
+        } catch (AssertionError e) {
+            assertEquals(message, e.getMessage());
+            assertEquals(cause, e.getCause());
+        }
+    }
+
 }
