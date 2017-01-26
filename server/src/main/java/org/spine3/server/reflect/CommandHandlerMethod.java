@@ -134,7 +134,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             final boolean nonDefaultModifier =
                     Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers);
             if (nonDefaultModifier) {
-                warnOnWrongModifier("Command handler method {} should be declared with default access modifier.",
+                warnOnWrongModifier("Command handler method {} should be declared with the default access modifier.",
                                     method);
             }
         }
