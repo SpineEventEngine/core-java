@@ -21,6 +21,7 @@
 package org.spine3.test;
 
 import org.junit.Test;
+import org.spine3.server.event.EventFilter;
 
 import javax.annotation.Nullable;
 
@@ -140,12 +141,21 @@ public class NullToleranceTestShould {
         assertTrue(passed);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalStateException.class)
     public void throw_exception_when_parameter_of_invokable_method_does_not_have_default_value() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNullableMethodParameters.class)
                                                                      .build();
         nullToleranceTest.check();
+    }
+
+    @Test
+    public void pass_the_check_when_method_contains_message_argument_type() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithMessageMethodParameter.class)
+                                                                     .build();
+        final boolean result = nullToleranceTest.check();
+        assertTrue(result);
     }
 
     /*
@@ -219,6 +229,15 @@ public class NullToleranceTestShould {
         }
 
         public static void methodWithMixedParameters(@Nullable Object first, String second) {
+            checkNotNull(second);
+        }
+    }
+
+    @SuppressWarnings("unused") // accessed via reflection
+    private static class ClassWithMessageMethodParameter {
+
+        public static void nullableParamsMethod(EventFilter first, EventFilter second) {
+            checkNotNull(first);
             checkNotNull(second);
         }
     }
