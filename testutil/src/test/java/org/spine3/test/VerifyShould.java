@@ -165,4 +165,26 @@ public class VerifyShould {
         Verify.assertNotEquals((short) 0, (short) 1);
     }
 
+    @Test(expected = AssertionError.class)
+    public void fail_if_object_is_not_instance_of_specified_type() {
+        Verify.assertInstanceOf(Integer.class, "");
+    }
+
+    @Test
+    public void pass_if_object_is_instance_of_specified_type() {
+        final String instance = "";
+        Verify.assertInstanceOf(instance.getClass(), instance);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_object_is_instance_of_specified_type() {
+        final String instance = "";
+        Verify.assertNotInstanceOf(instance.getClass(), instance);
+    }
+
+    @Test
+    public void pass_if_object_is_not_instance_of_specified_type() {
+        Verify.assertNotInstanceOf(Integer.class, "");
+    }
+
 }
