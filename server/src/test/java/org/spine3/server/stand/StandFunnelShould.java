@@ -170,7 +170,7 @@ public class StandFunnelShould {
     }
 
     @Test
-    public void deliver_updates_form_aggregate_repository() {
+    public void deliver_updates_from_aggregate_repository() {
         checkUpdatesDelivery(false, aggregateRepositoryDispatch());
     }
 
