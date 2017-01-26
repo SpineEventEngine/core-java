@@ -23,7 +23,7 @@ package org.spine3.io;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
@@ -33,7 +33,7 @@ public class IoUtilShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(IoUtil.class));
+        assertTrue(hasPrivateParameterlessCtor(IoUtil.class));
     }
 
     @Test

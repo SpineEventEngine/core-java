@@ -56,7 +56,7 @@ import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -71,7 +71,7 @@ public class EventsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateUtilityConstructor(Events.class));
+        assertTrue(hasPrivateParameterlessCtor(Events.class));
     }
 
     @Test

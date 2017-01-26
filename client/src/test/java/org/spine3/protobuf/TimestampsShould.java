@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 import static org.spine3.protobuf.Timestamps.convertToNanos;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
@@ -49,7 +49,7 @@ public class TimestampsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Timestamps.class));
+        assertTrue(hasPrivateParameterlessCtor(Timestamps.class));
     }
 
     @Test

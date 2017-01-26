@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
         "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
@@ -42,7 +42,7 @@ public class ChangesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Changes.class));
+        assertTrue(hasPrivateParameterlessCtor(Changes.class));
     }
 
     @Test(expected = NullPointerException.class)

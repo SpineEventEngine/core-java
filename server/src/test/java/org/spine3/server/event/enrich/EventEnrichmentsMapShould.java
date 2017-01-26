@@ -51,7 +51,7 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
@@ -61,7 +61,7 @@ public class EventEnrichmentsMapShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(EventEnrichmentsMap.class));
+        assertTrue(hasPrivateParameterlessCtor(EventEnrichmentsMap.class));
     }
 
     @Test

@@ -25,13 +25,13 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.Preconditions.checkNewValueNotEmpty;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class PreconditionsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Preconditions.class));
+        assertTrue(hasPrivateParameterlessCtor(Preconditions.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
