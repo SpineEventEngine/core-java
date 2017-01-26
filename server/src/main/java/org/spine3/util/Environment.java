@@ -135,8 +135,8 @@ public final class Environment {
         String testProp = System.getProperty(ENV_KEY_TESTS);
         if (testProp != null) {
             testProp = testProp.replaceAll("\"' ", "");
-            this.tests = (testProp.equalsIgnoreCase(VAL_TRUE)
-                                                || testProp.equals("1"));
+            this.tests = (VAL_TRUE.equalsIgnoreCase(testProp)
+                                                || "1".equals(testProp));
             return this.tests;
         }
 
