@@ -143,6 +143,7 @@ public class NullToleranceTestBuilderShould {
         expectedMap.put(long.class, 0L);
         expectedMap.put(float.class, 0.0f);
         expectedMap.put(double.class, 0.0d);
+        expectedMap.put(char.class, '\u0000');
         expectedMap.put(Long.class, 0L);
         assertEquals(NullToleranceTestBuilderShould.class, nullToleranceTest.getTargetClass());
         assertEquals(newHashSet(excludedMethodName), nullToleranceTest.getExcludedMethods());
