@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,9 @@ public final class Environment {
     @Nullable
     private static final String appEngineRuntimeVersion = System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
+    @VisibleForTesting
+    static final String VAL_TRUE = "true";
+
     /** If set tells if the code runs from a testing framework. */
     @Nullable
     private Boolean tests;
@@ -73,14 +77,12 @@ public final class Environment {
         return isVersionPresent;
     }
 
-    //TODO:2017-01-26:alexander.yevsyukov: Transform to Optional
     /**
      * Returns the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
      */
-    @Nullable
-    public String getAppEngineVersion() {
-        return appEngineRuntimeVersion;
+    public Optional<String> appEngineVersion() {
+        return Optional.fromNullable(appEngineRuntimeVersion);
     }
 
     /**
@@ -107,7 +109,7 @@ public final class Environment {
         String testProp = System.getProperty(ENV_KEY_TESTS);
         if (testProp != null) {
             testProp = testProp.replaceAll("\"' ", "");
-            if (testProp.equalsIgnoreCase("true")
+            if (testProp.equalsIgnoreCase(VAL_TRUE)
                     || testProp.equals("1")) {
                 this.tests = true;
                 return true;
