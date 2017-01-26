@@ -224,7 +224,10 @@ public class CommandBusShould {
 
     @Test
     public void accept_empty_process_manager_repository_dispatcher() {
-        final ProcessManagerRepoDispatcher pmRepo = new ProcessManagerRepoDispatcher(mock(BoundedContext.class));
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                            .build();
+        final ProcessManagerRepoDispatcher pmRepo = new ProcessManagerRepoDispatcher(boundedContext);
         commandBus.register(pmRepo);
     }
 
