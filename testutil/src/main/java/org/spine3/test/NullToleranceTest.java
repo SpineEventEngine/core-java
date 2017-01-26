@@ -38,6 +38,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -236,7 +237,7 @@ public class NullToleranceTest {
             for (int i = 0; i < parameterTypes.length; i++) {
                 final Class type = parameterTypes[i];
                 final Object defaultValue = defaultValuesMap.get(type);
-                checkNotNull(defaultValue);
+                checkState(defaultValue != null);
                 parameterValues[i] = defaultValue;
             }
             return parameterValues;
@@ -257,7 +258,7 @@ public class NullToleranceTest {
         private boolean validateException(InvocationTargetException ex) {
             final Throwable cause = ex.getCause();
             checkException(cause);
-            final boolean result = isExpectedStackTraceElements(cause);
+            final boolean result = hasExpectedStackTrace(cause);
             return result;
         }
 
@@ -271,23 +272,16 @@ public class NullToleranceTest {
         /**
          * Checks the stack trace elements.
          *
-         * <p> According to the business rules the non-null check should be in the each utility method.
-         * So the usage of the {@link Preconditions}#checkNotNull method should allocated there.
+         * <p> It is expected that each of the tested utility methods invokes
+         * {@link Preconditions}#checkNotNull(<arg types here>) as a first step of the execution.
          *
-         * <p> The first {@code StackTraceElement} has to contains
-         * the information about the {@code Preconditions} class.
-         * The allocated class name in the first {@code StackTraceElement}
-         * should be the {@code Preconditions} name.
-         *
-         * <p> The second {@code StackTraceElement} should contains information
-         * about the method from the {@code targetClass}.
-         * The allocated class name and the method name in the second {@code StackTraceElement}
-         * should be the class name and the method name which are checking.
+         * <p> Therefore the stack trace is analysed to ensure its first element references
+         * the {@code Preconditions#checkNotNull} and the second one references the tested method.
          *
          * @param cause the {@code Throwable}
          * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
          */
-        private boolean isExpectedStackTraceElements(Throwable cause) {
+        private boolean hasExpectedStackTrace(Throwable cause) {
             final StackTraceElement[] stackTraceElements = cause.getStackTrace();
             final StackTraceElement preconditionsElement = stackTraceElements[0];
             final boolean preconditionClass = Preconditions.class.getName()
@@ -296,19 +290,16 @@ public class NullToleranceTest {
                 return false;
             }
 
-            final StackTraceElement expectedUtilClassElement = stackTraceElements[1];
-            final boolean correct = isCorrectMethodName(method.getName(), expectedUtilClassElement.getMethodName());
+            final StackTraceElement targetClassElement = stackTraceElements[1];
+            final String targetMethodName = targetClassElement.getMethodName();
+            final boolean correct = method.getName()
+                                          .equals(targetMethodName);
             if (!correct) {
                 return false;
             }
 
-            final boolean correctClass = targetClassName.equals(expectedUtilClassElement.getClassName());
+            final boolean correctClass = targetClassName.equals(targetClassElement.getClassName());
             return correctClass;
-        }
-
-        private static boolean isCorrectMethodName(String expectedMethodName, String actualMethodName) {
-            final boolean correct = expectedMethodName.equals(actualMethodName);
-            return correct;
         }
     }
 
