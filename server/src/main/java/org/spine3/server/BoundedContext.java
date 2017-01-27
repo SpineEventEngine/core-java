@@ -21,6 +21,7 @@ package org.spine3.server;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
@@ -84,7 +85,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     /** If `true` the bounded context serves many organizations. */
     private final boolean multitenant;
 
-    private final Supplier<StorageFactory> storageFactorySupplier;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
@@ -100,19 +100,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
 
     /**
-     * The {@code StorageFactory} used by this instance.
-     *
-     * <p>If not initialized, {@link #storageFactorySupplier} will be used to
-     * set this field for further usage.
+     * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
      */
-    @Nullable
-    private StorageFactory storageFactory;
+    private final Supplier<StorageFactory> storageFactory;
 
     private BoundedContext(Builder builder) {
         super();
         this.name = builder.name;
         this.multitenant = builder.multitenant;
-        this.storageFactorySupplier = builder.storageFactorySupplier;
+        this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
@@ -151,9 +147,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      */
     @Override
     public void close() throws Exception {
-        if (storageFactory != null) {
-            storageFactory.close();
-        }
+        storageFactory.get().close();
         commandBus.close();
         eventBus.close();
         stand.close();
@@ -223,7 +217,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
     private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
-            repository.initStorage(getStorageFactory());
+            repository.initStorage(storageFactory.get());
         }
     }
 
@@ -296,13 +290,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             Class<? extends Message> aggregateStateClass) {
         final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
         return Optional.fromNullable(result);
-    }
-
-    private StorageFactory getStorageFactory() {
-        if (storageFactory == null) {
-            storageFactory = storageFactorySupplier.get();
-        }
-        return storageFactory;
     }
 
     /**
