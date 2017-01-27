@@ -23,6 +23,7 @@ package org.spine3.change;
 import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
@@ -91,6 +92,7 @@ public class DoubleMismatch {
     }
 
     private static double unpacked(Any any) {
+        checkNotNull(any);
         final DoubleValue unpacked = unpack(any, DoubleValue.class);
         return unpacked.getValue();
     }
@@ -101,6 +103,7 @@ public class DoubleMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
@@ -111,6 +114,7 @@ public class DoubleMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
@@ -121,6 +125,7 @@ public class DoubleMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-double values
      */
     public static double unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }

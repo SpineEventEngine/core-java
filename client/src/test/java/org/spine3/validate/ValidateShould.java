@@ -29,6 +29,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.TypeName;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
@@ -196,5 +197,14 @@ public class ValidateShould {
         final String formatted = ConstraintViolations.toText("abc %s abc %s", violation);
 
         assertEquals("abc 1 abc 2", formatted);
+    }
+
+    @Test
+    public void pass_the_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ConstraintViolations.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

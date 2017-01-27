@@ -27,6 +27,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
@@ -236,5 +237,15 @@ public class StringifiersShould {
         final String actual = new Stringifiers.EventIdStringifier().apply(id);
 
         assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void pass_the_check_projection_builder() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Stringifiers.class)
+                                                                     .addDefaultValue(CommandId.newBuilder())
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

@@ -23,6 +23,7 @@ package org.spine3.net;
 import org.junit.Test;
 import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -116,5 +117,14 @@ public class UrlsShould {
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Urls.class));
+    }
+
+    @Test
+    public void pass_the_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Urls.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

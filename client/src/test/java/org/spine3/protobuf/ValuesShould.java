@@ -28,6 +28,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -136,5 +137,14 @@ public class ValuesShould {
         final Any msg = Values.pack(value);
         final BoolValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
+    }
+
+    @Test
+    public void pass_the_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Values.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

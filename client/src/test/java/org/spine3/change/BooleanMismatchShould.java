@@ -21,6 +21,7 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -83,5 +84,14 @@ public class BooleanMismatchShould {
     public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
         final ValueMismatch mismatch = of(1, 2, 3, VERSION);
         BooleanMismatch.unpackNewValue(mismatch);
+    }
+
+    @Test
+    public void pass_the_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(BooleanMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

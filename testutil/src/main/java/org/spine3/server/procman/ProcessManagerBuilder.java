@@ -23,6 +23,8 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.EntityBuilder;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for building test instances of {@code ProcessManager}.
  *
@@ -37,6 +39,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends 
 
     @Override
     public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
+        checkNotNull(entityClass);
         super.setResultClass(entityClass);
         return this;
     }

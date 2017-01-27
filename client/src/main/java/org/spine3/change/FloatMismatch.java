@@ -23,6 +23,7 @@ package org.spine3.change;
 import com.google.protobuf.Any;
 import com.google.protobuf.FloatValue;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
@@ -91,6 +92,7 @@ public class FloatMismatch {
     }
 
     private static float unpacked(Any any) {
+        checkNotNull(any);
         final FloatValue unpacked = unpack(any, FloatValue.class);
         return unpacked.getValue();
     }
@@ -101,6 +103,7 @@ public class FloatMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
@@ -111,6 +114,7 @@ public class FloatMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
@@ -121,6 +125,7 @@ public class FloatMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
     public static float unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }

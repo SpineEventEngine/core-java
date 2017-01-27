@@ -23,6 +23,8 @@ package org.spine3.server.projection;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.EntityBuilder;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for building test {@code Projection}s.
  *
@@ -37,6 +39,7 @@ public class ProjectionBuilder<P extends Projection<I, S>, I, S extends Message>
 
     @Override
     public ProjectionBuilder<P, I, S> setResultClass(Class<P> entityClass) {
+        checkNotNull(entityClass);
         super.setResultClass(entityClass);
         return this;
     }

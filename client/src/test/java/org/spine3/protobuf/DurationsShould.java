@@ -19,9 +19,9 @@
  */
 package org.spine3.protobuf;
 
-
 import com.google.protobuf.Duration;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,7 +52,6 @@ import static org.spine3.protobuf.Durations.toNanos;
 import static org.spine3.protobuf.Durations.toSeconds;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-
 /**
  * @author Alexander Yevsyukov
  */
@@ -68,7 +67,6 @@ public class DurationsShould {
     public void have_ZERO_constant() {
         assertEquals(0, toNanos(ZERO));
     }
-
 
     @Test
     public void convert_milliseconds_to_duration() {
@@ -88,7 +86,6 @@ public class DurationsShould {
         ofMilliseconds(Long.MAX_VALUE);
     }
 
-
     @Test
     public void convert_seconds_to_duration() {
         convertSecondsToDurationTest(0);
@@ -106,7 +103,6 @@ public class DurationsShould {
     public void fail_to_convert_seconds_to_duration_if_input_is_too_big() {
         ofSeconds(Long.MAX_VALUE);
     }
-
 
     @Test
     public void convert_minutes_to_duration() {
@@ -127,7 +123,6 @@ public class DurationsShould {
         ofMinutes(Long.MAX_VALUE);
     }
 
-
     @Test
     public void convert_hours_to_duration() {
         convertHoursToDurationTest(0);
@@ -145,7 +140,6 @@ public class DurationsShould {
     public void fail_to_convert_hours_to_duration_if_input_is_too_big() {
         ofHours(Long.MAX_VALUE);
     }
-
 
     @Test
     public void convert_nanoseconds_to_duration_less_than_second() {
@@ -166,7 +160,6 @@ public class DurationsShould {
         assertEquals(1, duration.getSeconds());
         assertEquals(nanosExtra, duration.getNanos());
     }
-
 
     @Test
     public void add_null_durations_return_zero() {
@@ -213,7 +206,6 @@ public class DurationsShould {
         assertEquals(sumExpected, sumActual);
     }
 
-
     @Test
     public void subtract_zero_durations() {
         subtractDurationsTest(0, 0);
@@ -254,7 +246,6 @@ public class DurationsShould {
         assertEquals(resultExpected, resultActual);
     }
 
-
     @Test
     public void convert_hours_and_minutes_to_duration() {
 
@@ -267,7 +258,6 @@ public class DurationsShould {
 
         assertEquals(expected, actual);
     }
-
 
     @Test
     public void convert_duration_to_nanoseconds() {
@@ -315,7 +305,6 @@ public class DurationsShould {
         assertFalse(isPositiveOrZero(durationFromSec(-32)));
     }
 
-
     @Test
     public void return_true_if_positive_number() {
         assertTrue(isPositive(durationFromSec(360)));
@@ -346,7 +335,6 @@ public class DurationsShould {
         assertFalse(isZero(durationFromSec(-32)));
     }
 
-
     @Test
     public void return_true_if_is_negative_number() {
         assertTrue(isNegative(durationFromSec(-32)));
@@ -361,7 +349,6 @@ public class DurationsShould {
     public void return_false_if_is_not_negative_case_zero() {
         assertFalse(isNegative(durationFromSec(0)));
     }
-
 
     @Test
     public void return_true_if_first_number_is_greater() {
@@ -378,7 +365,6 @@ public class DurationsShould {
         assertFalse(isGreaterThan(durationFromSec(5), durationFromSec(5)));
     }
 
-
     @Test
     public void return_true_if_first_number_is_less() {
         assertTrue(isLessThan(durationFromSec(2), durationFromSec(64)));
@@ -393,7 +379,6 @@ public class DurationsShould {
     public void return_false_if_first_number_is_not_less_case_equal() {
         assertFalse(isLessThan(durationFromSec(5), durationFromSec(5)));
     }
-
 
     @Test
     public void return_positive_number_when_compare_case_first_is_greater() {
@@ -416,6 +401,17 @@ public class DurationsShould {
         assertTrue(compare(first, second) == 0);
     }
 
+    @Test
+    public void pass_the_check() {
+        final Duration.Builder defaultBuilder = Duration.newBuilder();
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Durations.class)
+                                                                     .addDefaultValue(defaultBuilder)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
+
     private static long hoursToSeconds(long hours) {
         return hours * 60L * 60L;
     }
@@ -425,6 +421,8 @@ public class DurationsShould {
     }
 
     private static Duration durationFromSec(long seconds) {
-        return Duration.newBuilder().setSeconds(seconds).build();
+        return Duration.newBuilder()
+                       .setSeconds(seconds)
+                       .build();
     }
 }
