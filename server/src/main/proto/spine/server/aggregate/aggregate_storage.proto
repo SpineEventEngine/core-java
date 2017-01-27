@@ -76,7 +76,13 @@ message AggregateStorageRecord {
     // The version of the aggregate after the event was applied.
     int32 version = 4;
 
-    reserved 5 to 19;
+    // If `true` the aggregate will not be loaded for regular queries.
+    bool archived = 5;
+
+    // If `true` the aggregate will not be loaded for regular queries.
+    bool deleted = 6;
+
+    reserved 7 to 19;
 
     oneof kind {
         // Event stored in the record, or...

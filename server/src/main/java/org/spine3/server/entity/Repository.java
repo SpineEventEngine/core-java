@@ -153,20 +153,42 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
-     * @param id the id of the entity to load
+     * @param id the ID of the entity to load
      * @return the entity or empty {@code Optional} if there's no entity with such id
      */
     @CheckReturnValue
     protected abstract Optional<E> load(I id);
 
-    /** Returns the storage assigned to this repository or {@code null} if the storage is not assigned yet. */
+    /**
+     * Marks the entity with the passed ID as {@code archived}.
+     *
+     * @param id the ID of the entity
+     * @return {@code true} if the operation was successful, {@code false} otherwise
+     */
+//    protected abstract boolean archive(I id);
+
+    /**
+     * Marks the entity with the passed ID as {@code deleted}.
+     *
+     * <p>This method does not delete information. Entities marked as {@code deleted}
+     * can be later physically removed from a storage by custom clean-up operation.
+     *
+     * @param id the ID of the entity
+     * @return {@code true} if the operation was successful, {@code false} otherwise
+     */
+//    protected abstract boolean delete(I id);
+
+    /**
+     * Returns the storage assigned to this repository or {@code null} if
+     * the storage is not assigned yet.
+     */
     @CheckReturnValue
     @Nullable
     protected AutoCloseable getStorage() {
         return this.storage;
     }
 
-    /** Returns true if the storage is assigned, false otherwise. */
+    /** Returns {@code true} if the storage is assigned, {@code false} otherwise. */
     public boolean storageAssigned() {
         return this.storage != null;
     }

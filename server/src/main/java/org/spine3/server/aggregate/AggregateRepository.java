@@ -159,8 +159,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         commandStatusService.setOk(commandId);
     }
 
+    private I getAggregateId(Message command) {
+        final I id = getIdFunction.apply(command, CommandContext.getDefaultInstance());
+        return id;
+    }
+
+    /** Posts passed events to {@link EventBus}. */
+    private void postEvents(Iterable<Event> events) {
+        for (Event event : events) {
+            eventBus.post(event);
+        }
+    }
+
     /**
-     * Returns the number of events until a next snapshot is made.
+     * Returns the number of events until a next {@code Snapshot} is made.
      *
      * @return a positive integer value
      * @see #DEFAULT_SNAPSHOT_TRIGGER
@@ -266,7 +278,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command}
      * dispatching is repeated from scratch.
      */
-    @SuppressWarnings("ChainOfInstanceofChecks")        // it's a rare case of handing an exception, so we are OK.
     private A loadAndDispatch(I aggregateId, CommandId commandId, Message command, CommandContext context) {
         final AggregateStorage<I> aggregateStorage = aggregateStorage();
         A aggregate;
@@ -276,11 +287,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         do {
             if (eventCountBeforeSave != null) {
                 final int newEventCount = eventCountBeforeSave - eventCountBeforeDispatch;
-                log().warn("Detected the concurrent modification of {} {}" +
-                                   "New events detected while dispatching the command {} " +
-                                   "The number of new events is {}. " +
-                                   "Restarting the command dispatching.",
-                           getAggregateClass(), aggregateId, command, newEventCount);
+                logConcurrentModification(aggregateId, command, newEventCount);
             }
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
             aggregate = loadOrCreate(aggregateId);
@@ -288,16 +295,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             try {
                 aggregate.dispatch(command, context);
             } catch (RuntimeException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof Exception) {
-                    final Exception exception = (Exception) cause;
-                    commandStatusService.setToError(commandId, exception);
-                } else if (cause instanceof FailureThrowable) {
-                    final FailureThrowable failure = (FailureThrowable) cause;
-                    commandStatusService.setToFailure(commandId, failure);
-                } else {
-                    commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-                }
+                updateCommandStatus(commandId, e);
             }
 
             eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
@@ -306,16 +304,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregate;
     }
 
-    /** Posts passed events to {@link EventBus}. */
-    private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            eventBus.post(event);
-        }
+    private void logConcurrentModification(I aggregateId, Message command, int newEventCount) {
+        log().warn("Detected the concurrent modification of {} {}" +
+                           "New events detected while dispatching the command {} " +
+                           "The number of new events is {}. " +
+                           "Restarting the command dispatching.",
+                   getAggregateClass(), aggregateId, command, newEventCount);
     }
 
-    private I getAggregateId(Message command) {
-        final I id = getIdFunction.apply(command, CommandContext.getDefaultInstance());
-        return id;
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case of handing an exception.
+    private void updateCommandStatus(CommandId commandId, RuntimeException e) {
+        final Throwable cause = e.getCause();
+        if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+            commandStatusService.setToError(commandId, exception);
+        } else if (cause instanceof FailureThrowable) {
+            final FailureThrowable failure = (FailureThrowable) cause;
+            commandStatusService.setToFailure(commandId, failure);
+        } else {
+            commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
+        }
     }
 
     private enum LogSingleton {
