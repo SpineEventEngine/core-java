@@ -20,15 +20,21 @@
 
 package org.spine3.test;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Multimap;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@SuppressWarnings("ClassWithTooManyMethods")
 public class VerifyShould {
 
     @Test
@@ -105,7 +111,7 @@ public class VerifyShould {
     @Test(expected = AssertionError.class)
     public void fail_if_float_values_are_equal() {
         final float positiveValue = 5.0f;
-        final float negativeValue = - positiveValue;
+        final float negativeValue = -positiveValue;
         final float equalToValuesDifference = positiveValue - negativeValue;
         Verify.assertNotEquals(positiveValue, negativeValue, equalToValuesDifference);
     }
@@ -185,6 +191,123 @@ public class VerifyShould {
     @Test
     public void pass_if_object_is_not_instance_of_specified_type() {
         Verify.assertNotInstanceOf(Integer.class, "");
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_not_empty() {
+        Verify.assertIterableEmpty(FluentIterable.of(1));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_null() {
+        Verify.assertIterableEmpty(null);
+        Verify.assertIterableNotEmpty(null);
+    }
+
+    @Test
+    public void pass_if_iterable_is_empty() {
+        Verify.assertIterableEmpty(FluentIterable.of());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_not_empty() {
+        final Map<Integer, Integer> map = new HashMap<>();
+
+        map.put(1, 1);
+
+        Verify.assertEmpty(map);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null() {
+        Verify.assertEmpty((Map) null);
+        Verify.assertNotEmpty((Map) null);
+    }
+
+    @Test
+    public void pass_if_map_is_empty() {
+        final Map emptyMap = new HashMap();
+        Verify.assertEmpty(emptyMap);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_not_empty() {
+        final Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
+
+        multimap.put(1, 1);
+
+        Verify.assertEmpty(multimap);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_null() {
+        Verify.assertEmpty((Multimap) null);
+    }
+
+    @Test
+    public void pass_if_multimap_is_empty() {
+        Verify.assertEmpty(ArrayListMultimap.create());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_empty() {
+        Verify.assertNotEmpty(FluentIterable.of());
+    }
+
+    @Test
+    public void pass_if_iterable_is_not_empty() {
+        Verify.assertNotEmpty(FluentIterable.of(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_empty() {
+        final Map emptyMap = new HashMap();
+        Verify.assertNotEmpty(emptyMap);
+    }
+
+    @Test
+    public void pass_if_map_is_not_empty() {
+        final Map<Integer, Integer> map = new HashMap<>();
+
+        map.put(1, 1);
+
+        Verify.assertNotEmpty(map);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_empty() {
+        Verify.assertNotEmpty(ArrayListMultimap.create());
+    }
+
+    @Test
+    public void pass_if_multimap_is_not_empty() {
+        final Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
+
+        multimap.put(1, 1);
+
+        Verify.assertNotEmpty(multimap);
+    }
+
+    @SuppressWarnings("ZeroLengthArrayAllocation")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_empty() {
+        final Integer[] array = {};
+        Verify.assertNotEmpty(array);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_null() {
+        Verify.assertNotEmpty((Integer[]) null);
+    }
+
+    @Test
+    public void pass_if_array_is_not_empty() {
+        final Integer[] array = {1, 2, 3};
+        Verify.assertNotEmpty(array);
     }
 
 }
