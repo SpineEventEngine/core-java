@@ -83,7 +83,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
     /** If `true` the bounded context serves many organizations. */
     private final boolean multitenant;
-    private final StorageFactory storageFactory;
+
     private final Supplier<StorageFactory> storageFactorySupplier;
     private final CommandBus commandBus;
     private final EventBus eventBus;
@@ -98,6 +98,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * manages such aggregates.
      */
     private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
+
+    /**
+     * The {@code StorageFactory} used by this instance.
+     *
+     * <p>If not initialized, {@link #storageFactorySupplier} will be used to
+     * set this field for further usage.
+     */
+    @Nullable
+    private StorageFactory storageFactory;
 
     private BoundedContext(Builder builder) {
         super();
@@ -143,7 +152,9 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      */
     @Override
     public void close() throws Exception {
-        storageFactory.close();
+        if (storageFactory != null) {
+            storageFactory.close();
+        }
         commandBus.close();
         eventBus.close();
         stand.close();
@@ -213,7 +224,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
     private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
-            repository.initStorage(this.storageFactory);
+            repository.initStorage(getStorageFactory());
         }
     }
 
@@ -287,6 +298,14 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
         return Optional.fromNullable(result);
     }
+
+    private StorageFactory getStorageFactory() {
+        if (storageFactory == null) {
+            storageFactory = storageFactorySupplier.get();
+        }
+        return storageFactory;
+    }
+
     /**
      * A builder for producing {@code BoundedContext} instances.
      *
