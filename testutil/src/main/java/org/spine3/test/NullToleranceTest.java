@@ -369,9 +369,9 @@ public class NullToleranceTest {
             return null;
         }
 
-        private static Object getDefaultMessageInstance(Class<?> key) {
+        private static Object getDefaultMessageInstance(Class<?> type) {
             try {
-                final Method method = key.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
+                final Method method = type.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
                 final Object defaultInstance = method.invoke(null, EMPTY_ARGUMENTS);
                 return defaultInstance;
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
