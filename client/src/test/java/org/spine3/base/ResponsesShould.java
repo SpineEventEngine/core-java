@@ -25,14 +25,14 @@ import org.junit.Test;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ResponsesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Responses.class));
+        assertTrue(hasPrivateParameterlessCtor(Responses.class));
     }
 
     @Test

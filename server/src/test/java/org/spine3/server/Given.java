@@ -193,17 +193,17 @@ public class Given {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             return EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        TaskAdded handle(AddTask cmd, CommandContext ctx) {
             return EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             final ProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
@@ -243,7 +243,7 @@ public class Given {
         }
 
         @Assign
-        public CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
+        CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
             final CustomerCreated event = CustomerCreated.newBuilder()
                                                          .setCustomerId(cmd.getCustomerId())
                                                          .setCustomer(cmd.getCustomer())

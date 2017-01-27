@@ -33,7 +33,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
 
 public class AnyPackerShould {
@@ -43,7 +43,7 @@ public class AnyPackerShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(AnyPacker.class));
+        assertTrue(hasPrivateParameterlessCtor(AnyPacker.class));
     }
 
     @Test
