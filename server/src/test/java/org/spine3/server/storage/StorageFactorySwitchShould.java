@@ -103,7 +103,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void return_custom_test_StorageFactory_if_supplier_for_tests_was_set() {
-        // This calls avoids the racing conditions anomaly when running
+        // This call avoids the racing conditions anomaly when running
         // the Gradle build from the console.
         // Despite the fact that we reset the switch state in `cleanUp()`, we still
         // get the cached value of the StorageFactory remembered by the switch in a previous test.
