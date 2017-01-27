@@ -45,11 +45,11 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
+import static com.google.common.primitives.Primitives.isWrapperType;
 import static com.google.common.primitives.Primitives.unwrap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static javax.lang.model.SourceVersion.isName;
-import static sun.invoke.util.Wrapper.isWrapperType;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
