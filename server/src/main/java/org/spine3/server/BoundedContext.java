@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
@@ -49,6 +50,7 @@ import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -82,6 +84,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     /** If `true` the bounded context serves many organizations. */
     private final boolean multitenant;
     private final StorageFactory storageFactory;
+    private final Supplier<StorageFactory> storageFactorySupplier;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
@@ -101,6 +104,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = builder.storageFactory;
+        this.storageFactorySupplier = builder.storageFactorySupplier;
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
@@ -293,6 +297,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
         private String name = DEFAULT_NAME;
         private StorageFactory storageFactory;
+        private Supplier<StorageFactory> storageFactorySupplier;
         private CommandStore commandStore;
         private CommandBus commandBus;
         private EventBus eventBus;
@@ -341,6 +346,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         @Nullable
         public StorageFactory getStorageFactory() {
             return storageFactory;
+        }
+
+        public Builder setStorageFactorySupplier(Supplier<StorageFactory> supplier) {
+            this.storageFactorySupplier = supplier;
+            return this;
+        }
+
+        public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
+            return Optional.fromNullable(storageFactorySupplier);
         }
 
         public Builder setCommandStore(CommandStore commandStore) {
@@ -395,7 +409,16 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
 
         public BoundedContext build() {
-            checkNotNull(storageFactory, "storageFactory must be set");
+            if (storageFactorySupplier == null) {
+                storageFactorySupplier = StorageFactorySwitch.instance();
+            }
+
+            this.storageFactory = storageFactorySupplier.get();
+
+            if (storageFactory == null) {
+                throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
+                                                        ") returned null instance");
+            }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {

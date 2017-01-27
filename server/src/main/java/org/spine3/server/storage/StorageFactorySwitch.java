@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Environment;
@@ -83,6 +85,32 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
                      @Nullable Supplier<StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);
         this.testsSupplier = testsSupplier;
+    }
+
+    /**
+     * Clears the internal state. Required for tests.
+     */
+    @VisibleForTesting
+    void reset() {
+        storageFactory = null;
+        productionSupplier = null;
+        testsSupplier = null;
+    }
+
+    /**
+     * Obtains production supplier. Required for tests.
+     */
+    @VisibleForTesting
+    Optional<Supplier<StorageFactory>> productionSupplier() {
+        return Optional.fromNullable(productionSupplier);
+    }
+
+    /**
+     * Obtains tests supplier. Required for tests.
+     */
+    @VisibleForTesting
+    Optional<Supplier<StorageFactory>> testsSupplier() {
+        return Optional.fromNullable(testsSupplier);
     }
 
     /**
