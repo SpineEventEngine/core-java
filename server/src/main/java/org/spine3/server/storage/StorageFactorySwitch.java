@@ -37,10 +37,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
  *
  * <h2>Production mode</h2>
- * <p>In production mode this class obtains the instance obtained
- * by the {@code Supplier} passed via {@link #init(Supplier, Supplier)}.
- * If the production {@code Supplier} was not initialized {@code IllegalStateException}
- * will be thrown.
+ * <p>In production mode this class obtains the instance provided by
+ * the {@code Supplier} passed via {@link #init(Supplier, Supplier)}.
+ * If the production {@code Supplier} was not initialized,
+ * {@code IllegalStateException} will be thrown.
  *
  * <h2>Remembering {@code StorageFactory} obtained from suppliers</h2>
  * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}

@@ -82,7 +82,7 @@ public class StorageFactorySwitchShould {
     }
 
     /**
-     * Cleans the `storageFactorySwitch` instance by nullifying fields.
+     * Clears the `storageFactorySwitch` instance by nullifying fields.
      */
     private void cleanSwitch() throws NoSuchFieldException, IllegalAccessException {
         // Clean the value of `storageFactory` field.
@@ -158,7 +158,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void cache_instance_of_StorageFactory_in_production() {
-        Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
 
         storageFactorySwitch.init(productionSupplier, inMemorySupplier);
 
