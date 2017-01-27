@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Defaults.defaultValue;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -44,9 +45,11 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
+import static com.google.common.primitives.Primitives.unwrap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static javax.lang.model.SourceVersion.isName;
+import static sun.invoke.util.Wrapper.isWrapperType;
 
 /**
  * Serves as a helper to ensure that none of the methods of the target utility
@@ -89,12 +92,12 @@ public class NullToleranceTest {
 
     private final Class targetClass;
     private final Set<String> excludedMethods;
-    private final Map<?, ?> defaultValuesMap;
+    private final Map<?, ?> defaultValues;
 
     private NullToleranceTest(Builder builder) {
         this.targetClass = builder.targetClass;
         this.excludedMethods = builder.excludedMethods;
-        this.defaultValuesMap = builder.defaultValues;
+        this.defaultValues = builder.defaultValues;
     }
 
     /**
@@ -106,7 +109,7 @@ public class NullToleranceTest {
      * for the input reference type parameters, {@code false} otherwise
      */
     public boolean check() {
-        final DefaultValuesProvider valuesProvider = new DefaultValuesProvider(defaultValuesMap);
+        final DefaultValuesProvider valuesProvider = new DefaultValuesProvider(defaultValues);
         final Method[] accessibleMethods = getAccessibleMethods(targetClass);
         final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
@@ -173,8 +176,8 @@ public class NullToleranceTest {
     }
 
     @VisibleForTesting
-    Map<?, ?> getDefaultValuesMap() {
-        return unmodifiableMap(defaultValuesMap);
+    Map<?, ?> getDefaultValues() {
+        return unmodifiableMap(defaultValues);
     }
 
     /**
@@ -274,10 +277,10 @@ public class NullToleranceTest {
          * Checks the stack trace elements.
          *
          * <p> It is expected that each of the tested utility methods invokes
-         * {@link Preconditions}#checkNotNull(<arg types here>) as a first step of the execution.
+         * {@link Preconditions#checkNotNull(Object)} as a first step of the execution.
          *
          * <p> Therefore the stack trace is analysed to ensure its first element references
-         * the {@code Preconditions#checkNotNull} and the second one references the tested method.
+         * the {@code Preconditions#checkNotNull(Object)} and the second one references the tested method.
          *
          * @param cause the {@code Throwable}
          * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
@@ -311,23 +314,12 @@ public class NullToleranceTest {
 
         private static final Class[] EMPTY_PARAMETER_TYPES = {};
         private static final Object[] EMPTY_ARGUMENTS = {};
+        private static final String STRING_DEFAULT_VALUE = "";
         private static final String METHOD_NAME = "getDefaultInstance";
         private final Map<?, ?> defaultValues;
 
         private DefaultValuesProvider(Map<?, ?> defaultValues) {
             this.defaultValues = defaultValues;
-        }
-
-        private Object getDefaultValue(Class<?> key) {
-            final Class messageClass = GeneratedMessageV3.class;
-            final boolean messageParent = messageClass.equals(key.getSuperclass());
-            Object result = defaultValues.get(key);
-            if (result == null && messageParent) {
-                result = getDefaultMessageInstance(key);
-            }
-
-            checkState(result != null);
-            return result;
         }
 
         /**
@@ -337,6 +329,37 @@ public class NullToleranceTest {
          * @param key the {@code Class} of the method argument
          * @return the default value
          */
+        private Object getDefaultValue(Class<?> key) {
+            Object result = defaultValues.get(key);
+            if (result != null) {
+                return result;
+            }
+
+            final boolean primitive = allPrimitiveTypes().contains(key);
+            if (primitive) {
+                result = defaultValue(key);
+            }
+
+            final boolean wrapper = isWrapperType(key);
+            if (result == null && wrapper) {
+                final Class<?> unwrappedPrimitive = unwrap(key);
+                result = defaultValue(unwrappedPrimitive);
+            }
+
+            final Class<GeneratedMessageV3> messageClass = GeneratedMessageV3.class;
+            final boolean messageParent = messageClass.isAssignableFrom(key);
+            if (result == null && messageParent) {
+                result = getDefaultMessageInstance(key);
+            }
+
+            final Class<String> stringClass = String.class;
+            if (result == null && stringClass.isAssignableFrom(key)) {
+                result = STRING_DEFAULT_VALUE;
+            }
+            checkState(result != null);
+            return result;
+        }
+
         private static Object getDefaultMessageInstance(Class<?> key) {
             try {
                 final Method method = key.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
@@ -392,6 +415,13 @@ public class NullToleranceTest {
         /**
          * Adds the default value for the method argument.
          *
+         * <p> Each static and non-private method in the {@code targetClass} executes during the check.
+         * Each method in the {@code targetClass} executes as many times as non-primitive
+         * and non-nullable arguments declared in the method.
+         *
+         * <p> To the each method passes the {@code null} sequentially for each non-primitive and non-nullable argument,
+         * in place of the other arguments set default values.
+         *
          * <p> Since the some classes have no value by default, that method serves to add it.
          *
          * <p> The list of the classes and their default values:
@@ -413,21 +443,22 @@ public class NullToleranceTest {
          *     <li> the {@code 0.0} for the {@code double};
          *     <li> the {@code false} for the {@code boolean};
          *     <li> the instance provided by the {@code getDefaultInstance} method
-         *     will be the default instance for the {@code GeneratedMessageV3};
+         *     will be the default instance for the {@code Class<? extends GeneratedMessageV3>};
+         *     </li>
          * </ul>
          *
-         * <p> For example:
-         * {@code public static void method(GeneratedMessageV3 message, int primitive, CustomType obj)}.
-         * That method will be executed two times (each execution for the non-primitive and non-nullable argument).
-         * The first time instead of the {@code message} will be set the null,
-         * instead of the other values will be set the default values.
-         * The second time instead of the {@code obj} will be set the default value,
+         * <p><b>For example:</b>
+         * <p> {@code public static void method({@link org.spine3.people.PersonName} message,
+         *                                                               Integer wrapper,
+         *                                                               CustomType obj)}.
+         * <p> That method will be executed two times (each execution for the non-primitive and non-nullable argument).
+         * The first time instead of the {@code message} will be set the null, instead of the other values will be set
+         * the default values. The second time instead of the {@code obj} will be set the default value,
          * provided through that method.
          *
          * <p> In that example default value for the message will be instance,
-         * returned by the {@code getDefaultInstance} method;
-         * for the {@code primitive} is zero; for the {@code obj} need to provide default value,
-         * {@code IllegalStateException} will be thrown otherwise.
+         * returned by the {@code #getDefaultInstance} method; for the {@code wrapper} is zero;
+         * for the {@code obj} need to provide default value, {@code IllegalStateException} will be thrown otherwise.
          *
          * @param value the default value for the class
          * @return the {@code Builder}
@@ -461,20 +492,8 @@ public class NullToleranceTest {
          */
         public NullToleranceTest build() {
             checkNotNull(targetClass);
-            putPrimitiveDefaultValues();
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
-        }
-
-        private void putPrimitiveDefaultValues() {
-            defaultValues.put(boolean.class, false);
-            defaultValues.put(byte.class, (byte) 0);
-            defaultValues.put(short.class, (short) 0);
-            defaultValues.put(int.class, 0);
-            defaultValues.put(long.class, 0L);
-            defaultValues.put(char.class, '\u0000');
-            defaultValues.put(float.class, 0.0f);
-            defaultValues.put(double.class, 0.0d);
         }
     }
 }
