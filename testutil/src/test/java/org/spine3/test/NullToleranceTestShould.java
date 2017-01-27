@@ -135,6 +135,7 @@ public class NullToleranceTestShould {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNullableMethodParameters.class)
                                                                      .addDefaultValue(DEFAULT_VALUE)
+                                                                     .addDefaultValue(new NullToleranceTestShould())
                                                                      .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
@@ -227,7 +228,7 @@ public class NullToleranceTestShould {
         public static void nullableParamsMethod(@Nullable Object first, @Nullable Object second) {
         }
 
-        public static void methodWithMixedParameters(@Nullable Object first, String second) {
+        public static void methodWithMixedParameters(@Nullable Object first, NullToleranceTestShould second) {
             checkNotNull(second);
         }
     }

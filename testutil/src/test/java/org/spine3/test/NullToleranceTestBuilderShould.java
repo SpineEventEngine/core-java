@@ -138,6 +138,7 @@ public class NullToleranceTestBuilderShould {
                                                                      .build();
         final Map<? super Class, ? super Object> expectedMap = newHashMap();
         expectedMap.put(NullToleranceTestBuilderShould.class, instance);
+        expectedMap.put(String.class, "");
         assertEquals(NullToleranceTestBuilderShould.class, nullToleranceTest.getTargetClass());
         assertEquals(newHashSet(excludedMethodName), nullToleranceTest.getExcludedMethods());
         assertEquals(expectedMap, nullToleranceTest.getDefaultValues());
