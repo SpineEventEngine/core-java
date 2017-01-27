@@ -80,11 +80,13 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
+     * @return this
      */
-    public void init(Supplier<StorageFactory> productionSupplier,
-                     @Nullable Supplier<StorageFactory> testsSupplier) {
+    public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
+                                     @Nullable Supplier<StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);
         this.testsSupplier = testsSupplier;
+        return this;
     }
 
     /**

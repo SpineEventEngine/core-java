@@ -32,6 +32,7 @@ import org.spine3.util.Environment;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -167,5 +168,11 @@ public class StorageFactorySwitchShould {
         storageFactorySwitch.get();
 
         verify(productionSupplier, times(1)).get();
+    }
+
+    @Test
+    public void return_itself_on_init() {
+        final StorageFactorySwitch result = storageFactorySwitch.init(inMemorySupplier, inMemorySupplier);
+        assertSame(storageFactorySwitch, result);
     }
 }
