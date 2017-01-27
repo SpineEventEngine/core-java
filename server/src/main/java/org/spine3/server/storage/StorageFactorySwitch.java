@@ -75,12 +75,12 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     }
 
     /**
-     * Initializes the switch with the suppliers of {@code StorageFactor}ies.
+     * Initializes the current singleton instance with the suppliers.
      *
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
-     * @return this
+     * @return the current singleton instance
      */
     public static StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
                                             @Nullable Supplier<StorageFactory> testsSupplier) {
