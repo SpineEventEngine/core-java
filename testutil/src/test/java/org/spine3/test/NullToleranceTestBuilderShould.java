@@ -130,23 +130,16 @@ public class NullToleranceTestBuilderShould {
     @Test
     public void build_instance_when_all_required_fields_are_set() {
         final String excludedMethodName = "excludedMethod";
+        final NullToleranceTestBuilderShould instance = new NullToleranceTestBuilderShould();
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(NullToleranceTestBuilderShould.class)
-                                                                     .addDefaultValue(0L)
+                                                                     .addDefaultValue(instance)
                                                                      .excludeMethod(excludedMethodName)
                                                                      .build();
         final Map<? super Class, ? super Object> expectedMap = newHashMap();
-        expectedMap.put(boolean.class, false);
-        expectedMap.put(byte.class, (byte) 0);
-        expectedMap.put(short.class, (short) 0);
-        expectedMap.put(int.class, 0);
-        expectedMap.put(long.class, 0L);
-        expectedMap.put(float.class, 0.0f);
-        expectedMap.put(double.class, 0.0d);
-        expectedMap.put(char.class, '\u0000');
-        expectedMap.put(Long.class, 0L);
+        expectedMap.put(NullToleranceTestBuilderShould.class, instance);
         assertEquals(NullToleranceTestBuilderShould.class, nullToleranceTest.getTargetClass());
         assertEquals(newHashSet(excludedMethodName), nullToleranceTest.getExcludedMethods());
-        assertEquals(expectedMap, nullToleranceTest.getDefaultValuesMap());
+        assertEquals(expectedMap, nullToleranceTest.getDefaultValues());
     }
 }

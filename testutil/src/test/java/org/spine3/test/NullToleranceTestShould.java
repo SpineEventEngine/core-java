@@ -134,7 +134,6 @@ public class NullToleranceTestShould {
     public void pass_the_check_when_method_contains_nullable_and_not_nullable_parameters() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ClassWithNullableMethodParameters.class)
-                                                                     .addDefaultValue("default value")
                                                                      .addDefaultValue(DEFAULT_VALUE)
                                                                      .build();
         final boolean passed = nullToleranceTest.check();
