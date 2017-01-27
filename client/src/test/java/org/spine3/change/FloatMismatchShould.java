@@ -114,7 +114,7 @@ public class FloatMismatchShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(FloatMismatch.class)
                                                                      .build();

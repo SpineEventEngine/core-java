@@ -402,7 +402,7 @@ public class DurationsShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final Duration.Builder defaultBuilder = Duration.newBuilder();
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Durations.class)

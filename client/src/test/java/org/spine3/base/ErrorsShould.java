@@ -58,7 +58,7 @@ public class ErrorsShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Errors.class)
                                                                      .addDefaultValue(new RuntimeException("exception"))

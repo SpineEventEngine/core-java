@@ -240,7 +240,7 @@ public class StringifiersShould {
     }
 
     @Test
-    public void pass_the_check_projection_builder() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Stringifiers.class)
                                                                      .addDefaultValue(CommandId.newBuilder())

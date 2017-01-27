@@ -92,7 +92,7 @@ public class GivenShould {
     }
 
     @Test
-    public void pass_the_check_given_class() {
+    public void pass_the_null_tolerance_check_in_the_given_class() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Given.class)
                                                                      .addDefaultValue(AProjection.class)
@@ -102,7 +102,7 @@ public class GivenShould {
     }
 
     @Test
-    public void pass_the_check_process_manager_builder() {
+    public void pass_the_null_tolerance_check_in_the_process_manager_builder() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ProcessManagerBuilder.class)
                                                                      .build();
@@ -111,7 +111,7 @@ public class GivenShould {
     }
 
     @Test
-    public void pass_the_check_projection_builder() {
+    public void pass_the_null_tolerance_check_in_the_projection_builder() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(ProjectionBuilder.class)
                                                                      .build();

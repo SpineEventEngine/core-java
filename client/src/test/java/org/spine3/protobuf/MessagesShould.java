@@ -137,7 +137,7 @@ public class MessagesShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final Class<StringValue> stringValueClass = StringValue.class;
         final FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
                                                                   .getDescriptorForType()

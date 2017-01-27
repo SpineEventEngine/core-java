@@ -353,7 +353,7 @@ public class ChangesShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Changes.class)
                                                                      .addDefaultValue(ByteString.EMPTY)

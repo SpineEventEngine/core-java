@@ -36,7 +36,7 @@ public class TypeNameShould {
     }
 
     @Test
-    public void pass_the_check_projection_builder() {
+    public void pass_the_null_tolerance_check() {
         final Descriptors.Descriptor descriptor = Command.getDefaultInstance()
                                                          .getDescriptorForType();
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()

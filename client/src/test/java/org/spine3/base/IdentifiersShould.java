@@ -72,7 +72,7 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void pass_the_check() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Identifiers.class)
                                                                      .addDefaultValue(Identifiers.class)
