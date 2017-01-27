@@ -439,8 +439,8 @@ public class NullToleranceTest {
          *     <li> for the primitive and wrapper types is used the default value
          *     returned by the {@link com.google.common.base.Defaults#defaultValue(Class)}
          *     </li>
-         *     <li> for the {@code Class<? extends Message>} instances will be default value
-         *     provided by the {@code getDefaultInstance} method.
+         *     <li> for the {@code Class<? extends Message>} instances the default value
+         *     will be provided by the {@code #getDefaultInstance} method.
          *     </li>
          * </ul>
          *
