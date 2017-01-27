@@ -33,7 +33,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
 
-        spineVersion = '0.7.21-SNAPSHOT'
+        spineVersion = '0.7.22-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
         spineProtobufPluginVersion = '0.6.6-SNAPSHOT'
@@ -151,6 +151,26 @@ subprojects {
         }
     }
 
+    /* Uncomment this block if you need to display console output during the Gradle build.
+    test {
+        testLogging {
+            // Make sure output from standard out or error is shown in Gradle output.
+            showStandardStreams = true
+
+            // Or we use events method:
+            // events 'standard_out', 'standard_error'
+
+            // Or set property events:
+            // events = ['standard_out', 'standard_error']
+
+            // Instead of string values we can
+            // use enum values:
+            // events org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+            //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+        }
+    }
+    */
+    
     protobuf {
         // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
         // See: https://youtrack.jetbrains.com/issue/IDEA-141744

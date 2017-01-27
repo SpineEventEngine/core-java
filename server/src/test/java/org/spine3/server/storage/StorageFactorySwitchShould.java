@@ -29,10 +29,10 @@ import org.junit.Test;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Environment;
 
-import java.lang.reflect.Field;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -72,7 +72,7 @@ public class StorageFactorySwitchShould {
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.instance();
+        storageFactorySwitch = StorageFactorySwitch.getInstance();
     }
 
     @After
@@ -85,20 +85,7 @@ public class StorageFactorySwitchShould {
      * Clears the `storageFactorySwitch` instance by nullifying fields.
      */
     private void clearSwitch() throws NoSuchFieldException, IllegalAccessException {
-        // Clear the value of `storageFactory` field.
-        final Field storageFactoryField = StorageFactorySwitch.class.getDeclaredField("storageFactory");
-        storageFactoryField.setAccessible(true);
-        storageFactoryField.set(storageFactorySwitch, null);
-
-        // Clear the `testSupplier` field.
-        final Field testsSupplierField = StorageFactorySwitch.class.getDeclaredField("testsSupplier");
-        testsSupplierField.setAccessible(true);
-        testsSupplierField.set(storageFactorySwitch, null);
-
-        // Clear the `productionSupplier` field.
-        final Field productionSupplierField = StorageFactorySwitch.class.getDeclaredField("productionSupplier");
-        productionSupplierField.setAccessible(true);
-        productionSupplierField.set(storageFactorySwitch, null);
+        storageFactorySwitch.reset();
     }
 
     @Test
@@ -116,6 +103,13 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void return_custom_test_StorageFactory_if_supplier_for_tests_was_set() {
+        // This call avoids the racing conditions anomaly when running
+        // the Gradle build from the console.
+        // Despite the fact that we reset the switch state in `cleanUp()`, we still
+        // get the cached value of the StorageFactory remembered by the switch in a previous test.
+        // Having this call avoids the problem.
+        storageFactorySwitch.reset();
+
         final StorageFactory custom = mock(StorageFactory.class);
 
         storageFactorySwitch.init(inMemorySupplier, new Supplier<StorageFactory>() {
@@ -125,9 +119,14 @@ public class StorageFactorySwitchShould {
             }
         });
 
+        // These calls ensure that we're under the testing mode and we get the supplier for tests.
+        assertTrue(Environment.getInstance().isTests());
+        assertTrue(storageFactorySwitch.testsSupplier().isPresent());
+
+        // Get the StorageFactory from the switch.
         final StorageFactory obtained = storageFactorySwitch.get();
 
-        assertEquals(custom.getClass(), obtained.getClass());
+        assertEquals(custom, obtained);
     }
 
     @SuppressWarnings("AccessOfSystemProperties") // OK for this test.
@@ -139,6 +138,7 @@ public class StorageFactorySwitchShould {
         // Pretend that we are not under tests for the `Environment`.
         Environment.getInstance().setToProduction();
 
+        assertFalse(storageFactorySwitch.productionSupplier().isPresent());
         storageFactorySwitch.get();
     }
 
@@ -168,5 +168,11 @@ public class StorageFactorySwitchShould {
         storageFactorySwitch.get();
 
         verify(productionSupplier, times(1)).get();
+    }
+
+    @Test
+    public void return_itself_on_init() {
+        final StorageFactorySwitch result = storageFactorySwitch.init(inMemorySupplier, inMemorySupplier);
+        assertSame(storageFactorySwitch, result);
     }
 }

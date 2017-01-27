@@ -153,6 +153,17 @@ public final class Environment {
     }
 
     /**
+     * Verifies if the code runs in the production mode.
+     *
+     * <p>This method is opposite to {@link #isTests()}
+     *
+     * @return {@code true} if the code runs in the production mode, {@code false} otherwise
+     */
+    public boolean isProduction() {
+        return !isTests();
+    }
+
+    /**
      * Turns the test mode on.
      *
      * <p>This method is opposite to {@link #setToProduction()}.

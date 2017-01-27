@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Environment;
@@ -68,7 +70,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     /**
      * Obtains the singleton instance.
      */
-    public static StorageFactorySwitch instance() {
+    public static StorageFactorySwitch getInstance() {
         return Singleton.INSTANCE.value;
     }
 
@@ -78,11 +80,39 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
+     * @return this
      */
-    public void init(Supplier<StorageFactory> productionSupplier,
-                     @Nullable Supplier<StorageFactory> testsSupplier) {
+    public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
+                                     @Nullable Supplier<StorageFactory> testsSupplier) {
         this.productionSupplier = checkNotNull(productionSupplier);
         this.testsSupplier = testsSupplier;
+        return this;
+    }
+
+    /**
+     * Clears the internal state. Required for tests.
+     */
+    @VisibleForTesting
+    void reset() {
+        storageFactory = null;
+        productionSupplier = null;
+        testsSupplier = null;
+    }
+
+    /**
+     * Obtains production supplier. Required for tests.
+     */
+    @VisibleForTesting
+    Optional<Supplier<StorageFactory>> productionSupplier() {
+        return Optional.fromNullable(productionSupplier);
+    }
+
+    /**
+     * Obtains tests supplier. Required for tests.
+     */
+    @VisibleForTesting
+    Optional<Supplier<StorageFactory>> testsSupplier() {
+        return Optional.fromNullable(testsSupplier);
     }
 
     /**
