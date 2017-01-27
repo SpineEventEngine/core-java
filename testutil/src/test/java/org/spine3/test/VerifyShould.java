@@ -22,21 +22,29 @@ package org.spine3.test;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyComplexClass"})
 public class VerifyShould {
+
+    private static final String emptyString = "";
+    private static final String notEmptyString = "Not empty string";
+    private static final String mapName = "map";
 
     @Test
     public void extend_Assert_class() {
@@ -373,6 +381,284 @@ public class VerifyShould {
     @Test
     public void pass_if_collection_size_is_equal() {
         Verify.assertSize(0, Collections.emptyList());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_string_not_contains_char_sequence() {
+        Verify.assertContains(notEmptyString, emptyString);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_char_sequence_is_null_in_contains() {
+        Verify.assertContains(null, emptyString);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_string_is_null_in_contains() {
+        Verify.assertContains(emptyString, (String) null);
+    }
+
+    @SuppressWarnings({"ConstantConditions", "ErrorNotRethrown"})
+    @Test(expected = AssertionError.class)
+    public void fail_if_contains_char_sequence_or_string_is_null() {
+        final String nullString = null;
+
+        try {
+            Verify.assertContains(null, emptyString);
+        } catch (AssertionError e) {
+            Verify.assertContains(emptyString, nullString);
+        }
+    }
+
+    @Test
+    public void pass_if_string_contains_char_sequence() {
+        Verify.assertContains(emptyString, notEmptyString);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_is_string_contains_char_sequence() {
+        Verify.assertNotContains(emptyString, notEmptyString);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_char_sequence_is_null_in_not_contains() {
+        Verify.assertNotContains(null, emptyString);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_string_is_null_in_not_contains() {
+        Verify.assertNotContains(emptyString, (String) null);
+    }
+
+    @Test
+    public void pass_if_string_not_contains_char_sequence() {
+        Verify.assertNotContains(notEmptyString, emptyString);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_collection_not_contains_item() {
+        Verify.assertContains(1, Collections.emptyList());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_collections_is_null_in_contains() {
+        Verify.assertContains(1, (Collection) null);
+    }
+
+    @Test
+    public void pass_if_collection_contains_item() {
+        final Integer item = 1;
+        Verify.assertContains(item, Collections.singletonList(item));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_immutable_collection_not_contains_item() {
+        Verify.assertContains(1, ImmutableList.of());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_immutable_collections_is_null_in_contains() {
+        Verify.assertContains(1, null);
+    }
+
+    @Test
+    public void pass_if_immutable_collection_contains_item() {
+        final Integer item = 1;
+        Verify.assertContains(item, ImmutableList.of(item));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_not_contains_all() {
+        Verify.assertContainsAll(Collections.emptyList(), 1);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_null_in_contains_all() {
+        Verify.assertContainsAll(null);
+    }
+
+    @Test
+    public void pass_if_iterable_contains_all() {
+        final Integer item = 1;
+        Verify.assertContainsAll(Collections.singletonList(item), item);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_are_not_equal() {
+        final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
+        final Map<Integer, Map<Integer, Integer>> secondOne = Collections.singletonMap(1, Collections.singletonMap(1, 2));
+
+        Verify.assertMapsEqual(firstOne, secondOne, mapName);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void pass_if_maps_are_null() {
+        Verify.assertMapsEqual(null, null, mapName);
+    }
+
+    @Test
+    public void pass_if_maps_are_equal() {
+        final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
+        final Map<Integer, Map<Integer, Integer>> secondOne = new HashMap<>(firstOne);
+
+        Verify.assertMapsEqual(firstOne, secondOne, mapName);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_sets_are_not_equal() {
+        final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4);
+        final Set<Integer> secondOne = Sets.newHashSet(1, 2, 4);
+
+        Verify.assertSetsEqual(firstOne, secondOne);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void pass_if_sets_are_null() {
+        Verify.assertSetsEqual(null, null);
+    }
+
+    @Test
+    public void pass_if_sets_are_equal() {
+        final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3);
+        final Set<Integer> secondOne = Sets.newHashSet(firstOne);
+
+        Verify.assertSetsEqual(firstOne, secondOne);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_not_contains_entry() {
+        Verify.assertContainsEntry(1, 1, ArrayListMultimap.<Integer, Integer>create());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_null_in_contains_entry() {
+        Verify.assertContainsEntry(1, 1, null);
+    }
+
+    @Test
+    public void pass_if_multimap_contains_entry() {
+        final Integer entryKey = 1;
+        final Integer entryValue = 1;
+
+        final Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
+        multimap.put(entryKey, entryValue);
+
+        Verify.assertContainsEntry(entryKey, entryValue, multimap);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_not_contains_key() {
+        Verify.assertContainsKey(1, Collections.emptyMap());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_contains_key() {
+        Verify.assertContainsKey(1, null);
+    }
+
+    @Test
+    public void pass_if_map_contains_key() {
+        final Integer key = 1;
+        Verify.assertContainsKey(key, Collections.singletonMap(key, 1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_contains_denied_key() {
+        final Integer key = 1;
+        Verify.denyContainsKey(key, Collections.singletonMap(key, 1));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_deny_contains_key() {
+        Verify.denyContainsKey(1, null);
+    }
+
+    @Test
+    public void pass_if_map_not_contains_denied_key() {
+        Verify.denyContainsKey(1, Collections.emptyMap());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_not_contains_entry() {
+        final Integer key = 0;
+        Verify.assertContainsKeyValue(key, 0, Collections.singletonMap(key, 1));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_contains_key_value() {
+        Verify.assertContainsKeyValue(1, 1, null);
+    }
+
+    @Test
+    public void pass_if_map_contains_entry() {
+        final Integer key = 1;
+        final Integer value = 1;
+
+        Verify.assertContainsKeyValue(key, value, Collections.singletonMap(key, value));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_collection_contains_item() {
+        final Integer item = 1;
+        Verify.assertNotContains(item, Collections.singletonList(item));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_collection_is_null_in_not_contains() {
+        Verify.assertNotContains(1, null);
+    }
+
+    @Test
+    public void pass_if_collection_not_contains_item() {
+        Verify.assertNotContains(1, Collections.emptyList());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_contains_item() {
+        final Integer item = 1;
+        Verify.assertNotContains(item, FluentIterable.of(item));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_null_in_contains_item() {
+        Verify.assertNotContains(1, (Iterable) null);
+    }
+
+    @Test
+    public void pass_if_iterable_not_contains_item() {
+        Verify.assertNotContains(1, FluentIterable.of());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_contains_key() {
+        final Integer key = 1;
+        Verify.assertNotContainsKey(key, Collections.singletonMap(key, 1));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_not_contains_key() {
+        Verify.assertNotContainsKey(1, null);
+    }
+
+    @Test
+    public void pass_if_map_not_contains_key() {
+        Verify.assertNotContainsKey(1, Collections.emptyMap());
     }
 
 }
