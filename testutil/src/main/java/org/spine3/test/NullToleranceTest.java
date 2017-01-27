@@ -347,8 +347,8 @@ public class NullToleranceTest {
             }
 
             final Class<GeneratedMessageV3> messageClass = GeneratedMessageV3.class;
-            final boolean messageParent = messageClass.isAssignableFrom(key);
-            if (result == null && messageParent) {
+            final boolean message = messageClass.isAssignableFrom(key);
+            if (result == null && message) {
                 result = getDefaultMessageInstance(key);
             }
 
@@ -356,6 +356,7 @@ public class NullToleranceTest {
             if (result == null && stringClass.isAssignableFrom(key)) {
                 result = STRING_DEFAULT_VALUE;
             }
+
             checkState(result != null);
             return result;
         }
