@@ -202,8 +202,11 @@ public class VerifyShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_iterable_is_null() {
-        Verify.assertIterableEmpty(null);
-        Verify.assertIterableNotEmpty(null);
+        final Iterable iterable = null;
+
+        Verify.assertIterableEmpty(iterable);
+        Verify.assertIterableNotEmpty(iterable);
+        Verify.assertSize(0, iterable);
     }
 
     @Test
@@ -223,8 +226,11 @@ public class VerifyShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_map_is_null() {
-        Verify.assertEmpty((Map) null);
-        Verify.assertNotEmpty((Map) null);
+        final Map map = null;
+
+        Verify.assertEmpty(map);
+        Verify.assertNotEmpty(map);
+        Verify.assertSize(0, map);
     }
 
     @Test
@@ -245,7 +251,11 @@ public class VerifyShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_multimap_is_null() {
-        Verify.assertEmpty((Multimap) null);
+        final Multimap multimap = null;
+
+        Verify.assertEmpty(multimap);
+        Verify.assertNotEmpty(multimap);
+        Verify.assertSize(0, multimap);
     }
 
     @Test
