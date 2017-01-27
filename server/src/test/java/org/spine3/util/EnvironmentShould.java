@@ -94,6 +94,7 @@ public class EnvironmentShould {
         Environment.getInstance().setToTests();
 
         assertTrue(environment.isTests());
+        assertFalse(environment.isProduction());
     }
 
     @Test
@@ -101,12 +102,14 @@ public class EnvironmentShould {
         System.setProperty(Environment.ENV_KEY_TESTS, "1");
 
         assertTrue(environment.isTests());
+        assertFalse(environment.isProduction());
     }
 
     @Test
     public void tell_that_we_are_under_tests_if_run_under_known_framework() {
         // As we run this from under JUnit...
         assertTrue(environment.isTests());
+        assertFalse(environment.isProduction());
     }
 
     @Test
@@ -114,6 +117,7 @@ public class EnvironmentShould {
         System.setProperty(Environment.ENV_KEY_TESTS, "neitherTrueNor1");
 
         assertFalse(environment.isTests());
+        assertTrue(environment.isProduction());
     }
 
     @Test
@@ -121,6 +125,7 @@ public class EnvironmentShould {
         environment.setToTests();
 
         assertTrue(environment.isTests());
+        assertFalse(environment.isProduction());
     }
 
     @Test
@@ -128,6 +133,7 @@ public class EnvironmentShould {
         environment.setToProduction();
 
         assertFalse(environment.isTests());
+        assertTrue(environment.isProduction());
     }
 
     @Test
