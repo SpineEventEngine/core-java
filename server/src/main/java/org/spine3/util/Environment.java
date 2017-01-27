@@ -49,14 +49,14 @@ public final class Environment {
     @VisibleForTesting
     static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
 
-    /** If set contains the version of AppEngine obtained from the system property. */
+    /** If set, contains the version of AppEngine obtained from the system property. */
     @Nullable
     private static final String appEngineRuntimeVersion = System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     private static final String VAL_TRUE = "true";
     private static final String VAL_FALSE = "false";
 
-    /** If set tells if the code runs from a testing framework. */
+    /** If set, tells if the code runs from a testing framework. */
     @Nullable
     private Boolean tests;
 
@@ -164,7 +164,9 @@ public final class Environment {
     }
 
     /**
-     * Turns the environment into tests mode.
+     * Turns the test mode on.
+     *
+     * <p>This method is opposite to {@link #setToProduction()}.
      */
     @VisibleForTesting
     public void setToTests() {
@@ -173,7 +175,9 @@ public final class Environment {
     }
 
     /**
-     * Turns the environment into the production mode.
+     * Turns the production mode on.
+     *
+     * <p>This method is opposite to {@link #setToTests()}.
      */
     @VisibleForTesting
     public void setToProduction() {

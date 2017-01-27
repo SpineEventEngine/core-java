@@ -77,14 +77,14 @@ public class StorageFactorySwitchShould {
 
     @After
     public void cleanUp() throws NoSuchFieldException, IllegalAccessException {
-        cleanSwitch();
+        clearSwitch();
         Environment.getInstance().reset();
     }
 
     /**
-     * Cleans the `storageFactorySwitch` instance by nullifying fields.
+     * Clears the `storageFactorySwitch` instance by nullifying fields.
      */
-    private void cleanSwitch() throws NoSuchFieldException, IllegalAccessException {
+    private void clearSwitch() throws NoSuchFieldException, IllegalAccessException {
         storageFactorySwitch.reset();
     }
 
@@ -144,7 +144,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void cache_instance_of_StorageFactory_in_testing() {
-        Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
 
         storageFactorySwitch.init(inMemorySupplier, testingSupplier);
 
@@ -158,7 +158,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void cache_instance_of_StorageFactory_in_production() {
-        Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
 
         storageFactorySwitch.init(productionSupplier, inMemorySupplier);
 
