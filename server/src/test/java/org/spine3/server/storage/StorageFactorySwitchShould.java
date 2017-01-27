@@ -77,25 +77,25 @@ public class StorageFactorySwitchShould {
 
     @After
     public void cleanUp() throws NoSuchFieldException, IllegalAccessException {
-        cleanSwitch();
+        clearSwitch();
         Environment.getInstance().reset();
     }
 
     /**
      * Clears the `storageFactorySwitch` instance by nullifying fields.
      */
-    private void cleanSwitch() throws NoSuchFieldException, IllegalAccessException {
-        // Clean the value of `storageFactory` field.
+    private void clearSwitch() throws NoSuchFieldException, IllegalAccessException {
+        // Clear the value of `storageFactory` field.
         final Field storageFactoryField = StorageFactorySwitch.class.getDeclaredField("storageFactory");
         storageFactoryField.setAccessible(true);
         storageFactoryField.set(storageFactorySwitch, null);
 
-        // Clean the `testSupplier` field.
+        // Clear the `testSupplier` field.
         final Field testsSupplierField = StorageFactorySwitch.class.getDeclaredField("testsSupplier");
         testsSupplierField.setAccessible(true);
         testsSupplierField.set(storageFactorySwitch, null);
 
-        // Clean the `productionSupplier` field.
+        // Clear the `productionSupplier` field.
         final Field productionSupplierField = StorageFactorySwitch.class.getDeclaredField("productionSupplier");
         productionSupplierField.setAccessible(true);
         productionSupplierField.set(storageFactorySwitch, null);
@@ -144,7 +144,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void cache_instance_of_StorageFactory_in_testing() {
-        Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
 
         storageFactorySwitch.init(inMemorySupplier, testingSupplier);
 
