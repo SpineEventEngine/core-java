@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Parameter;
 import com.google.common.reflect.TypeToken;
-import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Message;
 import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
@@ -57,33 +57,33 @@ import static javax.lang.model.SourceVersion.isName;
  *
  * <p> The helper checks the methods with access modifiers:
  * <ul>
- *     <li> the {@code public};
- *     <li> the {@code protected};
- *     <li> the {@code default}.
+ * <li> the {@code public};
+ * <li> the {@code protected};
+ * <li> the {@code default}.
  * </ul>
  *
  * <p> The helper does not check the methods:
  * <ul>
- *     <li> with the {@code private} modifier;
- *     <li> without the {@code static} modifier;
- *     <li> with only the primitive parameters;
- *     <li> if all the parameters are marked as {@code Nullable}.
+ * <li> with the {@code private} modifier;
+ * <li> without the {@code static} modifier;
+ * <li> with only the primitive parameters;
+ * <li> if all the parameters are marked as {@code Nullable}.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
  * <ul>
- *     <li> public static void method(Object obj);
- *     <li> protected static void method(Object first, long second);
- *     <li> public static void method(@Nullable Object first, Object second);
- *     <li> static void method(Object first, Object second).
+ * <li> public static void method(Object obj);
+ * <li> protected static void method(Object first, long second);
+ * <li> public static void method(@Nullable Object first, Object second);
+ * <li> static void method(Object first, Object second).
  * </ul>
  *
  * <p> The examples of the methods which will be ignored:
  * <ul>
- *     <li> public void method(Object obj);
- *     <li> private static void method(Object obj);
- *     <li> public static void method(@Nullable Object obj);
- *     <li> protected static void method(int first, float second).
+ * <li> public void method(Object obj);
+ * <li> private static void method(Object obj);
+ * <li> public static void method(@Nullable Object obj);
+ * <li> protected static void method(int first, float second).
  * </ul>
  *
  * @author Illia Shepilov
@@ -314,7 +314,6 @@ public class NullToleranceTest {
 
         private static final Class[] EMPTY_PARAMETER_TYPES = {};
         private static final Object[] EMPTY_ARGUMENTS = {};
-        private static final String STRING_DEFAULT_VALUE = "";
         private static final String METHOD_NAME = "getDefaultInstance";
         private final Map<?, ?> defaultValues;
 
@@ -326,39 +325,48 @@ public class NullToleranceTest {
          * Returns the default value for the method argument by the method argument type.
          * If default value does not provide, throws {@link IllegalStateException} otherwise.
          *
-         * @param key the {@code Class} of the method argument
+         * @param type the {@code Class} of the method argument
          * @return the default value
          */
-        private Object getDefaultValue(Class<?> key) {
-            Object result = defaultValues.get(key);
+        private Object getDefaultValue(Class<?> type) {
+            Object result = defaultValues.get(type);
             if (result != null) {
                 return result;
             }
 
-            final boolean primitive = allPrimitiveTypes().contains(key);
-            if (primitive) {
-                result = defaultValue(key);
+            result = getChildDefaultValue(type);
+
+            final boolean primitive = allPrimitiveTypes().contains(type);
+            if (result == null && primitive) {
+                result = defaultValue(type);
             }
 
-            final boolean wrapper = isWrapperType(key);
+            final boolean wrapper = isWrapperType(type);
             if (result == null && wrapper) {
-                final Class<?> unwrappedPrimitive = unwrap(key);
+                final Class<?> unwrappedPrimitive = unwrap(type);
                 result = defaultValue(unwrappedPrimitive);
             }
 
-            final Class<GeneratedMessageV3> messageClass = GeneratedMessageV3.class;
-            final boolean message = messageClass.isAssignableFrom(key);
+            final Class<Message> messageClass = Message.class;
+            final boolean message = messageClass.isAssignableFrom(type);
             if (result == null && message) {
-                result = getDefaultMessageInstance(key);
-            }
-
-            final Class<String> stringClass = String.class;
-            if (result == null && stringClass.isAssignableFrom(key)) {
-                result = STRING_DEFAULT_VALUE;
+                result = getDefaultMessageInstance(type);
             }
 
             checkState(result != null);
             return result;
+        }
+
+        @Nullable
+        private Object getChildDefaultValue(Class<?> type) {
+            for (Object clazz : defaultValues.keySet()) {
+                final boolean passedToMap = type.isAssignableFrom(((Class<?>) clazz));
+                if (passedToMap) {
+                    final Object result = defaultValues.get(clazz);
+                    return result;
+                }
+            }
+            return null;
         }
 
         private static Object getDefaultMessageInstance(Class<?> key) {
@@ -377,9 +385,10 @@ public class NullToleranceTest {
      */
     public static class Builder {
 
+        private static final String STRING_DEFAULT_VALUE = "";
         private final Set<String> excludedMethods;
-        private final Map<? super Class, ? super Object> defaultValues;
-        private Class targetClass;
+        private final Map<? super Class<?>, ? super Object> defaultValues;
+        private Class<?> targetClass;
 
         private Builder() {
             defaultValues = newHashMap();
@@ -416,50 +425,43 @@ public class NullToleranceTest {
         /**
          * Adds the default value for the method argument.
          *
-         * <p> Each static and non-private method in the {@code targetClass} executes during the check.
-         * Each method in the {@code targetClass} executes as many times as non-primitive
-         * and non-nullable arguments declared in the method.
+         * <p> During the checks, each applicable method of the target class is executed
+         * with the {@code null} values passed as arguments.This is done in an iterative fashion,
+         * so that each invocation checks the {@code null} tolerance for the only one of the parameters.
+         * The rest of the method arguments are set with the default values.
          *
-         * <p> To the each method passes the {@code null} sequentially for each non-primitive and non-nullable argument,
-         * in place of the other arguments set default values.
-         *
-         * <p> Since the some classes have no value by default, that method serves to add it.
+         * <p> If the default value for the type is not customized,
+         * the predefined list of the default values per type will be used:
          *
          * <p> The list of the classes and their default values:
          * <ul>
-         *     <li> the {@code 0} for the {@code Byte};
-         *     <li> the {@code 0} for the {@code Short};
-         *     <li> the {@code 0} for the {@code Integer};
-         *     <li> the {@code 0} for the {@code Long};
-         *     <li> the {@code '\u0000'} for the {@code Character};
-         *     <li> the {@code 0.0} for the {@code Float};
-         *     <li> the {@code 0.0} for the {@code Double};
-         *     <li> the {@code false} for the {@code Boolean};
-         *     <li> the {@code 0} for the {@code byte};
-         *     <li> the {@code 0} for the {@code short};
-         *     <li> the {@code 0} for the {@code int};
-         *     <li> the {@code 0} for the {@code long};
-         *     <li> the {@code '\u0000'} for the {@code char};
-         *     <li> the {@code 0.0} for the {@code float};
-         *     <li> the {@code 0.0} for the {@code double};
-         *     <li> the {@code false} for the {@code boolean};
-         *     <li> the instance provided by the {@code getDefaultInstance} method
-         *     will be the default instance for the {@code Class<? extends GeneratedMessageV3>};
+         *     <li> for the {@code String} is used empty string, as the default value;
+         *     <li> for the primitive and wrapper types is used the default value
+         *     returned by the {@link com.google.common.base.Defaults#defaultValue(Class)}
+         *     </li>
+         *     <li> for the {@code Class<? extends Message>} instances will be default value
+         *     provided by the {@code getDefaultInstance} method.
          *     </li>
          * </ul>
          *
-         * <p><b>For example:</b>
-         * <p> {@code public static void method({@link org.spine3.people.PersonName} message,
-         *                                                               Integer wrapper,
-         *                                                               CustomType obj)}.
-         * <p> That method will be executed two times (each execution for the non-primitive and non-nullable argument).
-         * The first time instead of the {@code message} will be set the null, instead of the other values will be set
-         * the default values. The second time instead of the {@code obj} will be set the default value,
-         * provided through that method.
+         * <p><b>Example.</b>
          *
-         * <p> In that example default value for the message will be instance,
-         * returned by the {@code #getDefaultInstance} method; for the {@code wrapper} is zero;
-         * for the {@code obj} need to provide default value, {@code IllegalStateException} will be thrown otherwise.
+         * <p>The method declared as
+         *
+         * <pre> {@code public static void doSomething(PersonName messageValue,
+         *                                             Integer wrapperValue,
+         *                                             CustomType objectValue)} </pre>
+         *
+         * <p> will be invoked three times:
+         *
+         * <ol>
+         * <li> {@code doSomething(null, 0, <default value for CustomType>)},
+         * <li> {@code doSomething(PersonName.getDefaultInstance(), null , <default value for CustomType>)},
+         * <li> {@code doSomething(PersonName.getDefaultInstance(), 0 , null)}.
+         * </ol>
+         *
+         * <p> If the default value for the {@code CustomType} is not provided,
+         * an {@code IllegalStateException} is thrown.
          *
          * @param value the default value for the class
          * @return the {@code Builder}
@@ -472,7 +474,7 @@ public class NullToleranceTest {
         }
 
         @VisibleForTesting
-        Class getTargetClass() {
+        Class<?> getTargetClass() {
             return targetClass;
         }
 
@@ -493,8 +495,19 @@ public class NullToleranceTest {
          */
         public NullToleranceTest build() {
             checkNotNull(targetClass);
+            addDefaultStringValueIfNeeded();
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
+        }
+
+        private void addDefaultStringValueIfNeeded() {
+            for (Object clazz : defaultValues.keySet()) {
+                final boolean stringClass = String.class.isAssignableFrom((Class) clazz);
+                if (stringClass) {
+                    return;
+                }
+            }
+            defaultValues.put(String.class, STRING_DEFAULT_VALUE);
         }
     }
 }
