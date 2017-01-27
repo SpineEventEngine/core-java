@@ -249,6 +249,7 @@ public class NullToleranceTest {
 
         private boolean invokeAndCheck(Object[] params) {
             try {
+                method.setAccessible(true);
                 method.invoke(null, params);
             } catch (InvocationTargetException ex) {
                 boolean valid = validateException(ex);
