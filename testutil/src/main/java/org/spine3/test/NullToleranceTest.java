@@ -34,7 +34,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +41,6 @@ import static com.google.common.base.Defaults.defaultValue;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
@@ -56,35 +54,35 @@ import static javax.lang.model.SourceVersion.isName;
  * Serves as a helper to ensure that none of the methods of the target utility
  * class accept {@code null}s as argument values.
  *
- * <p> The helper checks the methods with access modifiers:
+ * <p>The helper checks the methods with access modifiers:
  * <ul>
- *     <li> the {@code public};
- *     <li> the {@code protected};
- *     <li> the {@code default}.
+ *     <li>the {@code public};
+ *     <li>the {@code protected};
+ *     <li>the {@code default}.
  * </ul>
  *
- * <p> The helper does not check the methods:
+ * <p>The helper does not check the methods:
  * <ul>
- *     <li> with the {@code private} modifier;
- *     <li> without the {@code static} modifier;
- *     <li> with only the primitive parameters;
- *     <li> if all the parameters are marked as {@code Nullable}.
+ *     <li>with the {@code private} modifier;
+ *     <li>without the {@code static} modifier;
+ *     <li>with only the primitive parameters;
+ *     <li>if all the parameters are marked as {@code Nullable}.
  * </ul>
  *
- * <p> The examples of the methods which will be checked:
+ * <p>The examples of the methods which will be checked:
  * <ul>
- *     <li> public static void method(Object obj);
- *     <li> protected static void method(Object first, long second);
- *     <li> public static void method(@Nullable Object first, Object second);
- *     <li> static void method(Object first, Object second).
+ *     <li>public static void method(Object obj);
+ *     <li>protected static void method(Object first, long second);
+ *     <li>public static void method(@Nullable Object first, Object second);
+ *     <li>static void method(Object first, Object second).
  * </ul>
  *
- * <p> The examples of the methods which will be ignored:
+ * <p>The examples of the methods which will be ignored:
  * <ul>
- *     <li> public void method(Object obj);
- *     <li> private static void method(Object obj);
- *     <li> public static void method(@Nullable Object obj);
- *     <li> protected static void method(int first, float second).
+ *     <li>public void method(Object obj);
+ *     <li>private static void method(Object obj);
+ *     <li>public static void method(@Nullable Object obj);
+ *     <li>protected static void method(int first, float second).
  * </ul>
  *
  * @author Illia Shepilov
@@ -93,7 +91,7 @@ public class NullToleranceTest {
 
     private final Class targetClass;
     private final Set<String> excludedMethods;
-    private final Map<?, ?> defaultValues;
+    private final Map<Class<?>, ?> defaultValues;
 
     private NullToleranceTest(Builder builder) {
         this.targetClass = builder.targetClass;
@@ -104,14 +102,13 @@ public class NullToleranceTest {
     /**
      * Checks the all non-private methods in the {@code targetClass}.
      *
-     * <p> Check is successful if each of the non-primitive method parameters is ensured to be non-null.
+     * <p>The check is successful if each of the non-primitive method parameters is ensured to be non-null.
      *
-     * @return {@code true} if all methods have non-null check
-     * for the input reference type parameters, {@code false} otherwise
+     * @return {@code true} if the check is successful, {@code false} otherwise
      */
     public boolean check() {
-        final DefaultValuesProvider valuesProvider = new DefaultValuesProvider(defaultValues);
-        final Method[] accessibleMethods = getAccessibleMethods(targetClass);
+        final DefaultValueProvider valuesProvider = new DefaultValueProvider(defaultValues);
+        final Iterable<Method> accessibleMethods = getAccessibleMethods(targetClass);
         final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
             final Class[] parameterTypes = method.getParameterTypes();
@@ -134,26 +131,26 @@ public class NullToleranceTest {
     }
 
     /**
-     * Returns the array of the declared {@code Method}s
+     * Returns the {@code Iterable} over all the declared {@code Method}s
      * in the {@code Class} which are static and non-private.
      *
      * @param targetClass the target class
      * @return the array of the {@code Method}
      */
-    private static Method[] getAccessibleMethods(Class targetClass) {
+    private static Iterable<Method> getAccessibleMethods(Class targetClass) {
         final Method[] declaredMethods = targetClass.getDeclaredMethods();
-        final List<Method> methodList = newLinkedList();
+        final ImmutableList.Builder<Method> listBuilder = ImmutableList.builder();
 
         for (Method method : declaredMethods) {
             final Invokable<?, Object> invokable = Invokable.from(method);
             final boolean privateMethod = invokable.isPrivate();
             final boolean staticMethod = invokable.isStatic();
             if (!privateMethod && staticMethod) {
-                methodList.add(method);
+                listBuilder.add(method);
             }
         }
 
-        final Method[] result = methodList.toArray(new Method[methodList.size()]);
+        final ImmutableList<Method> result = listBuilder.build();
         return result;
     }
 
@@ -182,15 +179,26 @@ public class NullToleranceTest {
     }
 
     /**
-     * Serves as a helper to ensure that method does not accept {@code null}s as argument values.
+     * Serves as a helper to ensure that the method does not accept {@code null}s as argument values.
      */
     private static class MethodChecker {
 
+        /**
+         * The method to test.
+         */
         private final Method method;
-        private final String targetClassName;
-        private final DefaultValuesProvider valuesProvider;
 
-        private MethodChecker(Method method, String targetClassName, DefaultValuesProvider valuesProvider) {
+        /**
+         * The name of the {@code Class} instance, which the tested method belongs to.
+         */
+        private final String targetClassName;
+
+        /**
+         * The pre-configured provider of the default values per type.
+         */
+        private final DefaultValueProvider valuesProvider;
+
+        private MethodChecker(Method method, String targetClassName, DefaultValueProvider valuesProvider) {
             this.method = method;
             this.targetClassName = targetClassName;
             this.valuesProvider = valuesProvider;
@@ -278,10 +286,10 @@ public class NullToleranceTest {
         /**
          * Checks the stack trace elements.
          *
-         * <p> It is expected that each of the tested utility methods invokes
+         * <p>It is expected that each of the tested utility methods invokes
          * {@link Preconditions#checkNotNull(Object)} as a first step of the execution.
          *
-         * <p> Therefore the stack trace is analysed to ensure its first element references
+         * <p>Therefore the stack trace is analysed to ensure its first element references
          * the {@code Preconditions#checkNotNull(Object)} and the second one references the tested method.
          *
          * @param cause the {@code Throwable}
@@ -310,22 +318,25 @@ public class NullToleranceTest {
     }
 
     /**
-     * Provides the default values for the method arguments.
+     * Provides the default values for the method arguments based on the argument type.
      */
-    private static class DefaultValuesProvider {
+    private static class DefaultValueProvider {
 
         private static final Class[] EMPTY_PARAMETER_TYPES = {};
         private static final Object[] EMPTY_ARGUMENTS = {};
         private static final String METHOD_NAME = "getDefaultInstance";
-        private final Map<?, ?> defaultValues;
 
-        private DefaultValuesProvider(Map<?, ?> defaultValues) {
+        private final Map<Class<?>, ?> defaultValues;
+
+        private DefaultValueProvider(Map<Class<?>, ?> defaultValues) {
             this.defaultValues = defaultValues;
         }
 
         /**
-         * Returns the default value for the method argument by the method argument type.
-         * If default value does not provide, throws {@link IllegalStateException} otherwise.
+         * Returns the default value for the method argument by the method argument {@code type}.
+         *
+         * <p>If a default value cannot be provided for the type of interest,
+         * an {@link IllegalStateException} is thrown.
          *
          * @param type the {@code Class} of the method argument
          * @return the default value
@@ -336,7 +347,7 @@ public class NullToleranceTest {
                 return result;
             }
 
-            result = getChildDefaultValue(type);
+            result = findDerivedTypeValue(type);
 
             final boolean primitive = allPrimitiveTypes().contains(type);
             if (result == null && primitive) {
@@ -349,35 +360,65 @@ public class NullToleranceTest {
                 result = defaultValue(unwrappedPrimitive);
             }
 
-            final Class<Message> messageClass = Message.class;
-            final boolean message = messageClass.isAssignableFrom(type);
-            if (result == null && message) {
-                result = getDefaultMessageInstance(type);
+            if (result == null) {
+                final Class<Message> messageClass = Message.class;
+                final boolean assignableFromMessage = messageClass.isAssignableFrom(type);
+                if(assignableFromMessage) {
+                    @SuppressWarnings("unchecked")      //It's fine since we checked for the type.
+                    final Class<? extends Message> messageType = (Class<? extends Message>) type;
+                    result = getDefaultMessageInstance(messageType);
+                }
             }
 
             checkState(result != null);
             return result;
         }
 
+        /**
+         * Returns the default value, if its type is derived from the given {@code type}.
+         *
+         * <p><b>Example:</b>
+         *
+         * <pre>
+         *     {@code public class Person {...}
+         *
+         *     public class User extends Person {...}
+         *     // ...
+         *
+         *     builder.addDefaultValue(new User());
+         *     // ...
+         *     findDerivedTypeValue(Person);    // will return an instance of User.
+         *     }
+         * </pre>
+         *
+         * <p>In case there are several suitable value, the first one is used.
+         *
+         * @param type the parent type to look the default value for
+         * @return the default value, or {@code null} if no such value can be found
+         */
         @Nullable
-        private Object getChildDefaultValue(Class<?> type) {
-            for (Object clazz : defaultValues.keySet()) {
-                final boolean passedToMap = type.isAssignableFrom(((Class<?>) clazz));
+        private <T> T findDerivedTypeValue(Class<T> type) {
+            for (Class clazz : defaultValues.keySet()) {
+                final boolean passedToMap = type.isAssignableFrom(clazz);
                 if (passedToMap) {
-                    final Object result = defaultValues.get(clazz);
+                    @SuppressWarnings("unchecked")      // It's OK, since we check for the type compliance above.
+                    final T result = (T) defaultValues.get(clazz);
                     return result;
                 }
             }
             return null;
         }
 
-        private static Object getDefaultMessageInstance(Class<?> type) {
+        private static Message getDefaultMessageInstance(Class<? extends Message> type) {
+
+            // using the default instance of {@code Any} if the parameter type is {@code Message}
+            if (type.equals(Message.class)) {
+                return Any.getDefaultInstance();
+            }
+
             try {
-                if (type.equals(Message.class)) {
-                    return Any.getDefaultInstance();
-                }
                 final Method method = type.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
-                final Object defaultInstance = method.invoke(null, EMPTY_ARGUMENTS);
+                final Message defaultInstance = (Message) method.invoke(null, EMPTY_ARGUMENTS);
                 return defaultInstance;
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 throw Exceptions.wrappedCause(e);
@@ -386,13 +427,13 @@ public class NullToleranceTest {
     }
 
     /**
-     * A builder for producing the {@link NullToleranceTest} instance.
+     * A builder for {@link NullToleranceTest}.
      */
     public static class Builder {
 
         private static final String STRING_DEFAULT_VALUE = "";
         private final Set<String> excludedMethods;
-        private final Map<? super Class<?>, ? super Object> defaultValues;
+        private final Map<Class<?>, ? super Object> defaultValues;
         private Class<?> targetClass;
 
         private Builder() {
@@ -428,47 +469,41 @@ public class NullToleranceTest {
         }
 
         /**
-         * Adds the default value for the method argument.
+         * Adds a default value for the method argument.
          *
-         * <p> During the checks, each applicable method of the target class is executed
-         * with the {@code null} values passed as arguments.This is done in an iterative fashion,
+         * <p>During the checks, each applicable method of the target class is executed
+         * with the {@code null} values passed as arguments. This is done in an iterative fashion,
          * so that each invocation checks the {@code null} tolerance for the only one of the parameters.
          * The rest of the method arguments are set with the default values.
          *
-         * <p> If the default value for the type is not customized,
+         * <p>If the default value for the type is not customized,
          * the predefined list of the default values per type will be used:
-         *
-         * <p> The list of the classes and their default values:
          * <ul>
-         *     <li> for the {@code String} is used empty string, as the default value;
-         *     <li> for the primitive and wrapper types is used the default value
-         *     returned by the {@link com.google.common.base.Defaults#defaultValue(Class)}
-         *     </li>
-         *     <li> for the {@code Class<? extends Message>} instances the default value
-         *     will be provided by the {@code #getDefaultInstance} method.
-         *     </li>
+         *     <li>an empty string is used for the {@code String};
+         *     <li>the result of the {@link com.google.common.base.Defaults#defaultValue(Class)} call
+         *     is for the primitives and related wrapper types.</li>
+         *     <li>the result of {@code getDefaultInstance} call for the types
+         *     derived from {@link Message}.</li>
          * </ul>
          *
          * <p><b>Example.</b>
          *
          * <p>The method declared as
-         *
          * <pre> {@code public static void doSomething(PersonName messageValue,
          *                                             Integer wrapperValue,
          *                                             CustomType objectValue)} </pre>
          *
          * <p> will be invoked three times:
-         *
          * <ol>
-         *     <li> {@code doSomething(null, 0, <default value for CustomType>)},
-         *     <li> {@code doSomething(PersonName.getDefaultInstance(), null , <default value for CustomType>)},
-         *     <li> {@code doSomething(PersonName.getDefaultInstance(), 0 , null)}.
+         *     <li>{@code doSomething(null, 0, <default value for CustomType>)},
+         *     <li>{@code doSomething(PersonName.getDefaultInstance(), null , <default value for CustomType>)},
+         *     <li>{@code doSomething(PersonName.getDefaultInstance(), 0 , null)}.
          * </ol>
          *
-         * <p> If the default value for the {@code CustomType} is not provided,
+         * <p>If the default value for the {@code CustomType} is not provided,
          * an {@code IllegalStateException} is thrown.
          *
-         * @param value the default value for the class
+         * @param value the default value
          * @return the {@code Builder}
          */
         @SuppressWarnings("WeakerAccess") // it is a public API.
@@ -494,18 +529,21 @@ public class NullToleranceTest {
         }
 
         /**
-         * Returns the constructed {@link NullToleranceTest}.
+         * Initializes the {@link NullToleranceTest} instance.
          *
          * @return the {@code nullToleranceTest} instance.
          */
         public NullToleranceTest build() {
             checkNotNull(targetClass);
-            addDefaultStringValueIfNeeded();
+            addDefaultTypeValues();
+
             final NullToleranceTest result = new NullToleranceTest(this);
             return result;
         }
 
-        private void addDefaultStringValueIfNeeded() {
+        private void addDefaultTypeValues() {
+            // If no default value has been set for {@code String},
+            // add an empty string literal as one.
             for (Object clazz : defaultValues.keySet()) {
                 final boolean stringClass = String.class.isAssignableFrom((Class) clazz);
                 if (stringClass) {
