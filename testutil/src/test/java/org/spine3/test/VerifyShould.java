@@ -224,11 +224,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_map_is_not_empty() {
-        final Map<Integer, Integer> map = new HashMap<>();
-
-        map.put(1, 1);
-
-        Verify.assertEmpty(map);
+        Verify.assertEmpty(Collections.singletonMap(1, 1));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -243,8 +239,7 @@ public class VerifyShould {
 
     @Test
     public void pass_if_map_is_empty() {
-        final Map emptyMap = new HashMap();
-        Verify.assertEmpty(emptyMap);
+        Verify.assertEmpty(Collections.emptyMap());
     }
 
     @Test(expected = AssertionError.class)
@@ -283,17 +278,12 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_map_is_empty() {
-        final Map emptyMap = new HashMap();
-        Verify.assertNotEmpty(emptyMap);
+        Verify.assertNotEmpty(Collections.emptyMap());
     }
 
     @Test
     public void pass_if_map_is_not_empty() {
-        final Map<Integer, Integer> map = new HashMap<>();
-
-        map.put(1, 1);
-
-        Verify.assertNotEmpty(map);
+        Verify.assertNotEmpty(Collections.singletonMap(1, 1));
     }
 
     @Test(expected = AssertionError.class)
@@ -313,8 +303,7 @@ public class VerifyShould {
     @SuppressWarnings("ZeroLengthArrayAllocation")
     @Test(expected = AssertionError.class)
     public void fail_if_array_is_empty() {
-        final Integer[] array = {};
-        Verify.assertNotEmpty(array);
+        Verify.assertNotEmpty(new Integer[0]);
     }
 
     @SuppressWarnings("ConstantConditions")
