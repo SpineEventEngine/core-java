@@ -20,6 +20,7 @@
 
 package org.spine3.server.bc;
 
+import com.google.common.base.Supplier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,16 +59,21 @@ public class BoundedContextBuilderShould {
         storageFactory.close();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_StorageFactory() {
-        builder.setStorageFactory(Tests.<StorageFactory>nullRef());
+    @Test
+    public void return_storage_factory_supplier_if_it_was_set() {
+        @SuppressWarnings("unchecked") // OK for mocks.
+        Supplier<StorageFactory> mock = mock(Supplier.class);
+
+        builder.setStorageFactorySupplier(mock);
+
+        assertEquals(mock, builder.storageFactorySupplier().get());
     }
 
     @Test
-    public void return_StorageFactory() {
-        final StorageFactory sf = InMemoryStorageFactory.getInstance();
-        builder.setStorageFactory(sf);
-        assertEquals(sf, builder.storageFactory().get());
+    public void allow_clearing_storage_factory_supplier() {
+        builder.setStorageFactorySupplier(Tests.<Supplier<StorageFactory>>nullRef());
+
+        assertFalse(builder.storageFactorySupplier().isPresent());
     }
 
     @Test(expected = NullPointerException.class)
@@ -107,20 +113,18 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void create_CommandBus_using_set_StorageFactory_if_CommandBus_was_not_set() {
+    public void create_CommandBus_if_it_was_not_set() {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
-                .setStorageFactory(storageFactory)
                 .setEventBus(TestEventBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getCommandBus());
     }
 
     @Test
-    public void create_EventBus_using_set_StorageFactory_if_EventBus_was_not_set() {
+    public void create_EventBus_if_it_was_not_set() {
         // Pass CommandBus to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
-                .setStorageFactory(storageFactory)
                 .setCommandBus(TestCommandBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getEventBus());
@@ -129,7 +133,6 @@ public class BoundedContextBuilderShould {
     @Test
     public void create_both_CommandBus_and_EventBus_if_not_set() {
         final BoundedContext boundedContext = builder
-                .setStorageFactory(storageFactory)
                 .build();
         assertNotNull(boundedContext.getCommandBus());
         assertNotNull(boundedContext.getEventBus());

@@ -112,7 +112,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         super();
         this.name = builder.name;
         this.multitenant = builder.multitenant;
-        this.storageFactory = builder.storageFactory;
         this.storageFactorySupplier = builder.storageFactorySupplier;
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
@@ -315,7 +314,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     public static class Builder {
 
         private String name = DEFAULT_NAME;
-        private StorageFactory storageFactory;
         private Supplier<StorageFactory> storageFactorySupplier;
         private CommandStore commandStore;
         private CommandBus commandBus;
@@ -355,15 +353,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
         public boolean isMultitenant() {
             return this.multitenant;
-        }
-
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            this.storageFactory = checkNotNull(storageFactory);
-            return this;
-        }
-
-        public Optional<StorageFactory> storageFactory() {
-            return Optional.fromNullable(storageFactory);
         }
 
         /**
@@ -433,7 +422,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                 storageFactorySupplier = StorageFactorySwitch.getInstance();
             }
 
-            this.storageFactory = storageFactorySupplier.get();
+            final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
                 throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
@@ -442,13 +431,13 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
-                commandStore = createCommandStore();
+                commandStore = createCommandStore(storageFactory);
             }
             if (commandBus == null) {
-                commandBus = createCommandBus();
+                commandBus = createCommandBus(storageFactory);
             }
             if (eventBus == null) {
-                eventBus = createEventBus();
+                eventBus = createEventBus(storageFactory);
             }
 
             if (stand == null) {
@@ -474,14 +463,14 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return builder.build();
         }
 
-        private CommandStore createCommandStore() {
+        private static CommandStore createCommandStore(StorageFactory storageFactory) {
             final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
             return result;
         }
 
-        private CommandBus createCommandBus() {
+        private CommandBus createCommandBus(StorageFactory storageFactory) {
             if (commandStore == null) {
-                this.commandStore = createCommandStore();
+                this.commandStore = createCommandStore(storageFactory);
             }
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .setCommandStore(commandStore)
@@ -489,7 +478,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return commandBus;
         }
 
-        private EventBus createEventBus() {
+        private static EventBus createEventBus(StorageFactory storageFactory) {
             final EventBus result = EventBus.newBuilder()
                                             .setStorageFactory(storageFactory)
                                             .build();
