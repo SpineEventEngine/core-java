@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -48,7 +47,6 @@ public class AggregateRootShould {
     @Before
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
                                                             .build();
         boundedContext.register(new ProjectHeaderRepository(boundedContext));
 

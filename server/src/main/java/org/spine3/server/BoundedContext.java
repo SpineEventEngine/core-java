@@ -430,7 +430,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
         public BoundedContext build() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.instance();
+                storageFactorySupplier = StorageFactorySwitch.getInstance();
             }
 
             this.storageFactory = storageFactorySupplier.get();

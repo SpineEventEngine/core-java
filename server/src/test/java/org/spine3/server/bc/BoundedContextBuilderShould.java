@@ -63,7 +63,6 @@ public class BoundedContextBuilderShould {
         builder.setStorageFactory(Tests.<StorageFactory>nullRef());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we set right before get().
     @Test
     public void return_StorageFactory() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();

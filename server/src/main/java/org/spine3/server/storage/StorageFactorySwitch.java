@@ -70,7 +70,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     /**
      * Obtains the singleton instance.
      */
-    public static StorageFactorySwitch instance() {
+    public static StorageFactorySwitch getInstance() {
         return Singleton.INSTANCE.value;
     }
 

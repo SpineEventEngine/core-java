@@ -71,7 +71,7 @@ public class StorageFactorySwitchShould {
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.instance();
+        storageFactorySwitch = StorageFactorySwitch.getInstance();
     }
 
     @After
