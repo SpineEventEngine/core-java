@@ -56,7 +56,7 @@ public class AggregateRootShould {
 
     @Test
     public void return_part_state_by_class() {
-        final Message part = aggregateRoot.getPart(Project.class);
+        final Message part = aggregateRoot.getPartState(Project.class);
 
         assertNotNull(part);
     }
@@ -66,8 +66,8 @@ public class AggregateRootShould {
         final AggregateRoot rootSpy = spy(aggregateRoot);
         final Class<Project> partClass = Project.class;
 
-        rootSpy.getPart(partClass);
-        rootSpy.getPart(partClass);
+        rootSpy.getPartState(partClass);
+        rootSpy.getPartState(partClass);
 
         // It may be called once in another test. So here we check for atMost().
         verify(rootSpy, atMost(1)).lookup(partClass);
