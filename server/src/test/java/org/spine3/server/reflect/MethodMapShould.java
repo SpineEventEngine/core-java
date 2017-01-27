@@ -41,7 +41,7 @@ public class MethodMapShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext context) {
+        ProjectCreated handle(CreateProject command, CommandContext context) {
             return ProjectCreated.getDefaultInstance();
         }
     }

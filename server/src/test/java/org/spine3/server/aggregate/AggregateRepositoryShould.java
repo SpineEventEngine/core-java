@@ -415,7 +415,7 @@ public class AggregateRepositoryShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject msg, CommandContext context) {
+        ProjectCreated handle(CreateProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return ProjectCreated.newBuilder()
@@ -431,7 +431,7 @@ public class AggregateRepositoryShould {
         }
 
         @Assign
-        public TaskAdded handle(AddTask msg, CommandContext context) {
+        TaskAdded handle(AddTask msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return TaskAdded.newBuilder()
@@ -445,7 +445,7 @@ public class AggregateRepositoryShould {
         }
 
         @Assign
-        public ProjectStarted handle(StartProject msg, CommandContext context) {
+        ProjectStarted handle(StartProject msg, CommandContext context) {
             final Command cmd = Commands.create(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return ProjectStarted.newBuilder()
