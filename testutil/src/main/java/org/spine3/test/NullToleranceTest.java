@@ -57,33 +57,33 @@ import static javax.lang.model.SourceVersion.isName;
  *
  * <p> The helper checks the methods with access modifiers:
  * <ul>
- * <li> the {@code public};
- * <li> the {@code protected};
- * <li> the {@code default}.
+ *     <li> the {@code public};
+ *     <li> the {@code protected};
+ *     <li> the {@code default}.
  * </ul>
  *
  * <p> The helper does not check the methods:
  * <ul>
- * <li> with the {@code private} modifier;
- * <li> without the {@code static} modifier;
- * <li> with only the primitive parameters;
- * <li> if all the parameters are marked as {@code Nullable}.
+ *     <li> with the {@code private} modifier;
+ *     <li> without the {@code static} modifier;
+ *     <li> with only the primitive parameters;
+ *     <li> if all the parameters are marked as {@code Nullable}.
  * </ul>
  *
  * <p> The examples of the methods which will be checked:
  * <ul>
- * <li> public static void method(Object obj);
- * <li> protected static void method(Object first, long second);
- * <li> public static void method(@Nullable Object first, Object second);
- * <li> static void method(Object first, Object second).
+ *     <li> public static void method(Object obj);
+ *     <li> protected static void method(Object first, long second);
+ *     <li> public static void method(@Nullable Object first, Object second);
+ *     <li> static void method(Object first, Object second).
  * </ul>
  *
  * <p> The examples of the methods which will be ignored:
  * <ul>
- * <li> public void method(Object obj);
- * <li> private static void method(Object obj);
- * <li> public static void method(@Nullable Object obj);
- * <li> protected static void method(int first, float second).
+ *     <li> public void method(Object obj);
+ *     <li> private static void method(Object obj);
+ *     <li> public static void method(@Nullable Object obj);
+ *     <li> protected static void method(int first, float second).
  * </ul>
  *
  * @author Illia Shepilov
@@ -455,9 +455,9 @@ public class NullToleranceTest {
          * <p> will be invoked three times:
          *
          * <ol>
-         * <li> {@code doSomething(null, 0, <default value for CustomType>)},
-         * <li> {@code doSomething(PersonName.getDefaultInstance(), null , <default value for CustomType>)},
-         * <li> {@code doSomething(PersonName.getDefaultInstance(), 0 , null)}.
+         *     <li> {@code doSomething(null, 0, <default value for CustomType>)},
+         *     <li> {@code doSomething(PersonName.getDefaultInstance(), null , <default value for CustomType>)},
+         *     <li> {@code doSomething(PersonName.getDefaultInstance(), 0 , null)}.
          * </ol>
          *
          * <p> If the default value for the {@code CustomType} is not provided,
