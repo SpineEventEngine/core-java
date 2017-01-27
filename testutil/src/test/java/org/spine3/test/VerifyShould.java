@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -301,13 +302,67 @@ public class VerifyShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_array_is_null() {
-        Verify.assertNotEmpty((Integer[]) null);
+        final Integer[] nullArray = null;
+
+        Verify.assertNotEmpty(nullArray);
+        Verify.assertSize(0, nullArray);
     }
 
     @Test
     public void pass_if_array_is_not_empty() {
         final Integer[] array = {1, 2, 3};
         Verify.assertNotEmpty(array);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_object_array_size_is_not_equal() {
+        Verify.assertSize(-1, new Object[1]);
+    }
+
+    @Test
+    public void pass_if_object_array_size_is_equal() {
+        final int size = 0;
+        Verify.assertSize(size, new Object[size]);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_size_is_not_equal() {
+        Verify.assertSize(-1, FluentIterable.of(1));
+    }
+
+    @Test
+    public void pass_if_iterable_size_is_equal() {
+        Verify.assertSize(0, FluentIterable.of());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_size_is_not_equal() {
+        Verify.assertSize(-1, Collections.emptyMap());
+    }
+
+    @Test
+    public void pass_if_map_size_is_equal() {
+        Verify.assertSize(0, Collections.emptyMap());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_size_is_not_equal() {
+        Verify.assertSize(-1, ArrayListMultimap.create());
+    }
+
+    @Test
+    public void pass_if_multimap_size_is_equal() {
+        Verify.assertSize(0, ArrayListMultimap.create());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_collection_size_is_not_equal() {
+        Verify.assertSize(-1, Collections.emptyList());
+    }
+
+    @Test
+    public void pass_if_collection_size_is_equal() {
+        Verify.assertSize(0, Collections.emptyList());
     }
 
 }
