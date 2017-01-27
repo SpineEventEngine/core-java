@@ -105,9 +105,14 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_float_values_are_same_types_of_infinity() {
+    public void fail_if_float_values_are_positive_infinity() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_float_values_are_negative_infinity() {
+        final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
     }
 
@@ -209,12 +214,8 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null() {
-        final Iterable iterable = null;
-
-        Verify.assertIterableEmpty(iterable);
-        Verify.assertIterableNotEmpty(iterable);
-        Verify.assertSize(0, iterable);
+    public void fail_if_iterable_is_null_in_iterable_empty() {
+        Verify.assertIterableEmpty(null);
     }
 
     @Test
@@ -229,12 +230,8 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null() {
-        final Map map = null;
-
-        Verify.assertEmpty(map);
-        Verify.assertNotEmpty(map);
-        Verify.assertSize(0, map);
+    public void fail_if_map_is_null_in_assert_empty() {
+        Verify.assertEmpty((Map) null);
     }
 
     @Test
@@ -253,12 +250,8 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_null() {
-        final Multimap multimap = null;
-
-        Verify.assertEmpty(multimap);
-        Verify.assertNotEmpty(multimap);
-        Verify.assertSize(0, multimap);
+    public void fail_if_multimap_is_null_in_assert_empty() {
+        Verify.assertEmpty((Multimap) null);
     }
 
     @Test
@@ -271,6 +264,12 @@ public class VerifyShould {
         Verify.assertNotEmpty(FluentIterable.of());
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_null_in_iterable_not_empty() {
+        Verify.assertIterableNotEmpty(null);
+    }
+
     @Test
     public void pass_if_iterable_is_not_empty() {
         Verify.assertNotEmpty(FluentIterable.of(1));
@@ -281,6 +280,12 @@ public class VerifyShould {
         Verify.assertNotEmpty(Collections.emptyMap());
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_not_empty() {
+        Verify.assertNotEmpty((Map) null);
+    }
+
     @Test
     public void pass_if_map_is_not_empty() {
         Verify.assertNotEmpty(Collections.singletonMap(1, 1));
@@ -289,6 +294,12 @@ public class VerifyShould {
     @Test(expected = AssertionError.class)
     public void fail_if_multimap_is_empty() {
         Verify.assertNotEmpty(ArrayListMultimap.create());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_null_in_assert_not_empty() {
+        Verify.assertNotEmpty((Multimap) null);
     }
 
     @Test
@@ -308,11 +319,8 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null() {
-        final Integer[] nullArray = null;
-
-        Verify.assertNotEmpty(nullArray);
-        Verify.assertSize(0, nullArray);
+    public void fail_if_array_is_null_in_assert_not_empty() {
+        Verify.assertNotEmpty((Integer[]) null);
     }
 
     @Test
@@ -326,6 +334,12 @@ public class VerifyShould {
         Verify.assertSize(-1, new Object[1]);
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_null_in_assert_size() {
+        Verify.assertSize(0, (Integer[]) null);
+    }
+
     @Test
     public void pass_if_object_array_size_is_equal() {
         final int size = 0;
@@ -335,6 +349,12 @@ public class VerifyShould {
     @Test(expected = AssertionError.class)
     public void fail_if_iterable_size_is_not_equal() {
         Verify.assertSize(-1, FluentIterable.of(1));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_iterable_is_null_in_assert_size() {
+        Verify.assertSize(0, (Iterable) null);
     }
 
     @Test
@@ -347,6 +367,12 @@ public class VerifyShould {
         Verify.assertSize(-1, Collections.emptyMap());
     }
 
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_map_is_null_in_assert_size() {
+        Verify.assertSize(0, (Map) null);
+    }
+
     @Test
     public void pass_if_map_size_is_equal() {
         Verify.assertSize(0, Collections.emptyMap());
@@ -355,6 +381,12 @@ public class VerifyShould {
     @Test(expected = AssertionError.class)
     public void fail_if_multimap_size_is_not_equal() {
         Verify.assertSize(-1, ArrayListMultimap.create());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_multimap_is_null_in_assert_size() {
+        Verify.assertSize(0, (Multimap) null);
     }
 
     @Test
