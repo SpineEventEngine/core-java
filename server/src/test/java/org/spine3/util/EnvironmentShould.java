@@ -121,7 +121,7 @@ public class EnvironmentShould {
     }
 
     @Test
-    public void turn_into_tests_mode() {
+    public void turn_tests_mode_on() {
         environment.setToTests();
 
         assertTrue(environment.isTests());
@@ -129,7 +129,7 @@ public class EnvironmentShould {
     }
 
     @Test
-    public void turn_into_production_mode() {
+    public void turn_production_mode_on() {
         environment.setToProduction();
 
         assertFalse(environment.isTests());
