@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Parameter;
 import com.google.common.reflect.TypeToken;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.util.Exceptions;
 
@@ -372,6 +373,9 @@ public class NullToleranceTest {
 
         private static Object getDefaultMessageInstance(Class<?> type) {
             try {
+                if (type.equals(Message.class)) {
+                    return Any.getDefaultInstance();
+                }
                 final Method method = type.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
                 final Object defaultInstance = method.invoke(null, EMPTY_ARGUMENTS);
                 return defaultInstance;
