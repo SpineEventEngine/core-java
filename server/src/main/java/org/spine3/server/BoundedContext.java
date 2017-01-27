@@ -343,17 +343,23 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        @Nullable
-        public StorageFactory getStorageFactory() {
-            return storageFactory;
+        public Optional<StorageFactory> storageFactory() {
+            return Optional.fromNullable(storageFactory);
         }
 
-        public Builder setStorageFactorySupplier(Supplier<StorageFactory> supplier) {
+        /**
+         * Sets the supplier for {@code StorageFactory}.
+         *
+         * <p>If the supplier was not set or {@code null} was passed,
+         * {@link StorageFactorySwitch} will be used during the construction of
+         * a {@code BoundedContext} instance.
+         */
+        public Builder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
             this.storageFactorySupplier = supplier;
             return this;
         }
 
-        public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
+        public Optional<Supplier<StorageFactory>> storageFactorySupplier() {
             return Optional.fromNullable(storageFactorySupplier);
         }
 
@@ -362,9 +368,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        @Nullable
-        public CommandStore getCommandStore() {
-            return this.commandStore;
+        public Optional<CommandStore> commandStore() {
+            return Optional.fromNullable(commandStore);
         }
 
         public Builder setCommandBus(CommandBus commandBus) {
@@ -372,9 +377,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        @Nullable
-        public CommandBus getCommandBus() {
-            return commandBus;
+        public Optional<CommandBus> commandBus() {
+            return Optional.fromNullable(commandBus);
         }
 
 
@@ -383,9 +387,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        @Nullable
-        public EventBus getEventBus() {
-            return eventBus;
+        public Optional<EventBus> eventBus() {
+            return Optional.fromNullable(eventBus);
         }
 
         public Builder setStand(Stand stand) {
@@ -393,14 +396,12 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        @Nullable
-        public Stand getStand() {
-            return stand;
+        public Optional<Stand> stand() {
+            return Optional.fromNullable(stand);
         }
 
-        @Nullable
-        public StandUpdateDelivery getStandUpdateDelivery() {
-            return standUpdateDelivery;
+        public Optional<StandUpdateDelivery> standUpdateDelivery() {
+            return Optional.fromNullable(standUpdateDelivery);
         }
 
         public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
@@ -446,18 +447,12 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
 
         private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
-            StandFunnel standFunnel;
-            if (standUpdateDelivery == null) {
-                standFunnel = StandFunnel.newBuilder()
-                                         .setStand(stand)
-                                         .build();
-            } else {
-                standFunnel = StandFunnel.newBuilder()
-                                         .setDelivery(standUpdateDelivery)
-                                         .setStand(stand)
-                                         .build();
+            final StandFunnel.Builder builder = StandFunnel.newBuilder()
+                                                           .setStand(stand);
+            if (standUpdateDelivery != null) {
+                builder.setDelivery(standUpdateDelivery);
             }
-            return standFunnel;
+            return builder.build();
         }
 
         private CommandStore createCommandStore() {

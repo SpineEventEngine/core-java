@@ -40,7 +40,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention",
+                   "OptionalGetWithoutIsPresent" /* OK as we set right before get(). */})
 public class BoundedContextBuilderShould {
 
     private StorageFactory storageFactory;
@@ -62,11 +63,12 @@ public class BoundedContextBuilderShould {
         builder.setStorageFactory(Tests.<StorageFactory>nullRef());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we set right before get().
     @Test
     public void return_StorageFactory() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();
         builder.setStorageFactory(sf);
-        assertEquals(sf, builder.getStorageFactory());
+        assertEquals(sf, builder.storageFactory().get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -79,14 +81,14 @@ public class BoundedContextBuilderShould {
         final CommandBus expected = TestCommandBusFactory.create(storageFactory);
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
-        assertEquals(expected, builder.getCommandBus());
+        assertEquals(expected, builder.commandBus().get());
     }
 
     @Test
     public void return_EventBus() {
         final EventBus expected = TestEventBusFactory.create(storageFactory);
         builder.setEventBus(expected);
-        assertEquals(expected, builder.getEventBus());
+        assertEquals(expected, builder.eventBus().get());
     }
 
     @Test
@@ -138,7 +140,7 @@ public class BoundedContextBuilderShould {
     public void accept_CommandStore() {
         final CommandStore commandStore = mock(CommandStore.class);
         builder.setCommandStore(commandStore);
-        assertEquals(commandStore, builder.getCommandStore());
+        assertEquals(commandStore, builder.commandStore().get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -150,6 +152,6 @@ public class BoundedContextBuilderShould {
     public void return_StandUpdateDelivery_if_set() {
         final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
         assertEquals(mock, builder.setStandUpdateDelivery(mock)
-                                  .getStandUpdateDelivery());
+                                  .standUpdateDelivery().get());
     }
 }
