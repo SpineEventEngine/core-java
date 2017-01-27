@@ -43,7 +43,13 @@ message EntityStorageRecord {
     // The version of the entity.
     int32 version = 2;
 
-    reserved 3 to 19;
+    // If `true` the entity will not be loaded for regular queries.
+    bool archived = 3;
+
+    // If `true` the entity will not be loaded for regular queries.
+    bool deleted = 4;
+
+    reserved 5 to 19;
 
     // The state of the entity.
     google.protobuf.Any state = 20;
