@@ -38,6 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.spine3.server.storage.StorageFactorySwitch.init;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
@@ -112,7 +113,7 @@ public class StorageFactorySwitchShould {
 
         final StorageFactory custom = mock(StorageFactory.class);
 
-        storageFactorySwitch.init(inMemorySupplier, new Supplier<StorageFactory>() {
+        init(inMemorySupplier, new Supplier<StorageFactory>() {
             @Override
             public StorageFactory get() {
                 return custom;
@@ -146,7 +147,7 @@ public class StorageFactorySwitchShould {
     public void cache_instance_of_StorageFactory_in_testing() {
         final Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
 
-        storageFactorySwitch.init(inMemorySupplier, testingSupplier);
+        init(inMemorySupplier, testingSupplier);
 
         Environment.getInstance().setToTests();
 
@@ -160,7 +161,7 @@ public class StorageFactorySwitchShould {
     public void cache_instance_of_StorageFactory_in_production() {
         final Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
 
-        storageFactorySwitch.init(productionSupplier, inMemorySupplier);
+        init(productionSupplier, inMemorySupplier);
 
         Environment.getInstance().setToProduction();
 
@@ -172,7 +173,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void return_itself_on_init() {
-        final StorageFactorySwitch result = storageFactorySwitch.init(inMemorySupplier, inMemorySupplier);
+        final StorageFactorySwitch result = init(inMemorySupplier, inMemorySupplier);
         assertSame(storageFactorySwitch, result);
     }
 }

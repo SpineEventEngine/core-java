@@ -82,11 +82,12 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
      * @return this
      */
-    public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
-                                     @Nullable Supplier<StorageFactory> testsSupplier) {
-        this.productionSupplier = checkNotNull(productionSupplier);
-        this.testsSupplier = testsSupplier;
-        return this;
+    public static StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
+                                            @Nullable Supplier<StorageFactory> testsSupplier) {
+        final StorageFactorySwitch instance = getInstance();
+        instance.productionSupplier = checkNotNull(productionSupplier);
+        instance.testsSupplier = testsSupplier;
+        return instance;
     }
 
     /**
