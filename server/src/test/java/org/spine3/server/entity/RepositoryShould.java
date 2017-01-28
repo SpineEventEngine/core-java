@@ -96,7 +96,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean archive(ProjectId id) {
+        protected boolean markArchived(ProjectId id) {
             return false;
         }
     }
@@ -139,7 +139,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean archive(ProjectId id) {
+        protected boolean markArchived(ProjectId id) {
             return false;
         }
     }
@@ -182,7 +182,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean archive(ProjectId id) {
+        protected boolean markArchived(ProjectId id) {
             return false;
         }
     }
@@ -212,7 +212,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean archive(ProjectId id) {
+        protected boolean markArchived(ProjectId id) {
             return false;
         }
 
@@ -306,7 +306,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean archive(ProjectId id) {
+        protected boolean markArchived(ProjectId id) {
             return false;
         }
 

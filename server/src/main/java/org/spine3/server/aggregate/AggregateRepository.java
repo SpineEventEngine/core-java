@@ -327,7 +327,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected boolean archive(I id) {
+    protected boolean markArchived(I id) {
         return aggregateStorage().markArchived(id);
     }
 
