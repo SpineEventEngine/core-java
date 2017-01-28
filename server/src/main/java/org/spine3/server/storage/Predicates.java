@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
  */
 public class Predicates {
 
-    public static final Predicate<EntityStorageRecord> isVisible = new Predicate<EntityStorageRecord>() {
+    private static final Predicate<EntityStorageRecord> isVisible = new Predicate<EntityStorageRecord>() {
         @Override
         public boolean apply(@Nullable EntityStorageRecord input) {
             return input != null && !input.getArchived() && !input.getDeleted();
@@ -40,5 +40,9 @@ public class Predicates {
 
     private Predicates() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static Predicate<EntityStorageRecord> isVisible() {
+        return isVisible;
     }
 }

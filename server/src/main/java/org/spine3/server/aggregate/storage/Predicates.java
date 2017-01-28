@@ -31,21 +31,7 @@ import javax.annotation.Nullable;
  */
 public class Predicates {
 
-    public static final Predicate<AggregateStatus> isArchived = new Predicate<AggregateStatus>() {
-        @Override
-        public boolean apply(@Nullable AggregateStatus input) {
-            return input != null && input.getArchived();
-        }
-    };
-
-    public static final Predicate<AggregateStatus> isDeleted = new Predicate<AggregateStatus>() {
-        @Override
-        public boolean apply(@Nullable AggregateStatus input) {
-            return input != null && input.getDeleted();
-        }
-    };
-
-    public static final Predicate<AggregateStatus> isVisible = new Predicate<AggregateStatus>() {
+    private static final Predicate<AggregateStatus> isVisible = new Predicate<AggregateStatus>() {
         @Override
         public boolean apply(@Nullable AggregateStatus input) {
             return input == null ||
@@ -55,5 +41,9 @@ public class Predicates {
 
     private Predicates() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static Predicate<AggregateStatus> isVisible() {
+        return isVisible;
     }
 }

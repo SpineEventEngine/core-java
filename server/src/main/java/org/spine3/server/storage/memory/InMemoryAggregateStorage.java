@@ -139,7 +139,8 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
                 final AggregateStatus aggregateStatus = statuses.get(input);
 
                 return aggregateStatus == null
-                        || Predicates.isVisible.apply(aggregateStatus);
+                        || Predicates.isVisible()
+                                     .apply(aggregateStatus);
             }
         };
 

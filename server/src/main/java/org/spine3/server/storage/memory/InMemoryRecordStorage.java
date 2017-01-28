@@ -171,7 +171,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     private static class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
 
         private final Map<I, EntityStorageRecord> records = newHashMap();
-        private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, Predicates.isVisible);
+        private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, Predicates.isVisible());
 
         @Override
         public void put(I id, EntityStorageRecord record) {
@@ -182,7 +182,8 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         @Override
         public EntityStorageRecord get(I id) {
             final EntityStorageRecord record = records.get(id);
-            if (!Predicates.isVisible.apply(record)) {
+            if (!Predicates.isVisible()
+                           .apply(record)) {
                 return null;
             }
             return record;
