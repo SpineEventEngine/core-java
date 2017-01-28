@@ -44,12 +44,18 @@ abstract class MultitenantStorage<I, S extends TenantStorage<I, ?>> {
     /** The map from {@code TenantId} to its slice of data. */
     private final Map<TenantId, S> tenantSlices = newHashMap();
 
+    /** If {@code true} the storage will contain a data slice for each tenant. */
+    private final boolean multitenant;
+
     MultitenantStorage(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
-    private final boolean multitenant;
-
+    /**
+     * Obtains the data slice for the current tenant.
+     *
+     * <p>If the slice has not been created for this tenant, it will be created.
+     */
     S getStorage() {
         final TenantId tenantId = isMultitenant() ? CurrentTenant.get() : singleTenant;
         checkState(tenantId != null, "Current tenant is null");
