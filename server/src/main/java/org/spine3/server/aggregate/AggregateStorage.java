@@ -196,13 +196,13 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
         final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
 
-        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                                                                             .setEvent(event)
-                                                                             .setTimestamp(timestamp)
-                                                                             .setEventId(eventIdStr)
-                                                                             .setEventType(eventType)
-                                                                             .setVersion(context.getVersion());
-        return builder.build();
+        return AggregateStorageRecord.newBuilder()
+                                     .setEvent(event)
+                                     .setTimestamp(timestamp)
+                                     .setEventId(eventIdStr)
+                                     .setEventType(eventType)
+                                     .setVersion(context.getVersion())
+                                     .build();
     }
 
     // Storage implementation API.
@@ -223,4 +223,12 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
+
+    /**
+     * Marks the {@code AggregateStorageRecord} with the passed ID as {@code archived}.
+     *
+     * @param id the aggregate ID
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    protected abstract boolean markArchived(I id);
 }

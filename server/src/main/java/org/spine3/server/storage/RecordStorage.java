@@ -101,6 +101,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     }
 
     /**
+     * Marks the record with the passed ID as {@code archived}.
+     *
+     * @param id the ID of the record to mark
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean markArchived(I id);
+
+    /**
      * {@inheritDoc}
      */
     @Override

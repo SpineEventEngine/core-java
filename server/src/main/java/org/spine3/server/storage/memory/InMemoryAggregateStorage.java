@@ -20,12 +20,17 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.Predicates;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
@@ -42,12 +47,25 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
+    private final Multimap<I, AggregateStorageRecord> records = TreeMultimap.create(
             new AggregateStorageKeyComparator<I>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, Integer> eventCountMap = newHashMap();
+    private final Map<I, AggregateStatus> statuses = newHashMap();
+
+    private final Predicate<I> isVisible = new Predicate<I>() {
+        @Override
+        public boolean apply(@Nullable I input) {
+            final AggregateStatus aggregateStatus = statuses.get(input);
+
+            return aggregateStatus == null
+                    || Predicates.isVisible.apply(aggregateStatus);
+        }
+    };
+
+    private final Multimap<I, AggregateStorageRecord> filtered = Multimaps.filterKeys(records, isVisible);
+    private final Map<I, Integer> eventCounts = newHashMap();
 
     protected InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -60,20 +78,20 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected void writeRecord(I id, AggregateStorageRecord record) {
-        recordMap.put(id, record);
+        records.put(id, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = recordMap.get(id);
+        final Collection<AggregateStorageRecord> records = filtered.get(id);
         return records.iterator();
     }
 
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final Integer count = eventCountMap.get(id);
+        final Integer count = eventCounts.get(id);
         if (count == null) {
             return 0;
         }
@@ -83,7 +101,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
-        eventCountMap.put(id, eventCount);
+        eventCounts.put(id, eventCount);
     }
 
     /** Used for sorting by timestamp descending (from newer to older). */
@@ -96,6 +114,26 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
+    }
+
+    @Override
+    protected boolean markArchived(I id) {
+        final AggregateStatus currentStatus = statuses.get(id);
+        if (currentStatus != null) {
+            if (currentStatus.getArchived()) {
+                return false; // Already archived.
+            }
+            final AggregateStatus updatedStatus = currentStatus.toBuilder()
+                                                       .setArchived(true)
+                                                       .build();
+            statuses.put(id, updatedStatus);
+            return true;
+        }
+
+        statuses.put(id, AggregateStatus.newBuilder()
+                                        .setArchived(true)
+                                        .build());
+        return true;
     }
 
     /** Used for sorting keys by the key hash codes. */

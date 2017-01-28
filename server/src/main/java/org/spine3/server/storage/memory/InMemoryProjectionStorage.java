@@ -75,6 +75,11 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
+    public boolean markArchived(I id) {
+        return getRecordStorage().markArchived(id);
+    }
+
+    @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
         final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
         return result;

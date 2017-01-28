@@ -130,6 +130,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    @Override
+    protected boolean archive(I id) {
+        final RecordStorage<I> storage = recordStorage();
+        boolean result = storage.markArchived(id);
+        return result;
+    }
+
     /**
      * Loads all the entities in this repository with IDs,
      * contained within the passed {@code ids} values.

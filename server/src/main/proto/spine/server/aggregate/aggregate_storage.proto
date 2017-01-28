@@ -76,13 +76,7 @@ message AggregateStorageRecord {
     // The version of the aggregate after the event was applied.
     int32 version = 4;
 
-    // If `true` the aggregate will not be loaded for regular queries.
-    bool archived = 5;
-
-    // If `true` the aggregate will not be loaded for regular queries.
-    bool deleted = 6;
-
-    reserved 7 to 19;
+    reserved 5 to 19;
 
     oneof kind {
         // Event stored in the record, or...
@@ -109,3 +103,14 @@ message AggregateEvents {
     // Otherwise, events are full history of the aggregate.
     repeated base.Event event = 2;
 }
+
+// The storage status of an aggregate.
+message AggregateStatus {
+
+    // If `true` the aggregate will not be loaded for regular queries.
+    bool archived = 3;
+
+    // If `true` the aggregate will not be loaded for regular queries.
+    bool deleted = 4;
+}
+

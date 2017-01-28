@@ -74,7 +74,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
+    private static class RepositoryForEntitiesWithPrivateConstructor
+            extends Repository<ProjectId, EntityWithPrivateConstructor> {
         private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -92,6 +93,11 @@ public class RepositoryShould {
         @Override
         public Optional<EntityWithPrivateConstructor> load(ProjectId id) {
             return Optional.absent();
+        }
+
+        @Override
+        protected boolean archive(ProjectId id) {
+            return false;
         }
     }
 
@@ -111,7 +117,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class RepositoryForEntitiesWithProtectedConstructor extends Repository<ProjectId, EntityWithProtectedConstructor> {
+    private static class RepositoryForEntitiesWithProtectedConstructor
+            extends Repository<ProjectId, EntityWithProtectedConstructor> {
         public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -129,6 +136,11 @@ public class RepositoryShould {
         @Override
         public Optional<EntityWithProtectedConstructor> load(ProjectId id) {
             return Optional.absent();
+        }
+
+        @Override
+        protected boolean archive(ProjectId id) {
+            return false;
         }
     }
 
@@ -148,7 +160,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
+    private static class RepositoryForEntitiesWithoutRequiredConstructor
+            extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
         private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -166,6 +179,11 @@ public class RepositoryShould {
         @Override
         public Optional<EntityWithoutRequiredConstructor> load(ProjectId id) {
             return Optional.absent();
+        }
+
+        @Override
+        protected boolean archive(ProjectId id) {
+            return false;
         }
     }
 
@@ -191,6 +209,11 @@ public class RepositoryShould {
         @Override
         protected Optional<ProjectEntity> load(ProjectId id) {
             return Optional.absent();
+        }
+
+        @Override
+        protected boolean archive(ProjectId id) {
+            return false;
         }
 
         @Override
@@ -280,6 +303,11 @@ public class RepositoryShould {
         @Override
         protected Optional<FailingEntity> load(ProjectId id) {
             return null;
+        }
+
+        @Override
+        protected boolean archive(ProjectId id) {
+            return false;
         }
 
         @SuppressWarnings("ReturnOfNull")

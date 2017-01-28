@@ -95,7 +95,10 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage {
     }
 
     /**
-     * @return {@code true} if the storage is open for writing (wasn't closed until now), {@code false} otherwise
+     * Verifies if the storage is open.
+     *
+     * @return {@code true} if the storage is open for writing (wasn't closed until now),
+     *         {@code false} otherwise
      * @see #close()
      */
     public boolean isOpen() {
@@ -103,6 +106,8 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage {
     }
 
     /**
+     * Verifies if the storage is closed.
+     *
      * @return {@code true} if the storage is closed, {@code false} otherwise
      * @see #close()
      */

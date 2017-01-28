@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains generated classes and interfaces for storing
+ * This package contains classes and interfaces for storing
  * {@link org.spine3.server.aggregate.Aggregate}s.
  *
  * @see org.spine3.server.aggregate.AggregateStorage
