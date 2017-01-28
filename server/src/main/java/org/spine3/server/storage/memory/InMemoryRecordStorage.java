@@ -34,6 +34,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -44,6 +45,7 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
+ * @param <I> the type of entity IDs
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
@@ -54,7 +56,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
                                                          .setValue("SINGLE_TENANT")
                                                          .build();
 
-    private final Map<TenantId, TenantStorage<I>> tenantToStorageMap = newHashMap();
+    private final Map<TenantId, TenantRecords<I>> tenantToStorageMap = newHashMap();
 
     protected InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
@@ -67,7 +69,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
-        final TenantStorage<I> storage = getStorage();
+        final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
@@ -79,7 +81,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         return result;
     }
 
-    private EntityStorageRecord findAndApplyFieldMask(TenantStorage<I> storage,
+    private EntityStorageRecord findAndApplyFieldMask(TenantRecords<I> storage,
                                                       I givenId,
                                                       FieldMask fieldMask) {
         EntityStorageRecord matchingResult = null;
@@ -120,7 +122,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             return readAllRecords();
         }
 
-        final TenantStorage<I> storage = getStorage();
+        final TenantRecords<I> storage = getStorage();
 
         if (storage.isEmpty()) {
             return ImmutableMap.of();
@@ -150,13 +152,13 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         return new InMemoryRecordStorage<>(multitenant);
     }
 
-    private TenantStorage<I> getStorage() {
+    private TenantRecords<I> getStorage() {
         final TenantId tenantId = isMultitenant() ? CurrentTenant.get() : singleTenant;
         checkState(tenantId != null, "Current tenant is null");
 
-        TenantStorage<I> storage = tenantToStorageMap.get(tenantId);
+        TenantRecords<I> storage = tenantToStorageMap.get(tenantId);
         if (storage == null) {
-            storage = new TenantStorage<>();
+            storage = new TenantRecords<>();
             tenantToStorageMap.put(tenantId, storage);
         }
         return storage;
@@ -176,16 +178,19 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
      * The memory-based storage for {@code EntityStorageRecord} that represents
      * all storage operations available for data of a single tenant.
      */
-    private static class TenantStorage<I> {
+    private static class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
 
         private final Map<I, EntityStorageRecord> records = newHashMap();
         private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, Predicates.isVisible);
 
-        private void put(I id, EntityStorageRecord record) {
+        @Override
+        public void put(I id, EntityStorageRecord record) {
             records.put(id, record);
         }
 
-        private EntityStorageRecord get(I id) {
+        @Nullable
+        @Override
+        public EntityStorageRecord get(I id) {
             final EntityStorageRecord record = records.get(id);
             if (!Predicates.isVisible.apply(record)) {
                 return null;
@@ -218,7 +223,8 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             return result;
         }
 
-        private boolean isEmpty() {
+        @Override
+        public boolean isEmpty() {
             return filtered.isEmpty();
         }
     }
