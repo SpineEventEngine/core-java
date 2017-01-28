@@ -133,7 +133,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     protected boolean markArchived(I id) {
         final RecordStorage<I> storage = recordStorage();
-        boolean result = storage.markArchived(id);
+        final boolean result = storage.markArchived(id);
+        return result;
+    }
+
+    @Override
+    protected boolean markDeleted(I id) {
+        final RecordStorage<I> storage = recordStorage();
+        final boolean result = storage.markDeleted(id);
         return result;
     }
 

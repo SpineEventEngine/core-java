@@ -331,6 +331,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregateStorage().markArchived(id);
     }
 
+    @Override
+    protected boolean markDeleted(I id) {
+        return aggregateStorage().markDeleted(id);
+    }
+
     private enum LogSingleton {
         INSTANCE;
 

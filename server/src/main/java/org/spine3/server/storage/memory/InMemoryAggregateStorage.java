@@ -119,6 +119,26 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         return true;
     }
 
+    @Override
+    protected boolean markDeleted(I id) {
+        final AggregateStatus currentStatus = getStorage().statuses.get(id);
+        if (currentStatus != null) {
+            if (currentStatus.getDeleted()) {
+                return false; // Already deleted.
+            }
+            final AggregateStatus updatedStatus = currentStatus.toBuilder()
+                                                               .setDeleted(true)
+                                                               .build();
+            getStorage().statuses.put(id, updatedStatus);
+            return true;
+        }
+
+        getStorage().statuses.put(id, AggregateStatus.newBuilder()
+                                                     .setDeleted(true)
+                                                     .build());
+        return true;
+    }
+
     /**
      * The data “slice” for a tenant.
      *

@@ -176,7 +176,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param id the ID of the entity
      * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-//    protected abstract boolean markDeleted(I id);
+    protected abstract boolean markDeleted(I id);
 
     /**
      * Returns the storage assigned to this repository or {@code null} if

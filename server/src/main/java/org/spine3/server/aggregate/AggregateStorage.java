@@ -225,10 +225,18 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
     /**
-     * Marks the {@code AggregateStorageRecord} with the passed ID as {@code archived}.
+     * Marks the aggregate with the passed ID as {@code archived}.
      *
      * @param id the aggregate ID
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
     protected abstract boolean markArchived(I id);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code deleted}.
+     *
+     * @param id the aggregate ID
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    protected abstract boolean markDeleted(I id);
 }

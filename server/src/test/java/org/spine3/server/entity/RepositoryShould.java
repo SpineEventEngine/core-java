@@ -99,6 +99,11 @@ public class RepositoryShould {
         protected boolean markArchived(ProjectId id) {
             return false;
         }
+
+        @Override
+        protected boolean markDeleted(ProjectId id) {
+            return false;
+        }
     }
 
     @Test
@@ -140,6 +145,11 @@ public class RepositoryShould {
 
         @Override
         protected boolean markArchived(ProjectId id) {
+            return false;
+        }
+
+        @Override
+        protected boolean markDeleted(ProjectId id) {
             return false;
         }
     }
@@ -185,6 +195,11 @@ public class RepositoryShould {
         protected boolean markArchived(ProjectId id) {
             return false;
         }
+
+        @Override
+        protected boolean markDeleted(ProjectId id) {
+            return false;
+        }
     }
 
     //
@@ -213,6 +228,11 @@ public class RepositoryShould {
 
         @Override
         protected boolean markArchived(ProjectId id) {
+            return false;
+        }
+
+        @Override
+        protected boolean markDeleted(ProjectId id) {
             return false;
         }
 
@@ -307,6 +327,11 @@ public class RepositoryShould {
 
         @Override
         protected boolean markArchived(ProjectId id) {
+            return false;
+        }
+
+        @Override
+        protected boolean markDeleted(ProjectId id) {
             return false;
         }
 
