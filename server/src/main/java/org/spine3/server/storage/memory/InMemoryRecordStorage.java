@@ -31,15 +31,12 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.Predicates;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -51,15 +48,16 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
-
-    private final Map<TenantId, TenantRecords<I>> tenantToStorageMap = newHashMap();
+    private final MultitenantStorage<I, TenantRecords<I>> multitenantStorage;
 
     protected InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<I, TenantRecords<I>>(multitenant) {
+            @Override
+            TenantRecords<I> createSlice() {
+                return new TenantRecords<>();
+            }
+        };
     }
 
     @Override
@@ -153,15 +151,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     private TenantRecords<I> getStorage() {
-        final TenantId tenantId = isMultitenant() ? CurrentTenant.get() : singleTenant;
-        checkState(tenantId != null, "Current tenant is null");
-
-        TenantRecords<I> storage = tenantToStorageMap.get(tenantId);
-        if (storage == null) {
-            storage = new TenantRecords<>();
-            tenantToStorageMap.put(tenantId, storage);
-        }
-        return storage;
+        return multitenantStorage.getStorage();
     }
 
     @Override
