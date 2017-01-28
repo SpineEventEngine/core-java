@@ -41,12 +41,24 @@ import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
+/**
+ * In-memory implementation of {@code CommandStorage}.
+ *
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
+    private final MultitenantStorage<CommandId, TenantCommands> multitenantStorage;
 
     protected InMemoryCommandStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<CommandId, TenantCommands>(multitenant) {
+            @Override
+            TenantCommands createSlice() {
+                return new TenantCommands();
+            }
+        };
     }
 
     @Override
@@ -65,10 +77,14 @@ class InMemoryCommandStorage extends CommandStorage {
         return record;
     }
 
+    private TenantCommands getStorage() {
+        return multitenantStorage.getStorage();
+    }
+
     @Override
     protected Iterator<CommandStorageRecord> read(final CommandStatus status) {
         checkNotClosed();
-        final Collection<CommandStorageRecord> records = storage.values();
+        final Collection<CommandStorageRecord> records = getStorage().storage.values();
         final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
         return filteredRecords;
     }
@@ -125,11 +141,11 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     private void put(CommandId id, CommandStorageRecord record) {
-        storage.put(id, record);
+        getStorage().put(id, record);
     }
 
     private CommandStorageRecord get(CommandId id) {
-        final CommandStorageRecord record = storage.get(id);
+        final CommandStorageRecord record = getStorage().get(id);
         if (record == null) {
             return CommandStorageRecord.getDefaultInstance();
         }
@@ -139,5 +155,26 @@ class InMemoryCommandStorage extends CommandStorage {
     private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
         checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
         return record;
+    }
+
+    private static class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
+
+        private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
+
+        @Nullable
+        @Override
+        public CommandStorageRecord get(CommandId id) {
+            return storage.get(id);
+        }
+
+        @Override
+        public void put(CommandId id, CommandStorageRecord record) {
+            storage.put(id, record);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return storage.isEmpty();
+        }
     }
 }
