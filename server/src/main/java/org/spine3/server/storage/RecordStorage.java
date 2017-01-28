@@ -109,6 +109,25 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     public abstract boolean markArchived(I id);
 
     /**
+     * Marks the record with the passed ID as {@code deleted}.
+     *
+     * <p>This method does not delete the record.
+     * To delete the record please call {@link #delete(Object)}
+     *
+     * @param id the ID of the record to mark
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean markDeleted(I id);
+
+    /**
+     * Deletes the record with the passed ID.
+     *
+     * @param id the record to delete
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean delete(I id);
+
+    /**
      * {@inheritDoc}
      */
     @Override

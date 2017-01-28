@@ -86,6 +86,16 @@ class InMemoryStandStorage extends StandStorage {
         return recordStorage.markArchived(id);
     }
 
+    @Override
+    public boolean markDeleted(AggregateStateId id) {
+        return recordStorage.markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(AggregateStateId id) {
+        return recordStorage.delete(id);
+    }
+
     @Nullable
     @Override
     protected EntityStorageRecord readRecord(AggregateStateId id) {

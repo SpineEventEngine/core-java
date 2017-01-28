@@ -66,6 +66,16 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
+    public boolean markDeleted(I id) {
+        return getStorage().markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return getStorage().delete(id);
+    }
+
+    @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
@@ -202,6 +212,25 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
                                                              .build();
             records.put(id, archivedRecord);
             return true;
+        }
+
+        private boolean markDeleted(I id) {
+            final EntityStorageRecord record = records.get(id);
+            if (record == null) {
+                return false;
+            }
+            if (record.getDeleted()) {
+                return false;
+            }
+            final EntityStorageRecord deletedRecord = record.toBuilder()
+                                                            .setDeleted(true)
+                                                            .build();
+            records.put(id, deletedRecord);
+            return true;
+        }
+
+        private boolean delete(I id) {
+            return records.remove(id) != null;
         }
 
         private Map<I, EntityStorageRecord> filtered() {

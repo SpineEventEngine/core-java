@@ -81,6 +81,16 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
+    public boolean markDeleted(I id) {
+        return getRecordStorage().markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return getRecordStorage().delete(id);
+    }
+
+    @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
         final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
         return result;
