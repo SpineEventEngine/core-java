@@ -34,7 +34,7 @@ public class Predicates {
     private static final Predicate<EntityStorageRecord> isVisible = new Predicate<EntityStorageRecord>() {
         @Override
         public boolean apply(@Nullable EntityStorageRecord input) {
-            return input != null && !input.getArchived() && !input.getDeleted();
+            return input != null && !(input.getArchived() || input.getDeleted());
         }
     };
 
