@@ -39,36 +39,31 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Exceptions.unsupported;
 
 /**
  * In-memory storage for aggregate events and snapshots.
+ *
+ * @param <I> the type of IDs of aggregates managed by this storage
  *
  * @author Alexander Litus
  */
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<I, AggregateStorageRecord> records = TreeMultimap.create(
-            new AggregateStorageKeyComparator<I>(), // key comparator
-            new AggregateStorageRecordReverseComparator() // value comparator
-    );
-
-    private final Map<I, AggregateStatus> statuses = newHashMap();
-
-    private final Predicate<I> isVisible = new Predicate<I>() {
-        @Override
-        public boolean apply(@Nullable I input) {
-            final AggregateStatus aggregateStatus = statuses.get(input);
-
-            return aggregateStatus == null
-                    || Predicates.isVisible.apply(aggregateStatus);
-        }
-    };
-
-    private final Multimap<I, AggregateStorageRecord> filtered = Multimaps.filterKeys(records, isVisible);
-    private final Map<I, Integer> eventCounts = newHashMap();
+    private final MultitenantStorage<I, TenantAggregateRecords<I>> multitenantStorage;
 
     protected InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<I, TenantAggregateRecords<I>>(multitenant) {
+            @Override
+            TenantAggregateRecords<I> createSlice() {
+                return new TenantAggregateRecords<>();
+            }
+        };
+    }
+
+    private TenantAggregateRecords<I> getStorage() {
+        return multitenantStorage.getStorage();
     }
 
     /** Creates a new single-tenant storage instance. */
@@ -78,20 +73,20 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected void writeRecord(I id, AggregateStorageRecord record) {
-        records.put(id, record);
+        getStorage().put(id, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = filtered.get(id);
+        final Collection<AggregateStorageRecord> records = getStorage().filtered.get(id);
         return records.iterator();
     }
 
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final Integer count = eventCounts.get(id);
+        final Integer count = getStorage().eventCounts.get(id);
         if (count == null) {
             return 0;
         }
@@ -101,24 +96,12 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
-        eventCounts.put(id, eventCount);
-    }
-
-    /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
-                                                                            Serializable {
-        private static final long serialVersionUID = 0L;
-
-        @Override
-        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
-            final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
-            return result;
-        }
+        getStorage().eventCounts.put(id, eventCount);
     }
 
     @Override
     protected boolean markArchived(I id) {
-        final AggregateStatus currentStatus = statuses.get(id);
+        final AggregateStatus currentStatus = getStorage().statuses.get(id);
         if (currentStatus != null) {
             if (currentStatus.getArchived()) {
                 return false; // Already archived.
@@ -126,14 +109,59 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
             final AggregateStatus updatedStatus = currentStatus.toBuilder()
                                                        .setArchived(true)
                                                        .build();
-            statuses.put(id, updatedStatus);
+            getStorage().statuses.put(id, updatedStatus);
             return true;
         }
 
-        statuses.put(id, AggregateStatus.newBuilder()
+        getStorage().statuses.put(id, AggregateStatus.newBuilder()
                                         .setArchived(true)
                                         .build());
         return true;
+    }
+
+    /**
+     * The data “slice” for a tenant.
+     *
+     * @param <I> the type of IDs of aggregates managed by this storage
+     */
+    private static class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageRecord> {
+
+        private final Multimap<I, AggregateStorageRecord> records = TreeMultimap.create(
+                new AggregateStorageKeyComparator<I>(), // key comparator
+                new AggregateStorageRecordReverseComparator() // value comparator
+        );
+
+        private final Map<I, AggregateStatus> statuses = newHashMap();
+
+        private final Predicate<I> isVisible = new Predicate<I>() {
+            @Override
+            public boolean apply(@Nullable I input) {
+                final AggregateStatus aggregateStatus = statuses.get(input);
+
+                return aggregateStatus == null
+                        || Predicates.isVisible.apply(aggregateStatus);
+            }
+        };
+
+        private final Multimap<I, AggregateStorageRecord> filtered = Multimaps.filterKeys(records, isVisible);
+
+        private final Map<I, Integer> eventCounts = newHashMap();
+
+        @Nullable
+        @Override
+        public AggregateStorageRecord get(I id) {
+            throw unsupported("Returning single record by aggregate ID is not supported");
+        }
+
+        @Override
+        public void put(I id, AggregateStorageRecord record) {
+            records.put(id, record);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return filtered.isEmpty();
+        }
     }
 
     /** Used for sorting keys by the key hash codes. */
@@ -153,6 +181,18 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
             final int secondHashCode = second.hashCode();
 
             result = Integer.compare(firstHashCode, secondHashCode);
+            return result;
+        }
+    }
+
+    /** Used for sorting by timestamp descending (from newer to older). */
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
+                                                                            Serializable {
+        private static final long serialVersionUID = 0L;
+
+        @Override
+        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
+            final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
     }

@@ -43,7 +43,8 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The time of the last handled event. */
     private Timestamp timestampOfLastEvent;
 
-    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage, boolean multitenant) {
+    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage,
+                                                               boolean multitenant) {
         return new InMemoryProjectionStorage<>(entityStorage, multitenant);
     }
 
