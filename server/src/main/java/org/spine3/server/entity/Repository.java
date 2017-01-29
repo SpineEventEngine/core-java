@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
+public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -147,17 +146,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param obj an instance to store
      */
     protected abstract void store(E obj);
-
-    /**
-     * Loads the entity with the passed ID.
-     *
-     * <p>NOTE: The storage must be assigned before calling this method.
-     *
-     * @param id the ID of the entity to load
-     * @return the entity or empty {@code Optional} if there's no entity with such id
-     */
-    @CheckReturnValue
-    protected abstract Optional<E> load(I id);
 
     /**
      * Marks the entity with the passed ID as {@code archived}.

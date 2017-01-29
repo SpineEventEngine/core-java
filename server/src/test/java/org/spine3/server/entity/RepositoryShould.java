@@ -222,7 +222,7 @@ public class RepositoryShould {
         protected void store(ProjectEntity obj) {}
 
         @Override
-        protected Optional<ProjectEntity> load(ProjectId id) {
+        public Optional<ProjectEntity> load(ProjectId id) {
             return Optional.absent();
         }
 
@@ -321,7 +321,7 @@ public class RepositoryShould {
         @SuppressWarnings("ReturnOfNull") // It's the purpose of the test.
         @Nullable
         @Override
-        protected Optional<FailingEntity> load(ProjectId id) {
+        public Optional<FailingEntity> load(ProjectId id) {
             return null;
         }
 
