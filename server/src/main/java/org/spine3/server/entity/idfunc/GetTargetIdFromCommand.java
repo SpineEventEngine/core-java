@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.entity.idfunc;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;

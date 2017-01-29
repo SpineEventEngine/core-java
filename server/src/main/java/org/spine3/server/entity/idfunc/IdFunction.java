@@ -18,30 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-
-import java.util.Set;
+import org.spine3.server.entity.Entity;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * Obtains an entity ID based on an event/command message and context.
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
- * @author Alexander Yevsyukov
+ * @see Entity
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
+interface IdFunction<I, M extends Message, C extends Message> {
 
     /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     * Obtains an entity ID based on the passed event or command message and its context.
      *
-     * @param message an event or a command message
+     * @param message an event or command message to use to get an ID
      * @param context either {@link EventContext} or {@link CommandContext} instance
-     * @return a set of entity identifiers
+     * @return an entity ID
      */
-    Set<I> apply(M message, C context);
+    I apply(M message, C context);
 }

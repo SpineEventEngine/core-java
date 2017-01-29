@@ -18,23 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.entity.idfunc;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 
 import java.util.Set;
 
 /**
- * Utility class that provides default implementations for {@link IdSetEventFunction}s.
+ * Internal utility class that provides default {@link IdSetEventFunction}s
+ * for obtaining a producer from an event.
  *
  * @author Alexander Yevsyukov
  */
-public class DefaultIdSetEventFunction {
+@Internal
+public class Producers {
 
-    private DefaultIdSetEventFunction() {
+    private Producers() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

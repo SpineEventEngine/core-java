@@ -18,34 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-import org.spine3.base.Identifiers;
+
+import java.util.Set;
 
 /**
- * Obtains an event producer ID based on an event {@link Message} and context.
+ * Obtains a set of entity IDs based on an event/command message and its context.
  *
- * <p>An ID must be the first field in event messages (in Protobuf definition).
- * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
- *
- * @param <I> the type of target entity IDs
- * @param <M> the type of event messages to get IDs from
- * @author Alexander Litus
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @author Alexander Yevsyukov
  */
-class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
-
-    private GetProducerIdFromEvent(int idIndex) {
-        super(idIndex);
-    }
+public interface IdSetFunction<I, M extends Message, C extends Message> {
 
     /**
-     * Creates a new instance.
+     * Obtains a set of entity IDs based on the passed event or command message and its context.
      *
-     * @param index a zero-based index of an ID field in this type of messages
+     * @param message an event or a command message
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return a set of entity identifiers
      */
-    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
-        return new GetProducerIdFromEvent<>(index);
-    }
+    Set<I> apply(M message, C context);
 }

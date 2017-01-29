@@ -18,27 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.entity.idfunc;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.server.entity.idfunc.IdSetEventFunction;
-import org.spine3.server.event.EventDispatcher;
+import org.spine3.base.EventContext;
 
 /**
- * Delivers events to handlers (which are supposed to be entities).
+ * Obtains a set of entity IDs from an event message and its context.
+ *
+ * <p>Use such functions for transforming an event into a set of
+ * identifiers of entities that are interested in receiving the event.
  *
  * @param <I> the type of entity IDs
- * @author Alexander Litus
- * @see EventDispatcher
+ * @param <M> the type of messages to get IDs from
+ * @author Alexander Yevsyukov
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
-
-    /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
-     */
-    <E extends Message> Optional<IdSetEventFunction<I, E>> getIdSetFunction(Class<E> eventClass);
+public interface IdSetEventFunction<I, M extends Message> extends IdSetFunction<I, M, EventContext> {
 }
