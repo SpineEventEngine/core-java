@@ -86,7 +86,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage = InMemoryRecordStorage.newInstance(multitenant);
-        return InMemoryProjectionStorage.newInstance(entityStorage, multitenant);
+        return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 
     @Override
