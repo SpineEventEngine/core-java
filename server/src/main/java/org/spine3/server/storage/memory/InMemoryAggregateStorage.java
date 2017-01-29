@@ -33,7 +33,6 @@ import org.spine3.server.aggregate.storage.Predicates;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -81,7 +80,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
+        final List<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
         return records.iterator();
     }
 

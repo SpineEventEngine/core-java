@@ -84,23 +84,7 @@ class InMemoryCommandStorage extends CommandStorage {
     @Override
     protected Iterator<CommandStorageRecord> read(final CommandStatus status) {
         checkNotClosed();
-        final Collection<CommandStorageRecord> records = getStorage().storage.values();
-        final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
-        return filteredRecords;
-    }
-
-    private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
-                                                                 final CommandStatus status) {
-        return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
-            @Override
-            public boolean apply(@Nullable CommandStorageRecord record) {
-                if (record == null) {
-                    return false;
-                }
-                final boolean statusMatches = record.getStatus() == status;
-                return statusMatches;
-            }
-        });
+        return getStorage().getByStatus(status);
     }
 
     @Override
@@ -145,11 +129,7 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     private CommandStorageRecord get(CommandId id) {
-        final CommandStorageRecord record = getStorage().get(id);
-        if (record == null) {
-            return CommandStorageRecord.getDefaultInstance();
-        }
-        return record;
+        return getStorage().get(id);
     }
 
     private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
@@ -157,6 +137,9 @@ class InMemoryCommandStorage extends CommandStorage {
         return record;
     }
 
+    /**
+     * The storage of commands for a tenant.
+     */
     private static class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
 
         private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
@@ -164,7 +147,17 @@ class InMemoryCommandStorage extends CommandStorage {
         @Nullable
         @Override
         public CommandStorageRecord get(CommandId id) {
-            return storage.get(id);
+            final CommandStorageRecord record = storage.get(id);
+            if (record == null) {
+                return CommandStorageRecord.getDefaultInstance();
+            }
+            return record;
+        }
+
+        private Iterator<CommandStorageRecord> getByStatus(CommandStatus status) {
+            final Collection<CommandStorageRecord> records = storage.values();
+            final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
+            return filteredRecords;
         }
 
         @Override
@@ -175,6 +168,20 @@ class InMemoryCommandStorage extends CommandStorage {
         @Override
         public boolean isEmpty() {
             return storage.isEmpty();
+        }
+
+        private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
+                                                                     final CommandStatus status) {
+            return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
+                @Override
+                public boolean apply(@Nullable CommandStorageRecord record) {
+                    if (record == null) {
+                        return false;
+                    }
+                    final boolean statusMatches = record.getStatus() == status;
+                    return statusMatches;
+                }
+            });
         }
     }
 }
