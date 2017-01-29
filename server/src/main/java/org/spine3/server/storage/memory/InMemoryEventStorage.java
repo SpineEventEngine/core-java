@@ -64,25 +64,19 @@ class InMemoryEventStorage extends EventStorage {
 
     @Override
     public Iterator<Event> iterator(EventStreamQuery query) {
-        final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
-        final Iterator<Event> transformed = toEventIterator(getStorage().storage.iterator());
-        final Iterator<Event> result = filter(transformed, matchesQuery);
-        return result;
+        return getStorage().iterator(query);
     }
 
     @Override
     protected void writeRecord(EventStorageRecord record) {
         checkNotNull(record);
-        final String eventId = record.getEventId();
-        checkState(!eventId.isEmpty(), "eventId cannot be empty");
-        getStorage().put(eventId, record);
+        getStorage().addRecord(record);
     }
 
     @Nullable
     @Override
     protected EventStorageRecord readRecord(EventId eventId) {
-        final EventStorageRecord result = getStorage().get(eventId.getUuid());
-        return result;
+        return getStorage().readRecord(eventId);
     }
 
     private TenantEvents getStorage() {
@@ -100,12 +94,32 @@ class InMemoryEventStorage extends EventStorage {
         private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
                 INITIAL_CAPACITY,
                 new EventStorageRecordComparator());
+        /**
+         * The index of records where keys are string values of {@code EventId}s. */
         private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
 
         @Nullable
         @Override
         public EventStorageRecord get(String id) {
             return index.get(id);
+        }
+
+        private EventStorageRecord readRecord(EventId eventId) {
+            final EventStorageRecord result = get(eventId.getUuid());
+            return result;
+        }
+
+        private Iterator<Event> iterator(EventStreamQuery query) {
+            final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
+            final Iterator<Event> transformed = toEventIterator(storage.iterator());
+            final Iterator<Event> result = filter(transformed, matchesQuery);
+            return result;
+        }
+
+        private void addRecord(EventStorageRecord record) {
+            final String eventId = record.getEventId();
+            checkState(!eventId.isEmpty(), "eventId cannot be empty");
+            put(eventId, record);
         }
 
         @Override
