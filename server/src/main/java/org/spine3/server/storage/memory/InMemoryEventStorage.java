@@ -50,11 +50,11 @@ import static com.google.common.collect.Iterators.filter;
  */
 class InMemoryEventStorage extends EventStorage {
 
-    private final MultitenantStorage<String, TenantEvents> multitenantStorage;
+    private final MultitenantStorage<TenantEvents> multitenantStorage;
 
     protected InMemoryEventStorage(boolean multitenant) {
         super(multitenant);
-        this.multitenantStorage = new MultitenantStorage<String, TenantEvents>(multitenant) {
+        this.multitenantStorage = new MultitenantStorage<TenantEvents>(multitenant) {
             @Override
             TenantEvents createSlice() {
                 return new TenantEvents();

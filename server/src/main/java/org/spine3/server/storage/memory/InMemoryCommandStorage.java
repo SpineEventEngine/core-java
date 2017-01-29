@@ -43,11 +43,11 @@ import static org.spine3.validate.Validate.isNotDefault;
  */
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final MultitenantStorage<CommandId, TenantCommands> multitenantStorage;
+    private final MultitenantStorage<TenantCommands> multitenantStorage;
 
     protected InMemoryCommandStorage(boolean multitenant) {
         super(multitenant);
-        this.multitenantStorage = new MultitenantStorage<CommandId, TenantCommands>(multitenant) {
+        this.multitenantStorage = new MultitenantStorage<TenantCommands>(multitenant) {
             @Override
             TenantCommands createSlice() {
                 return new TenantCommands();

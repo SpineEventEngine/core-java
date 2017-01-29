@@ -37,11 +37,11 @@ import java.util.Map;
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
-    private final MultitenantStorage<I, TenantRecords<I>> multitenantStorage;
+    private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
     protected InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
-        this.multitenantStorage = new MultitenantStorage<I, TenantRecords<I>>(multitenant) {
+        this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
             TenantRecords<I> createSlice() {
                 return new TenantRecords<>();

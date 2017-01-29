@@ -31,11 +31,10 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * The multitenant storage
  *
- * @param <I> the type of IDs of records in the storage
  * @param <S> the type of the storage “slice” for each tenant
  * @author Alexander Yevsyukov
  */
-abstract class MultitenantStorage<I, S extends TenantStorage<I, ?>> {
+abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder()

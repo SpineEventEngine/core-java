@@ -39,11 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final MultitenantStorage<I, TenantAggregateRecords<I>> multitenantStorage;
+    private final MultitenantStorage<TenantAggregateRecords<I>> multitenantStorage;
 
     protected InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
-        this.multitenantStorage = new MultitenantStorage<I, TenantAggregateRecords<I>>(multitenant) {
+        this.multitenantStorage = new MultitenantStorage<TenantAggregateRecords<I>>(multitenant) {
             @Override
             TenantAggregateRecords<I> createSlice() {
                 return new TenantAggregateRecords<>();
