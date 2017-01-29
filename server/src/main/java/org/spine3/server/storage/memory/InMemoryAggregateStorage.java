@@ -21,6 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
@@ -35,6 +36,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,63 +81,48 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = getStorage().filtered.get(id);
+        final Collection<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
         return records.iterator();
     }
 
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final Integer count = getStorage().eventCounts.get(id);
-        if (count == null) {
-            return 0;
-        }
-        return count;
+        final int result = getStorage().getEventCount(id);
+        return result;
     }
 
     @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
-        getStorage().eventCounts.put(id, eventCount);
+        getStorage().putEventCount(id, eventCount);
     }
 
     @Override
     protected boolean markArchived(I id) {
-        final AggregateStatus currentStatus = getStorage().statuses.get(id);
-        if (currentStatus != null) {
-            if (currentStatus.getArchived()) {
-                return false; // Already archived.
-            }
-            final AggregateStatus updatedStatus = currentStatus.toBuilder()
-                                                       .setArchived(true)
-                                                       .build();
-            getStorage().statuses.put(id, updatedStatus);
-            return true;
+        final AggregateStatus currentStatus = getStorage().getStatus(id);
+
+        if (currentStatus.getArchived()) {
+            return false; // Already archived.
         }
 
-        getStorage().statuses.put(id, AggregateStatus.newBuilder()
-                                        .setArchived(true)
-                                        .build());
+        getStorage().putStatus(id, currentStatus.toBuilder()
+                                                .setArchived(true)
+                                                .build());
         return true;
     }
 
     @Override
     protected boolean markDeleted(I id) {
-        final AggregateStatus currentStatus = getStorage().statuses.get(id);
-        if (currentStatus != null) {
-            if (currentStatus.getDeleted()) {
-                return false; // Already deleted.
-            }
-            final AggregateStatus updatedStatus = currentStatus.toBuilder()
-                                                               .setDeleted(true)
-                                                               .build();
-            getStorage().statuses.put(id, updatedStatus);
-            return true;
+        final AggregateStatus currentStatus = getStorage().getStatus(id);
+
+        if (currentStatus.getDeleted()) {
+            return false; // Already deleted.
         }
 
-        getStorage().statuses.put(id, AggregateStatus.newBuilder()
-                                                     .setDeleted(true)
-                                                     .build());
+        getStorage().putStatus(id, currentStatus.toBuilder()
+                                                .setDeleted(true)
+                                                .build());
         return true;
     }
 
@@ -168,15 +155,74 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
         private final Map<I, Integer> eventCounts = newHashMap();
 
+        /**
+         * Always throws {@code UnsupportedOperationException}.
+         *
+         * <p>Unlike other storages, an aggregate data is a collection
+         * of events, not a single record. That's why this method does not
+         * conform in full to {@link TenantStorage} interface, and always throws.
+         */
         @Nullable
         @Override
         public AggregateStorageRecord get(I id) {
             throw unsupported("Returning single record by aggregate ID is not supported");
         }
 
+        /**
+         * Obtains aggregate events in the reverse historical order.
+         *
+         * @return immutable list
+         */
+        private List<AggregateStorageRecord> getHistoryBackward(I id) {
+            return ImmutableList.copyOf(filtered.get(id));
+        }
+
+        /**
+         * Obtains a count of events stored for the aggregate with the passed ID.
+         *
+         * <p>If no events were stored, the method returns zero.
+         *
+         * @param id the ID of the aggregate
+         * @return the number of events stored for the aggregate or zero
+         */
+        private int getEventCount(I id) {
+            final Integer count = eventCounts.get(id);
+            if (count == null) {
+                return 0;
+            }
+            return count;
+        }
+
+        /**
+         * Obtains {@code AggregateStatus} for the passed ID.
+         *
+         * <p>If no status stored, the default instance is returned.
+         */
+        private AggregateStatus getStatus(I id) {
+            final AggregateStatus aggregateStatus = statuses.get(id);
+            return aggregateStatus == null
+                   ? AggregateStatus.getDefaultInstance()
+                   : aggregateStatus;
+        }
+
         @Override
         public void put(I id, AggregateStorageRecord record) {
             records.put(id, record);
+        }
+
+        /**
+         * Stores the number of the aggregate events occurred since the last snapshot
+         * of the aggregate with the passed ID.
+         *
+         * @param id the aggregate ID
+         * @param eventCount the number of events
+         */
+        private void putEventCount(I id, int eventCount) {
+            eventCounts.put(id, eventCount);
+        }
+
+        private void putStatus(I id, AggregateStatus status) {
+            statuses.put(id, status);
         }
 
         @Override
