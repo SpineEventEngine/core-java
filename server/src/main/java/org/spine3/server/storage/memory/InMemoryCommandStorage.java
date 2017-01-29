@@ -20,8 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -29,14 +27,10 @@ import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStorage;
 import org.spine3.server.command.storage.CommandStorageRecord;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -135,53 +129,5 @@ class InMemoryCommandStorage extends CommandStorage {
     private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
         checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
         return record;
-    }
-
-    /**
-     * The storage of commands for a tenant.
-     */
-    private static class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
-
-        private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
-
-        @Nullable
-        @Override
-        public CommandStorageRecord get(CommandId id) {
-            final CommandStorageRecord record = storage.get(id);
-            if (record == null) {
-                return CommandStorageRecord.getDefaultInstance();
-            }
-            return record;
-        }
-
-        private Iterator<CommandStorageRecord> getByStatus(CommandStatus status) {
-            final Collection<CommandStorageRecord> records = storage.values();
-            final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
-            return filteredRecords;
-        }
-
-        @Override
-        public void put(CommandId id, CommandStorageRecord record) {
-            storage.put(id, record);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return storage.isEmpty();
-        }
-
-        private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
-                                                                     final CommandStatus status) {
-            return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
-                @Override
-                public boolean apply(@Nullable CommandStorageRecord record) {
-                    if (record == null) {
-                        return false;
-                    }
-                    final boolean statusMatches = record.getStatus() == status;
-                    return statusMatches;
-                }
-            });
-        }
     }
 }
