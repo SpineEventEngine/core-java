@@ -32,16 +32,16 @@ public class PredicatesShould {
     @Test
     public void consider_archived_invisible() {
         assertFalse(Predicates.isVisible()
-                             .apply(EntityStorageRecord.newBuilder()
-                                                       .setArchived(true)
-                                                       .build()));
+                              .apply(EntityStorageRecord.newBuilder()
+                                                        .setArchived(true)
+                                                        .build()));
     }
 
     @Test
     public void consider_deleted_invisible() {
         assertFalse(Predicates.isVisible()
-                             .apply(EntityStorageRecord.newBuilder()
-                                                       .setDeleted(true)
-                                                       .build()));
+                              .apply(EntityStorageRecord.newBuilder()
+                                                        .setDeleted(true)
+                                                        .build()));
     }
 }
