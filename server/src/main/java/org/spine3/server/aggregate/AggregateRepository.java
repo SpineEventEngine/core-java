@@ -340,7 +340,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             if (currentStatus.getArchived()) {
                 throw new IllegalStateException(String.format("The aggregate (ID: %s) is archived.", aggregateId));
             }
-            if (currentStatus.getArchived()) {
+            if (currentStatus.getDeleted()) {
                 throw new IllegalStateException(String.format("The aggregate (ID: %s) is deleted.", aggregateId));
             }
         }
