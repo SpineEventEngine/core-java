@@ -214,4 +214,19 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S e
         assertTrue(successful);
         assertFalse(repository.load(id).isPresent());
     }
+
+    @Test
+    public void mark_records_deleted() {
+        final E entity = createEntity();
+        final I id = entity.getId();
+
+        repository.store(entity);
+
+        assertTrue(repository.load(id).isPresent());
+
+        final boolean successful = repository.markDeleted(id);
+
+        assertTrue(successful);
+        assertFalse(repository.load(id).isPresent());
+    }
 }
