@@ -565,105 +565,43 @@ public class NullToleranceTest {
         }
 
         private void addDefaultTypeValues() {
-            boolean providedDefaultString = false;
-            boolean providedDefaultSet = false;
-            boolean providedDefaultList = false;
-            boolean providedDefaultMap = false;
-            boolean providedDefaultQueue = false;
-            for (Object clazz : defaultValues.keySet()) {
-                final Class castedClass = (Class) clazz;
-                providedDefaultString = isProvidedDefaultString(providedDefaultString, castedClass);
-                providedDefaultSet = isProvidedDefaultSet(providedDefaultSet, castedClass);
-                providedDefaultList = isProvidedDefaultList(providedDefaultList, castedClass);
-                providedDefaultMap = isProvidedDefaultMap(providedDefaultMap, castedClass);
-                providedDefaultQueue = isProvidedDefaultQueue(providedDefaultQueue, castedClass);
-            }
 
-            // If no default value has been set for {@code String},
-            // add an empty string literal as one.
-            addDefaultStringIfNeeded(providedDefaultString);
-            // If no default value has been set for {@code Set},
-            // add an empty {@code Set} as one.
-            addDefaultSetIfNeeded(providedDefaultSet);
-            // If no default value has been set for {@code List},
-            // add an empty {@code List} as one.
-            addDefaultListIfNeeded(providedDefaultList);
-            // If no default value has been set for {@code Map},
-            // add an empty {@code Map} as one.
-            addDefaultMapIfNeeded(providedDefaultMap);
-            // If no default value has been set for {@code Queue},
-            // add an empty {@code Queue} as one.
-            addDefaultQueueIfNeeded(providedDefaultQueue);
-        }
-
-        private static boolean isProvidedDefaultQueue(boolean providedDefaultQueue, Class castedClass) {
-           boolean result = providedDefaultQueue;
-            if (!providedDefaultQueue) {
-                result = Queue.class.isAssignableFrom(castedClass);
-            }
-            return result;
-        }
-
-        private static boolean isProvidedDefaultMap(boolean providedDefaultMap, Class castedClass) {
-            boolean result = providedDefaultMap;
-            if (!providedDefaultMap) {
-                result = Map.class.isAssignableFrom(castedClass);
-            }
-            return result;
-        }
-
-        private static boolean isProvidedDefaultList(boolean providedDefaultList, Class castedClass) {
-            boolean result = providedDefaultList;
-            if (!providedDefaultList) {
-                result =  List.class.isAssignableFrom(castedClass);
-            }
-            return result;
-        }
-
-        private static boolean isProvidedDefaultSet(boolean providedDefaultSet, Class castedClass) {
-            boolean result = providedDefaultSet;
-            if (!providedDefaultSet) {
-                result = Set.class.isAssignableFrom(castedClass);
-            }
-            return result;
-        }
-
-        private static boolean isProvidedDefaultString(boolean providedString, Class castedClass) {
-            boolean result = providedString;
-            if (!providedString) {
-                result = String.class.isAssignableFrom(castedClass);
-            }
-            return result;
-        }
-
-        private void addDefaultQueueIfNeeded(boolean providedDefaultQueue) {
-            if (!providedDefaultQueue) {
-                defaultValues.put(Queue.class, newPriorityQueue());
-            }
-        }
-
-        private void addDefaultMapIfNeeded(boolean providedDefaultMap) {
-            if (!providedDefaultMap) {
-                defaultValues.put(Map.class, emptyMap());
-            }
-        }
-
-        private void addDefaultListIfNeeded(boolean providedDefaultList) {
-            if (!providedDefaultList) {
-                defaultValues.put(List.class, emptyList());
-            }
-        }
-
-        private void addDefaultSetIfNeeded(boolean providedDefaultSet) {
-            if (!providedDefaultSet) {
-                defaultValues.put(Set.class, emptySet());
-            }
-        }
-
-        private void addDefaultStringIfNeeded(boolean providedString) {
-            if (!providedString) {
-                defaultValues.put(String.class, STRING_DEFAULT_VALUE);
-            }
+            final Customizer<String> stringCustomizer = new Customizer<>(STRING_DEFAULT_VALUE, defaultValues);
+            final Customizer<Queue> queueCustomizer = new Customizer(newPriorityQueue(), defaultValues);
+            final Customizer<Set> setCustomizer = new Customizer(emptySet(), defaultValues);
+            final Customizer<List> listCustomizer = new Customizer(emptyList(), defaultValues);
+            final Customizer<Map> mapCustomizer = new Customizer(emptyMap(), defaultValues);
+            final String defaultStringValue = stringCustomizer.getCustomizedValue(String.class);
+            defaultValues.put(String.class, defaultStringValue);
+            final Queue<?> defaultQueue = queueCustomizer.getCustomizedValue(Queue.class);
+            defaultValues.put(Queue.class, defaultQueue);
+            final Set<?> defaultSet = setCustomizer.getCustomizedValue(Set.class);
+            defaultValues.put(Set.class, defaultSet);
+            final List<?> defaultList = listCustomizer.getCustomizedValue(List.class);
+            defaultValues.put(List.class, defaultList);
+            final Map<?, ?> defaultMap = mapCustomizer.getCustomizedValue(Map.class);
+            defaultValues.put(Map.class, defaultMap);
         }
     }
+
+    private static class Customizer<T> {
+        private final T defaultValue;
+        private final Map<Class<?>, ?> defaultValues;
+
+        public Customizer(T defaultValue, Map<Class<?>, ?> defaultValues) {
+            this.defaultValue = defaultValue;
+            this.defaultValues = defaultValues;
+        }
+
+        public T getCustomizedValue(Class<T> typeOfInterest) {
+            for (Map.Entry<Class<?>, ?> entry : defaultValues.entrySet()) {
+                final boolean customValuePresent = typeOfInterest.isAssignableFrom(entry.getKey());
+                if (customValuePresent) {
+                    return (T) entry.getValue();
+                }
+            }
+            return defaultValue;
+        }
+    }
+
 }
