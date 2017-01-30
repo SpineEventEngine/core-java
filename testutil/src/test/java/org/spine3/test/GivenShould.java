@@ -98,28 +98,10 @@ public class GivenShould {
     }
 
     @Test
-    public void pass_the_null_tolerance_check_in_the_given_class() {
+    public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Given.class)
                                                                      .addDefaultValue(AProjection.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check_in_the_process_manager_builder() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(ProcessManagerBuilder.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check_in_the_projection_builder() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(ProjectionBuilder.class)
                                                                      .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
