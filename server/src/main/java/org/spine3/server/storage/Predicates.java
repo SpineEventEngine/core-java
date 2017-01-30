@@ -42,6 +42,16 @@ public class Predicates {
         // Prevent instantiation of this utility class.
     }
 
+    /**
+     * Obtains the predicate for checking if an entity is visible to regular queries.
+     *
+     * <p>An entity may be marked as archived or deleted. If so, it becomes “invisible”
+     * to regular queries.
+     *
+     * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
+     * @see EntityStorageRecord#getArchived()
+     * @see EntityStorageRecord#getDeleted()
+     */
     public static Predicate<EntityStorageRecord> isVisible() {
         return isVisible;
     }

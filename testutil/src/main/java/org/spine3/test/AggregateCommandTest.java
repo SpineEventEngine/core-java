@@ -55,7 +55,7 @@ public abstract class AggregateCommandTest<C extends Message, A extends Aggregat
     }
 
     /**
-     * Obtains the aggregate being tested or {@code Optional#absent()} if
+     * Obtains the aggregate being tested or {@code Optional.absent()} if
      * the test object has not been created yet.
      */
     protected Optional<A> aggregate() {

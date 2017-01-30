@@ -53,7 +53,7 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
      * Tries to obtain a target ID from the passed command message.
      *
      * @param commandMessage a message to get ID from
-     * @return an {@link Optional} of the ID or {@link Optional#absent()}
+     * @return an {@link Optional} of the ID or {@code Optional.absent()}
      * if {@link GetTargetIdFromCommand#apply(Message, Message)} throws an exception
      * (in the case if the command is not for an entity)
      */

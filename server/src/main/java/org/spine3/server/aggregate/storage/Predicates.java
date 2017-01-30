@@ -43,6 +43,16 @@ public class Predicates {
         // Prevent instantiation of this utility class.
     }
 
+    /**
+     * Obtains the predicate for checking if an aggregate is visible to regular queries.
+     *
+     * <p>An aggregate may be marked as archived or deleted. If so, it becomes “invisible”
+     * to regular queries.
+     *
+     * @return the predicate that filters “invisible” {@code AggregateStatus}es
+     * @see AggregateStatus#getArchived()
+     * @see AggregateStatus#getDeleted()
+     */
     public static Predicate<AggregateStatus> isVisible() {
         return isVisible;
     }

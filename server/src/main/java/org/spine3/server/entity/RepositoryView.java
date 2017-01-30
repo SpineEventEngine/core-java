@@ -27,6 +27,12 @@ import javax.annotation.CheckReturnValue;
 /**
  * A view on a repository.
  *
+ * <p>A {@link Repository} may have a view that provides a different set of entities.
+ * For example, there can be views that return archived or deleted entities
+ * (that are not visible by default).
+ *
+ * <p>The default behaviour of loading entities in a {@code Repository} is also a view.
+ *
  * @param <I> the type of IDs of entities returned by the view
  * @param <E> the entity type
  * @author Alexander Yevsyukov
@@ -37,7 +43,7 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * Loads the entity with the passed ID.
      *
      * @param id the ID of the entity to load
-     * @return the entity or empty {@code Optional} if there's no entity with such id
+     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
      */
     @CheckReturnValue
     Optional<E> load(I id);
