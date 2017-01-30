@@ -179,4 +179,20 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // Check that another attempt to mark deleted returns `false`.
         assertFalse(storage.markDeleted(id));
     }
+
+    @Test
+    public void delete_record() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+
+        // Write the record.
+        storage.write(id, record);
+
+        // Delete the record.
+        assertTrue(storage.delete(id));
+
+        // There's no record with such ID.
+        assertFalse(storage.read(id).isPresent());
+    }
 }
