@@ -31,6 +31,8 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.TaskAdded;
+import org.spine3.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
+import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.GranterEventsEnrichment;
 import org.spine3.test.event.enrichment.MultiplePackageEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
@@ -152,6 +154,22 @@ public class EventEnrichmentsMapShould {
                                             PermissionRevokedEvent.class,
                                             SharingRequestSent.class,
                                             SharingRequestApproved.class);
+    }
+
+    // TODO:20-01-17:dmytro.dashenkov: Simplify test case name.
+    @Test
+    public void contain_enrichments_targeting_events_with_by_with_different_names() {
+        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNames.class,
+                                            SharingRequestApproved.class,
+                                            PermissionGrantedEvent.class);
+    }
+
+    // TODO:20-01-17:dmytro.dashenkov: Simplify test case name.
+    @Test
+    public void contain_enrichments_targeting_events_through_fqn_with_by_with_different_names() {
+        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
+                                            SharingRequestApproved.class,
+                                            PermissionGrantedEvent.class);
     }
 
     @SafeVarargs

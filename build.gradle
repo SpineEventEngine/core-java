@@ -46,9 +46,7 @@ buildscript {
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                                             version: spineProtobufPluginVersion
-                                            //, changing: true // Uncomment this if you want the dependency to be
-                                            // fetched on each build, but offline builds will not be available then.
+                                             version: spineProtobufPluginVersion, changing: true
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')

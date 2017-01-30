@@ -38,4 +38,5 @@ message SharingRequestApproved {
 
     string user_uid = 1;
     string second_user_uid = 2;
+    int64 timestamp = 3;
 }
