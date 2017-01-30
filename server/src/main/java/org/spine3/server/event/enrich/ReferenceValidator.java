@@ -124,7 +124,16 @@ class ReferenceValidator {
         }
     }
 
-    // TODO:19-01-17:dmytro.dashenkov: Javadoc.
+    /**
+     * Searches for the event/context field with the name retrieved from the enrichment field `by` option.
+     *
+     * @param name            the name of the searched field
+     * @param enrichmentField the field of the enrichment targeted onto the searched field
+     * @param strict          if {@code true} the field must be found, an exception is thrown otherwise.
+     *                        <p>If {@code false} {@code null} will be returned upon an unsuccessful search
+     * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the field is absent and
+     * if not in the strict mode
+     */
     private FieldDescriptor findSourceFieldByName(String name, FieldDescriptor enrichmentField, boolean strict) {
         checkSourceFieldName(name, enrichmentField);
         final Descriptor srcMessage = getSrcMessage(name);
