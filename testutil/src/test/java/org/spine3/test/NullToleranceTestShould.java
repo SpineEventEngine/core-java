@@ -238,7 +238,7 @@ public class NullToleranceTestShould {
             throw new RuntimeException("Occurred exception.");
         }
 
-        @SuppressWarnings("ProhibitedExceptionThrown") // need to test the {@code NullToleranceTest} class.
+        @SuppressWarnings("ProhibitedExceptionThrown") // need to test the matching of the stack trace element.
         public static void methodWhichThrowsNPE(Object param) {
             throw new NullPointerException("Occurred NPE");
         }
