@@ -31,8 +31,8 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.RecordBasedRepository;
+import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
@@ -73,7 +73,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
-        extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 

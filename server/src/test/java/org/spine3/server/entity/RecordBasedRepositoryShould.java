@@ -43,7 +43,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
+public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
