@@ -31,7 +31,7 @@ import org.spine3.test.storage.Task;
 /**
  * @author Dmytro Dashenkov
  */
-public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId> {
+public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId, RecordStorage<ProjectId>> {
 
     @Override
     protected RecordStorage<ProjectId> getStorage() {

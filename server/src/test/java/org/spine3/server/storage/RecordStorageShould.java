@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -44,8 +45,8 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould<I>
-       extends AbstractStorageShould<I, EntityStorageRecord, RecordStorage<I>> {
+public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
+       extends AbstractStorageShould<I, EntityStorageRecord, S> {
 
     protected abstract Message newState(I id);
 
@@ -66,6 +67,19 @@ public abstract class RecordStorageShould<I>
                                                               .setVersion(0)
                                                               .build();
         return record;
+    }
+
+    @Test
+    public void write_and_read_record_by_Message_id() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord expected = newStorageRecord(id);
+        storage.write(id, expected);
+
+        final EntityStorageRecord actual = storage.read(id);
+
+        assertEquals(expected, actual);
+        close(storage);
     }
 
     @Test
