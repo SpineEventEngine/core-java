@@ -29,13 +29,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
+import java.security.acl.AclNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -974,6 +977,219 @@ public class VerifyShould {
     @Test
     public void pass_if_class_non_instantiable_through_reflection() {
         Verify.assertClassNonInstantiable(ClassThatThrowExceptionInConstructor.class);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_not_throws_error() {
+        final Runnable notThrowsException = new Runnable() {
+            @Override
+            public void run() {
+            }
+        };
+
+        Verify.assertError(AssertionError.class, notThrowsException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_not_throws_specified_error() {
+        final Runnable throwsAssertionError = new Runnable() {
+            @Override
+            public void run() {
+                throw new AssertionError();
+            }
+        };
+
+        Verify.assertError(Error.class, throwsAssertionError);
+    }
+
+    @Test
+    public void pass_if_runnable_throws_specified_error() {
+        final Runnable throwsAssertionError = new Runnable() {
+            @Override
+            public void run() {
+                throw new AssertionError();
+            }
+        };
+
+        Verify.assertError(AssertionError.class, throwsAssertionError);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_callable_not_throws_exception() {
+        final Callable notThrowsException = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                return null;
+            }
+        };
+
+        Verify.assertThrows(Exception.class, notThrowsException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_callable_not_throws_specified_exception() {
+        final Callable throwsEmptyStackException = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                throw new EmptyStackException();
+            }
+        };
+
+        Verify.assertThrows(Exception.class, throwsEmptyStackException);
+    }
+
+    @Test
+    public void pass_if_callable_throws_specified_exception() {
+        final Callable throwsEmptyStackException = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                throw new EmptyStackException();
+            }
+        };
+
+        Verify.assertThrows(EmptyStackException.class, throwsEmptyStackException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_not_throws_exception() {
+        final Runnable notThrowsException = new Runnable() {
+            @Override
+            public void run() {
+            }
+        };
+
+        Verify.assertThrows(Exception.class, notThrowsException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_not_throws_specified_exception() {
+        final Runnable throwsEmptyStackException = new Runnable() {
+            @Override
+            public void run() {
+                throw new EmptyStackException();
+            }
+        };
+
+        Verify.assertThrows(Exception.class, throwsEmptyStackException);
+    }
+
+    @Test
+    public void pass_if_runnable_throws_specified_exception() {
+        final Runnable throwsEmptyStackException = new Runnable() {
+            @Override
+            public void run() {
+                throw new EmptyStackException();
+            }
+        };
+
+        Verify.assertThrows(EmptyStackException.class, throwsEmptyStackException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_callable_not_throws_exception_with_cause() {
+        final Callable notThrowsException = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                return null;
+            }
+        };
+
+        Verify.assertThrowsWithCause(Exception.class, Exception.class, notThrowsException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_callable_throws_exception_with_different_causes() {
+        final Throwable expectedCause = new EmptyStackException();
+        final Throwable actualCause = new AclNotFoundException();
+        final RuntimeException runtimeException = new RuntimeException(actualCause);
+        final Callable throwsRuntimeException = new Callable() {
+            @Override
+            public Object call() {
+                throw runtimeException;
+            }
+        };
+
+        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(), throwsRuntimeException);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_callable_expected_cause_is_null() {
+        final Callable throwsRuntimeException = new Callable() {
+            @Override
+            public Object call() {
+                throw new RuntimeException(new EmptyStackException());
+            }
+        };
+
+        Verify.assertThrowsWithCause(EmptyStackException.class, null, throwsRuntimeException);
+    }
+
+    @Test
+    public void pass_if_callable_throws_specified_exception_with_specified_cause() {
+        final Throwable cause = new EmptyStackException();
+        final RuntimeException runtimeException = new RuntimeException(cause);
+        final Callable throwsRuntimeException = new Callable() {
+            @Override
+            public Object call() {
+                throw runtimeException;
+            }
+        };
+
+        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(), throwsRuntimeException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_not_throws_exception_with_cause() {
+        final Runnable notThrowsException = new Runnable() {
+            @Override
+            public void run() {
+            }
+        };
+
+        Verify.assertThrowsWithCause(Exception.class, Exception.class, notThrowsException);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_throws_exception_with_different_causes() {
+        final Throwable expectedCause = new EmptyStackException();
+        final Throwable actualCause = new AclNotFoundException();
+        final RuntimeException runtimeException = new RuntimeException(actualCause);
+        final Runnable throwsRuntimeException = new Runnable() {
+            @Override
+            public void run() {
+                throw runtimeException;
+            }
+        };
+
+        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(), throwsRuntimeException);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_runnable_expected_cause_is_null() {
+        final Runnable throwsRuntimeException = new Runnable() {
+            @Override
+            public void run() {
+                throw new RuntimeException(new EmptyStackException());
+            }
+        };
+
+        Verify.assertThrowsWithCause(EmptyStackException.class, null, throwsRuntimeException);
+    }
+
+    @Test
+    public void pass_if_runnable_throws_specified_exception_with_specified_cause() {
+        final Throwable cause = new EmptyStackException();
+        final RuntimeException runtimeException = new RuntimeException(cause);
+        final Runnable throwsRuntimeException = new Runnable() {
+            @Override
+            public void run() {
+                throw runtimeException;
+            }
+        };
+
+        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(), throwsRuntimeException);
     }
 
     @SuppressWarnings("EqualsAndHashcode")
