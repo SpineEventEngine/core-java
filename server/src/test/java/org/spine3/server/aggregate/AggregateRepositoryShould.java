@@ -333,15 +333,22 @@ public class AggregateRepositoryShould {
 
     @Test
     public void marks_aggregate_archived() {
-        final ProjectId id = Given.newProjectId();
-        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
-
-        repository.store(aggregate);
+        final ProjectId id = createAndStoreAggregate();
 
         repository.markArchived(id);
 
-        final Optional<ProjectAggregate> optional = repository.load(id);
-        assertFalse(optional.isPresent());
+        assertFalse(repository.load(id)
+                              .isPresent());
+    }
+
+    @Test
+    public void mark_aggregate_deleted() {
+        final ProjectId id = createAndStoreAggregate();
+
+        repository.markDeleted(id);
+
+        assertFalse(repository.load(id)
+                              .isPresent());
     }
 
     /*
@@ -359,6 +366,14 @@ public class AggregateRepositoryShould {
         aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
         aggregate.dispatchForTest(Given.CommandMessage.startProject(id), context);
         return aggregate;
+    }
+
+    private ProjectId createAndStoreAggregate() {
+        final ProjectId id = Given.newProjectId();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
+
+        repository.store(aggregate);
+        return id;
     }
 
     private CommandId dispatchCmdToAggregateThrowing(Throwable throwable) {
