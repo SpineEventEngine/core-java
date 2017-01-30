@@ -24,10 +24,14 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -133,12 +137,25 @@ public class NullToleranceTestBuilderShould {
                                                                      .addDefaultValue(instance)
                                                                      .excludeMethod(excludedMethodName)
                                                                      .build();
-        final Map<? super Class, ? super Object> expectedMap = newHashMap();
-        expectedMap.put(NullToleranceTestBuilderShould.class, instance);
-        expectedMap.put(String.class, "");
         assertEquals(NullToleranceTestBuilderShould.class, nullToleranceTest.getTargetClass());
         assertEquals(newHashSet(excludedMethodName), nullToleranceTest.getExcludedMethods());
-        assertEquals(expectedMap, nullToleranceTest.getDefaultValues());
+
+        final Map<?, ?> defaultValuesMap = nullToleranceTest.getDefaultValues();
+        assertEquals(6, defaultValuesMap.size());
+
+        final Collection<?> defaultValues = defaultValuesMap.values();
+        assertTrue(defaultValues.contains(emptyList()));
+        assertTrue(defaultValues.contains(emptySet()));
+        assertTrue(defaultValues.contains(emptyMap()));
+        assertTrue(defaultValues.contains(instance));
+        assertTrue(defaultValues.contains(""));
+
+        assertTrue(defaultValuesMap.keySet()
+                                   .contains(Queue.class));
+
+        @SuppressWarnings("TypeMayBeWeakened") // need to check the default value.
+        final Queue<?> queue = (Queue<?>) defaultValuesMap.get(Queue.class);
+        assertTrue(queue.isEmpty());
     }
 
     @Test
@@ -150,7 +167,7 @@ public class NullToleranceTestBuilderShould {
                                                                      .build();
         final Collection<?> defaultValues = nullToleranceTest.getDefaultValues()
                                                              .values();
-        assertEquals(1, defaultValues.size());
+        assertEquals(5, defaultValues.size());
         final boolean contains = defaultValues.contains(defaultValue);
         assertTrue(contains);
     }
