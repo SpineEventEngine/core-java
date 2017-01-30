@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,6 +63,10 @@ class EventEnrichmentsMap {
     /** A separator between event types in the `.properties` file. */
     private static final String EVENT_TYPE_SEPARATOR = ",";
 
+    private static final Pattern PIPE_SEPARATOR_PATTERN = Pattern.compile("\\|");
+
+    private static final char PROTO_PACKAGE_SEPARATOR = '.';
+
     private static final ImmutableMultimap<String, String> enrichmentsMap = buildEnrichmentsMap();
 
     private EventEnrichmentsMap() {
@@ -87,13 +92,6 @@ class EventEnrichmentsMap {
          * <p>Must be a postfix of the qualifier.
          */
         private static final String PACKAGE_WILDCARD_INDICATOR = ".*";
-
-        /**
-         * Constant indicating a field qualifier with a wildcard type.
-         *
-         * <p>Must be a prefix of the qualifier.
-         */
-        private static final String WILDCARD_TYPE_INDICATOR = "*.";
 
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<String, String> builder;
@@ -142,7 +140,7 @@ class EventEnrichmentsMap {
             final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 final String typeQualifier = type.getTypeName();
-                if (hasTargetFields(typeQualifier, boundFields)) {
+                if (hasOneOfTargetFields(typeQualifier, boundFields)) {
                     builder.put(enrichmentType, typeQualifier);
                 }
             }
@@ -155,13 +153,23 @@ class EventEnrichmentsMap {
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 final String extension = field.getOptions()
                                               .getExtension(EventAnnotationsProto.by);
-                final String fieldName = extension.substring(WILDCARD_TYPE_INDICATOR.length());
-                result.add(fieldName);
+                final String[] fieldNames = PIPE_SEPARATOR_PATTERN.split(extension);
+                for (String singleFieldName : fieldNames) {
+                    if (singleFieldName.isEmpty()) {
+                        continue;
+                    }
+                    int startIndex = singleFieldName.lastIndexOf(PROTO_PACKAGE_SEPARATOR) + 1;
+                    startIndex = startIndex > 0 // 0 is an invalid value, see line above
+                                 ? startIndex
+                                 : 0;
+                    final String fieldName = singleFieldName.substring(startIndex);
+                    result.add(fieldName);
+                }
             }
             return result;
         }
 
-        private static boolean hasTargetFields(String eventType, Collection<String> targetFields) {
+        private static boolean hasOneOfTargetFields(String eventType, Collection<String> targetFields) {
             final Descriptor eventDescriptor = KnownTypes.getDescriptorForType(eventType);
 
             final List<FieldDescriptor> fields = eventDescriptor.getFields();
@@ -174,8 +182,12 @@ class EventEnrichmentsMap {
                             return input.getName();
                         }
                     });
-            final boolean result = fieldNames.containsAll(targetFields);
-            return result;
+            for (String field : targetFields) {
+                if (fieldNames.contains(field)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
