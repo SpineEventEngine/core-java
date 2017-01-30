@@ -39,20 +39,29 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
+import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.test.aggregate.event.ProjectStarted;
+import org.spine3.test.aggregate.event.TaskAdded;
 
+import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -106,9 +115,9 @@ public class AggregateRepositoryShould {
         repository.close();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
-    public void return_aggregate_with_default_state_if_no_aggregate_found() {
+    public void create_aggregate_with_default_state_if_no_aggregate_found() {
         final ProjectAggregate aggregate = repository.load(Given.newProjectId())
                                                      .get();
         final Project state = aggregate.getState();
@@ -322,7 +331,6 @@ public class AggregateRepositoryShould {
         verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void marks_aggregate_archived() {
         final ProjectId id = Given.newProjectId();
@@ -400,11 +408,12 @@ public class AggregateRepositoryShould {
     }
 
     /*
-     * Test classes
+     * Test environment classes
      ****************************/
 
-    @SuppressWarnings("serial")
     private static class TestFailure extends FailureThrowable {
+        private static final long serialVersionUID = 0L;
+
         private TestFailure() {
             super(StringValue.newBuilder()
                              .setValue(TestFailure.class.getName())
@@ -412,7 +421,81 @@ public class AggregateRepositoryShould {
         }
     }
 
-    @SuppressWarnings("serial")
     private static class TestThrowable extends Throwable {
+        private static final long serialVersionUID = 0L;
+    }
+
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+
+        // Needs to be `static` to share the state updates in scope of the test.
+        private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
+
+        private ProjectAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        ProjectCreated handle(CreateProject msg, CommandContext context) {
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .setName(msg.getName())
+                                 .build();
+        }
+
+        @Apply
+        private void apply(ProjectCreated event) {
+            getBuilder().setId(event.getProjectId())
+                        .setName(event.getName());
+        }
+
+        @Assign
+        TaskAdded handle(AddTask msg, CommandContext context) {
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            return TaskAdded.newBuilder()
+                            .setProjectId(msg.getProjectId())
+                            .build();
+        }
+
+        @Apply
+        private void apply(TaskAdded event) {
+            getBuilder().setId(event.getProjectId());
+        }
+
+        @Assign
+        ProjectStarted handle(StartProject msg, CommandContext context) {
+            final Command cmd = Commands.create(msg, context);
+            commandsHandled.put(context.getCommandId(), cmd);
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(msg.getProjectId())
+                                 .build();
+        }
+
+        @Apply
+        private void apply(ProjectStarted event) {
+        }
+
+        static void assertHandled(Command expected) {
+            final CommandId id = Commands.getId(expected);
+            final Command actual = commandsHandled.get(id);
+            final String cmdName = Commands.getMessage(expected)
+                                           .getClass()
+                                           .getName();
+            assertNotNull("No such command handled: " + cmdName, actual);
+            assertEquals(expected, actual);
+        }
+
+        static void clearCommandsHandled() {
+            commandsHandled.clear();
+        }
+    }
+
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        protected ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+            initStorage(InMemoryStorageFactory.getInstance());
+        }
     }
 }
