@@ -29,9 +29,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -680,6 +682,194 @@ public class VerifyShould {
     @Test
     public void pass_if_map_not_contains_key() {
         Verify.assertNotContainsKey(1, Collections.emptyMap());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_former_later_latter() {
+        final Integer firstItem = 1;
+        final Integer secondItem = 2;
+
+        final List<Integer> list = Arrays.asList(firstItem, secondItem);
+
+        Verify.assertBefore(secondItem, firstItem, list);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_former_and_latter_are_equal() {
+        final Integer sameItem = 1;
+        Verify.assertBefore(sameItem, sameItem, Collections.singletonList(sameItem));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_is_null_in_assert_befor() {
+        Verify.assertBefore(1, 2, null);
+    }
+
+    @Test
+    public void pass_if_former_before_latter() {
+        final Integer firstItem = 1;
+        final Integer secondItem = 2;
+
+        final List<Integer> list = Arrays.asList(firstItem, secondItem);
+
+        Verify.assertBefore(firstItem, secondItem, list);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_item_not_at_index() {
+        final Integer firstItem = 1;
+        final Integer secondItem = 2;
+
+        final List<Integer> list = Arrays.asList(firstItem, secondItem);
+
+        Verify.assertItemAtIndex(firstItem, list.indexOf(secondItem), list);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_is_null_in_assert_item_at_index() {
+        Verify.assertItemAtIndex(1, 1, (List) null);
+    }
+
+    @Test
+    public void pass_if_list_item_at_index() {
+        final Integer value = 1;
+        final List<Integer> list = Collections.singletonList(value);
+
+        Verify.assertItemAtIndex(value, list.indexOf(value), list);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_item_not_at_index() {
+        final Integer firstItem = 1;
+        final Integer secondItem = 2;
+
+        final Object[] array = {firstItem, secondItem};
+
+        Verify.assertItemAtIndex(firstItem, 1, array);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_null_in_assert_item_at_index() {
+        Verify.assertItemAtIndex(1, 1, (Object[]) null);
+    }
+
+    @Test
+    public void pass_if_array_item_at_index() {
+        final Integer value = 1;
+        final Object[] array = {value};
+
+        Verify.assertItemAtIndex(value, 0, array);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_not_starts_with_items() {
+        final Integer[] array = {1, 2, 3};
+        final Integer notStartsWith = 777;
+
+        Verify.assertStartsWith(array, notStartsWith);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_null_in_starts_with() {
+        Verify.assertStartsWith((Integer[]) null, 1, 2, 3);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_items_is_empty_in_array_starts_with() {
+        Verify.assertStartsWith(new Integer[1]);
+    }
+
+    @Test
+    public void pass_if_array_starts_with_items() {
+        final Integer[] array = {1, 2};
+        final Integer firstItem = array[0];
+
+        Verify.assertStartsWith(array, firstItem);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_not_starts_with_items() {
+        final List<Integer> list = Arrays.asList(1, 2, 3);
+        final Integer notStartsWith = 777;
+
+        Verify.assertStartsWith(list, notStartsWith);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_is_null_in_starts_with() {
+        Verify.assertStartsWith((List) null, 1, 2, 3);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_items_is_empty_in_list_starts_with() {
+        Verify.assertStartsWith(Collections.emptyList());
+    }
+
+    @Test
+    public void pass_if_list_starts_with_items() {
+        final List<Integer> list = Arrays.asList(1, 2, 3);
+        final Integer firstItem = list.get(0);
+
+        Verify.assertStartsWith(list, firstItem);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_not_ends_with_items() {
+        final List<Integer> list = Arrays.asList(1, 2, 3);
+        final Integer notEndsWith = 777;
+
+        Verify.assertEndsWith(list, notEndsWith);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_list_is_null_in_ends_with() {
+        Verify.assertEndsWith((List) null, 1, 2, 3);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_items_is_empty_in_list_ends_with() {
+        Verify.assertEndsWith(Collections.emptyList());
+    }
+
+    @Test
+    public void pass_if_list_ends_with_items() {
+        final List<Integer> list = Arrays.asList(1, 2, 3);
+        final Integer lastItem = list.get(list.size() - 1);
+
+        Verify.assertEndsWith(list, lastItem);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_not_ends_with_items() {
+        final Integer[] array = {1, 2, 3};
+        final Integer notEndsWith = 777;
+
+        Verify.assertEndsWith(array, notEndsWith);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_array_is_null_in_ends_with() {
+        Verify.assertEndsWith((Integer[]) null, 1, 2, 3);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_items_is_empty_in_array_ends_with() {
+        Verify.assertEndsWith(new Integer[1]);
+    }
+
+    @Test
+    public void pass_if_array_ends_with() {
+        final Integer[] array = {1, 2, 3};
+        final Integer lastItem = array[array.length - 1];
+
+        Verify.assertEndsWith(array, lastItem);
     }
 
 }
