@@ -20,8 +20,8 @@
 
 package org.spine3.server.aggregate.storage;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
 
@@ -30,9 +30,9 @@ import static org.junit.Assert.assertFalse;
  */
 public class PredicatesShould {
 
-    @Before
-    public void setUp() throws Exception {
-
+    @Test
+    public void have_private_default_ctor() {
+        Tests.hasPrivateParameterlessCtor(Predicates.class);
     }
 
     @Test

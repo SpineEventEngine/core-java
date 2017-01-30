@@ -137,4 +137,29 @@ public abstract class RecordStorageShould<I>
         // Check that another attempt to mark archived returns `false`.
         assertFalse(storage.markArchived(id));
     }
+
+    @Test
+    public void mark_record_as_deleted() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // The attempt to mark a record which is not yet stored returns `false`.
+        assertFalse(storage.markDeleted(id));
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not deleted.
+        assertFalse(storage.read(id).getDeleted());
+
+        // Mark deleted.
+        storage.markDeleted(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id).getDeleted());
+
+        // Check that another attempt to mark deleted returns `false`.
+        assertFalse(storage.markDeleted(id));
+    }
 }
