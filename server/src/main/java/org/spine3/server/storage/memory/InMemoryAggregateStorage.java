@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
@@ -80,6 +81,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
+    protected Optional<AggregateStatus> readStatus(I id) {
+        checkNotClosed();
+        Optional<AggregateStatus> result = getStorage().getStatus(id);
+        return result;
+    }
+
+    @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
         getStorage().putEventCount(id, eventCount);
@@ -87,8 +95,15 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected boolean markArchived(I id) {
-        final AggregateStatus currentStatus = getStorage().getStatus(id);
+        final Optional<AggregateStatus> found = getStorage().getStatus(id);
 
+        if (!found.isPresent()) {
+            getStorage().putStatus(id, AggregateStatus.newBuilder()
+                                                      .setArchived(true)
+                                                      .build());
+            return true;
+        }
+        final AggregateStatus currentStatus = found.get();
         if (currentStatus.getArchived()) {
             return false; // Already archived.
         }
@@ -101,7 +116,16 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected boolean markDeleted(I id) {
-        final AggregateStatus currentStatus = getStorage().getStatus(id);
+        final Optional<AggregateStatus> found = getStorage().getStatus(id);
+
+        if (!found.isPresent()) {
+            getStorage().putStatus(id, AggregateStatus.newBuilder()
+                                                      .setDeleted(true)
+                                                      .build());
+            return true;
+        }
+
+        final AggregateStatus currentStatus = found.get();
 
         if (currentStatus.getDeleted()) {
             return false; // Already deleted.

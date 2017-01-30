@@ -33,6 +33,8 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.AggregateStatus;
+import org.spine3.server.aggregate.storage.Predicates;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
@@ -248,14 +250,28 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Loads the aggregate by the passed ID, or creates it if the aggregate was not found.
+     * Loads the aggregate by the passed ID.
+     *
+     * <p>If the aggregate is not available in the repository this method returns
+     * a newly created aggregate.
+     *
+     * <p>If the aggregate is “invisible” to regular queries, {@code Optional.absent()}
+     * is returned
      *
      * @param id the ID of the aggregate to load
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured prior to calling this method
+     * @see AggregateEvents
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
+        final Optional<AggregateStatus> status = aggregateStorage().readStatus(id);
+        if (status.isPresent()) {
+            if (!Predicates.isVisible().apply(status.get())) {
+                return Optional.absent();
+            }
+        }
+
         A result = loadOrCreate(id);
         return Optional.of(result);
     }
@@ -291,7 +307,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 final int newEventCount = eventCountBeforeSave - eventCountBeforeDispatch;
                 logConcurrentModification(aggregateId, command, newEventCount);
             }
+
+            checkCurrentStatus(aggregateId);
+
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
+
             aggregate = loadOrCreate(aggregateId);
 
             try {
@@ -304,6 +324,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
         return aggregate;
+    }
+
+    /**
+     * Ensures that the aggregate with the passed ID is visible to queries.
+     *
+     * @param aggregateId the ID of the aggregate to check
+     * @throws IllegalStateException if the aggregate is “invisible”
+     */
+    private void checkCurrentStatus(I aggregateId) {
+        final Optional<AggregateStatus> status = aggregateStorage().readStatus(aggregateId);
+
+        if (status.isPresent()) {
+            final AggregateStatus currentStatus = status.get();
+            if (currentStatus.getArchived()) {
+                throw new IllegalStateException(String.format("The aggregate (ID: %s) is archived.", aggregateId));
+            }
+            if (currentStatus.getArchived()) {
+                throw new IllegalStateException(String.format("The aggregate (ID: %s) is deleted.", aggregateId));
+            }
+        }
     }
 
     private void logConcurrentModification(I aggregateId, Message command, int newEventCount) {

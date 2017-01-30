@@ -27,6 +27,7 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
+import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.storage.AbstractStorage;
@@ -163,8 +164,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     /**
-     * Writes a count of events which were saved to the storage after the last snapshot was created,
-     * or a count of all events if there were no snapshots yet.
+     * Reads a count of events which were saved to the storage after
+     * the last snapshot was created,
+     * <strong>or</strong> a count of all events if there were no snapshots yet.
      *
      * @param id an ID of an aggregate
      * @return an even count after the last snapshot
@@ -173,7 +175,19 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     protected abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
-     * Reads a count of events which were saved to the storage after the last snapshot was created,
+     * Reads the {@code AggregateStatus} for the aggregate with the passed ID.
+     *
+     * <p>This method returns {@code Optional.absent()} if none of the
+     * flags of {@code AggregateStatus} were modified before. This means that
+     * the aggregate is visible to the regular queries.
+     *
+     * @param id the ID of the aggregate
+     * @return the aggregate status record or {@code Optional.absent()}
+     */
+    protected abstract Optional<AggregateStatus> readStatus(I id);
+
+    /**
+     * Writes a count of events which were saved to the storage after the last snapshot was created,
      * or a count of all events if there were no snapshots yet.
      *
      * @param id         an ID of an aggregate

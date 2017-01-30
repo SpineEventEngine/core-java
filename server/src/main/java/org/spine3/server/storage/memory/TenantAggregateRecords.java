@@ -113,11 +113,9 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      *
      * <p>If no status stored, the default instance is returned.
      */
-    AggregateStatus getStatus(I id) {
+    Optional<AggregateStatus> getStatus(I id) {
         final AggregateStatus aggregateStatus = statuses.get(id);
-        return aggregateStatus == null
-               ? AggregateStatus.getDefaultInstance()
-               : aggregateStatus;
+        return Optional.fromNullable(aggregateStatus);
     }
 
     @Override
