@@ -249,7 +249,6 @@ public class EventsShould {
     public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Events.class)
-                                                                     .addDefaultValue(newArrayList())
                                                                      .addDefaultValue(stringValue.getClass())
                                                                      .build();
         final boolean passed = nullToleranceTest.check();

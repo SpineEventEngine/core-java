@@ -34,7 +34,9 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import static com.google.common.base.Defaults.defaultValue;
@@ -42,10 +44,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Queues.newPriorityQueue;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.primitives.Primitives.allPrimitiveTypes;
 import static com.google.common.primitives.Primitives.isWrapperType;
 import static com.google.common.primitives.Primitives.unwrap;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static javax.lang.model.SourceVersion.isName;
@@ -559,15 +565,105 @@ public class NullToleranceTest {
         }
 
         private void addDefaultTypeValues() {
+            boolean providedDefaultString = false;
+            boolean providedDefaultSet = false;
+            boolean providedDefaultList = false;
+            boolean providedDefaultMap = false;
+            boolean providedDefaultQueue = false;
+            for (Object clazz : defaultValues.keySet()) {
+                final Class castedClass = (Class) clazz;
+                providedDefaultString = isProvidedDefaultString(providedDefaultString, castedClass);
+                providedDefaultSet = isProvidedDefaultSet(providedDefaultSet, castedClass);
+                providedDefaultList = isProvidedDefaultList(providedDefaultList, castedClass);
+                providedDefaultMap = isProvidedDefaultMap(providedDefaultMap, castedClass);
+                providedDefaultQueue = isProvidedDefaultQueue(providedDefaultQueue, castedClass);
+            }
+
             // If no default value has been set for {@code String},
             // add an empty string literal as one.
-            for (Object clazz : defaultValues.keySet()) {
-                final boolean stringClass = String.class.isAssignableFrom((Class) clazz);
-                if (stringClass) {
-                    return;
-                }
+            addDefaultStringIfNeeded(providedDefaultString);
+            // If no default value has been set for {@code Set},
+            // add an empty {@code Set} as one.
+            addDefaultSetIfNeeded(providedDefaultSet);
+            // If no default value has been set for {@code List},
+            // add an empty {@code List} as one.
+            addDefaultListIfNeeded(providedDefaultList);
+            // If no default value has been set for {@code Map},
+            // add an empty {@code Map} as one.
+            addDefaultMapIfNeeded(providedDefaultMap);
+            // If no default value has been set for {@code Queue},
+            // add an empty {@code Queue} as one.
+            addDefaultQueueIfNeeded(providedDefaultQueue);
+        }
+
+        private static boolean isProvidedDefaultQueue(boolean providedDefaultQueue, Class castedClass) {
+           boolean result = providedDefaultQueue;
+            if (!providedDefaultQueue) {
+                result = Queue.class.isAssignableFrom(castedClass);
             }
-            defaultValues.put(String.class, STRING_DEFAULT_VALUE);
+            return result;
+        }
+
+        private static boolean isProvidedDefaultMap(boolean providedDefaultMap, Class castedClass) {
+            boolean result = providedDefaultMap;
+            if (!providedDefaultMap) {
+                result = Map.class.isAssignableFrom(castedClass);
+            }
+            return result;
+        }
+
+        private static boolean isProvidedDefaultList(boolean providedDefaultList, Class castedClass) {
+            boolean result = providedDefaultList;
+            if (!providedDefaultList) {
+                result =  List.class.isAssignableFrom(castedClass);
+            }
+            return result;
+        }
+
+        private static boolean isProvidedDefaultSet(boolean providedDefaultSet, Class castedClass) {
+            boolean result = providedDefaultSet;
+            if (!providedDefaultSet) {
+                result = Set.class.isAssignableFrom(castedClass);
+            }
+            return result;
+        }
+
+        private static boolean isProvidedDefaultString(boolean providedString, Class castedClass) {
+            boolean result = providedString;
+            if (!providedString) {
+                result = String.class.isAssignableFrom(castedClass);
+            }
+            return result;
+        }
+
+        private void addDefaultQueueIfNeeded(boolean providedDefaultQueue) {
+            if (!providedDefaultQueue) {
+                defaultValues.put(Queue.class, newPriorityQueue());
+            }
+        }
+
+        private void addDefaultMapIfNeeded(boolean providedDefaultMap) {
+            if (!providedDefaultMap) {
+                defaultValues.put(Map.class, emptyMap());
+            }
+        }
+
+        private void addDefaultListIfNeeded(boolean providedDefaultList) {
+            if (!providedDefaultList) {
+                defaultValues.put(List.class, emptyList());
+            }
+        }
+
+        private void addDefaultSetIfNeeded(boolean providedDefaultSet) {
+            if (!providedDefaultSet) {
+                defaultValues.put(Set.class, emptySet());
+            }
+        }
+
+        private void addDefaultStringIfNeeded(boolean providedString) {
+            if (!providedString) {
+                defaultValues.put(String.class, STRING_DEFAULT_VALUE);
+            }
         }
     }
 }
