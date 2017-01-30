@@ -243,7 +243,6 @@ public class StringifiersShould {
     public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Stringifiers.class)
-                                                                     .addDefaultValue(CommandId.newBuilder())
                                                                      .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
