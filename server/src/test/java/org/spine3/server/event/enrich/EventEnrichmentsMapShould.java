@@ -33,6 +33,8 @@ import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNames;
+import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes;
+import org.spine3.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.GranterEventsEnrichment;
 import org.spine3.test.event.enrichment.MultiplePackageEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
@@ -40,6 +42,7 @@ import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFq
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
 import org.spine3.test.event.enrichment.SelectiveComplexEnrichment;
 import org.spine3.test.event.enrichment.UserPackageEventsEnrichment;
+import org.spine3.test.event.user.UserDeletedEvent;
 import org.spine3.test.event.user.UserLoggedInEvent;
 import org.spine3.test.event.user.UserLoggedOutEvent;
 import org.spine3.test.event.user.UserMentionedEvent;
@@ -170,6 +173,22 @@ public class EventEnrichmentsMapShould {
         assertOnlyEventTypeByEnrichmentType(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class);
+    }
+
+    @Test
+    public void contain_enrichments_targeting_multiple_events_with_by_with_different_names() {
+        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
+                                            SharingRequestApproved.class,
+                                            PermissionGrantedEvent.class,
+                                            UserDeletedEvent.class);
+    }
+
+    @Test
+    public void contain_enrichments_targeting_events_with_by_with_different_names_with_wildcard_types() {
+        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
+                                            SharingRequestApproved.class,
+                                            PermissionGrantedEvent.class,
+                                            PermissionRevokedEvent.class);
     }
 
     @SafeVarargs

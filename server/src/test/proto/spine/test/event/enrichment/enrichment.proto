@@ -98,3 +98,15 @@ message EnrichmentBoundWithFieldsWithDifferentNames {
 message EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames {
     int32 user_google_uid = 1 [(by) = "spine.test.event.user.sharing.SharingRequestApproved.second_user_uid|spine.test.event.user.permission.PermissionGrantedEvent.user_uid"];
 }
+
+message EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes {
+    option (enrichment_for) = "spine.test.event.user.sharing.SharingRequestApproved,spine.test.event.user.permission.*";
+
+    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|*.user_uid"];
+}
+
+message EnrichmentBoundWithMultipleFieldsWithDifferentNames {
+    option (enrichment_for) = "spine.test.event.user.sharing.SharingRequestApproved,spine.test.event.user.permission.PermissionGrantedEvent,spine.test.event.user.UserDeletedEvent";
+
+    int32 user_google_uid = 1 [(by) = "SharingRequestApproved.second_user_uid|PermissionGrantedEvent.user_uid|UserDeletedEvent.deleted_uid"];
+}

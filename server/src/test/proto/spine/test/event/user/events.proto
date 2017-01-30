@@ -44,3 +44,8 @@ message UserLoggedOutEvent {
     string user_uid = 1;
     string owner_email = 2;
 }
+
+message UserDeletedEvent {
+
+    string deleted_uid = 1;
+}
