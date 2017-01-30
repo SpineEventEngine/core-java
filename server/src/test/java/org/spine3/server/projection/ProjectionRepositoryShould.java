@@ -161,13 +161,6 @@ public class ProjectionRepositoryShould
     }
 
     @Test
-    public void load_empty_projection_by_default() {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // we're sure because load either loads or creates.
-        final TestProjection projection = repository.load(ID).get();
-        assertEquals(Project.getDefaultInstance(), projection.getState());
-    }
-
-    @Test
     public void dispatch_event_and_load_projection() {
         checkDispatchesEvent(Given.EventMessage.projectCreated(ID));
     }

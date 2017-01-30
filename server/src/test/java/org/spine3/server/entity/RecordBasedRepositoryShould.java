@@ -35,7 +35,9 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -196,5 +198,20 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S e
     private static <E extends Entity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
+    }
+
+    @Test
+    public void mark_records_archived() {
+        final E entity = createEntity();
+        final I id = entity.getId();
+
+        repository.store(entity);
+
+        assertTrue(repository.load(id).isPresent());
+
+        final boolean successful = repository.markArchived(id);
+
+        assertTrue(successful);
+        assertFalse(repository.load(id).isPresent());
     }
 }

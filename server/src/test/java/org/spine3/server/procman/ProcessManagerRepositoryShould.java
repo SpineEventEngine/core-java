@@ -157,13 +157,6 @@ public class ProcessManagerRepositoryShould
     //----------------------------
 
     @Test
-    public void load_empty_manager_by_default() {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure because PM is created.
-        final TestProcessManager manager = repository.load(ID).get();
-        assertEquals(manager.getDefaultState(), manager.getState());
-    }
-
-    @Test
     public void dispatch_event_and_load_manager() {
         testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
