@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
+
 import javax.annotation.Nullable;
 
 /**
@@ -31,7 +33,7 @@ import javax.annotation.Nullable;
 interface TenantStorage<I, R> {
 
     @Nullable
-    R get(I id);
+    Optional<R> get(I id);
 
     void put(I id, R record);
 

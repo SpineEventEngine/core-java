@@ -22,6 +22,7 @@ package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -79,16 +80,16 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     }
 
     @Override
-    public Event read(EventId id) {
+    public Optional<Event> read(EventId id) {
         checkNotClosed();
         checkNotNull(id);
 
-        final EventStorageRecord record = readRecord(id);
-        if (record == null) {
-            return Event.getDefaultInstance();
+        final Optional<EventStorageRecord> record = readRecord(id);
+        if (!record.isPresent()) {
+            return Optional.absent();
         }
-        final Event result = toEvent(record);
-        return result;
+        final Event result = toEvent(record.get());
+        return Optional.of(result);
     }
 
     /**
@@ -112,8 +113,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * @param eventId the ID of the event to read
      * @return the record instance of null if there's not record with such ID
      */
-    @Nullable
-    protected abstract EventStorageRecord readRecord(EventId eventId);
+    protected abstract Optional<EventStorageRecord> readRecord(EventId eventId);
 
     /** Converts EventStorageRecord to Event. */
     protected static Event toEvent(EventStorageRecord record) {

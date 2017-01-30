@@ -837,7 +837,7 @@ public class StandShould {
         final ImmutableList<EntityStorageRecord> nonEmptyList = ImmutableList.<EntityStorageRecord>builder().add(someRecord)
                                                                                                             .build();
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(nonEmptyList);
-        when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(someRecord);
+        when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(Optional.of(someRecord));
         when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityStorageRecord>newHashMap());
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
 
@@ -872,7 +872,7 @@ public class StandShould {
             stateIdsBuilder.add(stateId);
             recordsBuilder.add(entityStorageRecord);
 
-            when(standStorageMock.read(eq(stateId))).thenReturn(entityStorageRecord);
+            when(standStorageMock.read(eq(stateId))).thenReturn(Optional.of(entityStorageRecord));
         }
 
         final ImmutableList<AggregateStateId> stateIds = stateIdsBuilder.build();

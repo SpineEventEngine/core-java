@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -33,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * In-memory implementation of {@code CommandStorage}.
@@ -64,10 +64,10 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
-    public CommandStorageRecord read(CommandId id) {
+    public Optional<CommandStorageRecord> read(CommandId id) {
         checkNotClosed();
         checkNotDefault(id);
-        final CommandStorageRecord record = get(id);
+        final Optional<CommandStorageRecord> record = get(id);
         return record;
     }
 
@@ -86,7 +86,7 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.ERROR)
                                                          .setError(error)
@@ -99,7 +99,7 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.FAILURE)
                                                          .setFailure(failure)
@@ -111,7 +111,7 @@ class InMemoryCommandStorage extends CommandStorage {
     public void setOkStatus(CommandId id) {
         checkNotClosed();
         checkNotNull(id);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.OK)
                                                          .build();
@@ -122,12 +122,14 @@ class InMemoryCommandStorage extends CommandStorage {
         getStorage().put(id, record);
     }
 
-    private CommandStorageRecord get(CommandId id) {
+    private Optional<CommandStorageRecord> get(CommandId id) {
         return getStorage().get(id);
     }
 
-    private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
-        checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
-        return record;
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "OptionalUsedAsFieldOrParameterType"})
+        // We do check. It's the purpose of this method.
+    private static CommandStorageRecord checkFound(Optional<CommandStorageRecord> record, CommandId id) {
+        checkState(record.isPresent(), "No record found for command ID: " + idToString(id));
+        return record.get();
     }
 }

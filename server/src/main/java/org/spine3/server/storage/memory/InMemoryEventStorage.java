@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
@@ -73,9 +74,8 @@ class InMemoryEventStorage extends EventStorage {
         getStorage().addRecord(record);
     }
 
-    @Nullable
     @Override
-    protected EventStorageRecord readRecord(EventId eventId) {
+    protected Optional<EventStorageRecord> readRecord(EventId eventId) {
         return getStorage().readRecord(eventId);
     }
 
@@ -100,12 +100,12 @@ class InMemoryEventStorage extends EventStorage {
 
         @Nullable
         @Override
-        public EventStorageRecord get(String id) {
-            return index.get(id);
+        public Optional<EventStorageRecord> get(String id) {
+            return Optional.fromNullable(index.get(id));
         }
 
-        private EventStorageRecord readRecord(EventId eventId) {
-            final EventStorageRecord result = get(eventId.getUuid());
+        private Optional<EventStorageRecord> readRecord(EventId eventId) {
+            final Optional<EventStorageRecord> result = get(eventId.getUuid());
             return result;
         }
 

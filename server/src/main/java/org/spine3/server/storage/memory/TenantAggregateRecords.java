@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -78,7 +79,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      */
     @Nullable
     @Override
-    public AggregateStorageRecord get(I id) {
+    public Optional<AggregateStorageRecord> get(I id) {
         throw unsupported("Returning single record by aggregate ID is not supported");
     }
 

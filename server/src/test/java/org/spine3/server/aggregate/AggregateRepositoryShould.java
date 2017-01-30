@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
@@ -313,8 +314,8 @@ public class AggregateRepositoryShould {
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage)
                       .readEventCountAfterLastSnapshot(projectId);
-        doReturn(AggregateEvents.getDefaultInstance()).when(storage)
-                                                      .read(projectId);
+        doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage)
+                                                                   .read(projectId);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
 

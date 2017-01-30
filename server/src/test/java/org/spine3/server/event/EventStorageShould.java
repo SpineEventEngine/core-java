@@ -114,6 +114,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertFalse(iterator.hasNext());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void writeInternal_and_read_one_event() {
         final EventStorageRecord recordToStore = org.spine3.server.storage.Given.EventStorageRecord.projectCreated();
@@ -123,7 +124,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Event expected = toEvent(recordToStore);
 
         storage.writeRecord(recordToStore);
-        final Event actual = storage.read(id);
+        final Event actual = storage.read(id).get();
 
         assertEquals(expected, actual);
     }

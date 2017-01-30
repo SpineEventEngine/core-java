@@ -69,6 +69,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         return record;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void write_and_read_record_by_Message_id() {
         final RecordStorage<I> storage = getStorage();
@@ -76,7 +77,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityStorageRecord expected = newStorageRecord(id);
         storage.write(id, expected);
 
-        final EntityStorageRecord actual = storage.read(id);
+        final EntityStorageRecord actual = storage.read(id).get();
 
         assertEquals(expected, actual);
         close(storage);
@@ -127,6 +128,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_record_as_archived() {
         final I id = newId();
@@ -140,18 +142,19 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.write(id, record);
 
         // See it is not archived.
-        assertFalse(storage.read(id).getArchived());
+        assertFalse(storage.read(id).get().getArchived());
 
         // Mark archived.
         storage.markArchived(id);
 
         // See that the record is marked.
-        assertTrue(storage.read(id).getArchived());
+        assertTrue(storage.read(id).get().getArchived());
 
         // Check that another attempt to mark archived returns `false`.
         assertFalse(storage.markArchived(id));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_record_as_deleted() {
         final I id = newId();
@@ -165,13 +168,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.write(id, record);
 
         // See it is not deleted.
-        assertFalse(storage.read(id).getDeleted());
+        assertFalse(storage.read(id).get().getDeleted());
 
         // Mark deleted.
         storage.markDeleted(id);
 
         // See that the record is marked.
-        assertTrue(storage.read(id).getDeleted());
+        assertTrue(storage.read(id).get().getDeleted());
 
         // Check that another attempt to mark deleted returns `false`.
         assertFalse(storage.markDeleted(id));

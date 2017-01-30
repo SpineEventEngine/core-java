@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
@@ -102,7 +103,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected EntityStorageRecord readRecord(I id) {
+    protected Optional<EntityStorageRecord> readRecord(I id) {
         return getStorage().get(id);
     }
 

@@ -54,7 +54,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
-import static org.spine3.validate.Validate.isDefault;
 
 /**
  * The base class for repositories that store entities as records.
@@ -107,10 +106,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public Optional<E> load(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityStorageRecord record = storage.read(id);
-        if (isDefault(record)) {
+        final Optional<EntityStorageRecord> found = storage.read(id);
+        if (!found.isPresent()) {
             return Optional.absent();
         }
+        final EntityStorageRecord record = found.get();
         if (!Predicates.isVisible().apply(record)) {
             return Optional.absent();
         }

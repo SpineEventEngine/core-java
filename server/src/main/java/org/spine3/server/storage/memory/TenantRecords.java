@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
@@ -31,7 +32,6 @@ import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.Predicates;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
@@ -52,11 +52,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         records.put(id, record);
     }
 
-    @Nullable
     @Override
-    public EntityStorageRecord get(I id) {
+    public Optional<EntityStorageRecord> get(I id) {
         final EntityStorageRecord record = records.get(id);
-        return record;
+        return Optional.fromNullable(record);
     }
 
     boolean markArchived(I id) {
@@ -107,11 +106,11 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         EntityStorageRecord matchingResult = null;
         for (I recordId : filtered.keySet()) {
             if (recordId.equals(givenId)) {
-                final EntityStorageRecord record = get(recordId);
-                if (record == null) {
+                final Optional<EntityStorageRecord> record = get(recordId);
+                if (!record.isPresent()) {
                     continue;
                 }
-                EntityStorageRecord.Builder matchingRecord = record.toBuilder();
+                EntityStorageRecord.Builder matchingRecord = record.get().toBuilder();
                 final Any state = matchingRecord.getState();
                 final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
                 final Message wholeState = AnyPacker.unpack(state);

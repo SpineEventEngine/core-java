@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import org.spine3.base.CommandId;
@@ -44,11 +45,8 @@ class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
 
     @Nullable
     @Override
-    public CommandStorageRecord get(CommandId id) {
-        final CommandStorageRecord record = storage.get(id);
-        if (record == null) {
-            return CommandStorageRecord.getDefaultInstance();
-        }
+    public Optional<CommandStorageRecord> get(CommandId id) {
+        final Optional<CommandStorageRecord> record = Optional.fromNullable(storage.get(id));
         return record;
     }
 

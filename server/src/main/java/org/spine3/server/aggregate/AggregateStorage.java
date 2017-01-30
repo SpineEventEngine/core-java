@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
@@ -60,7 +61,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     @Override
-    public AggregateEvents read(I aggregateId) {
+    public Optional<AggregateEvents> read(I aggregateId) {
         checkNotClosed();
         checkNotNull(aggregateId);
 
@@ -94,7 +95,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         }
         builder.addAllEvent(history);
 
-        return builder.build();
+        return Optional.of(builder.build());
     }
 
     /**

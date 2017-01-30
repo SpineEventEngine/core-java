@@ -30,6 +30,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.FailureThrowable;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
@@ -209,7 +210,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // The storage always returns events.
+        final AggregateEvents aggregateEvents = aggregateStorage().read(id).get();
         final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
         final List<Event> events = aggregateEvents.getEventList();
@@ -305,11 +307,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private void logConcurrentModification(I aggregateId, Message command, int newEventCount) {
-        log().warn("Detected the concurrent modification of {} {}" +
+        final String idStr = Stringifiers.idToString(aggregateId);
+        final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
+        log().warn("Detected the concurrent modification of {} ID: {}. " +
                            "New events detected while dispatching the command {} " +
                            "The number of new events is {}. " +
                            "Restarting the command dispatching.",
-                   getAggregateClass(), aggregateId, command, newEventCount);
+                   aggregateClass, idStr, command, newEventCount);
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case of handing an exception.

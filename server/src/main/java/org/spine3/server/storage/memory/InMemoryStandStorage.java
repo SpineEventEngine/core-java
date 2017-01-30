@@ -19,6 +19,7 @@
  */
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -98,7 +99,7 @@ class InMemoryStandStorage extends StandStorage {
 
     @Nullable
     @Override
-    protected EntityStorageRecord readRecord(AggregateStateId id) {
+    protected Optional<EntityStorageRecord> readRecord(AggregateStateId id) {
         return recordStorage.read(id);
     }
 
