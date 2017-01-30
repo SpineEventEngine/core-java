@@ -100,9 +100,11 @@ public class NullToleranceTest {
     }
 
     /**
-     * Checks the all non-private methods in the {@code targetClass}.
+     * Checks the all non-private {@code static} methods in the {@code targetClass}
+     * to ensure each of them is not tolerant for {@code null} values passed as arguments.
      *
-     * <p>The check is successful if each of the non-primitive method parameters is ensured to be non-null.
+     * <p>The check is successful if all of the non-primitive method parameters
+     * do not accept {@code null}s.
      *
      * @return {@code true} if the check is successful, {@code false} otherwise
      */
@@ -132,10 +134,10 @@ public class NullToleranceTest {
 
     /**
      * Returns the {@code Iterable} over all the declared {@code Method}s
-     * in the {@code Class} which are static and non-private.
+     * in the {@code targetClass} which are eligible for testing.
      *
      * @param targetClass the target class
-     * @return the array of the {@code Method}
+     * @return an iterable over the {@code Method}s
      */
     private static Iterable<Method> getAccessibleMethods(Class targetClass) {
         final Method[] declaredMethods = targetClass.getDeclaredMethods();
@@ -195,6 +197,8 @@ public class NullToleranceTest {
 
         /**
          * The pre-configured provider of the default values per type.
+         *
+         * @see Builder#addDefaultValue(Object)
          */
         private final DefaultValueProvider valuesProvider;
 
@@ -292,7 +296,7 @@ public class NullToleranceTest {
          * <p>Therefore the stack trace is analysed to ensure its first element references
          * the {@code Preconditions#checkNotNull(Object)} and the second one references the tested method.
          *
-         * @param cause the {@code Throwable}
+         * @param cause the {@code Throwable} to inspect
          * @return {@code true} if the {@code StackTraceElement}s matches the expected, {@code false} otherwise
          */
         private boolean hasExpectedStackTrace(Throwable cause) {
@@ -380,14 +384,17 @@ public class NullToleranceTest {
          * <p><b>Example:</b>
          *
          * <pre>
-         *     {@code public class Person {...}
-         *
+         *     {@code
+         *     // Given the types
+         *     public class Person {...}
          *     public class User extends Person {...}
-         *     // ...
          *
-         *     builder.addDefaultValue(new User());
-         *     // ...
-         *     findDerivedTypeValue(Person);    // will return an instance of User.
+         *     // and customizing the default value for `User` type,
+         *     final User defaultUser = new User();
+         *     builder.addDefaultValue(defaultUser);
+         *
+         *     // an invocation of the method with `User` parent class
+         *     findDerivedTypeValue(Person.class);    // will return the `defaultUser` instance.
          *     }
          * </pre>
          *
@@ -399,8 +406,8 @@ public class NullToleranceTest {
         @Nullable
         private <T> T findDerivedTypeValue(Class<T> type) {
             for (Class clazz : defaultValues.keySet()) {
-                final boolean passedToMap = type.isAssignableFrom(clazz);
-                if (passedToMap) {
+                final boolean defaultValuePresent = type.isAssignableFrom(clazz);
+                if (defaultValuePresent) {
                     @SuppressWarnings("unchecked")      // It's OK, since we check for the type compliance above.
                     final T result = (T) defaultValues.get(clazz);
                     return result;
@@ -409,9 +416,15 @@ public class NullToleranceTest {
             return null;
         }
 
+        /**
+         * Obtains the default value for the given {@code Message} {@code type}.
+         *
+         * <p>The default instance of {@code Any} is used {@code type == Message.class}.
+         *
+         * @param type the type of {@code Message} to obtain a default value for
+         * @return the default instance of the given {@code Message}
+         */
         private static Message getDefaultMessageInstance(Class<? extends Message> type) {
-
-            // using the default instance of {@code Any} if the parameter type is {@code Message}
             if (type.equals(Message.class)) {
                 return Any.getDefaultInstance();
             }
@@ -432,6 +445,7 @@ public class NullToleranceTest {
     public static class Builder {
 
         private static final String STRING_DEFAULT_VALUE = "";
+
         private final Set<String> excludedMethods;
         private final Map<Class<?>, ? super Object> defaultValues;
         private Class<?> targetClass;
@@ -442,7 +456,9 @@ public class NullToleranceTest {
         }
 
         /**
-         * Sets the target class.
+         * Sets the target class to check.
+         *
+         * <p>This is a mandatory field.
          *
          * @param utilClass the utility {@link Class}
          * @return the {@code Builder}
@@ -514,6 +530,7 @@ public class NullToleranceTest {
         }
 
         @VisibleForTesting
+        @Nullable
         Class<?> getTargetClass() {
             return targetClass;
         }
@@ -534,7 +551,7 @@ public class NullToleranceTest {
          * @return the {@code nullToleranceTest} instance.
          */
         public NullToleranceTest build() {
-            checkNotNull(targetClass);
+            checkState(targetClass != null, "The targetClass is not set. Use setClass().");
             addDefaultTypeValues();
 
             final NullToleranceTest result = new NullToleranceTest(this);
