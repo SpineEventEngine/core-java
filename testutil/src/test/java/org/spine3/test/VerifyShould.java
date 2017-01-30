@@ -872,4 +872,164 @@ public class VerifyShould {
         Verify.assertEndsWith(array, lastItem);
     }
 
+    @Test(expected = AssertionError.class)
+    public void fail_if_objects_are_not_equal() {
+        Verify.assertEqualsAndHashCode(1, 2);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_objects_are_equal_but_hash_codes_are_not_equal() {
+        final ClassThatViolateHashCodeAndCloneableContract objectA = new ClassThatViolateHashCodeAndCloneableContract(1);
+        final ClassThatViolateHashCodeAndCloneableContract objectB = new ClassThatViolateHashCodeAndCloneableContract(1);
+
+        Verify.assertEqualsAndHashCode(objectA, objectB);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = AssertionError.class)
+    public void fail_if_objects_are_null() {
+        Verify.assertEqualsAndHashCode(null, null);
+    }
+
+    @Test
+    public void pass_if_objects_and_their_hash_codes_are_equal() {
+        Verify.assertEqualsAndHashCode(1, 1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_clone_returns_same_object() {
+        Verify.assertShallowClone(new ClassThatViolateHashCodeAndCloneableContract(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_clone_does_not_work_correctly() {
+        Verify.assertShallowClone(new ClassThatImplementCloneableIncorrectly(1));
+    }
+
+    @Test
+    public void pass_if_cloneable_equals_and_hash_code_overridden_correctly() {
+        Verify.assertShallowClone(new ClassThatImplementCloneableCorrectly(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_class_instantiable() {
+        Verify.assertClassNonInstantiable(Object.class);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_class_instantiable_through_reflection() {
+        Verify.assertClassNonInstantiable(ClassWithPrivateCtor.class);
+    }
+
+    @Test
+    public void pass_if_new_instance_throw_instantiable_exception() {
+        Verify.assertClassNonInstantiable(void.class);
+    }
+
+    @Test
+    public void pass_if_class_non_instantiable_through_reflection() {
+        Verify.assertClassNonInstantiable(ClassThatThrowExceptionInConstructor.class);
+    }
+
+    @SuppressWarnings("EqualsAndHashcode")
+    private static class ClassThatViolateHashCodeAndCloneableContract implements Cloneable {
+        private final int value;
+
+        private ClassThatViolateHashCodeAndCloneableContract(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            ClassThatViolateHashCodeAndCloneableContract that = (ClassThatViolateHashCodeAndCloneableContract) o;
+
+            return value == that.value;
+        }
+
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return this;
+        }
+    }
+
+    private static class ClassThatImplementCloneableCorrectly implements Cloneable {
+        private final int value;
+
+        private ClassThatImplementCloneableCorrectly(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            ClassThatImplementCloneableCorrectly that = (ClassThatImplementCloneableCorrectly) o;
+
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value;
+        }
+
+    }
+
+    private static final class ClassThatImplementCloneableIncorrectly implements Cloneable {
+        private final int value;
+
+        private ClassThatImplementCloneableIncorrectly(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            ClassThatImplementCloneableIncorrectly that = (ClassThatImplementCloneableIncorrectly) o;
+
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value;
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return new ClassThatImplementCloneableIncorrectly(value + 1);
+        }
+    }
+
+    private static class ClassWithPrivateCtor {
+        @SuppressWarnings("RedundantNoArgConstructor")
+        private ClassWithPrivateCtor() {
+        }
+    }
+
+    private static class ClassThatThrowExceptionInConstructor {
+        private ClassThatThrowExceptionInConstructor() {
+            throw new AssertionError("This is non-instantiable class");
+        }
+    }
+
 }
