@@ -539,9 +539,25 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_sets_are_not_equal() {
+    public void fail_if_sets_are_not_equal_by_size() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4);
         final Set<Integer> secondOne = Sets.newHashSet(1, 2, 4);
+
+        Verify.assertSetsEqual(firstOne, secondOne);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_sets_are_not_equal_by_content() {
+        final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3);
+        final Set<Integer> secondOne = Sets.newHashSet(1, 2, 777);
+
+        Verify.assertSetsEqual(firstOne, secondOne);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_sets_are_equal_by_size_but_have_over_than_5_differences() {
+        final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4, 5, 6);
+        final Set<Integer> secondOne = Sets.newHashSet(11, 12, 13, 14, 15, 16);
 
         Verify.assertSetsEqual(firstOne, secondOne);
     }
