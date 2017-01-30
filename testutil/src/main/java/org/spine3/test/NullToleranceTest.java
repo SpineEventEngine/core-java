@@ -363,7 +363,7 @@ public class NullToleranceTest {
             if (result == null) {
                 final Class<Message> messageClass = Message.class;
                 final boolean assignableFromMessage = messageClass.isAssignableFrom(type);
-                if(assignableFromMessage) {
+                if (assignableFromMessage) {
                     @SuppressWarnings("unchecked")      //It's fine since we checked for the type.
                     final Class<? extends Message> messageType = (Class<? extends Message>) type;
                     result = getDefaultMessageInstance(messageType);
