@@ -259,11 +259,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
+        final Collection<I> domainIds = unpackIds(filters);
+        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
+        return result;
+    }
+
+    /**
+     * Extracts entity IDs from the passed filters.
+     */
+    private Collection<I> unpackIds(EntityFilters filters) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
 
-        final Collection<I> domainIds = Collections2.transform(idsList, new Function<EntityId, I>() {
+        final Collection<I> result = Collections2.transform(idsList, new Function<EntityId, I>() {
             @Nullable
             @Override
             public I apply(@Nullable EntityId input) {
@@ -292,7 +301,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             }
         });
 
-        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
         return result;
     }
 
