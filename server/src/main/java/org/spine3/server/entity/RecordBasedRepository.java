@@ -231,7 +231,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         final ImmutableCollection<E> entities =
                 FluentIterable.from(recordMap.entrySet())
-                              .transform(storageRecordToEntityTransformer())
+                              .transform(storageRecordToEntity())
                               .toList();
         return entities;
     }
@@ -330,7 +330,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return builder.build();
     }
 
-    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntityTransformer() {
+    /**
+     * Creates a function that transforms a {@code EntityStorageRecord} stored in a map
+     * into an entity of type {@code <E>}.
+     *
+     * @return new instance of the transforming function
+     */
+    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntity() {
         return new Function<Map.Entry<I, EntityStorageRecord>, E>() {
             @Nullable
             @Override
