@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.server.event.EventFilter;
 
@@ -35,6 +36,7 @@ import static junit.framework.TestCase.assertTrue;
 public class NullToleranceTestShould {
 
     private static final Object DEFAULT_VALUE = new Object();
+    public static final String METHOD_NAME_WITHOUT_CHECK = "methodWithoutCheck";
 
     @Test
     public void return_false_for_class_with_methods_accepting_non_declared_null_parameters() {
@@ -52,7 +54,8 @@ public class NullToleranceTestShould {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithReferenceParameters.class)
-                                 .excludeMethod("methodWithoutCheck")
+                                 .excludeMethod(METHOD_NAME_WITHOUT_CHECK)
+                                 .excludeMethod("methodWithParameterTypeWhichDoesNotCheckInside")
                                  .addDefaultValue(DEFAULT_VALUE)
                                  .build();
         final boolean passed = nullToleranceTest.check();
@@ -96,6 +99,7 @@ public class NullToleranceTestShould {
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(UtilityClassWithThrownExceptionInTheMethod.class)
+                                 .excludeMethod("methodWhichThrowsNPE")
                                  .build();
         nullToleranceTest.check();
     }
@@ -158,11 +162,42 @@ public class NullToleranceTestShould {
         assertTrue(result);
     }
 
+    @Test
+    public void not_pass_the_check_when_not_null_check_is_not_present() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(UtilityClassWithReferenceParameters.class)
+                                                                     .excludeMethod(METHOD_NAME_WITHOUT_CHECK)
+                                                                     .build();
+        final boolean result = nullToleranceTest.check();
+        assertFalse(result);
+    }
+
+    @Test
+    public void not_pass_the_check_when_stack_trace_does_not_match_expected() {
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(UtilityClassWithThrownExceptionInTheMethod.class)
+                                 .excludeMethod("methodWhichThrowsException")
+                                 .build();
+        final boolean result = nullToleranceTest.check();
+        assertFalse(result);
+    }
+
+    @Test
+    public void pass_the_check_when_method_arguments_are_wrapper_types() {
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(ClassWithMethodWithWrapperTypeArguments.class)
+                                 .build();
+        final boolean result = nullToleranceTest.check();
+        assertTrue(result);
+    }
+
     /*
      * Test utility classes
      ******************************/
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class UtilityClassWithReferenceParameters {
 
         public static void methodWithoutCheck(Object param) {
@@ -172,16 +207,20 @@ public class NullToleranceTestShould {
             checkNotNull(first);
             checkNotNull(second);
         }
+
+        public static void methodWithParameterTypeWhichDoesNotCheckInside(Object first, Object second) {
+            methodWithCheck(first, second);
+        }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class UtilityClassWithPrimitiveParameters {
 
         public static void methodWithPrimitiveParams(int first, double second) {
         }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class UtilityClassWithMixedParameters {
 
         public static void methodWithMixedParameterTypesWithoutCheck(long first, Object second) {
@@ -192,15 +231,20 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class UtilityClassWithThrownExceptionInTheMethod {
 
         public static void methodWhichThrowsException(Object param) {
             throw new RuntimeException("Occurred exception.");
         }
+
+        @SuppressWarnings("ProhibitedExceptionThrown") // need to test the {@code NullToleranceTest} class.
+        public static void methodWhichThrowsNPE(Object param) {
+            throw new NullPointerException("Occurred NPE");
+        }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class ClassWithNonUtilMethod {
         public void nonUtilMethod(Object param) {
         }
@@ -210,7 +254,7 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class UtilityClassWithPrivateMethod {
 
         private static void privateMethod(Object first, Object second) {
@@ -222,7 +266,7 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class ClassWithNullableMethodParameters {
 
         public static void nullableParamsMethod(@Nullable Object first, @Nullable Object second) {
@@ -233,10 +277,22 @@ public class NullToleranceTestShould {
         }
     }
 
-    @SuppressWarnings("unused") // accessed via reflection
+    @SuppressWarnings("unused") // accessed via reflection.
     private static class ClassWithMessageMethodParameter {
 
-        public static void nullableParamsMethod(EventFilter first, EventFilter second) {
+        public static void messageParamsMethod(EventFilter first, EventFilter second) {
+            checkNotNull(first);
+            checkNotNull(second);
+        }
+
+        public static void messageParamMethod(Message first) {
+            checkNotNull(first);
+        }
+    }
+
+    @SuppressWarnings("unused") // accessed via reflection.
+    private static class ClassWithMethodWithWrapperTypeArguments {
+        public static void wrapperArgumentsMethod(Integer first, Boolean second) {
             checkNotNull(first);
             checkNotNull(second);
         }
