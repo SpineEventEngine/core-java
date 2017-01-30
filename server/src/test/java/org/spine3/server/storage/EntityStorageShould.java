@@ -35,7 +35,6 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @param <I> the type of Entity IDs
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord, RecordStorage<I>> {
 
     /**
