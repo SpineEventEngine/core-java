@@ -92,7 +92,6 @@ public class IntMismatch {
     }
 
     private static int unpacked(Any any) {
-        checkNotNull(any);
         final Int32Value unpacked = unpack(any, Int32Value.class);
         return unpacked.getValue();
     }
