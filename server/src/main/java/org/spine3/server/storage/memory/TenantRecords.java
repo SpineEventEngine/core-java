@@ -56,10 +56,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
     @Override
     public EntityStorageRecord get(I id) {
         final EntityStorageRecord record = records.get(id);
-        if (!Predicates.isVisible()
-                       .apply(record)) {
-            return null;
-        }
         return record;
     }
 

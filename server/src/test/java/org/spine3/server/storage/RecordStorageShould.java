@@ -34,7 +34,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
@@ -50,6 +52,10 @@ public abstract class RecordStorageShould<I>
     @Override
     protected EntityStorageRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
+    }
+
+    private EntityStorageRecord newStorageRecord(I id) {
+        return newStorageRecord(newState(id));
     }
 
     private static EntityStorageRecord newStorageRecord(Message state) {
@@ -105,5 +111,30 @@ public abstract class RecordStorageShould<I>
             final Message state = AnyPacker.unpack(record.getState());
             assertMatchesMask(state, fieldMask);
         }
+    }
+
+    @Test
+    public void mark_record_as_archived() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // The attempt to mark a record which is not yet stored returns `false`.
+        assertFalse(storage.markArchived(id));
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not archived.
+        assertFalse(storage.read(id).getArchived());
+
+        // Mark archived.
+        storage.markArchived(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id).getArchived());
+
+        // Check that another attempt to mark archived returns `false`.
+        assertFalse(storage.markArchived(id));
     }
 }
