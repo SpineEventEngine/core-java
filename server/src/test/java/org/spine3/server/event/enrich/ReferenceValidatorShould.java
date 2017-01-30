@@ -20,6 +20,7 @@
 
 package org.spine3.server.event.enrich;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.junit.Test;
@@ -40,6 +41,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -111,5 +115,15 @@ public class ReferenceValidatorShould {
         validator.validate();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void fail_if_no_mapping_function_is_defined() {
+        final EventEnricher mockEnricher = mock(EventEnricher.class);
+        when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
+                .thenReturn(Optional.<EnrichmentFunction<?, ?>>absent());
+        final ReferenceValidator validator = new ReferenceValidator(mockEnricher,
+                                                                    UserDeletedEvent.class,
+                                                                    GranterEventsEnrichment.class);
+        validator.validate();
+    }
 
 }
