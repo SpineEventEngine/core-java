@@ -897,6 +897,51 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
+    public void fail_if_value_is_not_negative() {
+        Verify.assertNegative(1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_value_is_zero_in_assert_negative() {
+        Verify.assertNegative(0);
+    }
+
+    @Test
+    public void pass_if_value_is_negative() {
+        Verify.assertNegative(-1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_value_is_not_positive() {
+        Verify.assertPositive(-1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_value_is_zero_in_assert_positive() {
+        Verify.assertPositive(0);
+    }
+
+    @Test
+    public void pass_if_value_is_positive() {
+        Verify.assertPositive(1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_value_is_positive() {
+        Verify.assertZero(1);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_if_value_is_negative() {
+        Verify.assertZero(-1);
+    }
+
+    @Test
+    public void pass_if_value_is_zero() {
+        Verify.assertZero(0);
+    }
+
+    @Test(expected = AssertionError.class)
     public void fail_if_clone_returns_same_object() {
         Verify.assertShallowClone(new ClassThatViolateHashCodeAndCloneableContract(1));
     }
