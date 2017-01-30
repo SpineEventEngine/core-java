@@ -39,7 +39,6 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends 
 
     @Override
     public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
-        checkNotNull(entityClass);
         super.setResultClass(entityClass);
         return this;
     }

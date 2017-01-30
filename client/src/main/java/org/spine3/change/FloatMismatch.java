@@ -92,7 +92,6 @@ public class FloatMismatch {
     }
 
     private static float unpacked(Any any) {
-        checkNotNull(any);
         final FloatValue unpacked = unpack(any, FloatValue.class);
         return unpacked.getValue();
     }

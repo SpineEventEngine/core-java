@@ -92,7 +92,6 @@ public class DoubleMismatch {
     }
 
     private static double unpacked(Any any) {
-        checkNotNull(any);
         final DoubleValue unpacked = unpack(any, DoubleValue.class);
         return unpacked.getValue();
     }

@@ -107,10 +107,6 @@ public class MessageMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
     private static ValueMismatch of(Message expected, Message actual, Message newValue, int version) {
-        checkNotNull(expected);
-        checkNotNull(actual);
-        checkNotNull(newValue);
-
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))

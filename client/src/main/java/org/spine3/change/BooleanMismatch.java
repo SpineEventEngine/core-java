@@ -77,7 +77,6 @@ public class BooleanMismatch {
     }
 
     private static boolean unpacked(Any any) {
-        checkNotNull(any);
         final BoolValue unpacked = unpack(any, BoolValue.class);
         return unpacked.getValue();
     }

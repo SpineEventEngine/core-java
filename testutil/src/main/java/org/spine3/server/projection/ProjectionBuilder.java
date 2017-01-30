@@ -39,7 +39,6 @@ public class ProjectionBuilder<P extends Projection<I, S>, I, S extends Message>
 
     @Override
     public ProjectionBuilder<P, I, S> setResultClass(Class<P> entityClass) {
-        checkNotNull(entityClass);
         super.setResultClass(entityClass);
         return this;
     }

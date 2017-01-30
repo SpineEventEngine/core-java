@@ -120,7 +120,6 @@ public class Stringifiers {
     }
 
     private static String convert(Message message) {
-        checkNotNull(message);
         final Collection<Object> values = message.getAllFields().values();
         final String result;
         if (values.isEmpty()) {
@@ -139,7 +138,6 @@ public class Stringifiers {
     }
 
     private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
-        checkNotNull(message);
         String result = shortDebugString(message);
         result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
         return result;

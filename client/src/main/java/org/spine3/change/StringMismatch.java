@@ -90,9 +90,6 @@ public class StringMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
-        checkNotNull(expected);
-        checkNotNull(actual);
-        checkNotNull(newValue);
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))
@@ -102,7 +99,6 @@ public class StringMismatch {
     }
 
     private static String unpacked(Any any) {
-        checkNotNull(any);
         final StringValue unpacked = unpack(any, StringValue.class);
         return unpacked.getValue();
     }

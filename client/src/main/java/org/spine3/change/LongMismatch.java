@@ -92,7 +92,6 @@ public class LongMismatch {
     }
 
     private static long unpacked(Any any) {
-        checkNotNull(any);
         final Int64Value unpacked = unpack(any, Int64Value.class);
         return unpacked.getValue();
     }
