@@ -42,7 +42,8 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+public abstract class RecordStorageShould<I>
+       extends AbstractStorageShould<I, EntityStorageRecord, RecordStorage<I>> {
 
     protected abstract Message newState(I id);
 

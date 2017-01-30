@@ -56,7 +56,8 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
+public abstract class AggregateStorageShould
+       extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Given.newProjectId();
 
@@ -71,10 +72,6 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void tearDownAggregateStorageTest() {
         close(storage);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract AggregateStorage<ProjectId> getStorage();
 
     /**
      * Used to get a storage in tests with different ID types.

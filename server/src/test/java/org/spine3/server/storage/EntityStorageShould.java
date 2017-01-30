@@ -36,10 +36,7 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
-
-    @Override
-    protected abstract RecordStorage<I> getStorage();
+public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord, RecordStorage<I>> {
 
     /**
      * Used to get a storage in tests with different ID types.

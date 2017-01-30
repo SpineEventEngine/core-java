@@ -22,8 +22,7 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.server.storage.AbstractStorage;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
@@ -34,9 +33,8 @@ import org.spine3.test.storage.Task;
  */
 public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId> {
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected AbstractStorage<ProjectId, EntityStorageRecord> getStorage() {
+    protected RecordStorage<ProjectId> getStorage() {
         return InMemoryRecordStorage.newInstance(false);
     }
 

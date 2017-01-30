@@ -62,7 +62,7 @@ import static org.spine3.server.event.EventStorage.toEvent;
 import static org.spine3.server.event.EventStorage.toEventList;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
+public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
 
     /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
@@ -96,10 +96,6 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     public void tearDownEventStorageTest() {
         close(storage);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract EventStorage getStorage();
 
     @Override
     protected Event newStorageRecord() {

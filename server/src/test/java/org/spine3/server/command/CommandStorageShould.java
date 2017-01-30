@@ -69,7 +69,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
+public abstract class CommandStorageShould
+        extends AbstractStorageShould<CommandId, CommandStorageRecord, CommandStorage> {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
@@ -90,10 +91,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     public void tearDownCommandStorageTest() {
         close(storage);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract CommandStorage getStorage();
 
     @Override
     protected CommandStorageRecord newStorageRecord() {

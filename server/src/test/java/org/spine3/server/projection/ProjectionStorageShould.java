@@ -59,7 +59,8 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+public abstract class ProjectionStorageShould<I>
+       extends AbstractStorageShould<I, EntityStorageRecord, ProjectionStorage<I>> {
 
     private ProjectionStorage<I> storage;
 
@@ -72,9 +73,6 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     public void tearDownProjectionStorageTest() {
         close(storage);
     }
-
-    @Override
-    protected abstract ProjectionStorage<I> getStorage();
 
     @Override
     protected EntityStorageRecord newStorageRecord() {

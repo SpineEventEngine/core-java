@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AbstractStorageShould<I, R extends Message> {
+public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
 
     private AbstractStorage<I, R> storage;
 
@@ -61,7 +61,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract <S extends AbstractStorage<I, R>> S getStorage();
+    protected abstract S getStorage();
 
     /** Creates a new storage record. */
     protected abstract R newStorageRecord();

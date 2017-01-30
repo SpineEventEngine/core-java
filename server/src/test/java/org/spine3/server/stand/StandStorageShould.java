@@ -80,6 +80,9 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return project;
     }
 
+    @Override
+    protected abstract StandStorage getStorage();
+
     @Test
     public void retrieve_all_records() {
         final StandStorage storage = getStorage();
