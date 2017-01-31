@@ -23,9 +23,12 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+import org.spine3.time.Interval;
+import org.spine3.time.Intervals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -109,14 +112,28 @@ public class EntityShould {
 
     @Test
     public void set_default_state() {
-        final Given.TestEntity entity = Given.TestEntity.withState();
-        entity.setDefault();
-        final long expectedTimeSec = currentTimeSeconds();
+        final Long id = 1L;
+        final Timestamp before = Timestamps.secondsAgo(1);
 
-        assertEquals(entity.getDefaultState(), entity.getState());
-        assertEquals(expectedTimeSec, entity.whenModified()
-                                            .getSeconds());
-        assertEquals(0, this.entityNew.getVersion());
+        // Create and init the entity.
+        Entity<Long, StringValue> entity = new BareBonesEntity(id);
+        entity.init();
+
+        final Timestamp after = Timestamps.getCurrentTime();
+
+        // The interval with a much earlier start to allow non-zero interval on faster computers.
+        final Interval whileWeCreate = Intervals.between(before, after);
+
+        assertEquals(id, entity.getId());
+        assertEquals(0, entity.getVersion());
+        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
+        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+    }
+
+    private static class BareBonesEntity extends Entity<Long, StringValue> {
+        private BareBonesEntity(Long id) {
+            super(id);
+        }
     }
 
     @Test
