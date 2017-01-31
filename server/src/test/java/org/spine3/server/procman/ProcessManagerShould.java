@@ -85,7 +85,11 @@ public class ProcessManagerShould {
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
-        processManager = new TestProcessManager(ID);
+        processManager = org.spine3.test.Given.processManagerOfClass(TestProcessManager.class)
+                                              .withId(ID)
+                                              .withVersion(2)
+                                              .withState(Any.getDefaultInstance())
+                                              .build();
     }
 
     @Test
