@@ -65,6 +65,11 @@ class ReferenceValidator {
     private static final String PIPE_SEPARATOR = "|";
     private static final Pattern PATTERN_PIPE_SEPARATOR = Pattern.compile("\\|");
 
+    private static final String SPACE = " ";
+    private static final String EMPTY_STRING = "";
+    private static final Pattern SPACE_PATTERN = Pattern.compile(SPACE, Pattern.LITERAL);
+
+
     /** The reference to the event context used in the `by` field option. */
     private static final String CONTEXT_REFERENCE = "context";
 
@@ -118,11 +123,12 @@ class ReferenceValidator {
         final String byOptionArgument = enrichmentField.getOptions()
                                                        .getExtension(EventAnnotationsProto.by);
         checkNotNull(byOptionArgument);
-        final int pipeSeparatorIndex = byOptionArgument.indexOf(PIPE_SEPARATOR);
+        final String targetFields = removeSpaces(byOptionArgument);
+        final int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
         if (pipeSeparatorIndex < 0) {
-            return Collections.singleton(findSourceFieldByName(byOptionArgument, enrichmentField, true));
+            return Collections.singleton(findSourceFieldByName(targetFields, enrichmentField, true));
         } else {
-            final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(byOptionArgument);
+            final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
             return findSourceFieldsByNames(targetFieldNames, enrichmentField);
         }
     }
@@ -145,6 +151,13 @@ class ReferenceValidator {
             throw noFieldException(name, srcMessage, enrichmentField);
         }
         return field;
+    }
+
+    private static String removeSpaces(String source) {
+        checkNotNull(source);
+        final String result = SPACE_PATTERN.matcher(source)
+                                           .replaceAll(EMPTY_STRING);
+        return result;
     }
 
     private Collection<FieldDescriptor> findSourceFieldsByNames(String[] names, FieldDescriptor enrichmentField) {

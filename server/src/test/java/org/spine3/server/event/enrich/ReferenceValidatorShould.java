@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.spine3.server.event.Given;
 import org.spine3.server.event.enrich.ReferenceValidator.ValidationResult;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.TaskAdded;
+import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.GranterEventsEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
@@ -52,6 +54,7 @@ import static org.spine3.test.Verify.assertSize;
  */
 public class ReferenceValidatorShould {
 
+    private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
     private final EventEnricher eventEnricher = Given.Enrichment.newEventEnricher();
 
     @Test
@@ -97,7 +100,7 @@ public class ReferenceValidatorShould {
 
         final FieldDescriptor enrichmentField = enrichmentFieldIterator.next();
         final String enrichmentFieldName = enrichmentField.getName();
-        assertEquals("user_google_uid", enrichmentFieldName);
+        assertEquals(USER_GOOGLE_UID_FIELD, enrichmentFieldName);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -122,5 +125,35 @@ public class ReferenceValidatorShould {
         assertTrue(functions.isEmpty());
         final Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
         assertEmpty(fields);
+    }
+
+    @Test
+    public void handle_separator_spaces_in_by_argument() {
+        final ReferenceValidator validator
+                = new ReferenceValidator(eventEnricher,
+                                         TaskAdded.class,
+                                         EnrichmentBoundWithFieldsSeparatedWithSpaces.class);
+        final ValidationResult result = validator.validate();
+        final Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
+        assertFalse(fieldMap.isEmpty());
+        assertSize(1, fieldMap);
+
+        final Iterator<Map.Entry<FieldDescriptor, Collection<FieldDescriptor>>> mapIterator = fieldMap.asMap()
+                                                                                                      .entrySet()
+                                                                                                      .iterator();
+        assertTrue(mapIterator.hasNext());
+        final Map.Entry<FieldDescriptor, Collection<FieldDescriptor>> singleEntry = mapIterator.next();
+        final FieldDescriptor boundField = singleEntry.getKey();
+
+        final String boundFieldName = boundField.getName();
+        assertEquals("project_id", boundFieldName);
+
+        final Collection<FieldDescriptor> targets = singleEntry.getValue();
+        assertSize(1, targets);
+
+        final FieldDescriptor targetField = targets.iterator()
+                                                   .next();
+        final String targetFieldName = targetField.getName();
+        assertEquals(USER_GOOGLE_UID_FIELD, targetFieldName);
     }
 }

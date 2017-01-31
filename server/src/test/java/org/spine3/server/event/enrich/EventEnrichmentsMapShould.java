@@ -32,6 +32,7 @@ import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
+import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDifferentNames;
@@ -187,6 +188,13 @@ public class EventEnrichmentsMapShould {
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class,
                                             PermissionRevokedEvent.class);
+    }
+
+    @Test
+    public void contain_enrichments_defined_with_by_containing_separating_spaces() {
+        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsSeparatedWithSpaces.class,
+                                            TaskAdded.class,
+                                            PermissionGrantedEvent.class);
     }
 
     @SafeVarargs

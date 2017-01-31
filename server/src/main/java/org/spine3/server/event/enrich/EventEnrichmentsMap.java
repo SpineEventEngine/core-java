@@ -164,10 +164,11 @@ class EventEnrichmentsMap {
             final Collection<String> result = new LinkedList<>();
             final String[] fieldNames = PIPE_SEPARATOR_PATTERN.split(qualifiers);
             for (String singleFieldName : fieldNames) {
-                if (singleFieldName.isEmpty()) {
+                final String normalizedFieldName = singleFieldName.trim();
+                if (normalizedFieldName.isEmpty()) {
                     continue;
                 }
-                final String fieldName = getSimpleFieldName(singleFieldName);
+                final String fieldName = getSimpleFieldName(normalizedFieldName);
                 result.add(fieldName);
             }
             return result;
