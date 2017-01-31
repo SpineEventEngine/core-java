@@ -574,44 +574,55 @@ public class NullToleranceTest {
         }
 
         private void addDefaultTypeValues() {
-            final Customizer<String> stringCustomizer = new Customizer<>(STRING_DEFAULT_VALUE, defaultValues);
-            final Customizer<Queue> queueCustomizer = new Customizer<>(newPriorityQueue(), defaultValues);
-            final Customizer<Set> setCustomizer = new Customizer<>(emptySet(), defaultValues);
-            final Customizer<List> listCustomizer = new Customizer<>(emptyList(), defaultValues);
-            final Customizer<Map> mapCustomizer = new Customizer<>(emptyMap(), defaultValues);
-            final String defaultStringValue = stringCustomizer.getCustomizedValue(String.class);
-            defaultValues.put(String.class, defaultStringValue);
-            final Queue<?> defaultQueue = queueCustomizer.getCustomizedValue(Queue.class);
-            defaultValues.put(Queue.class, defaultQueue);
-            final Set<?> defaultSet = setCustomizer.getCustomizedValue(Set.class);
-            defaultValues.put(Set.class, defaultSet);
-            final List<?> defaultList = listCustomizer.getCustomizedValue(List.class);
-            defaultValues.put(List.class, defaultList);
-            final Map<?, ?> defaultMap = mapCustomizer.getCustomizedValue(Map.class);
-            defaultValues.put(Map.class, defaultMap);
+            final DefaultValueCustomizer<String> stringCustomizer =
+                    new DefaultValueCustomizer<>(STRING_DEFAULT_VALUE, defaultValues);
+            stringCustomizer.customize(String.class);
+
+            final DefaultValueCustomizer<Queue> queueCustomizer =
+                    new DefaultValueCustomizer<>(newPriorityQueue(), defaultValues);
+            queueCustomizer.customize(Queue.class);
+
+            final DefaultValueCustomizer<Set> setCustomizer =
+                    new DefaultValueCustomizer<>(emptySet(), defaultValues);
+            setCustomizer.customize(Set.class);
+
+            final DefaultValueCustomizer<List> listCustomizer =
+                    new DefaultValueCustomizer<>(emptyList(), defaultValues);
+            listCustomizer.customize(List.class);
+
+            final DefaultValueCustomizer<Map> mapCustomizer =
+                    new DefaultValueCustomizer<>(emptyMap(), defaultValues);
+            mapCustomizer.customize(Map.class);
         }
     }
 
-    private static class Customizer<T> {
+    /**
+     * Customizes the default value for the provided type.
+     */
+    private static class DefaultValueCustomizer<T> {
         private final T defaultValue;
-        private final Map<Class<?>, ?> defaultValues;
+        private final Map<Class<?>, ? super Object> defaultValues;
 
-        <B extends T> Customizer(B defaultValue, Map<Class<?>, ?> defaultValues) {
+        private <B extends T> DefaultValueCustomizer(B defaultValue, Map<Class<?>, ? super Object> defaultValues) {
             this.defaultValue = defaultValue;
             this.defaultValues = defaultValues;
         }
 
-        T getCustomizedValue(Class<T> typeOfInterest) {
+        /**
+         * Adds the {@code defaultValue} for the {@code typeOfInterest},
+         * if no default value has been set.
+         *
+         * @param typeOfInterest the type for which will be provided default value
+         */
+        private void customize(Class<T> typeOfInterest) {
             for (Map.Entry<Class<?>, ?> entry : defaultValues.entrySet()) {
                 final boolean customValuePresent = typeOfInterest.isAssignableFrom(entry.getKey());
                 if (customValuePresent) {
-                    @SuppressWarnings("unchecked")      // It's OK, since we check for the type compliance above.
-                    final T result = (T) entry.getValue();
-                    return result;
+                    return;
                 }
             }
-            return defaultValue;
+
+            defaultValues.put(typeOfInterest, defaultValue);
         }
     }
-
 }
