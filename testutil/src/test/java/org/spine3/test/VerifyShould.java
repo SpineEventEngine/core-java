@@ -334,7 +334,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_object_array_size_is_not_equal() {
-        Verify.assertSize(-1, new Object[1]);
+        Verify.assertSize(0, new Object[1]);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -351,7 +351,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_iterable_size_is_not_equal() {
-        Verify.assertSize(-1, FluentIterable.of(1));
+        Verify.assertSize(0, FluentIterable.of(1));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -367,7 +367,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_map_size_is_not_equal() {
-        Verify.assertSize(-1, Collections.emptyMap());
+        Verify.assertSize(1, Collections.emptyMap());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -383,7 +383,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_multimap_size_is_not_equal() {
-        Verify.assertSize(-1, ArrayListMultimap.create());
+        Verify.assertSize(1, ArrayListMultimap.create());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -399,7 +399,7 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_collection_size_is_not_equal() {
-        Verify.assertSize(-1, Collections.emptyList());
+        Verify.assertSize(1, Collections.emptyList());
     }
 
     @Test
