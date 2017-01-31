@@ -27,9 +27,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Predicates;
+import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -53,16 +53,16 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, AggregateStatus> statuses = newHashMap();
+    private final Map<I, EntityStatus> statuses = newHashMap();
 
     private final Predicate<I> isVisible = new Predicate<I>() {
         @Override
         public boolean apply(@Nullable I input) {
-            final AggregateStatus aggregateStatus = statuses.get(input);
+            final EntityStatus entityStatus = statuses.get(input);
 
-            return aggregateStatus == null
+            return entityStatus == null
                     || Predicates.isVisible()
-                                 .apply(aggregateStatus);
+                                 .apply(entityStatus);
         }
     };
 
@@ -113,9 +113,9 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      *
      * <p>If no status stored, the default instance is returned.
      */
-    Optional<AggregateStatus> getStatus(I id) {
-        final AggregateStatus aggregateStatus = statuses.get(id);
-        return Optional.fromNullable(aggregateStatus);
+    Optional<EntityStatus> getStatus(I id) {
+        final EntityStatus entityStatus = statuses.get(id);
+        return Optional.fromNullable(entityStatus);
     }
 
     @Override
@@ -134,7 +134,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
         eventCounts.put(id, eventCount);
     }
 
-    void putStatus(I id, AggregateStatus status) {
+    void putStatus(I id, EntityStatus status) {
         statuses.put(id, status);
     }
 

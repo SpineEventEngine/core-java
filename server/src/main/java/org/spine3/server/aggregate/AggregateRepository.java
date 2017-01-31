@@ -33,13 +33,13 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.Predicates;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
@@ -265,7 +265,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
-        final Optional<AggregateStatus> status = aggregateStorage().readStatus(id);
+        final Optional<EntityStatus> status = aggregateStorage().readStatus(id);
         if (status.isPresent()) {
             if (!Predicates.isVisible().apply(status.get())) {
                 return Optional.absent();
@@ -333,10 +333,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @throws IllegalStateException if the aggregate is “invisible”
      */
     private void checkCurrentStatus(I aggregateId) {
-        final Optional<AggregateStatus> status = aggregateStorage().readStatus(aggregateId);
+        final Optional<EntityStatus> status = aggregateStorage().readStatus(aggregateId);
 
         if (status.isPresent()) {
-            final AggregateStatus currentStatus = status.get();
+            final EntityStatus currentStatus = status.get();
             if (currentStatus.getArchived()) {
                 throw new IllegalStateException(String.format("The aggregate (ID: %s) is archived.", aggregateId));
             }

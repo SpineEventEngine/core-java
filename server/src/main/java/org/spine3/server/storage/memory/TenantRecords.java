@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.Predicates;
 
@@ -63,11 +64,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         if (record == null) {
             return false;
         }
-        if (record.getArchived()) {
+        final EntityStatus currentStatus = record.getEntityStatus();
+        if (currentStatus.getArchived()) {
             return false;
         }
         final EntityStorageRecord archivedRecord = record.toBuilder()
-                                                         .setArchived(true)
+                                                         .setEntityStatus(currentStatus.toBuilder()
+                                                                                       .setArchived(true))
                                                          .build();
         records.put(id, archivedRecord);
         return true;
@@ -78,11 +81,14 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         if (record == null) {
             return false;
         }
-        if (record.getDeleted()) {
+
+        final EntityStatus currentStatus = record.getEntityStatus();
+        if (currentStatus.getDeleted()) {
             return false;
         }
         final EntityStorageRecord deletedRecord = record.toBuilder()
-                                                        .setDeleted(true)
+                                                        .setEntityStatus(currentStatus.toBuilder()
+                                                                                      .setDeleted(true))
                                                         .build();
         records.put(id, deletedRecord);
         return true;

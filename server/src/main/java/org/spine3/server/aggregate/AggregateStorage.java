@@ -27,9 +27,9 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
@@ -184,7 +184,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param id the ID of the aggregate
      * @return the aggregate status record or {@code Optional.absent()}
      */
-    protected abstract Optional<AggregateStatus> readStatus(I id);
+    protected abstract Optional<EntityStatus> readStatus(I id);
 
     /**
      * Writes a count of events which were saved to the storage after the last snapshot was created,

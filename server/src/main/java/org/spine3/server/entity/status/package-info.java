@@ -18,21 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
-
-import com.google.common.base.Optional;
-
 /**
- * Base interface for data stored in memory for one tenant.
- *
- * @param <I> the type of entity IDs
- * @author Alexander Yevsyukov
+ * This package contains generated classes and interfaces for working
+ * with entity statuses.
  */
-interface TenantStorage<I, R> {
 
-    Optional<R> get(I id);
+@SPI
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity.status;
 
-    void put(I id, R record);
+import org.spine3.SPI;
 
-    boolean isEmpty();
-}
+import javax.annotation.ParametersAreNonnullByDefault;

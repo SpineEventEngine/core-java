@@ -22,8 +22,8 @@ package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateStatus;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.Iterator;
 import java.util.List;
@@ -81,9 +81,9 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Optional<AggregateStatus> readStatus(I id) {
+    protected Optional<EntityStatus> readStatus(I id) {
         checkNotClosed();
-        Optional<AggregateStatus> result = getStorage().getStatus(id);
+        Optional<EntityStatus> result = getStorage().getStatus(id);
         return result;
     }
 
@@ -95,15 +95,15 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected boolean markArchived(I id) {
-        final Optional<AggregateStatus> found = getStorage().getStatus(id);
+        final Optional<EntityStatus> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
-            getStorage().putStatus(id, AggregateStatus.newBuilder()
-                                                      .setArchived(true)
-                                                      .build());
+            getStorage().putStatus(id, EntityStatus.newBuilder()
+                                                   .setArchived(true)
+                                                   .build());
             return true;
         }
-        final AggregateStatus currentStatus = found.get();
+        final EntityStatus currentStatus = found.get();
         if (currentStatus.getArchived()) {
             return false; // Already archived.
         }
@@ -116,16 +116,16 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected boolean markDeleted(I id) {
-        final Optional<AggregateStatus> found = getStorage().getStatus(id);
+        final Optional<EntityStatus> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
-            getStorage().putStatus(id, AggregateStatus.newBuilder()
-                                                      .setDeleted(true)
-                                                      .build());
+            getStorage().putStatus(id, EntityStatus.newBuilder()
+                                                   .setDeleted(true)
+                                                   .build());
             return true;
         }
 
-        final AggregateStatus currentStatus = found.get();
+        final EntityStatus currentStatus = found.get();
 
         if (currentStatus.getDeleted()) {
             return false; // Already deleted.

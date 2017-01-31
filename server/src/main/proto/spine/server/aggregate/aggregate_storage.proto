@@ -104,13 +104,3 @@ message AggregateEvents {
     repeated base.Event event = 2;
 }
 
-// The storage status of an aggregate.
-message AggregateStatus {
-
-    // If `true` the aggregate will not be loaded for regular queries.
-    bool archived = 1;
-
-    // If `true` the aggregate will not be loaded for regular queries.
-    bool deleted = 2;
-}
-

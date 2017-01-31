@@ -21,19 +21,20 @@
 package org.spine3.server.aggregate.storage;
 
 import com.google.common.base.Predicate;
+import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.Nullable;
 
 /**
- * Collection of predicates for filtering {@link AggregateStorageRecord}s.
+ * Collection of predicates for filtering aggregates by their {@code EntityStatus}.
  *
  * @author Alexander Yevsyukov
  */
 public class Predicates {
 
-    private static final Predicate<AggregateStatus> isVisible = new Predicate<AggregateStatus>() {
+    private static final Predicate<EntityStatus> isVisible = new Predicate<EntityStatus>() {
         @Override
-        public boolean apply(@Nullable AggregateStatus input) {
+        public boolean apply(@Nullable EntityStatus input) {
             return input == null ||
                     !(input.getArchived() || input.getDeleted());
         }
@@ -50,10 +51,10 @@ public class Predicates {
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code AggregateStatus}es
-     * @see AggregateStatus#getArchived()
-     * @see AggregateStatus#getDeleted()
+     * @see EntityStatus#getArchived()
+     * @see EntityStatus#getDeleted()
      */
-    public static Predicate<AggregateStatus> isVisible() {
+    public static Predicate<EntityStatus> isVisible() {
         return isVisible;
     }
 }

@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import org.junit.Test;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
@@ -39,7 +40,8 @@ public class PredicatesShould {
     public void consider_archived_invisible() {
         assertFalse(Predicates.isVisible()
                               .apply(EntityStorageRecord.newBuilder()
-                                                        .setArchived(true)
+                                                        .setEntityStatus(EntityStatus.newBuilder()
+                                                                                     .setArchived(true))
                                                         .build()));
     }
 
@@ -47,7 +49,8 @@ public class PredicatesShould {
     public void consider_deleted_invisible() {
         assertFalse(Predicates.isVisible()
                               .apply(EntityStorageRecord.newBuilder()
-                                                        .setDeleted(true)
+                                                        .setEntityStatus(EntityStatus.newBuilder()
+                                                        .setDeleted(true))
                                                         .build()));
     }
 }
