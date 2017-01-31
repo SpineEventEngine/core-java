@@ -20,13 +20,11 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Timestamp;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.command.CreateProject;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 class Given {
 
@@ -73,23 +71,25 @@ class Given {
         private boolean isValidateMethodCalled = false;
 
         static TestEntity newInstance(String id) {
-            final TestEntity entity = new TestEntity(id);
-            return entity;
+            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+                    .withId(id)
+                    .build();
         }
 
         static TestEntity withState() {
-            final Project state = newProject();
-            final int version = 3;
-            final Timestamp whenModified = getCurrentTime();
-            final TestEntity entity = new TestEntity(newUuid());
-            entity.setState(state, version, whenModified);
-            return entity;
+            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+                    .withId(newUuid())
+                    .withState(newProject())
+                    .withVersion(3)
+                    .build();
         }
 
         static TestEntity withState(TestEntity entity) {
-            final TestEntity result = new TestEntity(entity.getId());
-            result.setState(entity.getState(), entity.getVersion(), entity.whenModified());
-            return result;
+            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+                    .withId(entity.getId())
+                    .withState(entity.getState())
+                    .withVersion(entity.getVersion())
+                    .build();
         }
 
         private TestEntity(String id) {
