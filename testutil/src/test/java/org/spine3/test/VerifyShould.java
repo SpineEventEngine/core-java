@@ -47,9 +47,9 @@ import static org.junit.Assert.fail;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyComplexClass"})
 public class VerifyShould {
 
-    private static final String emptyString = "";
-    private static final String notEmptyString = "Not empty string";
-    private static final String mapName = "map";
+    private static final String EMPTY_STRING = "";
+    private static final String NON_EMPTY_STRING = "Non-empty string";
+    private static final String MAP_NAME = "map";
 
     @Test
     public void extend_Assert_class() {
@@ -411,19 +411,19 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_string_not_contains_char_sequence() {
-        Verify.assertContains(notEmptyString, emptyString);
+        Verify.assertContains(NON_EMPTY_STRING, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_char_sequence_is_null_in_contains() {
-        Verify.assertContains(null, emptyString);
+        Verify.assertContains(null, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_string_is_null_in_contains() {
-        Verify.assertContains(emptyString, (String) null);
+        Verify.assertContains(EMPTY_STRING, (String) null);
     }
 
     @SuppressWarnings({"ConstantConditions", "ErrorNotRethrown"})
@@ -432,37 +432,37 @@ public class VerifyShould {
         final String nullString = null;
 
         try {
-            Verify.assertContains(null, emptyString);
+            Verify.assertContains(null, EMPTY_STRING);
         } catch (AssertionError e) {
-            Verify.assertContains(emptyString, nullString);
+            Verify.assertContains(EMPTY_STRING, nullString);
         }
     }
 
     @Test
     public void pass_if_string_contains_char_sequence() {
-        Verify.assertContains(emptyString, notEmptyString);
+        Verify.assertContains(EMPTY_STRING, NON_EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
     public void fail_is_string_contains_char_sequence() {
-        Verify.assertNotContains(emptyString, notEmptyString);
+        Verify.assertNotContains(EMPTY_STRING, NON_EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_char_sequence_is_null_in_not_contains() {
-        Verify.assertNotContains(null, emptyString);
+        Verify.assertNotContains(null, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
     public void fail_if_string_is_null_in_not_contains() {
-        Verify.assertNotContains(emptyString, (String) null);
+        Verify.assertNotContains(EMPTY_STRING, (String) null);
     }
 
     @Test
     public void pass_if_string_not_contains_char_sequence() {
-        Verify.assertNotContains(notEmptyString, emptyString);
+        Verify.assertNotContains(NON_EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
@@ -521,13 +521,13 @@ public class VerifyShould {
         final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
         final Map<Integer, Map<Integer, Integer>> secondOne = Collections.singletonMap(1, Collections.singletonMap(1, 2));
 
-        Verify.assertMapsEqual(firstOne, secondOne, mapName);
+        Verify.assertMapsEqual(firstOne, secondOne, MAP_NAME);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test
     public void pass_if_maps_are_null() {
-        Verify.assertMapsEqual(null, null, mapName);
+        Verify.assertMapsEqual(null, null, MAP_NAME);
     }
 
     @Test
@@ -535,7 +535,7 @@ public class VerifyShould {
         final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
         final Map<Integer, Map<Integer, Integer>> secondOne = new HashMap<>(firstOne);
 
-        Verify.assertMapsEqual(firstOne, secondOne, mapName);
+        Verify.assertMapsEqual(firstOne, secondOne, MAP_NAME);
     }
 
     @Test(expected = AssertionError.class)
