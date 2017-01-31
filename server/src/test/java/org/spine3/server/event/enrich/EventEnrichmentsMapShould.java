@@ -159,24 +159,22 @@ public class EventEnrichmentsMapShould {
                                             SharingRequestApproved.class);
     }
 
-    // TODO:20-01-17:dmytro.dashenkov: Simplify test case name.
     @Test
-    public void contain_enrichments_targeting_events_with_by_with_different_names() {
+    public void contain_enrichments_defined_with_by_with_two_arguments() {
         assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNames.class,
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class);
     }
 
-    // TODO:20-01-17:dmytro.dashenkov: Simplify test case name.
     @Test
-    public void contain_enrichments_targeting_events_through_fqn_with_by_with_different_names() {
+    public void contain_enrichments_defined_with_by_with_two_fqn_arguments() {
         assertOnlyEventTypeByEnrichmentType(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class);
     }
 
     @Test
-    public void contain_enrichments_targeting_multiple_events_with_by_with_different_names() {
+    public void contain_enrichments_defined_with_by_with_multiple_arguments() {
         assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class,
@@ -184,7 +182,7 @@ public class EventEnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_targeting_events_with_by_with_different_names_with_wildcard_types() {
+    public void contain_enrichments_defined_with_by_with_multiple_arguments_using_wildcard() {
         assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
                                             SharingRequestApproved.class,
                                             PermissionGrantedEvent.class,
