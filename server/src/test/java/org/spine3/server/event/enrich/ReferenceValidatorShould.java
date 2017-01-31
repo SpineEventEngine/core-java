@@ -25,25 +25,26 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.junit.Test;
 import org.spine3.server.event.Given;
+import org.spine3.server.event.enrich.ReferenceValidator.ValidationResult;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDifferentNames;
 import org.spine3.test.event.enrichment.GranterEventsEnrichment;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
-import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.user.UserDeletedEvent;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -62,21 +63,13 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    public void store_null_map_of_enrichment_fields_before_validation() {
-        final ReferenceValidator validator = new ReferenceValidator(eventEnricher,
-                                                                    ProjectCreated.class,
-                                                                    ProjectCreatedEnrichmentAnotherPackageFqn.class);
-        final Multimap<?, ?> fieldMap = validator.fieldMap();
-        assertNull(fieldMap);
-    }
-
-    @Test
     public void store_valid_map_of_enrichment_fields_after_validation() {
-        final ReferenceValidator validator = new ReferenceValidator(eventEnricher,
-                                                                    UserDeletedEvent.class,
-                                                                    EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
-        validator.validate();
-        final Multimap<FieldDescriptor, FieldDescriptor> fieldMap = validator.fieldMap();
+        final ReferenceValidator validator
+                = new ReferenceValidator(eventEnricher,
+                                         UserDeletedEvent.class,
+                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
+        final ValidationResult result = validator.validate();
+        final Multimap<FieldDescriptor, FieldDescriptor> fieldMap = result.getFieldMap();
         assertNotNull(fieldMap);
         assertFalse(fieldMap.isEmpty());
         assertSize(1, fieldMap);
@@ -115,14 +108,19 @@ public class ReferenceValidatorShould {
         validator.validate();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_if_no_mapping_function_is_defined() {
+    @Test
+    public void skip_mapping_if_no_mapping_function_is_defined() {
         final EventEnricher mockEnricher = mock(EventEnricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.<EnrichmentFunction<?, ?>>absent());
-        final ReferenceValidator validator = new ReferenceValidator(mockEnricher,
-                                                                    UserDeletedEvent.class,
-                                                                    GranterEventsEnrichment.class);
-        validator.validate();
+        final ReferenceValidator validator
+                = new ReferenceValidator(mockEnricher,
+                                         UserDeletedEvent.class,
+                                         EnrichmentBoundWithMultipleFieldsWithDifferentNames.class);
+        final ValidationResult result = validator.validate();
+        final List<EnrichmentFunction<?, ?>> functions = result.getFunctions();
+        assertTrue(functions.isEmpty());
+        final Multimap<FieldDescriptor, FieldDescriptor> fields = result.getFieldMap();
+        assertEmpty(fields);
     }
 }

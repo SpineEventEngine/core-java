@@ -33,7 +33,6 @@ import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -95,8 +94,9 @@ class ReferenceValidator {
             final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
             putEnrichmentsByField(functions, fields, enrichmentField, sourceFields);
         }
-        this.sourceToTargetMap = ImmutableMultimap.copyOf(fields);
-        final ImmutableList<EnrichmentFunction<?, ?>> result = ImmutableList.copyOf(functions);
+        final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap = ImmutableMultimap.copyOf(fields);
+        final ImmutableList<EnrichmentFunction<?, ?>> enrichmentFunctions = ImmutableList.copyOf(functions);
+        final ValidationResult result = new ValidationResult(enrichmentFunctions, sourceToTargetMap);
         return result;
     }
 
