@@ -125,5 +125,4 @@ public class ReferenceValidatorShould {
                                                                     GranterEventsEnrichment.class);
         validator.validate();
     }
-
 }
