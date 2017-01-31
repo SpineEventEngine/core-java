@@ -104,10 +104,11 @@ public class AggregateCommandTestShould {
 
         @Override
         protected TimePrinter createAggregate() {
-            return Given.aggregateOfClass(TimePrinter.class)
+            final TimePrinter result = Given.aggregateOfClass(TimePrinter.class)
                         .withId(1L)
                         .withVersion(64)
                         .build();
+            return result;
         }
     }
 }

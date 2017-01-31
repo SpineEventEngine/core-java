@@ -109,9 +109,10 @@ public class ProcessManagerRepositoryShould
         final ProjectId id = ProjectId.newBuilder()
                                       .setId("123-id")
                                       .build();
-        return org.spine3.test.Given.processManagerOfClass(TestProcessManager.class)
+        final TestProcessManager result = org.spine3.test.Given.processManagerOfClass(TestProcessManager.class)
                                     .withId(id)
                                     .build();
+        return result;
     }
 
     @Override
