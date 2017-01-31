@@ -51,6 +51,12 @@ public class EntityShould {
 
     private final Given.TestEntity entityWithState = Given.TestEntity.withState();
 
+    @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_id() {
+        new BareBonesEntity(Tests.<Long>nullRef());
+    }
+
     @Test
     public void return_default_state() {
         final Project state = entityNew.getDefaultState();
