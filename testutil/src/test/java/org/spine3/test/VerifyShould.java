@@ -59,8 +59,8 @@ public class VerifyShould {
     }
 
     @Test
-    public void have_private_ctor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Verify.class));
+    public void has_private_ctor() {
+        assertTrue(Tests.hasPrivateParameterlessCtor(Verify.class));
     }
 
     @SuppressWarnings({"ThrowCaughtLocally", "ErrorNotRethrown"})
