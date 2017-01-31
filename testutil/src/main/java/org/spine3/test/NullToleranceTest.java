@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -502,8 +503,16 @@ public class NullToleranceTest {
          * the predefined list of the default values per type will be used:
          * <ul>
          *     <li>an empty string is used for the {@code String};
+         *     <li>the result of the {@link Collections#emptyList()} call for the types
+         *     derived from {@link List};</li>
+         *     <li>the result of the {@link Collections#emptySet()} call for the types
+         *     derived from {@link Set};</li>
+         *     <li>the result of the {@link Collections#emptyMap()} call for the types
+         *     derived from {@link Map};</li>
+         *     <li>the result of the {@link com.google.common.collect.Queues#newPriorityQueue()} call
+         *     for the types derived from {@link Queue};</li>
          *     <li>the result of the {@link com.google.common.base.Defaults#defaultValue(Class)} call
-         *     is for the primitives and related wrapper types.</li>
+         *     is for the primitives and related wrapper types;</li>
          *     <li>the result of {@code getDefaultInstance} call for the types
          *     derived from {@link Message}.</li>
          * </ul>
@@ -565,12 +574,11 @@ public class NullToleranceTest {
         }
 
         private void addDefaultTypeValues() {
-
             final Customizer<String> stringCustomizer = new Customizer<>(STRING_DEFAULT_VALUE, defaultValues);
-            final Customizer<Queue> queueCustomizer = new Customizer(newPriorityQueue(), defaultValues);
-            final Customizer<Set> setCustomizer = new Customizer(emptySet(), defaultValues);
-            final Customizer<List> listCustomizer = new Customizer(emptyList(), defaultValues);
-            final Customizer<Map> mapCustomizer = new Customizer(emptyMap(), defaultValues);
+            final Customizer<Queue> queueCustomizer = new Customizer<>(newPriorityQueue(), defaultValues);
+            final Customizer<Set> setCustomizer = new Customizer<>(emptySet(), defaultValues);
+            final Customizer<List> listCustomizer = new Customizer<>(emptyList(), defaultValues);
+            final Customizer<Map> mapCustomizer = new Customizer<>(emptyMap(), defaultValues);
             final String defaultStringValue = stringCustomizer.getCustomizedValue(String.class);
             defaultValues.put(String.class, defaultStringValue);
             final Queue<?> defaultQueue = queueCustomizer.getCustomizedValue(Queue.class);
@@ -588,16 +596,18 @@ public class NullToleranceTest {
         private final T defaultValue;
         private final Map<Class<?>, ?> defaultValues;
 
-        public Customizer(T defaultValue, Map<Class<?>, ?> defaultValues) {
+        <B extends T> Customizer(B defaultValue, Map<Class<?>, ?> defaultValues) {
             this.defaultValue = defaultValue;
             this.defaultValues = defaultValues;
         }
 
-        public T getCustomizedValue(Class<T> typeOfInterest) {
+        T getCustomizedValue(Class<T> typeOfInterest) {
             for (Map.Entry<Class<?>, ?> entry : defaultValues.entrySet()) {
                 final boolean customValuePresent = typeOfInterest.isAssignableFrom(entry.getKey());
                 if (customValuePresent) {
-                    return (T) entry.getValue();
+                    @SuppressWarnings("unchecked")      // It's OK, since we check for the type compliance above.
+                    final T result = (T) entry.getValue();
+                    return result;
                 }
             }
             return defaultValue;
