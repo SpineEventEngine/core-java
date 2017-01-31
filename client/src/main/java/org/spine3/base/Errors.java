@@ -23,6 +23,8 @@ package org.spine3.base;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with {@link Error}s.
  *
@@ -34,6 +36,7 @@ public class Errors {
 
     /** Creates new instance of {@link Error} by the passed exception. */
     public static Error fromException(Exception exception) {
+        checkNotNull(exception);
         final String message = exception.getMessage();
         final Error result = Error.newBuilder()
                                   .setType(exception.getClass().getName())
@@ -45,6 +48,7 @@ public class Errors {
 
     /** Creates new instance of {@link Error} by the passed {@code Throwable}. */
     public static Error fromThrowable(Throwable throwable) {
+        checkNotNull(throwable);
         final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()
                                   .setType(throwable.getClass().getName())

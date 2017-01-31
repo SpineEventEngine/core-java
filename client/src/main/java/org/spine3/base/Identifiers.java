@@ -29,6 +29,8 @@ import org.spine3.Internal;
 
 import java.util.UUID;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with identifiers.
  *
@@ -52,6 +54,7 @@ public class Identifiers {
      * @throws IllegalArgumentException if the class of IDs is not supported
      */
     public static <I> void checkSupported(Class<I> idClass) {
+        checkNotNull(idClass);
         Identifier.Type.getType(idClass);
     }
 
@@ -74,6 +77,7 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed value is not of the supported type
      */
     public static <I> Any idToAny(I id) {
+        checkNotNull(id);
         final Identifier<I> identifier = Identifier.from(id);
         final Any anyId = identifier.pack();
         return anyId;
@@ -93,6 +97,7 @@ public class Identifiers {
      * </ul>
      */
     public static Object idFromAny(Any any) {
+        checkNotNull(any);
         final Object result = Identifier.Type.unpack(any);
         return result;
     }
@@ -113,6 +118,7 @@ public class Identifiers {
      */
     @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
+        checkNotNull(idClass);
         return Identifier.getDefaultValue(idClass);
     }
 }

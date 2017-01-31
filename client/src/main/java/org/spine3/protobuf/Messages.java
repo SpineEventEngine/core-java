@@ -65,6 +65,7 @@ public class Messages {
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
         final ClassName className = KnownTypes.getClassName(typeUrl);
         try {
             @SuppressWarnings("unchecked") // the client considers this message is of this class
@@ -133,6 +134,7 @@ public class Messages {
      * @return new instance
      */
     public static <M extends Message> M newInstance(Class<M> messageClass) {
+        checkNotNull(messageClass);
         try {
             final Constructor<M> constructor = messageClass.getDeclaredConstructor();
             constructor.setAccessible(true);
@@ -159,6 +161,7 @@ public class Messages {
 
     /** Returns descriptor for the passed message class. */
     public static GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
+        checkNotNull(clazz);
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
             final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
@@ -178,6 +181,7 @@ public class Messages {
      */
     @SuppressWarnings("OverlyComplexMethod")    // as each branch is a fairly simple.
     public static Class<?> getFieldClass(FieldDescriptor field) {
+        checkNotNull(field);
         final FieldDescriptor.JavaType javaType = field.getJavaType();
         switch (javaType) {
             case INT:
