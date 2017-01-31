@@ -20,6 +20,8 @@
 
 package org.spine3.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with exceptions for cases that are not
  * supported by {@link com.google.common.base.Throwables}.
@@ -49,6 +51,7 @@ public class Exceptions {
      * @throws UnsupportedOperationException always
      */
     public static UnsupportedOperationException unsupported(String message) throws UnsupportedOperationException {
+        checkNotNull(message);
         throw new UnsupportedOperationException(message);
     }
 
@@ -81,6 +84,7 @@ public class Exceptions {
      * @return always throws an exception, the return type is for convenience
      */
     public static IllegalStateException wrappedCause(Throwable throwable) {
+        checkNotNull(throwable);
         throw new IllegalStateException(throwable.getCause());
     }
 }

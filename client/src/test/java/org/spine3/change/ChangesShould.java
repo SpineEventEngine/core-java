@@ -24,6 +24,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.test.NullToleranceTest;
 
 import java.util.UUID;
 
@@ -349,5 +350,15 @@ public class ChangesShould {
 
         assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
         assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Changes.class)
+                                                                     .addDefaultValue(ByteString.EMPTY)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

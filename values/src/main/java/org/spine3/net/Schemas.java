@@ -25,6 +25,8 @@ import org.spine3.net.Url.Record.Schema;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with {@link Schema}.
  *
@@ -45,6 +47,7 @@ class Schemas {
      * @return {@link Schema} value
      */
     static Schema parse(String value) {
+        checkNotNull(value);
         final String lowercaseValue = value.toLowerCase();
         if (!stringSchemas.containsKey(lowercaseValue)) {
             return Schema.UNDEFINED;
@@ -59,6 +62,7 @@ class Schemas {
      * @return String name
      */
     static String getLowerCaseName(Schema schema) {
+        checkNotNull(schema);
         return schema.name().toLowerCase();
     }
 

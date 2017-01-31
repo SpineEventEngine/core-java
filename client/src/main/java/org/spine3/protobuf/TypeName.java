@@ -24,6 +24,8 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for obtaining a type name from a {@code Message}.
  *
@@ -39,6 +41,7 @@ public class TypeName {
      * Obtains type name for the passed message.
      */
     public static String of(Message message) {
+        checkNotNull(message);
         final String result = TypeUrl.of(message)
                                      .getTypeName();
         return result;
@@ -48,6 +51,7 @@ public class TypeName {
      * Obtains type name for the passed message class.
      */
     public static String of(Class<? extends Message> clazz) {
+        checkNotNull(clazz);
         return TypeUrl.of(clazz).getTypeName();
     }
 
@@ -55,6 +59,7 @@ public class TypeName {
      * Obtains type name from the message of the passed command.
      */
     public static String ofCommand(Command command) {
+        checkNotNull(command);
         final String result = TypeUrl.ofCommand(command)
                                      .getTypeName();
         return result;
@@ -64,6 +69,7 @@ public class TypeName {
      * Obtains type name for the message type by its descriptor.
      */
     public static String from(Descriptor descriptor) {
+        checkNotNull(descriptor);
         final String result = TypeUrl.from(descriptor)
                                      .getTypeName();
         return result;

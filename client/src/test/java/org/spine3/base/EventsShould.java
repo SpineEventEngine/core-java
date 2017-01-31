@@ -29,6 +29,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.testdata.TestCommandContextFactory;
 
 import java.util.List;
@@ -242,6 +243,16 @@ public class EventsShould {
         final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue), boolValue);
         assertFalse(Events.getEnrichment(StringValue.class, context)
                           .isPresent());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Events.class)
+                                                                     .addDefaultValue(stringValue.getClass())
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {

@@ -10,6 +10,7 @@ import com.google.protobuf.DurationOrBuilder;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Durations.toMillis;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
@@ -160,6 +161,8 @@ public class Durations {
     public static Duration subtract(Duration d1, Duration d2) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
+        checkNotNull(d1);
+        checkNotNull(d2);
         final Duration result = com.google.protobuf.util.Durations.subtract(d1, d2);
         return result;
     }
@@ -174,12 +177,14 @@ public class Durations {
     public static long toNanos(Duration duration) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
+        checkNotNull(duration);
         final long result = com.google.protobuf.util.Durations.toNanos(duration);
         return result;
     }
 
     /** Convert a duration to the number of seconds. */
     public static long toSeconds(Duration duration) {
+        checkNotNull(duration);
         final long millis = toMillis(duration);
         final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
         return seconds;
@@ -192,6 +197,7 @@ public class Durations {
      * @return duration in minutes
      */
     public static long toMinutes(Duration duration) {
+        checkNotNull(duration);
         final long millis = toMillis(duration);
         final long result = (millis / MILLIS_PER_SECOND) / SECONDS_PER_MINUTE;
         return result;
@@ -204,6 +210,7 @@ public class Durations {
      * @return number of hours
      */
     public static long getHours(Duration value) {
+        checkNotNull(value);
         final long hours = toMinutes(value);
         final long result = hours / MINUTES_PER_HOUR;
         return result;
@@ -217,6 +224,7 @@ public class Durations {
      * @return number of minutes
      */
     public static int getMinutes(Duration value) {
+        checkNotNull(value);
         final long allMinutes = toMinutes(value);
         final long remainder = allMinutes % MINUTES_PER_HOUR;
         final int result = Long.valueOf(remainder)
@@ -226,6 +234,7 @@ public class Durations {
 
     /** Returns {@code true} of the passed value is greater or equal zero, {@code false} otherwise. */
     public static boolean isPositiveOrZero(Duration value) {
+        checkNotNull(value);
         final long millis = toMillis(value);
         final boolean result = millis >= 0;
         return result;
@@ -233,6 +242,7 @@ public class Durations {
 
     /** Returns {@code true} if the passed value is greater than zero, {@code false} otherwise. */
     public static boolean isPositive(DurationOrBuilder value) {
+        checkNotNull(value);
         final boolean secondsPositive = value.getSeconds() > 0;
         final boolean nanosPositive = value.getNanos() > 0;
         final boolean result = secondsPositive || nanosPositive;
@@ -242,6 +252,7 @@ public class Durations {
 
     /** Returns {@code true} if the passed value is zero, {@code false} otherwise. */
     public static boolean isZero(DurationOrBuilder value) {
+        checkNotNull(value);
         final boolean noSeconds = value.getSeconds() == 0;
         final boolean noNanos = value.getNanos() == 0;
         final boolean result = noSeconds && noNanos;
@@ -250,6 +261,8 @@ public class Durations {
 
     /** Returns {@code true} if the first argument is greater than the second, {@code false} otherwise. */
     public static boolean isGreaterThan(Duration value, Duration another) {
+        checkNotNull(value);
+        checkNotNull(another);
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
         final boolean isGreater = nanos > anotherNanos;
@@ -258,6 +271,8 @@ public class Durations {
 
     /** Returns {@code true} if the first argument is less than the second, {@code false} otherwise. */
     public static boolean isLessThan(Duration value, Duration another) {
+        checkNotNull(value);
+        checkNotNull(another);
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
         final boolean isLessThan = nanos < anotherNanos;
@@ -266,6 +281,8 @@ public class Durations {
 
     /** Numerically compare passed durations as nanosecond values. */
     public static int compare(Duration d1, Duration d2) {
+        checkNotNull(d1);
+        checkNotNull(d2);
         final long nanos = toNanos(d1);
         final long otherNanos = toNanos(d2);
         final int result = Long.compare(nanos, otherNanos);
@@ -274,6 +291,7 @@ public class Durations {
 
     /** Returns {@code true} if the passed duration is negative, {@code false} otherwise. */
     public static boolean isNegative(Duration value) {
+        checkNotNull(value);
         final long nanos = toNanos(value);
         final boolean isNegative = nanos < 0;
         return isNegative;

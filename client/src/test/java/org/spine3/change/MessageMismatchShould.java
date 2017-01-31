@@ -22,6 +22,7 @@ package org.spine3.change;
 
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -93,5 +94,14 @@ public class MessageMismatchShould {
         assertEquals(ACTUAL, unpackActual(mismatch));
         assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(MessageMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

@@ -22,6 +22,8 @@ package org.spine3.validate;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with {@link ConstraintViolation}s.
  *
@@ -41,6 +43,7 @@ public class ConstraintViolations {
      * @see String#format(String, Object...)
      */
     public static String toText(ConstraintViolation violation) {
+        checkNotNull(violation);
         final String format = violation.getMsgFormat();
         final List<String> params = violation.getParamList();
         final String result = String.format(format, params.toArray());
@@ -56,6 +59,8 @@ public class ConstraintViolations {
      * @see String#format(String, Object...)
      */
     public static String toText(String format, ConstraintViolation violation) {
+        checkNotNull(format);
+        checkNotNull(violation);
         final List<String> params = violation.getParamList();
         final String result = String.format(format, params.toArray());
         return result;
