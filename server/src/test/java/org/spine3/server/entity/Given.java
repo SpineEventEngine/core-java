@@ -71,25 +71,28 @@ class Given {
         private boolean isValidateMethodCalled = false;
 
         static TestEntity newInstance(String id) {
-            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+            final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
                                         .withId(id)
                                         .build();
+            return result;
         }
 
         static TestEntity withState() {
-            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+            final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
                                         .withId(newUuid())
                                         .withState(newProject())
                                         .withVersion(3)
                                         .build();
+            return result;
         }
 
         static TestEntity withState(TestEntity entity) {
-            return org.spine3.test.Given.entityOfClass(TestEntity.class)
+            final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
                                         .withId(entity.getId())
                                         .withState(entity.getState())
                                         .withVersion(entity.getVersion())
                                         .build();
+            return result;
         }
 
         private TestEntity(String id) {
