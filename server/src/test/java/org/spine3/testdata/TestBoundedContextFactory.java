@@ -25,7 +25,6 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
@@ -38,15 +37,12 @@ public class TestBoundedContextFactory {
 
     private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance();
 
-    public static BoundedContext newBoundedContext() {
-        final BoundedContext bc = newBoundedContext(FACTORY);
-        return bc;
+    private TestBoundedContextFactory() {
     }
 
-    public static BoundedContext newBoundedContext(StorageFactory storageFactory) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(storageFactory);
-        return builder.build();
+    public static BoundedContext newBoundedContext() {
+        return BoundedContext.newBuilder()
+                             .build();
     }
 
     public static BoundedContext newBoundedContext(EventEnricher enricher) {
@@ -58,43 +54,35 @@ public class TestBoundedContextFactory {
     }
 
     public static BoundedContext newBoundedContext(EventBus eventBus) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(FACTORY)
-                                                             .setEventBus(eventBus);
-        return builder.build();
+        return BoundedContext.newBuilder()
+                             .setEventBus(eventBus)
+                             .build();
     }
 
     public static BoundedContext newBoundedContext(Stand stand) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(FACTORY)
-                                                             .setStand(stand);
-        return builder.build();
+        return BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .build();
     }
 
     public static BoundedContext newBoundedContext(CommandBus commandBus) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(FACTORY)
-                                                             .setCommandBus(commandBus);
-        return builder.build();
+        return BoundedContext.newBuilder()
+                             .setCommandBus(commandBus)
+                             .build();
     }
 
     public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStorageFactory(FACTORY)
-                                                             .setCommandBus(commandBus)
-                                                             .setEventBus(eventBus);
-        return builder.build();
+        return BoundedContext.newBuilder()
+                             .setCommandBus(commandBus)
+                             .setEventBus(eventBus)
+                             .build();
     }
 
     public static BoundedContext newBoundedContext(String name, Stand stand) {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setStand(stand)
-                                                             .setName(name)
-                                                             .setStorageFactory(FACTORY);
-
-        return builder.build();
+        return BoundedContext.newBuilder()
+                             .setStand(stand)
+                             .setName(name)
+                             .build();
     }
 
-    private TestBoundedContextFactory() {
-    }
 }

@@ -23,9 +23,12 @@ package org.spine3.test;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Values;
 import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
@@ -48,21 +51,24 @@ public class Tests {
      * Verifies if the passed class has private parameter-less constructor and invokes it
      * using Reflection.
      *
-     * <p>Use this method to add utility constructor into covered code:
+     * <p>Typically this method is used to add a constructor of a utility class into
+     * the covered code.
+     *
+     * <p>Example:
      * <pre>
      * public class MyUtilityShould
      *     ...
      *     {@literal @}Test
      *     public void have_private_utility_ctor() {
-     *         assertTrue(hasPrivateUtilityConstructor(MyUtility.class));
+     *         assertTrue(hasPrivateParameterlessCtor(MyUtility.class));
      *     }
      * </pre>
      * @return true if the class has private parameter-less constructor
      */
-    public static boolean hasPrivateUtilityConstructor(Class<?> utilityClass) {
+    public static boolean hasPrivateParameterlessCtor(Class<?> targetClass) {
         final Constructor constructor;
         try {
-            constructor = utilityClass.getDeclaredConstructor();
+            constructor = targetClass.getDeclaredConstructor();
         } catch (NoSuchMethodException ignored) {
             return false;
         }
@@ -77,8 +83,9 @@ public class Tests {
         try {
             // Call the constructor to include it into the coverage.
 
-            // Some of the coding conventions may encourage throwing AssertionError to prevent the instantiation
-            // of the utility class from within the class.
+            // Some of the coding conventions may encourage throwing AssertionError
+            // to prevent the instantiation of the target class,
+            // if it is designed as a utility class.
             constructor.newInstance();
         } catch (Exception ignored) {
             return true;
@@ -126,11 +133,25 @@ public class Tests {
         return newUserId(Identifiers.newUuid());
     }
 
+    /**
+     * Generates a {@code StringValue} with generated UUID.
+     *
+     * <p>Use this method when you need to generate a test {@code Message} value
+     * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
+     */
+    public static StringValue newUuidValue() {
+        return Values.newStringValue(Identifiers.newUuid());
+    }
+    /**
+     * Asserts that the passed message has a field that matches the passed field mask.
+     *
+     * @throws AssertionError if the check fails
+     */
     public static void assertMatchesMask(Message message, FieldMask fieldMask) {
         final List<String> paths = fieldMask.getPathsList();
 
         for (Descriptors.FieldDescriptor field : message.getDescriptorForType()
-                                                      .getFields()) {
+                                                        .getFields()) {
             if (field.isRepeated()) {
                 continue;
             }
@@ -138,7 +159,26 @@ public class Tests {
         }
     }
 
-    /** The provider of current time, which is always the same. */
+    /**
+     * Adjusts a timestamp in the context of the passed command.
+     *
+     * @return new command instance with the modified timestamp
+     */
+    public static Command adjustTimestamp(Command command, Timestamp timestamp) {
+        final Command.Builder commandBuilder =
+                command.toBuilder()
+                       .setContext(command.getContext()
+                                          .toBuilder()
+                                          .setTimestamp(timestamp));
+        return commandBuilder.build();
+    }
+
+    /**
+     * The provider of current time, which is always the same.
+     *
+     * <p>Use this {@code Timestamps.Provider} in time-related tests that are sensitive to
+     * bounds of minutes, hours, days, etc.
+     */
     public static class FrozenMadHatterParty implements Timestamps.Provider {
         private final Timestamp frozenTime;
 

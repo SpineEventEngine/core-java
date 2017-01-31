@@ -27,6 +27,8 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
@@ -48,8 +50,11 @@ import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
 import static java.lang.String.format;
 
 /**
- * Performs validation checking that all fields annotated in the enrichment message
+ * Performs validation analyzing which of fields annotated in the enrichment message
  * can be initialized with the translation functions supplied in the parent enricher.
+ *
+ * <p>As long as the new enrichment functions may be appended to the parent enricher at runtime,
+ * the validation result will vary for the same enricher depending on its actual state.
  *
  * @author Alexander Yevsyukov
  */
@@ -68,9 +73,6 @@ class ReferenceValidator {
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    @Nullable
-    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
-
     ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> eventClass,
             Class<? extends Message> enrichmentClass) {
@@ -81,13 +83,12 @@ class ReferenceValidator {
                                             .getDescriptorForType();
     }
 
-    @Nullable
-    ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
-        return sourceToTargetMap;
-    }
-
-    /** Throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment */
-    List<EnrichmentFunction<?, ?>> validate() {
+    /**
+     * Returns those fields and functions, that may be used for the enrichment at the moment.
+     *
+     * @return a {@code ValidationResult} data transfer object, containing the valid fields and functions.
+     */
+    ValidationResult validate() {
         final List<EnrichmentFunction<?, ?>> functions = new LinkedList<>();
         final Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
@@ -104,9 +105,11 @@ class ReferenceValidator {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            final EnrichmentFunction<?, ?> function = getEnrichmentFunction(sourceField, enrichmentField);
-            functions.add(function);
-            fields.put(sourceField, enrichmentField);
+            final Optional<EnrichmentFunction<?, ?>> function = getEnrichmentFunction(sourceField, enrichmentField);
+            if (function.isPresent()) {
+                functions.add(function.get());
+                fields.put(sourceField, enrichmentField);
+            }
         }
     }
 
@@ -206,14 +209,15 @@ class ReferenceValidator {
         return msg;
     }
 
-    private EnrichmentFunction<?, ?> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
+    private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
+                                                                     FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
         final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
-            throw noFunction(sourceFieldClass, targetFieldClass);
+            logNoFunction(sourceFieldClass, targetFieldClass);
         }
-        return func.get();
+        return func;
     }
 
     /** Checks if the source field name (from event or context) is not empty. */
@@ -238,11 +242,52 @@ class ReferenceValidator {
         throw new IllegalStateException(msg);
     }
 
-    private static IllegalStateException noFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
-        final String msg = format(
-                "There is no enrichment function for translating %s to %s",
-                sourceFieldClass,
-                targetFieldClass);
-        throw new IllegalStateException(msg);
+    private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+        // Using `DEBUG` level to avoid polluting the `stderr`.
+        if (log().isDebugEnabled()) {
+            log().debug("There is no enrichment function for translating {} into {}",
+                        sourceFieldClass, targetFieldClass);
+        }
+    }
+
+    /**
+     * A wrapper DTO for the validation result.
+     */
+    static class ValidationResult {
+        private final ImmutableList<EnrichmentFunction<?, ?>> functions;
+        private final ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+
+        private ValidationResult(ImmutableList<EnrichmentFunction<?, ?>> functions,
+                                 ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap) {
+            this.functions = functions;
+            this.fieldMap = fieldMap;
+        }
+
+        /**
+         * Returns the validated list of {@code EnrichmentFunction}s that may be used for the conversion
+         * in scope of the validated {@code EventEnricher}.
+         */
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // OK, since an `ImmutableList` is returned.
+        List<EnrichmentFunction<?, ?>> getFunctions() {
+            return functions;
+        }
+
+        /**
+         * Returns a map from source event/context field to target enrichment field descriptors,
+         * which is valid in scope of the target {@code EventEnricher}.
+         */
+        ImmutableMultimap<FieldDescriptor, FieldDescriptor> getFieldMap() {
+            return fieldMap;
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ReferenceValidator.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

@@ -24,11 +24,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -49,29 +51,35 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.FluentIterable.from;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
- * {@code Enricher} extends information of an event basing on its type and content.
+ * {@code EventEnricher} extends information of an event basing on its type and content.
  *
  * <p>The interface implements
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
  * Enterprise Integration pattern.
  *
- * <p>There is one instance of an {@code Enricher} per {@code BoundedContext}. This instance is called by an
- * {@link EventBus} to enrich a new event before it is passed to further processing by dispatchers or handlers.
+ * <p>There is one instance of an {@code EventEnricher} per {@code BoundedContext}.
+ * This instance is called by an {@link EventBus} to enrich a new event before it
+ * is passed to further processing by dispatchers or handlers.
  *
  * <p>The event is passed to enrichment <em>after</em> it was passed to the {@link EventStore}.
+ * Therefore events are stored without attached enrichment information.
  *
  * @author Alexander Yevsyukov
  */
 public class EventEnricher {
 
     /** Available enrichment functions per event message class. */
-    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
+    private final Multimap<Class<?>, EnrichmentFunction<?, ?>> functions;
+
+    private final EnrichmentFunctionAppender appender;
 
     /** Creates a new builder. */
     public static Builder newBuilder() {
@@ -83,24 +91,30 @@ public class EventEnricher {
      *
      * <p>Also adds {@link EventMessageEnricher}s for all enrichments defined in Protobuf.
      */
-    private EventEnricher(Builder builder) {
-        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>> functionsMap = ImmutableMultimap.builder();
+    EventEnricher(Builder builder) {
+        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = LinkedListMultimap.create();
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = Multimaps.synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
-            functionsMap.put(function.getEventClass(), function);
+            functionMap.put(function.getEventClass(), function);
         }
-        putMsgEnrichers(functionsMap);
-        this.functions = functionsMap.build();
+        putMsgEnrichers(functionMap);
+
+        this.functions = functionMap;
+        this.appender = new EnrichmentFunctionAppender(functions);
+
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
-    private void putMsgEnrichers(ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
+    private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = toMessageClass(TypeUrl.of(enrichmentType));
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = toMessageClass(TypeUrl.of(eventType));
-                final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this, eventClass, enrichmentClass);
+                final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this,
+                                                                                          eventClass,
+                                                                                          enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }
@@ -112,9 +126,12 @@ public class EventEnricher {
      * <p>An event can be enriched if the following conditions are met:
      *
      * <ol>
-     *     <li>There is one or more enrichments defined in Protobuf using {@code enrichment_for} and/or {@code by} options.
-     *     <li>There is one or more field enrichment functions registered for the class of the passed event.
-     *     <li>The flag {@code do_not_enrich} is not set in the {@code EventContext} of the passed event.
+     *     <li>There is one or more enrichments defined in Protobuf using
+     *     {@code enrichment_for} and/or {@code by} options.
+     *     <li>There is one or more field enrichment functions registered for
+     *     the class of the passed event.
+     *     <li>The flag {@code do_not_enrich} is not set in the
+     *     {@code EventContext} of the passed event.
      * </ol>
      *
      * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
@@ -141,46 +158,141 @@ public class EventEnricher {
      * @see #canBeEnriched(Event)
      */
     public Event enrich(Event event) {
-        checkArgument(enrichmentRegistered(event), "No registered enrichment for the event %s", event);
-        checkArgument(isEnrichmentEnabled(event), "Enrichment is disabled for the event %s", event);
+        checkTypeRegistered(event);
+        checkEnabled(event);
 
         final Message eventMessage = getMessage(event);
-        final EventClass eventClass = EventClass.of(event);
-        final Collection<EnrichmentFunction<?, ?>> availableFunctions = functions.get(eventClass.value());
-        final Map<String, Any> enrichments = Maps.newHashMap();
-        for (EnrichmentFunction function : availableFunctions) {
-            function.setContext(event.getContext());
-            final Message enriched = apply(function, eventMessage);
-            checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
-                                    function, eventMessage);
-            final String typeName = TypeName.of(enriched);
-            enrichments.put(typeName, AnyPacker.pack(enriched));
+        final EventContext eventContext = event.getContext();
+
+        final Action action = new Action(this, eventMessage, eventContext);
+        final Event result = action.perform();
+        return result;
+    }
+
+    /**
+     * The method object class for enriching an event.
+     */
+    private static class Action {
+        private final Message eventMessage;
+        private final EventContext eventContext;
+        private final Collection<EnrichmentFunction<?, ?>> availableFunctions;
+
+        private final Map<String, Any> enrichments = Maps.newHashMap();
+
+        private Action(EventEnricher parent, Message eventMessage, EventContext eventContext) {
+            this.eventMessage = eventMessage;
+            this.eventContext = eventContext;
+            final Class<? extends Message> eventClass = EventClass.of(eventMessage)
+                                                             .value();
+            final Collection<EnrichmentFunction<?, ?>> functionsPerClass = parent.functions.get(eventClass);
+            this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
         }
-        final EventContext enrichedContext = event.getContext()
-                                                  .toBuilder()
-                                                  .setEnrichments(Enrichments.newBuilder()
-                                                                             .putAllMap(enrichments))
-                                                  .build();
-        final Event result = createEvent(eventMessage, enrichedContext);
-        return result;
+
+        private Event perform() {
+            createEnrichments();
+            final EventContext enrichedContext = enrichContext();
+            final Event result = createEvent(eventMessage, enrichedContext);
+            return result;
+        }
+
+        private void createEnrichments() {
+            for (EnrichmentFunction function : availableFunctions) {
+                function.setContext(eventContext);
+                final Message enriched = apply(function, eventMessage);
+                checkResult(enriched, function);
+                final String typeName = TypeName.of(enriched);
+                enrichments.put(typeName, AnyPacker.pack(enriched));
+            }
+        }
+
+        /**
+         * Applies the passed function to the message.
+         *
+         * <p>We suppress the {@code "unchecked"} because we ensure types when we...
+         * <ol>
+         *      <li>create enrichments,
+         *      <li>put them into {@link #functions} by their event message class.
+         * </ol>
+         */
+        @SuppressWarnings("unchecked")
+        private static Message apply(EnrichmentFunction function, Message input) {
+            final Message result = (Message) function.apply(input);
+            return result;
+        }
+
+        private void checkResult(Message enriched, EnrichmentFunction function) {
+            checkNotNull(enriched,
+                         "EnrichmentFunction %s produced `null` from event message %s",
+                         function, eventMessage);
+        }
+
+        private EventContext enrichContext() {
+            return eventContext.toBuilder()
+                               .setEnrichments(Enrichments.newBuilder()
+                                                          .putAllMap(enrichments))
+                               .build();
+        }
     }
 
-    private static Message apply(EnrichmentFunction function, Message input) {
-        @SuppressWarnings("unchecked") /** It is OK to suppress because we ensure types when we...
-         (a) create enrichments,
-         (b) put them into {@link #functions} by their event message class. **/
-        final Message result = (Message) function.apply(input);
-        return result;
+    private void checkTypeRegistered(Event event) {
+        checkArgument(enrichmentRegistered(event), "No registered enrichment for the event %s", event);
     }
 
+    private static void checkEnabled(Event event) {
+        checkArgument(isEnrichmentEnabled(event), "Enrichment is disabled for the event %s", event);
+    }
+
+    /**
+     * Finds a function that converts an event field into an enrichment field.
+     *
+     * @param eventFieldClass      the class of event fields
+     * @param enrichmentFieldClass the class of enrichment fields
+     */
     Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> eventFieldClass,
-                                                                 Class<?> enrichmentFieldClass) {
-        final Optional<EnrichmentFunction<?, ?>> result =
-                FluentIterable.from(functions.values())
-                              .firstMatch(SupportsFieldConversion.of(eventFieldClass, enrichmentFieldClass));
+                                                   Class<?> enrichmentFieldClass) {
+        final Optional<EnrichmentFunction<?, ?>> result = from(functions.values())
+                                                         .firstMatch(SupportsFieldConversion.of(eventFieldClass,
+                                                                                                enrichmentFieldClass));
         return result;
     }
 
+    public <S, T> void registerFieldEnrichment(Class<S> eventFieldClass,
+                                               Class<T> enrichmentFieldClass,
+                                               Function<S, T> function) {
+        appender.addEntry(eventFieldClass, enrichmentFieldClass, function);
+    }
+
+    /**
+     * The helper serving to append the enclosing instance of {@code EventEnricher} with the new
+     * enrichment configuration rules at runtime.
+     */
+    private static class EnrichmentFunctionAppender {
+
+        private final Multimap<Class<?>, EnrichmentFunction<?, ?>> destination;
+
+        private EnrichmentFunctionAppender(Multimap<Class<?>, EnrichmentFunction<?, ?>> destination) {
+            this.destination = destination;
+        }
+
+        private <S, T> void addEntry(Class<S> eventFieldClass,
+                                     Class<T> enrichmentFieldClass,
+                                     Function<S, T> function) {
+            final EnrichmentFunction<S, T> newEntry = fieldEnrichmentOf(eventFieldClass,
+                                                                        enrichmentFieldClass,
+                                                                        function);
+            checkDuplicate(newEntry, destination.values());
+            destination.put(newEntry.getEventClass(), newEntry);
+
+            validate(destination);
+        }
+    }
+
+    /**
+     * The predicate that helps finding a function that converts an event field (of the given class)
+     * into an enrichment field (of another given class).
+     *
+     * @see #functionFor(Class, Class)
+     */
     static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
 
         private final Class<?> eventFieldClass;
@@ -207,6 +319,40 @@ public class EventEnricher {
     }
 
     /**
+     * A helper predicate that allows to find functions with the same transition from
+     * source event to enrichment class.
+     *
+     * <p>Such functions are not necessarily equal because they may have different translators.
+     *
+     * @see EnrichmentFunction
+     */
+    @VisibleForTesting
+    static class SameTransition implements Predicate<EnrichmentFunction> {
+
+        private final EnrichmentFunction function;
+
+        static SameTransition asFor(EnrichmentFunction function) {
+            return new SameTransition(function);
+        }
+
+        private SameTransition(EnrichmentFunction function) {
+            this.function = checkNotNull(function);
+        }
+
+        @Override
+        public boolean apply(@Nullable EnrichmentFunction input) {
+            if (input == null) {
+                return false;
+            }
+            final boolean sameSourceClass = function.getEventClass()
+                                                    .equals(input.getEventClass());
+            final boolean sameEnrichmentClass = function.getEnrichmentClass()
+                                                        .equals(input.getEnrichmentClass());
+            return sameSourceClass && sameEnrichmentClass;
+        }
+    }
+
+    /**
      * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by the {@code Enricher}
      * and set a custom translation function, if needed.
      */
@@ -220,77 +366,24 @@ public class EventEnricher {
             return new Builder();
         }
 
-        private Builder() {}
+        private Builder() {
+        }
 
         /**
          * Add a new field enrichment translation function.
          *
-         * @param eventFieldClass a class of the field in the event message
+         * @param eventFieldClass      a class of the field in the event message
          * @param enrichmentFieldClass a class of the field in the enrichment message
-         * @param function a function which converts fields
+         * @param function             a function which converts fields
          * @return a builder instance
          */
         public <S, T> Builder addFieldEnrichment(Class<S> eventFieldClass,
                                                  Class<T> enrichmentFieldClass,
                                                  Function<S, T> function) {
-            checkNotNull(eventFieldClass);
-            checkNotNull(enrichmentFieldClass);
-            final EnrichmentFunction<S, T> newEntry = FieldEnricher.newInstance(eventFieldClass,
-                                                                                enrichmentFieldClass,
-                                                                                function);
-            checkDuplicate(newEntry);
+            final EnrichmentFunction<S, T> newEntry = fieldEnrichmentOf(eventFieldClass, enrichmentFieldClass, function);
+            checkDuplicate(newEntry, functions);
             functions.add(newEntry);
             return this;
-        }
-
-        /**
-         * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
-         *                                  source event and enrichment classes
-         */
-        private void checkDuplicate(EnrichmentFunction<?, ?> function) {
-            final Optional<EnrichmentFunction<?, ?>> duplicate = FluentIterable.from(functions)
-                    .firstMatch(SameTransition.asFor(function));
-            if (duplicate.isPresent()) {
-                final String msg = String.format("Enrichment from %s to %s already added as: %s",
-                        function.getEventClass(),
-                        function.getEnrichmentClass(),
-                        duplicate.get());
-                throw new IllegalArgumentException(msg);
-            }
-        }
-
-        /**
-         * A helper predicate that allows to find functions with the same transition from
-         * source event to enrichment class.
-         *
-         * <p>Such functions are not necessarily equal because they may have different translators.
-         *
-         * @see EnrichmentFunction
-         */
-        @VisibleForTesting
-        static class SameTransition implements Predicate<EnrichmentFunction> {
-
-            private final EnrichmentFunction function;
-
-            static SameTransition asFor(EnrichmentFunction function) {
-                return new SameTransition(function);
-            }
-
-            private SameTransition(EnrichmentFunction function) {
-                this.function = checkNotNull(function);
-            }
-
-            @Override
-            public boolean apply(@Nullable EnrichmentFunction input) {
-                if (input == null) {
-                    return false;
-                }
-                final boolean sameSourceClass = function.getEventClass()
-                                                        .equals(input.getEventClass());
-                final boolean sameEnrichmentClass = function.getEnrichmentClass()
-                                                        .equals(input.getEnrichmentClass());
-                return sameSourceClass && sameEnrichmentClass;
-            }
         }
 
         /** Removes a translation for the passed type. */
@@ -302,7 +395,7 @@ public class EventEnricher {
         /** Creates a new {@code Enricher}. */
         public EventEnricher build() {
             final EventEnricher result = new EventEnricher(this);
-            result.validate();
+            validate(result.functions);
             return result;
         }
 
@@ -312,10 +405,41 @@ public class EventEnricher {
         }
     }
 
+    /**
+     * A utility method to create an instance of {@link EnrichmentFunction} based on the {@link FieldEnricher}.
+     */
+    private static <S, T> EnrichmentFunction<S, T> fieldEnrichmentOf(Class<S> eventFieldClass,
+                                                                     Class<T> enrichmentFieldClass,
+                                                                     Function<S, T> function) {
+        checkNotNull(eventFieldClass);
+        checkNotNull(enrichmentFieldClass);
+        checkNotNull(function);
+        return FieldEnricher.newInstance(eventFieldClass,
+                                         enrichmentFieldClass,
+                                         function);
+    }
+
+    /**
+     * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
+     *                                  source event and enrichment classes
+     */
+    private static void checkDuplicate(EnrichmentFunction<?, ?> function,
+                                       Iterable<EnrichmentFunction<?, ?>> currentFns) {
+        final Optional<EnrichmentFunction<?, ?>> duplicate = from(currentFns)
+                .firstMatch(SameTransition.asFor(function));
+        if (duplicate.isPresent()) {
+            final String msg = String.format("Enrichment from %s to %s already added as: %s",
+                                             function.getEventClass(),
+                                             function.getEnrichmentClass(),
+                                             duplicate.get());
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
     /** Performs validation by validating its functions. */
-    private void validate() {
-        for (EnrichmentFunction<?, ?> func : functions.values()) {
-            func.validate();
+    private static void validate(Multimap<Class<?>, EnrichmentFunction<?, ?>> fnRegistry) {
+        for (EnrichmentFunction<?, ?> func : fnRegistry.values()) {
+            func.activate();
         }
     }
 }

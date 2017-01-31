@@ -38,8 +38,8 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message
        extends EntityBuilder<A, I, S> {
 
     @Override
-    public AggregateBuilder<A, I, S> setClass(Class<A> entityClass) {
-        super.setClass(entityClass);
+    public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
+        super.setResultClass(entityClass);
         return this;
     }
 }

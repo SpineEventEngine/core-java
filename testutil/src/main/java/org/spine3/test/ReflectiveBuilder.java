@@ -47,8 +47,9 @@ public abstract class ReflectiveBuilder<T> {
     /**
      * Sets the class of the object to build.
      */
-    protected void setResultClass(Class<T> resultClass) {
+    protected ReflectiveBuilder<T> setResultClass(Class<T> resultClass) {
         this.resultClass = resultClass;
+        return this;
     }
 
     /**

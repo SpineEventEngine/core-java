@@ -40,7 +40,6 @@ import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
@@ -99,7 +98,6 @@ class Given {
 
     static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStorageFactory(InMemoryStorageFactory.getInstance())
                                                             .build();
         return aggregateRepo(boundedContext);
     }
@@ -112,8 +110,7 @@ class Given {
 
     private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
         return BoundedContext.newBuilder()
-                             .setStand(stand)
-                             .setStorageFactory(InMemoryStorageFactory.getInstance());
+                             .setStand(stand);
     }
 
     static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
@@ -155,7 +152,7 @@ class Given {
         }
 
         @Assign
-        public List<? extends Message> handle(CreateProject createProject, CommandContext context) {
+        List<? extends Message> handle(CreateProject createProject, CommandContext context) {
             // In real life we would return a list with at least one element populated with real data.
             return Collections.emptyList();
         }

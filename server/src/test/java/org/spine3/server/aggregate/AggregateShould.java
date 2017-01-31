@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +61,7 @@ import static org.junit.Assert.fail;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.currentTimeSeconds;
+import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -83,7 +85,10 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
-        aggregate = new TestAggregate(ID);
+        aggregate = org.spine3.test.Given.aggregateOfClass(TestAggregate.class)
+                         .withId(ID)
+                         .withVersion(100)
+                         .build();
     }
 
     @Test
@@ -378,7 +383,7 @@ public class AggregateShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        public TestAggregate(ProjectId id) {
+        protected TestAggregate(ProjectId id) {
             super(id);
         }
 
@@ -388,28 +393,28 @@ public class AggregateShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
             return event;
         }
 
         @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
             final TaskAdded event = Given.EventMessage.taskAdded(cmd.getProjectId());
             return event;
         }
 
         @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
             final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
         @Assign
-        public List<Event> handle(ImportEvents command, CommandContext ctx) {
+        List<Event> handle(ImportEvents command, CommandContext ctx) {
             return command.getEventList();
         }
 
@@ -454,7 +459,7 @@ public class AggregateShould {
 
         /** There is no event applier for ProjectCreated event (intentionally). */
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             return Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
         }
@@ -527,7 +532,7 @@ public class AggregateShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }
@@ -594,6 +599,34 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new TestAggregateWithIdInteger(100).getBuilder();
+    }
+
+    @Test
+    public void set_version_when_creating_mismatches() {
+        final int version = aggregate.getVersion();
+
+        assertEquals(version, aggregate.expectedDefault(msg(), msg()).getVersion());
+        assertEquals(version, aggregate.expectedNotDefault(msg()).getVersion());
+        assertEquals(version, aggregate.expectedNotDefault(msg(), msg()).getVersion());
+        assertEquals(version, aggregate.unexpectedValue(msg(), msg(), msg()).getVersion());
+
+        assertEquals(version, aggregate.expectedEmpty(str(), str()).getVersion());
+        assertEquals(version, aggregate.expectedNotEmpty(str()).getVersion());
+        assertEquals(version, aggregate.unexpectedValue(str(), str(), str()).getVersion());
+    }
+
+    /**
+     * @return generated {@code StringValue} based on generated UUID
+     */
+    private static StringValue msg() {
+        return newUuidValue();
+    }
+
+    /**
+     * @return generated {@code String} based on generated UUID
+     */
+    private static String str() {
+        return msg().getValue();
     }
 
     /*

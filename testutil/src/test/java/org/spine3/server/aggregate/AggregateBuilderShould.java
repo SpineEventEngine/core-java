@@ -30,7 +30,7 @@ public class AggregateBuilderShould {
 
     private static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
         final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
-        result.setClass(TestAggregate.class);
+        result.setResultClass(TestAggregate.class);
         return result;
     }
 

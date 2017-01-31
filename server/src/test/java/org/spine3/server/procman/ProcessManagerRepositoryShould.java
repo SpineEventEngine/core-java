@@ -337,7 +337,7 @@ public class ProcessManagerRepositoryShould
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
                                                  can have two parameters. */
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        ProjectCreated handle(CreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
@@ -347,7 +347,7 @@ public class ProcessManagerRepositoryShould
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
                                                  can have two parameters. */
         @Assign
-        public TaskAdded handle(AddTask command, CommandContext ignored) {
+        TaskAdded handle(AddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
@@ -355,7 +355,7 @@ public class ProcessManagerRepositoryShould
         }
 
         @Assign
-        public CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(StartProject command, CommandContext context) {
             keep(command);
 
             handleProjectStarted();

@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -43,6 +42,11 @@ import static org.spine3.test.Tests.newUserId;
 @VisibleForTesting
 public class TestCommandFactory extends CommandFactory {
 
+    protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
+        super(newBuilder().setActor(actor)
+                          .setZoneOffset(zoneOffset));
+    }
+
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
         return new TestCommandFactory(newUserId(actor), zoneOffset);
     }
@@ -51,15 +55,9 @@ public class TestCommandFactory extends CommandFactory {
         return newInstance(testClass.getName(), ZoneOffsets.UTC);
     }
 
-    protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
-        super(newBuilder().setActor(actor).setZoneOffset(zoneOffset));
-    }
-
     /** Creates new command with the passed timestamp. */
     public Command create(Message message, Timestamp timestamp) {
-        final Command.Builder command = create(message).toBuilder();
-        final CommandContext.Builder context = command.getContext().toBuilder();
-
-        return command.setContext(context.setTimestamp(timestamp).build()).build();
+        final Command command = create(message);
+        return Tests.adjustTimestamp(command, timestamp);
     }
 }

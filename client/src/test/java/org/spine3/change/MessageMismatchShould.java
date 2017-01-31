@@ -32,7 +32,7 @@ import static org.spine3.change.MessageMismatch.unpackActual;
 import static org.spine3.change.MessageMismatch.unpackExpected;
 import static org.spine3.change.MessageMismatch.unpackNewValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class MessageMismatchShould {
 
@@ -44,7 +44,7 @@ public class MessageMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(MessageMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(MessageMismatch.class));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class MessageMismatchShould {
     }
 
     @Test
-    public void create_instance_for_unexpected_default_value() {
+    public void create_instance_for_unexpected_default_when_clearing() {
         final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
         assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -69,6 +69,19 @@ public class MessageMismatchShould {
         // Check that newValue has default value as the command intends to clear the field.
         assertEquals(DEFAULT_VALUE, unpackNewValue(mismatch));
 
+        assertEquals(VERSION, mismatch.getVersion());
+    }
+
+    @Test
+    public void create_instance_for_unexpected_default_when_changing() {
+        final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
+
+        assertEquals(EXPECTED, unpackExpected(mismatch));
+
+        // Check that the actual value is default.
+        assertEquals(DEFAULT_VALUE, unpackActual(mismatch));
+
+        assertEquals(NEW_VALUE, unpackNewValue(mismatch));
         assertEquals(VERSION, mismatch.getVersion());
     }
 

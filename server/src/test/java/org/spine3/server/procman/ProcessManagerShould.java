@@ -237,19 +237,19 @@ public class ProcessManagerShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
             return Given.EventMessage.projectCreated(command.getProjectId());
         }
 
         @Assign
-        public TaskAdded handle(AddTask command, CommandContext ignored) {
+        TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
             return Given.EventMessage.taskAdded(command.getProjectId());
         }
 
         @Assign
-        public CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(AnyPacker.pack(command));
 
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());

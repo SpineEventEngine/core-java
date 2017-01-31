@@ -50,7 +50,7 @@ import static org.spine3.protobuf.Durations.subtract;
 import static org.spine3.protobuf.Durations.toMinutes;
 import static org.spine3.protobuf.Durations.toNanos;
 import static org.spine3.protobuf.Durations.toSeconds;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 
 /**
@@ -61,7 +61,7 @@ public class DurationsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Durations.class));
+        assertTrue(hasPrivateParameterlessCtor(Durations.class));
     }
 
     @Test

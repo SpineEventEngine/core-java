@@ -24,14 +24,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MoneyUtilShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertTrue(hasPrivateUtilityConstructor(MoneyUtil.class));
+        assertTrue(hasPrivateParameterlessCtor(MoneyUtil.class));
     }
 
     @Test

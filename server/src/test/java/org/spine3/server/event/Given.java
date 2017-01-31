@@ -237,6 +237,17 @@ public class Given {
             }
         }
 
+        public static class GetProjectMaxMemberCount implements Function<ProjectId, Integer> {
+            @Nullable
+            @Override
+            public Integer apply(@Nullable ProjectId input) {
+                if (input == null) {
+                    return 0;
+                }
+                return input.hashCode();
+            }
+        }
+
         private static final Function<EventId, String> EVENT_ID_TO_STRING =
                 new Function<EventId, String>() {
                     @Nullable
