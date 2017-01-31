@@ -43,7 +43,11 @@ public class ProjectionShould {
 
     @Before
     public void setUp() {
-        projection = new TestProjection(newUuid());
+        projection = org.spine3.test.Given.projectionOfClass(TestProjection.class)
+                .withId(newUuid())
+                .withVersion(1)
+                .withState(newStringValue("Initial state"))
+                .build();
     }
 
     @Test
