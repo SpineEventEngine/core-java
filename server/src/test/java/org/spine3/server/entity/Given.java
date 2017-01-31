@@ -72,24 +72,24 @@ class Given {
 
         static TestEntity newInstance(String id) {
             return org.spine3.test.Given.entityOfClass(TestEntity.class)
-                    .withId(id)
-                    .build();
+                                        .withId(id)
+                                        .build();
         }
 
         static TestEntity withState() {
             return org.spine3.test.Given.entityOfClass(TestEntity.class)
-                    .withId(newUuid())
-                    .withState(newProject())
-                    .withVersion(3)
-                    .build();
+                                        .withId(newUuid())
+                                        .withState(newProject())
+                                        .withVersion(3)
+                                        .build();
         }
 
         static TestEntity withState(TestEntity entity) {
             return org.spine3.test.Given.entityOfClass(TestEntity.class)
-                    .withId(entity.getId())
-                    .withState(entity.getState())
-                    .withVersion(entity.getVersion())
-                    .build();
+                                        .withId(entity.getId())
+                                        .withState(entity.getState())
+                                        .withVersion(entity.getVersion())
+                                        .build();
         }
 
         private TestEntity(String id) {
