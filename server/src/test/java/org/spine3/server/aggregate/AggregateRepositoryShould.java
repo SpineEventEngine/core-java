@@ -360,7 +360,9 @@ public class AggregateRepositoryShould {
     }
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
-        final ProjectAggregate aggregate = new ProjectAggregate(id);
+        final ProjectAggregate aggregate = org.spine3.test.Given.aggregateOfClass(ProjectAggregate.class)
+                                                                .withId(id)
+                                                                .build();
         final CommandContext context = createCommandContext();
         aggregate.dispatchForTest(Given.CommandMessage.createProject(id), context);
         aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
