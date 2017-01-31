@@ -36,7 +36,7 @@ buildscript {
         spineVersion = '0.7.24-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.6.6-SNAPSHOT'
+        spineProtobufPluginVersion = spineVersion
     }
 
     dependencies {
@@ -170,7 +170,7 @@ subprojects {
         }
     }
     */
-    
+
     protobuf {
         // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.
         // See: https://youtrack.jetbrains.com/issue/IDEA-141744

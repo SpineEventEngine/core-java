@@ -139,6 +139,17 @@ public class EventEnricherShould {
     }
 
     @Test
+    public void enrich_several_events_bound_by_fields() {
+        final Event permissionGranted = Given.Event.permissionGranted();
+        final Event permissionRevoked = Given.Event.permissionRevoked();
+        final Event sharingRequestApproved = Given.Event.sharingRequestApproved();
+
+        assertTrue(enricher.canBeEnriched(permissionGranted));
+        assertTrue(enricher.canBeEnriched(permissionRevoked));
+        assertTrue(enricher.canBeEnriched(sharingRequestApproved));
+    }
+
+    @Test
     public void enrich_event_if_function_added_at_runtime() {
         final Given.Enrichment.GetProjectMaxMemberCount function = new Given.Enrichment.GetProjectMaxMemberCount();
         enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
