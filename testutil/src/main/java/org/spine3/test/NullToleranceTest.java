@@ -612,7 +612,7 @@ public class NullToleranceTest {
          * Adds the {@code defaultValue} for the {@code typeOfInterest},
          * if no default value has been set.
          *
-         * @param typeOfInterest the type for which will be provided default value
+         * @param typeOfInterest the type for which will be provided the default value
          */
         private void customize(Class<T> typeOfInterest) {
             for (Map.Entry<Class<?>, ?> entry : defaultValues.entrySet()) {
