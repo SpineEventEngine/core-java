@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
@@ -45,11 +46,16 @@ import static org.spine3.test.Tests.nullRef;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
-    private final Project state = Given.newProject();
+    private Project state = Given.newProject();
+    private Given.TestEntity entityNew;
+    private Given.TestEntity entityWithState;
 
-    private final Given.TestEntity entityNew = Given.TestEntity.newInstance(newUuid());
-
-    private final Given.TestEntity entityWithState = Given.TestEntity.withState();
+    @Before
+    public void setUp() {
+        state = Given.newProject();
+        entityNew = Given.TestEntity.newInstance(newUuid());
+        entityWithState = Given.TestEntity.withState();
+    }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
     @Test(expected = NullPointerException.class)
@@ -97,6 +103,7 @@ public class EntityShould {
     public void validate_state_when_set_it() {
         entityNew.setState(state, 0, getCurrentTime());
 
+        //TODO:2017-02-01:alexander.yevsyukov: Can we test it via Mockito spy?
         assertTrue(entityNew.isValidateMethodCalled());
     }
 
@@ -156,6 +163,8 @@ public class EntityShould {
     @Test
     public void record_modification_time_when_incrementing_version() {
         entityNew.incrementVersion();
+        //TODO:2017-02-01:alexander.yevsyukov: This may not work if the code is executed on the bound of a second.
+        // Use Tests.FrozenMadHatterParty.
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());

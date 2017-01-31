@@ -148,8 +148,9 @@ public abstract class Entity<I, S extends Message> {
     }
 
     private static IllegalStateException noSuchConstructorException(String entityClass, String idClass) {
-        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return new IllegalStateException(new NoSuchMethodException(message));
+        final String errMsg = String.format("%s class must declare a constructor with a single %s ID parameter.",
+                                            entityClass, idClass);
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
     /**
@@ -301,6 +302,42 @@ public abstract class Entity<I, S extends Message> {
                 ? EntityStatus.getDefaultInstance()
                 : this.status;
         return result;
+    }
+
+    /**
+     * Tests weather the entity is marked as archived.
+     *
+     * @return {@code true} if the entity is archived, {@code false} otherwise
+     */
+    protected boolean isArchived() {
+        return getStatus().getArchived();
+    }
+
+    /**
+     * Sets {@code archived} status flag to the passed value.
+     */
+    protected void setArchived(boolean archived) {
+        this.status = getStatus().toBuilder()
+                                 .setArchived(archived)
+                                 .build();
+    }
+
+    /**
+     * Tests weather the entity is marked as deleted.
+     *
+     * @return {@code true} if the entity is deleted, {@code false} otherwise
+     */
+    protected boolean isDeleted() {
+        return getStatus().getDeleted();
+    }
+
+    /**
+     * Sets {@code deleted} status flag to the passed value.
+     */
+    protected void setDeleted(boolean deleted) {
+        this.status = getStatus().toBuilder()
+                                 .setDeleted(deleted)
+                                 .build();
     }
 
     /**
