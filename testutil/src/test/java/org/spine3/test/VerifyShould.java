@@ -192,24 +192,22 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_object_is_not_instance_of_specified_type() {
-        Verify.assertInstanceOf(Integer.class, "");
+        Verify.assertInstanceOf(Integer.class, EMPTY_STRING);
     }
 
     @Test
     public void pass_if_object_is_instance_of_specified_type() {
-        final String instance = "";
-        Verify.assertInstanceOf(instance.getClass(), instance);
+        Verify.assertInstanceOf(EMPTY_STRING.getClass(), EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
     public void fail_if_object_is_instance_of_specified_type() {
-        final String instance = "";
-        Verify.assertNotInstanceOf(instance.getClass(), instance);
+        Verify.assertNotInstanceOf(EMPTY_STRING.getClass(), EMPTY_STRING);
     }
 
     @Test
     public void pass_if_object_is_not_instance_of_specified_type() {
-        Verify.assertNotInstanceOf(Integer.class, "");
+        Verify.assertNotInstanceOf(Integer.class, EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
