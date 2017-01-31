@@ -182,7 +182,7 @@ class ReferenceValidator {
     }
 
     private static String differentTypesErrorMessage(FieldDescriptor enrichmentField) {
-        return String.format("Enrichment field %s targets fields of different types.", enrichmentField);
+        return format("Enrichment field %s targets fields of different types.", enrichmentField);
     }
 
     private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
