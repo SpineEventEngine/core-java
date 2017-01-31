@@ -29,6 +29,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.testdata.TestCommandContextFactory;
 
 import java.util.List;
@@ -56,7 +57,7 @@ import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -71,7 +72,7 @@ public class EventsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateUtilityConstructor(Events.class));
+        assertTrue(hasPrivateParameterlessCtor(Events.class));
     }
 
     @Test
@@ -242,6 +243,16 @@ public class EventsShould {
         final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue), boolValue);
         assertFalse(Events.getEnrichment(StringValue.class, context)
                           .isPresent());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Events.class)
+                                                                     .addDefaultValue(stringValue.getClass())
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {

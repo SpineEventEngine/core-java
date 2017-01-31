@@ -20,18 +20,33 @@
 
 package org.spine3.protobuf;
 
+import com.google.protobuf.Descriptors;
 import org.junit.Test;
+import org.spine3.base.Command;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class TypeNameShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(TypeName.class));
+        assertTrue(hasPrivateParameterlessCtor(TypeName.class));
     }
 
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final Descriptors.Descriptor descriptor = Command.getDefaultInstance()
+                                                         .getDescriptorForType();
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(TypeName.class)
+                                                                     .addDefaultValue(descriptor)
+                                                                     .addDefaultValue(Command.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
     /**
      * Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by its own set of tests.
      **/

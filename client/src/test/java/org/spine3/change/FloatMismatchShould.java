@@ -21,6 +21,7 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,7 @@ import static org.spine3.change.FloatMismatch.unexpectedValue;
 import static org.spine3.change.FloatMismatch.unpackActual;
 import static org.spine3.change.FloatMismatch.unpackExpected;
 import static org.spine3.change.FloatMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class FloatMismatchShould {
 
@@ -43,7 +44,7 @@ public class FloatMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(FloatMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(FloatMismatch.class));
     }
 
     @Test
@@ -112,4 +113,12 @@ public class FloatMismatchShould {
         unexpectedValue(value, value, NEW_VALUE, VERSION);
     }
 
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(FloatMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
 }

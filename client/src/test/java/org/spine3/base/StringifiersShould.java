@@ -27,6 +27,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
@@ -46,7 +47,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class StringifiersShould {
 
@@ -54,7 +55,7 @@ public class StringifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Stringifiers.class));
+        assertTrue(hasPrivateParameterlessCtor(Stringifiers.class));
     }
 
     @Test
@@ -236,5 +237,14 @@ public class StringifiersShould {
         final String actual = new Stringifiers.EventIdStringifier().apply(id);
 
         assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Stringifiers.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

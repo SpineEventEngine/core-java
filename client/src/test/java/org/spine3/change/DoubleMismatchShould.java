@@ -21,6 +21,7 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,7 @@ import static org.spine3.change.DoubleMismatch.unexpectedValue;
 import static org.spine3.change.DoubleMismatch.unpackActual;
 import static org.spine3.change.DoubleMismatch.unpackExpected;
 import static org.spine3.change.DoubleMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class DoubleMismatchShould {
 
@@ -41,10 +42,9 @@ public class DoubleMismatchShould {
     private static final double NEW_VALUE = 14.52;
     private static final double DELTA = 0.01;
 
-
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(DoubleMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(DoubleMismatch.class));
     }
 
     @Test
@@ -111,5 +111,14 @@ public class DoubleMismatchShould {
     public void not_accept_same_expected_and_actual() {
         final double value = 19.19;
         unexpectedValue(value, value, NEW_VALUE, VERSION);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(DoubleMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

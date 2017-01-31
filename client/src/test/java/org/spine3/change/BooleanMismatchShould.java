@@ -21,6 +21,7 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,7 +31,7 @@ import static org.spine3.change.BooleanMismatch.unpackActual;
 import static org.spine3.change.BooleanMismatch.unpackExpected;
 import static org.spine3.change.BooleanMismatch.unpackNewValue;
 import static org.spine3.change.IntMismatch.of;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class BooleanMismatchShould {
 
@@ -38,7 +39,7 @@ public class BooleanMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(BooleanMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(BooleanMismatch.class));
     }
 
     @Test
@@ -83,5 +84,14 @@ public class BooleanMismatchShould {
     public void not_unpackNewValue_if_its_not_a_BooleanMismatch() {
         final ValueMismatch mismatch = of(1, 2, 3, VERSION);
         BooleanMismatch.unpackNewValue(mismatch);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(BooleanMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

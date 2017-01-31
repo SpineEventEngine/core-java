@@ -30,6 +30,8 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with {@link Message} value wrapper objects.
  *
@@ -47,6 +49,7 @@ public class Values {
      * @return a new StringValue instance
      */
     public static StringValue newStringValue(String value) {
+        checkNotNull(value);
         final StringValue result = StringValue.newBuilder()
                                               .setValue(value)
                                               .build();
@@ -55,6 +58,7 @@ public class Values {
 
     /** Packs the passed value into {@link Any}. */
     public static Any pack(String value) {
+        checkNotNull(value);
         final Any result = AnyPacker.pack(newStringValue(value));
         return result;
     }

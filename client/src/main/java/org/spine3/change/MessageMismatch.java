@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.change.Preconditions.checkNotEqual;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -95,8 +95,10 @@ public class MessageMismatch {
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue, int version) {
-        checkNotNullOrEqual(expected, actual);
+        checkNotNull(expected);
+        checkNotNull(actual);
         checkNotNull(newValue);
+        checkNotEqual(expected, actual);
 
         return of(expected, actual, newValue, version);
     }
@@ -119,6 +121,7 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any any = mismatch.getExpected();
         final Message result = unpack(any);
         return result;
@@ -130,6 +133,7 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any any = mismatch.getActual();
         final Message result = unpack(any);
         return result;
@@ -141,6 +145,7 @@ public class MessageMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any any = mismatch.getNewValue();
         final Message result = unpack(any);
         return result;

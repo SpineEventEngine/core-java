@@ -41,7 +41,6 @@ import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
-import org.spine3.test.projection.Project;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;

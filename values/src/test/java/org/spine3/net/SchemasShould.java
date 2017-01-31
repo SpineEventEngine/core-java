@@ -21,10 +21,11 @@
 package org.spine3.net;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
@@ -45,6 +46,16 @@ public class SchemasShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Schemas.class));
+        assertTrue(hasPrivateParameterlessCtor(Schemas.class));
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Schemas.class)
+                                                                     .addDefaultValue(Url.Record.Schema.UNDEFINED)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

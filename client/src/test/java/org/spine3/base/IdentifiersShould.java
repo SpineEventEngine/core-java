@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -28,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
@@ -38,7 +39,7 @@ public class IdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Identifiers.class));
+        assertTrue(hasPrivateParameterlessCtor(Identifiers.class));
     }
 
 
@@ -68,5 +69,15 @@ public class IdentifiersShould {
     public void do_not_convert_unsupported_ID_type_to_Any() {
         //noinspection UnnecessaryBoxing
         idToAny(Boolean.valueOf(false));
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Identifiers.class)
+                                                                     .addDefaultValue(Identifiers.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

@@ -32,6 +32,8 @@ import org.spine3.server.procman.ProcessManagerBuilder;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionBuilder;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for building test objects.
  *
@@ -48,6 +50,7 @@ public class Given {
      */
     public static <E extends Entity<I, S>, I, S extends Message>
     EntityBuilder<E, I, S> entityOfClass(Class<E> entityClass) {
+        checkNotNull(entityClass);
         final EntityBuilder<E, I, S> result = new EntityBuilder<>();
         result.setResultClass(entityClass);
         return result;
@@ -58,6 +61,7 @@ public class Given {
      */
     public static <A extends Aggregate<I, S, ?>, I, S extends Message>
            AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
+        checkNotNull(aggregateClass);
         final AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
         result.setResultClass(aggregateClass);
         return result;
@@ -68,6 +72,7 @@ public class Given {
      */
     public static <A extends AggregatePart<I, S, ?>, I, S extends Message>
            AggregatePartBuilder<A, I, S> aggregatePartOfClass(Class<A> partClass) {
+        checkNotNull(partClass);
         final AggregatePartBuilder<A, I, S> result = new AggregatePartBuilder<>();
         result.setResultClass(partClass);
         return result;
@@ -78,6 +83,7 @@ public class Given {
      */
     public static <P extends Projection<I, S>, I, S extends Message>
            ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
+        checkNotNull(projectionClass);
         final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
         result.setResultClass(projectionClass);
         return result;
@@ -88,6 +94,7 @@ public class Given {
      */
     public static <P extends ProcessManager<I, S>, I, S extends Message>
            ProcessManagerBuilder<P, I, S> processManagerOfClass(Class<P> pmClass) {
+        checkNotNull(pmClass);
         final ProcessManagerBuilder<P, I, S> result = new ProcessManagerBuilder<>();
         result.setResultClass(pmClass);
         return result;

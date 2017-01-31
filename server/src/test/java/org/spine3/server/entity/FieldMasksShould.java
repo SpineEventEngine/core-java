@@ -40,7 +40,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertMatchesMask;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -50,7 +50,7 @@ public class FieldMasksShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(FieldMasks.class));
+        assertTrue(hasPrivateParameterlessCtor(FieldMasks.class));
     }
 
     @Test

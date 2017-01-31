@@ -25,12 +25,13 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.Values;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
-                   "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})
+        "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})
 public class EntityBuilderShould {
 
     /**
@@ -80,6 +81,15 @@ public class EntityBuilderShould {
         assertEquals(state, entity.getState());
         assertEquals(version, entity.getVersion());
         assertEquals(timestamp, entity.whenModified());
+    }
+
+    @Test
+    public void pass_the_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(EntityBuilder.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     private static class TestEntity extends Entity<Long, StringValue> {

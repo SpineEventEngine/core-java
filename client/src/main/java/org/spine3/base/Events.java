@@ -75,11 +75,13 @@ public class Events {
      * @param events the event record list to sort
      */
     public static void sort(List<Event> events) {
+        checkNotNull(events);
         Collections.sort(events, EVENT_TIMESTAMP_COMPARATOR);
     }
 
     /** Obtains the timestamp of the event. */
     public static Timestamp getTimestamp(Event event) {
+        checkNotNull(event);
         final Timestamp result = event.getContext().getTimestamp();
         return result;
     }
@@ -87,12 +89,16 @@ public class Events {
     /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
+        checkNotNull(event);
+        checkNotNull(context);
         return createEvent(AnyPacker.pack(event), context);
     }
 
     /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Any eventAny, EventContext context) {
+        checkNotNull(eventAny);
+        checkNotNull(context);
         final Event result = Event.newBuilder()
                                   .setMessage(eventAny)
                                   .setContext(context)
@@ -108,6 +114,8 @@ public class Events {
      * @return event with data from an external source
      */
     public static Event createImportEvent(Message event, Message producerId) {
+        checkNotNull(event);
+        checkNotNull(producerId);
         final EventContext context = createImportEventContext(producerId);
         final Event result = createEvent(event, context);
         return result;
@@ -119,6 +127,7 @@ public class Events {
      * @param event an event to get message from
      */
     public static <M extends Message> M getMessage(Event event) {
+        checkNotNull(event);
         final Any any = event.getMessage();
         final M result = unpack(any);
         return result;
@@ -133,6 +142,7 @@ public class Events {
      * <p>This is a convenience method for obtaining actor in event subscriber methods.
      */
     public static UserId getActor(EventContext context) {
+        checkNotNull(context);
         final CommandContext commandContext = checkNotNull(context).getCommandContext();
         return commandContext.getActor();
     }
@@ -146,6 +156,7 @@ public class Events {
      * @return producer ID
      */
     public static <I> I getProducer(EventContext context) {
+        checkNotNull(context);
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
         @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I) aggregateId;
@@ -242,6 +253,7 @@ public class Events {
 
     /** Verifies if the enrichment is not disabled in the passed event. */
     public static boolean isEnrichmentEnabled(Event event) {
+        checkNotNull(event);
         final EventContext context = event.getContext();
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
         final boolean isEnabled = mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
@@ -255,6 +267,7 @@ public class Events {
      * @return an optional of enrichments
      */
     public static Optional<Enrichments> getEnrichments(EventContext context) {
+        checkNotNull(context);
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
         if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
             return Optional.of(context.getEnrichments());
@@ -271,6 +284,8 @@ public class Events {
      * @return an optional of the enrichment
      */
     public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
+        checkNotNull(enrichmentClass);
+        checkNotNull(context);
         final Optional<Enrichments> value = getEnrichments(context);
         if (!value.isPresent()) {
             return Optional.absent();
