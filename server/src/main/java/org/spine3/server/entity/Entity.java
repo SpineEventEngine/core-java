@@ -25,9 +25,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -74,11 +75,15 @@ public abstract class Entity<I, S extends Message> {
 
     private final I id;
 
+    @Nullable
     private S state;
 
+    @Nullable
     private Timestamp whenModified;
 
     private int version;
+
+    private EntityStatus status = EntityStatus.getDefaultInstance();
 
     /**
      * Creates a new instance.
@@ -87,8 +92,37 @@ public abstract class Entity<I, S extends Message> {
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
     protected Entity(I id) {
+        checkNotNull(id);
         Identifiers.checkSupported(id.getClass());
         this.id = id;
+    }
+
+    /**
+     * Sets the object into the default state.
+     *
+     * <p>Results of this method call are:
+     * <ul>
+     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
+     *   <li>The version number is set to zero.
+     *   <li>The {@link #whenModified} field is set to the system time of the call.
+     *   <li>The {@link #status} field is set to the default instance.
+     * </ul>
+     *
+     * This method cannot be called from within {@code Entity} constructor because
+     * the call to {@link #getDefaultState()} relies on completed initialization
+     * of the instance.
+     */
+    void init() {
+        setState(getDefaultState(), 0, getCurrentTime());
+        this.status = EntityStatus.getDefaultInstance();
+    }
+
+    /**
+     * Obtains the ID of the entity.
+     */
+    @CheckReturnValue
+    public I getId() {
+        return id;
     }
 
     /**
@@ -107,15 +141,17 @@ public abstract class Entity<I, S extends Message> {
     static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
             return result;
         } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
         }
     }
 
-    private static IllegalStateException noSuchConstructorException(String entityClass, String idClass) {
-        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
-        return new IllegalStateException(new NoSuchMethodException(message));
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = String.format("%s class must declare a constructor with a single %s ID parameter.",
+                                            entityClass, idClass);
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
     /**
@@ -130,7 +166,7 @@ public abstract class Entity<I, S extends Message> {
     static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
         try {
             final E result = constructor.newInstance(id);
-            result.setDefault();
+            result.init();
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
@@ -205,6 +241,13 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
+     * Sets status for the entity.
+     */
+    void setStatus(EntityStatus status) {
+        this.status = status;
+    }
+
+    /**
      * Sets version information of the entity.
      *
      * @param version the version number of the entity
@@ -214,7 +257,6 @@ public abstract class Entity<I, S extends Message> {
         this.version = version;
         this.whenModified = checkNotNull(whenLastModified);
     }
-
 
     /**
      * Updates the state incrementing the version number and recording time of the modification.
@@ -226,22 +268,9 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Sets the object into the default state.
+     * Obtains the version number of the entity.
      *
-     * <p>Results of this method call are:
-     * <ul>
-     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
-     *   <li>The version number is set to zero.
-     *   <li>The {@link #whenModified} field is set to the system time of the call.
-     * </ul>
-     * <p>The timestamp is set to current system time.
-     */
-    protected void setDefault() {
-        setState(getDefaultState(), 0, getCurrentTime());
-    }
-
-    /**
-     * @return current version number
+     * @return the version number or zero if the entity was not modified
      */
     public int getVersion() {
         return version;
@@ -258,24 +287,65 @@ public abstract class Entity<I, S extends Message> {
         return version;
     }
 
-    @CheckReturnValue
-    public I getId() {
-        return id;
-    }
-
     /**
      * Obtains the timestamp of the last modification.
      *
-     * @return the timestamp instance or the value produced by {@link Timestamp#getDefaultInstance()} if the state wasn't set
+     * @return the timestamp instance or the value produced by
+     *         {@link Timestamp#getDefaultInstance()} if the state wasn't set
      * @see #setState(Message, int, Timestamp)
      */
     @CheckReturnValue
-    @Nonnull
     public Timestamp whenModified() {
         final Timestamp result = whenModified == null
                                  ? Timestamp.getDefaultInstance()
                                  : whenModified;
         return result;
+    }
+
+    /**
+     * Obtains the entity status.
+     */
+    protected EntityStatus getStatus() {
+        final EntityStatus result = this.status ==  null
+                ? EntityStatus.getDefaultInstance()
+                : this.status;
+        return result;
+    }
+
+    /**
+     * Tests whether the entity is marked as archived.
+     *
+     * @return {@code true} if the entity is archived, {@code false} otherwise
+     */
+    protected boolean isArchived() {
+        return getStatus().getArchived();
+    }
+
+    /**
+     * Sets {@code archived} status flag to the passed value.
+     */
+    protected void setArchived(boolean archived) {
+        this.status = getStatus().toBuilder()
+                                 .setArchived(archived)
+                                 .build();
+    }
+
+    /**
+     * Tests whether the entity is marked as deleted.
+     *
+     * @return {@code true} if the entity is deleted, {@code false} otherwise
+     */
+    protected boolean isDeleted() {
+        return getStatus().getDeleted();
+    }
+
+    /**
+     * Sets {@code deleted} status flag to the passed value.
+     */
+    protected void setDeleted(boolean deleted) {
+        this.status = getStatus().toBuilder()
+                                 .setDeleted(deleted)
+                                 .build();
     }
 
     /**
@@ -354,6 +424,10 @@ public abstract class Entity<I, S extends Message> {
         if (getVersion() != another.getVersion()) {
             return false;
         }
+        if (!getStatus().equals(another.getStatus())) {
+            return false;
+        }
+
         final boolean result = whenModified().equals(another.whenModified());
         return result;
     }
@@ -364,6 +438,7 @@ public abstract class Entity<I, S extends Message> {
         result = 31 * result + getState().hashCode();
         result = 31 * result + whenModified().hashCode();
         result = 31 * result + getVersion();
+        result = 31 * result + getStatus().hashCode();
         return result;
     }
 }

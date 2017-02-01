@@ -20,25 +20,19 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.projection.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
+import com.google.common.base.Optional;
 
 /**
- * @author Alexander Litus
+ * Base interface for data stored in memory for one tenant.
+ *
+ * @param <I> the type of entity IDs
+ * @author Alexander Yevsyukov
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+interface TenantStorage<I, R> {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage);
-        return storage;
-    }
+    Optional<R> get(I id);
 
-    @Override
-    protected String newId() {
-        return newUuid();
-    }
+    void put(I id, R record);
+
+    boolean isEmpty();
 }

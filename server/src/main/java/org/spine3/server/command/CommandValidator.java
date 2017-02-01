@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.server.entity.GetTargetIdFromCommand;
+import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
 

@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
@@ -59,6 +60,7 @@ import java.util.Set;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -103,7 +105,7 @@ public class AggregateRepositoryShould {
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
-        repository = new TestAggregateRepository(boundedContext);
+        repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
     }
 
@@ -113,9 +115,9 @@ public class AggregateRepositoryShould {
         repository.close();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
-    public void return_aggregate_with_default_state_if_no_aggregate_found() {
+    public void create_aggregate_with_default_state_if_no_aggregate_found() {
         final ProjectAggregate aggregate = repository.load(Given.newProjectId())
                                                      .get();
         final Project state = aggregate.getState();
@@ -313,10 +315,12 @@ public class AggregateRepositoryShould {
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage)
                       .readEventCountAfterLastSnapshot(projectId);
-        doReturn(AggregateEvents.getDefaultInstance()).when(storage)
-                                                      .read(projectId);
+        doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage)
+                                                                   .read(projectId);
         doReturn(storage).when(repositorySpy)
                          .aggregateStorage();
+        doReturn(Optional.absent()).when(storage)
+                                   .readStatus(projectId);
 
         repositorySpy.dispatch(cmd);
 
@@ -327,7 +331,25 @@ public class AggregateRepositoryShould {
         verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
     }
 
+    @Test
+    public void marks_aggregate_archived() {
+        final ProjectId id = createAndStoreAggregate();
 
+        repository.markArchived(id);
+
+        assertFalse(repository.load(id)
+                              .isPresent());
+    }
+
+    @Test
+    public void mark_aggregate_deleted() {
+        final ProjectId id = createAndStoreAggregate();
+
+        repository.markDeleted(id);
+
+        assertFalse(repository.load(id)
+                              .isPresent());
+    }
 
     /*
      * Utility methods.
@@ -344,6 +366,14 @@ public class AggregateRepositoryShould {
         aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
         aggregate.dispatchForTest(Given.CommandMessage.startProject(id), context);
         return aggregate;
+    }
+
+    private ProjectId createAndStoreAggregate() {
+        final ProjectId id = Given.newProjectId();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
+
+        repository.store(aggregate);
+        return id;
     }
 
     private CommandId dispatchCmdToAggregateThrowing(Throwable throwable) {
@@ -392,25 +422,30 @@ public class AggregateRepositoryShould {
         return aggregateCaptor.getValue();
     }
 
-    private static class TestAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
-        protected TestAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-            initStorage(InMemoryStorageFactory.getInstance());
+    /*
+     * Test environment classes
+     ****************************/
+
+    private static class TestFailure extends FailureThrowable {
+        private static final long serialVersionUID = 0L;
+
+        private TestFailure() {
+            super(StringValue.newBuilder()
+                             .setValue(TestFailure.class.getName())
+                             .build());
         }
     }
 
-    /*
-     * Test classes
-     ****************************/
+    private static class TestThrowable extends Throwable {
+        private static final long serialVersionUID = 0L;
+    }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")      // Required to be `public`.
-        public ProjectAggregate(ProjectId id) {
+        private ProjectAggregate(ProjectId id) {
             super(id);
         }
 
@@ -472,16 +507,10 @@ public class AggregateRepositoryShould {
         }
     }
 
-    @SuppressWarnings("serial")
-    private static class TestFailure extends FailureThrowable {
-        private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        protected ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+            initStorage(InMemoryStorageFactory.getInstance());
         }
-    }
-
-    @SuppressWarnings("serial")
-    private static class TestThrowable extends Throwable {
     }
 }

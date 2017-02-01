@@ -20,37 +20,40 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.TreeMultimap;
-import org.spine3.protobuf.Timestamps;
+import com.google.common.base.Optional;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.entity.status.EntityStatus;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * In-memory storage for aggregate events and snapshots.
  *
+ * @param <I> the type of IDs of aggregates managed by this storage
+ *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
-            new AggregateStorageKeyComparator<I>(), // key comparator
-            new AggregateStorageRecordReverseComparator() // value comparator
-    );
-
-    private final Map<I, Integer> eventCountMap = newHashMap();
+    private final MultitenantStorage<TenantAggregateRecords<I>> multitenantStorage;
 
     protected InMemoryAggregateStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<TenantAggregateRecords<I>>(multitenant) {
+            @Override
+            TenantAggregateRecords<I> createSlice() {
+                return new TenantAggregateRecords<>();
+            }
+        };
+    }
+
+    private TenantAggregateRecords<I> getStorage() {
+        return multitenantStorage.getStorage();
     }
 
     /** Creates a new single-tenant storage instance. */
@@ -60,62 +63,77 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected void writeRecord(I id, AggregateStorageRecord record) {
-        recordMap.put(id, record);
+        getStorage().put(id, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = recordMap.get(id);
+        final List<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
         return records.iterator();
     }
 
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final Integer count = eventCountMap.get(id);
-        if (count == null) {
-            return 0;
-        }
-        return count;
+        final int result = getStorage().getEventCount(id);
+        return result;
+    }
+
+    @Override
+    protected Optional<EntityStatus> readStatus(I id) {
+        checkNotClosed();
+        Optional<EntityStatus> result = getStorage().getStatus(id);
+        return result;
     }
 
     @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
-        eventCountMap.put(id, eventCount);
+        getStorage().putEventCount(id, eventCount);
     }
 
-    /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
-                                                                            Serializable {
-        private static final long serialVersionUID = 0L;
+    @Override
+    protected boolean markArchived(I id) {
+        final Optional<EntityStatus> found = getStorage().getStatus(id);
 
-        @Override
-        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
-            final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
-            return result;
+        if (!found.isPresent()) {
+            getStorage().putStatus(id, EntityStatus.newBuilder()
+                                                   .setArchived(true)
+                                                   .build());
+            return true;
         }
+        final EntityStatus currentStatus = found.get();
+        if (currentStatus.getArchived()) {
+            return false; // Already archived.
+        }
+
+        getStorage().putStatus(id, currentStatus.toBuilder()
+                                                .setArchived(true)
+                                                .build());
+        return true;
     }
 
-    /** Used for sorting keys by the key hash codes. */
-    private static class AggregateStorageKeyComparator<K> implements Comparator<K>, Serializable {
+    @Override
+    protected boolean markDeleted(I id) {
+        final Optional<EntityStatus> found = getStorage().getStatus(id);
 
-        private static final long serialVersionUID = 0L;
-
-        @Override
-        public int compare(K first, K second) {
-            int result = 0;
-            if (first.equals(second)) {
-                return result;
-            }
-
-            // To define an order:
-            final int firstHashCode = first.hashCode();
-            final int secondHashCode = second.hashCode();
-
-            result = Integer.compare(firstHashCode, secondHashCode);
-            return result;
+        if (!found.isPresent()) {
+            getStorage().putStatus(id, EntityStatus.newBuilder()
+                                                   .setDeleted(true)
+                                                   .build());
+            return true;
         }
+
+        final EntityStatus currentStatus = found.get();
+
+        if (currentStatus.getDeleted()) {
+            return false; // Already deleted.
+        }
+
+        getStorage().putStatus(id, currentStatus.toBuilder()
+                                                .setDeleted(true)
+                                                .build());
+        return true;
     }
 }

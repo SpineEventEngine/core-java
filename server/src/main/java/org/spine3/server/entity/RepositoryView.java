@@ -20,28 +20,32 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
+import com.google.common.base.Optional;
 
-import java.util.Set;
+import javax.annotation.CheckReturnValue;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * A view on a repository.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * <p>A {@link Repository} may have a view that provides a different set of entities.
+ * For example, there can be views that represent archived or deleted entities (that are
+ * not “visible” by default).
+ *
+ * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
+ * “visible” entities.
+ *
+ * @param <I> the type of IDs of entities returned by the view
+ * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
+public interface RepositoryView<I, E extends Entity<I, ?>> {
 
     /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     * Loads the entity with the passed ID.
      *
-     * @param message an event or a command message
-     * @param context either {@link EventContext} or {@link CommandContext} instance
-     * @return a set of entity identifiers
+     * @param id the ID of the entity to load
+     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
      */
-    Set<I> apply(M message, C context);
+    @CheckReturnValue
+    Optional<E> load(I id);
 }

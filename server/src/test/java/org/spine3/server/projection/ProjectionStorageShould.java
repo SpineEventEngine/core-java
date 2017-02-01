@@ -22,6 +22,7 @@ package org.spine3.server.projection;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +30,8 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
@@ -59,9 +60,18 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+public abstract class ProjectionStorageShould<I>
+        extends RecordStorageShould<I, ProjectionStorage<I>> {
 
     private ProjectionStorage<I> storage;
+
+    @Override
+    protected Message newState(I id) {
+        final String projectId = id.getClass()
+                              .getName();
+        final Project state = Given.project(projectId,"Projection name " + projectId);
+        return state;
+    }
 
     @Before
     public void setUpProjectionStorageTest() {
@@ -72,9 +82,6 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     public void tearDownProjectionStorageTest() {
         close(storage);
     }
-
-    @Override
-    protected abstract ProjectionStorage<I> getStorage();
 
     @Override
     protected EntityStorageRecord newStorageRecord() {

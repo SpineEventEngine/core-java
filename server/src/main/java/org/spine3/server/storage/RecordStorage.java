@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -29,7 +30,6 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.FieldMasks;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -54,14 +54,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * {@inheritDoc}
      */
     @Override
-    public EntityStorageRecord read(I id) {
+    public Optional<EntityStorageRecord> read(I id) {
         checkNotClosed();
         checkNotNull(id);
 
-        final EntityStorageRecord record = readRecord(checkNotNull(id));
-        if (record == null) {
-            return EntityStorageRecord.getDefaultInstance();
-        }
+        final Optional<EntityStorageRecord> record = readRecord(id);
         return record;
     }
 
@@ -73,10 +70,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @return the item with the given ID and with the {@code FieldMask} applied.
      * @see #read(Object)
      */
-    public EntityStorageRecord read(I id, FieldMask fieldMask) {
-        final EntityStorageRecord rawResult = read(id);
+    public Optional<EntityStorageRecord> read(I id, FieldMask fieldMask) {
+        final Optional<EntityStorageRecord> rawResult = read(id);
 
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder(rawResult);
+        if (!rawResult.isPresent()) {
+            return Optional.absent();
+        }
+
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder(rawResult.get());
         final Any state = builder.getState();
         final TypeUrl type = TypeUrl.of(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
@@ -85,7 +86,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
 
         final Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);
-        return builder.build();
+        return Optional.of(builder.build());
     }
 
     /**
@@ -99,6 +100,33 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
 
         writeRecord(id, record);
     }
+
+    /**
+     * Marks the record with the passed ID as {@code archived}.
+     *
+     * @param id the ID of the record to mark
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean markArchived(I id);
+
+    /**
+     * Marks the record with the passed ID as {@code deleted}.
+     *
+     * <p>This method does not delete the record.
+     * To delete the record please call {@link #delete(Object)}
+     *
+     * @param id the ID of the record to mark
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean markDeleted(I id);
+
+    /**
+     * Deletes the record with the passed ID.
+     *
+     * @param id the record to delete
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public abstract boolean delete(I id);
 
     /**
      * {@inheritDoc}
@@ -157,8 +185,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @param id the ID of the record to load
      * @return a record instance or {@code null} if there is no record with this ID
      */
-    @Nullable
-    protected abstract EntityStorageRecord readRecord(I id);
+    protected abstract Optional<EntityStorageRecord> readRecord(I id);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
     protected abstract Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids);

@@ -20,6 +20,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
@@ -99,43 +100,52 @@ class AggregateQueryProcessor implements QueryProcessor {
     }
 
     private ImmutableCollection<EntityStorageRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
-        ImmutableCollection<EntityStorageRecord> result;
         final EntityFilters filters = target.getFilters();
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
         final boolean idsAreDefined = !filters.getIdFilter()
                                               .getIdsList()
                                               .isEmpty();
-        if (idsAreDefined) {
-            final EntityIdFilter idFilter = filters.getIdFilter();
-            final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
-                                                                                 stateIdTransformer);
-            if (stateIds.size() == 1) {
-                // no need to trigger bulk reading.
-                // may be more effective, as bulk reading implies additional time and performance expenses.
-                final AggregateStateId singleId = stateIds.iterator()
-                                                          .next();
-                final EntityStorageRecord singleResult = shouldApplyFieldMask
-                                                         ? standStorage.read(singleId, fieldMask)
-                                                         : standStorage.read(singleId);
-                result = ImmutableList.of(singleResult);
-            } else {
-                result = handleBulkRead(stateIds, fieldMask, shouldApplyFieldMask);
-            }
-        } else {
+        if (!idsAreDefined) {
+            return ImmutableList.of();
+        }
+
+        final EntityIdFilter idFilter = filters.getIdFilter();
+        final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
+                                                                             stateIdTransformer);
+
+        final ImmutableCollection<EntityStorageRecord> result = stateIds.size() == 1
+                 ? readOne(stateIds.iterator()
+                                   .next(), fieldMask)
+                 : readMany(stateIds, fieldMask);
+
+        return result;
+    }
+
+    private ImmutableCollection<EntityStorageRecord> readOne(AggregateStateId singleId,
+                                                             FieldMask fieldMask) {
+        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
+                                                       .isEmpty();
+
+        ImmutableCollection<EntityStorageRecord> result;
+        final Optional<EntityStorageRecord> singleResult = shouldApplyFieldMask
+                                                           ? standStorage.read(singleId, fieldMask)
+                                                           : standStorage.read(singleId);
+        if (!singleResult.isPresent()) {
             result = ImmutableList.of();
+        } else {
+            result = ImmutableList.of(singleResult.get());
         }
         return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> handleBulkRead(Collection<AggregateStateId> stateIds,
-                                                                    FieldMask fieldMask,
-                                                                    boolean applyFieldMask) {
-        ImmutableCollection<EntityStorageRecord> result;
+    private ImmutableCollection<EntityStorageRecord> readMany(Collection<AggregateStateId> stateIds,
+                                                              FieldMask fieldMask) {
+        final boolean applyFieldMask = !fieldMask.getPathsList()
+                                                 .isEmpty();
         final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask
                                                               ? standStorage.readMultiple(stateIds, fieldMask)
                                                               : standStorage.readMultiple(stateIds);
-        result = FluentIterable.from(bulkReadResults)
+        final ImmutableCollection<EntityStorageRecord> result
+                = FluentIterable.from(bulkReadResults)
                                .filter(new Predicate<EntityStorageRecord>() {
                                    @Override
                                    public boolean apply(@Nullable EntityStorageRecord input) {

@@ -18,27 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity.idfunc;
 
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.projection.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
+import org.spine3.base.Identifiers;
 
 /**
+ * Obtains an event producer ID based on an event {@link Message} and context.
+ *
+ * <p>An ID must be the first field in event messages (in Protobuf definition).
+ * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ *
+ * @param <I> the type of target entity IDs
+ * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage);
-        return storage;
+    private GetProducerIdFromEvent(int idIndex) {
+        super(idIndex);
     }
 
-    @Override
-    protected String newId() {
-        return newUuid();
+    /**
+     * Creates a new instance.
+     *
+     * @param index a zero-based index of an ID field in this type of messages
+     */
+    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
+        return new GetProducerIdFromEvent<>(index);
     }
 }

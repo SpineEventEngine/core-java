@@ -35,7 +35,9 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -43,7 +45,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
+public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -196,5 +198,35 @@ public abstract class AbstractEntityRepositoryShould<E extends Entity<I, S>, I, 
     private static <E extends Entity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
+    }
+
+    @Test
+    public void mark_records_archived() {
+        final E entity = createEntity();
+        final I id = entity.getId();
+
+        repository.store(entity);
+
+        assertTrue(repository.load(id).isPresent());
+
+        final boolean successful = repository.markArchived(id);
+
+        assertTrue(successful);
+        assertFalse(repository.load(id).isPresent());
+    }
+
+    @Test
+    public void mark_records_deleted() {
+        final E entity = createEntity();
+        final I id = entity.getId();
+
+        repository.store(entity);
+
+        assertTrue(repository.load(id).isPresent());
+
+        final boolean successful = repository.markDeleted(id);
+
+        assertTrue(successful);
+        assertFalse(repository.load(id).isPresent());
     }
 }

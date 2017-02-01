@@ -31,9 +31,9 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.AbstractEntityRepositoryShould;
-import org.spine3.server.entity.IdSetEventFunction;
 import org.spine3.server.entity.RecordBasedRepository;
+import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -73,7 +73,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
-        extends AbstractEntityRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -158,13 +158,6 @@ public class ProjectionRepositoryShould
         final ManualCatchupProjectionRepository repo = repoWithManualCatchup();
         assertEquals(STORAGE_ASSIGNED, repo.getStatus());
         assertFalse(repo.isOnline());
-    }
-
-    @Test
-    public void load_empty_projection_by_default() {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // we're sure because load either loads or creates.
-        final TestProjection projection = repository.load(ID).get();
-        assertEquals(Project.getDefaultInstance(), projection.getState());
     }
 
     @Test

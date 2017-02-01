@@ -22,6 +22,9 @@
  * This package provides implementation of in-memory storages.
  *
  * <p>One of the usage scenarios for such storages is tests.
+ *
+ * <p>In-memory storage supports multitenancy. Data for each tenant is stored
+ * in a “slice” represented by a data class prefixed with {@code Tenant}.
  */
 @ParametersAreNonnullByDefault
 package org.spine3.server.storage.memory;

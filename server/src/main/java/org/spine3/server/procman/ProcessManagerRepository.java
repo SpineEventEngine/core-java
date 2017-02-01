@@ -32,9 +32,8 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.entity.DefaultIdSetEventFunction;
 import org.spine3.server.entity.EventDispatchingRepository;
-import org.spine3.server.entity.GetTargetIdFromCommand;
+import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
@@ -72,7 +71,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
-        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromFirstMessageField());
+        super(boundedContext, EventDispatchingRepository.<I>producerFromFirstMessageField());
     }
 
     @Override

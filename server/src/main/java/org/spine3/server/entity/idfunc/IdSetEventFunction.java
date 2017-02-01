@@ -18,27 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity.idfunc;
 
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.projection.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
 
 /**
- * @author Alexander Litus
+ * Obtains a set of entity IDs from an event message and its context.
+ *
+ * <p>Use such functions for transforming an event into a set of
+ * identifiers of entities that are interested in receiving the event.
+ *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @author Alexander Yevsyukov
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
-
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage);
-        return storage;
-    }
-
-    @Override
-    protected String newId() {
-        return newUuid();
-    }
+public interface IdSetEventFunction<I, M extends Message> extends IdSetFunction<I, M, EventContext> {
 }
