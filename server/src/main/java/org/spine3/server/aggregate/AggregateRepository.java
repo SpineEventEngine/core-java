@@ -266,10 +266,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
         final Optional<EntityStatus> status = aggregateStorage().readStatus(id);
-        if (status.isPresent()) {
-            if (!Predicates.isVisible().apply(status.get())) {
-                return Optional.absent();
-            }
+        if (status.isPresent() && !Predicates.isVisible()
+                                             .apply(status.get())) {
+            // If there is a status that hides the aggregate, return nothing.
+            return Optional.absent();
         }
 
         A result = loadOrCreate(id);
