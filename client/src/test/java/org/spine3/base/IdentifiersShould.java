@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -68,5 +69,15 @@ public class IdentifiersShould {
     public void do_not_convert_unsupported_ID_type_to_Any() {
         //noinspection UnnecessaryBoxing
         idToAny(Boolean.valueOf(false));
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Identifiers.class)
+                                                                     .addDefaultValue(Identifiers.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

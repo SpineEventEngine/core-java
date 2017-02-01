@@ -28,7 +28,9 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.procman.ProcessManagerBuilder;
 import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +45,8 @@ public class GivenShould {
 
     @Test
     public void create_entity_builder() {
-        assertEquals(AnEntity.class, Given.entityOfClass(AnEntity.class).getResultClass());
+        assertEquals(AnEntity.class, Given.entityOfClass(AnEntity.class)
+                                          .getResultClass());
     }
 
     private static class AnEntity extends Entity<String, Timestamp> {
@@ -54,7 +57,8 @@ public class GivenShould {
 
     @Test
     public void create_aggregate_builder() {
-        assertEquals(AnAggregate.class, Given.aggregateOfClass(AnAggregate.class).getResultClass());
+        assertEquals(AnAggregate.class, Given.aggregateOfClass(AnAggregate.class)
+                                             .getResultClass());
     }
 
     private static class AnAggregate extends Aggregate<Integer, StringValue, StringValue.Builder> {
@@ -65,7 +69,8 @@ public class GivenShould {
 
     @Test
     public void create_aggregate_part_builder() {
-        assertEquals(AnAggregatePart.class, Given.aggregatePartOfClass(AnAggregatePart.class).getResultClass());
+        assertEquals(AnAggregatePart.class, Given.aggregatePartOfClass(AnAggregatePart.class)
+                                                 .getResultClass());
     }
 
     private static class AnAggregatePart extends AggregatePart<Long, Timestamp, Timestamp.Builder> {
@@ -76,7 +81,8 @@ public class GivenShould {
 
     @Test
     public void create_projection_builder() {
-        assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class).getResultClass());
+        assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class)
+                                             .getResultClass());
     }
 
     private static class AProjection extends Projection<String, UInt32Value> {
@@ -87,7 +93,18 @@ public class GivenShould {
 
     @Test
     public void create_builder_for_process_managers() {
-        assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class).getResultClass());
+        assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class)
+                                                 .getResultClass());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Given.class)
+                                                                     .addDefaultValue(AProjection.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {

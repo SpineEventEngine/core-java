@@ -44,3 +44,11 @@ message UserLoggedOutEvent {
     string user_uid = 1;
     string owner_email = 2;
 }
+
+// Used only in enrichment EnrichmentBoundWithMultipleFieldsWithDifferentNames.
+//
+// Do not reuse this event type to avoid test collisions.
+message UserDeletedEvent {
+
+    string deleted_uid = 1;
+}

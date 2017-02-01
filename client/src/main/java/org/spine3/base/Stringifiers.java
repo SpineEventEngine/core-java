@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -62,6 +63,7 @@ public class Stringifiers {
      * @return string representation of timestamp-based ID
      */
     public static String toIdString(Timestamp timestamp) {
+        checkNotNull(timestamp);
         String result = Timestamps.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
@@ -103,6 +105,7 @@ public class Stringifiers {
 
     @SuppressWarnings("unchecked") // OK to cast to String as output type of Stringifier.
     static String idMessageToString(Message message) {
+        checkNotNull(message);
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();

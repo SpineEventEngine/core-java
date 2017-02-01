@@ -20,9 +20,10 @@
 
 package org.spine3.time.change;
 
-import org.junit.Test;
 import com.google.protobuf.Timestamp;
+import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 import org.spine3.time.LocalDate;
@@ -248,5 +249,14 @@ public class ChangesShould {
 
         assertEquals(previousDateTime, result.getPreviousValue());
         assertEquals(newDateTime, result.getNewValue());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Changes.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

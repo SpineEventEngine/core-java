@@ -24,6 +24,8 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.spine3.Internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class for working with {@link Status}es.
  *
@@ -40,6 +42,7 @@ public class Statuses {
      * with the passed exception.
      */
     public static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
+        checkNotNull(exception);
         final StatusRuntimeException result = Status.INVALID_ARGUMENT
                 .withCause(exception)
                 .asRuntimeException();

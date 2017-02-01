@@ -23,6 +23,7 @@ package org.spine3.change;
 import com.google.protobuf.Any;
 import com.google.protobuf.Int64Value;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Mismatches.checkNotNullOrEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
@@ -101,6 +102,7 @@ public class LongMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
@@ -111,6 +113,7 @@ public class LongMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
@@ -121,6 +124,7 @@ public class LongMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-long values
      */
     public static long unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
