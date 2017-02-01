@@ -184,15 +184,16 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity then the delta value
-     * is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity or NaN then
+     * the delta value is ignored.
      */
     public static void assertNotEquals(String itemName, float notExpected, float actual, float delta) {
         try {
             // handle infinity specially since subtracting to infinite values gives NaN and the
             // the following test fails
-            //noinspection FloatingPointEquality
-            if (Float.isInfinite(notExpected) && notExpected == actual || Math.abs(notExpected - actual) <= delta) {
+            if (areNaNs(notExpected, actual)
+                    || areSameKindOfInfinity(notExpected, actual)
+                    || Math.abs(notExpected - actual) <= delta) {
                 Assert.fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
@@ -200,9 +201,20 @@ public final class Verify extends Assert {
         }
     }
 
+    private static boolean areNaNs(float first, float second)
+    {
+        return Float.isNaN(first) && Float.isNaN(second);
+    }
+
+    private static boolean areSameKindOfInfinity(float first, float second)
+    {
+        //noinspection FloatingPointEquality
+        return Float.isInfinite(first) && first == second;
+    }
+
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity then the delta value
-     * is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity or NaN then
+     * the delta value is ignored.
      */
     public static void assertNotEquals(float expected, float actual, float delta) {
         try {
@@ -562,6 +574,7 @@ public final class Verify extends Assert {
     /** Assert the size of the given {@link Map}. */
     public static void assertSize(String mapName, int expectedSize, Map<?, ?> actualMap) {
         try {
+            assertObjectNotNull(mapName, actualMap);
             assertSize(mapName, expectedSize, actualMap.keySet());
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -589,6 +602,8 @@ public final class Verify extends Assert {
     /** Assert the size of the given {@link Multimap}. */
     public static void assertSize(String multimapName, int expectedSize, Multimap<?, ?> actualMultimap) {
         try {
+            assertObjectNotNull(multimapName, actualMultimap);
+
             final int actualSize = actualMultimap.size();
             failOnSizeMismatch(multimapName, expectedSize, actualSize);
         } catch (AssertionError e) {
@@ -1108,6 +1123,7 @@ public final class Verify extends Assert {
     @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertEndsWith(List<T> list, T... items) {
         try {
+            assertObjectNotNull(PARAM_LIST, list);
             assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
@@ -1123,6 +1139,7 @@ public final class Verify extends Assert {
     @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertEndsWith(T[] array, T... items) {
         try {
+            assertObjectNotNull(PARAM_ARRAY, array);
             assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
