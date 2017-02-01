@@ -141,6 +141,7 @@ public abstract class Entity<I, S extends Message> {
     static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
             return result;
         } catch (NoSuchMethodException ignored) {
             throw noSuchConstructor(entityClass.getName(), idClass.getName());

@@ -31,9 +31,12 @@ import org.spine3.test.entity.ProjectId;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 
+import java.lang.reflect.Constructor;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
@@ -121,25 +124,6 @@ public class EntityShould {
         new EntityWithUnsupportedId(new Exception());
     }
 
-    @Test
-    public void set_default_state() {
-        final Long id = 1L;
-        final Timestamp before = Timestamps.secondsAgo(1);
-
-        // Create and init the entity.
-        Entity<Long, StringValue> entity = new BareBonesEntity(id);
-        entity.init();
-
-        final Timestamp after = Timestamps.getCurrentTime();
-
-        // The interval with a much earlier start to allow non-zero interval on faster computers.
-        final Interval whileWeCreate = Intervals.between(before, after);
-
-        assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion());
-        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
-        assertEquals(StringValue.getDefaultInstance(), entity.getState());
-    }
 
     private static class BareBonesEntity extends Entity<Long, StringValue> {
         private BareBonesEntity(Long id) {
@@ -249,6 +233,35 @@ public class EntityShould {
         protected EntityWithMessageId() {
             super(Given.AggregateId.newProjectId());
         }
+    }
+
+    @Test
+    public void obtain_entity_constructor_by_class_and_ID_class() {
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+
+        assertNotNull(ctor);
+    }
+
+    @Test
+    public void create_and_initialize_entity_instance() {
+        final Long id = 100L;
+        final Timestamp before = Timestamps.secondsAgo(1);
+
+        // Create and init the entity.
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+        final Entity<Long, StringValue> entity = Entity.createEntity(ctor, id);
+
+        final Timestamp after = Timestamps.getCurrentTime();
+
+        // The interval with a much earlier start to allow non-zero interval on faster computers.
+        final Interval whileWeCreate = Intervals.between(before, after);
+
+        assertEquals(id, entity.getId());
+        assertEquals(0, entity.getVersion());
+        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
+        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+        assertFalse(entity.isArchived());
+        assertFalse(entity.isDeleted());
     }
 }
 
