@@ -111,25 +111,25 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_float_values_are_positive_infinity() {
+    public void fail_assertNotEquals_if_float_values_are_positive_infinity() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_float_values_are_negative_infinity() {
+    public void fail_assertNotEquals_if_float_values_are_negative_infinity() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_float_values_are_NaN() {
+    public void fail_assertNotEquals_if_float_values_are_NaN() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.NaN, Float.NaN, anyDeltaAcceptable);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_float_values_are_equal() {
+    public void fail_assertNotEquals_if_float_values_are_equal() {
         final float positiveValue = 5.0f;
         final float negativeValue = -positiveValue;
         final float equalToValuesDifference = positiveValue - negativeValue;
@@ -137,14 +137,14 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_float_values_are_different_types_of_infinity() {
+    public void pass_assertNotEquals_assertNotEquals_if_float_values_are_different_types_of_infinity() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
         Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
     }
 
     @Test
-    public void pass_if_float_values_are_not_equal() {
+    public void pass_assertNotEquals_if_float_values_are_not_equal() {
         final float expected = 0.0f;
         final float actual = 1.0f;
         final float lessThanValuesDifference = Math.abs(expected - actual) - 0.1f;
@@ -152,99 +152,99 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_bool_values_are_equal() {
+    public void fail_assertNotEquals_if_bool_values_are_equal() {
         Verify.assertNotEquals(true, true);
     }
 
     @Test
-    public void pass_if_bool_values_are_not_equal() {
+    public void pass_assertNotEquals_if_bool_values_are_not_equal() {
         Verify.assertNotEquals(true, false);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_byte_values_are_equal() {
+    public void fail_assertNotEquals_if_byte_values_are_equal() {
         Verify.assertNotEquals((byte) 0, (byte) 0);
     }
 
     @Test
-    public void pass_if_byte_values_are_not_equal() {
+    public void pass_assertNotEquals_if_byte_values_are_not_equal() {
         Verify.assertNotEquals((byte) 0, (byte) 1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_char_values_are_equal() {
+    public void fail_assertNotEquals_if_char_values_are_equal() {
         Verify.assertNotEquals('a', 'a');
     }
 
     @Test
-    public void pass_if_char_values_are_not_equal() {
+    public void pass_assertNotEquals_if_char_values_are_not_equal() {
         Verify.assertNotEquals('a', 'b');
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_short_values_are_equal() {
+    public void fail_assertNotEquals_if_short_values_are_equal() {
         Verify.assertNotEquals((short) 0, (short) 0);
     }
 
     @Test
-    public void pass_if_short_values_are_not_equal() {
+    public void pass_assertNotEquals_if_short_values_are_not_equal() {
         Verify.assertNotEquals((short) 0, (short) 1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_object_is_not_instance_of_specified_type() {
+    public void fail_assertInstanceOf_if_object_is_not_instance_of_specified_type() {
         Verify.assertInstanceOf(Integer.class, EMPTY_STRING);
     }
 
     @Test
-    public void pass_if_object_is_instance_of_specified_type() {
+    public void pass_assertInstanceOf_if_object_is_instance_of_specified_type() {
         Verify.assertInstanceOf(EMPTY_STRING.getClass(), EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_object_is_instance_of_specified_type() {
+    public void fail_assertNotInstanceOf_if_object_is_instance_of_specified_type() {
         Verify.assertNotInstanceOf(EMPTY_STRING.getClass(), EMPTY_STRING);
     }
 
     @Test
-    public void pass_if_object_is_not_instance_of_specified_type() {
+    public void pass_assertNotInstanceOf_if_object_is_not_instance_of_specified_type() {
         Verify.assertNotInstanceOf(Integer.class, EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_not_empty() {
+    public void fail_assertIterableEmpty_if_iterable_is_not_empty() {
         Verify.assertIterableEmpty(FluentIterable.of(1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null_in_iterable_empty() {
+    public void fail_assertIterableEmpty_if_iterable_is_null_in_iterable_empty() {
         Verify.assertIterableEmpty(null);
     }
 
     @Test
-    public void pass_if_iterable_is_empty() {
+    public void pass_assertIterableEmpty_if_iterable_is_empty() {
         Verify.assertIterableEmpty(FluentIterable.of());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_not_empty() {
+    public void fail_assertEmpty_if_map_is_not_empty() {
         Verify.assertEmpty(Collections.singletonMap(1, 1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_assert_empty() {
+    public void fail_assertEmpty_if_map_is_null_in_assert_empty() {
         Verify.assertEmpty((Map) null);
     }
 
     @Test
-    public void pass_if_map_is_empty() {
+    public void pass_assertEmpty_if_map_is_empty() {
         Verify.assertEmpty(Collections.emptyMap());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_not_empty() {
+    public void fail_assertEmpty_if_multimap_is_not_empty() {
         final Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
 
         multimap.put(1, 1);
@@ -254,60 +254,60 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_null_in_assert_empty() {
+    public void fail_assertEmpty_if_multimap_is_null_in_assert_empty() {
         Verify.assertEmpty((Multimap) null);
     }
 
     @Test
-    public void pass_if_multimap_is_empty() {
+    public void pass_assertEmpty_if_multimap_is_empty() {
         Verify.assertEmpty(ArrayListMultimap.create());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_empty() {
+    public void fail_assertNotEmpty_if_iterable_is_empty() {
         Verify.assertNotEmpty(FluentIterable.of());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null_in_iterable_not_empty() {
+    public void fail_assertIterableNotEmpty_if_iterable_is_null_in_iterable_not_empty() {
         Verify.assertIterableNotEmpty(null);
     }
 
     @Test
-    public void pass_if_iterable_is_not_empty() {
+    public void pass_assertNotEmpty_if_iterable_is_not_empty() {
         Verify.assertNotEmpty(FluentIterable.of(1));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_empty() {
+    public void fail_assertNotEmpty_if_map_is_empty() {
         Verify.assertNotEmpty(Collections.emptyMap());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_not_empty() {
+    public void fail_assertNotEmpty_if_map_is_null_in_not_empty() {
         Verify.assertNotEmpty((Map) null);
     }
 
     @Test
-    public void pass_if_map_is_not_empty() {
+    public void pass_assertNotEmpty_if_map_is_not_empty() {
         Verify.assertNotEmpty(Collections.singletonMap(1, 1));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_empty() {
+    public void fail_assertNotEmpty_if_multimap_is_empty() {
         Verify.assertNotEmpty(ArrayListMultimap.create());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_null_in_assert_not_empty() {
+    public void fail_assertNotEmpty_if_multimap_is_null_in_assert_not_empty() {
         Verify.assertNotEmpty((Multimap) null);
     }
 
     @Test
-    public void pass_if_multimap_is_not_empty() {
+    public void pass_assertNotEmpty_if_multimap_is_not_empty() {
         final Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
 
         multimap.put(1, 1);
@@ -317,117 +317,117 @@ public class VerifyShould {
 
     @SuppressWarnings("ZeroLengthArrayAllocation")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_empty() {
+    public void fail_assertNotEmpty_if_array_is_empty() {
         Verify.assertNotEmpty(new Integer[0]);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null_in_assert_not_empty() {
+    public void fail_assertNotEmpty_if_array_is_null_in_assert_not_empty() {
         Verify.assertNotEmpty((Integer[]) null);
     }
 
     @Test
-    public void pass_if_array_is_not_empty() {
+    public void pass_assertNotEmpty_if_array_is_not_empty() {
         final Integer[] array = {1, 2, 3};
         Verify.assertNotEmpty(array);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_object_array_size_is_not_equal() {
+    public void fail_assertSize_if_object_array_size_is_not_equal() {
         Verify.assertSize(0, new Object[1]);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null_in_assert_size() {
+    public void fail_assertSize_if_array_is_null_in_assert_size() {
         Verify.assertSize(0, (Integer[]) null);
     }
 
     @Test
-    public void pass_if_object_array_size_is_equal() {
+    public void pass_assertSize_if_object_array_size_is_equal() {
         final int size = 0;
         Verify.assertSize(size, new Object[size]);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_size_is_not_equal() {
+    public void fail_assertSize_if_iterable_size_is_not_equal() {
         Verify.assertSize(0, FluentIterable.of(1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null_in_assert_size() {
+    public void fail_assertSize_if_iterable_is_null_in_assert_size() {
         Verify.assertSize(0, (Iterable) null);
     }
 
     @Test
-    public void pass_if_iterable_size_is_equal() {
+    public void pass_assertSize_if_iterable_size_is_equal() {
         Verify.assertSize(0, FluentIterable.of());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_size_is_not_equal() {
+    public void fail_assertSize_if_map_size_is_not_equal() {
         Verify.assertSize(1, Collections.emptyMap());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_assert_size() {
+    public void fail_assertSize_if_map_is_null_in_assert_size() {
         Verify.assertSize(0, (Map) null);
     }
 
     @Test
-    public void pass_if_map_size_is_equal() {
+    public void pass_assertSize_if_map_size_is_equal() {
         Verify.assertSize(0, Collections.emptyMap());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_size_is_not_equal() {
+    public void fail_assertSize_if_multimap_size_is_not_equal() {
         Verify.assertSize(1, ArrayListMultimap.create());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_null_in_assert_size() {
+    public void fail_assertSize_if_multimap_is_null_in_assert_size() {
         Verify.assertSize(0, (Multimap) null);
     }
 
     @Test
-    public void pass_if_multimap_size_is_equal() {
+    public void pass_assertSize_if_multimap_size_is_equal() {
         Verify.assertSize(0, ArrayListMultimap.create());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_collection_size_is_not_equal() {
+    public void fail_assertSize_if_collection_size_is_not_equal() {
         Verify.assertSize(1, Collections.emptyList());
     }
 
     @Test
-    public void pass_if_collection_size_is_equal() {
+    public void pass_assertSize_if_collection_size_is_equal() {
         Verify.assertSize(0, Collections.emptyList());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_string_not_contains_char_sequence() {
+    public void fail_assertContains_if_string_not_contains_char_sequence() {
         Verify.assertContains(NON_EMPTY_STRING, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_char_sequence_is_null_in_contains() {
+    public void fail_assertContains_if_char_sequence_is_null_in_contains() {
         Verify.assertContains(null, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_string_is_null_in_contains() {
+    public void fail_assertContains_if_string_is_null_in_contains() {
         Verify.assertContains(EMPTY_STRING, (String) null);
     }
 
     @SuppressWarnings({"ConstantConditions", "ErrorNotRethrown"})
     @Test(expected = AssertionError.class)
-    public void fail_if_contains_char_sequence_or_string_is_null() {
+    public void fail_assertContains_if_contains_char_sequence_or_string_is_null() {
         final String nullString = null;
 
         try {
@@ -438,85 +438,85 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_string_contains_char_sequence() {
+    public void pass_assertContains_if_string_contains_char_sequence() {
         Verify.assertContains(EMPTY_STRING, NON_EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_string_contains_char_sequence() {
+    public void fail_assertNotContains_if_string_contains_char_sequence() {
         Verify.assertNotContains(EMPTY_STRING, NON_EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_char_sequence_is_null_in_not_contains() {
+    public void fail_assertNotContains_if_char_sequence_is_null_in_not_contains() {
         Verify.assertNotContains(null, EMPTY_STRING);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_string_is_null_in_not_contains() {
+    public void fail_assertNotContains_if_string_is_null_in_not_contains() {
         Verify.assertNotContains(EMPTY_STRING, (String) null);
     }
 
     @Test
-    public void pass_if_string_not_contains_char_sequence() {
+    public void pass_assertNotContains_if_string_not_contains_char_sequence() {
         Verify.assertNotContains(NON_EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_collection_not_contains_item() {
+    public void fail_assertNotContains_if_collection_not_contains_item() {
         Verify.assertContains(1, Collections.emptyList());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_collection_is_null_in_contains() {
+    public void fail_assertContains_if_collection_is_null_in_contains() {
         Verify.assertContains(1, (Collection) null);
     }
 
     @Test
-    public void pass_if_collection_contains_item() {
+    public void pass_assertContains_if_collection_contains_item() {
         final Integer item = 1;
         Verify.assertContains(item, Collections.singletonList(item));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_immutable_collection_not_contains_item() {
+    public void fail_assertContains_if_immutable_collection_not_contains_item() {
         Verify.assertContains(1, ImmutableList.of());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_immutable_collections_is_null_in_contains() {
+    public void fail_assertContains_if_immutable_collections_is_null_in_contains() {
         Verify.assertContains(1, null);
     }
 
     @Test
-    public void pass_if_immutable_collection_contains_item() {
+    public void pass_assertContains_if_immutable_collection_contains_item() {
         final Integer item = 1;
         Verify.assertContains(item, ImmutableList.of(item));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_not_contains_all() {
+    public void fail_assertContainsAll_if_iterable_not_contains_all() {
         Verify.assertContainsAll(Collections.emptyList(), 1);
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null_in_contains_all() {
+    public void fail_assertContainsAll_if_iterable_is_null_in_contains_all() {
         Verify.assertContainsAll(null);
     }
 
     @Test
-    public void pass_if_iterable_contains_all() {
+    public void pass_assertContainsAll_if_iterable_contains_all() {
         final Integer item = 1;
         Verify.assertContainsAll(Collections.singletonList(item), item);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_are_not_equal() {
+    public void fail_assertMapsEqual_if_map_are_not_equal() {
         final Map<Integer, Map<Integer, Integer>> firstOne = singletonMap(1, singletonMap(1, 1));
         final Map<Integer, Map<Integer, Integer>> secondOne = singletonMap(1, singletonMap(1, 2));
 
@@ -525,12 +525,12 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void pass_if_maps_are_null() {
+    public void pass_assertMapsEqual_if_maps_are_null() {
         Verify.assertMapsEqual(null, null, MAP_NAME);
     }
 
     @Test
-    public void pass_if_maps_are_equal() {
+    public void pass_assertMapsEqual_if_maps_are_equal() {
         final Map<Integer, Map<Integer, Integer>> firstOne = singletonMap(1, singletonMap(1, 1));
         final Map<Integer, Map<Integer, Integer>> secondOne = new HashMap<>(firstOne);
 
@@ -538,7 +538,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_sets_are_not_equal_by_size() {
+    public void fail_assertSetsEqual_if_sets_are_not_equal_by_size() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4);
         final Set<Integer> secondOne = Sets.newHashSet(1, 2, 4);
 
@@ -546,7 +546,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_sets_are_not_equal_by_content() {
+    public void fail_assertSetsEqual_if_sets_are_not_equal_by_content() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3);
         final Set<Integer> secondOne = Sets.newHashSet(1, 2, 777);
 
@@ -554,7 +554,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_sets_are_equal_by_size_but_have_over_5_differences() {
+    public void fail_assertSetsEqual_if_sets_are_equal_by_size_but_have_over_5_differences() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4, 5, 6);
         final Set<Integer> secondOne = Sets.newHashSet(11, 12, 13, 14, 15, 16);
 
@@ -563,12 +563,12 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void pass_if_sets_are_null() {
+    public void pass_assertSetsEqual_if_sets_are_null() {
         Verify.assertSetsEqual(null, null);
     }
 
     @Test
-    public void pass_if_sets_are_equal() {
+    public void pass_assertSetsEqual_if_sets_are_equal() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3);
         final Set<Integer> secondOne = Sets.newHashSet(firstOne);
 
@@ -576,18 +576,18 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_not_contains_entry() {
+    public void fail_assertContainsEntry_if_multimap_not_contains_entry() {
         Verify.assertContainsEntry(1, 1, ArrayListMultimap.<Integer, Integer>create());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_multimap_is_null_in_contains_entry() {
+    public void fail_assertContainsEntry_if_multimap_is_null_in_contains_entry() {
         Verify.assertContainsEntry(1, 1, null);
     }
 
     @Test
-    public void pass_if_multimap_contains_entry() {
+    public void pass_assertContainsEntry_if_multimap_contains_entry() {
         final Integer entryKey = 1;
         final Integer entryValue = 1;
 
@@ -598,111 +598,111 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_not_contains_key() {
+    public void fail_assertContainsKey_if_map_not_contains_key() {
         Verify.assertContainsKey(1, Collections.emptyMap());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_contains_key() {
+    public void fail_assertContainsKey_if_map_is_null_in_contains_key() {
         Verify.assertContainsKey(1, null);
     }
 
     @Test
-    public void pass_if_map_contains_key() {
+    public void pass_assertContainsKey_if_map_contains_key() {
         final Integer key = 1;
         Verify.assertContainsKey(key, Collections.singletonMap(key, 1));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_contains_denied_key() {
+    public void fail_denyContainsKey_if_map_contains_denied_key() {
         final Integer key = 1;
         Verify.denyContainsKey(key, Collections.singletonMap(key, 1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_deny_contains_key() {
+    public void fail_denyContainsKey_if_map_is_null_in_deny_contains_key() {
         Verify.denyContainsKey(1, null);
     }
 
     @Test
-    public void pass_if_map_not_contains_denied_key() {
+    public void pass_denyContainsKey_if_map_not_contains_denied_key() {
         Verify.denyContainsKey(1, Collections.emptyMap());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_not_contains_entry() {
+    public void fail_assertContainsKeyValue_if_map_not_contains_entry() {
         final Integer key = 0;
         Verify.assertContainsKeyValue(key, 0, Collections.singletonMap(key, 1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_contains_key_value() {
+    public void fail_assertContainsKeyValue_if_map_is_null_in_contains_key_value() {
         Verify.assertContainsKeyValue(1, 1, null);
     }
 
     @Test
-    public void pass_if_map_contains_entry() {
+    public void pass_assertContainsKeyValue_if_map_contains_entry() {
         final Integer key = 1;
 
         Verify.assertContainsKeyValue(key, EMPTY_STRING, Collections.singletonMap(key, EMPTY_STRING));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_collection_contains_item() {
+    public void fail_assertNotContains_if_collection_contains_item() {
         final Integer item = 1;
         Verify.assertNotContains(item, Collections.singletonList(item));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_collection_is_null_in_not_contains() {
+    public void fail_assertNotContains_if_collection_is_null_in_not_contains() {
         Verify.assertNotContains(1, null);
     }
 
     @Test
-    public void pass_if_collection_not_contains_item() {
+    public void pass_assertNotContains_if_collection_not_contains_item() {
         Verify.assertNotContains(1, Collections.emptyList());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_contains_item() {
+    public void fail_assertNotContains_if_iterable_contains_item() {
         final Integer item = 1;
         Verify.assertNotContains(item, FluentIterable.of(item));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_iterable_is_null_in_contains_item() {
+    public void fail_assertNotContains_if_iterable_is_null_in_contains_item() {
         Verify.assertNotContains(1, (Iterable) null);
     }
 
     @Test
-    public void pass_if_iterable_not_contains_item() {
+    public void pass_assertNotContains_if_iterable_not_contains_item() {
         Verify.assertNotContains(1, FluentIterable.of());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_map_contains_key() {
+    public void fail_assertNotContainsKey_if_map_contains_key() {
         final Integer key = 1;
         Verify.assertNotContainsKey(key, Collections.singletonMap(key, 1));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_map_is_null_in_not_contains_key() {
+    public void fail_assertNotContainsKey_if_map_is_null_in_not_contains_key() {
         Verify.assertNotContainsKey(1, null);
     }
 
     @Test
-    public void pass_if_map_not_contains_key() {
+    public void pass_assertNotContainsKey_if_map_not_contains_key() {
         Verify.assertNotContainsKey(1, Collections.emptyMap());
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_former_goes_after_latter_in_list() {
+    public void fail_assertBefore_if_former_goes_after_latter_in_list() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -712,19 +712,19 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_former_and_latter_are_equal() {
+    public void fail_assertBefore_if_former_and_latter_are_equal() {
         final Integer sameItem = 1;
         Verify.assertBefore(sameItem, sameItem, Collections.singletonList(sameItem));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_list_is_null_in_assert_befor() {
+    public void fail_assertBefore_if_list_is_null_in_assert_befor() {
         Verify.assertBefore(1, 2, null);
     }
 
     @Test
-    public void pass_if_former_goes_before_latter_in_list() {
+    public void pass_assertBefore_if_former_goes_before_latter_in_list() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -734,7 +734,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_list_item_not_at_index() {
+    public void fail_assertItemAtIndex_if_list_item_not_at_index() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -745,12 +745,12 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_list_is_null_in_assert_item_at_index() {
+    public void fail_assertItemAtIndex_if_list_is_null_in_assert_item_at_index() {
         Verify.assertItemAtIndex(1, 1, (List) null);
     }
 
     @Test
-    public void pass_if_list_item_at_index() {
+    public void pass_assertItemAtIndex_if_list_item_at_index() {
         final Integer value = 1;
         final List<Integer> list = Collections.singletonList(value);
 
@@ -758,7 +758,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_array_item_not_at_index() {
+    public void fail_assertItemAtIndex_if_array_item_not_at_index() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -769,12 +769,12 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null_in_assert_item_at_index() {
+    public void fail_assertItemAtIndex_if_array_is_null_in_assert_item_at_index() {
         Verify.assertItemAtIndex(1, 1, (Object[]) null);
     }
 
     @Test
-    public void pass_if_array_item_at_index() {
+    public void pass_assertItemAtIndex_if_array_item_at_index() {
         final Integer value = 1;
         final Object[] array = {value};
 
@@ -782,7 +782,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_array_not_starts_with_items() {
+    public void fail_assertStartsWith_if_array_not_starts_with_items() {
         final Integer[] array = {1, 2, 3};
         final Integer notStartsWith = 777;
 
@@ -791,17 +791,17 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null_in_starts_with() {
+    public void fail_assertStartsWith_if_array_is_null_in_starts_with() {
         Verify.assertStartsWith((Integer[]) null, 1, 2, 3);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_items_is_empty_in_array_starts_with() {
+    public void fail_assertStartsWith_if_items_is_empty_in_array_starts_with() {
         Verify.assertStartsWith(new Integer[1]);
     }
 
     @Test
-    public void pass_if_array_starts_with_items() {
+    public void pass_assertStartsWith_if_array_starts_with_items() {
         final Integer[] array = {1, 2};
         final Integer firstItem = array[0];
 
@@ -809,7 +809,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_list_not_starts_with_items() {
+    public void fail_assertStartsWith_if_list_not_starts_with_items() {
         final List<Integer> list = Arrays.asList(1, 2, 3);
         final Integer notStartsWith = 777;
 
@@ -818,17 +818,17 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_list_is_null_in_starts_with() {
+    public void fail_assertStartsWith_if_list_is_null_in_starts_with() {
         Verify.assertStartsWith((List) null, 1, 2, 3);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_items_is_empty_in_list_starts_with() {
+    public void fail_assertStartsWith_if_items_is_empty_in_list_starts_with() {
         Verify.assertStartsWith(Collections.emptyList());
     }
 
     @Test
-    public void pass_if_list_starts_with_items() {
+    public void pass_assertStartsWith_if_list_starts_with_items() {
         final List<Integer> list = Arrays.asList(1, 2, 3);
         final Integer firstItem = list.get(0);
 
@@ -836,7 +836,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_list_not_ends_with_items() {
+    public void fail_assertEndsWith_if_list_not_ends_with_items() {
         final List<Integer> list = Arrays.asList(1, 2, 3);
         final Integer notEndsWith = 777;
 
@@ -845,17 +845,17 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_list_is_null_in_ends_with() {
+    public void fail_assertEndsWith_if_list_is_null_in_ends_with() {
         Verify.assertEndsWith((List) null, 1, 2, 3);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_items_is_empty_in_list_ends_with() {
+    public void fail_assertEndsWith_if_items_is_empty_in_list_ends_with() {
         Verify.assertEndsWith(Collections.emptyList());
     }
 
     @Test
-    public void pass_if_list_ends_with_items() {
+    public void pass_assertEndsWith_if_list_ends_with_items() {
         final List<Integer> list = Arrays.asList(1, 2, 3);
         final Integer lastItem = list.get(list.size() - 1);
 
@@ -863,7 +863,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_array_not_ends_with_items() {
+    public void fail_assertEndsWith_if_array_not_ends_with_items() {
         final Integer[] array = {1, 2, 3};
         final Integer notEndsWith = 777;
 
@@ -872,17 +872,17 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_array_is_null_in_ends_with() {
+    public void fail_assertEndsWith_if_array_is_null_in_ends_with() {
         Verify.assertEndsWith((Integer[]) null, 1, 2, 3);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_items_is_empty_in_array_ends_with() {
+    public void fail_assertEndsWith_if_items_is_empty_in_array_ends_with() {
         Verify.assertEndsWith(new Integer[1]);
     }
 
     @Test
-    public void pass_if_array_ends_with() {
+    public void pass_assertEndsWith_if_array_ends_with() {
         final Integer[] array = {1, 2, 3};
         final Integer lastItem = array[array.length - 1];
 
@@ -890,12 +890,12 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_objects_are_not_equal() {
+    public void fail_assertEqualsAndHashCode_if_objects_are_not_equal() {
         Verify.assertEqualsAndHashCode(1, 2);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_objects_are_equal_but_hash_codes_are_not_equal() {
+    public void fail_assertEqualsAndHashCode_if_objects_are_equal_but_hash_codes_are_not_equal() {
         final ClassThatViolateHashCodeAndCloneableContract objectA =
                 new ClassThatViolateHashCodeAndCloneableContract(1);
         final ClassThatViolateHashCodeAndCloneableContract objectB =
@@ -906,97 +906,97 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_objects_are_null() {
+    public void fail_assertEqualsAndHashCode_if_objects_are_null() {
         Verify.assertEqualsAndHashCode(null, null);
     }
 
     @Test
-    public void pass_if_objects_and_their_hash_codes_are_equal() {
+    public void pass_assertEqualsAndHashCode_if_objects_and_their_hash_codes_are_equal() {
         Verify.assertEqualsAndHashCode(1, 1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_not_negative() {
+    public void fail_assertNegative_if_value_is_not_negative() {
         Verify.assertNegative(1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_zero_in_assert_negative() {
+    public void fail_assertNegative_if_value_is_zero_in_assert_negative() {
         Verify.assertNegative(0);
     }
 
     @Test
-    public void pass_if_value_is_negative() {
+    public void pass_assertNegative_if_value_is_negative() {
         Verify.assertNegative(-1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_not_positive() {
+    public void fail_assertPositive_if_value_is_not_positive() {
         Verify.assertPositive(-1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_zero_in_assert_positive() {
+    public void fail_assertPositive_if_value_is_zero_in_assert_positive() {
         Verify.assertPositive(0);
     }
 
     @Test
-    public void pass_if_value_is_positive() {
+    public void pass_assertPositive_if_value_is_positive() {
         Verify.assertPositive(1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_positive() {
+    public void fail_assertZero_if_value_is_positive() {
         Verify.assertZero(1);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_value_is_negative() {
+    public void fail_assertZero_if_value_is_negative() {
         Verify.assertZero(-1);
     }
 
     @Test
-    public void pass_if_value_is_zero() {
+    public void pass_assertZero_if_value_is_zero() {
         Verify.assertZero(0);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_clone_returns_same_object() {
+    public void fail_assertShallowClone_if_clone_returns_same_object() {
         Verify.assertShallowClone(new ClassThatViolateHashCodeAndCloneableContract(1));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_clone_does_not_work_correctly() {
+    public void fail_assertShallowClone_if_clone_does_not_work_correctly() {
         Verify.assertShallowClone(new ClassThatImplementCloneableIncorrectly(1));
     }
 
     @Test
-    public void pass_if_cloneable_equals_and_hash_code_overridden_correctly() {
+    public void pass_assertShallowClone_if_cloneable_equals_and_hash_code_overridden_correctly() {
         Verify.assertShallowClone(new ClassThatImplementCloneableCorrectly(1));
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_class_instantiable() {
+    public void fail_assertClassNonInstantiable_if_class_instantiable() {
         Verify.assertClassNonInstantiable(Object.class);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_class_instantiable_through_reflection() {
+    public void fail_assertClassNonInstantiable_if_class_instantiable_through_reflection() {
         Verify.assertClassNonInstantiable(ClassWithPrivateCtor.class);
     }
 
     @Test
-    public void pass_if_new_instance_throw_instantiable_exception() {
+    public void pass_assertClassNonInstantiable_if_new_instance_throw_instantiable_exception() {
         Verify.assertClassNonInstantiable(void.class);
     }
 
     @Test
-    public void pass_if_class_non_instantiable_through_reflection() {
+    public void pass_assertClassNonInstantiable_if_class_non_instantiable_through_reflection() {
         Verify.assertClassNonInstantiable(ClassThatThrowExceptionInConstructor.class);
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_not_throws_error() {
+    public void fail_assertError_if_runnable_not_throws_error() {
         final Runnable notThrowsException = new Runnable() {
             @Override
             public void run() {
@@ -1007,7 +1007,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_not_throws_specified_error() {
+    public void fail_assertError_if_runnable_not_throws_specified_error() {
         final Runnable throwsAssertionError = new Runnable() {
             @Override
             public void run() {
@@ -1019,7 +1019,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_runnable_throws_specified_error() {
+    public void pass_assertError_if_runnable_throws_specified_error() {
         final Runnable throwsAssertionError = new Runnable() {
             @Override
             public void run() {
@@ -1031,7 +1031,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_callable_not_throws_exception() {
+    public void fail_assertThrows_if_callable_not_throws_exception() {
         final Callable notThrowsException = new Callable() {
             @Override
             public Object call() throws Exception {
@@ -1043,7 +1043,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_callable_not_throws_specified_exception() {
+    public void fail_assertThrows_if_callable_not_throws_specified_exception() {
         final Callable throwsEmptyStackException = new Callable() {
             @Override
             public Object call() throws Exception {
@@ -1055,7 +1055,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_callable_throws_specified_exception() {
+    public void pass_assertThrows_if_callable_throws_specified_exception() {
         final Callable throwsEmptyStackException = new Callable() {
             @Override
             public Object call() throws Exception {
@@ -1067,7 +1067,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_not_throws_exception() {
+    public void fail_assertThrows_if_runnable_not_throws_exception() {
         final Runnable notThrowsException = new Runnable() {
             @Override
             public void run() {
@@ -1078,7 +1078,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_not_throws_specified_exception() {
+    public void fail_assertThrows_if_runnable_not_throws_specified_exception() {
         final Runnable throwsEmptyStackException = new Runnable() {
             @Override
             public void run() {
@@ -1090,7 +1090,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_runnable_throws_specified_exception() {
+    public void pass_assertThrows_if_runnable_throws_specified_exception() {
         final Runnable throwsEmptyStackException = new Runnable() {
             @Override
             public void run() {
@@ -1102,7 +1102,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_callable_not_throws_exception_with_cause() {
+    public void fail_assertThrowsWithCause_if_callable_not_throws_exception_with_cause() {
         final Callable notThrowsException = new Callable() {
             @Override
             public Object call() throws Exception {
@@ -1114,7 +1114,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_callable_throws_exception_with_different_causes() {
+    public void fail_assertThrowsWithCause_if_callable_throws_exception_with_different_causes() {
         final Throwable expectedCause = new EmptyStackException();
         final Throwable actualCause = new AclNotFoundException();
         final RuntimeException runtimeException = new RuntimeException(actualCause);
@@ -1130,7 +1130,7 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_callable_expected_cause_is_null() {
+    public void fail_assertThrowsWithCause_if_callable_expected_cause_is_null() {
         final Callable throwsRuntimeException = new Callable() {
             @Override
             public Object call() {
@@ -1142,7 +1142,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_callable_throws_specified_exception_with_specified_cause() {
+    public void pass_assertThrowsWithCause_if_callable_throws_specified_exception_with_specified_cause() {
         final Throwable cause = new EmptyStackException();
         final RuntimeException runtimeException = new RuntimeException(cause);
         final Callable throwsRuntimeException = new Callable() {
@@ -1156,7 +1156,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_not_throws_exception_with_cause() {
+    public void fail_assertThrowsWithCause_if_runnable_not_throws_exception_with_cause() {
         final Runnable notThrowsException = new Runnable() {
             @Override
             public void run() {
@@ -1167,7 +1167,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_throws_exception_with_different_causes() {
+    public void fail_assertThrowsWithCause_if_runnable_throws_exception_with_different_causes() {
         final Throwable expectedCause = new EmptyStackException();
         final Throwable actualCause = new AclNotFoundException();
         final RuntimeException runtimeException = new RuntimeException(actualCause);
@@ -1183,7 +1183,7 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_runnable_expected_cause_is_null() {
+    public void fail_assertThrowsWithCause_if_runnable_expected_cause_is_null() {
         final Runnable throwsRuntimeException = new Runnable() {
             @Override
             public void run() {
@@ -1195,7 +1195,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_runnable_throws_specified_exception_with_specified_cause() {
+    public void pass_assertThrowsWithCause_if_runnable_throws_specified_exception_with_specified_cause() {
         final Throwable cause = new EmptyStackException();
         final RuntimeException runtimeException = new RuntimeException(cause);
         final Runnable throwsRuntimeException = new Runnable() {
