@@ -30,7 +30,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
 class Given {
 
-    /*package */ static class AggregateId {
+    static class AggregateId {
 
         private AggregateId() {
         }
