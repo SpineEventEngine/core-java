@@ -443,7 +443,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_is_string_contains_char_sequence() {
+    public void fail_if_string_contains_char_sequence() {
         Verify.assertNotContains(EMPTY_STRING, NON_EMPTY_STRING);
     }
 
