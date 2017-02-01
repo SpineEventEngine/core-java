@@ -702,7 +702,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_former_later_latter() {
+    public void fail_if_former_goes_after_latter_in_list() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -724,7 +724,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_if_former_before_latter() {
+    public void pass_if_former_goes_before_latter_in_list() {
         final Integer firstItem = 1;
         final Integer secondItem = 2;
 
@@ -1260,7 +1260,6 @@ public class VerifyShould {
         public int hashCode() {
             return value;
         }
-
     }
 
     private static final class ClassThatImplementCloneableIncorrectly implements Cloneable {
