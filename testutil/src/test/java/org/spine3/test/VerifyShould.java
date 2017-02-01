@@ -896,8 +896,10 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_objects_are_equal_but_hash_codes_are_not_equal() {
-        final ClassThatViolateHashCodeAndCloneableContract objectA = new ClassThatViolateHashCodeAndCloneableContract(1);
-        final ClassThatViolateHashCodeAndCloneableContract objectB = new ClassThatViolateHashCodeAndCloneableContract(1);
+        final ClassThatViolateHashCodeAndCloneableContract objectA =
+                new ClassThatViolateHashCodeAndCloneableContract(1);
+        final ClassThatViolateHashCodeAndCloneableContract objectB =
+                new ClassThatViolateHashCodeAndCloneableContract(1);
 
         Verify.assertEqualsAndHashCode(objectA, objectB);
     }
