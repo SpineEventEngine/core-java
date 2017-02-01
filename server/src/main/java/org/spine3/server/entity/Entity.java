@@ -143,11 +143,11 @@ public abstract class Entity<I, S extends Message> {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             return result;
         } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
         }
     }
 
-    private static IllegalStateException noSuchConstructorException(String entityClass, String idClass) {
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
         final String errMsg = String.format("%s class must declare a constructor with a single %s ID parameter.",
                                             entityClass, idClass);
         return new IllegalStateException(new NoSuchMethodException(errMsg));

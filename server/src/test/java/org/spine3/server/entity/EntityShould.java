@@ -38,12 +38,10 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.test.Tests.nullRef;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
     private Project state = Given.newProject();
@@ -237,64 +235,6 @@ public class EntityShould {
         final Given.TestEntity another = Given.TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
-    }
-
-    @Test
-    public void assure_same_entities_are_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-
-        assertTrue(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entity_is_equal_to_itself() {
-        // noinspection EqualsWithItself
-        assertTrue(entityWithState.equals(entityWithState));
-    }
-
-    @Test
-    public void assure_entity_is_not_equal_to_null() {
-        assertFalse(entityWithState.equals(nullRef()));
-    }
-
-    @Test
-    public void assure_entity_is_not_equal_to_object_of_another_class() {
-        //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(entityWithState.equals(newUuid()));
-    }
-
-    @Test
-    public void assure_entities_with_different_ids_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.newInstance(newUuid());
-
-        assertNotEquals(entityWithState.getId(), another.getId());
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_states_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setState(Given.newProject(), another.getVersion(), another.whenModified());
-
-        assertNotEquals(entityWithState.getState(), another.getState());
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_versions_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setVersion(entityWithState.getVersion() + 5, another.whenModified());
-
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_modification_times_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
-
-        assertNotEquals(entityWithState.whenModified(), another.whenModified());
-        assertFalse(entityWithState.equals(another));
     }
 
     private static class EntityWithUnsupportedId extends Entity<Exception, Project> {

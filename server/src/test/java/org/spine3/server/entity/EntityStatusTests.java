@@ -32,8 +32,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests of working with entity status.
  *
- * <p>When migrating to Java 8, this test suite may become a {@code @Nested}
- * class of {@link EntityShould}.
+ * <p>When migrating to JUnit 5, this class may become a
+ * {@code @Nested} class of {@link EntityShould}.
  *
  * @author Alexander Yevsyukov
  */
@@ -44,15 +44,15 @@ public class EntityStatusTests {
     /**
      * A minimal entity class.
      */
-    private static class EntityMini extends Entity<Long, StringValue> {
-        private EntityMini(Long id) {
+    private static class MiniEntity extends Entity<Long, StringValue> {
+        private MiniEntity(Long id) {
             super(id);
         }
     }
 
     @Before
     public void setUp() {
-        entity = new EntityMini(ThreadLocalRandom.current().nextLong());
+        entity = new MiniEntity(ThreadLocalRandom.current().nextLong());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class EntityStatusTests {
     @Test
     public void assure_entities_with_different_status_are_not_equal() {
         // Create an entity with the same ID and the same (default) state.
-        final Entity another = new EntityMini(entity.getId());
+        final Entity another = new MiniEntity(entity.getId());
 
         another.setArchived(true);
 
