@@ -58,6 +58,11 @@ public class EntityStatusTests {
     }
 
     @Test
+    public void return_default_status_after_constructor() {
+        assertEquals(EntityStatus.getDefaultInstance(), new MiniEntity(1L).getStatus());
+    }
+
+    @Test
     public void be_not_archived_when_created() {
         assertFalse(entity.isArchived());
     }
