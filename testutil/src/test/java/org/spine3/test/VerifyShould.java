@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -470,7 +471,7 @@ public class VerifyShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = AssertionError.class)
-    public void fail_if_collections_is_null_in_contains() {
+    public void fail_if_collection_is_null_in_contains() {
         Verify.assertContains(1, (Collection) null);
     }
 
@@ -516,8 +517,8 @@ public class VerifyShould {
 
     @Test(expected = AssertionError.class)
     public void fail_if_map_are_not_equal() {
-        final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
-        final Map<Integer, Map<Integer, Integer>> secondOne = Collections.singletonMap(1, Collections.singletonMap(1, 2));
+        final Map<Integer, Map<Integer, Integer>> firstOne = singletonMap(1, singletonMap(1, 1));
+        final Map<Integer, Map<Integer, Integer>> secondOne = singletonMap(1, singletonMap(1, 2));
 
         Verify.assertMapsEqual(firstOne, secondOne, MAP_NAME);
     }
@@ -530,7 +531,7 @@ public class VerifyShould {
 
     @Test
     public void pass_if_maps_are_equal() {
-        final Map<Integer, Map<Integer, Integer>> firstOne = Collections.singletonMap(1, Collections.singletonMap(1, 1));
+        final Map<Integer, Map<Integer, Integer>> firstOne = singletonMap(1, singletonMap(1, 1));
         final Map<Integer, Map<Integer, Integer>> secondOne = new HashMap<>(firstOne);
 
         Verify.assertMapsEqual(firstOne, secondOne, MAP_NAME);
@@ -553,7 +554,7 @@ public class VerifyShould {
     }
 
     @Test(expected = AssertionError.class)
-    public void fail_if_sets_are_equal_by_size_but_have_over_than_5_differences() {
+    public void fail_if_sets_are_equal_by_size_but_have_over_5_differences() {
         final Set<Integer> firstOne = Sets.newHashSet(1, 2, 3, 4, 5, 6);
         final Set<Integer> secondOne = Sets.newHashSet(11, 12, 13, 14, 15, 16);
 
