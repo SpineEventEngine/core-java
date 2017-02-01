@@ -20,12 +20,16 @@
 
 package org.spine3.testdata;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Descriptors.FieldDescriptor.Type;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.server.event.storage.EventStorageRecord;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,30 +37,81 @@ import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Random;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
+ * Utility for creating simple stubs for generated messages.
+ *
  * @author Dmytro Dashenkov
  */
 public class Sample {
 
-    private static <M extends Message> M filledMessage(Class<M> clazz) {
-        final M.Builder builder = builderFor(clazz);
+    public static class EventRecord {
+
+        public static EventStorageRecord withAllFields() {
+            return Sample.messageOfType(EventStorageRecord.class);
+        }
+
+        public static EventStorageRecord with(Timestamp timestamp) {
+            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
+            builder.setTimestamp(timestamp);
+            return builder.build();
+        }
+
+        public static EventStorageRecord with(String eventId) {
+            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
+            builder.setEventId(eventId);
+            return builder.build();
+        }
+
+        public static EventStorageRecord with(String eventId, Timestamp timestamp) {
+            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
+            builder.setEventId(eventId)
+                   .setTimestamp(timestamp);
+            return builder.build();
+        }
+    }
+
+    public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
+        checkClass(clazz);
+
+        final B builder = builderFor(clazz);
         final Descriptor builderDescriptor = builder.getDescriptorForType();
         final Collection<FieldDescriptor> fields = builderDescriptor.getFields();
+
         for (FieldDescriptor field : fields) {
-            final Object value = noEmptyValueFor(field);
+            final Object value = valueFor(field);
             if (value == null) {
                 continue;
             }
             builder.setField(field, value);
         }
-        @SuppressWarnings("unchecked") // Type safety is guaranteed
+        return builder;
+    }
+
+    public static <M extends Message> M messageOfType(Class<M> clazz) {
+        checkClass(clazz);
+
+        final M.Builder builder = builderForType(clazz);
+        @SuppressWarnings("unchecked") // Checked cast
         final M result = (M) builder.build();
+
         return result;
     }
 
-    private static Object noEmptyValueFor(FieldDescriptor field) {
+    private static void checkClass(Class<? extends Message> clazz) {
+        checkNotNull(clazz);
+        // Support only generated protobuf messages
+        checkArgument(clazz.isAssignableFrom(GeneratedMessageV3.class));
+        checkArgument(!clazz.equals(Any.class), format(
+                "%s type is not supported. Please, generate a generic message and use AnyPacker instead.",
+                Any.class.getCanonicalName()
+        ));
+    }
+
+    private static Object valueFor(FieldDescriptor field) {
         final Type type = field.getType();
         final JavaType javaType = type.getJavaType();
         final Random random = new SecureRandom();
@@ -76,7 +131,7 @@ public class Sample {
                 random.nextBytes(bytes);
                 return new String(bytes);
             case BYTE_STRING:
-                final byte[] bytesPrimitive = new byte[16];
+                final byte[] bytesPrimitive = new byte[8];
                 random.nextBytes(bytesPrimitive);
                 return ByteString.copyFrom(bytesPrimitive);
             case ENUM:
@@ -84,7 +139,7 @@ public class Sample {
             case MESSAGE:
                 return null;
             default:
-                throw new IllegalArgumentException(format("Type %s is not supported", javaType));
+                throw new IllegalArgumentException(format("Field type %s is not supported", javaType));
         }
     }
 
@@ -96,7 +151,7 @@ public class Sample {
             return result;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException(
-                    format("Class %s must be assignable from com.google.protobuf.Message",
+                    format("Class %s must be a generated proto message",
                            clazz.getCanonicalName()),
                     e);
         }
