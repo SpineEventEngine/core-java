@@ -56,7 +56,7 @@ public class Intervals {
     }
 
     /**
-     * Verifies in the timestamp is withing the interval.
+     * Verifies if the timestamp is withing the interval.
      *
      * <p>The interval is closed, which means that the method would return {@code true}
      * if {@code interval.start <= timestamp <= interval.end}.

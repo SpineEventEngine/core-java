@@ -313,7 +313,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Tests weather the entity is marked as archived.
+     * Tests whether the entity is marked as archived.
      *
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
@@ -331,7 +331,7 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Tests weather the entity is marked as deleted.
+     * Tests whether the entity is marked as deleted.
      *
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
