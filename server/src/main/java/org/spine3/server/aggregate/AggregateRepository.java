@@ -33,10 +33,10 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.Predicates;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
+import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.status.EntityStatus;
@@ -266,7 +266,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
         final Optional<EntityStatus> status = aggregateStorage().readStatus(id);
-        if (status.isPresent() && !Predicates.isVisible()
+        if (status.isPresent() && !Predicates.isEntityVisible()
                                              .apply(status.get())) {
             // If there is a status that hides the aggregate, return nothing.
             return Optional.absent();

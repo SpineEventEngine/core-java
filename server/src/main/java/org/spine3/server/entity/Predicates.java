@@ -18,21 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.entity;
 
 import com.google.common.base.Predicate;
 import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nullable;
 
 /**
- * Collection of predicates for filtering storage records.
+ * Collection of predicates for filtering aggregates by their {@code EntityStatus}.
  *
  * @author Alexander Yevsyukov
  */
 public class Predicates {
 
-    private static final Predicate<EntityStorageRecord> isVisible = new Predicate<EntityStorageRecord>() {
+    private static final Predicate<EntityStatus> isEntityVisible = new Predicate<EntityStatus>() {
+        @Override
+        public boolean apply(@Nullable EntityStatus input) {
+            return input == null ||
+                    !(input.getArchived() || input.getDeleted());
+        }
+    };
+    private static final Predicate<EntityStorageRecord> isRecordVisible = new Predicate<EntityStorageRecord>() {
         @Override
         public boolean apply(@Nullable EntityStorageRecord input) {
             if (input == null) {
@@ -48,6 +56,20 @@ public class Predicates {
     }
 
     /**
+     * Obtains the predicate for checking if an aggregate is visible to regular queries.
+     *
+     * <p>An aggregate may be marked as archived or deleted. If so, it becomes “invisible”
+     * to regular queries.
+     *
+     * @return the predicate that filters “invisible” {@code AggregateStatus}es
+     * @see EntityStatus#getArchived()
+     * @see EntityStatus#getDeleted()
+     */
+    public static Predicate<EntityStatus> isEntityVisible() {
+        return isEntityVisible;
+    }
+
+    /**
      * Obtains the predicate for checking if an entity is visible to regular queries.
      *
      * <p>An entity may be marked as archived or deleted. If so, it becomes “invisible”
@@ -56,7 +78,7 @@ public class Predicates {
      * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
      * @see EntityStorageRecord#getEntityStatus()
      */
-    public static Predicate<EntityStorageRecord> isVisible() {
-        return isVisible;
+    public static Predicate<EntityStorageRecord> isRecordVisible() {
+        return isRecordVisible;
     }
 }

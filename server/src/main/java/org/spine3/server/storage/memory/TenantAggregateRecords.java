@@ -28,7 +28,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
-import org.spine3.server.aggregate.storage.Predicates;
+import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.Nullable;
@@ -61,7 +61,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
             final EntityStatus entityStatus = statuses.get(input);
 
             return entityStatus == null
-                    || Predicates.isVisible()
+                    || Predicates.isEntityVisible()
                                  .apply(entityStatus);
         }
     };

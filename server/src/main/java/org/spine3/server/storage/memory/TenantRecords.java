@@ -31,7 +31,6 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.EntityStorageRecord;
-import org.spine3.server.storage.Predicates;
 
 import java.util.Map;
 
@@ -46,7 +45,7 @@ import static com.google.common.collect.Maps.newHashMap;
 class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
 
     private final Map<I, EntityStorageRecord> records = newHashMap();
-    private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, Predicates.isVisible());
+    private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, org.spine3.server.entity.Predicates.isRecordVisible());
 
     @Override
     public void put(I id, EntityStorageRecord record) {
