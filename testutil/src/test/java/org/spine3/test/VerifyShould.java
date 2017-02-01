@@ -646,9 +646,8 @@ public class VerifyShould {
     @Test
     public void pass_if_map_contains_entry() {
         final Integer key = 1;
-        final Integer value = 1;
 
-        Verify.assertContainsKeyValue(key, value, Collections.singletonMap(key, value));
+        Verify.assertContainsKeyValue(key, EMPTY_STRING, Collections.singletonMap(key, EMPTY_STRING));
     }
 
     @Test(expected = AssertionError.class)
