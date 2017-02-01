@@ -108,7 +108,7 @@ public abstract class Entity<I, S extends Message> {
      *   <li>The {@link #status} field is set to the default instance.
      * </ul>
      *
-     * This method cannot be called from within {@code Entity} constructor because
+     * <p>This method cannot be called from within {@code Entity} constructor because
      * the call to {@link #getDefaultState()} relies on completed initialization
      * of the instance.
      */
