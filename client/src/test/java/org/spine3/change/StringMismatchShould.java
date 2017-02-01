@@ -32,7 +32,6 @@ import static org.spine3.change.StringMismatch.unexpectedValue;
 import static org.spine3.change.StringMismatch.unpackActual;
 import static org.spine3.change.StringMismatch.unpackExpected;
 import static org.spine3.change.StringMismatch.unpackNewValue;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class StringMismatchShould {

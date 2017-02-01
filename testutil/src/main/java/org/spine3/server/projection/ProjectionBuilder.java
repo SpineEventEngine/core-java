@@ -23,8 +23,6 @@ package org.spine3.server.projection;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.EntityBuilder;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Utility class for building test {@code Projection}s.
  *

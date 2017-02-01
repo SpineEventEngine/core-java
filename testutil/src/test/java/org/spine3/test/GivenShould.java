@@ -28,9 +28,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.procman.ProcessManager;
-import org.spine3.server.procman.ProcessManagerBuilder;
 import org.spine3.server.projection.Projection;
-import org.spine3.server.projection.ProjectionBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
