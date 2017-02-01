@@ -23,9 +23,11 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -102,5 +104,15 @@ public class EntityStatusTests {
         another.setArchived(true);
 
         assertFalse(entity.equals(another));
+    }
+
+    @Test
+    public void assign_status() {
+        final EntityStatus status = EntityStatus.newBuilder()
+                                                .setArchived(true)
+                                                .setDeleted(false)
+                                                .build();
+        entity.setStatus(status);
+        assertEquals(status, entity.getStatus());
     }
 }

@@ -241,6 +241,13 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
+     * Sets status for the entity.
+     */
+    void setStatus(EntityStatus status) {
+        this.status = status;
+    }
+
+    /**
      * Sets version information of the entity.
      *
      * @param version the version number of the entity

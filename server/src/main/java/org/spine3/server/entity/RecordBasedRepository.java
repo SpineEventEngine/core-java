@@ -319,6 +319,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked")
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
+        entity.setStatus(record.getEntityStatus());
         return entity;
     }
 
@@ -330,6 +331,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                                                                        .setState(stateAny)
                                                                        .setWhenModified(whenModified)
+                                                                       .setEntityStatus(entity.getStatus())
                                                                        .setVersion(version);
         return builder.build();
     }
