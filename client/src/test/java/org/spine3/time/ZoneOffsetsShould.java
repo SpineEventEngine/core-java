@@ -34,6 +34,11 @@ import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
 
+    private static final int MIN_HOURS_OFFSET = -11;
+    private static final int MAX_HOURS_OFFSET = 14;
+    private static final int MIN_MINUTES_OFFSET = 0;
+    private static final int MAX_MINUTES_OFFSET = 60;
+
     @Test
     public void has_private_constructor() {
         assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
@@ -66,30 +71,30 @@ public class ZoneOffsetsShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_more_than_18_hours() {
-        ZoneOffsets.ofHours(15);
+    public void do_not_accept_more_than_14_hours() {
+        ZoneOffsets.ofHours(MAX_HOURS_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_more_than_18_hours_by_abs() {
-        ZoneOffsets.ofHours(-12);
+    public void do_not_accept_more_than_11_hours_by_abs() {
+        ZoneOffsets.ofHours(MIN_HOURS_OFFSET - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(10, 61);
+        ZoneOffsets.ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_17_hours_and_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(18, 30);
+        ZoneOffsets.ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
     }
 
-    private int secondsIn(int hours) {
+    private static int secondsIn(int hours) {
         return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
     }
 
-    private int secondsIn(int hours, int minutes) {
+    private static int secondsIn(int hours, int minutes) {
         return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
     }
 }
