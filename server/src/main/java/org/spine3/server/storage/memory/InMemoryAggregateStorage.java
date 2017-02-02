@@ -88,6 +88,12 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
+    protected void writeStatus(I id, EntityStatus status) {
+        checkNotClosed();
+        getStorage().putStatus(id, status);
+    }
+
+    @Override
     protected void writeEventCountAfterLastSnapshot(I id, int eventCount) {
         checkNotClosed();
         getStorage().putEventCount(id, eventCount);

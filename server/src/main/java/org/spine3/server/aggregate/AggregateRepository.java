@@ -39,8 +39,6 @@ import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
-import org.spine3.server.entity.status.CannotModifyArchivedEntity;
-import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
@@ -310,55 +308,27 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 logConcurrentModification(aggregateId, command, newEventCount);
             }
 
-            checkCurrentStatus(aggregateId);
-
-            //TODO:2017-02-02:alexander.yevsyukov: Load aggregate. Remember its EntityStatus.
-
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
 
             aggregate = loadOrCreate(aggregateId);
 
+            final EntityStatus statusBefore = aggregate.getStatus();
+            EntityStatus statusAfter = null;
             try {
                 aggregate.dispatch(command, context);
+                statusAfter = aggregate.getStatus();
             } catch (RuntimeException e) {
                 updateCommandStatus(commandId, e);
+            } finally {
+                if (statusAfter != null && !statusBefore.equals(statusAfter)) {
+                    aggregateStorage().writeStatus(aggregateId, statusAfter);
+                }
             }
-
-            //TODO:2017-02-02:alexander.yevsyukov: remember the status of the aggregate if it changed after dispatching.
 
             eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
         return aggregate;
-    }
-
-    /**
-     * Ensures that the aggregate with the passed ID is visible to queries.
-     *
-     * @param aggregateId the ID of the aggregate to check
-     * @throws IllegalStateException if the aggregate is “invisible”
-     */
-    private void checkCurrentStatus(I aggregateId) {
-        final Optional<EntityStatus> status = aggregateStorage().readStatus(aggregateId);
-
-        if (status.isPresent()) {
-            final String aggregateIdStr = Stringifiers.idToString(aggregateId);
-            final EntityStatus currentStatus = status.get();
-            final String errMsg;
-            final FailureThrowable failure;
-
-            if (currentStatus.getArchived()) {
-                errMsg = String.format("The aggregate (ID: %s) is archived.", aggregateId);
-                failure = new CannotModifyArchivedEntity(aggregateIdStr);
-                throw new IllegalStateException(errMsg, failure);
-            }
-
-            if (currentStatus.getDeleted()) {
-                errMsg = String.format("The aggregate (ID: %s) is deleted.", aggregateId);
-                failure = new CannotModifyDeletedEntity(aggregateIdStr);
-                throw new IllegalStateException(errMsg, failure);
-            }
-        }
     }
 
     private void logConcurrentModification(I aggregateId, Message command, int newEventCount) {
