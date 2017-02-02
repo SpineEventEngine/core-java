@@ -20,8 +20,11 @@
 
 package org.spine3.testdata;
 
+import com.google.common.base.Enums;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
@@ -29,16 +32,21 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.storage.EventStorageRecord;
+import org.spine3.type.ClassName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
@@ -135,11 +143,51 @@ public class Sample {
                 random.nextBytes(bytesPrimitive);
                 return ByteString.copyFrom(bytesPrimitive);
             case ENUM:
-                return null;
+                return enumValueFor(field, random);
             case MESSAGE:
-                return null;
+                return messageValueFor(field);
             default:
-                throw new IllegalArgumentException(format("Field type %s is not supported", javaType));
+                throw new IllegalArgumentException(format("Field type %s is not supported.", type));
+        }
+    }
+
+    private static Enum enumValueFor(FieldDescriptor field, Random random) {
+        final Descriptors.EnumDescriptor descriptor = field.getEnumType();
+        final List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
+        if (enumValues.isEmpty()) {
+            return null;
+        }
+
+        // Value under index 0 is usually used to store `undefined` option
+        // Use values with indexes from 1 to n
+        final int index = random.nextInt(enumValues.size() - 1) + 1;
+        final Descriptors.EnumValueDescriptor enumValue = descriptor.findValueByNumber(index);
+
+        final String enumValueName = enumValue.getName();
+        final TypeUrl enumType = TypeUrl.from(descriptor);
+        final Class<? extends Enum> enumClass = classFor(enumType);
+
+        final Optional<? extends Enum> enumField = Enums.getIfPresent(enumClass, enumValueName);
+        checkState(enumField.isPresent());
+        return enumField.get();
+    }
+
+    private static Message messageValueFor(FieldDescriptor field) {
+        final TypeUrl messageType = TypeUrl.from(field.getMessageType());
+        final Class<? extends Message> javaClass = classFor(messageType);
+        final Message fieldValue = Sample.messageOfType(javaClass);
+        return fieldValue;
+    }
+
+    @SuppressWarnings("unchecked") // Reflective class definition retrieving
+    private static <M extends Message> Class<M> classFor(TypeUrl type) {
+        final ClassName className = KnownTypes.getClassName(type);
+        final Class<M> javaClass;
+        try {
+            javaClass = (Class<M>) Class.forName(className.value());
+            return javaClass;
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
         }
     }
 
