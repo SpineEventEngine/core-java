@@ -82,7 +82,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
