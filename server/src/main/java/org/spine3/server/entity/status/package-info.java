@@ -19,8 +19,7 @@
  */
 
 /**
- * This package contains generated classes and interfaces for working
- * with entity statuses.
+ * This package contains classes and interfaces for working with entity statuses.
  */
 
 @SPI

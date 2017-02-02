@@ -141,7 +141,7 @@ subprojects {
     sourceSets {
         main {
             proto.srcDirs = ["$sourcesRootDir/main/proto"]
-            java.srcDirs = [generatedJavaDir, "$sourcesRootDir/main/java"]
+            java.srcDirs = [generatedJavaDir, "$sourcesRootDir/main/java", generatedSpineDir]
             resources.srcDirs = ["$generatedRootDir/main/resources"]
         }
         test {

@@ -39,6 +39,8 @@ import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
+import org.spine3.server.entity.status.CannotModifyArchivedEntity;
+import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
@@ -310,6 +312,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
             checkCurrentStatus(aggregateId);
 
+            //TODO:2017-02-02:alexander.yevsyukov: Load aggregate. Remember its EntityStatus.
+
             eventCountBeforeDispatch = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
 
             aggregate = loadOrCreate(aggregateId);
@@ -319,6 +323,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             } catch (RuntimeException e) {
                 updateCommandStatus(commandId, e);
             }
+
+            //TODO:2017-02-02:alexander.yevsyukov: remember the status of the aggregate if it changed after dispatching.
 
             eventCountBeforeSave = aggregateStorage.readEventCountAfterLastSnapshot(aggregateId);
         } while (eventCountBeforeDispatch != eventCountBeforeSave);
@@ -336,12 +342,21 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Optional<EntityStatus> status = aggregateStorage().readStatus(aggregateId);
 
         if (status.isPresent()) {
+            final String aggregateIdStr = Stringifiers.idToString(aggregateId);
             final EntityStatus currentStatus = status.get();
+            final String errMsg;
+            final FailureThrowable failure;
+
             if (currentStatus.getArchived()) {
-                throw new IllegalStateException(String.format("The aggregate (ID: %s) is archived.", aggregateId));
+                errMsg = String.format("The aggregate (ID: %s) is archived.", aggregateId);
+                failure = new CannotModifyArchivedEntity(aggregateIdStr);
+                throw new IllegalStateException(errMsg, failure);
             }
+
             if (currentStatus.getDeleted()) {
-                throw new IllegalStateException(String.format("The aggregate (ID: %s) is deleted.", aggregateId));
+                errMsg = String.format("The aggregate (ID: %s) is deleted.", aggregateId);
+                failure = new CannotModifyDeletedEntity(aggregateIdStr);
+                throw new IllegalStateException(errMsg, failure);
             }
         }
     }
