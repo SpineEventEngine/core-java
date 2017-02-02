@@ -184,9 +184,8 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta.
-     * If the expected value is {@code Float#POSITIVE_INFNITY}, {@code Float#NEGATIVE_INFINITY} or {@code Float#NaN}
-     * then the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is {@code infinity} or
+     * {@code NaN} then the delta value is ignored.
      */
     public static void assertNotEquals(String itemName, float notExpected, float actual, float delta) {
         try {
@@ -212,9 +211,8 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta.
-     * If the expected value is {@code Float#POSITIVE_INFNITY}, {@code Float#NEGATIVE_INFINITY} or {@code Float#NaN}
-     * then the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is {@code infinity} or
+     * {@code NaN} then the delta value is ignored.
      */
     public static void assertNotEquals(float expected, float actual, float delta) {
         try {
