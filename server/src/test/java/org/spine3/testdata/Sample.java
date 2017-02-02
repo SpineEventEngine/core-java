@@ -32,6 +32,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
@@ -153,6 +154,13 @@ public class Sample {
     public static <M extends Message> M messageOfType(Class<M> clazz) {
         checkClass(clazz);
 
+        if (Any.class.equals(clazz)) {
+            final Any any = Any.getDefaultInstance();
+            @SuppressWarnings("unchecked") //
+            final M result = (M) AnyPacker.pack(any);
+            return result;
+        }
+
         final M.Builder builder = builderForType(clazz);
         @SuppressWarnings("unchecked") // Checked cast
         final M result = (M) builder.build();
@@ -164,10 +172,6 @@ public class Sample {
         checkNotNull(clazz);
         // Support only generated protobuf messages
         checkArgument(clazz.isAssignableFrom(GeneratedMessageV3.class));
-        checkArgument(!clazz.equals(Any.class), format(
-                "%s type is not supported. Please, generate a generic message and use AnyPacker instead.",
-                Any.class.getCanonicalName()
-        ));
     }
 
     /**
