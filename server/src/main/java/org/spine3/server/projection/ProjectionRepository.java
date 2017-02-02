@@ -96,6 +96,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /** If {@code true} the projection will {@link #catchUp()} after initialization. */
     private final boolean catchUpAfterStorageInit;
 
+    private final Duration catchUpMaxDuration;
+
     private BulkWriteOperation<I, P> ongoingOperation;
 
     /**
@@ -104,7 +106,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      *
      * <p>NOTE: The {@link #catchUp()} will be called automatically after the {@link #initStorage(StorageFactory)} call
      * is performed. To override this behavior, please use
-     * {@link ProjectionRepository#ProjectionRepository(BoundedContext, boolean)} constructor.
+     * {@link ProjectionRepository#ProjectionRepository(BoundedContext, boolean, Duration)} constructor.
      *
      * @param boundedContext the target {@code BoundedContext}
      */
@@ -117,15 +119,33 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      *
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
      * automatically after the {@link #initStorage(StorageFactory)} call is performed.
-     *
-     * @param boundedContext          the target {@code BoundedContext}
+     *  @param boundedContext          the target {@code BoundedContext}
      * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
      */
     @SuppressWarnings("MethodParameterNamingConvention")
-    protected ProjectionRepository(BoundedContext boundedContext, boolean catchUpAfterStorageInit) {
+    protected ProjectionRepository(BoundedContext boundedContext,
+                                   boolean catchUpAfterStorageInit) {
+        this(boundedContext, catchUpAfterStorageInit, Duration.getDefaultInstance());
+    }
+
+    /**
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
+     *
+     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
+     * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     *
+     * @param boundedContext          the target {@code BoundedContext}
+     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
+     * @param catchUpMaxDuration      the maximum duration of the catch-up
+     */
+    @SuppressWarnings("MethodParameterNamingConvention")
+    protected ProjectionRepository(BoundedContext boundedContext,
+                                   boolean catchUpAfterStorageInit,
+                                   Duration catchUpMaxDuration) {
         super(boundedContext, EventDispatchingRepository.<I>producerFromContext());
         this.standFunnel = boundedContext.getStandFunnel();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
+        this.catchUpMaxDuration = catchUpMaxDuration;
     }
 
     protected Status getStatus() {
