@@ -57,7 +57,18 @@ import static java.lang.String.format;
  */
 public class Sample {
 
+    private Sample() {
+    }
+
+    /**
+     * Utility class for stubbing the {@link EventStorageRecord} instances.
+     *
+     * @see Sample
+     */
     public static class EventRecord {
+
+        private EventRecord() {
+        }
 
         public static EventStorageRecord withRandomFields() {
             return Sample.messageOfType(EventStorageRecord.class);
@@ -83,13 +94,33 @@ public class Sample {
         }
     }
 
+    /**
+     * Utility class for stubbing the {@link AggregateStorageRecord} instances.
+     *
+     * @see Sample
+     */
     public static class AggregateRecord {
+
+        private AggregateRecord() {
+        }
 
         public static AggregateStorageRecord withRandomFields() {
             return Sample.messageOfType(AggregateStorageRecord.class);
         }
     }
 
+    /**
+     * Generates a new stub {@link Message.Builder builder} with all the fields set to {@link Random random} values.
+     *
+     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
+     * may or may not have their default values ({@code 0} and {@code false}).
+     *
+     * @param clazz Java class of the stub message
+     * @param <M>   type of the required message
+     * @param <B>   type of the {@link Message.Builder builder} for the message
+     * @return new instance of the {@link Message.Builder} for given type
+     * @see #valueFor(FieldDescriptor)
+     */
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
 
@@ -99,14 +130,26 @@ public class Sample {
 
         for (FieldDescriptor field : fields) {
             final Object value = valueFor(field);
-            if (value == null) {
-                continue;
+            if (field.isRepeated()) {
+                builder.addRepeatedField(field, value);
+            } else {
+                builder.setField(field, value);
             }
-            builder.setField(field, value);
         }
         return builder;
     }
 
+    /**
+     * Generates a new stub {@link Message} with all the fields set to {@link Random random} values.
+     *
+     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
+     * may or may not have their default values ({@code 0} and {@code false}).
+     *
+     * @param clazz Java class of the required stub message
+     * @param <M>   type of the required message
+     * @return new instance of the given {@link Message} type with random fields
+     * @see #builderForType(Class)
+     */
     public static <M extends Message> M messageOfType(Class<M> clazz) {
         checkClass(clazz);
 
@@ -127,6 +170,14 @@ public class Sample {
         ));
     }
 
+    /**
+     * Generates a non-default value for the given message field.
+     *
+     * <p>All the protobuf types are supported including nested {@link Message}s and the {@code enum}s.
+     *
+     * @param field {@link FieldDescriptor} to take the type info from
+     * @return a non-default generated value of type of the given field
+     */
     private static Object valueFor(FieldDescriptor field) {
         final Type type = field.getType();
         final JavaType javaType = type.getJavaType();
