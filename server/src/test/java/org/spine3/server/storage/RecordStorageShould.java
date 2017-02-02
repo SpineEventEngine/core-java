@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -30,10 +29,13 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.entity.FieldMasks;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -120,7 +122,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Iterable<EntityStorageRecord> readRecords = storage.readMultiple(
                 ids.subList(0, bulkCount),
                 fieldMask);
-        final List<EntityStorageRecord> readList = Lists.newLinkedList(readRecords);
+        final List<EntityStorageRecord> readList = newLinkedList(readRecords);
         assertSize(bulkCount, readList);
         for (EntityStorageRecord record : readRecords) {
             final Message state = AnyPacker.unpack(record.getState());
@@ -206,5 +208,29 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // There's no record with such ID.
         assertFalse(storage.read(id).isPresent());
+    }
+
+    @Test
+    public void write_record_bulk() {
+        final RecordStorage<I> storage = getStorage();
+        final int bulkSize = 5;
+
+        final Map<I, EntityStorageRecord> expected = new HashMap<>(bulkSize);
+
+        for (int i = 0; i < bulkSize; i++) {
+            final I id = newId();
+            final EntityStorageRecord record = newStorageRecord(id);
+            expected.put(id, record);
+        }
+
+        storage.write(expected);
+
+
+        final Collection<EntityStorageRecord> actual = newLinkedList(storage.readMultiple(expected.keySet()));
+
+        assertEquals(expected.size(), actual.size());
+        assertTrue(actual.containsAll(expected.values()));
+
+        close(storage);
     }
 }
