@@ -37,6 +37,7 @@ import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -45,6 +46,8 @@ import org.spine3.server.type.EventClass;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -264,10 +267,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     private void store(Collection<P> projections) {
-        // TODO:02-02-17:dmytro.dashenkov: Implement bulk store.
+        final RecordStorage<I> storage = recordStorage();
+        final Map<I, EntityStorageRecord> records = new HashMap<>(projections.size());
         for (P projection : projections) {
-            store(projection);
+            final I id = projection.getId();
+            final EntityStorageRecord record = toEntityRecord(projection);
+            records.put(id, record);
         }
+        storage.write(records);
     }
 
     /**
