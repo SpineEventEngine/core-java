@@ -248,20 +248,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final Timestamp eventTime = context.getTimestamp();
 
         if (ongoingOperation != null && ongoingOperation.isInProgress()) {
-            scheduledStore(projection, eventTime);
+            storePostponed(projection, eventTime);
         } else {
-            immediateStore(projection, eventTime);
+            storeNow(projection, eventTime);
         }
 
         standFunnel.post(projection);
     }
 
-    private void immediateStore(P projection, Timestamp eventTime) {
+    private void storeNow(P projection, Timestamp eventTime) {
         store(projection);
         projectionStorage().writeLastHandledEventTime(eventTime);
     }
 
-    private void scheduledStore(P projection, Timestamp eventTime) {
+    private void storePostponed(P projection, Timestamp eventTime) {
         ongoingOperation.writeProjection(projection);
         ongoingOperation.writeLastHandledEventTime(eventTime);
     }
@@ -372,6 +372,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         return bulkWriteOperation;
     }
 
+    /**
+     * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing the projections and
+     * the last handled event time into the {@link ProjectionRepository}.
+     */
     private static class PendingDataFlushTask<P extends Projection<?, ?>>
             implements BulkWriteOperation.FlushCallback<P> {
 
@@ -384,7 +388,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         @Override
         public void onFlushResults(Set<P> projections, Timestamp lastHandledEventTime) {
             projectionRepository.store(projections);
-            projectionRepository.projectionStorage().writeLastHandledEventTime(lastHandledEventTime);
+            projectionRepository.projectionStorage()
+                                .writeLastHandledEventTime(lastHandledEventTime);
         }
     }
 

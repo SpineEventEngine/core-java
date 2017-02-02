@@ -225,7 +225,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         storage.write(expected);
 
-
         final Collection<EntityStorageRecord> actual = newLinkedList(storage.readMultiple(expected.keySet()));
 
         assertEquals(expected.size(), actual.size());
