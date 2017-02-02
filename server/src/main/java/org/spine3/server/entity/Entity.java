@@ -428,7 +428,7 @@ public abstract class Entity<I, S extends Message> {
      * @see EntityStatus#getDeleted()
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getStatus().getArchived()) {
+        if (getStatus().getDeleted()) {
             final String idStr = Stringifiers.idToString(getId());
             throw new CannotModifyDeletedEntity(idStr);
         }
