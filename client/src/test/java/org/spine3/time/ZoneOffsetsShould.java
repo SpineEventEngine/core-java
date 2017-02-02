@@ -26,6 +26,7 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
@@ -40,21 +41,20 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_default_instance_according_to_place() {
-        final int currentOffset = TimeZone.getDefault().getRawOffset()/1000;
+        final int currentOffset = TimeZone.getDefault().getRawOffset()/(int)MILLIS_PER_SECOND;
         assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 2;
+        final int secondsInTwoHours = secondsIn(2);
         assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
                                                    .getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 8
-                + SECONDS_PER_MINUTE * 45;
+        final int secondsIn8Hours45Minutes = secondsIn(8, 45);
         final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
                                                     .getAmountSeconds();
         assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
@@ -80,4 +80,11 @@ public class ZoneOffsetsShould {
         ZoneOffsets.ofHoursMinutes(18, 30);
     }
 
+    private int secondsIn(int hours) {
+        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
+    }
+
+    private int secondsIn(int hours, int minutes) {
+        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
+    }
 }
