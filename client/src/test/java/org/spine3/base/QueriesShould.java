@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko
@@ -55,12 +55,12 @@ public class QueriesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Queries.class));
+        assertTrue(hasPrivateParameterlessCtor(Queries.class));
     }
 
     @Test
     public void have_private_constructor_of_targets_class() {
-        assertTrue(hasPrivateUtilityConstructor(Queries.Targets.class));
+        assertTrue(hasPrivateParameterlessCtor(Queries.Targets.class));
     }
 
     @Test

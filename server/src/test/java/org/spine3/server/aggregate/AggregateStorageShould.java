@@ -21,6 +21,7 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -56,7 +57,8 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
+public abstract class AggregateStorageShould
+       extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Given.newProjectId();
 
@@ -71,10 +73,6 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void tearDownAggregateStorageTest() {
         close(storage);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract AggregateStorage<ProjectId> getStorage();
 
     /**
      * Used to get a storage in tests with different ID types.
@@ -100,6 +98,18 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     @Override
     protected ProjectId newId() {
         return Given.newProjectId();
+    }
+
+    /**
+     * Overwrites the test behaviour checking that {@code AggregatStorage}
+     * always returns events.
+     */
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType",
+                        "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
+    @Override
+    protected void assertResultForMissingId(Optional<AggregateEvents> record) {
+        assertTrue(record.isPresent());
+        assertTrue(record.get().getEventList().isEmpty());
     }
 
     @Test
@@ -257,12 +267,13 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         storage.readEventCountAfterLastSnapshot(id);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
         final Event expectedEvent = org.spine3.server.storage.Given.Event.projectCreated();
 
         storage.writeEvent(id, expectedEvent);
 
-        final AggregateEvents events = storage.read(id);
+        final AggregateEvents events = storage.read(id).get();
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -276,12 +287,13 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void rewrite_record_if_write_by_the_same_id() {
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
         final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 
-        final AggregateEvents events = storage.read(id);
+        final AggregateEvents events = storage.read(id).get();
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);

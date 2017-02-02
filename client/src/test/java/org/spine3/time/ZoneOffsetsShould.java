@@ -28,19 +28,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
 
     @Test
     public void has_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(ZoneOffsets.class));
+        assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
     }
 
     @Test
     public void have_private_utility_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(ZoneOffsets.class));
+        assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
     }
 
     @Test

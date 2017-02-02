@@ -27,7 +27,7 @@ import org.spine3.server.BoundedContext;
  *
  * @author Alexander Yevsyukov
  */
-public class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
+public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
 
     /**
      * {@inheritDoc}

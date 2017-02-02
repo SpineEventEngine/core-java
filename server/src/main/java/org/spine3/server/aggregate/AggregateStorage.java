@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
@@ -28,6 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
@@ -60,7 +62,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     @Override
-    public AggregateEvents read(I aggregateId) {
+    public Optional<AggregateEvents> read(I aggregateId) {
         checkNotClosed();
         checkNotNull(aggregateId);
 
@@ -94,7 +96,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         }
         builder.addAllEvent(history);
 
-        return builder.build();
+        return Optional.of(builder.build());
     }
 
     /**
@@ -162,8 +164,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     /**
-     * Writes a count of events which were saved to the storage after the last snapshot was created,
-     * or a count of all events if there were no snapshots yet.
+     * Reads a count of events which were saved to the storage after
+     * the last snapshot was created,
+     * <strong>or</strong> a count of all events if there were no snapshots yet.
      *
      * @param id an ID of an aggregate
      * @return an even count after the last snapshot
@@ -172,7 +175,19 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     protected abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
-     * Reads a count of events which were saved to the storage after the last snapshot was created,
+     * Reads the {@code AggregateStatus} for the aggregate with the passed ID.
+     *
+     * <p>This method returns {@code Optional.absent()} if none of the
+     * flags of {@code AggregateStatus} were modified before. This means that
+     * the aggregate is visible to the regular queries.
+     *
+     * @param id the ID of the aggregate
+     * @return the aggregate status record or {@code Optional.absent()}
+     */
+    protected abstract Optional<EntityStatus> readStatus(I id);
+
+    /**
+     * Writes a count of events which were saved to the storage after the last snapshot was created,
      * or a count of all events if there were no snapshots yet.
      *
      * @param id         an ID of an aggregate
@@ -196,13 +211,13 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
         final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
 
-        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                                                                             .setEvent(event)
-                                                                             .setTimestamp(timestamp)
-                                                                             .setEventId(eventIdStr)
-                                                                             .setEventType(eventType)
-                                                                             .setVersion(context.getVersion());
-        return builder.build();
+        return AggregateStorageRecord.newBuilder()
+                                     .setEvent(event)
+                                     .setTimestamp(timestamp)
+                                     .setEventId(eventIdStr)
+                                     .setEventType(eventType)
+                                     .setVersion(context.getVersion())
+                                     .build();
     }
 
     // Storage implementation API.
@@ -223,4 +238,20 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code archived}.
+     *
+     * @param id the aggregate ID
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    protected abstract boolean markArchived(I id);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code deleted}.
+     *
+     * @param id the aggregate ID
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    protected abstract boolean markDeleted(I id);
 }

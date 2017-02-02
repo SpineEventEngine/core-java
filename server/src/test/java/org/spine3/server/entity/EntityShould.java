@@ -22,31 +22,47 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+import org.spine3.time.Interval;
+import org.spine3.time.Intervals;
+
+import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.test.Tests.nullRef;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
-    private final Project state = Given.newProject();
+    private Project state = Given.newProject();
+    private Given.TestEntity entityNew;
+    private Given.TestEntity entityWithState;
 
-    private final Given.TestEntity entityNew = Given.TestEntity.newInstance(newUuid());
+    @Before
+    public void setUp() {
+        state = Given.newProject();
+        entityNew = Given.TestEntity.newInstance(newUuid());
+        entityWithState = Given.TestEntity.withState();
+    }
 
-    private final Given.TestEntity entityWithState = Given.TestEntity.withState();
+    @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_id() {
+        new BareBonesEntity(Tests.<Long>nullRef());
+    }
 
     @Test
     public void return_default_state() {
@@ -88,6 +104,7 @@ public class EntityShould {
     public void validate_state_when_set_it() {
         entityNew.setState(state, 0, getCurrentTime());
 
+        //TODO:2017-02-01:alexander.yevsyukov: Can we test it via Mockito spy?
         assertTrue(entityNew.isValidateMethodCalled());
     }
 
@@ -107,16 +124,11 @@ public class EntityShould {
         new EntityWithUnsupportedId(new Exception());
     }
 
-    @Test
-    public void set_default_state() {
-        final Given.TestEntity entity = Given.TestEntity.withState();
-        entity.setDefault();
-        final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(entity.getDefaultState(), entity.getState());
-        assertEquals(expectedTimeSec, entity.whenModified()
-                                            .getSeconds());
-        assertEquals(0, this.entityNew.getVersion());
+    private static class BareBonesEntity extends Entity<Long, StringValue> {
+        private BareBonesEntity(Long id) {
+            super(id);
+        }
     }
 
     @Test
@@ -133,6 +145,8 @@ public class EntityShould {
     @Test
     public void record_modification_time_when_incrementing_version() {
         entityNew.incrementVersion();
+        //TODO:2017-02-01:alexander.yevsyukov: This may not work if the code is executed on the bound of a second.
+        // Use Tests.FrozenMadHatterParty.
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
@@ -207,64 +221,6 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-    @Test
-    public void assure_same_entities_are_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-
-        assertTrue(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entity_is_equal_to_itself() {
-        // noinspection EqualsWithItself
-        assertTrue(entityWithState.equals(entityWithState));
-    }
-
-    @Test
-    public void assure_entity_is_not_equal_to_null() {
-        assertFalse(entityWithState.equals(nullRef()));
-    }
-
-    @Test
-    public void assure_entity_is_not_equal_to_object_of_another_class() {
-        //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(entityWithState.equals(newUuid()));
-    }
-
-    @Test
-    public void assure_entities_with_different_ids_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.newInstance(newUuid());
-
-        assertNotEquals(entityWithState.getId(), another.getId());
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_states_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setState(Given.newProject(), another.getVersion(), another.whenModified());
-
-        assertNotEquals(entityWithState.getState(), another.getState());
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_versions_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setVersion(entityWithState.getVersion() + 5, another.whenModified());
-
-        assertFalse(entityWithState.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_modification_times_are_not_equal() {
-        final Given.TestEntity another = Given.TestEntity.withState(entityWithState);
-        another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
-
-        assertNotEquals(entityWithState.whenModified(), another.whenModified());
-        assertFalse(entityWithState.equals(another));
-    }
-
     private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
 
         protected EntityWithUnsupportedId(Exception id) {
@@ -277,6 +233,35 @@ public class EntityShould {
         protected EntityWithMessageId() {
             super(Given.AggregateId.newProjectId());
         }
+    }
+
+    @Test
+    public void obtain_entity_constructor_by_class_and_ID_class() {
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+
+        assertNotNull(ctor);
+    }
+
+    @Test
+    public void create_and_initialize_entity_instance() {
+        final Long id = 100L;
+        final Timestamp before = Timestamps.secondsAgo(1);
+
+        // Create and init the entity.
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+        final Entity<Long, StringValue> entity = Entity.createEntity(ctor, id);
+
+        final Timestamp after = Timestamps.getCurrentTime();
+
+        // The interval with a much earlier start to allow non-zero interval on faster computers.
+        final Interval whileWeCreate = Intervals.between(before, after);
+
+        assertEquals(id, entity.getId());
+        assertEquals(0, entity.getVersion());
+        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
+        assertEquals(StringValue.getDefaultInstance(), entity.getState());
+        assertFalse(entity.isArchived());
+        assertFalse(entity.isDeleted());
     }
 }
 

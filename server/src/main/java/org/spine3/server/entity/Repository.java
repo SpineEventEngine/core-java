@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
+public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -149,24 +148,35 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected abstract void store(E obj);
 
     /**
-     * Loads the entity with the passed ID.
+     * Marks the entity with the passed ID as {@code archived}.
      *
-     * <p>NOTE: The storage must be assigned before calling this method.
-     *
-     * @param id the id of the entity to load
-     * @return the entity or empty {@code Optional} if there's no entity with such id
+     * @param id the ID of the entity
+     * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-    @CheckReturnValue
-    protected abstract Optional<E> load(I id);
+    protected abstract boolean markArchived(I id);
 
-    /** Returns the storage assigned to this repository or {@code null} if the storage is not assigned yet. */
+    /**
+     * Marks the entity with the passed ID as {@code deleted}.
+     *
+     * <p>This method does not delete information. Entities marked as {@code deleted}
+     * can be later physically removed from a storage by custom clean-up operation.
+     *
+     * @param id the ID of the entity
+     * @return {@code true} if the operation was successful, {@code false} otherwise
+     */
+    protected abstract boolean markDeleted(I id);
+
+    /**
+     * Returns the storage assigned to this repository or {@code null} if
+     * the storage is not assigned yet.
+     */
     @CheckReturnValue
     @Nullable
     protected AutoCloseable getStorage() {
         return this.storage;
     }
 
-    /** Returns true if the storage is assigned, false otherwise. */
+    /** Returns {@code true} if the storage is assigned, {@code false} otherwise. */
     public boolean storageAssigned() {
         return this.storage != null;
     }

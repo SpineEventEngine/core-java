@@ -35,6 +35,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
@@ -55,7 +56,8 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId> {
+public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId,
+                                                                     RecordStorage<AggregateStateId>> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -79,6 +81,9 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
                                        .build();
         return project;
     }
+
+    @Override
+    protected abstract StandStorage getStorage();
 
     @Test
     public void retrieve_all_records() {

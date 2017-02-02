@@ -32,10 +32,11 @@ buildscript {
     ext {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
-        spineVersion = '0.7.24-SNAPSHOT'
+
+        spineVersion = '0.8.1-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.6.6-SNAPSHOT'
+        spineProtobufPluginVersion = '0.7.24-SNAPSHOT'
     }
 
     dependencies {
@@ -67,7 +68,7 @@ allprojects {
 ext {
     // NOTE: when updating Protobuf dependency, please check that KnownTypes.addStandardProtobufTypes() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    protobufVersion = '3.1.0'
+    protobufVersion = '3.2.0'
     protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
     gRpcVersion = '1.0.2'
     slf4JVersion = '1.7.21'

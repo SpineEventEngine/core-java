@@ -20,6 +20,8 @@
 
 package org.spine3.net;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utility class, which simplifies working with {@link Url}.
  *
@@ -42,6 +44,7 @@ public class Urls {
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public static Url of(Url rawUrl) {
+        checkNotNull(rawUrl);
         if (rawUrl.getValueCase() != Url.ValueCase.RAW) {
             throw new IllegalArgumentException("Given url is already built");
         }
@@ -64,6 +67,7 @@ public class Urls {
      * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
      */
     public static Url of(String rawUrlString) {
+        checkNotNull(rawUrlString);
         final Url.Builder builder = Url.newBuilder();
         builder.setRaw(rawUrlString);
         final Url rawUrl = of(builder.build());
@@ -78,6 +82,7 @@ public class Urls {
      * @throws IllegalArgumentException if the argument is invalid
      */
     public static String toString(Url url) {
+        checkNotNull(url);
         validate(url);
         final String stringUrl = UrlPrinter.printToString(url);
         return stringUrl;
@@ -98,6 +103,7 @@ public class Urls {
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void validate(Url url) {
+        checkNotNull(url);
         if (url.getValueCase() == Url.ValueCase.VALUE_NOT_SET) {
             throw new IllegalArgumentException("Url is empty");
         }

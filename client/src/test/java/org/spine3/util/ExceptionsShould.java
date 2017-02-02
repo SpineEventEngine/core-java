@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertTrue;
@@ -34,7 +35,7 @@ public class ExceptionsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Exceptions.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(Exceptions.class));
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -45,5 +46,15 @@ public class ExceptionsShould {
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
         Exceptions.unsupported(newUuid());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Exceptions.class)
+                                                                     .addDefaultValue(new RuntimeException("message"))
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

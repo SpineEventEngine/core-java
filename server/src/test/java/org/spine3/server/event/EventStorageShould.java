@@ -62,7 +62,7 @@ import static org.spine3.server.event.EventStorage.toEvent;
 import static org.spine3.server.event.EventStorage.toEventList;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
+public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
 
     /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
@@ -97,10 +97,6 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         close(storage);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract EventStorage getStorage();
-
     @Override
     protected Event newStorageRecord() {
         return org.spine3.server.storage.Given.Event.projectCreated();
@@ -118,6 +114,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertFalse(iterator.hasNext());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void writeInternal_and_read_one_event() {
         final EventStorageRecord recordToStore = org.spine3.server.storage.Given.EventStorageRecord.projectCreated();
@@ -127,7 +124,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Event expected = toEvent(recordToStore);
 
         storage.writeRecord(recordToStore);
-        final Event actual = storage.read(id);
+        final Event actual = storage.read(id).get();
 
         assertEquals(expected, actual);
     }

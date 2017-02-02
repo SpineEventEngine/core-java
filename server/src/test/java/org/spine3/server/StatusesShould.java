@@ -23,16 +23,17 @@ package org.spine3.server;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class StatusesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Statuses.class));
+        assertTrue(hasPrivateParameterlessCtor(Statuses.class));
     }
 
     @Test
@@ -43,6 +44,17 @@ public class StatusesShould {
         final StatusRuntimeException statusRuntimeException = Statuses.invalidArgumentWithCause(exception);
 
         assertEquals(exception, statusRuntimeException.getCause());
-        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus().getCode());
+        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus()
+                                                                              .getCode());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Statuses.class)
+                                                                     .addDefaultValue(new RuntimeException("default"))
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

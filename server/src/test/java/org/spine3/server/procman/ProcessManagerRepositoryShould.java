@@ -39,8 +39,8 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.entity.AbstractEntityRepositoryShould;
 import org.spine3.server.entity.RecordBasedRepository;
+import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -76,7 +76,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerRepositoryShould
-        extends AbstractEntityRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
@@ -155,13 +155,6 @@ public class ProcessManagerRepositoryShould
 
     // Tests
     //----------------------------
-
-    @Test
-    public void load_empty_manager_by_default() {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure because PM is created.
-        final TestProcessManager manager = repository.load(ID).get();
-        assertEquals(manager.getDefaultState(), manager.getState());
-    }
 
     @Test
     public void dispatch_event_and_load_manager() {
@@ -337,7 +330,7 @@ public class ProcessManagerRepositoryShould
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
                                                  can have two parameters. */
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
+        ProjectCreated handle(CreateProject command, CommandContext ignored) {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
@@ -347,7 +340,7 @@ public class ProcessManagerRepositoryShould
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
                                                  can have two parameters. */
         @Assign
-        public TaskAdded handle(AddTask command, CommandContext ignored) {
+        TaskAdded handle(AddTask command, CommandContext ignored) {
             keep(command);
 
             handleTaskAdded(command.getTask());
@@ -355,7 +348,7 @@ public class ProcessManagerRepositoryShould
         }
 
         @Assign
-        public CommandRouted handle(StartProject command, CommandContext context) {
+        CommandRouted handle(StartProject command, CommandContext context) {
             keep(command);
 
             handleProjectStarted();

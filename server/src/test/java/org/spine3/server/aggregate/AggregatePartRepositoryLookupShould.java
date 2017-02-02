@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
@@ -47,9 +46,7 @@ public class AggregatePartRepositoryLookupShould {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         boundedContext = BoundedContext.newBuilder()
-                                       .setStorageFactory(storageFactory)
                                        .build();
         boundedContext.register(new ProjectPartRepository(boundedContext));
         boundedContext.register(new TaskAggregateRepository(boundedContext));

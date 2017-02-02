@@ -33,6 +33,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.Tests;
 import org.spine3.test.messages.MessageWithStringValue;
 import org.spine3.test.messages.TestEnum;
@@ -50,7 +51,7 @@ public class MessagesShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertTrue(Tests.hasPrivateUtilityConstructor(Messages.class));
+        assertTrue(Tests.hasPrivateParameterlessCtor(Messages.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -62,7 +63,6 @@ public class MessagesShould {
     public void toJson_fail_on_null() {
         Messages.toJson(Tests.<Message>nullRef());
     }
-
 
     @Test
     public void print_to_json() {
@@ -136,8 +136,26 @@ public class MessagesShould {
         assertReturnsFieldClass(StringValue.class, MessageWithStringValue.getDescriptor());
     }
 
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final Class<StringValue> stringValueClass = StringValue.class;
+        final FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
+                                                                  .getDescriptorForType()
+                                                                  .getFields()
+                                                                  .get(0);
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Messages.class)
+                                                                     .addDefaultValue(TypeUrl.of(stringValueClass))
+                                                                     .addDefaultValue(stringValueClass)
+                                                                     .addDefaultValue(defaultFieldDescriptor)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
+    }
+
     private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptors.Descriptor msgDescriptor) {
-        final FieldDescriptor field = msgDescriptor.getFields().get(0);
+        final FieldDescriptor field = msgDescriptor.getFields()
+                                                   .get(0);
 
         assertEquals(expectedClass, Messages.getFieldClass(field));
     }

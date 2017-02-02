@@ -20,6 +20,8 @@
 package org.spine3.server;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
@@ -49,6 +51,7 @@ import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -67,7 +70,7 @@ import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
+public final class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
@@ -81,7 +84,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
 
     /** If `true` the bounded context serves many organizations. */
     private final boolean multitenant;
-    private final StorageFactory storageFactory;
+
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
@@ -96,11 +99,16 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
      */
     private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
 
+    /**
+     * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
+     */
+    private final Supplier<StorageFactory> storageFactory;
+
     private BoundedContext(Builder builder) {
         super();
         this.name = builder.name;
         this.multitenant = builder.multitenant;
-        this.storageFactory = builder.storageFactory;
+        this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
@@ -139,7 +147,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
      */
     @Override
     public void close() throws Exception {
-        storageFactory.close();
+        storageFactory.get().close();
         commandBus.close();
         eventBus.close();
         stand.close();
@@ -209,7 +217,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
 
     private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
-            repository.initStorage(this.storageFactory);
+            repository.initStorage(storageFactory.get());
         }
     }
 
@@ -283,6 +291,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
         return Optional.fromNullable(result);
     }
+
     /**
      * A builder for producing {@code BoundedContext} instances.
      *
@@ -292,7 +301,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
     public static class Builder {
 
         private String name = DEFAULT_NAME;
-        private StorageFactory storageFactory;
+        private Supplier<StorageFactory> storageFactorySupplier;
         private CommandStore commandStore;
         private CommandBus commandBus;
         private EventBus eventBus;
@@ -333,14 +342,20 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return this.multitenant;
         }
 
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            this.storageFactory = checkNotNull(storageFactory);
+        /**
+         * Sets the supplier for {@code StorageFactory}.
+         *
+         * <p>If the supplier was not set or {@code null} was passed,
+         * {@link StorageFactorySwitch} will be used during the construction of
+         * a {@code BoundedContext} instance.
+         */
+        public Builder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
+            this.storageFactorySupplier = supplier;
             return this;
         }
 
-        @Nullable
-        public StorageFactory getStorageFactory() {
-            return storageFactory;
+        public Optional<Supplier<StorageFactory>> storageFactorySupplier() {
+            return Optional.fromNullable(storageFactorySupplier);
         }
 
         public Builder setCommandStore(CommandStore commandStore) {
@@ -348,9 +363,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return this;
         }
 
-        @Nullable
-        public CommandStore getCommandStore() {
-            return this.commandStore;
+        public Optional<CommandStore> commandStore() {
+            return Optional.fromNullable(commandStore);
         }
 
         public Builder setCommandBus(CommandBus commandBus) {
@@ -358,9 +372,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return this;
         }
 
-        @Nullable
-        public CommandBus getCommandBus() {
-            return commandBus;
+        public Optional<CommandBus> commandBus() {
+            return Optional.fromNullable(commandBus);
         }
 
 
@@ -369,9 +382,8 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return this;
         }
 
-        @Nullable
-        public EventBus getEventBus() {
-            return eventBus;
+        public Optional<EventBus> eventBus() {
+            return Optional.fromNullable(eventBus);
         }
 
         public Builder setStand(Stand stand) {
@@ -379,14 +391,12 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return this;
         }
 
-        @Nullable
-        public Stand getStand() {
-            return stand;
+        public Optional<Stand> stand() {
+            return Optional.fromNullable(stand);
         }
 
-        @Nullable
-        public StandUpdateDelivery getStandUpdateDelivery() {
-            return standUpdateDelivery;
+        public Optional<StandUpdateDelivery> standUpdateDelivery() {
+            return Optional.fromNullable(standUpdateDelivery);
         }
 
         public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
@@ -395,17 +405,26 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         public BoundedContext build() {
-            checkNotNull(storageFactory, "storageFactory must be set");
+            if (storageFactorySupplier == null) {
+                storageFactorySupplier = StorageFactorySwitch.getInstance();
+            }
+
+            final StorageFactory storageFactory = storageFactorySupplier.get();
+
+            if (storageFactory == null) {
+                throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
+                                                        ") returned null instance");
+            }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
-                commandStore = createCommandStore();
+                commandStore = createCommandStore(storageFactory);
             }
             if (commandBus == null) {
-                commandBus = createCommandBus();
+                commandBus = createCommandBus(storageFactory);
             }
             if (eventBus == null) {
-                eventBus = createEventBus();
+                eventBus = createEventBus(storageFactory);
             }
 
             if (stand == null) {
@@ -423,28 +442,22 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
         }
 
         private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
-            StandFunnel standFunnel;
-            if (standUpdateDelivery == null) {
-                standFunnel = StandFunnel.newBuilder()
-                                         .setStand(stand)
-                                         .build();
-            } else {
-                standFunnel = StandFunnel.newBuilder()
-                                         .setDelivery(standUpdateDelivery)
-                                         .setStand(stand)
-                                         .build();
+            final StandFunnel.Builder builder = StandFunnel.newBuilder()
+                                                           .setStand(stand);
+            if (standUpdateDelivery != null) {
+                builder.setDelivery(standUpdateDelivery);
             }
-            return standFunnel;
+            return builder.build();
         }
 
-        private CommandStore createCommandStore() {
+        private static CommandStore createCommandStore(StorageFactory storageFactory) {
             final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
             return result;
         }
 
-        private CommandBus createCommandBus() {
+        private CommandBus createCommandBus(StorageFactory storageFactory) {
             if (commandStore == null) {
-                this.commandStore = createCommandStore();
+                this.commandStore = createCommandStore(storageFactory);
             }
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .setCommandStore(commandStore)
@@ -452,7 +465,7 @@ public class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEv
             return commandBus;
         }
 
-        private EventBus createEventBus() {
+        private static EventBus createEventBus(StorageFactory storageFactory) {
             final EventBus result = EventBus.newBuilder()
                                             .setStorageFactory(storageFactory)
                                             .build();

@@ -30,7 +30,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.DefaultIdSetEventFunction;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
@@ -116,7 +115,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      */
     @SuppressWarnings("MethodParameterNamingConvention")
     protected ProjectionRepository(BoundedContext boundedContext, boolean catchUpAfterStorageInit) {
-        super(boundedContext, DefaultIdSetEventFunction.<I>producerFromContext());
+        super(boundedContext, EventDispatchingRepository.<I>producerFromContext());
         this.standFunnel = boundedContext.getStandFunnel();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
     }
@@ -237,7 +236,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
         store(projection);
-        final S state = projection.getState();
         standFunnel.post(projection);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();

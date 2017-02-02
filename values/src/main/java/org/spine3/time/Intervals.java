@@ -26,6 +26,7 @@ import org.spine3.protobuf.Durations;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
+import static org.spine3.protobuf.Timestamps.compare;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 
 /**
@@ -52,6 +53,20 @@ public class Intervals {
                                                   .setStart(start)
                                                   .setEnd(end);
         return interval.build();
+    }
+
+    /**
+     * Verifies if the timestamp is withing the interval.
+     *
+     * <p>The interval is closed, which means that the method would return {@code true}
+     * if {@code interval.start <= timestamp <= interval.end}.
+     *
+     * @return {@code true} if the timestamp is withing the interval, {@code false} otherwise
+     */
+    public static boolean contains(Interval interval, Timestamp timestamp) {
+        final boolean isAfterOrOnStart = compare(interval.getStart(), timestamp) <= 0;
+        final boolean isBeforeOrOnEnd = compare(timestamp, interval.getEnd()) <= 0;
+        return isAfterOrOnStart && isBeforeOrOnEnd;
     }
 
     /**

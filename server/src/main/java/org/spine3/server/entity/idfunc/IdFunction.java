@@ -18,33 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity.idfunc;
 
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.EntityStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
 
 /**
- * Tests of an in-memory {@link RecordStorage} implementation.
+ * Obtains an entity ID based on an event/command message and context.
  *
- * @author Alexander Litus
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @see Entity
  */
-public class InMemoryEntityStorageShould extends EntityStorageShould<String> {
+interface IdFunction<I, M extends Message, C extends Message> {
 
-    @Override
-    protected RecordStorage<String> getStorage() {
-        return InMemoryRecordStorage.newInstance(false);
-    }
-
-    @Override
-    protected <Id> RecordStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass) {
-        return InMemoryRecordStorage.newInstance(false);
-    }
-
-    @Override
-    protected String newId() {
-        return newUuid();
-    }
+    /**
+     * Obtains an entity ID based on the passed event or command message and its context.
+     *
+     * @param message an event or command message to use to get an ID
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return an entity ID
+     */
+    I apply(M message, C context);
 }

@@ -56,8 +56,6 @@ import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
-import org.spine3.testdata.TestCommandBusFactory;
-import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.List;
 
@@ -191,9 +189,6 @@ public class BoundedContextShould {
     @Test
     public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                .setCommandBus(TestCommandBusFactory.create(storageFactory))
-                                                .setEventBus(TestEventBusFactory.create(storageFactory))
                                                 .setMultitenant(true)
                                                 .build();
         assertTrue(bc.isMultitenant());

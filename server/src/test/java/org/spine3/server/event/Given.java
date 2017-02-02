@@ -22,11 +22,15 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.Identifiers;
 import org.spine3.people.PersonName;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectCompleted;
@@ -34,6 +38,9 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.user.permission.PermissionGrantedEvent;
+import org.spine3.test.event.user.permission.PermissionRevokedEvent;
+import org.spine3.test.event.user.sharing.SharingRequestApproved;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.UserId;
 
@@ -111,6 +118,27 @@ public class Given {
                                  .setProjectId(id)
                                  .build();
         }
+
+        public static PermissionGrantedEvent permissionGranted() {
+            return PermissionGrantedEvent.newBuilder()
+                                         .setGranterUid(Identifiers.newUuid())
+                                         .setPermissionId("mock-permission")
+                                         .setUserUid(Identifiers.newUuid())
+                                         .build();
+        }
+
+        public static PermissionRevokedEvent permissionRevoked() {
+            return PermissionRevokedEvent.newBuilder()
+                                         .setPermissionId("old-permission")
+                                         .setUserUid(Identifiers.newUuid())
+                                         .build();
+        }
+
+        public static SharingRequestApproved sharingRequestApproved() {
+            return SharingRequestApproved.newBuilder()
+                                         .setUserUid(Identifiers.newUuid())
+                                         .build();
+        }
     }
 
     public static class Event {
@@ -137,6 +165,31 @@ public class Given {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
             final org.spine3.base.Event event = createEvent(msg, eventContext);
             return event;
+        }
+
+        public static org.spine3.base.Event permissionGranted() {
+            final PermissionGrantedEvent message = EventMessage.permissionGranted();
+            final org.spine3.base.Event permissionGranted = createGenericEvent(message);
+            return permissionGranted;
+        }
+
+        public static org.spine3.base.Event permissionRevoked() {
+            final PermissionRevokedEvent message = EventMessage.permissionRevoked();
+            final org.spine3.base.Event permissionRevoked = createGenericEvent(message);
+            return permissionRevoked;
+        }
+
+        public static org.spine3.base.Event sharingRequestApproved() {
+            final SharingRequestApproved message = EventMessage.sharingRequestApproved();
+            final org.spine3.base.Event sharingReqquestApproved = createGenericEvent(message);
+            return sharingReqquestApproved;
+        }
+
+        private static org.spine3.base.Event createGenericEvent(Message eventMessage) {
+            final Any wrappedMessage = AnyPacker.pack(eventMessage);
+            final EventContext eventContext = createEventContext();
+            final org.spine3.base.Event permissionRevoked = Events.createEvent(wrappedMessage, eventContext);
+            return permissionRevoked;
         }
     }
 
@@ -181,6 +234,17 @@ public class Given {
                     return null;
                 }
                 return Tests.newUserId("Project owner " + id.getId());
+            }
+        }
+
+        public static class GetProjectMaxMemberCount implements Function<ProjectId, Integer> {
+            @Nullable
+            @Override
+            public Integer apply(@Nullable ProjectId input) {
+                if (input == null) {
+                    return 0;
+                }
+                return input.hashCode();
             }
         }
 

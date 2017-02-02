@@ -23,12 +23,12 @@ package org.spine3.server.reflect;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClassesShould {
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateUtilityConstructor(Classes.class));
+        assertTrue(hasPrivateParameterlessCtor(Classes.class));
     }
 }

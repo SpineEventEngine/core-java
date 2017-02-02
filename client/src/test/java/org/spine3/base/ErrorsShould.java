@@ -21,17 +21,18 @@
 package org.spine3.base;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ErrorsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Errors.class));
+        assertTrue(hasPrivateParameterlessCtor(Errors.class));
     }
 
     @Test
@@ -41,7 +42,8 @@ public class ErrorsShould {
         final Error error = Errors.fromException(exception);
 
         assertEquals(msg, error.getMessage());
-        assertEquals(exception.getClass().getName(), error.getType());
+        assertEquals(exception.getClass()
+                              .getName(), error.getType());
     }
 
     @Test
@@ -51,6 +53,17 @@ public class ErrorsShould {
 
         final Error error = Errors.fromThrowable(throwable);
         assertEquals(msg, error.getMessage());
-        assertEquals(throwable.getClass().getName(), error.getType());
+        assertEquals(throwable.getClass()
+                              .getName(), error.getType());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Errors.class)
+                                                                     .addDefaultValue(new RuntimeException("exception"))
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

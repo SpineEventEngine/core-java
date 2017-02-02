@@ -20,9 +20,10 @@
 
 package org.spine3.time.change;
 
-import org.junit.Test;
 import com.google.protobuf.Timestamp;
+import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 import org.spine3.time.LocalDate;
@@ -40,7 +41,7 @@ import org.spine3.time.ZoneOffsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
         "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
@@ -49,7 +50,7 @@ public class ChangesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Changes.class));
+        assertTrue(hasPrivateParameterlessCtor(Changes.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -248,5 +249,14 @@ public class ChangesShould {
 
         assertEquals(previousDateTime, result.getPreviousValue());
         assertEquals(newDateTime, result.getNewValue());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Changes.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

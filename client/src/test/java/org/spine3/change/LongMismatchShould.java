@@ -21,6 +21,7 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,7 @@ import static org.spine3.change.LongMismatch.unexpectedValue;
 import static org.spine3.change.LongMismatch.unpackActual;
 import static org.spine3.change.LongMismatch.unpackExpected;
 import static org.spine3.change.LongMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class LongMismatchShould {
 
@@ -42,7 +43,7 @@ public class LongMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LongMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(LongMismatch.class));
     }
 
     @Test
@@ -109,5 +110,14 @@ public class LongMismatchShould {
     public void not_accept_same_expected_and_actual() {
         final long value = 1919L;
         unexpectedValue(value, value, NEW_VALUE, VERSION);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(LongMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

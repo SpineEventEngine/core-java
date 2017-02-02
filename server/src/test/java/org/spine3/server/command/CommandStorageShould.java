@@ -69,7 +69,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
+public abstract class CommandStorageShould
+        extends AbstractStorageShould<CommandId, CommandStorageRecord, CommandStorage> {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
@@ -90,10 +91,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     public void tearDownCommandStorageTest() {
         close(storage);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected abstract CommandStorage getStorage();
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
@@ -121,17 +118,19 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
      * Storing and loading tests.
      ****************************/
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_and_read_command() {
         final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
 
         storage.store(command);
-        final CommandStorageRecord record = storage.read(commandId);
+        final CommandStorageRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, RECEIVED);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_error() {
         final Command command = Given.Command.createProject();
@@ -139,7 +138,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         final Error error = newError();
 
         storage.store(command, error);
-        final CommandStorageRecord record = storage.read(commandId);
+        final CommandStorageRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, ERROR);
         assertEquals(error, record.getError());
@@ -161,6 +160,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                            .isEmpty());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_status() {
         final Command command = Given.Command.createProject();
@@ -168,7 +168,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         final CommandStatus status = SCHEDULED;
 
         storage.store(command, status);
-        final CommandStorageRecord record = storage.read(commandId);
+        final CommandStorageRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, status);
     }
@@ -196,16 +196,18 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
      * Update command status tests.
      ******************************/
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
     public void set_ok_command_status() {
         givenNewRecord();
 
         storage.setOkStatus(id);
 
-        final CommandStorageRecord actual = storage.read(id);
+        final CommandStorageRecord actual = storage.read(id).get();
         assertEquals(OK, actual.getStatus());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
     public void set_error_command_status() {
         givenNewRecord();
@@ -213,11 +215,12 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
         storage.updateStatus(id, error);
 
-        final CommandStorageRecord actual = storage.read(id);
+        final CommandStorageRecord actual = storage.read(id).get();
         assertEquals(ERROR, actual.getStatus());
         assertEquals(error, actual.getError());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
     @Test
     public void set_failure_command_status() {
         givenNewRecord();
@@ -225,7 +228,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
         storage.updateStatus(id, failure);
 
-        final CommandStorageRecord actual = storage.read(id);
+        final CommandStorageRecord actual = storage.read(id).get();
         assertEquals(FAILURE, actual.getStatus());
         assertEquals(failure, actual.getFailure());
     }

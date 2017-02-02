@@ -21,16 +21,19 @@
 package org.spine3.change;
 
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
-import static org.spine3.change.IntMismatch.*;
+import static org.spine3.change.IntMismatch.expectedNonZero;
+import static org.spine3.change.IntMismatch.expectedZero;
+import static org.spine3.change.IntMismatch.of;
 import static org.spine3.change.IntMismatch.unexpectedValue;
 import static org.spine3.change.IntMismatch.unpackActual;
 import static org.spine3.change.IntMismatch.unpackExpected;
 import static org.spine3.change.IntMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 public class IntMismatchShould {
 
@@ -41,7 +44,7 @@ public class IntMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(IntMismatch.class));
+        assertTrue(hasPrivateParameterlessCtor(IntMismatch.class));
     }
 
     @Test
@@ -109,5 +112,14 @@ public class IntMismatchShould {
     public void not_accept_same_expected_and_actual() {
         final int value = 5;
         unexpectedValue(value, value, NEW_VALUE, VERSION);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(IntMismatch.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

@@ -28,12 +28,13 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
@@ -45,7 +46,7 @@ public class ValuesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Values.class));
+        assertTrue(hasPrivateParameterlessCtor(Values.class));
     }
 
     @Test
@@ -136,5 +137,14 @@ public class ValuesShould {
         final Any msg = Values.pack(value);
         final BoolValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(Values.class)
+                                                                     .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 }

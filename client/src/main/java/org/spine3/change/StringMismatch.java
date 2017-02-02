@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.change.Preconditions.checkNotEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
 
@@ -78,8 +78,10 @@ public class StringMismatch {
      * @return new {@code ValueMismatch} instance
      */
     public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
-        checkNotNullOrEqual(expected, actual);
+        checkNotNull(expected);
+        checkNotNull(actual);
         checkNotNull(newValue);
+        checkNotEqual(expected, actual);
 
         return of(expected, actual, newValue, version);
     }
@@ -107,6 +109,7 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
@@ -117,6 +120,7 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
@@ -127,6 +131,7 @@ public class StringMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
     public static String unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }

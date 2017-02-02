@@ -43,12 +43,12 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     /** The time of the last handled event. */
     private Timestamp timestampOfLastEvent;
 
-    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage, boolean multitenant) {
-        return new InMemoryProjectionStorage<>(entityStorage, multitenant);
+    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage) {
+        return new InMemoryProjectionStorage<>(entityStorage);
     }
 
-    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage, boolean multitenant) {
-        super(multitenant);
+    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
+        super(recordStorage.isMultitenant());
         this.recordStorage = recordStorage;
     }
 
@@ -72,6 +72,21 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     public void close() throws Exception {
         recordStorage.close();
         super.close();
+    }
+
+    @Override
+    public boolean markArchived(I id) {
+        return getRecordStorage().markArchived(id);
+    }
+
+    @Override
+    public boolean markDeleted(I id) {
+        return getRecordStorage().markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return getRecordStorage().delete(id);
     }
 
     @Override

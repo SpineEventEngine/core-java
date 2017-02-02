@@ -20,76 +20,63 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
+import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.users.TenantId;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
-
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
- * @author Alexander Litus, Alex Tymchenko
+ * @param <I> the type of entity IDs
+ * @author Alexander Litus
+ * @author Alex Tymchenko
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
-
-    private final Map<TenantId, Map<I, EntityStorageRecord>> tenantToStorageMap = newHashMap();
+    private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
     protected InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
+            @Override
+            TenantRecords<I> createSlice() {
+                return new TenantRecords<>();
+            }
+        };
+    }
+
+    @Override
+    public boolean markArchived(I id) {
+        return getStorage().markArchived(id);
+    }
+
+    @Override
+    public boolean markDeleted(I id) {
+        return getStorage().markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(I id) {
+        return getStorage().delete(id);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
-        final Map<I, EntityStorageRecord> storage = getStorage();
+        final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
         final Collection<EntityStorageRecord> result = new LinkedList<>();
 
         for (I givenId : givenIds) {
-            final EntityStorageRecord matchingResult = findAndApplyFieldMask(storage, givenId, fieldMask);
+            final EntityStorageRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
         return result;
-    }
-
-    private EntityStorageRecord findAndApplyFieldMask(Map<I, EntityStorageRecord> storage,
-                                                      I givenId,
-                                                      FieldMask fieldMask) {
-        EntityStorageRecord matchingResult = null;
-        for (I recordId : storage.keySet()) {
-            if (recordId.equals(givenId)) {
-                EntityStorageRecord.Builder matchingRecord = storage.get(recordId)
-                                                                    .toBuilder();
-                final Any state = matchingRecord.getState();
-                final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
-                final Message wholeState = AnyPacker.unpack(state);
-                final Message maskedState = FieldMasks.applyMask(fieldMask, wholeState, typeUrl);
-                final Any processed = AnyPacker.pack(maskedState);
-
-                matchingRecord.setState(processed);
-                matchingResult = matchingRecord.build();
-            }
-        }
-        return matchingResult;
     }
 
     @Override
@@ -99,63 +86,24 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords() {
-        final Map<I, EntityStorageRecord> storage = getStorage();
-
-        final ImmutableMap<I, EntityStorageRecord> result = ImmutableMap.copyOf(storage);
-        return result;
+        return getStorage().readAllRecords();
     }
 
     @Override
     protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        if (fieldMask.getPathsList()
-                     .isEmpty()) {
-            return readAllRecords();
-        }
-
-        final Map<I, EntityStorageRecord> storage = getStorage();
-
-        if (storage.isEmpty()) {
-            return ImmutableMap.of();
-        }
-
-        final ImmutableMap.Builder<I, EntityStorageRecord> result = ImmutableMap.builder();
-
-        for (Map.Entry<I, EntityStorageRecord> storageEntry : storage.entrySet()) {
-            final I id = storageEntry.getKey();
-            final EntityStorageRecord rawRecord = storageEntry.getValue();
-            final TypeUrl type = TypeUrl.of(rawRecord.getState()
-                                                     .getTypeUrl());
-            final Any recordState = rawRecord.getState();
-            final Message stateAsMessage = AnyPacker.unpack(recordState);
-            final Message processedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
-            final Any packedState = AnyPacker.pack(processedState);
-            final EntityStorageRecord resultingRecord = EntityStorageRecord.newBuilder()
-                                                                           .setState(packedState)
-                                                                           .build();
-            result.put(id, resultingRecord);
-        }
-
-        return result.build();
+        return getStorage().readAllRecords(fieldMask);
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
         return new InMemoryRecordStorage<>(multitenant);
     }
 
-    private Map<I, EntityStorageRecord> getStorage() {
-        final TenantId tenantId = isMultitenant() ? CurrentTenant.get() : singleTenant;
-        checkState(tenantId != null, "Current tenant is null");
-
-        Map<I, EntityStorageRecord> storage = tenantToStorageMap.get(tenantId);
-        if (storage == null) {
-            storage = newHashMap();
-            tenantToStorageMap.put(tenantId, storage);
-        }
-        return storage;
+    private TenantRecords<I> getStorage() {
+        return multitenantStorage.getStorage();
     }
 
     @Override
-    protected EntityStorageRecord readRecord(I id) {
+    protected Optional<EntityStorageRecord> readRecord(I id) {
         return getStorage().get(id);
     }
 
@@ -164,8 +112,4 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         getStorage().put(id, record);
     }
 
-    @Override
-    public void close() throws Exception {
-        super.close();
-    }
 }

@@ -103,3 +103,4 @@ message AggregateEvents {
     // Otherwise, events are full history of the aggregate.
     repeated base.Event event = 2;
 }
+

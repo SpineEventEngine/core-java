@@ -23,6 +23,7 @@ package org.spine3.change;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
 
@@ -86,6 +87,7 @@ public class BooleanMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
     public static boolean unpackExpected(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
@@ -96,6 +98,7 @@ public class BooleanMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
     public static boolean unpackActual(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
@@ -106,6 +109,7 @@ public class BooleanMismatch {
      * @throws RuntimeException if the passed instance represent a mismatch of non-boolean values
      */
     public static boolean unpackNewValue(ValueMismatch mismatch) {
+        checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }

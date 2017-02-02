@@ -19,6 +19,7 @@
  */
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -81,35 +82,45 @@ class InMemoryStandStorage extends StandStorage {
         return result;
     }
 
+    @Override
+    public boolean markArchived(AggregateStateId id) {
+        return recordStorage.markArchived(id);
+    }
+
+    @Override
+    public boolean markDeleted(AggregateStateId id) {
+        return recordStorage.markDeleted(id);
+    }
+
+    @Override
+    public boolean delete(AggregateStateId id) {
+        return recordStorage.delete(id);
+    }
+
     @Nullable
     @Override
-    protected EntityStorageRecord readRecord(AggregateStateId id) {
-        final EntityStorageRecord result = recordStorage.read(id);
-        return result;
+    protected Optional<EntityStorageRecord> readRecord(AggregateStateId id) {
+        return recordStorage.read(id);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
-        return result;
+        return recordStorage.readMultiple(ids);
     }
 
     @Override
     protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids, fieldMask);
-        return result;
+        return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords() {
-        final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll();
-        return result;
+        return recordStorage.readAll();
     }
 
     @Override
     protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        final Map<AggregateStateId, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
-        return result;
+        return recordStorage.readAll(fieldMask);
     }
 
     @Override
@@ -146,6 +157,5 @@ class InMemoryStandStorage extends StandStorage {
             final InMemoryStandStorage result = new InMemoryStandStorage(this);
             return result;
         }
-
     }
 }

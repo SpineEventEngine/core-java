@@ -393,28 +393,28 @@ public class AggregateShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
             return event;
         }
 
         @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+        TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
             final TaskAdded event = Given.EventMessage.taskAdded(cmd.getProjectId());
             return event;
         }
 
         @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+        List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
             final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
         @Assign
-        public List<Event> handle(ImportEvents command, CommandContext ctx) {
+        List<Event> handle(ImportEvents command, CommandContext ctx) {
             return command.getEventList();
         }
 
@@ -459,7 +459,7 @@ public class AggregateShould {
 
         /** There is no event applier for ProjectCreated event (intentionally). */
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             return Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
         }
@@ -532,7 +532,7 @@ public class AggregateShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }

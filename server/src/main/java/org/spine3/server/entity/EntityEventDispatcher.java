@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
+import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventDispatcher;
 
 /**

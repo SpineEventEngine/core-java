@@ -18,17 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
-
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-
 /**
- * Obtains a set of entity IDs based on an even message and its context.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for obtaining entity identifiers.
  */
-public interface IdSetEventFunction<I, M extends Message> extends IdSetFunction<I, M, EventContext> {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity.idfunc;
+
+import javax.annotation.ParametersAreNonnullByDefault;
