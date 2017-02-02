@@ -34,6 +34,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.type.ClassName;
 
@@ -58,7 +59,7 @@ public class Sample {
 
     public static class EventRecord {
 
-        public static EventStorageRecord withAllFields() {
+        public static EventStorageRecord withRandomFields() {
             return Sample.messageOfType(EventStorageRecord.class);
         }
 
@@ -79,6 +80,13 @@ public class Sample {
             builder.setEventId(eventId)
                    .setTimestamp(timestamp);
             return builder.build();
+        }
+    }
+
+    public static class AggregateRecord {
+
+        public static AggregateStorageRecord withRandomFields() {
+            return Sample.messageOfType(AggregateStorageRecord.class);
         }
     }
 
