@@ -39,11 +39,6 @@ public class ZoneOffsetsShould {
     }
 
     @Test
-    public void have_private_utility_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
-    }
-
-    @Test
     public void create_default_instance_according_to_place() {
         final int currentOffset = TimeZone.getDefault().getRawOffset()/1000;
         assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
