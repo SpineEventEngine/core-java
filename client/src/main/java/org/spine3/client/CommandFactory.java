@@ -43,7 +43,7 @@ public class CommandFactory {
     private final UserId actor;
 
     /**
-     * In case when zone offset was not defined it sets the current time zone offset value by default.
+     * In case the zone offset is not defined, the current time zone offset value is set by default.
      */
     private final ZoneOffset zoneOffset;
 
@@ -112,7 +112,8 @@ public class CommandFactory {
         @Nullable
         private TenantId tenantId;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public UserId getActor() {
             return actor;
@@ -160,7 +161,7 @@ public class CommandFactory {
         public CommandFactory build() {
             checkNotNull(actor, "`actor` must be defined");
 
-            if (zoneOffset==null){
+            if (zoneOffset == null) {
                 setZoneOffset(ZoneOffsets.getDefault());
             }
             final CommandFactory result = new CommandFactory(this);

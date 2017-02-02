@@ -27,6 +27,7 @@ import java.util.TimeZone;
 
 import static org.spine3.protobuf.Durations.hours;
 import static org.spine3.protobuf.Durations.minutes;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -57,7 +58,8 @@ public class ZoneOffsets {
      * Obtains the ZoneOffset instance using timezone offset of the Java virtual machine.
      */
     public static ZoneOffset getDefault() {
-        final int seconds = TimeZone.getDefault().getRawOffset()/1000;
+        final int seconds = TimeZone.getDefault()
+                                    .getRawOffset() / (int) MILLIS_PER_SECOND;
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(seconds)
                          .build();
