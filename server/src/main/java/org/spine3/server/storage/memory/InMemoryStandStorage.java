@@ -135,6 +135,13 @@ class InMemoryStandStorage extends StandStorage {
         recordStorage.write(id, record);
     }
 
+    @Override
+    protected void writeRecords(Map<AggregateStateId, EntityStorageRecord> records) {
+        for (Map.Entry<AggregateStateId, EntityStorageRecord> record : records.entrySet()) {
+            writeRecord(record.getKey(), record.getValue());
+        }
+    }
+
     public static class Builder {
 
         private boolean multitenant;
