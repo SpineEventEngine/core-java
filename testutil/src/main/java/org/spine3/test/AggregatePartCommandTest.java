@@ -60,7 +60,7 @@ public abstract class AggregatePartCommandTest<C extends Message,
     protected abstract P createAggregatePart();
 
     /**
-     * Obtains the aggregate part being tested or {@code Optional#absent()} if
+     * Obtains the aggregate part being tested or {@code Optional.absent()} if
      * the test object has not been created yet.
      */
     protected Optional<P> aggregatePart() {

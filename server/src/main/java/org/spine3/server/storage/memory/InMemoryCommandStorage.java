@@ -20,8 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
+import com.google.common.base.Optional;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -29,24 +28,31 @@ import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStorage;
 import org.spine3.server.command.storage.CommandStorageRecord;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
-import static org.spine3.validate.Validate.isNotDefault;
 
+/**
+ * In-memory implementation of {@code CommandStorage}.
+ *
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
+    private final MultitenantStorage<TenantCommands> multitenantStorage;
 
     protected InMemoryCommandStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<TenantCommands>(multitenant) {
+            @Override
+            TenantCommands createSlice() {
+                return new TenantCommands();
+            }
+        };
     }
 
     @Override
@@ -58,33 +64,21 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
-    public CommandStorageRecord read(CommandId id) {
+    public Optional<CommandStorageRecord> read(CommandId id) {
         checkNotClosed();
         checkNotDefault(id);
-        final CommandStorageRecord record = get(id);
+        final Optional<CommandStorageRecord> record = get(id);
         return record;
+    }
+
+    private TenantCommands getStorage() {
+        return multitenantStorage.getStorage();
     }
 
     @Override
     protected Iterator<CommandStorageRecord> read(final CommandStatus status) {
         checkNotClosed();
-        final Collection<CommandStorageRecord> records = storage.values();
-        final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
-        return filteredRecords;
-    }
-
-    private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
-                                                                 final CommandStatus status) {
-        return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
-            @Override
-            public boolean apply(@Nullable CommandStorageRecord record) {
-                if (record == null) {
-                    return false;
-                }
-                final boolean statusMatches = record.getStatus() == status;
-                return statusMatches;
-            }
-        });
+        return getStorage().getByStatus(status);
     }
 
     @Override
@@ -92,7 +86,7 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.ERROR)
                                                          .setError(error)
@@ -105,7 +99,7 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.FAILURE)
                                                          .setFailure(failure)
@@ -117,7 +111,7 @@ class InMemoryCommandStorage extends CommandStorage {
     public void setOkStatus(CommandId id) {
         checkNotClosed();
         checkNotNull(id);
-        final CommandStorageRecord record = checkIsNotDefault(get(id), id);
+        final CommandStorageRecord record = checkFound(get(id), id);
         final CommandStorageRecord updatedRecord = record.toBuilder()
                                                          .setStatus(CommandStatus.OK)
                                                          .build();
@@ -125,19 +119,17 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     private void put(CommandId id, CommandStorageRecord record) {
-        storage.put(id, record);
+        getStorage().put(id, record);
     }
 
-    private CommandStorageRecord get(CommandId id) {
-        final CommandStorageRecord record = storage.get(id);
-        if (record == null) {
-            return CommandStorageRecord.getDefaultInstance();
-        }
-        return record;
+    private Optional<CommandStorageRecord> get(CommandId id) {
+        return getStorage().get(id);
     }
 
-    private static CommandStorageRecord checkIsNotDefault(CommandStorageRecord record, CommandId id) {
-        checkState(isNotDefault(record), "No record found for command ID: " + idToString(id));
-        return record;
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "OptionalUsedAsFieldOrParameterType"})
+        // We do check. It's the purpose of this method.
+    private static CommandStorageRecord checkFound(Optional<CommandStorageRecord> record, CommandId id) {
+        checkState(record.isPresent(), "No record found for command ID: " + idToString(id));
+        return record.get();
     }
 }

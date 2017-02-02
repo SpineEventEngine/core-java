@@ -18,28 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
-
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-
 /**
- * Obtains an entity ID based on an event/command message and context.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext} or {@link CommandContext} type
- * @see Entity
+ * This package contains generated classes and interfaces for working
+ * with entity statuses.
  */
-interface IdFunction<I, M extends Message, C extends Message> {
 
-    /**
-     * Obtains an entity ID based on the passed event or command message and its context.
-     *
-     * @param message an event or command message to use to get an ID
-     * @param context either {@link EventContext} or {@link CommandContext} instance
-     * @return an entity ID
-     */
-    I apply(M message, C context);
-}
+@SPI
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity.status;
+
+import org.spine3.SPI;
+
+import javax.annotation.ParametersAreNonnullByDefault;

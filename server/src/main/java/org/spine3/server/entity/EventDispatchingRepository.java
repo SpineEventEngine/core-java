@@ -26,6 +26,8 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.server.entity.idfunc.Producers;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -93,27 +95,9 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
         return idSetFunctions.get(eventClass);
     }
 
+    @CheckReturnValue
     protected Set<I> findIds(Message event, EventContext context) {
         return idSetFunctions.findAndApply(event, context);
-    }
-
-    /**
-     * Loads or creates an entity by the passed ID.
-     *
-     * <p>The entity is created if it was not found.
-     *
-     * @param id the ID of the entity to load
-     * @return loaded or created projection instance
-     */
-    @Override
-    @CheckReturnValue
-    public Optional<E> load(I id) {
-        final Optional<E> loaded = super.load(id);
-        if (loaded.isPresent()) {
-            return loaded;
-        }
-        final E result = create(id);
-        return Optional.of(result);
     }
 
     /**
@@ -139,4 +123,19 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
      * @param context the event context
      */
     protected abstract void dispatchToEntity(I id, Message eventMessage, EventContext context);
+
+    /**
+     * Obtains default {@code IdSetFunction} that retrieves an event producer
+     * from the event context.
+     *
+     * @param <I> the type of the event producer
+     * @return {@code IdSetFunction} instance that returns a set with a single element
+     */
+    protected static <I> IdSetEventFunction<I, Message> producerFromContext() {
+        return Producers.producerFromContext();
+    }
+
+    protected static <I> IdSetEventFunction<I, Message> producerFromFirstMessageField() {
+        return Producers.producerFromFirstMessageField();
+    }
 }

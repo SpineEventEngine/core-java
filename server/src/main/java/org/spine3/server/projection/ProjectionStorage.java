@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -43,11 +44,10 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
         super(multitenant);
     }
 
-    @Nullable
     @Override
-    protected EntityStorageRecord readRecord(I id) {
+    protected Optional<EntityStorageRecord> readRecord(I id) {
         final RecordStorage<I> storage = getRecordStorage();
-        final EntityStorageRecord record = storage.read(id);
+        final Optional<EntityStorageRecord> record = storage.read(id);
         return record;
     }
 

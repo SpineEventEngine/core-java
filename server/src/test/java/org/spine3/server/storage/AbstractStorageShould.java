@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ import static org.junit.Assert.fail;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AbstractStorageShould<I, R extends Message> {
+public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
 
     private AbstractStorage<I, R> storage;
 
@@ -61,7 +62,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract <S extends AbstractStorage<I, R>> S getStorage();
+    protected abstract S getStorage();
 
     /** Creates a new storage record. */
     protected abstract R newStorageRecord();
@@ -94,20 +95,27 @@ public abstract class AbstractStorageShould<I, R extends Message> {
     }
 
     /** Writes a record, reads it and asserts it is the same as the expected one. */
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
         final R expected = newStorageRecord();
         storage.write(id, expected);
 
-        final R actual = storage.read(id);
+        final Optional<R> actual = storage.read(id);
 
-        assertEquals(expected, actual);
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test
-    public void return_default_record_instance_if_no_record_with_such_id() {
-        final R record = storage.read(newId());
+    public void handle_absence_of_record_with_passed_id() {
+        final Optional<R> record = storage.read(newId());
 
-        assertEquals(record.getDefaultInstanceForType(), record);
+        assertResultForMissingId(record);
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This is the purpose of the method.
+    protected void assertResultForMissingId(Optional<R> record) {
+        assertFalse(record.isPresent());
     }
 
     @Test(expected = NullPointerException.class)

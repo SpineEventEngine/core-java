@@ -34,7 +34,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
@@ -42,13 +45,18 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
+public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
+       extends AbstractStorageShould<I, EntityStorageRecord, S> {
 
     protected abstract Message newState(I id);
 
     @Override
     protected EntityStorageRecord newStorageRecord() {
         return newStorageRecord(newState(newId()));
+    }
+
+    private EntityStorageRecord newStorageRecord(I id) {
+        return newStorageRecord(newState(id));
     }
 
     private static EntityStorageRecord newStorageRecord(Message state) {
@@ -59,6 +67,20 @@ public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, En
                                                               .setVersion(0)
                                                               .build();
         return record;
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
+    @Test
+    public void write_and_read_record_by_Message_id() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord expected = newStorageRecord(id);
+        storage.write(id, expected);
+
+        final EntityStorageRecord actual = storage.read(id).get();
+
+        assertEquals(expected, actual);
+        close(storage);
     }
 
     @Test
@@ -104,5 +126,85 @@ public abstract class RecordStorageShould<I> extends AbstractStorageShould<I, En
             final Message state = AnyPacker.unpack(record.getState());
             assertMatchesMask(state, fieldMask);
         }
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
+    @Test
+    public void mark_record_as_archived() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // The attempt to mark a record which is not yet stored returns `false`.
+        assertFalse(storage.markArchived(id));
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not archived.
+        assertFalse(storage.read(id)
+                           .get()
+                           .getEntityStatus()
+                           .getArchived());
+
+        // Mark archived.
+        storage.markArchived(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id)
+                          .get()
+                          .getEntityStatus()
+                          .getArchived());
+
+        // Check that another attempt to mark archived returns `false`.
+        assertFalse(storage.markArchived(id));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
+    @Test
+    public void mark_record_as_deleted() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // The attempt to mark a record which is not yet stored returns `false`.
+        assertFalse(storage.markDeleted(id));
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not deleted.
+        assertFalse(storage.read(id)
+                           .get()
+                           .getEntityStatus()
+                           .getDeleted());
+
+        // Mark deleted.
+        storage.markDeleted(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id)
+                          .get()
+                          .getEntityStatus()
+                          .getDeleted());
+
+        // Check that another attempt to mark deleted returns `false`.
+        assertFalse(storage.markDeleted(id));
+    }
+
+    @Test
+    public void delete_record() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+
+        // Write the record.
+        storage.write(id, record);
+
+        // Delete the record.
+        assertTrue(storage.delete(id));
+
+        // There's no record with such ID.
+        assertFalse(storage.read(id).isPresent());
     }
 }

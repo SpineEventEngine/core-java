@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
@@ -50,16 +51,87 @@ import static com.google.common.collect.Iterators.filter;
  */
 class InMemoryEventStorage extends EventStorage {
 
-    private static final int INITIAL_CAPACITY = 100;
-
-    @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
-    private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
-            INITIAL_CAPACITY,
-            new EventStorageRecordComparator());
-    private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
+    private final MultitenantStorage<TenantEvents> multitenantStorage;
 
     protected InMemoryEventStorage(boolean multitenant) {
         super(multitenant);
+        this.multitenantStorage = new MultitenantStorage<TenantEvents>(multitenant) {
+            @Override
+            TenantEvents createSlice() {
+                return new TenantEvents();
+            }
+        };
+    }
+
+    @Override
+    public Iterator<Event> iterator(EventStreamQuery query) {
+        return getStorage().iterator(query);
+    }
+
+    @Override
+    protected void writeRecord(EventStorageRecord record) {
+        checkNotNull(record);
+        getStorage().addRecord(record);
+    }
+
+    @Override
+    protected Optional<EventStorageRecord> readRecord(EventId eventId) {
+        return getStorage().readRecord(eventId);
+    }
+
+    private TenantEvents getStorage() {
+        return multitenantStorage.getStorage();
+    }
+
+    /**
+     * Data “slice” of a tenant that stores events.
+     */
+    private static class TenantEvents implements TenantStorage<String, EventStorageRecord> {
+
+        private static final int INITIAL_CAPACITY = 100;
+
+        @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
+        private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
+                INITIAL_CAPACITY,
+                new EventStorageRecordComparator());
+        /**
+         * The index of records where keys are string values of {@code EventId}s. */
+        private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
+
+        @Nullable
+        @Override
+        public Optional<EventStorageRecord> get(String id) {
+            return Optional.fromNullable(index.get(id));
+        }
+
+        private Optional<EventStorageRecord> readRecord(EventId eventId) {
+            final Optional<EventStorageRecord> result = get(eventId.getUuid());
+            return result;
+        }
+
+        private Iterator<Event> iterator(EventStreamQuery query) {
+            final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
+            final Iterator<Event> transformed = toEventIterator(storage.iterator());
+            final Iterator<Event> result = filter(transformed, matchesQuery);
+            return result;
+        }
+
+        private void addRecord(EventStorageRecord record) {
+            final String eventId = record.getEventId();
+            checkState(!eventId.isEmpty(), "eventId cannot be empty");
+            put(eventId, record);
+        }
+
+        @Override
+        public void put(String id, EventStorageRecord record) {
+            index.put(id, record);
+            storage.add(record);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
     }
 
     /** Compares event records by timestamps of events. */
@@ -74,29 +146,5 @@ class InMemoryEventStorage extends EventStorage {
             final int result = Timestamps.compare(time1, time2);
             return result;
         }
-    }
-
-    @Override
-    public Iterator<Event> iterator(EventStreamQuery query) {
-        final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
-        final Iterator<Event> transformed = toEventIterator(storage.iterator());
-        final Iterator<Event> result = filter(transformed, matchesQuery);
-        return result;
-    }
-
-    @Override
-    protected void writeRecord(EventStorageRecord record) {
-        checkNotNull(record);
-        final String eventId = record.getEventId();
-        checkState(!eventId.isEmpty(), "eventId cannot be empty");
-        storage.add(record);
-        index.put(eventId, record);
-    }
-
-    @Nullable
-    @Override
-    protected EventStorageRecord readRecord(EventId eventId) {
-        final EventStorageRecord result = index.get(eventId.getUuid());
-        return result;
     }
 }

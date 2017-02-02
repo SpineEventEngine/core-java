@@ -23,6 +23,7 @@ package org.spine3.server.entity;
 import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.test.entity.command.CreateProject;
 
 import static org.junit.Assert.assertEquals;

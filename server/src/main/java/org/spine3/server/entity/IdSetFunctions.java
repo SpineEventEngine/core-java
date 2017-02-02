@@ -23,8 +23,8 @@ package org.spine3.server.entity;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.base.EventContext;
+import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.type.EventClass;
 
 import java.util.Map;
@@ -37,7 +37,6 @@ import java.util.Set;
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-@Internal
 class IdSetFunctions<I> {
 
     /** The map from event class to a function that generates a set of project IDs for the corresponding event. */

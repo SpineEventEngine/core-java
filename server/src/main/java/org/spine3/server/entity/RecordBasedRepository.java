@@ -53,7 +53,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
-import static org.spine3.validate.Validate.isDefault;
 
 /**
  * The base class for repositories that store entities as records.
@@ -106,8 +105,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public Optional<E> load(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityStorageRecord record = storage.read(id);
-        if (isDefault(record)) {
+        final Optional<EntityStorageRecord> found = storage.read(id);
+        if (!found.isPresent()) {
+            return Optional.absent();
+        }
+        final EntityStorageRecord record = found.get();
+        if (!Predicates.isEntityVisible().apply(record.getEntityStatus())) {
             return Optional.absent();
         }
         final E entity = toEntity(id, record);
@@ -127,6 +130,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
 
         final E result = loaded.get();
+        return result;
+    }
+
+    @Override
+    protected boolean markArchived(I id) {
+        final RecordStorage<I> storage = recordStorage();
+        final boolean result = storage.markArchived(id);
+        return result;
+    }
+
+    @Override
+    protected boolean markDeleted(I id) {
+        final RecordStorage<I> storage = recordStorage();
+        final boolean result = storage.markDeleted(id);
         return result;
     }
 
@@ -217,7 +234,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         final ImmutableCollection<E> entities =
                 FluentIterable.from(recordMap.entrySet())
-                              .transform(storageRecordToEntityTransformer())
+                              .transform(storageRecordToEntity())
                               .toList();
         return entities;
     }
@@ -245,11 +262,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
+        final Collection<I> domainIds = unpackIds(filters);
+        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
+        return result;
+    }
+
+    /**
+     * Extracts entity IDs from the passed filters.
+     */
+    private Collection<I> unpackIds(EntityFilters filters) {
         final List<EntityId> idsList = filters.getIdFilter()
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
 
-        final Collection<I> domainIds = Collections2.transform(idsList, new Function<EntityId, I>() {
+        final Collection<I> result = Collections2.transform(idsList, new Function<EntityId, I>() {
             @Nullable
             @Override
             public I apply(@Nullable EntityId input) {
@@ -278,7 +304,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             }
         });
 
-        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
         return result;
     }
 
@@ -293,6 +318,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked")
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
+        entity.setStatus(record.getEntityStatus());
         return entity;
     }
 
@@ -304,11 +330,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                                                                        .setState(stateAny)
                                                                        .setWhenModified(whenModified)
+                                                                       .setEntityStatus(entity.getStatus())
                                                                        .setVersion(version);
         return builder.build();
     }
 
-    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntityTransformer() {
+    /**
+     * Creates a function that transforms a {@code EntityStorageRecord} stored in a map
+     * into an entity of type {@code <E>}.
+     *
+     * @return new instance of the transforming function
+     */
+    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntity() {
         return new Function<Map.Entry<I, EntityStorageRecord>, E>() {
             @Nullable
             @Override
