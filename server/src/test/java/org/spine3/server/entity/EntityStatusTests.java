@@ -144,5 +144,4 @@ public class EntityStatusTests {
         // This should throw.
         entity.checkNotDeleted();
     }
-
 }

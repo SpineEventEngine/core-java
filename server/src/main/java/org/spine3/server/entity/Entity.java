@@ -389,13 +389,12 @@ public abstract class Entity<I, S extends Message> {
      *
      * @return
      *  <ul>
-     *      <li>Short Protobuf type name if the value is {@link Message}.
+     *      <li>Short Protobuf type name if ID is a {@link Message}.
      *      <li>Simple class name of the value, otherwise.
      *  </ul>
      */
     public String getShortIdTypeName() {
         if (id instanceof Message) {
-            //noinspection TypeMayBeWeakened
             final Message message = (Message) id;
             final Descriptors.Descriptor descriptor = message.getDescriptorForType();
             final String result = descriptor.getName();
