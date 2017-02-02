@@ -21,6 +21,7 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EventDispatchingRepository;
@@ -42,6 +44,7 @@ import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -53,7 +56,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
-                extends EventDispatchingRepository<I, P, S> {
+        extends EventDispatchingRepository<I, P, S> {
 
     /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
     protected enum Status {
@@ -90,6 +93,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /** If {@code true} the projection will {@link #catchUp()} after initialization. */
     private final boolean catchUpAfterStorageInit;
 
+    private BulkWriteOperation<I, P> ongoingOperation;
+
     /**
      * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
      * after the storage initialization.
@@ -110,7 +115,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
      * automatically after the {@link #initStorage(StorageFactory)} call is performed.
      *
-     * @param boundedContext the target {@code BoundedContext}
+     * @param boundedContext          the target {@code BoundedContext}
      * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
      */
     @SuppressWarnings("MethodParameterNamingConvention")
@@ -148,7 +153,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         super.initStorage(factory);
         setStatus(Status.STORAGE_ASSIGNED);
 
-        if(catchUpAfterStorageInit) {
+        if (catchUpAfterStorageInit) {
             log().debug("Storage assigned. {} is starting to catch-up", getClass());
             catchUp();
         }
@@ -235,11 +240,34 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
+
         store(projection);
-        standFunnel.post(projection);
-        final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
-        storage.writeLastHandledEventTime(eventTime);
+
+        if (ongoingOperation != null && ongoingOperation.isInProgress()) {
+            scheduledStore(projection, eventTime);
+        } else {
+            immediateStore(projection, eventTime);
+        }
+
+        standFunnel.post(projection);
+    }
+
+    private void immediateStore(P projection, Timestamp eventTime) {
+        store(projection);
+        projectionStorage().writeLastHandledEventTime(eventTime);
+    }
+
+    private void scheduledStore(P projection, Timestamp eventTime) {
+        ongoingOperation.writeProjection(projection);
+        ongoingOperation.writeLastHandledEventTime(eventTime);
+    }
+
+    private void store(Collection<P> projections) {
+        // TODO:02-02-17:dmytro.dashenkov: Implement bulk store.
+        for (P projection : projections) {
+            store(projection);
+        }
     }
 
     /**
@@ -248,14 +276,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         // Get the timestamp of the last event. This also ensures we have the storage.
         final Timestamp timestamp = nullToDefault(projectionStorage().readLastHandledEventTime());
-        final EventStore eventStore = getBoundedContext().getEventBus().getEventStore();
+        final EventStore eventStore = getBoundedContext().getEventBus()
+                                                         .getEventStore();
 
         final Set<EventFilter> eventFilters = getEventFilters();
 
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-               .setAfter(timestamp)
-               .addAllFilter(eventFilters)
-               .build();
+                                                       .setAfter(timestamp)
+                                                       .addAllFilter(eventFilters)
+                                                       .build();
 
         setStatus(Status.CATCHING_UP);
         eventStore.read(query, new EventStreamObserver(this));
@@ -287,13 +316,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         setStatus(Status.ONLINE);
     }
 
-   /**
+    /**
      * The stream observer which redirects events from {@code EventStore} to
      * the associated {@code ProjectionRepository}.
      */
     private static class EventStreamObserver implements StreamObserver<Event> {
 
         private final ProjectionRepository projectionRepository;
+        private BulkWriteOperation operation;
 
         EventStreamObserver(ProjectionRepository projectionRepository) {
             this.projectionRepository = projectionRepository;
@@ -301,7 +331,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onNext(Event event) {
+            if (operation == null || operation.isInProgress()) {
+                // Set the max time to complete the bulk to 40 seconds.
+                operation = projectionRepository.startBulkWrite(Durations.ofSeconds(40));
+            }
             projectionRepository.internalDispatch(event);
+            operation.checkExpiration();    // `flush` the data if the operation expires.
         }
 
         @Override
@@ -311,11 +346,38 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onCompleted() {
+            if (operation != null) {
+                operation.complete();
+            }
             projectionRepository.setStatus(Status.ONLINE);
             if (log().isInfoEnabled()) {
                 final Class<? extends ProjectionRepository> repositoryClass = projectionRepository.getClass();
                 log().info("{} catch-up complete", repositoryClass.getName());
             }
+        }
+    }
+
+    private BulkWriteOperation startBulkWrite(Duration expirationTime) {
+        final BulkWriteOperation<I, P> bulkWriteOperation = new BulkWriteOperation<>(
+                expirationTime,
+                new PendingDataFlushTask<>(this));
+        this.ongoingOperation = bulkWriteOperation;
+        return bulkWriteOperation;
+    }
+
+    private static class PendingDataFlushTask<P extends Projection<?, ?>>
+            implements BulkWriteOperation.FlushCallback<P> {
+
+        private final ProjectionRepository<?, P, ?> projectionRepository;
+
+        private PendingDataFlushTask(ProjectionRepository<?, P, ?> projectionRepository) {
+            this.projectionRepository = projectionRepository;
+        }
+
+        @Override
+        public void onFlushResults(Set<P> projections, Timestamp lastHandledEventTime) {
+            projectionRepository.store(projections);
+            projectionRepository.projectionStorage().writeLastHandledEventTime(lastHandledEventTime);
         }
     }
 
