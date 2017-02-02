@@ -42,6 +42,12 @@ public class ZoneOffsetsShould {
     }
 
     @Test
+    public void create_default_instance_according_to_place() {
+        final int currentOffset = 7200;
+        assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
+    }
+
+    @Test
     public void create_instance_by_hours_offset() {
         final int secondsInTwoHours = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 2;
         assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
