@@ -1307,5 +1307,4 @@ public class VerifyShould {
             throw new AssertionError("This is non-instantiable class");
         }
     }
-
 }
