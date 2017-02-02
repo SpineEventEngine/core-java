@@ -22,6 +22,8 @@ package org.spine3.time;
 
 import org.junit.Test;
 
+import java.util.TimeZone;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
@@ -43,7 +45,7 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_default_instance_according_to_place() {
-        final int currentOffset = 7200;
+        final int currentOffset = TimeZone.getDefault().getRawOffset()/1000;
         assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
     }
 
