@@ -35,11 +35,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.add;
 
 /**
- * Represents a write operation for the storage, designed to modify
+ * Represents a write operation for the projection storage, designed to modify
  * multiple items in the {@code Storage} at once.
  *
  * <p>Acts as an intermediate buffer for the changes to apply.
  *
+ * <p>Primary usage is letting the {@link ProjectionRepository} write loaded projections all at once.
+ *
+ * @param <I> type of the ID of the projection
+ * @param <P> type of the projection
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
@@ -60,7 +64,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     }
 
     /**
-     * Checks if this operation has been started and is still in progress.
+     * Checks if this operation has been started and is still in progress (is active).
      *
      * @return {@code true} if the operation is in progress, {@code false} otherwise
      */
@@ -68,6 +72,11 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
         return active.get();
     }
 
+    /**
+     * Verifies if the operation lasts for too long. If so, completes the operation.
+     *
+     * @see #complete()
+     */
     void checkExpiration() {
         if (!active.get()) {
             return;
@@ -82,26 +91,61 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
         }
     }
 
+    /**
+     * Add new {@link Projection} to store. All the projections will be passed tothe {@link FlushCallback callback}
+     * on {@link #complete()}.
+     *
+     * @param projection new {@link Projection} to store
+     */
     void writeProjection(P projection) {
         pendingProjections.add(projection);
     }
 
-    void writeLastHandledEventTime(Timestamp lastHandledEventTime) {
+    /**
+     * Update the {@code lastHandledEventTime} field. Only the last value is saved and passed to
+     * the {@link FlushCallback callback} on {@link #complete()}.
+     *
+     * @param lastHandledEventTime new value of the timestamp
+     */
+    synchronized void writeLastHandledEventTime(Timestamp lastHandledEventTime) {
         this.lastHandledEventTime = checkNotNull(lastHandledEventTime);
     }
 
+    /**
+     * Completes the operation and calls the {@link FlushCallback} passed as a parameter to the constructor.
+     *
+     * <p>While executing the callback the operation is still considered to be active. See {@link #isInProgress()}
+     * for details.
+     */
     void complete() {
         flushCallback.onFlushResults(pendingProjections, lastHandledEventTime);
+        close();
     }
 
+    /**
+     * Makes the operation not active and flushes the callback.
+     *
+     * <p>Called automatically on {@link #complete() operation complete} after the callback is triggered.
+     *
+     * @see #isInProgress()
+     */
     @Override
     public void close() {
         active.set(false);
         flushCallback = null;
     }
 
+    /**
+     * A callback to execute when the {@link BulkWriteOperation operation} is complete.
+     */
     interface FlushCallback<P extends Projection<?, ?>> {
 
+        /**
+         * Process the accumulated results.
+         *
+         * @param projections          accumulated {@link Projection}s to store
+         * @param lastHandledEventTime last handled event to store
+         */
         void onFlushResults(Set<P> projections, Timestamp lastHandledEventTime);
     }
 
