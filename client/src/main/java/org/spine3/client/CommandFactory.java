@@ -25,6 +25,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -40,6 +41,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class CommandFactory {
 
     private final UserId actor;
+
+    /**
+     * In case the zone offset is not defined, the current time zone offset value is set by default.
+     */
     private final ZoneOffset zoneOffset;
 
     /**
@@ -107,7 +112,8 @@ public class CommandFactory {
         @Nullable
         private TenantId tenantId;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public UserId getActor() {
             return actor;
@@ -154,8 +160,10 @@ public class CommandFactory {
 
         public CommandFactory build() {
             checkNotNull(actor, "`actor` must be defined");
-            checkNotNull(zoneOffset, "`zoneOffset` must be defined");
 
+            if (zoneOffset == null) {
+                setZoneOffset(ZoneOffsets.getDefault());
+            }
             final CommandFactory result = new CommandFactory(this);
             return result;
         }
