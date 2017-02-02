@@ -146,6 +146,9 @@ public class Sample {
      * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
      * may or may not have their default values ({@code 0} and {@code false}).
      *
+     * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into another {@link Any}
+     * is returned. See {@link AnyPacker}.
+     *
      * @param clazz Java class of the required stub message
      * @param <M>   type of the required message
      * @return new instance of the given {@link Message} type with random fields
