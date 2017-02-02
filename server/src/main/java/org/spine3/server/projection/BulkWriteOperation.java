@@ -40,11 +40,11 @@ import static com.google.protobuf.util.Timestamps.add;
  *
  * <p>Acts as an intermediate buffer for the changes to apply.
  *
+ * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
 class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable {
 
-    private final Duration maximumDuration;
     private final Timestamp expirationTime;
     private final AtomicBoolean active = new AtomicBoolean(false);
 
@@ -54,7 +54,6 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     private FlushCallback<P> flushCallback;
 
     BulkWriteOperation(Duration maximumDuration, FlushCallback<P> flushCallback) {
-        this.maximumDuration = maximumDuration;
         this.flushCallback = flushCallback;
         this.expirationTime = add(Timestamps.getCurrentTime(), maximumDuration);
         this.active.set(true);
