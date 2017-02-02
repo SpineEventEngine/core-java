@@ -184,8 +184,9 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity or NaN then
-     * the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta.
+     * If the expected value is {@code Float#POSITIVE_INFNITY}, {@code Float#NEGATIVE_INFINITY} or {@code Float#NaN}
+     * then the delta value is ignored.
      */
     public static void assertNotEquals(String itemName, float notExpected, float actual, float delta) {
         try {
@@ -201,20 +202,19 @@ public final class Verify extends Assert {
         }
     }
 
-    private static boolean areNaNs(float first, float second)
-    {
+    private static boolean areNaNs(float first, float second) {
         return Float.isNaN(first) && Float.isNaN(second);
     }
 
-    private static boolean areSameKindOfInfinity(float first, float second)
-    {
-        //noinspection FloatingPointEquality
+    @SuppressWarnings("FloatingPointEquality") // OK because second compared with infinity constant.
+    private static boolean areSameKindOfInfinity(float first, float second) {
         return Float.isInfinite(first) && first == second;
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is infinity or NaN then
-     * the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta.
+     * If the expected value is {@code Float#POSITIVE_INFNITY}, {@code Float#NEGATIVE_INFINITY} or {@code Float#NaN}
+     * then the delta value is ignored.
      */
     public static void assertNotEquals(float expected, float actual, float delta) {
         try {
