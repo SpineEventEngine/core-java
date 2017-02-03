@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
@@ -34,6 +35,8 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
+import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
@@ -78,6 +81,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+
+    private final IdCommandFunction<I, Message> defaultIdFunction = GetTargetIdFromCommand.newInstance();
 
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
@@ -135,6 +140,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<CommandClass> getCommandClasses() {
         final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
         return result;
+    }
+
+    /**
+     * Returns the function which obtains an aggregate ID from a command.
+     *
+     * <p>The default implementation takes the first field from a command message.
+     *
+     * <p>If your repository needs another way of getting aggregate IDs, override
+     * this method returning custom implementation of {@code IdCommandFunction}.
+     *
+     * @return default implementation of {@code IdCommandFunction}
+     */
+    protected IdCommandFunction<I, Message> getIdFunction() {
+        return defaultIdFunction;
+    }
+
+    I getAggregateId(Message commandMessage, CommandContext commandContext) {
+        final I id = getIdFunction().apply(commandMessage, commandContext);
+        return id;
     }
 
     /**

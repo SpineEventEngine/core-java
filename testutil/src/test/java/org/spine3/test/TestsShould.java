@@ -30,12 +30,12 @@ import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
 
-@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class TestsShould {
 
     @Test
@@ -101,6 +101,11 @@ public class TestsShould {
         final Tests.FrozenMadHatterParty provider = new Tests.FrozenMadHatterParty(fiveMinutesAgo);
 
         assertEquals(fiveMinutesAgo, provider.getCurrentTime());
+    }
+
+    @Test
+    public void return_empty_StreamObserver() {
+        assertNotNull(Tests.emptyObserver());
     }
 
     private static class ClassWithPrivateCtor {

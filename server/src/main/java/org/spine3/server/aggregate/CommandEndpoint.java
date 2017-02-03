@@ -29,7 +29,6 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandStatusService;
-import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.status.EntityStatus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,8 +42,6 @@ import static org.spine3.base.Commands.getMessage;
  * @author Alexander Yevsyukov
  */
 class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
-
-    private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
 
     private final AggregateRepository<I, A> aggregateRepository;
     private final CommandStatusService commandStatusService;
@@ -89,7 +86,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
             this.commandMessage = getMessage(checkNotNull(command));
             this.context = command.getContext();
             this.commandId = context.getCommandId();
-            this.aggregateId = commandEndpoint.getAggregateId(commandMessage);
+            this.aggregateId = commandEndpoint.getAggregateId(commandMessage, context);
         }
 
         /**
@@ -161,9 +158,8 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         }
     }
 
-    private I getAggregateId(Message command) {
-        final I id = getIdFunction.apply(command, CommandContext.getDefaultInstance());
-        return id;
+    private I getAggregateId(Message commandMessage, CommandContext commandContext) {
+        return aggregateRepository.getAggregateId(commandMessage, commandContext);
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case of handing an exception.
