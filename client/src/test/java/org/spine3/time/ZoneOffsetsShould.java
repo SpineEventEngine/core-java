@@ -30,6 +30,8 @@ import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
+import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
@@ -38,6 +40,7 @@ public class ZoneOffsetsShould {
     private static final int MAX_HOURS_OFFSET = 14;
     private static final int MIN_MINUTES_OFFSET = 0;
     private static final int MAX_MINUTES_OFFSET = 60;
+    public static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -46,8 +49,10 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_default_instance_according_to_place() {
-        final int currentOffset = TimeZone.getDefault().getRawOffset()/(int)MILLIS_PER_SECOND;
-        assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
+        final int currentOffset = getOffsetInSeconds(timeZone);
+        final String zoneId = timeZone.getID();
+        assertEquals(currentOffset, toZoneOffset(timeZone).getAmountSeconds());
+        assertEquals(zoneId, toZoneOffset(timeZone).getId());
     }
 
     @Test
