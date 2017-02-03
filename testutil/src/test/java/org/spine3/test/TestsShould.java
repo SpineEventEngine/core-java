@@ -21,7 +21,9 @@
 package org.spine3.test;
 
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.spine3.base.Response;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.users.UserId;
@@ -105,7 +107,12 @@ public class TestsShould {
 
     @Test
     public void return_empty_StreamObserver() {
-        assertNotNull(Tests.emptyObserver());
+        final StreamObserver<Response> emptyObserver = Tests.emptyObserver();
+        assertNotNull(emptyObserver);
+        // Call methods just to add to coverage.
+        emptyObserver.onNext(Tests.<Response>nullRef());
+        emptyObserver.onError(Tests.<Throwable>nullRef());
+        emptyObserver.onCompleted();
     }
 
     private static class ClassWithPrivateCtor {
