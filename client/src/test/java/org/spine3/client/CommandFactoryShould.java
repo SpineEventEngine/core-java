@@ -62,13 +62,6 @@ public class CommandFactoryShould {
                       .build();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void require_zoneOffset_in_Builder() {
-        CommandFactory.newBuilder()
-                      .setActor(actor)
-                      .build();
-    }
-
     @Test
     public void return_set_values_in_Builder() {
         final CommandFactory.Builder builder = CommandFactory.newBuilder()
@@ -77,6 +70,18 @@ public class CommandFactoryShould {
         assertNotNull(builder.getActor());
         assertNotNull(builder.getZoneOffset());
         assertNull(builder.getTenantId());
+    }
+
+    @Test
+    public void create_instance_by_user() {
+        final int currentOffset = ZoneOffsets.getDefault()
+                                             .getAmountSeconds();
+        final CommandFactory comFactory = CommandFactory.newBuilder()
+                                                        .setActor(actor)
+                                                        .build();
+
+        assertEquals(actor, comFactory.getActor());
+        assertEquals(currentOffset, comFactory.getZoneOffset().getAmountSeconds());
     }
 
     @Test
@@ -111,15 +116,15 @@ public class CommandFactoryShould {
     @Test
     public void set_tenant_ID_in_commands_when_created_with_tenant_ID() {
         final TenantId tenantId = TenantId.newBuilder()
-                                       .setValue(getClass().getSimpleName())
-                                       .build();
+                                          .setValue(getClass().getSimpleName())
+                                          .build();
         final CommandFactory mtCommandFactory = CommandFactory.newBuilder()
-                                                            .setTenantId(tenantId)
-                                                            .setActor(actor)
-                                                            .setZoneOffset(zoneOffset)
-                                                            .build();
-
+                                                              .setTenantId(tenantId)
+                                                              .setActor(actor)
+                                                              .setZoneOffset(zoneOffset)
+                                                              .build();
         final Command command = mtCommandFactory.create(StringValue.getDefaultInstance());
+
         assertEquals(tenantId, command.getContext().getTenantId());
     }
 }

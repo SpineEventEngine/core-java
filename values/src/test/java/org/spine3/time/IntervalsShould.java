@@ -34,8 +34,31 @@ import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class IntervalsShould {
 
+    @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateParameterlessCtor(Intervals.class));
+    }
+
+    @Test
+    public void return_duration_zero(){
+        final Timestamp start = newTimestamp(5, 6);
+        final Interval interval = Interval.newBuilder()
+                                          .setStart(start)
+                                          .setEnd(start)
+                                          .build();
+        assertEquals(0L, Intervals.toDuration(interval).getSeconds());
+    }
+
+    @Test
+    public void return_true_if_interval_contains_timestamp() {
+        final Timestamp start = newTimestamp(5, 6);
+        final Timestamp end = newTimestamp(10, 10);
+        final Timestamp between = newTimestamp(7, 100);
+        final Interval interval = Interval.newBuilder()
+                                          .setStart(start)
+                                          .setEnd(end)
+                                          .build();
+        assertTrue(Intervals.contains(interval, between));
     }
 
     @Test
