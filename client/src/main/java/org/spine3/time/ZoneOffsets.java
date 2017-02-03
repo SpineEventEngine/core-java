@@ -77,15 +77,13 @@ public class ZoneOffsets {
     }
 
     /**
-     * Obtains the ZoneOffset instance using timezone offset of the Java virtual machine.
+     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java virtual machine.
+     *
+     * @see TimeZone#getDefault()
      */
     public static ZoneOffset getDefault() {
         final TimeZone timeZone = TimeZone.getDefault();
-        final int seconds = getOffsetInSeconds(timeZone);
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(seconds)
-                         .setId(nullToEmpty(timeZone.getID()))
-                         .build();
+        return toZoneOffset(timeZone);
     }
 
     /**
