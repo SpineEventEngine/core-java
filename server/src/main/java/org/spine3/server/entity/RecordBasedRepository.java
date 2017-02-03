@@ -322,7 +322,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return entity;
     }
 
-    private EntityStorageRecord toEntityRecord(E entity) {
+    protected EntityStorageRecord toEntityRecord(E entity) {
         final S state = entity.getState();
         final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();

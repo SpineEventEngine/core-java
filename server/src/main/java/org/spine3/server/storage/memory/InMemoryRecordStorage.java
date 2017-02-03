@@ -112,4 +112,11 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         getStorage().put(id, record);
     }
 
+    @Override
+    protected void writeRecords(Map<I, EntityStorageRecord> records) {
+        final TenantRecords<I> storage = getStorage();
+        for (Map.Entry<I, EntityStorageRecord> record : records.entrySet()) {
+            storage.put(record.getKey(), record.getValue());
+        }
+    }
 }

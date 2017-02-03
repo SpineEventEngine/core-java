@@ -144,6 +144,20 @@ extend google.protobuf.FieldOptions {
     //     int32 user_id = 1;
     // }
     //
+    // Also, the multiple arguments are supported. The syntax is:
+    //
+    // message EnrichmentForSeveralEvents {
+    //     option (enrichment) = "EnrichmentForSeveralEvents";
+    //
+    //     int32 user_id = 1 [(by) = "qualifier.One.target_field | qualifier.Two.alternate_target_field"];
+    // }
+    //
+    // Wildcard syntax for the target fields is supported in cases when annotation `enrichment_for` gives a
+    // not ambiguous definition for the target type.
+    //
+    // If using the FQN field names, the `enrichment_for` annotation may be omitted
+    // (the same behavior as with a single-argument `by` annotation).
+    //
     string by = 57125; // NOTE: this field number is used in the `tools` project,
                        // EnrichmentLookupPlugin (update it there on changing).
 }

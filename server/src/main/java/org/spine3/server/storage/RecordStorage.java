@@ -102,6 +102,21 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
     }
 
     /**
+     * Writes a bulk of records into the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param records an ID to record map with the entries to store
+     * @throws IllegalStateException if the storage is closed
+     */
+    public void write(Map<I, EntityStorageRecord> records) {
+        checkNotNull(records);
+        checkNotClosed();
+
+        writeRecords(records);
+    }
+
+    /**
      * Marks the record with the passed ID as {@code archived}.
      *
      * @param id the ID of the record to mark
@@ -208,4 +223,13 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageR
      * @param record a record to store
      */
     protected abstract void writeRecord(I id, EntityStorageRecord record);
+
+    /**
+     * Writes a bulk of records into the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param records an ID to record map with the entries to store
+     */
+    protected abstract void writeRecords(Map<I, EntityStorageRecord> records);
 }
