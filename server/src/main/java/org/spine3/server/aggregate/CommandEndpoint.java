@@ -43,11 +43,11 @@ import static org.spine3.base.Commands.getMessage;
  */
 class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
-    private final AggregateRepository<I, A> aggregateRepository;
+    private final AggregateRepository<I, A> repository;
     private final CommandStatusService commandStatusService;
 
     CommandEndpoint(AggregateRepository<I, A> repository) {
-        this.aggregateRepository = repository;
+        this.repository = repository;
         final BoundedContext boundedContext = repository.getBoundedContext();
         this.commandStatusService = boundedContext.getCommandBus()
                                                   .getCommandStatusService();
@@ -73,7 +73,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
     private static class Action<I, A extends Aggregate<I, ?, ?>> {
 
         private final CommandEndpoint<I, A> commandEndpoint;
-        private final AggregateRepository<I, A> aggregateRepository;
+        private final AggregateRepository<I, A> repository;
         private final CommandId commandId;
         private final Message commandMessage;
         private final CommandContext context;
@@ -81,7 +81,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
         private Action(CommandEndpoint<I, A> commandEndpoint, Command command) {
             this.commandEndpoint = commandEndpoint;
-            this.aggregateRepository = commandEndpoint.aggregateRepository;
+            this.repository = commandEndpoint.repository;
 
             this.commandMessage = getMessage(checkNotNull(command));
             this.context = command.getContext();
@@ -104,8 +104,8 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
          * dispatching is repeated from scratch.
          */
         private A loadAndDispatch() {
+            final AggregateStorage<I> storage = storage();
             A aggregate;
-
             Integer eventCountBeforeSave = null;
             int eventCountBeforeDispatch = 0;
             do {
@@ -114,18 +114,18 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
                     logConcurrentModification(aggregateId, commandMessage, newEventCount);
                 }
 
-                eventCountBeforeDispatch = getAggregateStorage().readEventCountAfterLastSnapshot(aggregateId);
+                eventCountBeforeDispatch = storage.readEventCountAfterLastSnapshot(aggregateId);
 
                 aggregate = doDispatch();
 
-                eventCountBeforeSave = getAggregateStorage().readEventCountAfterLastSnapshot(aggregateId);
+                eventCountBeforeSave = storage.readEventCountAfterLastSnapshot(aggregateId);
             } while (eventCountBeforeDispatch != eventCountBeforeSave);
 
             return aggregate;
         }
 
         private A doDispatch() {
-            A aggregate = aggregateRepository.loadOrCreate(aggregateId);
+            final A aggregate = repository.loadOrCreate(aggregateId);
 
             final EntityStatus statusBefore = aggregate.getStatus();
             EntityStatus statusAfter = null;
@@ -136,15 +136,22 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
                 commandEndpoint.updateCommandStatus(commandId, e);
             } finally {
                 if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                    getAggregateStorage().writeStatus(aggregateId, statusAfter);
+                    storage().writeStatus(aggregateId, statusAfter);
                 }
             }
             return aggregate;
         }
 
+        /**
+         * Obtains the aggregate storage from the repository.
+         */
+        private AggregateStorage<I> storage() {
+            return repository.aggregateStorage();
+        }
+
         private void logConcurrentModification(I aggregateId, Message commandMessage, int newEventCount) {
             final String idStr = Stringifiers.idToString(aggregateId);
-            final Class<? extends Aggregate<I, ?, ?>> aggregateClass = aggregateRepository.getAggregateClass();
+            final Class<? extends Aggregate<I, ?, ?>> aggregateClass = repository.getAggregateClass();
             AggregateRepository.log()
                                .warn("Detected the concurrent modification of {} ID: {}. " +
                                              "New events detected while dispatching the command {} " +
@@ -152,14 +159,10 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
                                              "Restarting the command dispatching.",
                                      aggregateClass, idStr, commandMessage, newEventCount);
         }
-
-        private AggregateStorage<I> getAggregateStorage() {
-            return aggregateRepository.aggregateStorage();
-        }
     }
 
     private I getAggregateId(Message commandMessage, CommandContext commandContext) {
-        return aggregateRepository.getAggregateId(commandMessage, commandContext);
+        return repository.getAggregateId(commandMessage, commandContext);
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case of handing an exception.
