@@ -374,22 +374,25 @@ public class ProjectionRepositoryShould
         // Set up bounded context
         final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext(
                 TestEventBusFactory.create());
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId("never-processed-event-message")
-                                             .build();
-        final Message eventMessage = ProjectCreated.newBuilder()
-                                                   .setProjectId(projectId)
-                                                   .build();
-        final EventContext context = EventContext.newBuilder()
-                                                 .setEventId(EventId.newBuilder()
-                                                                    .setUuid("never-processed-event"))
-                                                 .setProducerId(AnyPacker.pack(projectId))
-                                                 .setTimestamp(Timestamps.getCurrentTime())
+        final int eventsCount = 10;
+        final EventStore eventStore = boundedContext.getEventBus()
+                                                    .getEventStore();
+        for (int i = 0; i < eventsCount; i++) {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(String.valueOf(i))
                                                  .build();
-        final Event event = Events.createEvent(eventMessage, context);
-        boundedContext.getEventBus()
-                      .getEventStore()
-                      .append(event);
+            final Message eventMessage = ProjectCreated.newBuilder()
+                                                       .setProjectId(projectId)
+                                                       .build();
+            final EventContext context = EventContext.newBuilder()
+                                                     .setEventId(EventId.newBuilder()
+                                                                        .setUuid(String.valueOf(i)))
+                                                     .setProducerId(AnyPacker.pack(projectId))
+                                                     .setTimestamp(Timestamps.getCurrentTime())
+                                                     .build();
+            final Event event = Events.createEvent(eventMessage, context);
+            eventStore.append(event);
+        }
         // Set up repository
         final Duration duration = Durations.nanos(1L);
         final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
