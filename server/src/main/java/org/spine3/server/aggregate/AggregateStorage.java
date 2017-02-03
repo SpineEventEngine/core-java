@@ -175,16 +175,24 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     protected abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
-     * Reads the {@code AggregateStatus} for the aggregate with the passed ID.
+     * Reads the {@code EntityStatus} for the aggregate with the passed ID.
      *
      * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of {@code AggregateStatus} were modified before. This means that
+     * flags of {@code EntityStatus} were modified before. This means that
      * the aggregate is visible to the regular queries.
      *
      * @param id the ID of the aggregate
      * @return the aggregate status record or {@code Optional.absent()}
      */
     protected abstract Optional<EntityStatus> readStatus(I id);
+
+    /**
+     * Writes the {@code EntityStatus} for the aggregate with the passed ID.
+     *
+     * @param id the ID of the aggregate for which we update the status
+     * @param status the status to write
+     */
+    protected abstract void writeStatus(I id, EntityStatus status);
 
     /**
      * Writes a count of events which were saved to the storage after the last snapshot was created,

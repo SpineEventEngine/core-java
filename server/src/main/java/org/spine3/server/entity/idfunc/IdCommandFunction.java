@@ -18,14 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.server.entity.idfunc;
+
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+
 /**
- * This package contains classes and interfaces for working with entity statuses.
+ * Base interface for function obtaining target identifiers from commands.
+ *
+ * @author Alexander Yevsykov
  */
-
-@SPI
-@ParametersAreNonnullByDefault
-package org.spine3.server.entity.status;
-
-import org.spine3.SPI;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+public interface IdCommandFunction<I, M extends Message> extends IdFunction<I, M, CommandContext> {
+}

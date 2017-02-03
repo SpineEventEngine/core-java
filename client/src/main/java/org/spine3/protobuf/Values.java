@@ -46,7 +46,7 @@ public class Values {
      * Creates a new {@code StringValue} wrapping the passed string.
      *
      * @param value the value to wrap
-     * @return a new StringValue instance
+     * @return a new {@code StringValue} instance
      */
     public static StringValue newStringValue(String value) {
         checkNotNull(value);
@@ -54,6 +54,21 @@ public class Values {
                                               .setValue(value)
                                               .build();
         return result;
+    }
+
+    /**
+     * Creates a new {@code StringValue} wrapping the passed string.
+     *
+     * @param format a format string
+     * @param args arguments referenced by the format string
+     * @return a new {@code StringValue} instance
+     * @see String#format(String, Object...)
+     */
+    public static StringValue newStringValue(String format, Object... args) {
+        checkNotNull(format);
+        checkNotNull(args);
+        final String msg = String.format(format, args);
+        return newStringValue(msg);
     }
 
     /** Packs the passed value into {@link Any}. */

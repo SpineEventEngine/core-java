@@ -24,7 +24,10 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.entity.status.CannotModifyArchivedEntity;
+import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
@@ -386,13 +389,12 @@ public abstract class Entity<I, S extends Message> {
      *
      * @return
      *  <ul>
-     *      <li>Short Protobuf type name if the value is {@link Message}.
+     *      <li>Short Protobuf type name if ID is a {@link Message}.
      *      <li>Simple class name of the value, otherwise.
      *  </ul>
      */
     public String getShortIdTypeName() {
         if (id instanceof Message) {
-            //noinspection TypeMayBeWeakened
             final Message message = (Message) id;
             final Descriptors.Descriptor descriptor = message.getDescriptorForType();
             final String result = descriptor.getName();
@@ -400,6 +402,34 @@ public abstract class Entity<I, S extends Message> {
         } else {
             final String result = id.getClass().getSimpleName();
             return result;
+        }
+    }
+
+    /**
+     * Ensures that the entity is not marked as {@code archived}.
+     *
+     * @throws CannotModifyArchivedEntity if the entity in in the archived status
+     * @see #getStatus()
+     * @see EntityStatus#getArchived()
+     */
+    protected void checkNotArchived() throws CannotModifyArchivedEntity {
+        if (getStatus().getArchived()) {
+            final String idStr = Stringifiers.idToString(getId());
+            throw new CannotModifyArchivedEntity(idStr);
+        }
+    }
+
+    /**
+     * Ensures that the entity is not marked as {@code deleted}.
+     *
+     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
+     * @see #getStatus()
+     * @see EntityStatus#getDeleted()
+     */
+    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
+        if (getStatus().getDeleted()) {
+            final String idStr = Stringifiers.idToString(getId());
+            throw new CannotModifyDeletedEntity(idStr);
         }
     }
 
