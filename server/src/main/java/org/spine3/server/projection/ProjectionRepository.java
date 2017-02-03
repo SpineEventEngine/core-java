@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -121,6 +122,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      *
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
      * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     *
      * @param boundedContext          the target {@code BoundedContext}
      * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
      */
@@ -272,7 +274,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final P projection = loadOrCreate(id);
         projection.handle(eventMessage, context);
 
-        store(projection);
         final Timestamp eventTime = context.getTimestamp();
 
         if (isBulkWriteInProgress()) {
@@ -294,7 +295,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         ongoingOperation.storeLastHandledEventTime(eventTime);
     }
 
-    private void store(Collection<P> projections) {
+    /**
+     * Store a number of projections at a time.
+     *
+     * @param projections {@link Projection} bulk to store
+     */
+    @VisibleForTesting
+    void store(Collection<P> projections) {
         final RecordStorage<I> storage = recordStorage();
         final Map<I, EntityStorageRecord> records = new HashMap<>(projections.size());
         for (P projection : projections) {
@@ -376,14 +383,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onNext(Event event) {
-            projectionRepository.internalDispatch(event);
-
             if (projectionRepository.isBulkWriteRequired()) {
                 if (!projectionRepository.isBulkWriteInProgress()) {
                     operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
                 }
                 operation.checkExpiration();  // `flush` the data if the operation expires.
             }
+
+            projectionRepository.internalDispatch(event);
         }
 
         @Override

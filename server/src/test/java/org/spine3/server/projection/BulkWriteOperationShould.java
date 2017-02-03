@@ -21,14 +21,18 @@
 package org.spine3.server.projection;
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
+import org.spine3.test.projection.Project;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -107,18 +111,108 @@ public class BulkWriteOperationShould {
         verify(callback).onFlushResults(any(Set.class), any(Timestamp.class));
     }
 
-    private static BulkWriteOperation newOperation() {
-        final Duration duration = Durations.seconds(42);
-        final BulkWriteOperation operation = new BulkWriteOperation<>(duration, new EmptyCallback());
+    @Test
+    public void store_given_projections_in_memory() {
+        final int projectionsCount = 5;
+        final Set<TestProjection> projections = new HashSet<>(projectionsCount);
+        for (int i = 0; i < projectionsCount; i++) {
+            projections.add(new TestProjection(i));
+        }
+        final Timestamp whenHandled = Timestamp.getDefaultInstance();
+        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
+        assertTrue(operation.isInProgress());
+        for (TestProjection projection : projections) {
+            operation.storeProjection(projection);
+        }
+        operation.complete();
+        assertFalse(operation.isInProgress());
+    }
+
+    @Test
+    public void store_given_timestamp_in_memory() {
+        final Set<TestProjection> projections = emptySet();
+        final Timestamp whenHandled = Timestamps.secondsAgo(5L);
+        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
+        assertTrue(operation.isInProgress());
+
+        operation.storeLastHandledEventTime(whenHandled);
+
+        operation.complete();
+        assertFalse(operation.isInProgress());
+    }
+
+    @Test
+    public void store_the_very_last_timestamp_only() {
+        final Set<TestProjection> projections = emptySet();
+        final Timestamp firstEvent = Timestamps.secondsAgo(5L);
+        final Timestamp secondEvent = Timestamps.secondsAgo(5L);
+        final Timestamp lastEvent = Timestamps.secondsAgo(5L);
+
+        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, lastEvent);
+        assertTrue(operation.isInProgress());
+
+        operation.storeLastHandledEventTime(firstEvent);
+        operation.storeLastHandledEventTime(secondEvent);
+        operation.storeLastHandledEventTime(lastEvent);
+
+        operation.complete();
+        assertFalse(operation.isInProgress());
+    }
+
+    private static BulkWriteOperation<Object, TestProjection> newOperation() {
+        final Duration duration = Durations.seconds(100);
+        final BulkWriteOperation<Object, TestProjection> operation
+                = new BulkWriteOperation<>(duration, new EmptyCallback());
         return operation;
     }
 
-    private static class EmptyCallback implements FlushCallback<Projection<Object, Message>> {
+    private static BulkWriteOperation<Object, TestProjection> newOperation(
+            Set<TestProjection> projections,
+            Timestamp lastHandldEventTime) {
+        final Duration duration = Durations.seconds(100);
+        final BulkWriteOperation<Object, TestProjection> operation
+                = new BulkWriteOperation<>(duration, new AssertResults(projections, lastHandldEventTime));
+        return operation;
+    }
+
+    private static class EmptyCallback implements FlushCallback<TestProjection> {
 
         @Override
-        public void onFlushResults(Set<Projection<Object, Message>> projections, Timestamp lastHandledEventTime) {
+        public void onFlushResults(Set<TestProjection> projections, Timestamp lastHandledEventTime) {
             assertNotNull(projections);
             assertNotNull(lastHandledEventTime);
+        }
+    }
+
+    private static class AssertResults implements FlushCallback<TestProjection> {
+
+        private final Set<TestProjection> projections;
+        private final Timestamp lastEventTime;
+
+        private AssertResults(Set<TestProjection> projections, Timestamp lastEventTime) {
+            this.projections = projections;
+            this.lastEventTime = lastEventTime;
+        }
+
+        @Override
+        public void onFlushResults(Set<TestProjection> projections, Timestamp lastHandledEventTime) {
+            assertEquals(this.projections.size(), projections.size());
+            assertTrue(projections.containsAll(this.projections));
+
+            assertEquals(this.lastEventTime, lastHandledEventTime);
+        }
+    }
+
+    private static class TestProjection extends Projection<Object, Project> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the supported types
+         */
+        protected TestProjection(Object id) {
+            super(id);
         }
     }
 }

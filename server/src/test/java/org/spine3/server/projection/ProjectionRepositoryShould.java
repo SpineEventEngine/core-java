@@ -23,13 +23,18 @@ package org.spine3.server.projection;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -46,7 +51,10 @@ import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
+import org.spine3.testdata.TestBoundedContextFactory;
+import org.spine3.testdata.TestEventBusFactory;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +64,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
@@ -325,6 +335,39 @@ public class ProjectionRepositoryShould
         assertEquals(idSetForCreateProject, func.get());
     }
 
+    @SuppressWarnings("unchecked") // Due to mockito matcher usage
+    @Test
+    public void perform_bulk_catch_up_if_required() throws InterruptedException {
+        // Set up bounded context
+        final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext(
+                TestEventBusFactory.create());
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId("mock-project-id")
+                                             .build();
+        final Message eventMessage = ProjectCreated.newBuilder()
+                                                   .setProjectId(projectId)
+                                                   .build();
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventId(EventId.newBuilder()
+                                                                    .setUuid("mock-event"))
+                                                 .setProducerId(AnyPacker.pack(projectId))
+                                                 .setTimestamp(Timestamps.getCurrentTime())
+                                                 .build();
+        final Event event = Events.createEvent(eventMessage, context);
+        boundedContext.getEventBus()
+                      .getEventStore()
+                      .append(event);
+        // Set up repository
+        final Duration duration = Durations.seconds(10L);
+        final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
+        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.catchUp();
+
+        // Check bulk write
+        verify(repository).store(any(Collection.class));
+        verify(repository, never()).store(any(TestProjection.class));
+    }
+
     @Test
     public void remove_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
@@ -401,12 +444,30 @@ public class ProjectionRepositoryShould
         protected TestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
+
+        protected TestProjectionRepository(BoundedContext boundedContext, Duration catchUpMaxDuration) {
+            super(boundedContext, true, catchUpMaxDuration);
+        }
+
+        @Subscribe
+        public void apply(ProjectCreated event, EventContext eventContext) {
+            // NOP
+        }
     }
 
     /** Stub projection repository with the disabled automatic catch-up */
     private static class ManualCatchupProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
         protected ManualCatchupProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext, false);
+        }
+
+        protected ManualCatchupProjectionRepository(BoundedContext boundedContext, Duration catchUpMaxDuration) {
+            super(boundedContext, false, catchUpMaxDuration);
+        }
+
+        @Subscribe
+        public void apply(ProjectCreated event, EventContext eventContext) {
+            // NOP
         }
     }
 
