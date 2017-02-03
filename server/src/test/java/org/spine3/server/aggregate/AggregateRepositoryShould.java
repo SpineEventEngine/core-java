@@ -27,13 +27,10 @@ import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -49,7 +46,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -61,7 +57,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -76,13 +71,8 @@ public class AggregateRepositoryShould {
 
     @Before
     public void setUp() {
-        final CommandStore commandStore = mock(CommandStore.class);
-        doReturn(emptyIterator()).when(commandStore)
-                                 .iterator(any(CommandStatus.class)); // to avoid NPE
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setCommandStore(commandStore)
-                                                .build();
-        final BoundedContext boundedContext = newBoundedContext(commandBus);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
         repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
     }
