@@ -53,7 +53,6 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -76,15 +75,10 @@ public class AggregateRepositoryShould {
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
-    private CommandStore commandStore;
-    private EventBus eventBus;
-
-    private final ProjectId projectId = Given.newProjectId();
-
     @Before
     public void setUp() {
-        eventBus = mock(EventBus.class);
-        commandStore = mock(CommandStore.class);
+        final EventBus eventBus = mock(EventBus.class);
+        final CommandStore commandStore = mock(CommandStore.class);
         doReturn(emptyIterator()).when(commandStore)
                                  .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
@@ -307,16 +301,6 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectStarted event) {
-        }
-
-        static void assertHandled(Command expected) {
-            final CommandId id = Commands.getId(expected);
-            final Command actual = commandsHandled.get(id);
-            final String cmdName = Commands.getMessage(expected)
-                                           .getClass()
-                                           .getName();
-            assertNotNull("No such command handled: " + cmdName, actual);
-            assertEquals(expected, actual);
         }
 
         static void clearCommandsHandled() {
