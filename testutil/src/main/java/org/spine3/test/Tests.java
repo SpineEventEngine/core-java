@@ -203,14 +203,17 @@ public class Tests {
     private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
         @Override
         public void onNext(Response value) {
+            // Do nothing.
         }
 
         @Override
         public void onError(Throwable t) {
+            // Do nothing.
         }
 
         @Override
         public void onCompleted() {
+            // Do nothing.
         }
     };
 
