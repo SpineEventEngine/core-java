@@ -31,8 +31,6 @@ import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
-import java.util.TimeZone;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +38,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.newUserId;
-import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {
@@ -77,13 +74,15 @@ public class CommandFactoryShould {
 
     @Test
     public void create_instance_by_user() {
-        final int currentOffset = toZoneOffset(TimeZone.getDefault()).getAmountSeconds();
+        final int currentOffset = ZoneOffsets.getDefault()
+                                             .getAmountSeconds();
         final CommandFactory comFactory = CommandFactory.newBuilder()
                                                         .setActor(actor)
                                                         .build();
 
         assertEquals(actor, comFactory.getActor());
-        assertEquals(currentOffset, comFactory.getZoneOffset().getAmountSeconds());
+        assertEquals(currentOffset, comFactory.getZoneOffset()
+                                              .getAmountSeconds());
     }
 
     @Test
@@ -112,7 +111,8 @@ public class CommandFactoryShould {
         final Command command = commandFactory.create(StringValue.getDefaultInstance());
         final Timestamp afterCall = Timestamps.secondsFromNow(1);
 
-        assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
+        assertTrue(Timestamps.isBetween(command.getContext()
+                                               .getTimestamp(), beforeCall, afterCall));
     }
 
     @Test
@@ -127,6 +127,7 @@ public class CommandFactoryShould {
                                                               .build();
         final Command command = mtCommandFactory.create(StringValue.getDefaultInstance());
 
-        assertEquals(tenantId, command.getContext().getTenantId());
+        assertEquals(tenantId, command.getContext()
+                                      .getTenantId());
     }
 }

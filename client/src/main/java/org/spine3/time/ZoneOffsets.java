@@ -69,11 +69,23 @@ public class ZoneOffsets {
     }
 
     /**
-     * Converts offset in millis to seconds.
+     * Obtains offset of the passed {@code TimeZone} in seconds.
      */
     public static int getOffsetInSeconds(TimeZone timeZone) {
         final int seconds = timeZone.getRawOffset() / (int) MILLIS_PER_SECOND;
         return seconds;
+    }
+
+    /**
+     * Obtains the ZoneOffset instance using timezone offset of the Java virtual machine.
+     */
+    public static ZoneOffset getDefault() {
+        final TimeZone timeZone = TimeZone.getDefault();
+        final int seconds = getOffsetInSeconds(timeZone);
+        return ZoneOffset.newBuilder()
+                         .setAmountSeconds(seconds)
+                         .setId(nullToEmpty(timeZone.getID()))
+                         .build();
     }
 
     /**

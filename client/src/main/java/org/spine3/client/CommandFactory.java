@@ -31,10 +31,7 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
-import java.util.TimeZone;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 /**
  * The factory to generate new {@link Command} instances.
@@ -165,7 +162,7 @@ public class CommandFactory {
             checkNotNull(actor, "`actor` must be defined");
 
             if (zoneOffset == null) {
-                setZoneOffset(toZoneOffset(TimeZone.getDefault()));
+                setZoneOffset(ZoneOffsets.getDefault());
             }
             final CommandFactory result = new CommandFactory(this);
             return result;
