@@ -81,8 +81,7 @@ public class CommandFactoryShould {
                                                         .build();
 
         assertEquals(actor, comFactory.getActor());
-        assertEquals(currentOffset, comFactory.getZoneOffset()
-                                              .getAmountSeconds());
+        assertEquals(currentOffset, comFactory.getZoneOffset().getAmountSeconds());
     }
 
     @Test
@@ -111,8 +110,7 @@ public class CommandFactoryShould {
         final Command command = commandFactory.create(StringValue.getDefaultInstance());
         final Timestamp afterCall = Timestamps.secondsFromNow(1);
 
-        assertTrue(Timestamps.isBetween(command.getContext()
-                                               .getTimestamp(), beforeCall, afterCall));
+        assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
     }
 
     @Test
@@ -127,7 +125,6 @@ public class CommandFactoryShould {
                                                               .build();
         final Command command = mtCommandFactory.create(StringValue.getDefaultInstance());
 
-        assertEquals(tenantId, command.getContext()
-                                      .getTenantId());
+        assertEquals(tenantId, command.getContext().getTenantId());
     }
 }
