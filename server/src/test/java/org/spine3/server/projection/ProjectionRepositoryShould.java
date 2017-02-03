@@ -337,7 +337,7 @@ public class ProjectionRepositoryShould
 
     @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
-    public void perform_bulk_catch_up_if_required() throws InterruptedException {
+    public void perform_bulk_catch_up_if_required() {
         // Set up bounded context
         final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext(
                 TestEventBusFactory.create());
@@ -366,6 +366,38 @@ public class ProjectionRepositoryShould
         // Check bulk write
         verify(repository).store(any(Collection.class));
         verify(repository, never()).store(any(TestProjection.class));
+    }
+
+    @SuppressWarnings("unchecked") // Due to mockito matcher usage
+    @Test
+    public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
+        // Set up bounded context
+        final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext(
+                TestEventBusFactory.create());
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId("never-processed-event-message")
+                                             .build();
+        final Message eventMessage = ProjectCreated.newBuilder()
+                                                   .setProjectId(projectId)
+                                                   .build();
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventId(EventId.newBuilder()
+                                                                    .setUuid("never-processed-event"))
+                                                 .setProducerId(AnyPacker.pack(projectId))
+                                                 .setTimestamp(Timestamps.getCurrentTime())
+                                                 .build();
+        final Event event = Events.createEvent(eventMessage, context);
+        boundedContext.getEventBus()
+                      .getEventStore()
+                      .append(event);
+        // Set up repository
+        final Duration duration = Durations.nanos(1L);
+        final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
+        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.catchUp();
+
+        // Check bulk write
+        verify(repository, never()).store(any(Projection.class));
     }
 
     @Test

@@ -398,7 +398,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 if (!projectionRepository.isBulkWriteInProgress()) {
                     operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
                 }
-                operation.checkExpiration();  // `flush` the data if the operation expires.
+                // `flush` the data if the operation expires.
+                operation.checkExpiration();
+
+                if (!operation.isInProgress()) { // Expired. End now
+                    return;
+                }
             }
 
             projectionRepository.internalDispatch(event);
@@ -414,7 +419,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             if (projectionRepository.isBulkWriteInProgress()) {
                 operation.complete();
             }
-            projectionRepository.setStatus(Status.ONLINE);
+            projectionRepository.completeCatchUp();
             if (log().isInfoEnabled()) {
                 final Class<? extends ProjectionRepository> repositoryClass = projectionRepository.getClass();
                 log().info("{} catch-up complete", repositoryClass.getName());
