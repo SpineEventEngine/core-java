@@ -114,16 +114,19 @@ public class TestsShould {
     }
 
     private static class ClassWithPublicCtor {
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // It's the purpose of this tests class.
         public ClassWithPublicCtor() {}
     }
 
     private static class ClassThrowingExceptionInConstructor {
         private ClassThrowingExceptionInConstructor() {
-            throw new AssertionError("Private constructor must not be called.");
+            throw new AssertionError("This private constructor must not be called.");
         }
     }
 
     private static class ClassWithCtorWithArgs {
-        private ClassWithCtorWithArgs(int i) {}
+        @SuppressWarnings("unused")
+        private final int id;
+        private ClassWithCtorWithArgs(int id) { this.id = id;}
     }
 }
