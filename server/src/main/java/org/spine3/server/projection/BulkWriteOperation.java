@@ -26,12 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.Timestamps;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.util.Timestamps.add;
 
 /**
@@ -55,10 +57,16 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     private final Set<P> pendingProjections = Collections.synchronizedSet(new HashSet<P>());
     private Timestamp lastHandledEventTime = Timestamp.getDefaultInstance();
 
+    /**
+     * Callback to execute after the operation is complete.
+     *
+     * <p>Can be {@code null} if the {@link BulkWriteOperation#close()} have been already called.
+     */
+    @Nullable
     private FlushCallback<P> flushCallback;
 
     BulkWriteOperation(Duration maximumDuration, FlushCallback<P> flushCallback) {
-        this.flushCallback = flushCallback;
+        this.flushCallback = checkNotNull(flushCallback);
         this.expirationTime = add(Timestamps.getCurrentTime(), maximumDuration);
         this.active.set(true);
     }
@@ -73,20 +81,21 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     }
 
     /**
-     * Verifies if the operation lasts for too long. If so, completes the operation.
+     * Verifies if the operation lasts for too long. If so, completes the operation, otherwise performs no action.
+     *
+     * <p>Performs no action if the operation is already finished.
      *
      * @see #complete()
      */
     void checkExpiration() {
-        if (!active.get()) {
+        if (!isInProgress()) {
             return;
         }
 
         final Timestamp currentTime = Timestamps.getCurrentTime();
         if (Timestamps.compare(currentTime, expirationTime) > 0) {
-            log().warn(
-                    "Completing bulk write operation before all the events are processed. Took at least {} seconds.",
-                    expirationTime.getSeconds());
+            log().warn("Completing bulk write operation before all the events are processed.");
+
             complete();
         }
     }
@@ -97,7 +106,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
      *
      * @param projection new {@link Projection} to store
      */
-    void writeProjection(P projection) {
+    void storeProjection(P projection) {
         pendingProjections.add(projection);
     }
 
@@ -107,7 +116,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
      *
      * @param lastHandledEventTime new value of the timestamp
      */
-    synchronized void writeLastHandledEventTime(Timestamp lastHandledEventTime) {
+    synchronized void storeLastHandledEventTime(Timestamp lastHandledEventTime) {
         this.lastHandledEventTime = checkNotNull(lastHandledEventTime);
     }
 
@@ -118,6 +127,11 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
      * for details.
      */
     void complete() {
+        final boolean closed = flushCallback == null || !active.get();
+        checkState(
+                !closed,
+                String.format("Can not complete the %s. Already closed.", BulkWriteOperation.class.getSimpleName()));
+
         flushCallback.onFlushResults(pendingProjections, lastHandledEventTime);
         close();
     }

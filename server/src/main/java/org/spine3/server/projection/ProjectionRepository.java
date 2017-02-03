@@ -290,8 +290,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     private void storePostponed(P projection, Timestamp eventTime) {
-        ongoingOperation.writeProjection(projection);
-        ongoingOperation.writeLastHandledEventTime(eventTime);
+        ongoingOperation.storeProjection(projection);
+        ongoingOperation.storeLastHandledEventTime(eventTime);
     }
 
     private void store(Collection<P> projections) {
@@ -376,13 +376,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onNext(Event event) {
-            if (projectionRepository.isBulkWriteRequired()
-                    && !projectionRepository.isBulkWriteInProgress()) {
-                // Set the max time to complete the bulk to 40 seconds.
-                operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
-            }
             projectionRepository.internalDispatch(event);
-            operation.checkExpiration();    // `flush` the data if the operation expires.
+
+            if (projectionRepository.isBulkWriteRequired()) {
+                if (!projectionRepository.isBulkWriteInProgress()) {
+                    operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
+                }
+                operation.checkExpiration();  // `flush` the data if the operation expires.
+            }
         }
 
         @Override
