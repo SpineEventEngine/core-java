@@ -25,10 +25,13 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Response;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.Values;
+import org.spine3.server.command.CommandBus;
 import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
@@ -191,5 +194,36 @@ public class Tests {
         public Timestamp getCurrentTime() {
             return frozenTime;
         }
+    }
+
+    /**
+     * The {@code StreamObserver} which does nothing.
+     * @see #emptyObserver()
+     */
+    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
+        @Override
+        public void onNext(Response value) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
+    };
+
+    /**
+     * Returns {@code StringObserver} that does nothing.
+     *
+     * <p>Use this method when you need to call {@link CommandBus#post(Command, StreamObserver)}
+     * and observing results is not needed.
+     */
+    public static StreamObserver<Response> emptyObserver() {
+        return emptyObserver;
     }
 }

@@ -36,7 +36,9 @@ import org.spine3.server.error.MissingEntityIdException;
  * @author Alexander Litus
  */
 @Internal
-public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+public class GetTargetIdFromCommand<I, M extends Message>
+        extends GetIdByFieldIndex<I, M, CommandContext>
+        implements IdCommandFunction<I, M> {
 
     private static final int ID_FIELD_INDEX = 0;
 
