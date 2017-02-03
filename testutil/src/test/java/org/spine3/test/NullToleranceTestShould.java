@@ -36,7 +36,7 @@ import static junit.framework.TestCase.assertTrue;
 public class NullToleranceTestShould {
 
     private static final Object DEFAULT_VALUE = new Object();
-    public static final String METHOD_NAME_WITHOUT_CHECK = "methodWithoutCheck";
+    private static final String METHOD_NAME_WITHOUT_CHECK = "methodWithoutCheck";
 
     @Test
     public void return_false_for_class_with_methods_accepting_non_declared_null_parameters() {
@@ -193,6 +193,15 @@ public class NullToleranceTestShould {
         assertTrue(result);
     }
 
+    @Test
+    public void pass_the_check_when_method_has_varargs_parameter() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithVarargsMethodParameters.class)
+                                                                     .build();
+        final boolean result = nullToleranceTest.check();
+        assertTrue(result);
+    }
+
     /*
      * Test utility classes
      ******************************/
@@ -295,6 +304,22 @@ public class NullToleranceTestShould {
         public static void wrapperArgumentsMethod(Integer first, Boolean second) {
             checkNotNull(first);
             checkNotNull(second);
+        }
+    }
+
+    @SuppressWarnings("unused") // accessed via reflection.
+    private static class ClassWithVarargsMethodParameters {
+        public static void methodWithVarargsArgument(Object... args) {
+            checkNotNull(args);
+        }
+
+        public static void methodWithVarargsArgument(int... args) {
+            checkNotNull(args);
+        }
+
+        public static void methodWithVarargsArgument(Object obj, Integer... args) {
+            checkNotNull(obj);
+            checkNotNull(args);
         }
     }
 }

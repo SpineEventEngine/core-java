@@ -25,6 +25,7 @@ import org.spine3.protobuf.Durations;
 
 import java.util.TimeZone;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static org.spine3.protobuf.Durations.hours;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
@@ -55,14 +56,34 @@ public class ZoneOffsets {
     }
 
     /**
-     * Obtains the ZoneOffset instance using timezone offset of the Java virtual machine.
+     * Obtains the {@code ZoneOffset} instance using {@code TimeZone}.
+     *
+     * @param timeZone target time zone
+     * @return zone offset instance of specified timezone
+     */
+    public static ZoneOffset toZoneOffset(TimeZone timeZone) {
+        return ZoneOffset.newBuilder()
+                         .setAmountSeconds(getOffsetInSeconds(timeZone))
+                         .setId(nullToEmpty(timeZone.getID()))
+                         .build();
+    }
+
+    /**
+     * Obtains offset of the passed {@code TimeZone} in seconds.
+     */
+    public static int getOffsetInSeconds(TimeZone timeZone) {
+        final int seconds = timeZone.getRawOffset() / (int) MILLIS_PER_SECOND;
+        return seconds;
+    }
+
+    /**
+     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java virtual machine.
+     *
+     * @see TimeZone#getDefault()
      */
     public static ZoneOffset getDefault() {
-        final int seconds = TimeZone.getDefault()
-                                    .getRawOffset() / (int) MILLIS_PER_SECOND;
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(seconds)
-                         .build();
+        final TimeZone timeZone = TimeZone.getDefault();
+        return toZoneOffset(timeZone);
     }
 
     /**
