@@ -511,6 +511,7 @@ public class NullToleranceTest {
          * the predefined list of the default values per type will be used:
          * <ul>
          *     <li>an empty string is used for the {@code String};
+         *     <li>an empty array is used for the varargs and array parameters;
          *     <li>the result of the {@link Collections#emptyList()} call for the types
          *     derived from {@link List};</li>
          *     <li>the result of the {@link Collections#emptySet()} call for the types
