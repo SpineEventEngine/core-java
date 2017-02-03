@@ -359,6 +359,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         setStatus(Status.ONLINE);
     }
 
+    private void completeCatchUp() {
+        setOnline();
+    }
+
     private boolean isBulkWriteInProgress() {
         return ongoingOperation != null
                 && ongoingOperation.isInProgress();
@@ -384,6 +388,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onNext(Event event) {
+            if (projectionRepository.status != Status.CATCHING_UP) {
+                // The repository is catching up. Skip all the events and perform {@code #onCompleted}.
+                log().info("The catch-up is completing due to an overtime. Skipping event {}.", event);
+                return;
+            }
+
             if (projectionRepository.isBulkWriteRequired()) {
                 if (!projectionRepository.isBulkWriteInProgress()) {
                     operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
@@ -438,6 +448,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             projectionRepository.store(projections);
             projectionRepository.projectionStorage()
                                 .writeLastHandledEventTime(lastHandledEventTime);
+            projectionRepository.completeCatchUp();
         }
     }
 
