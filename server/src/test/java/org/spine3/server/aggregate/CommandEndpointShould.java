@@ -55,7 +55,8 @@ import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Collections.emptyIterator;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -155,14 +156,10 @@ public class CommandEndpointShould {
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
-        doReturn(0, 1).when(storage)
-                      .readEventCountAfterLastSnapshot(projectId);
-        doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage)
-                                                                   .read(projectId);
-        doReturn(storage).when(repositorySpy)
-                         .aggregateStorage();
-        doReturn(Optional.absent()).when(storage)
-                                   .readStatus(projectId);
+        doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
+        doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage).read(projectId);
+        doReturn(storage).when(repositorySpy).aggregateStorage();
+        doReturn(Optional.absent()).when(storage).readStatus(projectId);
 
         repositorySpy.dispatch(cmd);
 
@@ -238,10 +235,8 @@ public class CommandEndpointShould {
         final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
         final RuntimeException exception = new RuntimeException(cause);
-        doThrow(exception).when(throwingAggregate)
-                          .dispatch(msg, cmd.getContext());
-        doReturn(throwingAggregate).when(repositorySpy)
-                                   .loadOrCreate(any(ProjectId.class));
+        doThrow(exception).when(throwingAggregate).dispatch(msg, cmd.getContext());
+        doReturn(throwingAggregate).when(repositorySpy).loadOrCreate(any(ProjectId.class));
     }
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
@@ -341,7 +336,8 @@ public class CommandEndpointShould {
         }
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> {
+    private static class ProjectAggregateRepository
+            extends AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(InMemoryStorageFactory.getInstance());
