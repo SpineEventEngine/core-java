@@ -31,6 +31,7 @@ import com.google.protobuf.Message;
 import org.spine3.util.Exceptions;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -335,6 +336,7 @@ public class NullToleranceTest {
 
         private static final Class[] EMPTY_PARAMETER_TYPES = {};
         private static final Object[] EMPTY_ARGUMENTS = {};
+        private static final int DEFAULT_ARRAY_LENGTH = 0;
         private static final String METHOD_NAME = "getDefaultInstance";
 
         private final Map<Class<?>, ?> defaultValues;
@@ -369,6 +371,12 @@ public class NullToleranceTest {
             if (result == null && wrapper) {
                 final Class<?> unwrappedPrimitive = unwrap(type);
                 result = defaultValue(unwrappedPrimitive);
+            }
+
+            final boolean array = type.isArray();
+            if (result == null && array) {
+                final Class componentType = type.getComponentType();
+                result = Array.newInstance(componentType, DEFAULT_ARRAY_LENGTH);
             }
 
             if (result == null) {
