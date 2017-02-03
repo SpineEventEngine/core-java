@@ -52,14 +52,14 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = secondsIn(2);
+        final int secondsInTwoHours = secondsInHours(2);
         assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
                                                    .getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = secondsIn(8, 45);
+        final int secondsIn8Hours45Minutes = secondsInHoursAndMinutes(8, 45);
         final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
                                                     .getAmountSeconds();
         assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
@@ -85,11 +85,11 @@ public class ZoneOffsetsShould {
         ZoneOffsets.ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
     }
 
-    private static int secondsIn(int hours) {
+    private static int secondsInHours(int hours) {
         return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
     }
 
-    private static int secondsIn(int hours, int minutes) {
+    private static int secondsInHoursAndMinutes(int hours, int minutes) {
         return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
     }
 }
