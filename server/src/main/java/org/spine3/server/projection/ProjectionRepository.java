@@ -138,11 +138,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
      * automatically after the {@link #initStorage(StorageFactory)} call is performed.
      *
-     * <p>If the passed {@code catchUpMaxDuration} is not default, the catch-up is performed through a bulk write.
-     * The {@code catchUpMaxDuration} is the time span from the start of the catch-up that is maximum allowed time for
-     * the catch-up to complete. If the catch-up process takes longer then that time, the read will be automatically
-     * finished and all the read records will be flushed to the storage as a bulk.
-     * // TODO:03-02-17:dmytro.dashenkov: Rewrite this part of the doc.
+     * <p>If the passed {@code catchUpMaxDuration} is not default, the repository uses a {@link BulkWriteOperation}
+     * to accumulate the read projections and then save them as a single bulk of records.
+     *
+     * <p>The {@code catchUpMaxDuration} represents the maximum time span for the catch-up to read the events and apply
+     * them to corresponding projections. If the reading process takes longer then this time, the the read will be
+     * automatically finished and all the result projections will be flushed to the storage as a bulk.
      *
      * @param boundedContext          the target {@code BoundedContext}
      * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
