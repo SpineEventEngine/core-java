@@ -38,6 +38,7 @@ public class ZoneOffsetsShould {
     private static final int MAX_HOURS_OFFSET = 14;
     private static final int MIN_MINUTES_OFFSET = 0;
     private static final int MAX_MINUTES_OFFSET = 60;
+    public static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -46,8 +47,10 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_default_instance_according_to_place() {
-        final int currentOffset = TimeZone.getDefault().getRawOffset()/(int)MILLIS_PER_SECOND;
+        final int currentOffset = timeZone.getRawOffset()/(int)MILLIS_PER_SECOND;
+        final String zoneId = timeZone.getID();
         assertEquals(currentOffset, ZoneOffsets.getDefault().getAmountSeconds());
+        assertEquals(zoneId, ZoneOffsets.getDefault().getId());
     }
 
     @Test
