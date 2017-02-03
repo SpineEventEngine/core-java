@@ -31,6 +31,8 @@ import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
+import java.util.TimeZone;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,6 +40,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.newUserId;
+import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {
@@ -74,8 +77,7 @@ public class CommandFactoryShould {
 
     @Test
     public void create_instance_by_user() {
-        final int currentOffset = ZoneOffsets.getDefault()
-                                             .getAmountSeconds();
+        final int currentOffset = toZoneOffset(TimeZone.getDefault()).getAmountSeconds();
         final CommandFactory comFactory = CommandFactory.newBuilder()
                                                         .setActor(actor)
                                                         .build();

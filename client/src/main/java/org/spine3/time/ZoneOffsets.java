@@ -56,16 +56,24 @@ public class ZoneOffsets {
     }
 
     /**
-     * Obtains the ZoneOffset instance using timezone offset of the Java virtual machine.
+     * Obtains the {@code ZoneOffset} instance using {@code TimeZone}.
+     *
+     * @param timeZone target time zone
+     * @return zone offset instance of specified timezone
      */
-    public static ZoneOffset getDefault() {
-        final TimeZone timeZone = TimeZone.getDefault();
-        final int seconds = timeZone
-                                    .getRawOffset() / (int) MILLIS_PER_SECOND;
+    public static ZoneOffset toZoneOffset(TimeZone timeZone) {
         return ZoneOffset.newBuilder()
-                         .setAmountSeconds(seconds)
+                         .setAmountSeconds(getOffsetInSeconds(timeZone))
                          .setId(nullToEmpty(timeZone.getID()))
                          .build();
+    }
+
+    /**
+     * Converts offset in millis to seconds.
+     */
+    public static int getOffsetInSeconds(TimeZone timeZone) {
+        final int seconds = timeZone.getRawOffset() / (int) MILLIS_PER_SECOND;
+        return seconds;
     }
 
     /**
