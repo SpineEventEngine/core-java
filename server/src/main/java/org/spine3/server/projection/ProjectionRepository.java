@@ -357,7 +357,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     private boolean isBulkWriteRequired() {
-        return catchUpMaxDuration.equals(
+        return !catchUpMaxDuration.equals(
                 catchUpMaxDuration.getDefaultInstanceForType());
     }
 
