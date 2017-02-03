@@ -34,7 +34,6 @@ import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
@@ -77,14 +76,13 @@ public class AggregateRepositoryShould {
 
     @Before
     public void setUp() {
-        final EventBus eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
         doReturn(emptyIterator()).when(commandStore)
                                  .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
                                                 .build();
-        final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
+        final BoundedContext boundedContext = newBoundedContext(commandBus);
         repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
     }
