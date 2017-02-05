@@ -41,10 +41,15 @@ public class AnyPacker {
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
      *
-     * @param message message that should be put inside the {@link Any} instance
-     * @return the instance of {@link Any} object that wraps given message
+     * <p>If an instance of {@code Any} passed, this instance is returned.
+     *
+     * @param message the message to pack
+     * @return the wrapping instance of {@link Any} or the message itself, if it is {@code Any}
      */
     public static Any pack(Message message) {
+        if (message instanceof Any) {
+            return (Any) message;
+        }
         final TypeUrl typeUrl = TypeUrl.from(message.getDescriptorForType());
         final String typeUrlPrefix = typeUrl.getPrefix();
         final Any result = Any.pack(message, typeUrlPrefix);

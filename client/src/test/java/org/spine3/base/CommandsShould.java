@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.TypeName;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
 
@@ -77,6 +78,14 @@ public class CommandsShould {
     @Test
     public void have_private_ctor() {
         assertTrue(hasPrivateParameterlessCtor(Commands.class));
+    }
+
+    @Test
+    public void pass_null_tolerance_test() {
+        NullToleranceTest.newBuilder()
+                         .setClass(Commands.class)
+                         .build()
+                         .check();
     }
 
     @Test

@@ -127,26 +127,20 @@ public class Commands {
     /**
      * Creates a command instance with the given {@code message} and the {@code context}.
      *
-     * @param message the domain model message to send in the command
+     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
+     * Otherwise, the command message will be packed into {@code Any}.
+     *
+     * @param message the command message
      * @param context the context of the command
      * @return a new command
      */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Command create(Message message, CommandContext context) {
-        return create(AnyPacker.pack(message), context);
-    }
+        checkNotNull(message);
+        checkNotNull(context);
 
-    /**
-     * Creates a command instance with the given message wrapped to {@link Any} and the {@code context}.
-     *
-     * @param messageAny the domain model message wrapped to {@link Any}
-     * @param context    the context of the command
-     * @return a new command
-     */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static Command create(Any messageAny, CommandContext context) {
+        final Any packed = AnyPacker.pack(message);
         final Command.Builder request = Command.newBuilder()
-                                               .setMessage(messageAny)
+                                               .setMessage(packed)
                                                .setContext(context);
         return request.build();
     }
@@ -163,14 +157,18 @@ public class Commands {
         return result;
     }
 
-    /** Extracts a command ID from the passed {@code Command} instance. */
+    /**
+     * Extracts a command ID from the passed {@code Command} instance.
+     */
     public static CommandId getId(Command command) {
         final CommandId id = command.getContext()
                                     .getCommandId();
         return id;
     }
 
-    /** Creates a predicate for filtering commands created after the passed timestamp. */
+    /**
+     * Creates a predicate for filtering commands created after the passed timestamp.
+     */
     public static Predicate<Command> wereAfter(final Timestamp from) {
         return new Predicate<Command>() {
             @Override
@@ -182,7 +180,9 @@ public class Commands {
         };
     }
 
-    /** Creates a predicate for filtering commands created withing given timerange. */
+    /**
+     * Creates a predicate for filtering commands created withing given timerange.
+     */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
         return new Predicate<Command>() {
             @Override
