@@ -350,9 +350,9 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
             };
         }
 
-        private Command produceCommand(Message newMessage) {
+        private Command produceCommand(Message commandMessage) {
             final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
-            final Command result = Commands.create(newMessage, newContext);
+            final Command result = Commands.create(commandMessage, newContext);
             return result;
         }
     }
