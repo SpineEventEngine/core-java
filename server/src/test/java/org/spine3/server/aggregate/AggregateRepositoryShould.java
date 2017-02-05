@@ -239,6 +239,10 @@ public class AggregateRepositoryShould {
         return storage;
     }
 
+    /*
+     * Test environment classes
+     ****************************/
+
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.

@@ -27,6 +27,7 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * The storage used by projection repositories for keeping {@link Projection}s
@@ -46,15 +47,21 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Optional<EntityStorageRecord> readRecord(I id) {
-        final RecordStorage<I> storage = getRecordStorage();
+        final RecordStorage<I> storage = recordStorage();
         final Optional<EntityStorageRecord> record = storage.read(id);
         return record;
     }
 
     @Override
     protected void writeRecord(I id, EntityStorageRecord record) {
-        final RecordStorage<I> storage = getRecordStorage();
+        final RecordStorage<I> storage = recordStorage();
         storage.write(id, record);
+    }
+
+    @Override
+    protected void writeRecords(Map<I, EntityStorageRecord> records) {
+        final RecordStorage<I> storage = recordStorage();
+        storage.write(records);
     }
 
     /**
@@ -73,5 +80,5 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     protected abstract Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
-    protected abstract RecordStorage<I> getRecordStorage();
+    protected abstract RecordStorage<I> recordStorage();
 }
