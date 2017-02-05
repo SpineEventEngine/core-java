@@ -43,10 +43,6 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.time.ZoneOffset;
-import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -277,24 +273,8 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
 
         private final CommandBus commandBus;
 
-        /** The command message of the source command. */
-        private Message sourceCommand;
-
-        /** The command context of the source command. */
-        private CommandContext sourceContext;
-
-        /** The cached value of the source command. */
+        /** The command that we route. */
         private Command source;
-
-        /**
-         * The actor of the command we route.
-         *
-         * <p>We route commands on the original's author behalf.
-         */
-        private UserId actor;
-
-        /** The zone offset from which the actor works. */
-        private ZoneOffset zoneOffset;
 
         /** Command messages to route. */
         private final List<Message> toRoute = Lists.newArrayList();
@@ -314,12 +294,11 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         }
 
         /** Sets the command to be routed. */
-        public CommandRouter of(Message sourceCommand, CommandContext context) {
-            this.sourceCommand = checkNotNull(sourceCommand);
-            this.sourceContext = checkNotNull(context);
-            this.source = Commands.create(sourceCommand, sourceContext);
-            this.actor = context.getActor();
-            this.zoneOffset = context.getZoneOffset();
+        public CommandRouter of(Message commandMessage, CommandContext context) {
+            checkNotNull(commandMessage);
+            checkNotNull(context);
+
+            this.source = Commands.create(commandMessage, context);
             return this;
         }
 
@@ -372,8 +351,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         }
 
         private Command produceCommand(Message newMessage) {
-            final TenantId currentTenant = CurrentTenant.get();
-            final CommandContext newContext = Commands.createContext(currentTenant, actor, zoneOffset);
+            final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }

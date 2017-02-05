@@ -90,6 +90,7 @@ public class Commands {
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
      * @param userId     the actor id
      * @param zoneOffset the offset of the timezone in which the user works
+     * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
     @Internal
@@ -103,6 +104,23 @@ public class Commands {
         if (tenantId != null) {
             result.setTenantId(tenantId);
         }
+        return result.build();
+    }
+
+    /**
+     * Creates a new instance of {@code CommandContext} based on the passed one.
+     *
+     * <p>The returned instance gets new generated {@code CommandId} and {@code timestamp}
+     * set to the time of the call.
+     *
+     * @param commandContext the instance from which to copy values
+     * @return new {@code CommandContext}
+     */
+    public static CommandContext newContextBasedOn(CommandContext commandContext) {
+        checkNotNull(commandContext);
+        final CommandContext.Builder result = commandContext.toBuilder()
+                .setCommandId(generateId())
+                .setTimestamp(getCurrentTime());
         return result.build();
     }
 
