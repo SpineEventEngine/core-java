@@ -262,8 +262,6 @@ public class ProcessManagerShould {
 
     private static class AddTaskDispatcher implements CommandDispatcher {
 
-        private boolean dispatcherInvoked = false;
-
         @Override
         public Set<CommandClass> getCommandClasses() {
             return CommandClass.setOf(AddTask.class);
@@ -271,11 +269,7 @@ public class ProcessManagerShould {
 
         @Override
         public void dispatch(Command request) throws Exception {
-            dispatcherInvoked = true;
-        }
-
-        public boolean wasDispatcherInvoked() {
-            return dispatcherInvoked;
+            // Do nothing in this dummy dispatcher.
         }
     }
 }
