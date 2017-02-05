@@ -257,9 +257,9 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      *
      * <pre>
      *     {@literal @}Assign
-     *     public CommandRouted on(MyCommand message, CommandContext context) {
+     *     CommandRouted on(MyCommand message, CommandContext context) {
      *         // Create new command messages here.
-     *         return new Router().of(message, context)
+     *         return newRouter().of(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
      *                  .route();
