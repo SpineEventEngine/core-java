@@ -215,8 +215,8 @@ public class ProcessManagerShould {
             super(id);
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod") // OK for this test.
         @Override
-        @SuppressWarnings("RefusedBequest")
         protected Any getDefaultState() {
             return Any.getDefaultInstance();
         }
@@ -255,7 +255,7 @@ public class ProcessManagerShould {
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
             final CommandRouted route = newRouter().of(command, context)
                                                    .add(addTask)
-                                                   .route();
+                                                   .routeAll();
             return route;
         }
     }

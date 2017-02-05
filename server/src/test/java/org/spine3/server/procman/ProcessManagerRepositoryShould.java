@@ -356,7 +356,7 @@ public class ProcessManagerRepositoryShould
 
             return newRouter().of(command, context)
                               .add(addTask)
-                              .route();
+                              .routeAll();
         }
     }
 }

@@ -262,7 +262,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      *         return newRouter().of(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
-     *                  .route();
+     *                  .routeAll();
      *     }
      * </pre>
      *
@@ -277,8 +277,14 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
 
         private final CommandBus commandBus;
 
+        /** The command message of the source command. */
         private Message sourceCommand;
+
+        /** The command context of the source command. */
         private CommandContext sourceContext;
+
+        /** The cached value of the source command. */
+        private Command source;
 
         /**
          * The actor of the command we route.
@@ -293,20 +299,31 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         /** Command messages to route. */
         private final List<Message> toRoute = Lists.newArrayList();
 
+        /**
+         * The future for waiting until the {@link CommandBus#post posting of the command} completes.
+         */
+        private final SettableFuture<Void> finishFuture = SettableFuture.create();
+
+        /**
+         * The observer for posting commands.
+         */
+        private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
+
         private CommandRouter(CommandBus commandBus) {
             this.commandBus = commandBus;
         }
 
-        /** Sets command to be routed. */
+        /** Sets the command to be routed. */
         public CommandRouter of(Message sourceCommand, CommandContext context) {
             this.sourceCommand = checkNotNull(sourceCommand);
             this.sourceContext = checkNotNull(context);
+            this.source = Commands.create(sourceCommand, sourceContext);
             this.actor = context.getActor();
             this.zoneOffset = context.getZoneOffset();
             return this;
         }
 
-        /** Adds {@code commandMessage} to be routed as a command. */
+        /** Adds {@code commandMessage} to be routed. */
         public CommandRouter add(Message commandMessage) {
             toRoute.add(commandMessage);
             return this;
@@ -317,11 +334,10 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
          *
          * @return the event with source and produced commands
          */
-        public CommandRouted route() {
+        public CommandRouted routeAll() {
             final CommandRouted.Builder result = CommandRouted.newBuilder();
-            result.setSource(Commands.create(sourceCommand, sourceContext));
-            final SettableFuture<Void> finishFuture = SettableFuture.create();
-            final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
+            result.setSource(source);
+
             for (Message message : toRoute) {
                 final Command command = produceCommand(message);
                 commandBus.post(command, responseObserver);
