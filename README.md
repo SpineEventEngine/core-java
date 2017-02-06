@@ -10,7 +10,7 @@ clients built with JavaScript, Java Nano (Android), Objective-C, and Java.
 Requires Java 7 or higher.
 
 ## Pre-release
-The project is under active ongoing development.At this stage, we do not recommend using the framework for production purposes.
+The project is under active ongoing development. At this stage, we do not recommend using the framework for production purposes.
 You are welcome to experiment and [provide your feedback][email-developers].
 
 The latest stable version is [0.8.0][latest-release].
