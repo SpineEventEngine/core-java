@@ -13,7 +13,7 @@ Requires Java 7 or higher.
 The project is under active ongoing development.At this stage, we do not recommend using the framework for production purposes.
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [0.8.0](https://github.com/SpineEventEngine/core-java/releases/tag/0.8.0).
+The latest stable version is [0.8.0][latest-release].
 
 Please track our release announcement to be informed about the production version (1.0.0) release.  
 
@@ -99,6 +99,7 @@ or provide custom storage implementations.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:spine-developers@teamdev.com
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/0.8.0 
 [spine-site]: https://spine3.org/
 [spine-git-book]: https://docs.spine3.org/
 [wiki-home]: https://github.com/SpineEventEngine/core-java/wiki
