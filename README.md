@@ -62,7 +62,7 @@ repositories {
 }
 
 ext {
-    protobufVersion = '3.1.0'
+    protobufVersion = '3.2.0'
 }
 
 dependencies {
