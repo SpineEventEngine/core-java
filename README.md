@@ -41,7 +41,7 @@ buildscript{
         maven { url = spineRepository }
         
         // Snapshots repository
-        maven { url = spineRepository }
+        maven { url = spineSnapshotsRepository }
     }
         
     dependencies {
@@ -53,6 +53,7 @@ buildscript{
 
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
+apply plugin: 'org.spine3.tools.protobuf-plugin'
 
 repositories {
     jcenter()
@@ -61,16 +62,9 @@ repositories {
     maven { url = spineSnapshotsRepository }
 }
 
-ext {
-    protobufVersion = '3.2.0'
-}
-
 dependencies {
         
     // ...
-    
-    // Protobuf run-time
-    compile group: 'com.google.protobuf', name: 'protobuf-java', version: protobufVersion
     
     // Client-side and shared API. 
     compile group: 'org.spine3', name: 'spine-client-core', version: spineVersion
