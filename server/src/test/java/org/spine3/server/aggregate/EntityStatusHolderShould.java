@@ -25,8 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.test.entity.Project;
-import org.spine3.test.entity.ProjectId;
+import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
