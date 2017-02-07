@@ -255,7 +255,6 @@ public abstract class AggregateStorageShould
         assertEquals(expectedValue, actualCount);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
     @Test
     public void write_entity_status_of_aggregate() {
         final ProjectId id = Given.newProjectId();
@@ -268,7 +267,6 @@ public abstract class AggregateStorageShould
         assertEquals(status, readStatus.get());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
     @Test
     public void mark_aggregate_archived() {
         final ProjectId id = Given.newProjectId();
@@ -278,7 +276,6 @@ public abstract class AggregateStorageShould
         assertArchived(aggregateStatus);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
     @Test
     public void mark_aggregate_deleted() {
         final ProjectId id = Given.newProjectId();
