@@ -33,7 +33,6 @@ import org.spine3.base.Event;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
@@ -49,7 +48,6 @@ import static com.google.protobuf.util.Timestamps.add;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -255,129 +253,6 @@ public abstract class AggregateStorageShould
         final int actualCount = storage.readEventCountAfterLastSnapshot(id);
 
         assertEquals(expectedValue, actualCount);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
-    @Test
-    public void write_entity_status_of_aggregate() {
-        final ProjectId id = Given.newProjectId();
-        final EntityStatus status = EntityStatus.newBuilder()
-                                                .setArchived(true)
-                                                .build();
-        storage.writeStatus(id, status);
-        final Optional<EntityStatus> readStatus = storage.readStatus(id);
-        assertTrue(readStatus.isPresent());
-        assertEquals(status, readStatus.get());
-    }
-
-    @Test
-    public void save_whole_status() {
-        final ProjectId id = Given.newProjectId();
-        final boolean archived = true;
-        final boolean deleted = true;
-        final EntityStatus expected = EntityStatus.newBuilder()
-                                                  .setArchived(archived)
-                                                  .setDeleted(deleted)
-                                                  .build();
-        storage.writeStatus(id, expected);
-        final Optional<EntityStatus> optionalActual = storage.readStatus(id);
-        assertStatus(optionalActual, true, true);
-    }
-
-    @Test
-    public void mark_aggregate_archived() {
-        final ProjectId id = Given.newProjectId();
-        final boolean success = storage.markArchived(id);
-        assertTrue(success);
-        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
-        assertArchived(aggregateStatus);
-    }
-
-    @Test
-    public void mark_aggregate_deleted() {
-        final ProjectId id = Given.newProjectId();
-        final boolean success = storage.markDeleted(id);
-        assertTrue(success);
-        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
-        assertDeleted(aggregateStatus);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_archived_twice() {
-        final ProjectId id = Given.newProjectId();
-        final boolean firstSuccessful = storage.markArchived(id);
-        assertTrue(firstSuccessful);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
-        assertArchived(firstRead);
-
-        final boolean secondSuccessful = storage.markArchived(id);
-        assertFalse(secondSuccessful);
-
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
-        assertArchived(secondRead);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_deleted_twice() {
-        final ProjectId id = Given.newProjectId();
-        final boolean firstSuccessful = storage.markDeleted(id);
-        assertTrue(firstSuccessful);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
-        assertDeleted(firstRead);
-
-        final boolean secondSuccessful = storage.markDeleted(id);
-        assertFalse(secondSuccessful);
-
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
-        assertDeleted(secondRead);
-    }
-
-    @Test
-    public void mark_archived_if_deleted() {
-        final ProjectId id = Given.newProjectId();
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
-        assertDeleted(storage.readStatus(id));
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
-        assertStatus(storage.readStatus(id), true, true);
-    }
-
-    @Test
-    public void mark_deleted_if_archived() {
-        final ProjectId id = Given.newProjectId();
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
-        assertArchived(storage.readStatus(id));
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
-        assertStatus(storage.readStatus(id), true, true);
-    }
-
-    @Test
-    public void retrieve_empty_status_if_never_written() {
-        final ProjectId id = Given.newProjectId();
-        final Optional<EntityStatus> entityStatus = storage.readStatus(id);
-        assertNotNull(entityStatus);
-        assertFalse(entityStatus.isPresent());
-    }
-
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
-    private static void assertArchived(Optional<EntityStatus> entityStatus) {
-        assertStatus(entityStatus, true, false);
-    }
-
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
-    private static void assertDeleted(Optional<EntityStatus> entityStatus) {
-        assertStatus(entityStatus, false, true);
-    }
-
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
-    private static void assertStatus(Optional<EntityStatus> entityStatus, boolean archived, boolean deleted) {
-        assertTrue(entityStatus.isPresent());
-        final EntityStatus status = entityStatus.get();
-        assertEquals(archived, status.getArchived());
-        assertEquals(deleted, status.getDeleted());
     }
 
     @Test(expected = IllegalStateException.class)
