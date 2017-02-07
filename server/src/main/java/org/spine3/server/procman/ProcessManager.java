@@ -142,7 +142,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
-     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
+     * {@link #extendEventContext(EventContext.Builder, Message, CommandContext)}.
      *
      * @param event          the event for which to create the context
      * @param commandContext     the context of the command, which processing caused the event
@@ -161,7 +161,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(producerId)
                                                          .setVersion(currentVersion);
-        extendEventContext(event, builder, commandContext);
+        extendEventContext(builder, event, commandContext);
         return builder.build();
     }
 
@@ -169,13 +169,13 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Adds custom attributes to an event context builder during the creation of the event context.
      *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
-     * @param event          the event message
      * @param builder        a builder for the event context
+     * @param event          the event message
      * @param commandContext the context of the command that produced the event
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void extendEventContext(Message event,
-                                      EventContext.Builder builder,
+    protected void extendEventContext(EventContext.Builder builder,
+                                      Message event,
                                       CommandContext commandContext) {
         // Do nothing.
     }

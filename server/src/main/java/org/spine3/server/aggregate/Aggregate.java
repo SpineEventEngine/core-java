@@ -29,7 +29,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
 import org.spine3.change.ValueMismatch;
@@ -50,13 +49,10 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.createEvent;
-import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Abstract base for aggregates.
@@ -134,9 +130,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @Nullable
     private volatile B builder;
 
-    /** Cached value of the ID in the form of {@code Any} instance. */
-    private final Any idAsAny;
-
     /**
      * Events generated in the process of handling commands that were not yet committed.
      *
@@ -164,7 +157,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     protected Aggregate(I id) {
         super(id);
-        this.idAsAny = idToAny(id);
     }
 
     /**
@@ -186,10 +178,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
         return getHandledMessageClasses(clazz, EventApplierMethod.PREDICATE);
-    }
-
-    private Any getIdAsAny() {
-        return idAsAny;
     }
 
     /**
@@ -394,7 +382,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private void apply(Message eventOrMsg, CommandContext commandContext) throws InvocationTargetException {
         final Message eventMsg;
         final EventContext eventContext;
-        final Timestamp currentTime = getCurrentTime();
         if (eventOrMsg instanceof Event) {
             // We are receiving the event during import or integration. This happened because
             // an aggregate's command handler returned either List<Event> or Event.
@@ -403,12 +390,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             eventContext = event.getContext()
                                 .toBuilder()
                                 .setCommandContext(commandContext)
-                                .setTimestamp(currentTime)
+                                .setTimestamp(getCurrentTime())
                                 .setVersion(getVersion())
                                 .build();
         } else {
             eventMsg = eventOrMsg;
-            eventContext = createEventContext(eventMsg, commandContext, currentTime);
+            eventContext = createEventContext(eventMsg, commandContext);
         }
         applyEventOrSnapshot(eventMsg);
         incrementVersion();
@@ -475,54 +462,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
-    }
-
-    /**
-     * Creates a context for an event message.
-     *
-     * <p>The context may optionally have custom attributes added by
-     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
-     *
-     *
-     * @param event          the event for which to create the context
-     * @param commandContext the context of the command, execution of which produced the event
-     * @param whenModified   the time when an aggregate was modified
-     * @return new instance of the {@code EventContext}
-     * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
-     */
-    @CheckReturnValue
-    protected EventContext createEventContext(Message event,
-                                              CommandContext commandContext,
-                                              Timestamp whenModified) {
-        checkPositive(whenModified, "Aggregate modification time");
-        final EventId eventId = generateId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setTimestamp(whenModified)
-                .setCommandContext(commandContext)
-                .setProducerId(getIdAsAny())
-                .setVersion(getVersion());
-        extendEventContext(event, builder, commandContext);
-        return builder.build();
-    }
-
-    /**
-     * Adds custom attributes to {@code EventContext.Builder} during
-     * the creation of the event context.
-     *
-     * <p>Does nothing by default. Override this method if you want to
-     * add custom attributes to the created context.
-     *
-     * @param event          the event message
-     * @param builder        a builder for the event context
-     * @param commandContext the context of the command that produced the event
-     * @see #createEventContext(Message, CommandContext, Timestamp)
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void extendEventContext(Message event,
-                                      EventContext.Builder builder,
-                                      CommandContext commandContext) {
-        // Do nothing.
     }
 
     /**
