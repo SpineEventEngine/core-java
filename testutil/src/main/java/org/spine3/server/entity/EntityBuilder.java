@@ -144,8 +144,8 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
      */
     protected Timestamp timestamp() {
         return this.whenModified != null
-                                    ? this.whenModified
-                                    : Timestamp.getDefaultInstance();
+               ? this.whenModified
+               : Timestamp.getDefaultInstance();
     }
 
     @Override

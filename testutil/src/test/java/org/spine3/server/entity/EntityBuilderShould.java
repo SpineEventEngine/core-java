@@ -84,6 +84,21 @@ public class EntityBuilderShould {
     }
 
     @Test
+    public void create_entity_with_default_values() {
+        final int version = 100500;
+        final String expectedState = Values.newStringValue("").getValue();
+        final Timestamp defaultTimestamp = Timestamp.getDefaultInstance();
+        final Entity entity = givenEntity().withVersion(version).build();
+        final String actualState = entity.getState().toString();
+
+        assertEquals(TestEntity.class, entity.getClass());
+        assertEquals(0L, entity.getId());
+        assertEquals(expectedState, actualState);
+        assertEquals(version, entity.getVersion());
+        assertEquals(defaultTimestamp, entity.whenModified());
+    }
+
+    @Test
     public void pass_the_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(EntityBuilder.class)
