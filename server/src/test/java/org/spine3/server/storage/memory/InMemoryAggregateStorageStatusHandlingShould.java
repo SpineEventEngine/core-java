@@ -22,13 +22,13 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.EntityStatusHolderShould;
+import org.spine3.server.aggregate.AggregateStorageStatusHandlingShould;
 import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class InMemoryEntityStatusHolderShould extends EntityStatusHolderShould {
+public class InMemoryAggregateStorageStatusHandlingShould extends AggregateStorageStatusHandlingShould {
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(

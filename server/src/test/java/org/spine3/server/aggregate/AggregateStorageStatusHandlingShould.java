@@ -38,7 +38,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Dmytro Dashenkov.
  */
-public abstract class EntityStatusHolderShould {
+public abstract class AggregateStorageStatusHandlingShould {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
