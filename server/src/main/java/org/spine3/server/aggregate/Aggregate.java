@@ -258,7 +258,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *                          with this exception as the cause
      * @see #dispatchForTest(Message, CommandContext)
      */
-    List<? extends Message> dispatch(Message command, CommandContext context) {
+    List<? extends Message> dispatchCommand(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
 
@@ -297,12 +297,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * This method is provided <em>only</em> for the purpose of testing command
      * handling and must not be called from the production code.
      *
-     * <p>The production code uses the method {@link #dispatch(Message, CommandContext)},
+     * <p>The production code uses the method {@link #dispatchCommand(Message, CommandContext)},
      * which is called automatically by {@link AggregateRepository}.
      */
     @VisibleForTesting
     public final List<? extends Message> dispatchForTest(Message command, CommandContext context) {
-        return dispatch(command, context);
+        return dispatchCommand(command, context);
     }
 
     /**

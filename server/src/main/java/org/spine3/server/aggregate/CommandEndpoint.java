@@ -98,7 +98,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
          * during the {@link AggregateRepository#load(Object)}
-         * and {@link Aggregate#dispatch(Message, CommandContext)}.
+         * and {@link Aggregate#dispatchCommand(Message, CommandContext)}.
          *
          * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command}
          * dispatching is repeated from scratch.
@@ -130,7 +130,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
             final EntityStatus statusBefore = aggregate.getStatus();
             EntityStatus statusAfter = null;
             try {
-                aggregate.dispatch(commandMessage, context);
+                aggregate.dispatchCommand(commandMessage, context);
                 statusAfter = aggregate.getStatus();
             } catch (RuntimeException e) {
                 commandEndpoint.updateCommandStatus(commandId, e);

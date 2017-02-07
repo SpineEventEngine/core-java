@@ -235,7 +235,7 @@ public class CommandEndpointShould {
         final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
         final Message msg = unpack(cmd.getMessage());
         final RuntimeException exception = new RuntimeException(cause);
-        doThrow(exception).when(throwingAggregate).dispatch(msg, cmd.getContext());
+        doThrow(exception).when(throwingAggregate).dispatchCommand(msg, cmd.getContext());
         doReturn(throwingAggregate).when(repositorySpy).loadOrCreate(any(ProjectId.class));
     }
 
