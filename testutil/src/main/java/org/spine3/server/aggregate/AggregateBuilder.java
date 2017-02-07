@@ -37,6 +37,9 @@ import org.spine3.server.entity.EntityBuilder;
 public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message>
        extends EntityBuilder<A, I, S> {
 
+    /**
+     * {@inheritDoc}
+     */
     public AggregateBuilder() {
         super();
         // Have the constructor for easier location of usages.

@@ -30,6 +30,9 @@ import com.google.protobuf.Message;
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
        extends AggregateBuilder<A, I, S> {
 
+    /**
+     * {@inheritDoc}
+     */
     public AggregatePartBuilder() {
         super();
         // Have the constructor for easier location of usages.
