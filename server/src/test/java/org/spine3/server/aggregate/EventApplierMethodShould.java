@@ -135,13 +135,13 @@ public class EventApplierMethodShould {
 
     @Test
     public void do_not_accept_methods_with_two_parameters() {
-        assertTrue(Aggregate.getEventClasses(AggregateWithTwoMethodsApplier.class)
-                            .isEmpty());
+        assertTrue(EventApplierMethod.getEventClasses(AggregateWithTwoMethodsApplier.class)
+                                     .isEmpty());
     }
 
     @Test
     public void accept_non_private_appliers() {
-        final ImmutableSet<Class<? extends Message>> eventClasses = Aggregate.getEventClasses(
+        final ImmutableSet<Class<? extends Message>> eventClasses = EventApplierMethod.getEventClasses(
                 AggregateWithNonPrivateApplier.class);
 
         // The method is counted and the event is present.

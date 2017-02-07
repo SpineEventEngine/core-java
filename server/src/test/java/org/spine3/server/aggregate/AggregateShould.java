@@ -211,14 +211,6 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_event_classes_which_represent_the_state_of_the_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getEventClasses(TestAggregate.class);
-
-        assertContains(classes,
-                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
-    }
-
-    @Test
     public void return_default_state_by_default() {
         final Project state = aggregate.getState();
 
