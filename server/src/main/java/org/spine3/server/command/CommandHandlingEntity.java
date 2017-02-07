@@ -27,12 +27,16 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Set;
 
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
 /**
  * An entity that can handle commands.
@@ -61,7 +65,6 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      *
      * <p>The context may optionally have custom attributes added by
      * {@link #extendEventContext(EventContext.Builder, Message, CommandContext)}.
-     *
      *
      * @param event          the event for which to create the context
      * @param commandContext the context of the command, execution of which produced the event
@@ -94,10 +97,23 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @param commandContext the context of the command that produced the event
      * @see #createEventContext(Message, CommandContext)
      */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
+    // Have no-op method to avoid forced overriding.
     protected void extendEventContext(EventContext.Builder builder,
                                       Message event,
                                       CommandContext commandContext) {
         // Do nothing.
+    }
+
+    /**
+     * Returns the set of the command classes handled by the passed class.
+     *
+     * @param clazz the class of objects that handle commands
+     * @return immutable set of command classes
+     */
+    public static Set<CommandClass> getCommandClasses(Class<? extends CommandHandlingEntity> clazz) {
+        final Set<CommandClass> result = CommandClass.setOf(
+                getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE));
+        return result;
     }
 }

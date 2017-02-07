@@ -35,6 +35,7 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -60,6 +61,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.aggregate.Project.newBuilder;
@@ -199,13 +201,13 @@ public class AggregateShould {
 
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(TestAggregate.class);
+        final Set<CommandClass> classes = getCommandClasses(TestAggregate.class);
 
         assertTrue(classes.size() == 4);
-        assertTrue(classes.contains(CreateProject.class));
-        assertTrue(classes.contains(AddTask.class));
-        assertTrue(classes.contains(StartProject.class));
-        assertTrue(classes.contains(ImportEvents.class));
+        assertTrue(classes.contains(CommandClass.of(CreateProject.class)));
+        assertTrue(classes.contains(CommandClass.of(AddTask.class)));
+        assertTrue(classes.contains(CommandClass.of(StartProject.class)));
+        assertTrue(classes.contains(CommandClass.of(ImportEvents.class)));
     }
 
     @Test

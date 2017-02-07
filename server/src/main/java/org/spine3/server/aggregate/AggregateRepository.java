@@ -32,6 +32,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -138,7 +139,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
+        final Set<CommandClass> result = CommandHandlingEntity.getCommandClasses(getAggregateClass());
         return result;
     }
 
