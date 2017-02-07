@@ -151,12 +151,12 @@ public abstract class EntityStatusHolderShould {
     }
 
 
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static void assertArchived(Optional<EntityStatus> entityStatus) {
         assertStatus(entityStatus, true, false);
     }
 
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static void assertDeleted(Optional<EntityStatus> entityStatus) {
         assertStatus(entityStatus, false, true);
     }
