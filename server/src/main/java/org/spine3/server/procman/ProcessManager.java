@@ -23,20 +23,15 @@ package org.spine3.server.procman;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
@@ -49,7 +44,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -237,16 +231,9 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Creates a new {@link CommandRouter} instance.
-     */
-    protected CommandRouter newRouter() {
-        final CommandBus commandBus = getCommandBus();
-        checkState(commandBus != null, "CommandBus must be initialized");
-        return new CommandRouter(commandBus);
-    }
-
-    /**
-     * A {@code CommandRouter} allows to create and post one or more commands
+     * Creates a new {@link CommandRouter}.
+     *
+     * <p>A {@code CommandRouter} allows to create and post one or more commands
      * in response to a command received by the {@code ProcessManager}.
      *
      * <p>A typical usage looks like this:
@@ -255,7 +242,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      *     {@literal @}Assign
      *     CommandRouted on(MyCommand message, CommandContext context) {
      *         // Create new command messages here.
-     *         return newRouter().of(message, context)
+     *         return newRouterFor(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
      *                  .routeAll();
@@ -266,95 +253,42 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
      *
-     * <p>This class is made internal and protected to {@code ProcessManager} so that only derived classes
-     * can have the code constructs similar to the quoted above.
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
+     * @return new {@code CommandRouter}
      */
-    protected static class CommandRouter {
+    protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
+        final CommandBus commandBus = ensureCommandBus();
+        final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
+        return router;
+    }
 
-        private final CommandBus commandBus;
+    /**
+     * Creates a new {@code IteratingCommandRouter}.
+     *
+     * <p>An {@code IteratingCommandRouter} allows to create several commands
+     * in response to a command received by the {@code ProcessManager} and
+     * post these commands one by one.
+     * .
+     * <p>A typical usage looks like this:
+     * <pre>
+     *     
+     * </pre>
+     *
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
+     * @return new {@code IteratingCommandRouter}
+     */
+    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage, CommandContext commandContext) {
+        final CommandBus commandBus = ensureCommandBus();
+        final IteratingCommandRouter router = new IteratingCommandRouter(commandBus, commandMessage, commandContext);
+        return router;
+    }
 
-        /** The command that we route. */
-        private Command source;
-
-        /** Command messages to route. */
-        private final List<Message> toRoute = Lists.newArrayList();
-
-        /**
-         * The future for waiting until the {@link CommandBus#post posting of the command} completes.
-         */
-        private final SettableFuture<Void> finishFuture = SettableFuture.create();
-
-        /**
-         * The observer for posting commands.
-         */
-        private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
-
-        private CommandRouter(CommandBus commandBus) {
-            this.commandBus = commandBus;
-        }
-
-        /** Sets the command to be routed. */
-        public CommandRouter of(Message commandMessage, CommandContext context) {
-            checkNotNull(commandMessage);
-            checkNotNull(context);
-
-            this.source = Commands.create(commandMessage, context);
-            return this;
-        }
-
-        /** Adds {@code commandMessage} to be routed. */
-        public CommandRouter add(Message commandMessage) {
-            toRoute.add(commandMessage);
-            return this;
-        }
-
-        /**
-         * Posts the added messages as commands to {@code CommandBus}.
-         *
-         * @return the event with source and produced commands
-         */
-        public CommandRouted routeAll() {
-            final CommandRouted.Builder result = CommandRouted.newBuilder();
-            result.setSource(source);
-
-            for (Message message : toRoute) {
-                final Command command = produceCommand(message);
-                commandBus.post(command, responseObserver);
-                // Wait till the call is completed.
-                try {
-                    finishFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new IllegalArgumentException(e);
-                }
-                result.addProduced(command);
-            }
-            return result.build();
-        }
-
-        private static StreamObserver<Response> newResponseObserver(final SettableFuture<Void> finishFuture) {
-            return new StreamObserver<Response>() {
-                @Override
-                public void onNext(Response response) {
-                    // Do nothing. It's just a confirmation of successful post to Command Bus.
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    finishFuture.setException(throwable);
-                }
-
-                @Override
-                public void onCompleted() {
-                    finishFuture.set(null);
-                }
-            };
-        }
-
-        private Command produceCommand(Message commandMessage) {
-            final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
-            final Command result = Commands.create(commandMessage, newContext);
-            return result;
-        }
+    private CommandBus ensureCommandBus() {
+        final CommandBus commandBus = getCommandBus();
+        checkState(commandBus != null, "CommandBus must be initialized");
+        return commandBus;
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {

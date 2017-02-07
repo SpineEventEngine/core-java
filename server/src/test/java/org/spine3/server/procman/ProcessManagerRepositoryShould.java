@@ -354,9 +354,9 @@ public class ProcessManagerRepositoryShould
             handleProjectStarted();
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
 
-            return newRouter().of(command, context)
-                              .add(addTask)
-                              .routeAll();
+            return newRouterFor(command, context)
+                    .add(addTask)
+                    .routeAll();
         }
     }
 }

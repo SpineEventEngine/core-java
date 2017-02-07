@@ -26,6 +26,8 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnexpectedTypeException;
 import org.spine3.protobuf.error.UnknownTypeException;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
@@ -89,6 +91,46 @@ public class AnyPacker {
             return result;
         } catch (InvalidProtocolBufferException e) {
             throw new UnexpectedTypeException(e);
+        }
+    }
+
+    /**
+     * Creates an iterator that packs each incoming messages into {@code Any}.
+     *
+     * @param iterator the iterator over messages to pack
+     * @return the packing iterator
+     */
+    public static Iterator<Any> pack(Iterator<Message> iterator) {
+        return new PackingIterator(iterator);
+    }
+
+    /**
+     * An iterator that packs messages from the associated iterator.
+     */
+    private static class PackingIterator implements Iterator<Any> {
+
+        private final Iterator<Message> source;
+
+        private PackingIterator(Iterator<Message> source) {
+            this.source = source;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return source.hasNext();
+        }
+
+        @Override
+        public Any next() {
+            final Message next = source.next();
+            final Any result = pack(next);
+            return result;
+        }
+
+        @SuppressWarnings("NewExceptionWithoutArguments")
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
 }

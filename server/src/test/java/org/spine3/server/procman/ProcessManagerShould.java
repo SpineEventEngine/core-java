@@ -253,9 +253,9 @@ public class ProcessManagerShould {
             incrementState(AnyPacker.pack(command));
 
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
-            final CommandRouted route = newRouter().of(command, context)
-                                                   .add(addTask)
-                                                   .routeAll();
+            final CommandRouted route = newRouterFor(command, context)
+                                                     .add(addTask)
+                                                     .routeAll();
             return route;
         }
     }
