@@ -34,9 +34,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link EntityStatus}.
+ *
  * @author Dmytro Dashenkov.
  */
-public abstract class EntityStatusShould {
+public abstract class EntityStatusHolderShould {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
