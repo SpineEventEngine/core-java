@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.EntityStatusHolderShould;
-import org.spine3.test.entity.ProjectId;
+import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
