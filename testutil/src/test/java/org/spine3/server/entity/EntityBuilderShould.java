@@ -88,11 +88,8 @@ public class EntityBuilderShould {
         final int version = 100500;
         final String expectedState = Values.newStringValue("").getValue();
         final Timestamp defaultTimestamp = Timestamp.getDefaultInstance();
-        final Entity entity = givenEntity()
-                .withVersion(version)
-                .build();
-        final String actualState = entity.getState()
-                                   .toString();
+        final Entity entity = givenEntity().withVersion(version).build();
+        final String actualState = entity.getState().toString();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
