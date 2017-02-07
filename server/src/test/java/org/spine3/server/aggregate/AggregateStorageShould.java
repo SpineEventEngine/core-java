@@ -60,7 +60,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould
-       extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
+        extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Given.newProjectId();
 
@@ -107,11 +107,13 @@ public abstract class AggregateStorageShould
      * always returns events.
      */
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType",
-                        "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
+            "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
     @Override
     protected void assertResultForMissingId(Optional<AggregateEvents> record) {
         assertTrue(record.isPresent());
-        assertTrue(record.get().getEventList().isEmpty());
+        assertTrue(record.get()
+                         .getEventList()
+                         .isEmpty());
     }
 
     @Test
@@ -255,6 +257,7 @@ public abstract class AggregateStorageShould
         assertEquals(expectedValue, actualCount);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
     public void write_entity_status_of_aggregate() {
         final ProjectId id = Given.newProjectId();
@@ -265,6 +268,20 @@ public abstract class AggregateStorageShould
         final Optional<EntityStatus> readStatus = storage.readStatus(id);
         assertTrue(readStatus.isPresent());
         assertEquals(status, readStatus.get());
+    }
+
+    @Test
+    public void save_whole_status() {
+        final ProjectId id = Given.newProjectId();
+        final boolean archived = true;
+        final boolean deleted = true;
+        final EntityStatus expected = EntityStatus.newBuilder()
+                                                  .setArchived(archived)
+                                                  .setDeleted(deleted)
+                                                  .build();
+        storage.writeStatus(id, expected);
+        final Optional<EntityStatus> optionalActual = storage.readStatus(id);
+        assertStatus(optionalActual, true, true);
     }
 
     @Test
@@ -316,6 +333,28 @@ public abstract class AggregateStorageShould
     }
 
     @Test
+    public void mark_archived_if_deleted() {
+        final ProjectId id = Given.newProjectId();
+        final boolean deletingSuccess = storage.markDeleted(id);
+        assertTrue(deletingSuccess);
+        assertDeleted(storage.readStatus(id));
+        final boolean archivingSuccess = storage.markArchived(id);
+        assertTrue(archivingSuccess);
+        assertStatus(storage.readStatus(id), true, true);
+    }
+
+    @Test
+    public void mark_deleted_if_archived() {
+        final ProjectId id = Given.newProjectId();
+        final boolean archivingSuccess = storage.markArchived(id);
+        assertTrue(archivingSuccess);
+        assertArchived(storage.readStatus(id));
+        final boolean deletingSuccess = storage.markDeleted(id);
+        assertTrue(deletingSuccess);
+        assertStatus(storage.readStatus(id), true, true);
+    }
+
+    @Test
     public void retrieve_empty_status_if_never_written() {
         final ProjectId id = Given.newProjectId();
         final Optional<EntityStatus> entityStatus = storage.readStatus(id);
@@ -361,7 +400,8 @@ public abstract class AggregateStorageShould
 
         storage.writeEvent(id, expectedEvent);
 
-        final AggregateEvents events = storage.read(id).get();
+        final AggregateEvents events = storage.read(id)
+                                              .get();
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -381,7 +421,8 @@ public abstract class AggregateStorageShould
 
         writeAll(id, records);
 
-        final AggregateEvents events = storage.read(id).get();
+        final AggregateEvents events = storage.read(id)
+                                              .get();
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);
