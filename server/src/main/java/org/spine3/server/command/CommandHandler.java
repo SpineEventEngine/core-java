@@ -29,7 +29,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.FailureThrowable;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
@@ -55,17 +54,6 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * </ol>
  *
  * <p>Event messages are returned as values of command handling methods.
- *
- * <h2>Command handling methods</h2>
- * <p>A command handling method is a {@code public} method that accepts two parameters.
- * The first parameter is a command message. The second parameter is {@link CommandContext}.
- *
- * <p>The method returns an event message of the specific type, or {@code List} of messages
- * if it produces more than one event.
- *
- * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
- * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a business failure, which can be obtained via {@link FailureThrowable#getFailure()}.
  *
  * @author Alexander Yevsyukov
  * @see CommandDispatcher
