@@ -32,13 +32,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
- * Utilities for working with {@link Any}.
+ * Utilities for packing messages into {@link Any} and unpacking them.
+ *
+ * <p>When packing, the {@code AnyPacker} takes care of obtaining correct type URL prefix
+ * for the passed messages.
+ *
+ * <p>When unpacking, the {@code AnyPacker} obtains Java class matching the type URL
+ * from the passed {@code Any}.
  *
  * @author Alexander Yevsyukov
+ * @see Any#pack(Message, String)
+ * @see Any#unpack(Class)
  */
 public class AnyPacker {
 
-    private AnyPacker() {}
+    private AnyPacker() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
