@@ -51,7 +51,7 @@ public class CommandValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), createCommandContext());
+        final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(), createCommandContext());
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
@@ -60,7 +60,7 @@ public class CommandValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.createCommand(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
@@ -76,14 +76,14 @@ public class CommandValidatorShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void check_command_and_throw_exception_if_message_is_NOT_valid() {
-        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), createCommandContext());
+        final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(), createCommandContext());
 
         CommandValidator.checkCommand(cmd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void check_command_and_throw_exception_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.createCommand(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
 
         CommandValidator.checkCommand(cmd);
     }

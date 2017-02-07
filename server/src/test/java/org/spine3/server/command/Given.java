@@ -65,7 +65,7 @@ class Given {
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
-            final org.spine3.base.Command result = Commands.create(command, context);
+            final org.spine3.base.Command result = Commands.createCommand(command, context);
             return result;
         }
 
@@ -88,7 +88,7 @@ class Given {
         }
 
         public static org.spine3.base.Command createProject(Duration delay) {
-            final org.spine3.base.Command cmd = Commands.create(CommandMessage.createProject(), createCommandContext(delay));
+            final org.spine3.base.Command cmd = Commands.createCommand(CommandMessage.createProject(), createCommandContext(delay));
             return cmd;
         }
 

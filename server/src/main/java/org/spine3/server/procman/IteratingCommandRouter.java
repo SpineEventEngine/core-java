@@ -99,4 +99,15 @@ public class IteratingCommandRouter extends AbstractCommandRouter {
         super.add(commandMessage);
         return this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
+     */
+    @Override
+    protected IteratingCommandRouter addAll(Iterable<Message> iterable) {
+        super.addAll(iterable);
+        return this;
+    }
 }

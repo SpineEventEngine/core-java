@@ -119,7 +119,7 @@ public class CommandServiceShould {
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final Command unsupportedCmd = Commands.create(StringValue.getDefaultInstance(), createCommandContext());
+        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(), createCommandContext());
 
         service.post(unsupportedCmd, responseObserver);
 

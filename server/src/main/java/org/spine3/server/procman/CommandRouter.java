@@ -68,4 +68,15 @@ public class CommandRouter extends AbstractCommandRouter {
         super.add(commandMessage);
         return this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
+     */
+    @Override
+    protected CommandRouter addAll(Iterable<Message> iterable) {
+        super.addAll(iterable);
+        return this;
+    }
 }

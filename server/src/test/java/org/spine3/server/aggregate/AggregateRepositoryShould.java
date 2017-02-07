@@ -254,7 +254,7 @@ public class AggregateRepositoryShould {
 
         @Assign
         ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return ProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
@@ -270,7 +270,7 @@ public class AggregateRepositoryShould {
 
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return TaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
@@ -284,7 +284,7 @@ public class AggregateRepositoryShould {
 
         @Assign
         ProjectStarted handle(StartProject msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return ProjectStarted.newBuilder()
                                  .setProjectId(msg.getProjectId())

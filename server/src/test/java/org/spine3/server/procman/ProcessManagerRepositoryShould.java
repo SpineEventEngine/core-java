@@ -187,7 +187,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final Command cmd = Commands.create(cmdMsg, CMD_CONTEXT);
+        final Command cmd = Commands.createCommand(cmdMsg, CMD_CONTEXT);
         repository.dispatch(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
@@ -210,7 +210,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
+        final Command request = Commands.createCommand(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 

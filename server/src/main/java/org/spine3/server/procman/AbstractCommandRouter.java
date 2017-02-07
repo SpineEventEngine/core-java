@@ -74,7 +74,7 @@ class AbstractCommandRouter {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        this.source = Commands.create(commandMessage, commandContext);
+        this.source = Commands.createCommand(commandMessage, commandContext);
         this.queue = Queues.newConcurrentLinkedQueue();
     }
 
@@ -90,6 +90,16 @@ class AbstractCommandRouter {
      */
     protected AbstractCommandRouter add(Message commandMessage) {
         queue.add(commandMessage);
+        return this;
+    }
+
+    /**
+     * Adds all command messages from the passed iterable.
+     */
+    protected AbstractCommandRouter addAll(Iterable<Message> iterable) {
+        for (Message message : iterable) {
+            add(message);
+        }
         return this;
     }
 
@@ -130,7 +140,7 @@ class AbstractCommandRouter {
 
     private Command produceCommand(Message commandMessage) {
         final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
-        final Command result = Commands.create(commandMessage, newContext);
+        final Command result = Commands.createCommand(commandMessage, newContext);
         return result;
     }
 

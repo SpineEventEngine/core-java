@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FileDescriptor;
@@ -94,7 +95,9 @@ public class Commands {
      * @see CommandFactory#create(Message)
      */
     @Internal
-    public static CommandContext createContext(@Nullable TenantId tenantId, UserId userId, ZoneOffset zoneOffset) {
+    public static CommandContext createContext(@Nullable TenantId tenantId,
+                                               UserId userId,
+                                               ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -134,7 +137,7 @@ public class Commands {
      * @param context the context of the command
      * @return a new command
      */
-    public static Command create(Message message, CommandContext context) {
+    public static Command createCommand(Message message, CommandContext context) {
         checkNotNull(message);
         checkNotNull(context);
 
@@ -325,5 +328,17 @@ public class Commands {
                                       .setContext(contextUpdated)
                                       .build();
         return result;
+    }
+
+    /**
+     * Tests whether both command contexts are from the same actor
+     * working under the same tenant.
+     */
+    @VisibleForTesting
+    public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
+        checkNotNull(c1);
+        checkNotNull(c2);
+        return  c1.getActor().equals(c2.getActor()) &&
+                c1.getTenantId().equals(c2.getTenantId());
     }
 }

@@ -23,7 +23,6 @@ package org.spine3.client;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -32,6 +31,8 @@ import org.spine3.users.UserId;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Commands.createCommand;
+import static org.spine3.base.Commands.createContext;
 
 /**
  * The factory to generate new {@link Command} instances.
@@ -101,9 +102,16 @@ public class CommandFactory {
      */
     public Command create(Message message) {
         checkNotNull(message);
-        final CommandContext context = Commands.createContext(getTenantId(), getActor(), getZoneOffset());
-        final Command result = Commands.create(message, context);
+        final CommandContext context = createCommandContext();
+        final Command result = createCommand(message, context);
         return result;
+    }
+
+    /**
+     * Creates command context for a new command.
+     */
+    protected CommandContext createCommandContext() {
+        return createContext(getTenantId(), getActor(), getZoneOffset());
     }
 
     public static class Builder {
@@ -113,6 +121,7 @@ public class CommandFactory {
         private TenantId tenantId;
 
         private Builder() {
+            // Prevent instantiations from outside.
         }
 
         public UserId getActor() {
