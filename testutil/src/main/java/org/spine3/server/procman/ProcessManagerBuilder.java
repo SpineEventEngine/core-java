@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.EntityBuilder;
 
@@ -32,6 +33,7 @@ import org.spine3.server.entity.EntityBuilder;
  *
  * @author Alexander Yevsyukov
  */
+@VisibleForTesting
 public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends Message>
         extends EntityBuilder<P, I, S> {
 
