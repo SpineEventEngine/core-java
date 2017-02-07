@@ -27,9 +27,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.change.MessageMismatch;
-import org.spine3.change.StringMismatch;
-import org.spine3.change.ValueMismatch;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
@@ -395,98 +392,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder.build();
     }
 
-    // Factory methods for exceptions
-    //------------------------------------
-
     private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
-    }
-
-    // Helper methods for producing `ValueMismatch`es in command handling methods
-    //-----------------------------------------------------------------------------
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a non-default value,
-     * when the default value was expected by a command.
-     *
-     * @param actual   the value discovered instead of the default value
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedDefault(Message actual, Message newValue) {
-        return MessageMismatch.expectedDefault(actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to <em>clear</em> a value,
-     * but discovered that the field already has the default value.
-     *
-     * @param expected the value of the field that the command wanted to clear
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedNotDefault(Message expected) {
-        return MessageMismatch.expectedNotDefault(expected, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to <em>change</em> a field value,
-     * but discovered that the field has the default value.
-     *
-     * @param expected the value expected by the command
-     * @param newValue the value the command wanted to set
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedNotDefault(Message expected, Message newValue) {
-        return MessageMismatch.expectedNotDefault(expected, newValue, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
-     *
-     * @param expected the value expected by the command
-     * @param actual   the value discovered instead of the expected value
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue) {
-        return MessageMismatch.unexpectedValue(expected, actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a non-empty value,
-     * when an empty string was expected by a command.
-     *
-     * @param actual   the value discovered instead of the empty string
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedEmpty(String actual, String newValue) {
-        return StringMismatch.expectedEmpty(actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value,
-     * but discovered that the field is already empty.
-     *
-     * @param expected the value of the field that the command wanted to clear
-     * @return new ValueMismatch instance
-     */
-    protected ValueMismatch expectedNotEmpty(String expected) {
-        return StringMismatch.expectedNotEmpty(expected, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a value
-     * different than expected by a command.
-     *
-     * @param expected the value expected by the command
-     * @param actual   the value discovered instead of the expected string
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
-        return StringMismatch.unexpectedValue(expected, actual, newValue, getVersion());
     }
 }
