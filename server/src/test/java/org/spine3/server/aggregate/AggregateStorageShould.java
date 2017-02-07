@@ -33,6 +33,7 @@ import org.spine3.base.Event;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
@@ -251,6 +252,45 @@ public abstract class AggregateStorageShould
         final int actualCount = storage.readEventCountAfterLastSnapshot(id);
 
         assertEquals(expectedValue, actualCount);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
+    @Test
+    public void write_entity_status_of_aggregate() {
+        final ProjectId id = Given.newProjectId();
+        final EntityStatus status = EntityStatus.newBuilder()
+                                                .setArchived(true)
+                                                .build();
+        storage.writeStatus(id, status);
+        final Optional<EntityStatus> readStatus = storage.readStatus(id);
+        assertTrue(readStatus.isPresent());
+        assertEquals(status, readStatus.get());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
+    @Test
+    public void mark_aggregate_archived() {
+        final ProjectId id = Given.newProjectId();
+        final boolean success = storage.markArchived(id);
+        assertTrue(success);
+        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
+        assertTrue(aggregateStatus.isPresent());
+        final EntityStatus status = aggregateStatus.get();
+        assertTrue(status.getArchived());
+        assertFalse(status.getDeleted());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
+    @Test
+    public void mark_aggregate_deleted() {
+        final ProjectId id = Given.newProjectId();
+        final boolean success = storage.markDeleted(id);
+        assertTrue(success);
+        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
+        assertTrue(aggregateStatus.isPresent());
+        final EntityStatus status = aggregateStatus.get();
+        assertTrue(status.getDeleted());
+        assertFalse(status.getArchived());
     }
 
     @Test(expected = IllegalStateException.class)
