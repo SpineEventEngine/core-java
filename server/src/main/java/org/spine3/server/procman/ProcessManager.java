@@ -27,7 +27,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -124,14 +123,15 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         return events;
     }
 
-    private List<Event> toEvents(final List<? extends Message> events, final CommandContext cmdContext) {
+    private List<Event> toEvents(final List<? extends Message> events, final CommandContext commandContext) {
         return Lists.transform(events, new Function<Message, Event>() {
             @Override
             public Event apply(@Nullable Message event) {
                 if (event == null) {
                     return Event.getDefaultInstance();
                 }
-                final EventContext eventContext = createEventContext(cmdContext, event, getState(), whenModified(), getVersion());
+                final EventContext eventContext = createEventContext(event, commandContext
+                );
                 final Event result = Events.createEvent(event, eventContext);
                 return result;
             }
@@ -142,31 +142,26 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
-     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
-     * @param cmdContext     the context of the command, which processing caused the event
      * @param event          the event for which to create the context
-     * @param currentState   the state of the process manager after the event was applied
-     * @param whenModified   the moment of the process manager modification for this event
-     * @param currentVersion the version of the process manager after the event was applied
+     * @param commandContext     the context of the command, which processing caused the event
      * @return new instance of the {@code EventContext}
      */
     @CheckReturnValue
-    private EventContext createEventContext(CommandContext cmdContext,
-                                            Message event,
-                                            S currentState,
-                                            Timestamp whenModified,
-                                            int currentVersion) {
+    private EventContext createEventContext(Message event, CommandContext commandContext) {
         final EventId eventId = Events.generateId();
         final Any producerId = idToAny(getId());
-        final CommandId commandId = cmdContext.getCommandId();
+        final Timestamp whenModified = whenModified();
+        final int currentVersion = getVersion();
+
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(whenModified)
-                                                         .setCommandContext(cmdContext)
+                                                         .setCommandContext(commandContext)
                                                          .setProducerId(producerId)
                                                          .setVersion(currentVersion);
-        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
+        extendEventContext(event, builder, commandContext);
         return builder.build();
     }
 
@@ -174,19 +169,14 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Adds custom attributes to an event context builder during the creation of the event context.
      *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
-     *
-     * @param builder        a builder for the event context
-     * @param commandId      the id of the command, which cased the event
      * @param event          the event message
-     * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the process manager after the event was applied
+     * @param builder        a builder for the event context
+     * @param commandContext the context of the command that produced the event
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId,
-                                             Message event,
-                                             S currentState,
-                                             int currentVersion) {
+    protected void extendEventContext(Message event,
+                                      EventContext.Builder builder,
+                                      CommandContext commandContext) {
         // Do nothing.
     }
 
