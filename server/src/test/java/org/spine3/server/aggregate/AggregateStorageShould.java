@@ -49,6 +49,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -274,10 +275,7 @@ public abstract class AggregateStorageShould
         final boolean success = storage.markArchived(id);
         assertTrue(success);
         final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
-        assertTrue(aggregateStatus.isPresent());
-        final EntityStatus status = aggregateStatus.get();
-        assertTrue(status.getArchived());
-        assertFalse(status.getDeleted());
+        assertArchived(aggregateStatus);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // For assertion purposes
@@ -287,10 +285,63 @@ public abstract class AggregateStorageShould
         final boolean success = storage.markDeleted(id);
         assertTrue(success);
         final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
-        assertTrue(aggregateStatus.isPresent());
-        final EntityStatus status = aggregateStatus.get();
-        assertTrue(status.getDeleted());
-        assertFalse(status.getArchived());
+        assertDeleted(aggregateStatus);
+    }
+
+    @Test
+    public void do_not_mark_aggregate_archived_twice() {
+        final ProjectId id = Given.newProjectId();
+        final boolean firstSuccessful = storage.markArchived(id);
+        assertTrue(firstSuccessful);
+        final Optional<EntityStatus> firstRead = storage.readStatus(id);
+        assertArchived(firstRead);
+
+        final boolean secondSuccessful = storage.markArchived(id);
+        assertFalse(secondSuccessful);
+
+        final Optional<EntityStatus> secondRead = storage.readStatus(id);
+        assertArchived(secondRead);
+    }
+
+    @Test
+    public void do_not_mark_aggregate_deleted_twice() {
+        final ProjectId id = Given.newProjectId();
+        final boolean firstSuccessful = storage.markDeleted(id);
+        assertTrue(firstSuccessful);
+        final Optional<EntityStatus> firstRead = storage.readStatus(id);
+        assertDeleted(firstRead);
+
+        final boolean secondSuccessful = storage.markDeleted(id);
+        assertFalse(secondSuccessful);
+
+        final Optional<EntityStatus> secondRead = storage.readStatus(id);
+        assertDeleted(secondRead);
+    }
+
+    @Test
+    public void retrieve_empty_status_if_never_written() {
+        final ProjectId id = Given.newProjectId();
+        final Optional<EntityStatus> entityStatus = storage.readStatus(id);
+        assertNotNull(entityStatus);
+        assertFalse(entityStatus.isPresent());
+    }
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    private static void assertArchived(Optional<EntityStatus> entityStatus) {
+        assertStatus(entityStatus, true, false);
+    }
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    private static void assertDeleted(Optional<EntityStatus> entityStatus) {
+        assertStatus(entityStatus, false, true);
+    }
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
+    private static void assertStatus(Optional<EntityStatus> entityStatus, boolean archived, boolean deleted) {
+        assertTrue(entityStatus.isPresent());
+        final EntityStatus status = entityStatus.get();
+        assertEquals(archived, status.getArchived());
+        assertEquals(deleted, status.getDeleted());
     }
 
     @Test(expected = IllegalStateException.class)
