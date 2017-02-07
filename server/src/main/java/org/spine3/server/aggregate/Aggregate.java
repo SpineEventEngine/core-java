@@ -37,7 +37,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandler;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
@@ -118,7 +118,8 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Litus
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder> extends Entity<I, S> {
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
+                extends CommandHandlingEntity<I, S> {
 
     /**
      * The builder for the aggregate state.

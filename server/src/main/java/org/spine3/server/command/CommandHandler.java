@@ -129,7 +129,7 @@ public abstract class CommandHandler extends Entity<String, Empty> {
     }
 
     @Override
-    @SuppressWarnings("ConstantConditions" /** It is required to check for null. */)
+    @SuppressWarnings("ConstantConditions" /* It is required to check for null. */)
     public boolean equals(Object otherObj) {
         if (this == otherObj) {
             return true;
