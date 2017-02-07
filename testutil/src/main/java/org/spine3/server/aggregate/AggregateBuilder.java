@@ -37,6 +37,11 @@ import org.spine3.server.entity.EntityBuilder;
 public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message>
        extends EntityBuilder<A, I, S> {
 
+    public AggregateBuilder() {
+        super();
+        // Have the constructor for easier location of usages.
+    }
+
     @Override
     public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);

@@ -45,6 +45,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
        extends ReflectiveBuilder<E> {
 
+    public EntityBuilder() {
+        super();
+        // Have the constructor for easier location of usages.
+    }
+
     /** The class of the entity IDs. */
     private Class<I> idClass;
 

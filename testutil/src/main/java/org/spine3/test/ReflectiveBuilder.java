@@ -29,6 +29,9 @@ import java.lang.reflect.Constructor;
  */
 public abstract class ReflectiveBuilder<T> {
 
+    /** Constructor for use by subclasses. */
+    protected ReflectiveBuilder() {}
+
     /** The class of the object we create. */
     private Class<T> resultClass;
 
