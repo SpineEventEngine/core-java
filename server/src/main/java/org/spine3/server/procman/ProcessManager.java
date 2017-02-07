@@ -126,7 +126,6 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
 
     private List<Event> toEvents(final List<? extends Message> events, final CommandContext cmdContext) {
         return Lists.transform(events, new Function<Message, Event>() {
-            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Event apply(@Nullable Message event) {
                 if (event == null) {
@@ -258,6 +257,8 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @return new {@code CommandRouter}
      */
     protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
+        checkNotNull(commandMessage);
+        checkNotNull(commandContext);
         final CommandBus commandBus = ensureCommandBus();
         final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
         return router;
@@ -297,6 +298,8 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @see IteratingCommandRouter#routeNext()
      */
     protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage, CommandContext commandContext) {
+        checkNotNull(commandMessage);
+        checkNotNull(commandContext);
         final CommandBus commandBus = ensureCommandBus();
         final IteratingCommandRouter router = new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
