@@ -51,10 +51,10 @@ import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
 
 /**
- * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
- *
- * <p>A central processing unit used to maintain the state of the business process and determine
+ * A central processing unit used to maintain the state of the business process and determine
  * the next processing step based on intermediate results.
+ *
+ * <p>A process manager reacts to domain events in a cross-aggregate, eventually consistent manner.
  *
  * <p>Event/command handlers are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.

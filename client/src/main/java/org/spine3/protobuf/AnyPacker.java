@@ -103,34 +103,4 @@ public class AnyPacker {
     public static Iterator<Any> pack(Iterator<Message> iterator) {
         return new PackingIterator(iterator);
     }
-
-    /**
-     * An iterator that packs messages from the associated iterator.
-     */
-    private static class PackingIterator implements Iterator<Any> {
-
-        private final Iterator<Message> source;
-
-        private PackingIterator(Iterator<Message> source) {
-            this.source = source;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return source.hasNext();
-        }
-
-        @Override
-        public Any next() {
-            final Message next = source.next();
-            final Any result = pack(next);
-            return result;
-        }
-
-        @SuppressWarnings("NewExceptionWithoutArguments")
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
 }
