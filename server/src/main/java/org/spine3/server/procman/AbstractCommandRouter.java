@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-class AbstractCommandRouter {
+abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
 
     /**
      * The command that we route.
@@ -79,6 +79,16 @@ class AbstractCommandRouter {
     }
 
     /**
+     * Returns typed reference to {@code this}.
+     *
+     * <p>This method provides return type covariance in fluent API methods.
+     *
+     * @see #add(Message)
+     * @see #addAll(Iterable) 
+     */
+    protected abstract T getThis();
+
+    /**
      * Obtains the source command to be routed.
      */
     protected Command getSource() {
@@ -88,19 +98,19 @@ class AbstractCommandRouter {
     /**
      * Adds {@code commandMessage} to be routed.
      */
-    protected AbstractCommandRouter add(Message commandMessage) {
+    protected T add(Message commandMessage) {
         queue.add(commandMessage);
-        return this;
+        return getThis();
     }
 
     /**
      * Adds all command messages from the passed iterable.
      */
-    protected AbstractCommandRouter addAll(Iterable<Message> iterable) {
+    protected T addAll(Iterable<Message> iterable) {
         for (Message message : iterable) {
             add(message);
         }
-        return this;
+        return getThis();
     }
 
     /**
