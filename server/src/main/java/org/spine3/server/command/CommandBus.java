@@ -40,7 +40,6 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.util.Environment;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -329,7 +328,7 @@ public class CommandBus implements AutoCloseable {
         try {
             handler.handle(msg, context);
             commandStatusService.setOk(commandId);
-        } catch (InvocationTargetException e) {
+        } catch (IllegalStateException e) {
             final Throwable cause = e.getCause();
             onHandlerException(msg, commandId, cause);
         } catch (RuntimeException e) {

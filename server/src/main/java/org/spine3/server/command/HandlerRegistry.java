@@ -27,6 +27,7 @@ import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.HandlerMethod;
 import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.command.RegistryUtil.checkNotAlreadyRegistered;
 
 /**
  * The registry of command handlers by command class.
@@ -84,7 +86,8 @@ class HandlerRegistry {
         for (Map.Entry<Class<? extends Message>, CommandHandlerMethod> entry : methods.entrySet()) {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
             if (handlerRegistered(commandClass)) {
-                final CommandHandlerMethod registered = getHandler(commandClass).getHandlerMethod(commandClass.value());
+                final CommandHandler handler = getHandler(commandClass);
+                final CommandHandlerMethod registered = getHandlerMethod(handler.getClass(), commandClass.value());
                 final CommandHandlerMethod passed = entry.getValue();
                 if (registered.equals(passed)) {
                     removeFor(commandClass);
@@ -102,12 +105,19 @@ class HandlerRegistry {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
 
             if (handlerRegistered(commandClass)) {
-                final HandlerMethod alreadyRegistered = getHandler(commandClass).getHandlerMethod(commandClass.value());
+                final CommandHandler handler = getHandler(commandClass);
+                final HandlerMethod alreadyRegistered = getHandlerMethod(handler.getClass(), commandClass.value());
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
                         alreadyRegistered.getFullName(),
                         entry.getValue().getFullName());
             }
         }
+    }
+
+    private static CommandHandlerMethod getHandlerMethod(Class<? extends CommandHandler> clazz,
+                                                         Class<? extends Message> commandClass) {
+        return MethodRegistry.getInstance()
+                             .get(clazz, commandClass, CommandHandlerMethod.factory());
     }
 
     @CheckReturnValue
@@ -147,8 +157,11 @@ class HandlerRegistry {
             }
         }
 
-        RegistryUtil.checkNotAlreadyRegistered(alreadyRegistered, dispatcher,
-                "Cannot register dispatcher %s for command class %s which already has registered handler.",
-                "Cannot register dispatcher %s for command classes (%s) which already have registered handlers.");
+        checkNotAlreadyRegistered(
+            alreadyRegistered,
+            dispatcher,
+            "Cannot register dispatcher %s for command class %s which already has registered handler.",
+            "Cannot register dispatcher %s for command classes (%s) which already have registered handlers."
+        );
     }
 }

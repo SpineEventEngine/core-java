@@ -61,6 +61,7 @@ import static java.lang.String.format;
  * @param <I> the type of the process manager IDs
  * @param <S> the type of the process manager state
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public abstract class ProcessManager<I, S extends Message> extends CommandHandlingEntity<I, S> {
 
