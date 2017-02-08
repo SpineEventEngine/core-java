@@ -24,11 +24,11 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.Values;
 import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
         "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})
@@ -66,7 +66,7 @@ public class EntityBuilderShould {
     public void create_entity() {
         final long id = 1024L;
         final int version = 100500;
-        final StringValue state = Values.newStringValue(getClass().getName());
+        final StringValue state = newStringValue(getClass().getName());
         final Timestamp timestamp = Timestamps.getCurrentTime();
 
         final Entity entity = givenEntity()
@@ -85,17 +85,13 @@ public class EntityBuilderShould {
 
     @Test
     public void create_entity_with_default_values() {
-        final int version = 100500;
-        final String expectedState = Values.newStringValue("").getValue();
-        final Timestamp defaultTimestamp = Timestamp.getDefaultInstance();
-        final Entity entity = givenEntity().withVersion(version).build();
-        final String actualState = entity.getState().toString();
+        final Entity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
-        assertEquals(expectedState, actualState);
-        assertEquals(version, entity.getVersion());
-        assertEquals(defaultTimestamp, entity.whenModified());
+        assertEquals(newStringValue(""), entity.getState());
+        assertEquals(0, entity.getVersion());
+        assertEquals(Timestamp.getDefaultInstance(), entity.whenModified());
     }
 
     @Test
