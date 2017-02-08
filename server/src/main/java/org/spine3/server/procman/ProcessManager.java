@@ -20,21 +20,17 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -108,20 +104,6 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         return events;
     }
 
-    private List<Event> toEvents(final List<? extends Message> events, final CommandContext commandContext) {
-        return Lists.transform(events, new Function<Message, Event>() {
-            @Override
-            public Event apply(@Nullable Message event) {
-                if (event == null) {
-                    return Event.getDefaultInstance();
-                }
-                final EventContext eventContext = createEventContext(event, commandContext);
-                final Event result = Events.createEvent(event, eventContext);
-                return result;
-            }
-        });
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -148,12 +130,14 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @param context of the event
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
-    protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+    protected void dispatchEvent(Message event, EventContext context)
+            throws InvocationTargetException {
         checkNotNull(context);
         checkNotNull(event);
         final Class<? extends Message> eventClass = event.getClass();
-        final EventSubscriberMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(), eventClass, EventSubscriberMethod.factory());
+        final EventSubscriberMethod method =
+                MethodRegistry.getInstance()
+                              .get(getClass(), eventClass, EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
@@ -166,7 +150,8 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @param pmClass the process manager class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
+    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(
+            Class<? extends ProcessManager> pmClass) {
         return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
     }
 
@@ -238,11 +223,13 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @see IteratingCommandRouter#routeFirst()
      * @see IteratingCommandRouter#routeNext()
      */
-    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage, CommandContext commandContext) {
+    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage,
+                                                           CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
         final CommandBus commandBus = ensureCommandBus();
-        final IteratingCommandRouter router = new IteratingCommandRouter(commandBus, commandMessage, commandContext);
+        final IteratingCommandRouter router =
+                new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
@@ -253,8 +240,11 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = format("Missing event handler for event class %s in the process manager class %s",
-                                     eventClass, this.getClass());
+        final String msg = format(
+                "Missing event handler for event class %s in the process manager class %s",
+                eventClass,
+                this.getClass()
+        );
         return new IllegalStateException(msg);
     }
 }

@@ -21,12 +21,16 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.base.FailureThrowable;
 import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
@@ -38,6 +42,7 @@ import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
@@ -224,6 +229,28 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
         return new IllegalStateException(
                 String.format("Missing handler for command class %s in the class %s.",
                         commandClass.getName(), getClass().getName()));
+    }
+
+    /**
+     * Transforms the passed list of event messages into the list of events.
+     *
+     * @param eventMessages event messages for which generate events
+     * @param commandContext the context of the command which generated the event messages
+     * @return list of events
+     */
+    protected List<Event> toEvents(List<? extends Message> eventMessages,
+                                   final CommandContext commandContext) {
+        return Lists.transform(eventMessages, new Function<Message, Event>() {
+            @Override
+            public Event apply(@Nullable Message eventMessage) {
+                if (eventMessage == null) {
+                    return Event.getDefaultInstance();
+                }
+                final EventContext eventContext = createEventContext(eventMessage, commandContext);
+                final Event result = Events.createEvent(eventMessage, eventContext);
+                return result;
+            }
+        });
     }
 
     //
