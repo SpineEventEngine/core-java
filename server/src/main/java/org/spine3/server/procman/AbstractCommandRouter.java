@@ -133,7 +133,7 @@ class AbstractCommandRouter {
         try {
             finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         }
         return command;
     }
