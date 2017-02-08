@@ -142,10 +142,10 @@ public class Commands {
         checkNotNull(context);
 
         final Any packed = AnyPacker.pack(message);
-        final Command.Builder request = Command.newBuilder()
+        final Command.Builder result = Command.newBuilder()
                                                .setMessage(packed)
                                                .setContext(context);
-        return request.build();
+        return result.build();
     }
 
     /**
