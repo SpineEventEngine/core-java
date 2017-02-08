@@ -40,6 +40,7 @@ import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.command.AddTask;
 import org.spine3.test.procman.command.CreateProject;
@@ -57,18 +58,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
-    private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
+
+    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
 
     private CommandBus commandBus;
 
@@ -122,7 +126,8 @@ public class ProcessManagerShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
+        final List<Event> events = processManager.dispatchCommand(command,
+                                                                  commandFactory.createCommandContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -181,7 +186,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, COMMAND_CONTEXT);
+        processManager.dispatchCommand(unknownCommand, commandFactory.createCommandContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -208,6 +213,42 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
+    @Test
+    public void create_iterating_router() {
+        final StringValue commandMessage = newStringValue("create_iterating_router");
+        final CommandContext commandContext = commandFactory.createCommandContext();
+
+        processManager.setCommandBus(mock(CommandBus.class));
+        
+        final IteratingCommandRouter router
+                = processManager.newIteratingRouterFor(commandMessage,
+                                                       commandContext);
+        assertNotNull(router);
+
+        assertEquals(commandMessage, getMessage(router.getSource()));
+        assertEquals(commandContext, router.getSource().getContext());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void require_command_bus_when_creating_router() {
+        processManager.newRouterFor(StringValue.getDefaultInstance(),
+                                    CommandContext.getDefaultInstance());
+    }
+
+    @Test
+    public void create_router() {
+        final StringValue commandMessage = newStringValue("create_router");
+        final CommandContext commandContext = commandFactory.createCommandContext();
+
+        processManager.setCommandBus(mock(CommandBus.class));
+
+        final CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
+        assertNotNull(router);
+
+        assertEquals(commandMessage, getMessage(router.getSource()));
+        assertEquals(commandContext, router.getSource().getContext());
+    }
+
     @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
@@ -215,8 +256,8 @@ public class ProcessManagerShould {
             super(id);
         }
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod") // OK for this test.
         @Override
-        @SuppressWarnings("RefusedBequest")
         protected Any getDefaultState() {
             return Any.getDefaultInstance();
         }
@@ -253,16 +294,14 @@ public class ProcessManagerShould {
             incrementState(AnyPacker.pack(command));
 
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
-            final CommandRouted route = newRouter().of(command, context)
-                                                   .add(addTask)
-                                                   .route();
+            final CommandRouted route = newRouterFor(command, context)
+                                                     .add(addTask)
+                                                     .routeAll();
             return route;
         }
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
-
-        private boolean dispatcherInvoked = false;
 
         @Override
         public Set<CommandClass> getCommandClasses() {
@@ -271,11 +310,7 @@ public class ProcessManagerShould {
 
         @Override
         public void dispatch(Command request) throws Exception {
-            dispatcherInvoked = true;
-        }
-
-        public boolean wasDispatcherInvoked() {
-            return dispatcherInvoked;
+            // Do nothing in this dummy dispatcher.
         }
     }
 }

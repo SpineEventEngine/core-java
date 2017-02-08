@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -59,5 +60,15 @@ public class TestCommandFactory extends CommandFactory {
     public Command create(Message message, Timestamp timestamp) {
         final Command command = create(message);
         return Tests.adjustTimestamp(command, timestamp);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open access to creating command contexts in tests.
+     */
+    @Override
+    public CommandContext createCommandContext() {
+        return super.createCommandContext();
     }
 }

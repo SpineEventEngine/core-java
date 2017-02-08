@@ -26,25 +26,42 @@ import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnexpectedTypeException;
 import org.spine3.protobuf.error.UnknownTypeException;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
- * Utilities for working with {@link Any}.
+ * Utilities for packing messages into {@link Any} and unpacking them.
+ *
+ * <p>When packing, the {@code AnyPacker} takes care of obtaining correct type URL prefix
+ * for the passed messages.
+ *
+ * <p>When unpacking, the {@code AnyPacker} obtains Java class matching the type URL
+ * from the passed {@code Any}.
  *
  * @author Alexander Yevsyukov
+ * @see Any#pack(Message, String)
+ * @see Any#unpack(Class)
  */
 public class AnyPacker {
 
-    private AnyPacker() {}
+    private AnyPacker() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
      *
-     * @param message message that should be put inside the {@link Any} instance
-     * @return the instance of {@link Any} object that wraps given message
+     * <p>If an instance of {@code Any} passed, this instance is returned.
+     *
+     * @param message the message to pack
+     * @return the wrapping instance of {@link Any} or the message itself, if it is {@code Any}
      */
     public static Any pack(Message message) {
+        if (message instanceof Any) {
+            return (Any) message;
+        }
         final TypeUrl typeUrl = TypeUrl.from(message.getDescriptorForType());
         final String typeUrlPrefix = typeUrl.getPrefix();
         final Any result = Any.pack(message, typeUrlPrefix);
@@ -85,5 +102,15 @@ public class AnyPacker {
         } catch (InvalidProtocolBufferException e) {
             throw new UnexpectedTypeException(e);
         }
+    }
+
+    /**
+     * Creates an iterator that packs each incoming message into {@code Any}.
+     *
+     * @param iterator the iterator over messages to pack
+     * @return the packing iterator
+     */
+    public static Iterator<Any> pack(Iterator<Message> iterator) {
+        return new PackingIterator(iterator);
     }
 }

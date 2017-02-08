@@ -154,7 +154,7 @@ public class Given {
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
-            final org.spine3.base.Command result = Commands.create(command, context);
+            final org.spine3.base.Command result = Commands.createCommand(command, context);
             return result;
         }
 

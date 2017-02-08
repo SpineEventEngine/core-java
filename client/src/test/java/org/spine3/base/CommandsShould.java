@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.TypeName;
+import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
 
@@ -80,6 +81,14 @@ public class CommandsShould {
     }
 
     @Test
+    public void pass_null_tolerance_test() {
+        NullToleranceTest.newBuilder()
+                         .setClass(Commands.class)
+                         .build()
+                         .check();
+    }
+
+    @Test
     public void generate_command_ids() {
         final CommandId id = Commands.generateId();
 
@@ -88,7 +97,7 @@ public class CommandsShould {
 
     @Test
     public void create_command() {
-        final Command command = Commands.create(stringValue, CommandContext.getDefaultInstance());
+        final Command command = Commands.createCommand(stringValue, CommandContext.getDefaultInstance());
 
         assertEquals(stringValue, Commands.getMessage(command));
     }
@@ -97,7 +106,7 @@ public class CommandsShould {
     public void create_command_with_Any() {
         final Any msg = AnyPacker.pack(stringValue);
 
-        final Command command = Commands.create(msg, CommandContext.getDefaultInstance());
+        final Command command = Commands.createCommand(msg, CommandContext.getDefaultInstance());
 
         assertEquals(msg, command.getMessage());
     }
@@ -106,7 +115,7 @@ public class CommandsShould {
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");
 
-        final Command command = Commands.create(message, CommandContext.getDefaultInstance());
+        final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
 
         assertEquals(message, Commands.getMessage(command));
     }
@@ -180,14 +189,14 @@ public class CommandsShould {
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(10));
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
+        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
 
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
     public void when_no_scheduling_options_then_consider_command_not_scheduled() {
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
 
         assertFalse(Commands.isScheduled(cmd));
     }
@@ -195,7 +204,7 @@ public class CommandsShould {
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
+        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
     }

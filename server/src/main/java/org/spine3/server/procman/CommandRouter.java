@@ -20,31 +20,46 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import org.spine3.server.entity.EntityBuilder;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.server.command.CommandBus;
 
 /**
- * Utility class for building test instances of {@code ProcessManager}.
- *
- * @param <P> the type of process managers
- * @param <I> the type of process manager identifier
- * @param <S> the type of the process manager state
+ * The command router that routes all commands in one call.
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends Message>
-        extends EntityBuilder<P, I, S> {
+public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
 
-    public ProcessManagerBuilder() {
-        super();
-        // Have the constructor for easier location of usages.
+    CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
+        super(commandBus, commandMessage, commandContext);
     }
 
     @Override
-    public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
-        super.setResultClass(entityClass);
+    protected CommandRouter getThis() {
         return this;
+    }
+
+    /**
+     * Posts the added messages as commands to {@code CommandBus}.
+     *
+     * <p>The commands are posted in the order their messages were added.
+     *
+     * <p>The method returns after the last command was successfully posted.
+     *
+     * @return the event with the source and produced commands
+     */
+    protected CommandRouted routeAll() {
+        final CommandRouted.Builder result = CommandRouted.newBuilder();
+        result.setSource(getSource());
+
+        while (hasNext()) {
+            final Message message = next();
+            final Command command = route(message);
+            result.addProduced(command);
+        }
+
+        return result.build();
     }
 }

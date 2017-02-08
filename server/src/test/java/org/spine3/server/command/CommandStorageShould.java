@@ -146,8 +146,8 @@ public abstract class CommandStorageShould
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.create(Given.CommandMessage.createProject(),
-                                                CommandContext.getDefaultInstance());
+        final Command command = Commands.createCommand(Given.CommandMessage.createProject(),
+                                                       CommandContext.getDefaultInstance());
         final Error error = newError();
 
         storage.store(command, error);
@@ -250,7 +250,7 @@ public abstract class CommandStorageShould
     @Test
     public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
         final StringValue message = StringValue.getDefaultInstance();
-        final Command command = Commands.create(message, CommandContext.getDefaultInstance());
+        final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
         final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
 
         assertEquals("", record.getTargetId());
