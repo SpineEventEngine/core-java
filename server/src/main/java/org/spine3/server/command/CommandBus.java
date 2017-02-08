@@ -20,6 +20,7 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -225,13 +226,12 @@ public class CommandBus implements AutoCloseable {
      * @param command a command to post
      */
     void doPost(Command command) {
-        final Message message = getMessage(command);
-        final CommandClass commandClass = CommandClass.of(message);
-        final CommandContext commandContext = command.getContext();
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
         if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
-            dispatch(command);
+            dispatch(commandEnvelope);
         } else if (handlerRegistry.handlerRegistered(commandClass)) {
-            invokeHandler(message, commandContext);
+            invokeHandler(commandEnvelope);
         }
     }
 
@@ -309,47 +309,69 @@ public class CommandBus implements AutoCloseable {
         return scheduler;
     }
 
-    private void dispatch(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
+    private void dispatch(CommandEnvelope envelope) {
+        final CommandClass commandClass = envelope.getCommandClass();
         final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
-        final CommandId commandId = getId(command);
+        final CommandId commandId = envelope.getCommandId();
         try {
-            dispatcher.dispatch(command);
-        } catch (Exception e) {
-            log.errorDispatching(e, command);
-            commandStatusService.setToError(commandId, e);
-        }
-    }
-
-    private void invokeHandler(Message msg, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        final CommandId commandId = context.getCommandId();
-        try {
-            handler.handle(msg, context);
-            commandStatusService.setOk(commandId);
-        } catch (IllegalStateException e) {
-            final Throwable cause = e.getCause();
-            onHandlerException(msg, commandId, cause);
+            dispatcher.dispatch(envelope.getCommand());
+            setStatusOk(envelope);
         } catch (RuntimeException e) {
-            onHandlerException(msg, commandId, e);
+            final Throwable cause = Throwables.getRootCause(e);
+            updateCommandStatus(envelope, cause, true);
         }
     }
 
-    private void onHandlerException(Message msg, CommandId commandId, Throwable cause) {
-        //noinspection ChainOfInstanceofChecks
-        if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
-            log.errorHandling(exception, msg, commandId);
-            commandStatusService.setToError(commandId, exception);
-        } else if (cause instanceof FailureThrowable){
+    private void invokeHandler(CommandEnvelope commandEnvelope) {
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        final CommandId commandId = commandEnvelope.getCommandId();
+        try {
+            handler.handle(commandEnvelope.getCommandMessage(),
+                           commandEnvelope.getCommandContext());
+            setStatusOk(commandEnvelope);
+        } catch (RuntimeException e) {
+            final Throwable cause = Throwables.getRootCause(e);
+            updateCommandStatus(commandEnvelope, cause, false);
+        }
+    }
+
+    private void setStatusOk(CommandEnvelope envelope) {
+        final CommandId commandId = envelope.getCommandId();
+        commandStatusService.setOk(commandId);
+    }
+
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
+    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, boolean dispatching) {
+        if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
-            log.failureHandling(failure, msg, commandId);
-            commandStatusService.setToFailure(commandId, failure);
+
+            if (dispatching) {
+                //TODO:2017-02-09:alexander.yevsyukov: Log failure dispatching
+            } else {
+                log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            }
+
+            commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
+        } else if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+
+            if (dispatching) {
+                log.errorDispatching(exception, commandEnvelope.getCommand());
+            } else {
+                log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            }
+
+            commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
-            log.errorHandlingUnknown(cause, msg, commandId);
+            if (dispatching) {
+                //TODO:2017-02-09:alexander.yevsyukov: log error dispatching
+            } else {
+                log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            }
+
             final Error error = Errors.fromThrowable(cause);
-            commandStatusService.setToError(commandId, error);
+            commandStatusService.setToError(commandEnvelope.getCommandId(), error);
         }
     }
 
@@ -483,6 +505,46 @@ public class CommandBus implements AutoCloseable {
             }
 
             return commandBus;
+        }
+    }
+
+    /**
+     * The holder of the command, which provides convenient access to its properties.
+     */
+    private static final class CommandEnvelope {
+
+        private final Command command;
+        private final CommandId commandId;
+        private final Message commandMessage;
+        private final CommandContext commandContext;
+        private final CommandClass commandClass;
+
+        private CommandEnvelope(Command command) {
+            this.command = checkNotNull(command);
+            this.commandId = getId(command);
+            this.commandMessage = getMessage(command);
+            this.commandContext = command.getContext();
+            this.commandClass = CommandClass.of(commandMessage);
+        }
+
+        public Command getCommand() {
+            return command;
+        }
+
+        public CommandId getCommandId() {
+            return commandId;
+        }
+
+        public Message getCommandMessage() {
+            return commandMessage;
+        }
+
+        public CommandContext getCommandContext() {
+            return commandContext;
+        }
+
+        public CommandClass getCommandClass() {
+            return commandClass;
         }
     }
 }

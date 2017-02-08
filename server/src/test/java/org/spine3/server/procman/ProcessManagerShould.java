@@ -300,7 +300,7 @@ public class ProcessManagerShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
             // Do nothing in this dummy dispatcher.
         }
     }

@@ -163,7 +163,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Processes the command by dispatching it to a method of an aggregate.
+     * Processes the command by dispatching it an aggregate.
      *
      * <p>The aggregate ID is obtained from the passed command.
      *
@@ -171,10 +171,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * if there is no aggregate with such ID.
      *
      * @param command the command to dispatch
-     * @throws IllegalStateException if storage for the repository was not initialized
      */
     @Override
-    public void dispatch(Command command) throws IllegalStateException {
+    public void dispatch(Command command) {
         final CommandEndpoint<I, A> commandEndpoint = new CommandEndpoint<>(this);
         final A aggregate = commandEndpoint.dispatch(command);
 

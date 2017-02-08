@@ -739,7 +739,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -765,7 +765,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -776,7 +776,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -790,7 +790,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
             dispatcherInvoked = true;
         }
 
@@ -810,7 +810,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
             throw exception;
         }
     }

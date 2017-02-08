@@ -108,8 +108,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * @throws IllegalArgumentException if commands of this type are not handled by the process manager
      */
     @Override
-    public void dispatch(Command command)
-            throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
+    public void dispatch(Command command) {
         final Message commandMessage = getMessage(checkNotNull(command));
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(commandMessage);
