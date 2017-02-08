@@ -32,6 +32,10 @@ public abstract class ReflectiveBuilder<T> {
     /** The class of the object we create. */
     private Class<T> resultClass;
 
+    /** Constructor for use by subclasses. */
+    protected ReflectiveBuilder() {
+    }
+
     /**
      * Obtains constructor for the result object.
      */

@@ -28,6 +28,7 @@ import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
@@ -38,7 +39,10 @@ import static org.spine3.test.Tests.newUserId;
 
 public class AnyPackerShould {
 
+    /** A message with type URL standard to Google Protobuf. */
     private final StringValue googleMsg = newStringValue(newUuid());
+
+    /** A message with different type URL. */
     private final UserId spineMsg = newUserId(newUuid());
 
     @Test
@@ -80,6 +84,13 @@ public class AnyPackerShould {
         final StringValue actual = AnyPacker.unpack(any);
 
         assertEquals(googleMsg, actual);
+    }
+
+    @Test
+    public void return_Any_if_it_is_passed_to_pack() {
+        final Any any = Any.pack(googleMsg);
+
+        assertSame(any, AnyPacker.pack(any));
     }
 
     @Test(expected = NullPointerException.class)

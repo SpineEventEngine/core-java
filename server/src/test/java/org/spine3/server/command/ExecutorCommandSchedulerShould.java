@@ -70,7 +70,7 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmdPrimary = Commands.create(Given.CommandMessage.createProject(), context);
+        final Command cmdPrimary = Commands.createCommand(Given.CommandMessage.createProject(), context);
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
         scheduler.schedule(cmdPrimary);
@@ -85,8 +85,8 @@ public class ExecutorCommandSchedulerShould {
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();
-        final Command expectedCmd = Commands.create(Given.CommandMessage.createProject(id), context);
-        final Command extraCmd = Commands.create(Given.CommandMessage.addTask(id), context);
+        final Command expectedCmd = Commands.createCommand(Given.CommandMessage.createProject(id), context);
+        final Command extraCmd = Commands.createCommand(Given.CommandMessage.addTask(id), context);
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);

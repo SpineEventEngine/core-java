@@ -18,29 +18,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.protobuf;
 
+import com.google.common.collect.UnmodifiableIterator;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
+import java.util.Iterator;
+
 /**
- * Utility class for building {@code AggregatePart}s for tests.
+ * An iterator that packs messages from the source iterator.
  *
  * @author Alexander Yevsyukov
+ * @see AnyPacker#pack(Iterator)
  */
-public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
-       extends AggregateBuilder<A, I, S> {
+class PackingIterator extends UnmodifiableIterator<Any> {
 
-    /**
-     * {@inheritDoc}
-     */
-    public AggregatePartBuilder() {
+    private final Iterator<Message> source;
+
+    PackingIterator(Iterator<Message> source) {
         super();
-        // Have the constructor for easier location of usages.
+        this.source = source;
     }
 
     @Override
-    public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
-        super.setResultClass(entityClass);
-        return this;
+    public boolean hasNext() {
+        return source.hasNext();
+    }
+
+    /**
+     * Takes the message from the source iterator, wraps it into {@code Any}
+     * and returns.
+     *
+     * <p>If the source iterator returns {@code null} message, the default instance
+     * of {@code Any} will be returned.
+     *
+     * @return the packed message or default {@code Any}
+     */
+    @Override
+    public Any next() {
+        final Message next = source.next();
+        final Any result = next != null
+                           ? AnyPacker.pack(next)
+                           : Any.getDefaultInstance();
+        return result;
     }
 }

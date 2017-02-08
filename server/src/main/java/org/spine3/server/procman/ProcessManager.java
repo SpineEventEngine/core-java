@@ -23,37 +23,26 @@ package org.spine3.server.procman;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.time.ZoneOffset;
-import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -61,10 +50,10 @@ import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
 
 /**
- * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
- *
- * <p>A central processing unit used to maintain the state of the business process and determine
+ * A central processing unit used to maintain the state of the business process and determine
  * the next processing step based on intermediate results.
+ *
+ * <p>A process manager reacts to domain events in a cross-aggregate, eventually consistent manner.
  *
  * <p>Event/command handlers are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.
@@ -134,15 +123,14 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         return events;
     }
 
-    private List<Event> toEvents(final List<? extends Message> events, final CommandContext cmdContext) {
+    private List<Event> toEvents(final List<? extends Message> events, final CommandContext commandContext) {
         return Lists.transform(events, new Function<Message, Event>() {
-            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Event apply(@Nullable Message event) {
                 if (event == null) {
                     return Event.getDefaultInstance();
                 }
-                final EventContext eventContext = createEventContext(cmdContext, event, getState(), whenModified(), getVersion());
+                final EventContext eventContext = createEventContext(event, commandContext);
                 final Event result = Events.createEvent(event, eventContext);
                 return result;
             }
@@ -153,31 +141,26 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
-     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
-     * @param cmdContext     the context of the command, which processing caused the event
      * @param event          the event for which to create the context
-     * @param currentState   the state of the process manager after the event was applied
-     * @param whenModified   the moment of the process manager modification for this event
-     * @param currentVersion the version of the process manager after the event was applied
+     * @param commandContext     the context of the command, which processing caused the event
      * @return new instance of the {@code EventContext}
      */
     @CheckReturnValue
-    private EventContext createEventContext(CommandContext cmdContext,
-                                            Message event,
-                                            S currentState,
-                                            Timestamp whenModified,
-                                            int currentVersion) {
+    private EventContext createEventContext(Message event, CommandContext commandContext) {
         final EventId eventId = Events.generateId();
         final Any producerId = idToAny(getId());
-        final CommandId commandId = cmdContext.getCommandId();
+        final Timestamp whenModified = whenModified();
+        final int currentVersion = getVersion();
+
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(whenModified)
-                                                         .setCommandContext(cmdContext)
+                                                         .setCommandContext(commandContext)
                                                          .setProducerId(producerId)
                                                          .setVersion(currentVersion);
-        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
+        extendEventContext(event, builder, commandContext);
         return builder.build();
     }
 
@@ -185,19 +168,14 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * Adds custom attributes to an event context builder during the creation of the event context.
      *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
-     *
-     * @param builder        a builder for the event context
-     * @param commandId      the id of the command, which cased the event
      * @param event          the event message
-     * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the process manager after the event was applied
+     * @param builder        a builder for the event context
+     * @param commandContext the context of the command that produced the event
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId,
-                                             Message event,
-                                             S currentState,
-                                             int currentVersion) {
+    protected void extendEventContext(Message event,
+                                      EventContext.Builder builder,
+                                      CommandContext commandContext) {
         // Do nothing.
     }
 
@@ -241,28 +219,21 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Creates a new {@link CommandRouter} instance.
-     */
-    protected CommandRouter newRouter() {
-        final CommandBus commandBus = getCommandBus();
-        checkState(commandBus != null, "CommandBus must be initialized");
-        return new CommandRouter(commandBus);
-    }
-
-    /**
-     * A {@code CommandRouter} allows to create and post one or more commands
+     * Creates a new {@link CommandRouter}.
+     *
+     * <p>A {@code CommandRouter} allows to create and post one or more commands
      * in response to a command received by the {@code ProcessManager}.
      *
      * <p>A typical usage looks like this:
      *
      * <pre>
      *     {@literal @}Assign
-     *     public CommandRouted on(MyCommand message, CommandContext context) {
+     *     CommandRouted on(MyCommand message, CommandContext context) {
      *         // Create new command messages here.
-     *         return new Router().of(message, context)
+     *         return newRouterFor(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
-     *                  .route();
+     *                  .routeAll();
      *     }
      * </pre>
      *
@@ -270,97 +241,63 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
      *
-     * <p>This class is made internal and protected to {@code ProcessManager} so that only derived classes
-     * can have the code constructs similar to the quoted above.
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
+     * @return new {@code CommandRouter}
      */
-    protected static class CommandRouter {
+    protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
+        checkNotNull(commandMessage);
+        checkNotNull(commandContext);
+        final CommandBus commandBus = ensureCommandBus();
+        final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
+        return router;
+    }
 
-        private final CommandBus commandBus;
+    /**
+     * Creates a new {@code IteratingCommandRouter}.
+     *
+     * <p>An {@code IteratingCommandRouter} allows to create several commands
+     * in response to a command received by the {@code ProcessManager} and
+     * post these commands one by one.
+     * .
+     * <p>A typical usage looks like this:
+     * <pre>
+     *     {@literal @}Assign
+     *     CommandRouted on(MyCommand message, CommandContext context) {
+     *         // Create new command messages here.
+     *         router = newIteratingRouterFor(message, context);
+     *         return router.add(messageOne)
+     *                      .add(messageTwo)
+     *                      .add(messageThree)
+     *                      .routeFirst();
+     *     }
+     *
+     *     {@literal @}Subscribe
+     *     void on(EventOne message, EventContext context) {
+     *         if (router.hasNext()) {
+     *             router.routeNext();
+     *         }
+     *     }
+     * </pre>
+     *
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
+     * @return new {@code IteratingCommandRouter}
+     * @see IteratingCommandRouter#routeFirst()
+     * @see IteratingCommandRouter#routeNext()
+     */
+    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage, CommandContext commandContext) {
+        checkNotNull(commandMessage);
+        checkNotNull(commandContext);
+        final CommandBus commandBus = ensureCommandBus();
+        final IteratingCommandRouter router = new IteratingCommandRouter(commandBus, commandMessage, commandContext);
+        return router;
+    }
 
-        private Message sourceCommand;
-        private CommandContext sourceContext;
-
-        /**
-         * The actor of the command we route.
-         *
-         * <p>We route commands on the original's author behalf.
-         */
-        private UserId actor;
-
-        /** The zone offset from which the actor works. */
-        private ZoneOffset zoneOffset;
-
-        /** Command messages to route. */
-        private final List<Message> toRoute = Lists.newArrayList();
-
-        private CommandRouter(CommandBus commandBus) {
-            this.commandBus = commandBus;
-        }
-
-        /** Sets command to be routed. */
-        public CommandRouter of(Message sourceCommand, CommandContext context) {
-            this.sourceCommand = checkNotNull(sourceCommand);
-            this.sourceContext = checkNotNull(context);
-            this.actor = context.getActor();
-            this.zoneOffset = context.getZoneOffset();
-            return this;
-        }
-
-        /** Adds {@code commandMessage} to be routed as a command. */
-        public CommandRouter add(Message commandMessage) {
-            toRoute.add(commandMessage);
-            return this;
-        }
-
-        /**
-         * Posts the added messages as commands to {@code CommandBus}.
-         *
-         * @return the event with source and produced commands
-         */
-        public CommandRouted route() {
-            final CommandRouted.Builder result = CommandRouted.newBuilder();
-            result.setSource(Commands.create(sourceCommand, sourceContext));
-            final SettableFuture<Void> finishFuture = SettableFuture.create();
-            final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
-            for (Message message : toRoute) {
-                final Command command = produceCommand(message);
-                commandBus.post(command, responseObserver);
-                // Wait till the call is completed.
-                try {
-                    finishFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new IllegalArgumentException(e);
-                }
-                result.addProduced(command);
-            }
-            return result.build();
-        }
-
-        private static StreamObserver<Response> newResponseObserver(final SettableFuture<Void> finishFuture) {
-            return new StreamObserver<Response>() {
-                @Override
-                public void onNext(Response response) {
-                    // Do nothing. It's just a confirmation of successful post to Command Bus.
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    finishFuture.setException(throwable);
-                }
-
-                @Override
-                public void onCompleted() {
-                    finishFuture.set(null);
-                }
-            };
-        }
-
-        private Command produceCommand(Message newMessage) {
-            final TenantId currentTenant = CurrentTenant.get();
-            final CommandContext newContext = Commands.createContext(currentTenant, actor, zoneOffset);
-            final Command result = Commands.create(newMessage, newContext);
-            return result;
-        }
+    private CommandBus ensureCommandBus() {
+        final CommandBus commandBus = getCommandBus();
+        checkState(commandBus != null, "CommandBus must be initialized");
+        return commandBus;
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {

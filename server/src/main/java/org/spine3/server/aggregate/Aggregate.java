@@ -514,6 +514,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param event          the event message
      * @param builder        a builder for the event context
+     * @param commandContext the context of the command that produced the event
      * @see #createEventContext(Message, CommandContext, Timestamp)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.

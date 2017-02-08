@@ -35,6 +35,11 @@ import org.spine3.server.entity.EntityBuilder;
 public class ProjectionBuilder<P extends Projection<I, S>, I, S extends Message>
        extends EntityBuilder<P, I, S> {
 
+    public ProjectionBuilder() {
+        super();
+        // Have the constructor for easier location of usages.
+    }
+
     @Override
     public ProjectionBuilder<P, I, S> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);

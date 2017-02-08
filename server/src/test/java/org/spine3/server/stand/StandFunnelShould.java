@@ -21,6 +21,7 @@ package org.spine3.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
@@ -98,13 +99,13 @@ public class StandFunnelShould {
                                             .setId("PRJ-001")
                                             .build();
         final Given.StandTestAggregate entity = repository.create(entityId);
-        final Any state = entity.getState();
+        final StringValue state = entity.getState();
         final Any packedState = AnyPacker.pack(state);
         final int version = entity.getVersion();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(entityId, state, version);
+                   .update(entityId, packedState, version);
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
@@ -129,8 +130,8 @@ public class StandFunnelShould {
         final StandFunnel standFunnel = builder.build();
         Assert.assertNotNull(standFunnel);
 
-        final Any state = Any.getDefaultInstance();
         final Object id = new Object();
+        final StringValue state = StringValue.getDefaultInstance();
         final int version = 17;
 
         final Entity entity = mock(Entity.class);
