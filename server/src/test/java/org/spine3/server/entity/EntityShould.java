@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -40,6 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.currentTimeSeconds;
 
 /**
@@ -80,12 +82,59 @@ public class EntityShould {
     }
 
     @Test
-    public void set_id_in_constructor() {
-        final String id = newUuid();
+    public void accept_String_id_to_constructor() {
+        final String stringId = "stringId";
+        final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
 
-        final Given.TestEntity entity = Given.TestEntity.newInstance(id);
+        assertEquals(stringId, entityWithStringId.getId());
+    }
 
-        assertEquals(id, entity.getId());
+    @Test
+    public void accept_Long_id_to_constructor() {
+        final Long longId = 12L;
+        final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
+
+        assertEquals(longId, entityWithLongId.getId());
+    }
+
+    @Test
+    public void accept_Integer_id_to_constructor() {
+        final Integer integerId = 12;
+        final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
+
+        assertEquals(integerId, entityWithIntegerId.getId());
+    }
+
+    @Test
+    public void accept_Message_id_to_constructor() {
+        final StringValue messageId = newStringValue("messageId");
+        final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
+
+        assertEquals(messageId, entityWithMessageID.getId());
+    }
+
+    private static class TestEntityWithIdString extends Entity <String, Project> {
+        private TestEntityWithIdString(String id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdMessage extends Entity <Message, Project> {
+        private TestEntityWithIdMessage(Message id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdInteger extends Entity <Integer, Project> {
+        private TestEntityWithIdInteger(Integer id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdLong extends Entity <Long, Project> {
+        private TestEntityWithIdLong(Long id) {
+            super(id);
+        }
     }
 
     @Test

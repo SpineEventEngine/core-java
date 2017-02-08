@@ -57,7 +57,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
@@ -89,49 +88,6 @@ public class AggregateShould {
                          .withId(ID)
                          .withVersion(100)
                          .build();
-    }
-
-    @Test
-    public void accept_Message_id_to_constructor() {
-        try {
-            final TestAggregate aggregate = new TestAggregate(ID);
-            assertEquals(ID, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_String_id_to_constructor() {
-        try {
-            final String id = "string_id";
-            final TestAggregateWithIdString aggregate = new TestAggregateWithIdString(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_Integer_id_to_constructor() {
-        try {
-            final Integer id = 12;
-            final TestAggregateWithIdInteger aggregate = new TestAggregateWithIdInteger(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_Long_id_to_constructor() {
-        try {
-            final Long id = 12L;
-            final TestAggregateWithIdLong aggregate = new TestAggregateWithIdLong(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -457,20 +413,8 @@ public class AggregateShould {
         }
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
-        private TestAggregateWithIdString(String id) {
-            super(id);
-        }
-    }
-
     private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
-            super(id);
-        }
-    }
-
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
-        private TestAggregateWithIdLong(Long id) {
             super(id);
         }
     }
