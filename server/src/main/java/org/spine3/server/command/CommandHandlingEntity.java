@@ -60,14 +60,16 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * <h2>Command handling methods</h2>
  *
  * <p>A command handling method is a {@code public} method that accepts two parameters.
- * The first parameter is a command message. The second parameter is {@link CommandContext}.
+ * The first parameter is a command message of an <strong>exact</strong> type
+ * derived from {@code Message}
+ * The second (optional) parameter is {@link CommandContext}.
  *
  * <p>The method returns an event message of the specific type, or {@code List} of messages
  * if it produces more than one event.
  *
  * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a business failure, which can be obtained via {@link FailureThrowable#getFailure()}.
+ * because of a {@linkplain FailureThrowable#getFailure() business failure}.
  *
  * @author Alexander Yevsyukov
  */
