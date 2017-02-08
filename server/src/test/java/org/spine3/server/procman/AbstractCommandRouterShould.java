@@ -43,6 +43,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -121,7 +122,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
      * Asserts that the produced command context has correct fields.
      */
     protected void assertActorAndTenant(Command produced) {
-        assertTrue(Commands.sameActorAndTenant(sourceContext, produced.getContext()));
+        assertTrue(sameActorAndTenant(sourceContext, produced.getContext()));
     }
 
     static List<StringValue> unpackAll(List<Any> anyList) {
