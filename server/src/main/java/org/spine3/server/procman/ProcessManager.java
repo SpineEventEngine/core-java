@@ -130,8 +130,7 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
                 if (event == null) {
                     return Event.getDefaultInstance();
                 }
-                final EventContext eventContext = createEventContext(event, commandContext
-                );
+                final EventContext eventContext = createEventContext(event, commandContext);
                 final Event result = Events.createEvent(event, eventContext);
                 return result;
             }
