@@ -105,7 +105,7 @@ public class AnyPacker {
     }
 
     /**
-     * Creates an iterator that packs each incoming messages into {@code Any}.
+     * Creates an iterator that packs each incoming message into {@code Any}.
      *
      * @param iterator the iterator over messages to pack
      * @return the packing iterator
