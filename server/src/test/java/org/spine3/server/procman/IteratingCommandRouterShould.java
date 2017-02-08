@@ -96,7 +96,7 @@ public class IteratingCommandRouterShould {
     }
 
     @Test
-    public void routeFirst() throws Exception {
+    public void return_CommandRouted_from_routeFirst() throws Exception {
         final CommandRouted commandRouted = router.routeFirst();
 
         // Check that the source command is stored.
@@ -124,7 +124,7 @@ public class IteratingCommandRouterShould {
     }
 
     @Test
-    public void routeNext() throws Exception {
+    public void produce_a_command_on_routeNext() throws Exception {
         router.routeFirst();
 
         final Command command = router.routeNext();
