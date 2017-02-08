@@ -21,8 +21,19 @@
 package org.spine3.server.procman;
 
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Alexaneder Yevsyukov
@@ -30,8 +41,24 @@ import org.spine3.server.command.CommandBus;
 public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<CommandRouter> {
 
     @Override
-    CommandRouter createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext) {
-        return new CommandRouter(commandBus, sourceMessage, commandContext);
+    CommandRouter createRouter(CommandBus ignored, Message sourceMessage, CommandContext commandContext) {
+        final CommandBus mockBus = mock(CommandBus.class);
+
+        doAnswer(new Answer() {
+            @SuppressWarnings("ReturnOfNull") // is OK for Answer
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                final StreamObserver<Response> observer = invocation.getArgument(1);
+                observer.onError(new RuntimeException("simulate error"));
+                return null;
+            }
+        }).when(mockBus).post(any(Command.class), ArgumentMatchers.<StreamObserver<Response>>any());
+
+        return new CommandRouter(mockBus, sourceMessage, commandContext);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void throw_IllegalStateException_when_caught_error_when_posting() {
+        router().routeAll();
+    }
 }
