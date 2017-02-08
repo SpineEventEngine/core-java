@@ -127,17 +127,19 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final EntityStatus statusBefore = aggregate.getStatus();
-            EntityStatus statusAfter = null;
             try {
+                final EntityStatus statusBefore = aggregate.getStatus();
+
                 aggregate.dispatchCommand(commandMessage, context);
-                statusAfter = aggregate.getStatus();
-            } catch (RuntimeException e) {
-                commandEndpoint.updateCommandStatus(commandId, e);
-            } finally {
+
+                // Update status only if the command was handled successfully.
+                final EntityStatus statusAfter = aggregate.getStatus();
                 if (statusAfter != null && !statusBefore.equals(statusAfter)) {
                     storage().writeStatus(aggregateId, statusAfter);
                 }
+
+            } catch (RuntimeException e) {
+                commandEndpoint.updateCommandStatus(commandId, e);
             }
             return aggregate;
         }
