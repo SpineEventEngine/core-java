@@ -196,15 +196,6 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void return_handled_command_classes() {
-        final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(TestProcessManager.class);
-        assertEquals(3, classes.size());
-        assertTrue(classes.contains(CreateProject.class));
-        assertTrue(classes.contains(AddTask.class));
-        assertTrue(classes.contains(StartProject.class));
-    }
-
-    @Test
     public void return_handled_event_classes() {
         final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());

@@ -20,7 +20,6 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
@@ -64,10 +64,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
 
     @Nullable
-    private ImmutableSet<CommandClass> commandClasses;
+    private Set<CommandClass> commandClasses;
 
     @Nullable
-    private ImmutableSet<EventClass> eventClasses;
+    private Set<EventClass> eventClasses;
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
@@ -79,8 +79,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     public Set<CommandClass> getCommandClasses() {
         if (commandClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(pmClass);
-            commandClasses = CommandClass.setOf(classes);
+            commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
         }
         return commandClasses;
     }
