@@ -42,9 +42,9 @@ public class IteratingCommandRouterShould
         extends AbstractCommandRouterShould<IteratingCommandRouter> {
 
     @Override
-    protected IteratingCommandRouter createRouter(CommandBus commandBus,
-                                                  Message sourceMessage,
-                                                  CommandContext commandContext) {
+    IteratingCommandRouter createRouter(CommandBus commandBus,
+                                        Message sourceMessage,
+                                        CommandContext commandContext) {
         return new IteratingCommandRouter(commandBus, sourceMessage, commandContext);
     }
 

@@ -69,29 +69,14 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
             newStringValue("cuatro")
     );
 
-    protected static List<StringValue> unpackAll(List<Any> anyList) {
-        return Lists.transform(anyList, new Function<Any, StringValue>() {
-            @Nullable
-            @Override
-            public StringValue apply(@Nullable Any input) {
-                if (input == null) {
-                    return null;
-                }
-                return AnyPacker.unpack(input);
-            }
-        });
-    }
+    abstract T createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
 
-    protected abstract T createRouter(CommandBus commandBus,
-                                      Message sourceMessage,
-                                      CommandContext commandContext);
-
-    protected T router() {
+    T router() {
         return router;
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
-    protected List<Message> messages() {
+    List<Message> messages() {
         return messages;
     }
 
@@ -100,6 +85,9 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         final CommandBus commandBus = boundedContext.getCommandBus();
+
+        // Register dispatcher for `StringValue` message type.
+        // Otherwise we won't be able to post.
         commandBus.register(new CommandDispatcher() {
             @Override
             public Set<CommandClass> getCommandClasses() {
@@ -134,5 +122,18 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
      */
     protected void assertActorAndTenant(Command produced) {
         assertTrue(Commands.sameActorAndTenant(sourceContext, produced.getContext()));
+    }
+
+    static List<StringValue> unpackAll(List<Any> anyList) {
+        return Lists.transform(anyList, new Function<Any, StringValue>() {
+            @Nullable
+            @Override
+            public StringValue apply(@Nullable Any input) {
+                if (input == null) {
+                    return null;
+                }
+                return AnyPacker.unpack(input);
+            }
+        });
     }
 }
