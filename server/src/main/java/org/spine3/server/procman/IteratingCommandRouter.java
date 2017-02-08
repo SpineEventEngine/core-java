@@ -35,10 +35,15 @@ import java.util.NoSuchElementException;
  *
  * @author Alexander Yevsyukov
  */
-public class IteratingCommandRouter extends AbstractCommandRouter {
+public class IteratingCommandRouter extends AbstractCommandRouter<IteratingCommandRouter> {
 
     IteratingCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
         super(commandBus, commandMessage, commandContext);
+    }
+
+    @Override
+    protected IteratingCommandRouter getThis() {
+        return this;
     }
 
     /**
@@ -87,27 +92,5 @@ public class IteratingCommandRouter extends AbstractCommandRouter {
         final Message message = next();
         final Command command = route(message);
         return command;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    protected IteratingCommandRouter add(Message commandMessage) {
-        super.add(commandMessage);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    protected IteratingCommandRouter addAll(Iterable<Message> iterable) {
-        super.addAll(iterable);
-        return this;
     }
 }

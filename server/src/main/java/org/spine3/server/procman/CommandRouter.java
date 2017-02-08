@@ -30,10 +30,15 @@ import org.spine3.server.command.CommandBus;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandRouter extends AbstractCommandRouter {
+public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
 
     CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
         super(commandBus, commandMessage, commandContext);
+    }
+
+    @Override
+    protected CommandRouter getThis() {
+        return this;
     }
 
     /**
@@ -56,27 +61,5 @@ public class CommandRouter extends AbstractCommandRouter {
         }
 
         return result.build();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    protected CommandRouter add(Message commandMessage) {
-        super.add(commandMessage);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    protected CommandRouter addAll(Iterable<Message> iterable) {
-        super.addAll(iterable);
-        return this;
     }
 }
