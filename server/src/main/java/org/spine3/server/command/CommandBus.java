@@ -22,11 +22,9 @@ package org.spine3.server.command;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
@@ -45,8 +43,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.isScheduled;
 
 /**
@@ -508,43 +504,4 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    /**
-     * The holder of the command, which provides convenient access to its properties.
-     */
-    private static final class CommandEnvelope {
-
-        private final Command command;
-        private final CommandId commandId;
-        private final Message commandMessage;
-        private final CommandContext commandContext;
-        private final CommandClass commandClass;
-
-        private CommandEnvelope(Command command) {
-            this.command = checkNotNull(command);
-            this.commandId = getId(command);
-            this.commandMessage = getMessage(command);
-            this.commandContext = command.getContext();
-            this.commandClass = CommandClass.of(commandMessage);
-        }
-
-        public Command getCommand() {
-            return command;
-        }
-
-        public CommandId getCommandId() {
-            return commandId;
-        }
-
-        public Message getCommandMessage() {
-            return commandMessage;
-        }
-
-        public CommandContext getCommandContext() {
-            return commandContext;
-        }
-
-        public CommandClass getCommandClass() {
-            return commandClass;
-        }
-    }
 }
