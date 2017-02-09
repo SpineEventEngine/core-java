@@ -57,6 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -180,7 +181,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
-        final Set<CommandClass> aggregateCommands = CommandClass.setOf(Aggregate.getCommandClasses(ProjectAggregate.class));
+        final Set<CommandClass> aggregateCommands = getCommandClasses(ProjectAggregate.class);
         final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));

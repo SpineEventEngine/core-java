@@ -462,7 +462,8 @@ public class CommandBusShould {
         commandBus.post(command, responseObserver);
 
         verify(commandStore).updateStatus(getId(command), dispatcher.exception);
-        verify(log).errorDispatching(dispatcher.exception, command);
+        final CommandEnvelope envelope = new CommandEnvelope(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
     }
 
     @Test
@@ -739,7 +740,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -765,7 +766,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -776,7 +777,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
         }
     }
 
@@ -790,7 +791,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
             dispatcherInvoked = true;
         }
 
@@ -810,7 +811,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public void dispatch(Command request) throws Exception {
+        public void dispatch(Command request) {
             throw exception;
         }
     }
