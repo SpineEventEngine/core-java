@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -51,6 +52,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -76,8 +78,7 @@ public class CommandBusShouldHandleCommandStatus {
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
-        final ExecutorCommandScheduler scheduler =
-                spy(new ExecutorCommandScheduler());
+        final ExecutorCommandScheduler scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         commandBus = CommandBus.newBuilder()
                                .setCommandStore(commandStore)
@@ -91,6 +92,14 @@ public class CommandBusShouldHandleCommandStatus {
         responseObserver = new TestResponseObserver();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        if (commandStore.isOpen()) { // then command bus is opened, too
+            commandBus.close();
+        }
+        eventBus.close();
+    }
+
     @Test
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
@@ -99,7 +108,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore).updateStatus(getId(command), dispatcher.exception);
+        verify(commandStore, atMost(1)).updateStatus(getId(command), dispatcher.exception);
         final CommandEnvelope envelope = new CommandEnvelope(command);
         verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
     }
@@ -113,7 +122,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
@@ -126,7 +135,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore).updateStatus(eq(commandId), eq(exception));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(exception));
         verify(log).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
     }
 
@@ -139,23 +148,26 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
         verify(log).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
 
     @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
-        final List<Command> commands = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
+        final List<Command> commands = newArrayList(Given.Command.createProject(),
+                                                    Given.Command.addTask(),
+                                                    Given.Command.startProject());
         final Duration delay = Durations.ofMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        commandBus.rescheduler().doRescheduleCommands();
+        commandBus.rescheduler()
+                  .doRescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);
             final CommandId id = getId(cmd);
-            verify(commandStore).updateStatus(id, commandExpiredError(msg));
+            verify(commandStore, atMost(1)).updateStatus(id, commandExpiredError(msg));
             verify(log).errorExpiredCommand(msg, id);
         }
     }
@@ -185,7 +197,8 @@ public class CommandBusShouldHandleCommandStatus {
         }
 
         @Assign
-        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
+        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"})
+            // Throwing is the purpose of this method.
         ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
             throw throwable;
         }
@@ -198,6 +211,7 @@ public class CommandBusShouldHandleCommandStatus {
         final Command command = commandFactory.create(msg);
         return command;
     }
+
     /*
      * Throwables.
      ********************/
