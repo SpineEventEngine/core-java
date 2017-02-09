@@ -114,10 +114,10 @@ class HandlerRegistry {
         }
     }
 
-    private static CommandHandlerMethod getHandlerMethod(Class<? extends CommandHandler> clazz,
+    private static CommandHandlerMethod getHandlerMethod(Class<? extends CommandHandler> handlerClass,
                                                          Class<? extends Message> commandClass) {
         return MethodRegistry.getInstance()
-                             .get(clazz, commandClass, CommandHandlerMethod.factory());
+                             .get(handlerClass, commandClass, CommandHandlerMethod.factory());
     }
 
     @CheckReturnValue
