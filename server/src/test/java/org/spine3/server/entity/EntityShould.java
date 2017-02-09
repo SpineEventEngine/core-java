@@ -113,6 +113,18 @@ public class EntityShould {
         assertEquals(messageId, entityWithMessageID.getId());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void not_accept_to_constructor_id_of_unsupported_type() {
+        new TestEntityWithIdUnsupported(new UnsupportedClassVersionError());
+    }
+
+    private static class TestEntityWithIdUnsupported extends Entity<UnsupportedClassVersionError, Project> {
+        private TestEntityWithIdUnsupported(UnsupportedClassVersionError id) {
+            super(id);
+        }
+    }
+
     private static class TestEntityWithIdString extends Entity <String, Project> {
         private TestEntityWithIdString(String id) {
             super(id);

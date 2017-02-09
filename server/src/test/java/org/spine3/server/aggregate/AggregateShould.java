@@ -85,15 +85,9 @@ public class AggregateShould {
     @Before
     public void setUp() {
         aggregate = org.spine3.test.Given.aggregateOfClass(TestAggregate.class)
-                         .withId(ID)
-                         .withVersion(100)
-                         .build();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void not_accept_to_constructor_id_of_unsupported_type() {
-        new TestAggregateWithIdUnsupported(new UnsupportedClassVersionError());
+                                         .withId(ID)
+                                         .withVersion(100)
+                                         .build();
     }
 
     @Test
@@ -415,12 +409,6 @@ public class AggregateShould {
 
     private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
-            super(id);
-        }
-    }
-
-    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project, Project.Builder> {
-        private TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
