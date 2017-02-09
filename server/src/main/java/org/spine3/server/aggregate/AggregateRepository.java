@@ -149,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Processes the command by dispatching it an aggregate.
+     * Dispatches the passed command it an aggregate.
      *
      * <p>The aggregate ID is obtained from the passed command.
      *
@@ -173,7 +173,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         standFunnel.post(aggregate);
     }
 
-    /** Posts passed events to {@link EventBus}. */
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
     private void postEvents(Iterable<Event> events) {
         for (Event event : events) {
             eventBus.post(event);
