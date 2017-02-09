@@ -112,7 +112,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
      * @return {@code true} if the option {@code 'if_invalid'} is set to a non-default value.
      */
     private boolean hasCustomInvalidMessage() {
-        final boolean result = isDefault(ifInvalidOption);
+        final boolean result = !isDefault(ifInvalidOption);
         return result;
     }
 
