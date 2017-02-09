@@ -109,7 +109,10 @@ public class ProcessManagerRepositoryShould
         final ProjectId id = ProjectId.newBuilder()
                                       .setId("123-id")
                                       .build();
-        return new TestProcessManager(id);
+        final TestProcessManager result = org.spine3.test.Given.processManagerOfClass(TestProcessManager.class)
+                                    .withId(id)
+                                    .build();
+        return result;
     }
 
     @Override
@@ -187,7 +190,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final Command cmd = Commands.create(cmdMsg, CMD_CONTEXT);
+        final Command cmd = Commands.createCommand(cmdMsg, CMD_CONTEXT);
         repository.dispatch(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
@@ -210,7 +213,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
+        final Command request = Commands.createCommand(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
@@ -354,9 +357,9 @@ public class ProcessManagerRepositoryShould
             handleProjectStarted();
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
 
-            return newRouter().of(command, context)
-                              .add(addTask)
-                              .route();
+            return newRouterFor(command, context)
+                    .add(addTask)
+                    .routeAll();
         }
     }
 }

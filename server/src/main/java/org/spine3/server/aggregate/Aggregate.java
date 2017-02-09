@@ -38,6 +38,7 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
@@ -188,6 +189,15 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
     private Any getIdAsAny() {
         return idAsAny;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("RedundantMethodOverride") // Expose the method to this package.
+    @Override
+    protected EntityStatus getStatus() {
+        return super.getStatus();
     }
 
     /**
@@ -504,6 +514,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param event          the event message
      * @param builder        a builder for the event context
+     * @param commandContext the context of the command that produced the event
      * @see #createEventContext(Message, CommandContext, Timestamp)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.

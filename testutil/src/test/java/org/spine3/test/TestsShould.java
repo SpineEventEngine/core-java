@@ -21,7 +21,9 @@
 package org.spine3.test;
 
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.spine3.base.Response;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.users.UserId;
@@ -30,12 +32,12 @@ import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
 
-@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class TestsShould {
 
     @Test
@@ -103,22 +105,35 @@ public class TestsShould {
         assertEquals(fiveMinutesAgo, provider.getCurrentTime());
     }
 
+    @Test
+    public void return_empty_StreamObserver() {
+        final StreamObserver<Response> emptyObserver = Tests.emptyObserver();
+        assertNotNull(emptyObserver);
+        // Call methods just to add to coverage.
+        emptyObserver.onNext(Tests.<Response>nullRef());
+        emptyObserver.onError(Tests.<Throwable>nullRef());
+        emptyObserver.onCompleted();
+    }
+
     private static class ClassWithPrivateCtor {
         @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.
         private ClassWithPrivateCtor() {}
     }
 
     private static class ClassWithPublicCtor {
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // It's the purpose of this tests class.
         public ClassWithPublicCtor() {}
     }
 
     private static class ClassThrowingExceptionInConstructor {
         private ClassThrowingExceptionInConstructor() {
-            throw new AssertionError("Private constructor must not be called.");
+            throw new AssertionError("This private constructor must not be called.");
         }
     }
 
     private static class ClassWithCtorWithArgs {
-        private ClassWithCtorWithArgs(int i) {}
+        @SuppressWarnings("unused")
+        private final int id;
+        private ClassWithCtorWithArgs(int id) { this.id = id;}
     }
 }

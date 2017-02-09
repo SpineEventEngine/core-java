@@ -58,7 +58,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould
-       extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
+        extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Given.newProjectId();
 
@@ -105,11 +105,13 @@ public abstract class AggregateStorageShould
      * always returns events.
      */
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType",
-                        "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
+            "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
     @Override
     protected void assertResultForMissingId(Optional<AggregateEvents> record) {
         assertTrue(record.isPresent());
-        assertTrue(record.get().getEventList().isEmpty());
+        assertTrue(record.get()
+                         .getEventList()
+                         .isEmpty());
     }
 
     @Test
@@ -273,7 +275,8 @@ public abstract class AggregateStorageShould
 
         storage.writeEvent(id, expectedEvent);
 
-        final AggregateEvents events = storage.read(id).get();
+        final AggregateEvents events = storage.read(id)
+                                              .get();
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -293,7 +296,8 @@ public abstract class AggregateStorageShould
 
         writeAll(id, records);
 
-        final AggregateEvents events = storage.read(id).get();
+        final AggregateEvents events = storage.read(id)
+                                              .get();
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);

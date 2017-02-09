@@ -64,7 +64,7 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public RecordStorage<I> getRecordStorage() {
+    public RecordStorage<I> recordStorage() {
         return recordStorage;
     }
 
@@ -76,17 +76,17 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public boolean markArchived(I id) {
-        return getRecordStorage().markArchived(id);
+        return recordStorage().markArchived(id);
     }
 
     @Override
     public boolean markDeleted(I id) {
-        return getRecordStorage().markDeleted(id);
+        return recordStorage().markDeleted(id);
     }
 
     @Override
     public boolean delete(I id) {
-        return getRecordStorage().delete(id);
+        return recordStorage().delete(id);
     }
 
     @Override

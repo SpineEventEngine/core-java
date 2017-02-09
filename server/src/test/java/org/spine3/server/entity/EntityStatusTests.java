@@ -23,6 +23,8 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.entity.status.CannotModifyArchivedEntity;
+import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -119,5 +121,27 @@ public class EntityStatusTests {
                                                 .build();
         entity.setStatus(status);
         assertEquals(status, entity.getStatus());
+    }
+
+    @Test(expected = CannotModifyArchivedEntity.class)
+    public void check_not_archived() throws Throwable {
+        entity.setArchived(true);
+
+        // This should pass.
+        entity.checkNotDeleted();
+
+        // This should throw.
+        entity.checkNotArchived();
+    }
+
+    @Test(expected = CannotModifyDeletedEntity.class)
+    public void check_not_deleted() throws Throwable {
+        entity.setDeleted(true);
+
+        // This should pass.
+        entity.checkNotArchived();
+
+        // This should throw.
+        entity.checkNotDeleted();
     }
 }

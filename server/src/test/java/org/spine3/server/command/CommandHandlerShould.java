@@ -213,21 +213,21 @@ public class CommandHandlerShould {
 
         @Assign
         ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return ProjectCreated.getDefaultInstance();
         }
 
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return TaskAdded.getDefaultInstance();
         }
 
         @Assign
         List<Message> handle(StartProject msg, CommandContext context) {
-            final Command cmd = Commands.create(msg, context);
+            final Command cmd = Commands.createCommand(msg, context);
             commandsHandled.put(context.getCommandId(), cmd);
             return eventsOnStartProjectCmd;
         }

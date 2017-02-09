@@ -22,14 +22,25 @@ package org.spine3.time;
 
 import org.junit.Test;
 
+import java.util.TimeZone;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
+import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
+
+    private static final int MIN_HOURS_OFFSET = -11;
+    private static final int MAX_HOURS_OFFSET = 14;
+    private static final int MIN_MINUTES_OFFSET = 0;
+    private static final int MAX_MINUTES_OFFSET = 60;
+    public static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -37,44 +48,53 @@ public class ZoneOffsetsShould {
     }
 
     @Test
-    public void have_private_utility_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
+    public void create_default_instance_according_to_place() {
+        final int currentOffset = getOffsetInSeconds(timeZone);
+        final String zoneId = timeZone.getID();
+        assertEquals(currentOffset, toZoneOffset(timeZone).getAmountSeconds());
+        assertEquals(zoneId, toZoneOffset(timeZone).getId());
     }
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 2;
+        final int secondsInTwoHours = secondsInHours(2);
         assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
                                                    .getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * 8
-                + SECONDS_PER_MINUTE * 45;
+        final int secondsIn8Hours45Minutes = secondsInHoursAndMinutes(8, 45);
         final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
                                                     .getAmountSeconds();
         assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_more_than_18_hours() {
-        ZoneOffsets.ofHours(15);
+    public void do_not_accept_more_than_14_hours() {
+        ZoneOffsets.ofHours(MAX_HOURS_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_more_than_18_hours_by_abs() {
-        ZoneOffsets.ofHours(-12);
+    public void do_not_accept_more_than_11_hours_by_abs() {
+        ZoneOffsets.ofHours(MIN_HOURS_OFFSET - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(10, 61);
+        ZoneOffsets.ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_17_hours_and_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(18, 30);
+        ZoneOffsets.ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
     }
 
+    private static int secondsInHours(int hours) {
+        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
+    }
+
+    private static int secondsInHoursAndMinutes(int hours, int minutes) {
+        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
+    }
 }

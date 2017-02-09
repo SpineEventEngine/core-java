@@ -21,8 +21,8 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -139,7 +139,7 @@ class Given {
         }
     }
 
-    static class StandTestAggregate extends Aggregate<ProjectId, Any, Any.Builder> {
+    static class StandTestAggregate extends Aggregate<ProjectId, StringValue, StringValue.Builder> {
 
         /**
          * Creates a new aggregate instance.

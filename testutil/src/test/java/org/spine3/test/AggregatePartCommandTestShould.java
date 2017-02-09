@@ -101,7 +101,14 @@ public class AggregatePartCommandTestShould {
 
         @Override
         protected TimerCounter createAggregatePart() {
-            return new TimerCounter(getClass().getSimpleName());
+            final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
+                        .withId(getClass().getName())
+                        .withVersion(5)
+                        .withState(UInt32Value.newBuilder()
+                                              .setValue(42)
+                                              .build())
+                        .build();
+            return result;
         }
     }
 }

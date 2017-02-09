@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FileDescriptor;
@@ -90,10 +91,13 @@ public class Commands {
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
      * @param userId     the actor id
      * @param zoneOffset the offset of the timezone in which the user works
+     * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
     @Internal
-    public static CommandContext createContext(@Nullable TenantId tenantId, UserId userId, ZoneOffset zoneOffset) {
+    public static CommandContext createContext(@Nullable TenantId tenantId,
+                                               UserId userId,
+                                               ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -107,30 +111,41 @@ public class Commands {
     }
 
     /**
-     * Creates a command instance with the given {@code message} and the {@code context}.
+     * Creates a new instance of {@code CommandContext} based on the passed one.
      *
-     * @param message the domain model message to send in the command
-     * @param context the context of the command
-     * @return a new command
+     * <p>The returned instance gets new generated {@code CommandId} and {@code timestamp}
+     * set to the time of the call.
+     *
+     * @param commandContext the instance from which to copy values
+     * @return new {@code CommandContext}
      */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static Command create(Message message, CommandContext context) {
-        return create(AnyPacker.pack(message), context);
+    public static CommandContext newContextBasedOn(CommandContext commandContext) {
+        checkNotNull(commandContext);
+        final CommandContext.Builder result = commandContext.toBuilder()
+                .setCommandId(generateId())
+                .setTimestamp(getCurrentTime());
+        return result.build();
     }
 
     /**
-     * Creates a command instance with the given message wrapped to {@link Any} and the {@code context}.
+     * Creates a command instance with the given {@code message} and the {@code context}.
      *
-     * @param messageAny the domain model message wrapped to {@link Any}
-     * @param context    the context of the command
+     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
+     * Otherwise, the command message will be packed into {@code Any}.
+     *
+     * @param message the command message
+     * @param context the context of the command
      * @return a new command
      */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static Command create(Any messageAny, CommandContext context) {
-        final Command.Builder request = Command.newBuilder()
-                                               .setMessage(messageAny)
+    public static Command createCommand(Message message, CommandContext context) {
+        checkNotNull(message);
+        checkNotNull(context);
+
+        final Any packed = AnyPacker.pack(message);
+        final Command.Builder result = Command.newBuilder()
+                                               .setMessage(packed)
                                                .setContext(context);
-        return request.build();
+        return result.build();
     }
 
     /**
@@ -145,14 +160,18 @@ public class Commands {
         return result;
     }
 
-    /** Extracts a command ID from the passed {@code Command} instance. */
+    /**
+     * Extracts a command ID from the passed {@code Command} instance.
+     */
     public static CommandId getId(Command command) {
         final CommandId id = command.getContext()
                                     .getCommandId();
         return id;
     }
 
-    /** Creates a predicate for filtering commands created after the passed timestamp. */
+    /**
+     * Creates a predicate for filtering commands created after the passed timestamp.
+     */
     public static Predicate<Command> wereAfter(final Timestamp from) {
         return new Predicate<Command>() {
             @Override
@@ -164,7 +183,9 @@ public class Commands {
         };
     }
 
-    /** Creates a predicate for filtering commands created withing given timerange. */
+    /**
+     * Creates a predicate for filtering commands created withing given timerange.
+     */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
         return new Predicate<Command>() {
             @Override
@@ -307,5 +328,17 @@ public class Commands {
                                       .setContext(contextUpdated)
                                       .build();
         return result;
+    }
+
+    /**
+     * Tests whether both command contexts are from the same actor
+     * working under the same tenant.
+     */
+    @VisibleForTesting
+    public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
+        checkNotNull(c1);
+        checkNotNull(c2);
+        return  c1.getActor().equals(c2.getActor()) &&
+                c1.getTenantId().equals(c2.getTenantId());
     }
 }
