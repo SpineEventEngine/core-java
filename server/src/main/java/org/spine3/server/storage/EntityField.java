@@ -20,12 +20,15 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.SPI;
+
 /**
  * A container for the storage fields used in multiple {@link Storage storages}.
  *
  * @author Dmytro Dashenkov
  * @see StorageField
  */
+@SPI
 public enum EntityField {
 
     timestamp,

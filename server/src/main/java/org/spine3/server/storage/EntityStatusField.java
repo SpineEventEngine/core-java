@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.SPI;
 import org.spine3.server.entity.status.EntityStatus;
 
 /**
@@ -28,6 +29,7 @@ import org.spine3.server.entity.status.EntityStatus;
  * @author Dmytro Dashenkov
  * @see StorageField
  */
+@SPI
 public enum EntityStatusField {
 
     archived,

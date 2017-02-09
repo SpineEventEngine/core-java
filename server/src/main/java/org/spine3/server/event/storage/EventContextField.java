@@ -20,6 +20,7 @@
 
 package org.spine3.server.event.storage;
 
+import org.spine3.SPI;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
@@ -31,6 +32,7 @@ import org.spine3.server.storage.StorageField;
  * @author Dmytro Dashenkov
  * @see StorageField
  */
+@SPI
 public enum EventContextField implements StorageField {
 
     context_event_id,

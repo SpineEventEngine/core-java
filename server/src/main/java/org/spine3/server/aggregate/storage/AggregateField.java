@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate.storage;
 
+import org.spine3.SPI;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.storage.StorageField;
 
@@ -29,6 +30,7 @@ import org.spine3.server.storage.StorageField;
  * @author Dmytro Dashenkov
  * @see StorageField
  */
+@SPI
 public enum AggregateField implements StorageField {
 
     aggregate_id
