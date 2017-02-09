@@ -55,14 +55,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 public class CommandEndpointShould {
@@ -71,7 +68,6 @@ public class CommandEndpointShould {
 
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repositorySpy;
-    private CommandStore commandStore;
     private EventBus eventBus;
 
     private final ProjectId projectId = Given.newProjectId();
@@ -79,7 +75,7 @@ public class CommandEndpointShould {
     @Before
     public void setUp() {
         eventBus = mock(EventBus.class);
-        commandStore = mock(CommandStore.class);
+        final CommandStore commandStore = mock(CommandStore.class);
         doReturn(emptyIterator()).when(commandStore)
                                  .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
@@ -108,16 +104,6 @@ public class CommandEndpointShould {
     }
 
     @Test
-    public void set_ok_command_status_on_command_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final CommandId commandId = getId(cmd);
-
-        repository.dispatch(cmd);
-
-        verify(commandStore).setCommandStatusOk(commandId);
-    }
-
-    @Test
     public void store_aggregate_on_command_dispatching() {
         final ProjectId id = Given.newProjectId();
         final Command cmd = Given.Command.createProject(id);
@@ -129,18 +115,6 @@ public class CommandEndpointShould {
         assertEquals(id, aggregate.getId());
         assertEquals(msg.getName(), aggregate.getState()
                                              .getName());
-    }
-
-    @Test
-    public void set_cmd_status_to_error_if_failed_to_store_aggregate_on_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final RuntimeException exception = new RuntimeException(newUuid());
-        doThrow(exception).when(repositorySpy)
-                          .store(any(ProjectAggregate.class));
-
-        repositorySpy.dispatch(cmd);
-
-        verify(commandStore).updateStatus(getId(cmd), exception);
     }
 
     @Test
