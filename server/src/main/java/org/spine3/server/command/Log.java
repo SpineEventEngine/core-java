@@ -23,12 +23,13 @@ package org.spine3.server.command;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
+import org.spine3.protobuf.TypeName;
 
-import static org.spine3.base.Commands.formatCommandTypeAndId;
-import static org.spine3.base.Commands.formatMessageTypeAndId;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Convenience wrapper for logging errors and warnings.
@@ -37,20 +38,9 @@ import static org.spine3.base.Commands.formatMessageTypeAndId;
  */
 class Log {
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
-    }
-
     /** The logger instance used by {@code CommandBus}. */
     static Logger log() {
         return LogSingleton.INSTANCE.value;
-    }
-
-    void errorDispatching(Exception exception, Command command) {
-        final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
-        log().error(msg, exception);
     }
 
     void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
@@ -74,5 +64,32 @@ class Log {
     void errorExpiredCommand(Message commandMsg, CommandId id) {
         final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
         log().error(msg);
+    }
+
+    /**
+     * Creates a formatted string with type of the command message and command ID.
+     *
+     * <p>The {@code format} string must have two {@code %s} format specifiers.
+     * The first specifier is for message type name. The second is for command ID.
+     *
+     * @param format    the format string
+     * @param commandId the ID of the command
+     * @return formatted string
+     */
+    private static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
+        checkNotNull(format);
+        checkNotEmptyOrBlank(format, "format string");
+
+        final String cmdType = TypeName.of(commandMessage);
+        final String id = idToString(commandId);
+        final String result = String.format(format, cmdType, id);
+        return result;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
 }

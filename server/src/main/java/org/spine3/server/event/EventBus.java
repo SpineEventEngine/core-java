@@ -32,11 +32,9 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
-import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
-import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
@@ -57,38 +55,48 @@ import static com.google.common.base.Preconditions.checkState;
  * <h2>Receiving Events</h2>
  * <p>To receive event messages a subscriber object should:
  * <ol>
- *    <li>Expose a public method that accepts an event message as the first parameter
- *        and an {@link EventContext} as the second (optional) parameter;
- *    <li>Mark the method with the {@link Subscribe} annotation;
- *    <li>Register with an instance of EventBus using {@link #subscribe(EventSubscriber)}.
+ *    <li>Expose a {@code public} method that accepts an event message as the first parameter
+ *        and an {@link EventContext} as the second (optional) parameter.
+ *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
+ *    <li>{@linkplain #subscribe(EventSubscriber) Register} with an instance of
+ *    {@code EventBus} directly, or rely on message delivery from an {@link EventDispatcher}.
+ *    An example of such a dispatcher is
+ *    {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
  * </ol>
- * Note: Since Protobuf messages are final classes, a subscriber method cannot accept just {@link Message}
- * as the first parameter. It must be an exact type of the event message that needs to be handled.
+ *
+ * <p><strong>Note:</strong> A subscriber method cannot accept just {@link Message} as
+ * the first parameter. It must be an <strong>exact type</strong> of the event message
+ * that needs to be handled.
  *
  * <h2>Posting Events</h2>
  * <p>Events are posted to an EventBus using {@link #post(Event)} method. Normally this
- * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
+ * is done by an {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
+ * in the process of handling a command, or by a
+ * {@link org.spine3.server.procman.ProcessManager ProcessManager}.
  *
- * <p>The passed {@link Event} is stored in the {@link EventStore} associated with the {@code EventBus}
- * <strong>before</strong> it is passed to subscribers.
+ * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
+ * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
  *
- * <p>The delivery of the events to the subscribers and dispatchers is performed by an {@link SubscriberEventDelivery}
- * and {@link DispatcherEventDelivery} strategies associated with the instance of the {@code EventBus}, respectively.
+ * <p>The delivery of the events to the subscribers and dispatchers is performed by
+ * an {@link SubscriberEventDelivery} and {@link DispatcherEventDelivery} strategies
+ * associated with the instance of the {@code EventBus}, respectively.
  *
- * <p>If there is no subscribers or dispatchers for the posted event, the fact is logged as warning,
- * with no further processing.
+ * <p>If there is no subscribers or dispatchers for the posted event, the fact is
+ * logged as warning, with no further processing.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
- * @see Subscribe
+ * @see org.spine3.server.projection.Projection Projection
+ * @see Subscribe @Subscribe
  */
 public class EventBus implements AutoCloseable {
 
-    /**
-     * NOTE: Even though, the EventBus has a private constructor and is not supposed to be derived,
-     * we do not make this class final in order to be able to spy() on it from Mockito (which cannot spy
-     * on final or anonymous classes).
-     **/
+    /*
+     * NOTE: Even though, the EventBus has a private constructor and
+     * is not supposed to be derived, we do not make this class final
+     * in order to be able to spy() on it from Mockito (which cannot
+     * spy on final or anonymous classes).
+     */
 
     /** The registry of event dispatchers. */
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
@@ -122,13 +130,19 @@ public class EventBus implements AutoCloseable {
         this.subscriberEventDelivery = builder.subscriberEventDelivery;
         this.dispatcherEventDelivery = builder.dispatcherEventDelivery;
 
-        /**
-         * Sets up the {@code DispatcherEventDelivery} and {@code SubscriberEventDelivery} with an ability to obtain
-         * {@link EventDispatcher}s and {@link EventSubscriber}s by a given {@link EventClass} instance.
-         *
-         * <p>Such an approach allows to query for an actual state of the {@code dispatcherRegistry}
-         * and {@code subscriberRegistry}, keeping both of the registries private to the {@code EventBus}.
-         **/
+        injectProviders();
+    }
+
+    /**
+     * Sets up the {@code DispatcherEventDelivery} and {@code SubscriberEventDelivery}
+     * with an ability to obtain {@link EventDispatcher}s and {@link EventSubscriber}s
+     * by a given {@link EventClass} instance.
+     *
+     * <p>Such an approach allows to query for an actual state of the
+     * {@code dispatcherRegistry} and {@code subscriberRegistry}, keeping both of
+     * the registries private to the {@code EventBus}.
+     */
+    private void injectProviders() {
         injectDispatcherProvider();
         injectSubscriberProvider();
     }
@@ -245,7 +259,8 @@ public class EventBus implements AutoCloseable {
     /**
      * Posts the event for handling.
      *
-     * <p>The event is stored in the associated {@link EventStore} before passing it to dispatchers and subscribers.
+     * <p>The event is stored in the associated {@link EventStore} before
+     * passing it to dispatchers and subscribers.
      *
      * @param event the event to be handled
      */
@@ -286,7 +301,8 @@ public class EventBus implements AutoCloseable {
      * Invoke the subscribers for the {@code event}.
      *
      * @param event the event to pass to the subscribers.
-     * @return the number of the subscribers invoked, or {@code 0} if no subscribers were invoked.
+     * @return the number of the subscribers invoked, or {@code 0}
+     *         if no subscribers were invoked.
      */
     private int invokeSubscribers(Event event) {
         final EventClass eventClass = EventClass.of(event);
@@ -308,8 +324,10 @@ public class EventBus implements AutoCloseable {
      *
      * @param event            the event message to check
      * @param responseObserver the observer to obtain the result of the call;
-     *                         {@link StreamObserver#onError(Throwable)} is called if an event is unsupported or invalid
-     * @return {@code true} if event is supported and valid and can be posted, {@code false} otherwise
+     *                         {@link StreamObserver#onError(Throwable)} is called if
+     *                         an event is unsupported or invalid
+     * @return {@code true} if event is supported and valid and can be posted,
+     *         {@code false} otherwise
      */
     public boolean validate(Message event, StreamObserver<Response> responseObserver) {
         final EventClass eventClass = EventClass.of(event);
@@ -320,7 +338,8 @@ public class EventBus implements AutoCloseable {
         }
         final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
-            final InvalidEventException invalidEvent = InvalidEventException.onConstraintViolations(event, violations);
+            final InvalidEventException invalidEvent =
+                    InvalidEventException.onConstraintViolations(event, violations);
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
             return false;
         }
@@ -361,8 +380,9 @@ public class EventBus implements AutoCloseable {
     }
 
     private static void handleDeadEvent(Message event) {
-        log().warn("No subscriber or dispatcher defined for the event class: " + event.getClass()
-                                                                                      .getName());
+        log().warn("No subscriber or dispatcher defined for the event class: {}",
+                   event.getClass()
+                        .getName());
     }
 
     @Override
@@ -378,13 +398,15 @@ public class EventBus implements AutoCloseable {
         private static final String EVENT_STORE_CONFIGURED_MESSAGE = "EventStore is already configured.";
 
         /**
-         * A {@code StorageFactory} for configuring the {@code EventStore} instance for this {@code EventBus}.
+         * A {@code StorageFactory} for configuring the {@code EventStore} instance
+         * for this {@code EventBus}.
          *
          * <p>If the {@code EventStore} is passed to this {@code Builder} explicitly
-         * via {@link #setEventStore(EventStore)}, the {@code storageFactory} field value is not used.
+         * via {@link #setEventStore(EventStore)}, the {@code storageFactory} field
+         * value is not used.
          *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
-         * {@code EventBus}.
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
+         * to create an instance of {@code EventBus}.
          */
         @Nullable
         private StorageFactory storageFactory;
@@ -392,10 +414,11 @@ public class EventBus implements AutoCloseable {
         /**
          * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
          *
-         * <p>If not set, a default instance will be created by the builder with the help of the {@code StorageFactory}.
+         * <p>If not set, a default instance will be created by the builder
+         * with the help of the {@code StorageFactory}.
          *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an instance of
-         * {@code EventBus}.
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
+         * to create an instance of {@code EventBus}.
          */
         @Nullable
         private EventStore eventStore;
@@ -448,10 +471,12 @@ public class EventBus implements AutoCloseable {
         /**
          * Specifies an {@code StorageFactory} to configure this {@code EventBus}.
          *
-         * <p>This {@code StorageFactory} instance will be used to create an instance of {@code EventStore}
-         * for this {@code EventBus}, <em>if</em> {@code EventStore} was not explicitly set in the builder.
+         * <p>This {@code StorageFactory} instance will be used to create
+         * an instance of {@code EventStore} for this {@code EventBus},
+         * <em>if</em> {@code EventStore} was not explicitly set in the builder.
          *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory to create an {@code EventBus}.
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
+         * to create an {@code EventBus}.
          *
          * @see #setEventStore(EventStore)
          */
@@ -471,7 +496,8 @@ public class EventBus implements AutoCloseable {
          * <p>This method can be called if neither {@link #setEventStoreStreamExecutor(Executor)}
          * nor {@link #setStorageFactory(StorageFactory)} were called before.
          *
-         * <p>Either a {@code StorageFactory} or an {@code EventStore} must be set to create an {@code EventBus}.
+         * <p>Either a {@code StorageFactory} or an {@code EventStore} must be set
+         * to create an {@code EventBus}.
          *
          * @see #setEventStoreStreamExecutor(Executor)
          * @see #setStorageFactory(StorageFactory)
@@ -511,11 +537,11 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets a {@code SubscriberEventDelivery} to be used for the event delivery to the subscribers
-         * in the {@code EventBus} we build.
+         * Sets a {@code SubscriberEventDelivery} to be used for the event delivery
+         * to the subscribers in the {@code EventBus} we build.
          *
-         * <p>If the {@code SubscriberEventDelivery} is not set, {@link SubscriberEventDelivery#directDelivery()}
-         * will be used.
+         * <p>If the {@code SubscriberEventDelivery} is not set,
+         * {@link SubscriberEventDelivery#directDelivery()} will be used.
          */
         public Builder setSubscriberEventDelivery(SubscriberEventDelivery delivery) {
             this.subscriberEventDelivery = checkNotNull(delivery);
@@ -527,11 +553,11 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets a {@code DispatcherEventDelivery} to be used for the event delivery to the dispatchers
-         * in the {@code EventBus} we build.
+         * Sets a {@code DispatcherEventDelivery} to be used for the event delivery
+         * to the dispatchers in the {@code EventBus} we build.
          *
-         * <p>If the {@code DispatcherEventDelivery} is not set, {@link DispatcherEventDelivery#directDelivery()}
-         * will be used.
+         * <p>If the {@code DispatcherEventDelivery} is not set,
+         * {@link DispatcherEventDelivery#directDelivery()} will be used.
          */
         public Builder setDispatcherEventDelivery(DispatcherEventDelivery delivery) {
             this.dispatcherEventDelivery = checkNotNull(delivery);
@@ -552,12 +578,14 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets a custom {@link EventEnricher} for events posted to the {@code EventBus} which is being built.
+         * Sets a custom {@link EventEnricher} for events posted to
+         * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code Enricher} is not set, the enrichments will NOT be supported for the {@code EventBus}
-         * instance built.
+         * <p>If the {@code Enricher} is not set, the enrichments
+         * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is not supported
+         * @param enricher the {@code Enricher} for events or
+         *                 {@code null} if enrichment is not supported
          */
         public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;

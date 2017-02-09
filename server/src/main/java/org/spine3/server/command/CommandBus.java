@@ -20,12 +20,11 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
@@ -40,13 +39,10 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.util.Environment;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.isScheduled;
 
 /**
@@ -57,6 +53,7 @@ import static org.spine3.base.Commands.isScheduled;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for this central point of the framework.
 public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
@@ -135,6 +132,52 @@ public class CommandBus implements AutoCloseable {
         this.isThreadSpawnAllowed = threadSpawnAllowed;
         this.filter = new Filter(this);
         this.rescheduler = new Rescheduler(this);
+    }
+
+    boolean isMultitenant() {
+        return isMultitenant;
+    }
+
+    boolean isThreadSpawnAllowed() {
+        return isThreadSpawnAllowed;
+    }
+
+    CommandStore commandStore() {
+        return commandStore;
+    }
+
+    Log problemLog() {
+        return log;
+    }
+
+    @VisibleForTesting
+    Rescheduler rescheduler() {
+        return rescheduler;
+    }
+
+    @VisibleForTesting
+    CommandScheduler scheduler() {
+        return scheduler;
+    }
+
+    /**
+     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     *
+     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported commands
+     */
+    public Set<CommandClass> getSupportedCommandClasses() {
+        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
+                                                    handlerRegistry.getCommandClasses());
+        return result;
+    }
+
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    CommandStatusService getCommandStatusService() {
+        return commandStatusService;
     }
 
     /**
@@ -218,22 +261,18 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Directs a command to be dispatched or handled.
+     * Checks if a command is supported by the {@code CommandBus}.
      *
-     * <p>Logs exceptions which may occur during dispatching or handling and
-     * sets the command status to {@code error} or {@code failure} in the storage.
-     *
-     * @param command a command to post
+     * @param commandClass a class of commands to check
+     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
+     *      for commands of this type, {@code false} otherwise
      */
-    void doPost(Command command) {
-        final Message message = getMessage(command);
-        final CommandClass commandClass = CommandClass.of(message);
-        final CommandContext commandContext = command.getContext();
-        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
-            dispatch(command);
-        } else if (handlerRegistry.handlerRegistered(commandClass)) {
-            invokeHandler(message, commandContext);
-        }
+    @VisibleForTesting
+    boolean isSupportedCommand(CommandClass commandClass) {
+        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
+        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
+        final boolean isSupported = dispatcherRegistered || handlerRegistered;
+        return isSupported;
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -250,107 +289,73 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Checks if a command is supported by the Command Bus.
+     * Directs a command to be dispatched or handled.
      *
-     * @param commandClass a class of commands to check
-     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
-     *      for commands of this type, {@code false} otherwise
-     */
-    @VisibleForTesting
-    boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
-    }
-
-    /**
-     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     * <p>Logs exceptions which may occur during dispatching or handling and
+     * sets the command status to {@code error} or {@code failure} in the storage.
      *
-     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
-     *
-     * @return a set of classes of supported commands
+     * @param command a command to post
      */
-    public Set<CommandClass> getSupportedCommandClasses() {
-        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
-                                                    handlerRegistry.getCommandClasses());
-        return result;
+    void doPost(Command command) {
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
+        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
+            dispatch(commandEnvelope);
+        } else if (handlerRegistry.handlerRegistered(commandClass)) {
+            invokeHandler(commandEnvelope);
+        }
     }
 
-    /**
-     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
-     */
-    public CommandStatusService getCommandStatusService() {
-        return commandStatusService;
-    }
-
-    boolean isMultitenant() {
-        return isMultitenant;
-    }
-
-    boolean isThreadSpawnAllowed() {
-        return isThreadSpawnAllowed;
-    }
-
-    CommandStore commandStore() {
-        return commandStore;
-    }
-
-    Log problemLog() {
-        return log;
-    }
-
-    @VisibleForTesting
-    Rescheduler rescheduler() {
-        return rescheduler;
-    }
-
-    @VisibleForTesting
-    CommandScheduler scheduler() {
-        return scheduler;
-    }
-
-    private void dispatch(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
+    private void dispatch(CommandEnvelope envelope) {
+        final CommandClass commandClass = envelope.getCommandClass();
         final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
-        final CommandId commandId = getId(command);
         try {
-            dispatcher.dispatch(command);
-        } catch (Exception e) {
-            log.errorDispatching(e, command);
-            commandStatusService.setToError(commandId, e);
-        }
-    }
-
-    private void invokeHandler(Message msg, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        final CommandId commandId = context.getCommandId();
-        try {
-            handler.handle(msg, context);
-            commandStatusService.setOk(commandId);
-        } catch (InvocationTargetException e) {
-            final Throwable cause = e.getCause();
-            onHandlerException(msg, commandId, cause);
+            dispatcher.dispatch(envelope.getCommand());
+            setStatusOk(envelope);
         } catch (RuntimeException e) {
-            onHandlerException(msg, commandId, e);
+            final Throwable cause = Throwables.getRootCause(e);
+            updateCommandStatus(envelope, cause);
         }
     }
 
-    private void onHandlerException(Message msg, CommandId commandId, Throwable cause) {
-        //noinspection ChainOfInstanceofChecks
-        if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
-            log.errorHandling(exception, msg, commandId);
-            commandStatusService.setToError(commandId, exception);
-        } else if (cause instanceof FailureThrowable){
+    private void invokeHandler(CommandEnvelope commandEnvelope) {
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        try {
+            handler.handle(commandEnvelope.getCommandMessage(),
+                           commandEnvelope.getCommandContext());
+            setStatusOk(commandEnvelope);
+        } catch (RuntimeException e) {
+            final Throwable cause = Throwables.getRootCause(e);
+            updateCommandStatus(commandEnvelope, cause);
+        }
+    }
+
+    private void setStatusOk(CommandEnvelope envelope) {
+        final CommandId commandId = envelope.getCommandId();
+        commandStatusService.setOk(commandId);
+    }
+
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
+    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
+        if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
-            log.failureHandling(failure, msg, commandId);
-            commandStatusService.setToFailure(commandId, failure);
+
+            log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
+            commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
+        } else if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+
+            log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
+            commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
-            log.errorHandlingUnknown(cause, msg, commandId);
+
+            log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
             final Error error = Errors.fromThrowable(cause);
-            commandStatusService.setToError(commandId, error);
+            commandStatusService.setToError(commandEnvelope.getCommandId(), error);
         }
     }
 

@@ -19,9 +19,7 @@
  */
 package org.spine3.server.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,18 +27,12 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.change.MessageMismatch;
-import org.spine3.change.StringMismatch;
-import org.spine3.change.ValueMismatch;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
-import org.spine3.server.command.CommandHandler;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
@@ -48,15 +40,10 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.createEvent;
-import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Abstract base for aggregates.
@@ -85,20 +72,16 @@ import static org.spine3.validate.Validate.checkPositive;
  * <h2>Adding command handler methods</h2>
  *
  * <p>Command handling methods of an {@code Aggregate} are defined in
- * the same way as described in {@link CommandHandler}.
+ * the same way as described in {@link CommandHandlingEntity}.
  *
  * <p>Event(s) returned by command handling methods are posted to
- * the {@link EventBus} automatically.
+ * the {@link EventBus} automatically by {@link AggregateRepository}.
  *
  * <h2>Adding event applier methods</h2>
  *
  * <p>Aggregate data is stored as a sequence of events it produces.
  * The state of the aggregate is restored by re-playing the history of
  * events and invoking corresponding <em>event applier methods</em>.
- *
- * <p>In order to improve performance of loading aggregates an
- * {@link AggregateRepository} periodically stores aggregate snapshots.
- * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
  *
  * <p>An event applier is a method that changes the state of the aggregate
  * in response to an event. An event applier takes a single parameter of the
@@ -110,6 +93,12 @@ import static org.spine3.validate.Validate.checkPositive;
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
  *
+ * <h2>Performance considerations for aggregate state</h2>
+ *
+ * <p>In order to improve performance of loading aggregates an
+ * {@link AggregateRepository} periodically stores aggregate snapshots.
+ * See {@link AggregateRepository#setSnapshotTrigger(int)} for details.
+ *
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
@@ -118,7 +107,8 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Litus
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder> extends Entity<I, S> {
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
+                extends CommandHandlingEntity<I, S> {
 
     /**
      * The builder for the aggregate state.
@@ -132,9 +122,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @Nullable
     private volatile B builder;
-
-    /** Cached value of the ID in the form of {@code Any} instance. */
-    private final Any idAsAny;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -163,32 +150,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     protected Aggregate(I id) {
         super(id);
-        this.idAsAny = idToAny(id);
-    }
-
-    /**
-     * Returns the set of the command classes handled by the passed class.
-     *
-     * @param clazz the {@code Aggregate} class
-     * @return immutable set of command classes
-     */
-    @CheckReturnValue
-    static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
-    }
-
-    /**
-     * Returns the set of the event classes generated by the passed {@code Aggregate} class.
-     *
-     * @param clazz the class of the aggregate
-     * @return immutable set of event classes
-     */
-    static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
-        return getHandledMessageClasses(clazz, EventApplierMethod.PREDICATE);
-    }
-
-    private Any getIdAsAny() {
-        return idAsAny;
     }
 
     /**
@@ -239,91 +200,29 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Dispatches the passed command to appropriate handler.
+     * {@inheritDoc}
      *
      * <p>As the result of this method call, the aggregate generates
-     * event messages and applies them to the compute new state.
-     *
-     * <p>The returned list of event messages is used only for testing purposes.
-     * An {@link AggregateRepository} obtains events generated by the aggregate
-     * via {@link #getUncommittedEvents()}.
-     *
-     * @param command the command message to be executed on the aggregate.
-     *                If this parameter is passed as {@link Any} the enclosing
-     *                message will be unwrapped.
-     * @param context the context of the command
-     * @return event messages generated by the aggregate
-     * @throws RuntimeException if an exception occurred during command dispatching
-     *                          with this exception as the cause
-     * @see #dispatchForTest(Message, CommandContext)
+     * event messages and applies them to compute new state.
      */
-    List<? extends Message> dispatch(Message command, CommandContext context) {
-        checkNotNull(command);
-        checkNotNull(context);
-
-        final Message commandMessage = ensureCommandMessage(command);
-
-        try {
-            final List<? extends Message> events = invokeHandler(commandMessage, context);
-            apply(events, context);
-            return events;
-        } catch (InvocationTargetException e) {
-            throw wrappedCause(e);
-        }
-    }
-
-    /**
-     * Ensures that the passed instance of {@code Message} is not an {@code Any},
-     * and unwraps the command message if {@code Any} is passed.
-     */
-    private static Message ensureCommandMessage(Message command) {
-        Message commandMessage;
-        if (command instanceof Any) {
-            /* It looks that we're getting the result of `command.getMessage()`
-               because the calling code did not bother to unwrap it.
-               Extract the wrapped message (instead of treating this as an error).
-               There may be many occasions of such a call especially from the
-               testing code. */
-            final Any any = (Any) command;
-            commandMessage = AnyPacker.unpack(any);
-        } else {
-            commandMessage = command;
-        }
-        return commandMessage;
-    }
-
-    /**
-     * This method is provided <em>only</em> for the purpose of testing command
-     * handling and must not be called from the production code.
-     *
-     * <p>The production code uses the method {@link #dispatch(Message, CommandContext)},
-     * which is called automatically by {@link AggregateRepository}.
-     */
-    @VisibleForTesting
-    public final List<? extends Message> dispatchForTest(Message command, CommandContext context) {
-        return dispatch(command, context);
-    }
-
-    /**
-     * Directs the passed command to the corresponding command handler method.
-     *
-     * @param commandMessage the command to be processed
-     * @param context the context of the command
-     * @return a list of the event messages that were produced as the result of handling the command
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
+    @Override
+    protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
-        final Class<? extends Message> commandClass = commandMessage.getClass();
-        final CommandHandlerMethod method = MethodRegistry.getInstance()
-                                                          .get(getClass(),
-                                                               commandClass,
-                                                               CommandHandlerMethod.factory());
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
-        final List<? extends Message> result = method.invoke(this, commandMessage, context);
-        return result;
+        final List<? extends Message> eventMessages = super.invokeHandler(commandMessage, context);
+
+        apply(eventMessages, context);
+
+        return eventMessages;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
+        return super.dispatchCommand(command, context);
     }
 
     /**
@@ -374,15 +273,15 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies event messages.
      *
-     * @param events the event message to apply
+     * @param eventMessages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> events, CommandContext commandContext)
+    private void apply(Iterable<? extends Message> eventMessages, CommandContext commandContext)
             throws InvocationTargetException {
         createBuilder();
         try {
-            for (Message message : events) {
+            for (Message message : eventMessages) {
                 apply(message, commandContext);
             }
         } finally {
@@ -393,7 +292,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private void apply(Message eventOrMsg, CommandContext commandContext) throws InvocationTargetException {
         final Message eventMsg;
         final EventContext eventContext;
-        final Timestamp currentTime = getCurrentTime();
         if (eventOrMsg instanceof Event) {
             // We are receiving the event during import or integration. This happened because
             // an aggregate's command handler returned either List<Event> or Event.
@@ -402,12 +300,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             eventContext = event.getContext()
                                 .toBuilder()
                                 .setCommandContext(commandContext)
-                                .setTimestamp(currentTime)
+                                .setTimestamp(getCurrentTime())
                                 .setVersion(getVersion())
                                 .build();
         } else {
             eventMsg = eventOrMsg;
-            eventContext = createEventContext(eventMsg, commandContext, currentTime);
+            eventContext = createEventContext(eventMsg, commandContext);
         }
         applyEventOrSnapshot(eventMsg);
         incrementVersion();
@@ -477,54 +375,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Creates a context for an event message.
-     *
-     * <p>The context may optionally have custom attributes added by
-     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
-     *
-     *
-     * @param event          the event for which to create the context
-     * @param commandContext the context of the command, execution of which produced the event
-     * @param whenModified   the time when an aggregate was modified
-     * @return new instance of the {@code EventContext}
-     * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
-     */
-    @CheckReturnValue
-    protected EventContext createEventContext(Message event,
-                                              CommandContext commandContext,
-                                              Timestamp whenModified) {
-        checkPositive(whenModified, "Aggregate modification time");
-        final EventId eventId = generateId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setTimestamp(whenModified)
-                .setCommandContext(commandContext)
-                .setProducerId(getIdAsAny())
-                .setVersion(getVersion());
-        extendEventContext(event, builder, commandContext);
-        return builder.build();
-    }
-
-    /**
-     * Adds custom attributes to {@code EventContext.Builder} during
-     * the creation of the event context.
-     *
-     * <p>Does nothing by default. Override this method if you want to
-     * add custom attributes to the created context.
-     *
-     * @param event          the event message
-     * @param builder        a builder for the event context
-     * @param commandContext the context of the command that produced the event
-     * @see #createEventContext(Message, CommandContext, Timestamp)
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void extendEventContext(Message event,
-                                      EventContext.Builder builder,
-                                      CommandContext commandContext) {
-        // Do nothing.
-    }
-
-    /**
      * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
      * @return new snapshot
@@ -542,104 +392,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder.build();
     }
 
-    // Factory methods for exceptions
-    //------------------------------------
-
-    private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
-        return new IllegalStateException(
-                String.format("Missing handler for command class %s in aggregate class %s.",
-                        commandClass.getName(), getClass().getName()));
-    }
-
     private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
-    }
-
-    // Helper methods for producing `ValueMismatch`es in command handling methods
-    //-----------------------------------------------------------------------------
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a non-default value,
-     * when the default value was expected by a command.
-     *
-     * @param actual   the value discovered instead of the default value
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedDefault(Message actual, Message newValue) {
-        return MessageMismatch.expectedDefault(actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to <em>clear</em> a value,
-     * but discovered that the field already has the default value.
-     *
-     * @param expected the value of the field that the command wanted to clear
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedNotDefault(Message expected) {
-        return MessageMismatch.expectedNotDefault(expected, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to <em>change</em> a field value,
-     * but discovered that the field has the default value.
-     *
-     * @param expected the value expected by the command
-     * @param newValue the value the command wanted to set
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedNotDefault(Message expected, Message newValue) {
-        return MessageMismatch.expectedNotDefault(expected, newValue, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
-     *
-     * @param expected the value expected by the command
-     * @param actual   the value discovered instead of the expected value
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue) {
-        return MessageMismatch.unexpectedValue(expected, actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a non-empty value,
-     * when an empty string was expected by a command.
-     *
-     * @param actual   the value discovered instead of the empty string
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch expectedEmpty(String actual, String newValue) {
-        return StringMismatch.expectedEmpty(actual, newValue, getVersion());
-    }
-
-    /**
-     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value,
-     * but discovered that the field is already empty.
-     *
-     * @param expected the value of the field that the command wanted to clear
-     * @return new ValueMismatch instance
-     */
-    protected ValueMismatch expectedNotEmpty(String expected) {
-        return StringMismatch.expectedNotEmpty(expected, getVersion());
-    }
-
-    /**
-     * Creates {@code ValueMismatch} for the case of discovering a value
-     * different than expected by a command.
-     *
-     * @param expected the value expected by the command
-     * @param actual   the value discovered instead of the expected string
-     * @param newValue the new value requested in the command
-     * @return new {@code ValueMismatch} instance
-     */
-    protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
-        return StringMismatch.unexpectedValue(expected, actual, newValue, getVersion());
     }
 }
