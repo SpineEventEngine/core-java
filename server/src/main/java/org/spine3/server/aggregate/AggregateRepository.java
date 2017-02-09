@@ -149,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Dispatches the passed command it an aggregate.
+     * Dispatches the passed command to an aggregate.
      *
      * <p>The aggregate ID is obtained from the passed command.
      *
