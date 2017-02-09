@@ -462,7 +462,8 @@ public class CommandBusShould {
         commandBus.post(command, responseObserver);
 
         verify(commandStore).updateStatus(getId(command), dispatcher.exception);
-        verify(log).errorDispatching(dispatcher.exception, command);
+        final CommandEnvelope envelope = new CommandEnvelope(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
     }
 
     @Test

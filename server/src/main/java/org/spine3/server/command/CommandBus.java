@@ -53,6 +53,7 @@ import static org.spine3.base.Commands.isScheduled;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for this central point of the framework.
 public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
@@ -131,6 +132,52 @@ public class CommandBus implements AutoCloseable {
         this.isThreadSpawnAllowed = threadSpawnAllowed;
         this.filter = new Filter(this);
         this.rescheduler = new Rescheduler(this);
+    }
+
+    boolean isMultitenant() {
+        return isMultitenant;
+    }
+
+    boolean isThreadSpawnAllowed() {
+        return isThreadSpawnAllowed;
+    }
+
+    CommandStore commandStore() {
+        return commandStore;
+    }
+
+    Log problemLog() {
+        return log;
+    }
+
+    @VisibleForTesting
+    Rescheduler rescheduler() {
+        return rescheduler;
+    }
+
+    @VisibleForTesting
+    CommandScheduler scheduler() {
+        return scheduler;
+    }
+
+    /**
+     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     *
+     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported commands
+     */
+    public Set<CommandClass> getSupportedCommandClasses() {
+        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
+                                                    handlerRegistry.getCommandClasses());
+        return result;
+    }
+
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    CommandStatusService getCommandStatusService() {
+        return commandStatusService;
     }
 
     /**
@@ -214,6 +261,34 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
+     * Checks if a command is supported by the {@code CommandBus}.
+     *
+     * @param commandClass a class of commands to check
+     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
+     *      for commands of this type, {@code false} otherwise
+     */
+    @VisibleForTesting
+    boolean isSupportedCommand(CommandClass commandClass) {
+        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
+        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
+        final boolean isSupported = dispatcherRegistered || handlerRegistered;
+        return isSupported;
+    }
+
+    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
+        final CommandException unsupported = new UnsupportedCommandException(command);
+        commandStore.storeWithError(command, unsupported);
+        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+    }
+
+    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+        scheduler.schedule(command);
+        commandStore.store(command, SCHEDULED);
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+    }
+
+    /**
      * Directs a command to be dispatched or handled.
      *
      * <p>Logs exceptions which may occur during dispatching or handling and
@@ -231,104 +306,28 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final CommandException unsupported = new UnsupportedCommandException(command);
-        commandStore.storeWithError(command, unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
-    }
-
-    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
-        scheduler.schedule(command);
-        commandStore.store(command, SCHEDULED);
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * Checks if a command is supported by the Command Bus.
-     *
-     * @param commandClass a class of commands to check
-     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
-     *      for commands of this type, {@code false} otherwise
-     */
-    @VisibleForTesting
-    boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
-    }
-
-    /**
-     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
-     *
-     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
-     *
-     * @return a set of classes of supported commands
-     */
-    public Set<CommandClass> getSupportedCommandClasses() {
-        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
-                                                    handlerRegistry.getCommandClasses());
-        return result;
-    }
-
-    /**
-     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
-     */
-    public CommandStatusService getCommandStatusService() {
-        return commandStatusService;
-    }
-
-    boolean isMultitenant() {
-        return isMultitenant;
-    }
-
-    boolean isThreadSpawnAllowed() {
-        return isThreadSpawnAllowed;
-    }
-
-    CommandStore commandStore() {
-        return commandStore;
-    }
-
-    Log problemLog() {
-        return log;
-    }
-
-    @VisibleForTesting
-    Rescheduler rescheduler() {
-        return rescheduler;
-    }
-
-    @VisibleForTesting
-    CommandScheduler scheduler() {
-        return scheduler;
-    }
-
     private void dispatch(CommandEnvelope envelope) {
         final CommandClass commandClass = envelope.getCommandClass();
         final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
-        final CommandId commandId = envelope.getCommandId();
         try {
             dispatcher.dispatch(envelope.getCommand());
             setStatusOk(envelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
-            updateCommandStatus(envelope, cause, true);
+            updateCommandStatus(envelope, cause);
         }
     }
 
     private void invokeHandler(CommandEnvelope commandEnvelope) {
         final CommandClass commandClass = commandEnvelope.getCommandClass();
         final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        final CommandId commandId = commandEnvelope.getCommandId();
         try {
             handler.handle(commandEnvelope.getCommandMessage(),
                            commandEnvelope.getCommandContext());
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
-            updateCommandStatus(commandEnvelope, cause, false);
+            updateCommandStatus(commandEnvelope, cause);
         }
     }
 
@@ -338,33 +337,22 @@ public class CommandBus implements AutoCloseable {
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
-    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, boolean dispatching) {
+    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
 
-            if (dispatching) {
-                //TODO:2017-02-09:alexander.yevsyukov: Log failure dispatching
-            } else {
-                log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-            }
+            log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
 
             commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
 
-            if (dispatching) {
-                log.errorDispatching(exception, commandEnvelope.getCommand());
-            } else {
-                log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-            }
+            log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
 
             commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
-            if (dispatching) {
-                //TODO:2017-02-09:alexander.yevsyukov: log error dispatching
-            } else {
-                log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-            }
+
+            log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
 
             final Error error = Errors.fromThrowable(cause);
             commandStatusService.setToError(commandEnvelope.getCommandId(), error);
@@ -503,5 +491,4 @@ public class CommandBus implements AutoCloseable {
             return commandBus;
         }
     }
-
 }
