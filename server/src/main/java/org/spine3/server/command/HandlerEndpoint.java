@@ -25,10 +25,17 @@ package org.spine3.server.command;
  *
  * @author Alexander Yevsyukov
  */
-public class HandlerEndpoint implements CommandEndpoint {
+class HandlerEndpoint implements CommandEndpoint {
+
+    private final CommandHandler handler;
+
+    HandlerEndpoint(CommandHandler handler) {
+        this.handler = handler;
+    }
 
     @Override
     public void process(CommandEnvelope commandEnvelope) {
-        //TODO:2017-02-09:alexander.yevsyukov: Implement
+        handler.handle(commandEnvelope.getCommandMessage(),
+                       commandEnvelope.getCommandContext());
     }
 }

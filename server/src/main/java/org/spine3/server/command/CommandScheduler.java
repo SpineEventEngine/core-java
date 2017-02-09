@@ -88,8 +88,7 @@ public abstract class CommandScheduler {
      * @param command a command to deliver
      */
     protected void post(Command command) {
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
-        commandBus.doPost(commandEnvelope);
+        commandBus.postPreviouslyScheduled(command);
     }
 
     private static boolean isScheduledAlready(Command command) {

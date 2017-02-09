@@ -27,8 +27,14 @@ package org.spine3.server.command;
  */
 class DispatcherEndpoint implements CommandEndpoint {
 
+    private final CommandDispatcher dispatcher;
+
+    DispatcherEndpoint(CommandDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+
     @Override
     public void process(CommandEnvelope commandEnvelope) {
-        //TODO:2017-02-09:alexander.yevsyukov: Implement
+        dispatcher.dispatch(commandEnvelope.getCommand());
     }
 }

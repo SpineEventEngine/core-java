@@ -20,6 +20,7 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
@@ -216,6 +217,10 @@ public class CommandBus implements AutoCloseable {
         commandEndpoints.unregister(checkNotNull(handler));
     }
 
+    private Optional<CommandEndpoint> getEndpoint(CommandClass commandClass) {
+        return commandEndpoints.get(commandClass);
+    }
+
     /**
      * Directs the command to be dispatched or handled.
      *
@@ -232,14 +237,18 @@ public class CommandBus implements AutoCloseable {
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         final CommandClass commandClass = commandEnvelope.getCommandClass();
 
+        final Optional<CommandEndpoint> commandEndpoint = getEndpoint(commandClass);
+
         // If the command is not supported, return as error.
-        if (!isSupportedCommand(commandClass)) {
+        if (!commandEndpoint.isPresent()) {
             handleUnsupported(command, responseObserver);
             return;
         }
+
         if (!filter.handleValidation(command, responseObserver)) {
             return;
         }
+
         if (isScheduled(command)) {
             scheduleAndStore(command, responseObserver);
             return;
@@ -248,10 +257,22 @@ public class CommandBus implements AutoCloseable {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
+
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
-        doPost(commandEnvelope);
+        doPost(commandEnvelope, commandEndpoint.get());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Passes a previously scheduled command to corresponding endpoint.
+     */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // We are sure that we have an endpoint because this command passed checking in CommandBus.post().
+    void postPreviouslyScheduled(Command command) {
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandEndpoint endpoint = getEndpoint(commandEnvelope.getCommandClass()).get();
+        doPost(commandEnvelope, endpoint);
     }
 
     /**
@@ -283,34 +304,11 @@ public class CommandBus implements AutoCloseable {
      * Directs a command to be dispatched or handled.
      *
      * @param commandEnvelope a command to post
+     * @param commandEndpoint the endpoint to process the command
      */
-    void doPost(CommandEnvelope commandEnvelope) {
-        final CommandClass commandClass = commandEnvelope.getCommandClass();
-        if (commandEndpoints.hasDispatcherFor(commandClass)) {
-            dispatch(commandEnvelope);
-        } else if (commandEndpoints.handlerRegistered(commandClass)) {
-            invokeHandler(commandEnvelope);
-        }
-    }
-
-    private void dispatch(CommandEnvelope envelope) {
-        final CommandClass commandClass = envelope.getCommandClass();
-        final CommandDispatcher dispatcher = commandEndpoints.getDispatcher(commandClass);
+    void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
-            dispatcher.dispatch(envelope.getCommand());
-            setStatusOk(envelope);
-        } catch (RuntimeException e) {
-            final Throwable cause = Throwables.getRootCause(e);
-            updateCommandStatus(envelope, cause);
-        }
-    }
-
-    private void invokeHandler(CommandEnvelope commandEnvelope) {
-        final CommandClass commandClass = commandEnvelope.getCommandClass();
-        final CommandHandler handler = commandEndpoints.getHandler(commandClass);
-        try {
-            handler.handle(commandEnvelope.getCommandMessage(),
-                           commandEnvelope.getCommandContext());
+            commandEndpoint.process(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);

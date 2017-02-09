@@ -20,10 +20,14 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import org.spine3.server.type.CommandClass;
 
+import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * Manages registration, unregistration, and finding and caching endpoints for commands.
@@ -33,13 +37,34 @@ import java.util.Set;
 class CommandEndpointManager {
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
-
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
+    private final Map<CommandClass, CommandEndpoint> endpointMap = newConcurrentMap();
 
     Set<CommandClass> getSupportedCommandClasses() {
         final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
                                                     handlerRegistry.getCommandClasses());
         return result;
+    }
+
+    Optional<CommandEndpoint> get(CommandClass commandClass) {
+        final CommandEndpoint endpoint = endpointMap.get(commandClass);
+        if (endpoint != null) {
+            return Optional.of(endpoint);
+        }
+
+        final CommandDispatcher dispatcher = getDispatcher(commandClass);
+        if (dispatcher != null) {
+            final CommandEndpoint result = new DispatcherEndpoint(dispatcher);
+            return Optional.of(result);
+        }
+
+        final CommandHandler handler = getHandler(commandClass);
+        if (handler != null) {
+            final CommandEndpoint result = new HandlerEndpoint(handler);
+            return Optional.of(result);
+        }
+
+        return Optional.absent();
     }
 
     void register(CommandDispatcher dispatcher) {
@@ -65,14 +90,6 @@ class CommandEndpointManager {
         final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
         final boolean isSupported = dispatcherRegistered || handlerRegistered;
         return isSupported;
-    }
-
-    boolean hasDispatcherFor(CommandClass commandClass) {
-        return dispatcherRegistry.hasDispatcherFor(commandClass);
-    }
-
-    boolean handlerRegistered(CommandClass commandClass) {
-        return handlerRegistry.handlerRegistered(commandClass);
     }
 
     CommandDispatcher getDispatcher(CommandClass commandClass) {
