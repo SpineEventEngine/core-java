@@ -21,7 +21,6 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
@@ -58,9 +57,7 @@ public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
 
-    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
-
-    private final HandlerRegistry handlerRegistry = new HandlerRegistry();
+    private final CommandEndpointManager commandEndpoints = new CommandEndpointManager();
 
     private final CommandStore commandStore;
 
@@ -168,9 +165,7 @@ public class CommandBus implements AutoCloseable {
      * @return a set of classes of supported commands
      */
     public Set<CommandClass> getSupportedCommandClasses() {
-        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
-                                                    handlerRegistry.getCommandClasses());
-        return result;
+        return commandEndpoints.getSupportedCommandClasses();
     }
 
     /**
@@ -187,8 +182,7 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
      */
     public void register(CommandDispatcher dispatcher) {
-        handlerRegistry.checkNoHandlersRegisteredForCommandsOf(dispatcher);
-        dispatcherRegistry.register(dispatcher);
+        commandEndpoints.register(checkNotNull(dispatcher));
     }
 
     /**
@@ -200,7 +194,7 @@ public class CommandBus implements AutoCloseable {
      * @param dispatcher the dispatcher to unregister
      */
     public void unregister(CommandDispatcher dispatcher) {
-        dispatcherRegistry.unregister(dispatcher);
+        commandEndpoints.undregister(checkNotNull(dispatcher));
     }
 
     /**
@@ -210,8 +204,7 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if the handler does not have command handling methods
      */
     public void register(CommandHandler handler) {
-        dispatcherRegistry.checkNoDispatchersRegisteredForCommandsOf(handler);
-        handlerRegistry.register(handler);
+        commandEndpoints.register(checkNotNull(handler));
     }
 
     /**
@@ -220,7 +213,7 @@ public class CommandBus implements AutoCloseable {
      * @param handler the handler to unregister
      */
     public void unregister(CommandHandler handler) {
-        handlerRegistry.unregister(handler);
+        commandEndpoints.unregister(checkNotNull(handler));
     }
 
     /**
@@ -270,10 +263,7 @@ public class CommandBus implements AutoCloseable {
      */
     @VisibleForTesting
     boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
+        return commandEndpoints.isSupportedCommand(commandClass);
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -296,16 +286,16 @@ public class CommandBus implements AutoCloseable {
      */
     void doPost(CommandEnvelope commandEnvelope) {
         final CommandClass commandClass = commandEnvelope.getCommandClass();
-        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
+        if (commandEndpoints.hasDispatcherFor(commandClass)) {
             dispatch(commandEnvelope);
-        } else if (handlerRegistry.handlerRegistered(commandClass)) {
+        } else if (commandEndpoints.handlerRegistered(commandClass)) {
             invokeHandler(commandEnvelope);
         }
     }
 
     private void dispatch(CommandEnvelope envelope) {
         final CommandClass commandClass = envelope.getCommandClass();
-        final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
+        final CommandDispatcher dispatcher = commandEndpoints.getDispatcher(commandClass);
         try {
             dispatcher.dispatch(envelope.getCommand());
             setStatusOk(envelope);
@@ -317,7 +307,7 @@ public class CommandBus implements AutoCloseable {
 
     private void invokeHandler(CommandEnvelope commandEnvelope) {
         final CommandClass commandClass = commandEnvelope.getCommandClass();
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        final CommandHandler handler = commandEndpoints.getHandler(commandClass);
         try {
             handler.handle(commandEnvelope.getCommandMessage(),
                            commandEnvelope.getCommandContext());
@@ -368,8 +358,7 @@ public class CommandBus implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        dispatcherRegistry.unregisterAll();
-        handlerRegistry.unregisterAll();
+        commandEndpoints.unregisterAll();
         commandStore.close();
         scheduler.shutdown();
     }
