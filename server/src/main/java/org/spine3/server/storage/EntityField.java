@@ -33,6 +33,7 @@ public enum EntityField {
 
     timestamp,
     timestamp_nanos,
-    value
+    value,
+    type_url
 
 }
