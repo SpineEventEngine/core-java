@@ -236,7 +236,8 @@ public class CommandBus implements AutoCloseable {
      * @param responseObserver the observer to return the result of the call
      */
     public void post(Command command, StreamObserver<Response> responseObserver) {
-        final CommandClass commandClass = CommandClass.of(command);
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
 
         // If the command is not supported, return as error.
         if (!isSupportedCommand(commandClass)) {
@@ -256,7 +257,7 @@ public class CommandBus implements AutoCloseable {
         }
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
-        doPost(command);
+        doPost(commandEnvelope);
         responseObserver.onCompleted();
     }
 
@@ -291,13 +292,9 @@ public class CommandBus implements AutoCloseable {
     /**
      * Directs a command to be dispatched or handled.
      *
-     * <p>Logs exceptions which may occur during dispatching or handling and
-     * sets the command status to {@code error} or {@code failure} in the storage.
-     *
-     * @param command a command to post
+     * @param commandEnvelope a command to post
      */
-    void doPost(Command command) {
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+    void doPost(CommandEnvelope commandEnvelope) {
         final CommandClass commandClass = commandEnvelope.getCommandClass();
         if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
             dispatch(commandEnvelope);
