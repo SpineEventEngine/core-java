@@ -43,7 +43,6 @@ import org.spine3.test.command.event.TaskAdded;
 import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -200,15 +199,6 @@ public class CommandHandlerShould {
 
         ImmutableList<Message> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
-        }
-
-        @Override
-        public void handle(Message commandMessage, CommandContext context) {
-            try {
-                super.handle(commandMessage, context);
-            } catch (InvocationTargetException e) {
-                throw new IllegalStateException(e);
-            }
         }
 
         @Assign
