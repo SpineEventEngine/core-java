@@ -44,6 +44,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -72,7 +73,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private static final ProjectId ID = Given.newProjectId();
+    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);

@@ -118,7 +118,6 @@ public class Sample {
      *
      * @param clazz Java class of the stub message
      * @param <M>   type of the required message
-     * @param <B>   type of the {@link Message.Builder builder} for the message
      * @return new instance of the {@link Message.Builder} for given type
      * @see #valueFor(FieldDescriptor)
      */
