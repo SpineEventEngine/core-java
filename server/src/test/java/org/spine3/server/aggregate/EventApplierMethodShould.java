@@ -20,12 +20,8 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.base.EventContext;
 import org.spine3.server.reflect.HandlerMethod;
-import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.event.ProjectCreated;
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +31,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Verify.assertContains;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventApplierMethodShould {
@@ -133,21 +128,6 @@ public class EventApplierMethodShould {
         assertIsNotEventApplier(applier);
     }
 
-    @Test
-    public void do_not_accept_methods_with_two_parameters() {
-        assertTrue(EventApplierMethod.getEventClasses(AggregateWithTwoMethodsApplier.class)
-                                     .isEmpty());
-    }
-
-    @Test
-    public void accept_non_private_appliers() {
-        final ImmutableSet<Class<? extends Message>> eventClasses = EventApplierMethod.getEventClasses(
-                AggregateWithNonPrivateApplier.class);
-
-        // The method is counted and the event is present.
-        assertContains(ProjectCreated.class, eventClasses);
-    }
-
     private static void assertIsEventApplier(Method applier) {
         assertTrue(EventApplierMethod.PREDICATE.apply(applier));
     }
@@ -224,34 +204,6 @@ public class EventApplierMethodShould {
                 }
             }
             throw new RuntimeException("No applier method found: " + APPLIER_METHOD_NAME);
-        }
-    }
-
-    /*
-     * Other
-     *********/
-
-    private static class AggregateWithTwoMethodsApplier extends Aggregate<Long, Project, Project.Builder> {
-
-        public AggregateWithTwoMethodsApplier(Long id) {
-            super(id);
-        }
-
-        @Apply
-        private void apply(ProjectCreated event, EventContext context) {
-            // Do nothing.
-        }
-    }
-
-    private static class AggregateWithNonPrivateApplier extends Aggregate<Long, Project, Project.Builder> {
-
-        public AggregateWithNonPrivateApplier(Long id) {
-            super(id);
-        }
-
-        @Apply
-        public void apply(ProjectCreated event) {
-            // Do nothing.
         }
     }
 }
