@@ -23,7 +23,6 @@ package org.spine3.server.command;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -32,11 +31,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
-import org.spine3.base.Errors;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
@@ -63,7 +59,6 @@ import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.testdata.TestEventBusFactory;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -90,12 +85,10 @@ import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.base.CommandValidationError.TENANT_UNKNOWN;
 import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {
@@ -103,7 +96,6 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private Log log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -114,12 +106,10 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new Log());
         commandBus = CommandBus.newBuilder()
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setThreadSpawnAllowed(true)
-                               .setLog(log)
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
@@ -454,66 +444,6 @@ public class CommandBusShould {
     }
 
     @Test
-    public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
-        final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
-        commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProject());
-
-        commandBus.post(command, responseObserver);
-
-        verify(commandStore).updateStatus(getId(command), dispatcher.exception);
-        final CommandEnvelope envelope = new CommandEnvelope(command);
-        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
-    }
-
-    @Test
-    public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
-        final TestFailure failure = new TestFailure();
-        final Command command = givenThrowingHandler(failure);
-        final CommandId commandId = getId(command);
-        final Message commandMessage = getMessage(command);
-
-        commandBus.post(command, responseObserver);
-
-        verify(commandStore).updateStatus(eq(commandId), eq(failure.toMessage()));
-        verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
-    }
-
-    @Test
-    public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
-        final RuntimeException exception = new IllegalStateException("handler throws");
-        final Command command = givenThrowingHandler(exception);
-        final CommandId commandId = getId(command);
-        final Message commandMessage = getMessage(command);
-
-        commandBus.post(command, responseObserver);
-
-        verify(commandStore).updateStatus(eq(commandId), eq(exception));
-        verify(log).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
-    }
-
-    @Test
-    public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
-        final Throwable throwable = new TestThrowable();
-        final Command command = givenThrowingHandler(throwable);
-        final CommandId commandId = getId(command);
-        final Message commandMessage = getMessage(command);
-
-        commandBus.post(command, responseObserver);
-
-        verify(commandStore).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
-        verify(log).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
-    }
-
-    private <E extends Throwable> Command givenThrowingHandler(E throwable) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
-        commandBus.register(handler);
-        final CreateProject msg = Given.CommandMessage.createProject();
-        final Command command = commandFactory.create(msg);
-        return command;
-    }
-
-    @Test
     public void return_supported_classes() {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
@@ -655,23 +585,6 @@ public class CommandBusShould {
         });
     }
 
-    @Test
-    public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
-        final List<Command> commands = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
-        final Duration delay = Durations.ofMinutes(5);
-        final Timestamp schedulingTime = minutesAgo(10); // time to post passed
-        storeAsScheduled(commands, delay, schedulingTime);
-
-        commandBus.rescheduler().doRescheduleCommands();
-
-        for (Command cmd : commands) {
-            final Message msg = getMessage(cmd);
-            final CommandId id = getId(cmd);
-            verify(commandStore).updateStatus(id, commandExpiredError(msg));
-            verify(log).errorExpiredCommand(msg, id);
-        }
-    }
-
     /*
      * Test utility methods.
      ***********************/
@@ -800,22 +713,6 @@ public class CommandBusShould {
         }
     }
 
-    private static class ThrowingDispatcher implements CommandDispatcher {
-
-        @SuppressWarnings("ThrowableInstanceNeverThrown")
-        private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
-
-        @Override
-        public Set<CommandClass> getCommandClasses() {
-            return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
-        }
-
-        @Override
-        public void dispatch(Command request) {
-            throw exception;
-        }
-    }
-
     /*
      * Test command handlers.
      ************************/
@@ -863,30 +760,6 @@ public class CommandBusShould {
         }
     }
 
-    /**
-     * A stub handler that throws passed `Throwable` in the command handler method.
-     *
-     * @see #set_command_status_to_failure_when_handler_throws_failure
-     * @see #set_command_status_to_failure_when_handler_throws_exception
-     * @see #set_command_status_to_failure_when_handler_throws_unknown_Throwable
-     */
-    private class ThrowingCreateProjectHandler extends CommandHandler {
-
-        @Nonnull
-        private final Throwable throwable;
-
-        protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
-            super(newUuid(), eventBus);
-            this.throwable = throwable;
-        }
-
-        @Assign
-        @SuppressWarnings({"unused", "ProhibitedExceptionThrown"}) // Throwing is the purpose of this method.
-        ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
-            throw throwable;
-        }
-    }
-
     private class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler() {
             super(newUuid(), eventBus);
@@ -929,23 +802,5 @@ public class CommandBusShould {
         boolean isCompleted() {
             return this.completed;
         }
-    }
-
-    /*
-     * Throwables.
-     ********************/
-
-    private static class TestFailure extends FailureThrowable {
-        private static final long serialVersionUID = 1L;
-
-        private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class TestThrowable extends Throwable {
     }
 }
