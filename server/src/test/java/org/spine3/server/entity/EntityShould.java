@@ -278,7 +278,7 @@ public class EntityShould {
 
     @Test
     public void generate_unique_hash_code_for_different_instances() {
-        final Given.TestEntity another = Given.TestEntity.withState();
+        final TestEntity another = TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
@@ -293,7 +293,7 @@ public class EntityShould {
     private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
-            super(Given.AggregateId.newProjectId());
+            super(Sample.messageOfType(ProjectId.class));
         }
     }
 
