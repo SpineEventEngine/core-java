@@ -46,7 +46,6 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.ListValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.Method;
 import com.google.protobuf.Mixin;
 import com.google.protobuf.NullValue;
@@ -135,7 +134,7 @@ public class KnownTypes {
 
     /**
      * Retrieves a Java class name generated for the Protobuf type by its type url
-     * to be used to parse {@link Message} from {@link Any}.
+     * to be used to parse {@link com.google.protobuf.Message} from {@link Any}.
      *
      * @param typeUrl {@link Any} type url
      * @return Java class name
