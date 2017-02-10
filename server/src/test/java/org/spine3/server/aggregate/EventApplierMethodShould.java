@@ -27,6 +27,7 @@ import org.spine3.base.EventContext;
 import org.spine3.server.reflect.HandlerMethod;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.testdata.Sample;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -46,7 +47,7 @@ public class EventApplierMethodShould {
     public void invoke_applier_method() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
-        final ProjectCreated event = Given.EventMessage.projectCreated();
+        final ProjectCreated event = Sample.messageOfType(ProjectCreated.class);
 
         applier.invoke(applierObject, event);
 

@@ -37,6 +37,7 @@ import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -60,7 +61,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
 
-    private final ProjectId id = Given.newProjectId();
+    private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
     private AggregateStorage<ProjectId> storage;
 
@@ -97,7 +98,7 @@ public abstract class AggregateStorageShould
 
     @Override
     protected ProjectId newId() {
-        return Given.newProjectId();
+        return Sample.messageOfType(ProjectId.class);
     }
 
     /**

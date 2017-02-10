@@ -32,6 +32,9 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
@@ -106,8 +109,21 @@ public class Sample {
         }
 
         public static AggregateStorageRecord withRandomFields() {
-            return Sample.messageOfType(AggregateStorageRecord.class);
+            return messageOfType(AggregateStorageRecord.class);
         }
+    }
+
+    public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+        final Message eventMessage = messageOfType(eventClass);
+        final Event event = Events.createEvent(eventMessage, eventContext);
+        return event;
+    }
+
+    public static Event eventBy(Message producerId, Message eventMessage) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+        final Event event = Events.createEvent(eventMessage, eventContext);
+        return event;
     }
 
     /**
@@ -174,7 +190,8 @@ public class Sample {
     private static void checkClass(Class<? extends Message> clazz) {
         checkNotNull(clazz);
         // Support only generated protobuf messages
-        checkArgument(clazz.isAssignableFrom(GeneratedMessageV3.class));
+        checkArgument(GeneratedMessageV3.class.isAssignableFrom(clazz),
+                      "Only generated protobuf messages are allowed.");
     }
 
     /**

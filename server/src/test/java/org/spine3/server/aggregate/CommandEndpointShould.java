@@ -50,6 +50,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Sample;
 
 import java.util.Map;
 
@@ -79,7 +80,7 @@ public class CommandEndpointShould {
     private CommandStore commandStore;
     private EventBus eventBus;
 
-    private final ProjectId projectId = Given.newProjectId();
+    private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
 
     @Before
     public void setUp() {
@@ -124,14 +125,13 @@ public class CommandEndpointShould {
 
     @Test
     public void store_aggregate_on_command_dispatching() {
-        final ProjectId id = Given.newProjectId();
-        final Command cmd = Given.Command.createProject(id);
+        final Command cmd = Given.Command.createProject(projectId);
         final CreateProject msg = Commands.getMessage(cmd);
 
         repositorySpy.dispatch(cmd);
 
         final ProjectAggregate aggregate = verifyAggregateStored(repositorySpy);
-        assertEquals(id, aggregate.getId());
+        assertEquals(projectId, aggregate.getId());
         assertEquals(msg.getName(), aggregate.getState()
                                              .getName());
     }
@@ -152,7 +152,6 @@ public class CommandEndpointShould {
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        final ProjectId projectId = Given.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
@@ -177,10 +176,9 @@ public class CommandEndpointShould {
 
     @Test
     public void dispatch_several_commands() {
-        final ProjectId id = Given.newProjectId();
-        assertDispatches(Given.Command.createProject(id));
-        assertDispatches(Given.Command.addTask(id));
-        assertDispatches(Given.Command.startProject(id));
+        assertDispatches(Given.Command.createProject(projectId));
+        assertDispatches(Given.Command.addTask(projectId));
+        assertDispatches(Given.Command.startProject(projectId));
     }
 
     @Test

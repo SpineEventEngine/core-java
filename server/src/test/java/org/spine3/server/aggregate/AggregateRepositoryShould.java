@@ -227,11 +227,11 @@ public class AggregateRepositoryShould {
                         .setProjectId(id)
                         .build();
         final AddTask addTask =
-                ((AddTask.Builder) Sample.builderForType(CreateProject.class))
+                ((AddTask.Builder) Sample.builderForType(AddTask.class))
                         .setProjectId(id)
                         .build();
         final StartProject startProject =
-                ((StartProject.Builder) Sample.builderForType(CreateProject.class))
+                ((StartProject.Builder) Sample.builderForType(StartProject.class))
                         .setProjectId(id)
                         .build();
 
