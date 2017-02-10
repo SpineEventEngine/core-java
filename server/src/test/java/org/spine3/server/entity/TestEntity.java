@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import org.spine3.test.Given;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 
@@ -35,14 +36,14 @@ class TestEntity extends Entity<String, Project> {
     private boolean isValidateMethodCalled = false;
 
     static TestEntity newInstance(String id) {
-        final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
-                                                       .withId(id)
-                                                       .build();
+        final TestEntity result = Given.entityOfClass(TestEntity.class)
+                                       .withId(id)
+                                       .build();
         return result;
     }
 
     static TestEntity withState() {
-        final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
+        final TestEntity result = Given.entityOfClass(TestEntity.class)
                                                        .withId(newUuid())
                                                        .withState(Sample.messageOfType(Project.class))
                                                        .withVersion(3)
@@ -51,7 +52,7 @@ class TestEntity extends Entity<String, Project> {
     }
 
     static TestEntity withState(TestEntity entity) {
-        final TestEntity result = org.spine3.test.Given.entityOfClass(TestEntity.class)
+        final TestEntity result = Given.entityOfClass(TestEntity.class)
                                                        .withId(entity.getId())
                                                        .withState(entity.getState())
                                                        .withVersion(entity.getVersion())
