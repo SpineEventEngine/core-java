@@ -23,8 +23,6 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
@@ -84,7 +82,7 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
     protected abstract V getAbs(V number);
 
     /**
-     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
+     * Wraps a value to a corresponding message wrapper ({@link com.google.protobuf.DoubleValue}, {@link com.google.protobuf.Int32Value}, etc) and {@link Any}.
      */
     protected abstract Any wrap(V value);
 
