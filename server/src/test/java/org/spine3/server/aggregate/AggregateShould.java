@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +34,7 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -58,11 +58,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -87,58 +86,9 @@ public class AggregateShould {
     @Before
     public void setUp() {
         aggregate = org.spine3.test.Given.aggregateOfClass(TestAggregate.class)
-                         .withId(ID)
-                         .withVersion(100)
-                         .build();
-    }
-
-    @Test
-    public void accept_Message_id_to_constructor() {
-        try {
-            final TestAggregate aggregate = new TestAggregate(ID);
-            assertEquals(ID, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_String_id_to_constructor() {
-        try {
-            final String id = "string_id";
-            final TestAggregateWithIdString aggregate = new TestAggregateWithIdString(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_Integer_id_to_constructor() {
-        try {
-            final Integer id = 12;
-            final TestAggregateWithIdInteger aggregate = new TestAggregateWithIdInteger(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void accept_Long_id_to_constructor() {
-        try {
-            final Long id = 12L;
-            final TestAggregateWithIdLong aggregate = new TestAggregateWithIdLong(id);
-            assertEquals(id, aggregate.getId());
-        } catch (Throwable e) {
-            fail();
-        }
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void not_accept_to_constructor_id_of_unsupported_type() {
-        new TestAggregateWithIdUnsupported(new UnsupportedClassVersionError());
+                                         .withId(ID)
+                                         .withVersion(100)
+                                         .build();
     }
 
     @Test
@@ -200,21 +150,13 @@ public class AggregateShould {
 
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(TestAggregate.class);
+        final Set<CommandClass> classes = getCommandClasses(TestAggregate.class);
 
         assertTrue(classes.size() == 4);
-        assertTrue(classes.contains(CreateProject.class));
-        assertTrue(classes.contains(AddTask.class));
-        assertTrue(classes.contains(StartProject.class));
-        assertTrue(classes.contains(ImportEvents.class));
-    }
-
-    @Test
-    public void return_event_classes_which_represent_the_state_of_the_aggregate() {
-        final Set<Class<? extends Message>> classes = Aggregate.getEventClasses(TestAggregate.class);
-
-        assertContains(classes,
-                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+        assertTrue(classes.contains(CommandClass.of(CreateProject.class)));
+        assertTrue(classes.contains(CommandClass.of(AddTask.class)));
+        assertTrue(classes.contains(CommandClass.of(StartProject.class)));
+        assertTrue(classes.contains(CommandClass.of(ImportEvents.class)));
     }
 
     @Test
@@ -466,26 +408,8 @@ public class AggregateShould {
         }
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
-        private TestAggregateWithIdString(String id) {
-            super(id);
-        }
-    }
-
     private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
-            super(id);
-        }
-    }
-
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
-        private TestAggregateWithIdLong(Long id) {
-            super(id);
-        }
-    }
-
-    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project, Project.Builder> {
-        private TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
@@ -602,33 +526,6 @@ public class AggregateShould {
         new TestAggregateWithIdInteger(100).getBuilder();
     }
 
-    @Test
-    public void set_version_when_creating_mismatches() {
-        final int version = aggregate.getVersion();
-
-        assertEquals(version, aggregate.expectedDefault(msg(), msg()).getVersion());
-        assertEquals(version, aggregate.expectedNotDefault(msg()).getVersion());
-        assertEquals(version, aggregate.expectedNotDefault(msg(), msg()).getVersion());
-        assertEquals(version, aggregate.unexpectedValue(msg(), msg(), msg()).getVersion());
-
-        assertEquals(version, aggregate.expectedEmpty(str(), str()).getVersion());
-        assertEquals(version, aggregate.expectedNotEmpty(str()).getVersion());
-        assertEquals(version, aggregate.unexpectedValue(str(), str(), str()).getVersion());
-    }
-
-    /**
-     * @return generated {@code StringValue} based on generated UUID
-     */
-    private static StringValue msg() {
-        return newUuidValue();
-    }
-
-    /**
-     * @return generated {@code String} based on generated UUID
-     */
-    private static String str() {
-        return msg().getValue();
-    }
 
     /*
      * Utility methods.

@@ -20,14 +20,7 @@
 package org.spine3.server.stand;
 
 import org.spine3.Internal;
-import org.spine3.base.Command;
-import org.spine3.base.Event;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.projection.ProjectionRepository;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -35,15 +28,21 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Delivers the latest {@link Entity} states from the entity repositories to the {@link Stand}.
  *
- * <p>Note: Unlike {@link EventBus} and {@link CommandBus}, which assume many publishers and many subscribers,
- * the funnel may have zero or more publishers (typically, instances of {@link AggregateRepository} or
- * {@link ProjectionRepository}), but the only subscriber, the instance of {@code Stand}.
+ * <p><strong>Note:</strong> Unlike {@link org.spine3.server.event.EventBus EventBus} and
+ * {@link org.spine3.server.command.CommandBus CommandBus}, which assume many publishers and
+ * many subscribers, the funnel may have zero or more publishers (typically, instances of
+ * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository} or
+ * {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}),
+ * but the only subscriber, the instance of {@code Stand}.
  *
- * <p>In scope of a single {@link BoundedContext} there can be the only instance of {@code StandFunnel}.
+ * <p>In scope of a single {@link org.spine3.server.BoundedContext BoundedContext}
+ * there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
- * @see AggregateRepository#dispatch(Command)
- * @see ProjectionRepository#dispatch(Event)
+ * @see org.spine3.server.aggregate.AggregateRepository#dispatch(org.spine3.base.Command)
+ *      AggregateRepository.dispatch(Command)
+ * @see org.spine3.server.projection.ProjectionRepository#dispatch(org.spine3.base.Event)
+ *      ProjectionRepository.dispatch(Event)
  */
 @Internal
 public class StandFunnel {

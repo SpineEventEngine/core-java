@@ -20,7 +20,6 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
@@ -64,10 +64,10 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
 
     @Nullable
-    private ImmutableSet<CommandClass> commandClasses;
+    private Set<CommandClass> commandClasses;
 
     @Nullable
-    private ImmutableSet<EventClass> eventClasses;
+    private Set<EventClass> eventClasses;
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
@@ -79,8 +79,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     public Set<CommandClass> getCommandClasses() {
         if (commandClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(pmClass);
-            commandClasses = CommandClass.setOf(classes);
+            commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
         }
         return commandClasses;
     }
@@ -99,18 +98,14 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     /**
      * Dispatches the command to a corresponding process manager.
      *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed command.
+     * <p>If there is no stored process manager with such an ID,
+     * a new process manager is created and stored after it handles the passed command.
      *
      * @param command a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
-     * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws IllegalStateException if no command handler method found for a command
-     * @throws IllegalArgumentException if commands of this type are not handled by the process manager
      */
     @Override
-    public void dispatch(Command command)
-            throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
+    public void dispatch(Command command) {
         final Message commandMessage = getMessage(checkNotNull(command));
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(commandMessage);
@@ -122,7 +117,9 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         postEvents(events);
     }
 
-    /** Posts passed events to {@link EventBus}. */
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
     private void postEvents(Iterable<Event> events) {
         final EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {

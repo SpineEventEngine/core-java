@@ -40,6 +40,11 @@ import static org.mockito.Mockito.mock;
  */
 public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<CommandRouter> {
 
+    /**
+     * Creates a router with mocked {@code CommandBus} which always calls
+     * {@link StreamObserver#onError(Throwable) StreamObserver.onError()} when
+     * {@link CommandBus#post(Command, StreamObserver) CommandBus.post()} is invoked.
+     */
     @Override
     CommandRouter createRouter(CommandBus ignored, Message sourceMessage, CommandContext commandContext) {
         final CommandBus mockBus = mock(CommandBus.class);

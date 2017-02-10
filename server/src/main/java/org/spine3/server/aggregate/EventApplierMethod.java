@@ -54,7 +54,7 @@ class EventApplierMethod extends HandlerMethod<Empty> {
      */
     protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
-        return super.invoke(aggregate, message, Empty.getDefaultInstance());
+        return invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
@@ -103,8 +103,8 @@ class EventApplierMethod extends HandlerMethod<Empty> {
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;
 
+        @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
         @Override
-        @SuppressWarnings("RefusedBequest")
         protected boolean acceptsCorrectParams(Method method) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
             final boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;

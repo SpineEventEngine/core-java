@@ -142,7 +142,7 @@ public class ProcessManagerRepositoryShould
                           }
 
                           @Override
-                          public void dispatch(Command request) throws Exception {
+                          public void dispatch(Command request) {
                               // Simply swallow the command. We need this dispatcher for allowing Process Manager
                               // under test to route the AddTask command.
                           }

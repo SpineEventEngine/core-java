@@ -20,34 +20,23 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToAny;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -72,8 +61,9 @@ import static org.spine3.base.Identifiers.idToAny;
  * @param <I> the type of the process manager IDs
  * @param <S> the type of the process manager state
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> {
+public abstract class ProcessManager<I, S extends Message> extends CommandHandlingEntity<I, S> {
 
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
@@ -99,84 +89,39 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
     }
 
     /**
-     * Dispatches a command to the command handler method of the process manager.
+     * Directs the passed command to the handler method and transforms its output to a list of events.
      *
-     * @param command the command to be executed on the process manager
-     * @param context of the command
-     * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws IllegalStateException if no command handler method found for a command
+     * @param commandMessage the command to be processed
+     * @param context the context of the command
+     * @return the events resulted from the call
+     * @throws InvocationTargetException if an exception occurs during command handling
      */
-    protected List<Event> dispatchCommand(Message command, CommandContext context)
-            throws InvocationTargetException, IllegalStateException {
-        checkNotNull(command);
-        checkNotNull(context);
-        final Class<? extends Message> commandClass = command.getClass();
-        final CommandHandlerMethod method = MethodRegistry.getInstance()
-                                                          .get(getClass(),
-                                                               commandClass,
-                                                               CommandHandlerMethod.factory());
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
-        final List<? extends Message> messages = method.invoke(this, command, context);
+    @Override
+    protected List<Event> invokeHandler(Message commandMessage, CommandContext context)
+            throws InvocationTargetException {
+        final List<? extends Message> messages = super.invokeHandler(commandMessage, context);
+
         final List<Event> events = toEvents(messages, context);
         return events;
     }
 
-    private List<Event> toEvents(final List<? extends Message> events, final CommandContext commandContext) {
-        return Lists.transform(events, new Function<Message, Event>() {
-            @Override
-            public Event apply(@Nullable Message event) {
-                if (event == null) {
-                    return Event.getDefaultInstance();
-                }
-                final EventContext eventContext = createEventContext(event, commandContext);
-                final Event result = Events.createEvent(event, eventContext);
-                return result;
-            }
-        });
-    }
-
     /**
-     * Creates a context for an event.
+     * {@inheritDoc}
      *
-     * <p>The context may optionally have custom attributes added by
-     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
+     * This method overrides the parent for:
+     * <ol>
+     *     <li>Opening the method to the package.
+     *     <li>Casting the result to {@code List<Event>}, which is produced by
+     *     {@link #invokeHandler(Message, CommandContext) invokeHander()}.
+     * </ol>
      *
-     * @param event          the event for which to create the context
-     * @param commandContext     the context of the command, which processing caused the event
-     * @return new instance of the {@code EventContext}
+     * @return the list of events generated as the result of handling the command.
      */
-    @CheckReturnValue
-    private EventContext createEventContext(Message event, CommandContext commandContext) {
-        final EventId eventId = Events.generateId();
-        final Any producerId = idToAny(getId());
-        final Timestamp whenModified = whenModified();
-        final int currentVersion = getVersion();
-
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setTimestamp(whenModified)
-                                                         .setCommandContext(commandContext)
-                                                         .setProducerId(producerId)
-                                                         .setVersion(currentVersion);
-        extendEventContext(event, builder, commandContext);
-        return builder.build();
-    }
-
-    /**
-     * Adds custom attributes to an event context builder during the creation of the event context.
-     *
-     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
-     * @param event          the event message
-     * @param builder        a builder for the event context
-     * @param commandContext the context of the command that produced the event
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void extendEventContext(Message event,
-                                      EventContext.Builder builder,
-                                      CommandContext commandContext) {
-        // Do nothing.
+    @SuppressWarnings("unchecked") // See Javadoc above
+    @Override
+    protected List<Event> dispatchCommand(Message command, CommandContext context) {
+        final List<? extends Message> messages = super.dispatchCommand(command, context);
+        return (List<Event>)messages;
     }
 
     /**
@@ -186,26 +131,18 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @param context of the event
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
-    protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+    protected void dispatchEvent(Message event, EventContext context)
+            throws InvocationTargetException {
         checkNotNull(context);
         checkNotNull(event);
         final Class<? extends Message> eventClass = event.getClass();
-        final EventSubscriberMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(), eventClass, EventSubscriberMethod.factory());
+        final EventSubscriberMethod method =
+                MethodRegistry.getInstance()
+                              .get(getClass(), eventClass, EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
         method.invoke(this, event, context);
-    }
-
-    /**
-     * Returns the set of the command types handled by the process manager.
-     *
-     * @param pmClass the process manager class to inspect
-     * @return immutable set of command classes or an empty set if no commands are handled
-     */
-    public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.PREDICATE);
     }
 
     /**
@@ -214,7 +151,8 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @param pmClass the process manager class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
+    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(
+            Class<? extends ProcessManager> pmClass) {
         return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
     }
 
@@ -286,11 +224,13 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
      * @see IteratingCommandRouter#routeFirst()
      * @see IteratingCommandRouter#routeNext()
      */
-    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage, CommandContext commandContext) {
+    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage,
+                                                           CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
         final CommandBus commandBus = ensureCommandBus();
-        final IteratingCommandRouter router = new IteratingCommandRouter(commandBus, commandMessage, commandContext);
+        final IteratingCommandRouter router =
+                new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
@@ -300,15 +240,12 @@ public abstract class ProcessManager<I, S extends Message> extends Entity<I, S> 
         return commandBus;
     }
 
-    private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
-        final String msg = format("Missing handler for command class %s in process manager class %s.",
-                                     commandClass.getName(), getClass().getName());
-        return new IllegalStateException(msg);
-    }
-
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = format("Missing event handler for event class %s in the process manager class %s",
-                                     eventClass, this.getClass());
+        final String msg = format(
+                "Missing event handler for event class %s in the process manager class %s",
+                eventClass,
+                this.getClass()
+        );
         return new IllegalStateException(msg);
     }
 }

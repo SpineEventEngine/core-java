@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -27,7 +28,10 @@ import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
@@ -36,6 +40,7 @@ import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
+import static org.spine3.test.Tests.newUuidValue;
 
 public class AnyPackerShould {
 
@@ -101,5 +106,11 @@ public class AnyPackerShould {
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_unpack_null() {
         AnyPacker.unpack(Tests.<Any>nullRef());
+    }
+
+    @Test
+    public void create_packing_iterator() {
+        final Iterator<Message> iterator = Lists.<Message>newArrayList(newUuidValue()).iterator();
+        assertNotNull(AnyPacker.pack(iterator));
     }
 }

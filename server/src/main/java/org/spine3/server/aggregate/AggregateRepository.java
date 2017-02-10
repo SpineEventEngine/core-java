@@ -26,13 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandStatusService;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
@@ -86,7 +85,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
-    private final CommandStatusService commandStatusService;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -100,8 +98,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        this.commandStatusService = boundedContext.getCommandBus()
-                                                  .getCommandStatusService();
     }
 
     /**
@@ -113,15 +109,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BoundedContext getBoundedContext() {
-        // Expose the method to the package.
-        return super.getBoundedContext();
     }
 
     /**
@@ -138,7 +125,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
+        final Set<CommandClass> result = CommandHandlingEntity.getCommandClasses(getAggregateClass());
         return result;
     }
 
@@ -162,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Processes the command by dispatching it to a method of an aggregate.
+     * Dispatches the passed command to an aggregate.
      *
      * <p>The aggregate ID is obtained from the passed command.
      *
@@ -170,30 +157,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * if there is no aggregate with such ID.
      *
      * @param command the command to dispatch
-     * @throws IllegalStateException if storage for the repository was not initialized
      */
     @Override
-    public void dispatch(Command command) throws IllegalStateException {
+    public void dispatch(Command command) {
         final CommandEndpoint<I, A> commandEndpoint = new CommandEndpoint<>(this);
         final A aggregate = commandEndpoint.dispatch(command);
 
-        final CommandId commandId = command.getContext().getCommandId();
         final List<Event> events = aggregate.getUncommittedEvents();
-        storeAndPostToStand(aggregate, commandId);
+        storeAndPostToStand(aggregate);
         postEvents(events);
-        commandStatusService.setOk(commandId);
     }
 
-    private void storeAndPostToStand(A aggregate, CommandId commandId) {
-        try {
-            store(aggregate);
-            standFunnel.post(aggregate);
-        } catch (RuntimeException e) {
-            commandStatusService.setToError(commandId, e);
-        }
+    private void storeAndPostToStand(A aggregate) {
+        store(aggregate);
+        standFunnel.post(aggregate);
     }
 
-    /** Posts passed events to {@link EventBus}. */
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
     private void postEvents(Iterable<Event> events) {
         for (Event event : events) {
             eventBus.post(event);
