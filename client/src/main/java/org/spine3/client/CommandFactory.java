@@ -117,8 +117,10 @@ public class CommandFactory {
      *                      the commands can be applied to any entity
      * @return new command instance
      */
-    public Command create(Message message, @Nullable Integer targetVersion) {
+    public Command create(Message message, int targetVersion) {
         checkNotNull(message);
+        checkNotNull(targetVersion);
+
         final CommandContext context = createCommandContext(targetVersion);
         final Command result = createCommand(message, context);
         return result;
@@ -127,7 +129,7 @@ public class CommandFactory {
     /**
      * Creates command context for a new command with entity ID.
      */
-    protected CommandContext createCommandContext(@Nullable Integer targetVersion) {
+    protected CommandContext createCommandContext(int targetVersion) {
         return createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
     }
 

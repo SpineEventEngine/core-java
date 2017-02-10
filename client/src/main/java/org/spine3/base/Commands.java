@@ -117,11 +117,10 @@ public class Commands {
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
                                                ZoneOffset zoneOffset,
-                                               @Nullable Integer targetVersion) {
+                                               int targetVersion) {
         final CommandContext.Builder result = getContextBuilder(tenantId, userId, zoneOffset);
-        if (targetVersion != null) {
-            result.setTargetVersion(targetVersion);
-        }
+        result.setTargetVersion(targetVersion);
+
         return result.build();
     }
 
