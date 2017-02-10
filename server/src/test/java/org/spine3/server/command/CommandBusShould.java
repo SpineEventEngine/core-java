@@ -136,7 +136,6 @@ public class CommandBusShould {
         eventBus.close();
     }
 
-
     /*
      * Creation tests.
      *********************/
