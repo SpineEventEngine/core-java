@@ -107,6 +107,25 @@ public class Commands {
         return result.build();
     }
 
+    @Internal
+    public static CommandContext createContext(@Nullable TenantId tenantId,
+                                               UserId userId,
+                                               ZoneOffset zoneOffset, @Nullable Integer targetVersion) {
+        final CommandId commandId = generateId();
+        final CommandContext.Builder result = newBuilder()
+                .setActor(userId)
+                .setTimestamp(getCurrentTime())
+                .setCommandId(commandId)
+                .setZoneOffset(zoneOffset);
+        if (tenantId != null) {
+            result.setTenantId(tenantId);
+        }
+        if (targetVersion != null) {
+            result.setTargetVersion(targetVersion);
+        }
+        return result.build();
+    }
+
     /**
      * Creates a new instance of {@code CommandContext} based on the passed one.
      *

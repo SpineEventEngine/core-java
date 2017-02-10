@@ -56,10 +56,14 @@ public class CommandFactory {
     @Nullable
     private final TenantId tenantId;
 
+    @Nullable
+    private final Integer targetVersion;
+
     protected CommandFactory(Builder builder) {
         this.actor = builder.actor;
         this.zoneOffset = builder.zoneOffset;
         this.tenantId = builder.tenantId;
+        this.targetVersion = builder.targetVersion;
     }
 
     public static Builder newBuilder() {
@@ -92,6 +96,11 @@ public class CommandFactory {
         return tenantId;
     }
 
+    @Nullable
+    public Integer getTargetVersion() {
+        return targetVersion;
+    }
+
     /**
      * Creates new {@code Command} with the passed message.
      *
@@ -108,6 +117,30 @@ public class CommandFactory {
     }
 
     /**
+     * Creates new {@code Command} with the passed message and target entity version.
+     *
+     * <p>The command contains a {@code CommandContext} instance with the current time.
+     *
+     * @param message       the command message
+     * @param targetVersion the ID of the entity for applying commands if {@code null}
+     *                      the commands can be applied to any entity
+     * @return new command instance
+     */
+    public Command create(Message message, @Nullable Integer targetVersion) {
+        checkNotNull(message);
+        final CommandContext context = createCommandContext(targetVersion);
+        final Command result = createCommand(message, context);
+        return result;
+    }
+
+    /**
+     * Creates command context for a new command with entity ID.
+     */
+    protected CommandContext createCommandContext(@Nullable Integer targetVersion) {
+        return createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
+    }
+
+    /**
      * Creates command context for a new command.
      */
     protected CommandContext createCommandContext() {
@@ -119,9 +152,26 @@ public class CommandFactory {
         private ZoneOffset zoneOffset;
         @Nullable
         private TenantId tenantId;
+        @Nullable
+        private Integer targetVersion;
 
         private Builder() {
             // Prevent instantiations from outside.
+        }
+
+        public Integer getTargetVersion() {
+            return targetVersion;
+        }
+
+        /**
+         * Sets the entity ID for which commands will be applied.
+         *
+         * @param targetVersion the ID of the entity for applying commands if {@code null}
+         *                      the commands can be applied to any entity
+         */
+        public Builder setTargetVersion(@Nullable Integer targetVersion) {
+            this.targetVersion = checkNotNull(targetVersion);
+            return this;
         }
 
         public UserId getActor() {
