@@ -95,35 +95,49 @@ public class Commands {
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
                                                ZoneOffset zoneOffset) {
-        final CommandId commandId = generateId();
-        final CommandContext.Builder result = newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .setCommandId(commandId)
-                .setZoneOffset(zoneOffset);
-        if (tenantId != null) {
-            result.setTenantId(tenantId);
-        }
+        final CommandContext.Builder result = getContextBuilder(tenantId, userId, zoneOffset);
         return result.build();
     }
 
+    /**
+     * Creates a new command context with the current time.
+     *
+     * <p>This method is not supposed to be called from outside the framework.
+     * Commands in client applications should be created by {@link CommandFactory#create(Message)},
+     * which creates {@code CommandContext} automatically.
+     *
+     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId        the actor id
+     * @param zoneOffset    the offset of the timezone in which the user works
+     * @param targetVersion the the ID of the entity for applying commands
+     * @return new {@code CommandContext}
+     * @see CommandFactory#create(Message)
+     */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
-                                               ZoneOffset zoneOffset, @Nullable Integer targetVersion) {
-        final CommandId commandId = generateId();
-        final CommandContext.Builder result = newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .setCommandId(commandId)
-                .setZoneOffset(zoneOffset);
-        if (tenantId != null) {
-            result.setTenantId(tenantId);
-        }
+                                               ZoneOffset zoneOffset,
+                                               @Nullable Integer targetVersion) {
+        final CommandContext.Builder result = getContextBuilder(tenantId, userId, zoneOffset);
         if (targetVersion != null) {
             result.setTargetVersion(targetVersion);
         }
         return result.build();
+    }
+
+    private static CommandContext.Builder getContextBuilder(@Nullable TenantId tenantId,
+                                                            UserId userId,
+                                                            ZoneOffset zoneOffset) {
+        final CommandId commandId = generateId();
+        final CommandContext.Builder result = newBuilder()
+                .setActor(userId)
+                .setTimestamp(getCurrentTime())
+                .setCommandId(commandId)
+                .setZoneOffset(zoneOffset);
+        if (tenantId != null) {
+            result.setTenantId(tenantId);
+        }
+        return result;
     }
 
     /**
@@ -138,8 +152,8 @@ public class Commands {
     public static CommandContext newContextBasedOn(CommandContext commandContext) {
         checkNotNull(commandContext);
         final CommandContext.Builder result = commandContext.toBuilder()
-                .setCommandId(generateId())
-                .setTimestamp(getCurrentTime());
+                                                            .setCommandId(generateId())
+                                                            .setTimestamp(getCurrentTime());
         return result.build();
     }
 
@@ -159,8 +173,8 @@ public class Commands {
 
         final Any packed = AnyPacker.pack(message);
         final Command.Builder result = Command.newBuilder()
-                                               .setMessage(packed)
-                                               .setContext(context);
+                                              .setMessage(packed)
+                                              .setContext(context);
         return result.build();
     }
 
@@ -317,7 +331,9 @@ public class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        return  c1.getActor().equals(c2.getActor()) &&
-                c1.getTenantId().equals(c2.getTenantId());
+        return c1.getActor()
+                 .equals(c2.getActor()) &&
+                c1.getTenantId()
+                  .equals(c2.getTenantId());
     }
 }

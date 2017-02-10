@@ -56,14 +56,10 @@ public class CommandFactory {
     @Nullable
     private final TenantId tenantId;
 
-    @Nullable
-    private final Integer targetVersion;
-
     protected CommandFactory(Builder builder) {
         this.actor = builder.actor;
         this.zoneOffset = builder.zoneOffset;
         this.tenantId = builder.tenantId;
-        this.targetVersion = builder.targetVersion;
     }
 
     public static Builder newBuilder() {
@@ -94,11 +90,6 @@ public class CommandFactory {
     @Nullable
     public TenantId getTenantId() {
         return tenantId;
-    }
-
-    @Nullable
-    public Integer getTargetVersion() {
-        return targetVersion;
     }
 
     /**
@@ -152,26 +143,8 @@ public class CommandFactory {
         private ZoneOffset zoneOffset;
         @Nullable
         private TenantId tenantId;
-        @Nullable
-        private Integer targetVersion;
-
         private Builder() {
             // Prevent instantiations from outside.
-        }
-
-        public Integer getTargetVersion() {
-            return targetVersion;
-        }
-
-        /**
-         * Sets the entity ID for which commands will be applied.
-         *
-         * @param targetVersion the ID of the entity for applying commands if {@code null}
-         *                      the commands can be applied to any entity
-         */
-        public Builder setTargetVersion(@Nullable Integer targetVersion) {
-            this.targetVersion = checkNotNull(targetVersion);
-            return this;
         }
 
         public UserId getActor() {

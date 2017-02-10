@@ -114,6 +114,13 @@ public class CommandFactoryShould {
     }
 
     @Test
+    public void create_new_instance_with_entity_version() {
+        final Command command = commandFactory.create(StringValue.getDefaultInstance(), 2);
+
+        assertEquals(2, command.getContext().getTargetVersion());
+    }
+
+    @Test
     public void set_tenant_ID_in_commands_when_created_with_tenant_ID() {
         final TenantId tenantId = TenantId.newBuilder()
                                           .setValue(getClass().getSimpleName())

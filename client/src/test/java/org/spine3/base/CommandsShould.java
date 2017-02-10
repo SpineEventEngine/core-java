@@ -35,6 +35,7 @@ import org.spine3.protobuf.Durations;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
+import org.spine3.users.TenantId;
 
 import java.util.List;
 
@@ -42,8 +43,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.getId;
+import static org.spine3.base.Commands.newContextBasedOn;
+import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations.seconds;
@@ -52,6 +56,7 @@ import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
@@ -59,6 +64,11 @@ public class CommandsShould {
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
     private final StringValue stringValue = newStringValue(newUuid());
+
+    @Test
+    public void have_private_ctor() {
+        assertTrue(hasPrivateParameterlessCtor(Commands.class));
+    }
 
     @Test
     public void sort() {
@@ -75,8 +85,22 @@ public class CommandsShould {
     }
 
     @Test
-    public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Commands.class));
+    public void create_new_context_based_on_passed() {
+        final CommandContext commandContext = createCommandContext();
+        final CommandContext newContext = newContextBasedOn(commandContext);
+
+        assertNotEquals(commandContext.getCommandId(), newContext.getCommandId());
+        assertNotEquals(commandContext.getTimestamp(), newContext.getTimestamp());
+    }
+
+    @Test
+    public void check_if_contexts_have_same_actor_and_tenantId() {
+        final CommandContext commandContext = CommandContext.newBuilder()
+                                                            .setActor(newUserUuid())
+                                                            .setTenantId(TenantId.getDefaultInstance())
+                                                            .build();
+
+        assertTrue(sameActorAndTenant(commandContext, commandContext));
     }
 
     @Test

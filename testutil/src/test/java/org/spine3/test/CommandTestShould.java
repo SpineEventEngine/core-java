@@ -107,12 +107,9 @@ public class CommandTestShould {
 
     @Test
     public void have_empty_state_before_command_creation() {
-        assertFalse(commandTest.commandMessage()
-                               .isPresent());
-        assertFalse(commandTest.commandContext()
-                               .isPresent());
-        assertFalse(commandTest.command()
-                               .isPresent());
+        assertFalse(commandTest.commandMessage().isPresent());
+        assertFalse(commandTest.commandContext().isPresent());
+        assertFalse(commandTest.command().isPresent());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals are initialized.
@@ -121,12 +118,9 @@ public class CommandTestShould {
         final StringValue commandMessage = newUuidValue();
         final Command command = commandTest.createCommand(commandMessage);
 
-        assertEquals(commandMessage, commandTest.commandMessage()
-                                                .get());
-        assertEquals(command.getContext(), commandTest.commandContext()
-                                                      .get());
-        assertEquals(command, commandTest.command()
-                                         .get());
+        assertEquals(commandMessage, commandTest.commandMessage().get());
+        assertEquals(command.getContext(), commandTest.commandContext().get());
+        assertEquals(command, commandTest.command().get());
     }
 
     @Test
@@ -135,8 +129,7 @@ public class CommandTestShould {
         final Timestamp timestamp = Timestamps.minutesAgo(5);
         final Command command = commandTest.createCommand(commandMessage, timestamp);
 
-        assertEquals(timestamp, command.getContext()
-                                       .getTimestamp());
+        assertEquals(timestamp, command.getContext().getTimestamp());
     }
 
     @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
