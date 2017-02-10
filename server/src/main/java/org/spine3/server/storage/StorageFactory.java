@@ -23,17 +23,15 @@ package org.spine3.server.storage;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link CommandStore}, {@link EventStore}, and {@link Stand}.
+ * {@link org.spine3.server.command.CommandStore}, {@link org.spine3.server.event.EventStore},
+ * and {@link org.spine3.server.stand.Stand}.
  *
  * @author Alexander Yevsyukov
  */
