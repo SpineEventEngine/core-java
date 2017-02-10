@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -222,7 +221,7 @@ public class BoundedContextShould {
         verify(stand).registerTypeSupplier(eq(repository));
     }
 
-    /** Returns {@link Mockito#any()} matcher for response observer. */
+    /** Returns {@link org.mockito.Mockito#any()} matcher for response observer. */
     @SuppressWarnings("unchecked")
     private static StreamObserver<Response> anyResponseObserver() {
         return (StreamObserver<Response>) any();
