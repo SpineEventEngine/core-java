@@ -32,6 +32,9 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -55,7 +58,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
- * Utility for creating simple stubs for generated messages.
+ * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and {@link Command}),
+ * storage objects and else.
  *
  * @author Dmytro Dashenkov
  */
@@ -124,6 +128,19 @@ public class Sample {
         final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
+    }
+
+    public static Command commandOfType(Class<? extends Message> commandClass) {
+        final CommandContext commandContext = TestCommandContextFactory.createCommandContext();
+        final Message commandMessage = messageOfType(commandClass);
+        final Command command = Commands.createCommand(commandMessage, commandContext);
+        return command;
+    }
+
+    public static Command command(Message commandMessage) {
+        final CommandContext commandContext = TestCommandContextFactory.createCommandContext();
+        final Command command = Commands.createCommand(commandMessage, commandContext);
+        return command;
     }
 
     /**

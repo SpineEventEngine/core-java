@@ -125,7 +125,7 @@ public class ProjectionRepositoryShould
         final List<TestProjection> projections = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final TestProjection projection = org.spine3.test.Given.projectionOfClass(TestProjection.class)
+            final TestProjection projection = Given.projectionOfClass(TestProjection.class)
                                                                    .withId(createId(i))
                                                                    .build();
             projections.add(projection);
