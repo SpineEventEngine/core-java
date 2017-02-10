@@ -90,7 +90,6 @@ public class CommandsShould {
         final CommandContext newContext = newContextBasedOn(commandContext);
 
         assertNotEquals(commandContext.getCommandId(), newContext.getCommandId());
-        assertNotEquals(commandContext.getTimestamp(), newContext.getTimestamp());
     }
 
     @Test
