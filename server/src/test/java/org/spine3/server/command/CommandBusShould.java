@@ -106,12 +106,10 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        final Log log = spy(new Log());
         commandBus = CommandBus.newBuilder()
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setThreadSpawnAllowed(true)
-                               .setLog(log)
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
