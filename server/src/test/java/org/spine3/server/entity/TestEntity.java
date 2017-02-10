@@ -33,8 +33,6 @@ import static org.spine3.base.Identifiers.newUuid;
  */
 class TestEntity extends Entity<String, Project> {
 
-    private boolean isValidateMethodCalled = false;
-
     static TestEntity newInstance(String id) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
                                        .withId(id)
@@ -62,15 +60,5 @@ class TestEntity extends Entity<String, Project> {
 
     private TestEntity(String id) {
         super(id);
-    }
-
-    @Override
-    protected void validate(Project state) throws IllegalStateException {
-        super.validate(state);
-        isValidateMethodCalled = true;
-    }
-
-    boolean isValidateMethodCalled() {
-        return isValidateMethodCalled;
     }
 }
