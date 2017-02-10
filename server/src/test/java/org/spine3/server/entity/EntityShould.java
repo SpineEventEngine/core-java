@@ -28,6 +28,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+import org.spine3.testdata.Sample;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 
@@ -47,15 +48,15 @@ import static org.spine3.test.Tests.currentTimeSeconds;
  */
 public class EntityShould {
 
-    private Project state = Given.newProject();
-    private Given.TestEntity entityNew;
-    private Given.TestEntity entityWithState;
+    private Project state = Sample.messageOfType(Project.class);
+    private TestEntity entityNew;
+    private TestEntity entityWithState;
 
     @Before
     public void setUp() {
-        state = Given.newProject();
-        entityNew = Given.TestEntity.newInstance(newUuid());
-        entityWithState = Given.TestEntity.withState();
+        state = Sample.messageOfType(Project.class);
+        entityNew = TestEntity.newInstance(newUuid());
+        entityWithState = TestEntity.withState();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
@@ -83,7 +84,7 @@ public class EntityShould {
     public void set_id_in_constructor() {
         final String id = newUuid();
 
-        final Given.TestEntity entity = Given.TestEntity.newInstance(id);
+        final TestEntity entity = TestEntity.newInstance(id);
 
         assertEquals(id, entity.getId());
     }
@@ -177,7 +178,7 @@ public class EntityShould {
 
     @Test
     public void return_id_class() {
-        final Class<String> actual = Entity.getIdClass(Given.TestEntity.class);
+        final Class<String> actual = Entity.getIdClass(TestEntity.class);
 
         assertEquals(String.class, actual);
     }
@@ -216,7 +217,7 @@ public class EntityShould {
 
     @Test
     public void generate_unique_hash_code_for_different_instances() {
-        final Given.TestEntity another = Given.TestEntity.withState();
+        final TestEntity another = TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
@@ -231,7 +232,7 @@ public class EntityShould {
     private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
-            super(Given.AggregateId.newProjectId());
+            super(Sample.messageOfType(ProjectId.class));
         }
     }
 

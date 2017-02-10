@@ -20,8 +20,6 @@
 
 package org.spine3.testdata;
 
-import com.google.common.base.Enums;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
@@ -54,7 +52,6 @@ import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
@@ -251,7 +248,7 @@ public class Sample {
         }
     }
 
-    private static Enum enumValueFor(FieldDescriptor field, Random random) {
+    private static Object enumValueFor(FieldDescriptor field, Random random) {
         final Descriptors.EnumDescriptor descriptor = field.getEnumType();
         final List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
         if (enumValues.isEmpty()) {
@@ -262,14 +259,7 @@ public class Sample {
         // Use values with indexes from 1 to n
         final int index = random.nextInt(enumValues.size() - 1) + 1;
         final Descriptors.EnumValueDescriptor enumValue = descriptor.findValueByNumber(index);
-
-        final String enumValueName = enumValue.getName();
-        final TypeUrl enumType = TypeUrl.from(descriptor);
-        final Class<? extends Enum> enumClass = classFor(enumType);
-
-        final Optional<? extends Enum> enumField = Enums.getIfPresent(enumClass, enumValueName);
-        checkState(enumField.isPresent());
-        return enumField.get();
+        return enumValue;
     }
 
     private static Message messageValueFor(FieldDescriptor field) {
