@@ -31,7 +31,6 @@ import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.TypeName;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -46,9 +45,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
-import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -217,43 +214,6 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Creates a formatted string with type and ID of the passed command.
-     *
-     * <p>The {@code format} string must have two {@code %s} format specifiers.
-     * The first specifier is for command type name. The second is for command ID.
-     *
-     * @param format  the format string with two parameters
-     * @param command the command to log
-     * @return formatted string
-     */
-    public static String formatCommandTypeAndId(String format, Command command) {
-        final CommandId commandId = getId(command);
-        final Message commandMessage = getMessage(command);
-        final String msg = formatMessageTypeAndId(format, commandMessage, commandId);
-        return msg;
-    }
-
-    /**
-     * Creates a formatted string with type of the command message and command ID.
-     *
-     * <p>The {@code format} string must have two {@code %s} format specifiers.
-     * The first specifier is for message type name. The second is for command ID.
-     *
-     * @param format    the format string
-     * @param commandId the ID of the command
-     * @return formatted string
-     */
-    public static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
-        checkNotNull(format);
-        checkNotEmptyOrBlank(format, "format string");
-
-        final String cmdType = TypeName.of(commandMessage);
-        final String id = idToString(commandId);
-        final String result = String.format(format, cmdType, id);
-        return result;
     }
 
     /**

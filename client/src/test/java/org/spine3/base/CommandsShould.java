@@ -32,7 +32,6 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.TypeName;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
@@ -147,29 +146,6 @@ public class CommandsShould {
 
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
-    }
-
-    @Test
-    public void create_logging_message_for_command_with_type_and_id() {
-        final Command command = commandFactory.create(stringValue);
-        final String typeName = TypeName.ofCommand(command);
-        final String commandId = idToString(getId(command));
-
-        @SuppressWarnings("QuestionableName") // is OK for this test.
-        final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);
-
-        assertTrue(string.contains(typeName));
-        assertTrue(string.contains(commandId));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_create_logging_message_and_format_string_is_empty() {
-        Commands.formatCommandTypeAndId("", commandFactory.create(stringValue));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
-        Commands.formatCommandTypeAndId("  ", commandFactory.create(stringValue));
     }
 
     @Test
