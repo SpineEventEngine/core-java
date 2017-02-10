@@ -20,7 +20,6 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
 import org.spine3.protobuf.TypeUrl;
@@ -34,7 +33,7 @@ import org.spine3.server.storage.RecordStorage;
  * <p>Used by an instance of {@link Stand} to optimize the {@code Aggregate} state fetch performance.
  *
  * @author Alex Tymchenko
- * @see Any#getTypeUrl()
+ * @see com.google.protobuf.Any#getTypeUrl()
  * @see Stand
  */
 @SPI
@@ -48,7 +47,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * Reads all the state records by the given type.
      *
      * @param type a {@link TypeUrl} instance
-     * @return the state records which {@link Any#getTypeUrl()} equals the argument value
+     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl()} equals the argument value
      */
     public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type);
 
@@ -56,7 +55,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * Reads all the state records by the given type.
      *
      * @param type a {@link TypeUrl} instance
-     * @return the state records which {@link Any#getTypeUrl()} equals the argument value
+     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl()} equals the argument value
      */
     public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
 }
