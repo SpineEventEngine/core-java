@@ -20,15 +20,12 @@
 
 package org.spine3.protobuf.error;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-
 /**
- * Exception thrown when the content of {@link Any} does not match one we expect
+ * Exception thrown when the content of {@link com.google.protobuf.Any} does not match one we expect
  * when unpacking.
  *
- * <p>Typically this exception wraps {@link InvalidProtocolBufferException} thrown
- * in unsuccessful call of {@link Any#unpack(Class)}.
+ * <p>Typically this exception wraps {@link com.google.protobuf.InvalidProtocolBufferException} thrown
+ * in unsuccessful call of {@link com.google.protobuf.Any#unpack(Class)}.
  *
  * @author Alexander Yevsyukov
  */
