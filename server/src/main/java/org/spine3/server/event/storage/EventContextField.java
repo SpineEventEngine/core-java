@@ -21,6 +21,7 @@
 package org.spine3.server.event.storage;
 
 import org.spine3.SPI;
+import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
@@ -35,9 +36,25 @@ import org.spine3.server.storage.StorageField;
 @SPI
 public enum EventContextField implements StorageField {
 
+    /**
+     * A field representing the {@link EventContext#getEventId() event ID} stored in the {@link EventContext}.
+     */
     context_event_id,
+
+    /**
+     * A field representing the {@link EventContext#getTimestamp() event posting time}.
+     */
     context_timestamp,
+
+    /**
+     * A field representing the serialized {@link CommandContext}. This is not the only ay to store it, but it's
+     * acceptable.
+     */
     context_of_command,
+
+    /**
+     * A field representing the {@link EventContext#getVersion() producer entity version}.
+     */
     context_version
 
 }

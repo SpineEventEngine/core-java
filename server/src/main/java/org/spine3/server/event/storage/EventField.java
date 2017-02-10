@@ -21,6 +21,9 @@
 package org.spine3.server.event.storage;
 
 import org.spine3.SPI;
+import org.spine3.base.Event;
+import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
 
@@ -33,8 +36,26 @@ import org.spine3.server.storage.StorageField;
 @SPI
 public enum EventField implements StorageField {
 
+    /**
+     * A field representing the string representation of the  {@link EventStorageRecord#getProducerId() producer ID}
+     * of an event.
+     *
+     * <p>Typically, it's an ID of the {@link Aggregate} that produced the {@linkplain Event}.
+     */
     producer_id,
+
+    /**
+     * A field representing the {@link EventStorageRecord#getEventId() event ID}.
+     *
+     * <p>An event ID is a protobuf-message type, though the {@link EventStorageRecord#getEventId()} returns its string
+     * representation. This as what is stored in this field indeed.
+     */
     event_id,
+
+    /**
+     * A field representing the type of an {@linkplain Event} message e.g. as a {@link TypeUrl}. This may be needed for
+     * the serialization purposes.
+     */
     event_type
 
 }

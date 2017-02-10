@@ -20,20 +20,61 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
+import org.spine3.base.Command;
+import org.spine3.base.Event;
+import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.Entity;
 
 /**
  * A container for the storage fields used in multiple {@link Storage storages}.
+ *
+ * <p>Basic usage is:
+ * <ul>
+ *     <li>Storing custom {@link Entity} state fields.
+ *     <li>Storing custom {@link Event} and {@link Command} messages fields.
+ * </ul>
  *
  * @author Dmytro Dashenkov
  * @see StorageField
  */
 @SPI
-public enum EntityField {
+public enum EntityField implements StorageField {
 
+    /**
+     * A field representing a timestamp in seconds.
+     *
+     * @see Timestamp#getSeconds()
+     */
     timestamp,
+
+    /**
+     * A field for storing the part of a timestamp representing the amount of nanoseconds which is less then
+     * {@link org.spine3.protobuf.Timestamps#NANOS_PER_SECOND 10^9}.
+     *
+     * @see Timestamp#getNanos()
+     */
     timestamp_nanos,
+
+    /**
+     * A field for storing the serialized {@link Message} bytes. This is the way to store objects of custom types within
+     * a strongly-typed storage (e.g. relational database) and make the read/write operations easy requiring
+     * no reflection.
+     *
+     * @see Message#toByteArray()
+     * @see Any#getValue()
+     */
     value,
+
+    /**
+     * A field representing a {@link TypeUrl} of a certain {@link Message} type. This field is commonly used in pair
+     * with {@link EntityField#value} to store the fully qualified type name with the type prefix.
+     *
+     * @see TypeUrl
+     */
     type_url
 
 }

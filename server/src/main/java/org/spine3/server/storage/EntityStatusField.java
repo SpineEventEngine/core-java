@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.status.EntityStatus;
 
 /**
@@ -30,8 +31,19 @@ import org.spine3.server.entity.status.EntityStatus;
  * @see StorageField
  */
 @SPI
-public enum EntityStatusField {
+public enum EntityStatusField implements StorageField {
 
+    /**
+     * A {@linkplain boolean} field representing weather the relevant record is {@code archived} or not.
+     *
+     * @see Repository#markArchived
+     */
     archived,
+
+    /**
+     * A {@linkplain boolean} field representing weather the relevant record is {@code deleted} or not.
+     *
+     * @see Repository#markDeleted
+     */
     deleted
 }
