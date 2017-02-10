@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
+import org.spine3.test.Given;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +44,7 @@ public class ProjectionShould {
 
     @Before
     public void setUp() {
-        projection = org.spine3.test.Given.projectionOfClass(TestProjection.class)
+        projection = Given.projectionOfClass(TestProjection.class)
                                           .withId(newUuid())
                                           .withVersion(1)
                                           .withState(newStringValue("Initial state"))
