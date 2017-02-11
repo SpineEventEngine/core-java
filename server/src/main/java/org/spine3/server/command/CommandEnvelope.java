@@ -60,23 +60,23 @@ final class CommandEnvelope {
         this.commandClass = CommandClass.of(commandMessage);
     }
 
-    public Command getCommand() {
+    Command getCommand() {
         return command;
     }
 
-    public CommandId getCommandId() {
+    CommandId getCommandId() {
         return commandId;
     }
 
-    public Message getCommandMessage() {
+    Message getCommandMessage() {
         return commandMessage;
     }
 
-    public CommandContext getCommandContext() {
+    CommandContext getCommandContext() {
         return command.getContext();
     }
 
-    public CommandClass getCommandClass() {
+    CommandClass getCommandClass() {
         return commandClass;
     }
 
