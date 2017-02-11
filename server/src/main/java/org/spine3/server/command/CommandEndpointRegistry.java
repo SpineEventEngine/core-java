@@ -34,7 +34,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  *
  * @author Alexander Yevsyukov
  */
-class CommandEndpointManager {
+class CommandEndpointRegistry {
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();

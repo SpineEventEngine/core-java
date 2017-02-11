@@ -58,7 +58,7 @@ public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
 
-    private final CommandEndpointManager commandEndpoints = new CommandEndpointManager();
+    private final CommandEndpointRegistry commandEndpoints = new CommandEndpointRegistry();
 
     private final CommandStore commandStore;
 
@@ -257,6 +257,7 @@ public class CommandBus implements AutoCloseable {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
+        //TODO:2017-02-11:alexander.yevsyukov: Restore previous tenant in `finally`
 
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
