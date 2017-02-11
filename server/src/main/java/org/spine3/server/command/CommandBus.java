@@ -234,6 +234,9 @@ public class CommandBus implements AutoCloseable {
      * @param responseObserver the observer to return the result of the call
      */
     public void post(Command command, StreamObserver<Response> responseObserver) {
+        checkNotNull(command);
+        checkNotNull(responseObserver);
+
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         final CommandClass commandClass = commandEnvelope.getCommandClass();
 

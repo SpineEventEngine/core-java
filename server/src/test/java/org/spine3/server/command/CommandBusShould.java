@@ -242,6 +242,15 @@ public class CommandBusShould {
     /*
      * Command processing tests.
      ***************************/
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_command() {
+        commandBus.post(Tests.<Command>nullRef(), responseObserver);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_observer() {
+        commandBus.post(Given.Command.createProject(), Tests.<StreamObserver<Response>>nullRef());
+    }
 
     @Test
     public void post_command_and_return_OK_response() {
