@@ -52,7 +52,7 @@ public class EntityEqualsShould {
 
     @Test
     public void assure_same_entities_are_equal() {
-        final TestEntity another = TestEntity.withState(entity);
+        final TestEntity another = TestEntity.withStateOf(entity);
 
         assertTrue(entity.equals(another));
     }
@@ -84,7 +84,7 @@ public class EntityEqualsShould {
 
     @Test
     public void assure_entities_with_different_states_are_not_equal() {
-        final TestEntity another = TestEntity.withState(entity);
+        final TestEntity another = TestEntity.withStateOf(entity);
         another.setState(Sample.messageOfType(Project.class), another.getVersion(), another.whenModified());
 
         assertNotEquals(entity.getState(), another.getState());
@@ -93,7 +93,7 @@ public class EntityEqualsShould {
 
     @Test
     public void assure_entities_with_different_versions_are_not_equal() {
-        final TestEntity another = TestEntity.withState(entity);
+        final TestEntity another = TestEntity.withStateOf(entity);
         another.setVersion(entity.getVersion() + 5, another.whenModified());
 
         assertFalse(entity.equals(another));
@@ -101,7 +101,7 @@ public class EntityEqualsShould {
 
     @Test
     public void assure_entities_with_different_modification_times_are_not_equal() {
-        final TestEntity another = TestEntity.withState(entity);
+        final TestEntity another = TestEntity.withStateOf(entity);
         another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
 
         assertNotEquals(entity.whenModified(), another.whenModified());

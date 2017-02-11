@@ -49,7 +49,7 @@ class TestEntity extends Entity<String, Project> {
         return result;
     }
 
-    static TestEntity withState(TestEntity entity) {
+    static TestEntity withStateOf(TestEntity entity) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
                                                        .withId(entity.getId())
                                                        .withState(entity.getState())
