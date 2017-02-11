@@ -355,6 +355,19 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
+    /**
+     * Closes the instance for further posting of commands.
+     *
+     * <p>The following operations are performed:
+     * <ol>
+     *     <li>All command handlers and dispatchers are un-registered.
+     *     <li>{@code CommandStore} is closed.
+     *     <li>{@code CommandScheduler} is shut down.
+     * </ol>
+     * <li>
+     *
+     * @throws Exception if closing the {@code CommandStore} cases an exception
+     */
     @Override
     public void close() throws Exception {
         commandEndpoints.unregisterAll();
