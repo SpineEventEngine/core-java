@@ -61,6 +61,11 @@ public class CommandEndpointRegistryShould {
     private EventBus eventBus;
     private CreateProjectHandler createProjectHandler;
 
+    /**
+     * The object we test.
+     */
+    private CommandEndpointRegistry registry;
+
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
@@ -72,6 +77,8 @@ public class CommandEndpointRegistryShould {
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         createProjectHandler = new CreateProjectHandler(newUuid());
+
+        registry = new CommandEndpointRegistry();
     }
 
     @After
@@ -85,9 +92,11 @@ public class CommandEndpointRegistryShould {
 
     @SafeVarargs
     private final void assertSupported(Class<? extends Message>... cmdClasses) {
+        final Set<CommandClass> supportedClasses = registry.getSupportedCommandClasses();
+
         for (Class<? extends Message> clazz : cmdClasses) {
             final CommandClass cmdClass = CommandClass.of(clazz);
-            assertTrue(commandBus.isSupportedCommand(cmdClass));
+            assertTrue(supportedClasses.contains(cmdClass));
         }
     }
 
@@ -99,18 +108,19 @@ public class CommandEndpointRegistryShould {
         }
     }
 
-    //TODO:2017-02-11:alexander.yevsyukov: Test removing dispatchers too.
-    @Test
-    public void remove_all_handlers_on_close() throws Exception {
-        commandBus.register(createProjectHandler);
-
-        commandBus.close();
-        assertNotSupported(CreateProject.class);
-    }
-
     /*
      * Registration tests.
      *********************/
+    @Test
+    public void remove_all_handlers_and_dispatchers() {
+        // Pass real objects. We cannot use mocks because we need declared methods.
+        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new AddTaskDispatcher());
+
+        registry.unregisterAll();
+
+        assertTrue(registry.getSupportedCommandClasses().isEmpty());
+    }
 
     @Test
     public void state_that_no_commands_are_supported_if_nothing_registered() {
@@ -119,7 +129,7 @@ public class CommandEndpointRegistryShould {
 
     @Test
     public void register_command_dispatcher() {
-        commandBus.register(new AllCommandDispatcher());
+        registry.register(new AllCommandDispatcher());
 
         assertSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
@@ -136,7 +146,7 @@ public class CommandEndpointRegistryShould {
 
     @Test
     public void register_command_handler() {
-        commandBus.register(new AllCommandHandler());
+        registry.register(new AllCommandHandler());
 
         assertSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
@@ -202,8 +212,8 @@ public class CommandEndpointRegistryShould {
 
     @Test
     public void validate_commands_both_dispatched_and_handled() {
-        commandBus.register(createProjectHandler);
-        commandBus.register(new AddTaskDispatcher());
+        registry.register(createProjectHandler);
+        registry.register(new AddTaskDispatcher());
 
         assertSupported(CreateProject.class, AddTask.class);
     }
