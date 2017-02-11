@@ -35,6 +35,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -159,11 +161,39 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         assertEquals(mainThreadName, actualThreadName);
     }
 
-    private void storeSingleCommandForRescheduling() {
+    @Test
+    public void post_previously_scheduled_command() {
+        CommandBus spy = spy(commandBus);
+        spy.register(createProjectHandler);
+        Command command = storeSingleCommandForRescheduling();
+
+        spy.postPreviouslyScheduled(command);
+
+        verify(spy).doPost(eq(new CommandEnvelope(command)), any(CommandEndpoint.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void reject_previously_scheduled_command_if_no_endpoint_found() {
+        Command command = storeSingleCommandForRescheduling();
+        commandBus.postPreviouslyScheduled(command);
+    }
+    /*
+     * Utility methods
+     ********************/
+
+    private static Command createScheduledCommand() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
-        final Command cmdWithSchedule = setSchedule(createProject(), delayPrimary, schedulingTime);
+        return setSchedule(createProject(), delayPrimary, schedulingTime);
+    }
+
+    /**
+     * Creates and stores one scheduled command.
+     */
+    private Command storeSingleCommandForRescheduling() {
+        final Command cmdWithSchedule = createScheduledCommand();
         commandStore.store(cmdWithSchedule, SCHEDULED);
+        return cmdWithSchedule;
     }
 
     /**
@@ -184,10 +214,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
             }
         });
     }
-
-    /*
-     * Utility methods
-     ********************/
 
     private void storeAsScheduled(Iterable<Command> commands, Duration delay, Timestamp schedulingTime) {
         for (Command cmd : commands) {

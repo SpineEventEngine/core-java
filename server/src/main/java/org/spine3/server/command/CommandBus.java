@@ -275,16 +275,13 @@ public class CommandBus implements AutoCloseable {
     /**
      * Passes a previously scheduled command to corresponding endpoint.
      */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // We are sure that we have an endpoint because this command passed checking in CommandBus.post().
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
         if (!endpoint.isPresent()) {
             throw noEndpointFound(commandEnvelope);
         }
-        final CommandEndpoint endpointVar = endpoint.get();
-        doPost(commandEnvelope, endpointVar);
+        doPost(commandEnvelope, endpoint.get());
     }
 
     private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
