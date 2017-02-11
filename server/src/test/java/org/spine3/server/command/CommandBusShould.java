@@ -152,14 +152,12 @@ public class CommandBusShould {
         assertEquals(expectedScheduler, actualScheduler);
     }
 
-
-
-    @Test // To improve coverage stats.
+    @Test
     public void have_log() {
         assertNotNull(Log.log());
     }
 
-    @Test // To improve coverage stats.
+    @Test
     public void have_command_status_service() {
         assertNotNull(commandBus.getCommandStatusService());
     }
@@ -242,6 +240,7 @@ public class CommandBusShould {
     /*
      * Command processing tests.
      ***************************/
+    
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_command() {
         commandBus.post(Tests.<Command>nullRef(), responseObserver);
@@ -250,6 +249,11 @@ public class CommandBusShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_observer() {
         commandBus.post(Given.Command.createProject(), Tests.<StreamObserver<Response>>nullRef());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_default_command() {
+        commandBus.post(Command.getDefaultInstance(), responseObserver);
     }
 
     @Test

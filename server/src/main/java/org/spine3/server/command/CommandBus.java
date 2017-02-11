@@ -41,9 +41,11 @@ import org.spine3.util.Environment;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -236,6 +238,7 @@ public class CommandBus implements AutoCloseable {
     public void post(Command command, StreamObserver<Response> responseObserver) {
         checkNotNull(command);
         checkNotNull(responseObserver);
+        checkArgument(isNotDefault(command));
 
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         final CommandClass commandClass = commandEnvelope.getCommandClass();
