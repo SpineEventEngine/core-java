@@ -37,8 +37,10 @@ import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
+import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -259,16 +261,35 @@ public class CommandBus implements AutoCloseable {
             scheduleAndStore(command, responseObserver);
             return;
         }
+
+        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        @Nullable
+        final TenantId rememberTenant = currentTenant.isPresent()
+                                        ? currentTenant.get()
+                                        : null;
+
         if (isMultitenant) {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
-        //TODO:2017-02-11:alexander.yevsyukov: Restore previous tenant in `finally`
-
-        commandStore.store(command);
-        responseObserver.onNext(Responses.ok());
-        doPost(commandEnvelope, commandEndpoint.get());
-        responseObserver.onCompleted();
+        try {
+            commandStore.store(command);
+            responseObserver.onNext(Responses.ok());
+            doPost(commandEnvelope, commandEndpoint.get());
+            responseObserver.onCompleted();
+        } finally {
+//TODO:2017-02-11:alexander.yevsyukov: Uncomment when support for setting current tenant is made in repositories.
+// Make sure to update CommandBusShould.post_command_and_set_current_tenant_if_multitenant()
+// with checking that the tenant is set and restored. This cannot be done using Mockito. We need PowerMock for this.
+// See more at:
+//    http://stackoverflow.com/questions/21105403/mocking-static-methods-with-mockito
+//    https://github.com/powermock/powermock/wiki/MockitoUsage
+//            if (rememberTenant != null) {
+//                CurrentTenant.set(rememberTenant);
+//            } else {
+//                CurrentTenant.clear();
+//            }
+        }
     }
 
     /**

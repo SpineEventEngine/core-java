@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -50,6 +51,7 @@ import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.users.TenantId;
 
 import java.util.List;
 import java.util.Set;
@@ -265,6 +267,7 @@ public class CommandBusShould {
         assertResponseOkAndCompleted(responseObserver);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // we check in assertion
     @Test
     public void post_command_and_set_current_tenant_if_multitenant() {
         commandBus.setMultitenant(true);
@@ -273,8 +276,10 @@ public class CommandBusShould {
 
         commandBus.post(cmd, responseObserver);
 
+        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        assertTrue(currentTenant.isPresent());
         assertEquals(cmd.getContext()
-                        .getTenantId(), CurrentTenant.get());
+                        .getTenantId(), currentTenant.get());
     }
 
     @Test
@@ -283,7 +288,7 @@ public class CommandBusShould {
 
         commandBus.post(Given.Command.createProject(), responseObserver);
 
-        assertNull(CurrentTenant.get());
+        assertFalse(CurrentTenant.get().isPresent());
     }
 
     @Test
