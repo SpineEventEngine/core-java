@@ -105,8 +105,9 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
         final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
-        singleCommandForRescheduling();
+        storeSingleCommandForRescheduling();
 
+        // Create CommandBus specific for this test.
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
@@ -126,7 +127,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(1)).schedule(commandCaptor.capture());
 
-        // and the call has been made for a thread, different than main thread.
+        // and the call has been made for a thread, different than the main thread.
         final String actualThreadName = threadNameUponScheduling.toString();
         assertNotNull(actualThreadName);
         assertNotEquals(mainThreadName, actualThreadName);
@@ -137,8 +138,9 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
         final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
-        singleCommandForRescheduling();
+        storeSingleCommandForRescheduling();
 
+        // Create CommandBus specific for this test.
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
                                                 .setCommandScheduler(scheduler)
@@ -151,13 +153,13 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(1)).schedule(commandCaptor.capture());
 
-        // and the call has been made for a thread, different than main thread.
+        // and the call has been made in the main thread (as spawning is not allowed).
         final String actualThreadName = threadNameUponScheduling.toString();
         assertNotNull(actualThreadName);
         assertEquals(mainThreadName, actualThreadName);
     }
 
-    private void singleCommandForRescheduling() {
+    private void storeSingleCommandForRescheduling() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
         final Command cmdWithSchedule = setSchedule(createProject(), delayPrimary, schedulingTime);
@@ -172,7 +174,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
      * @param targetThreadName the builder of the thread name that will be created upon command scheduling
      * @return newly created instance
      */
-    @SuppressWarnings("MethodMayBeStatic")
+    @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
     private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName) {
         return spy(new ExecutorCommandScheduler() {
             @Override
