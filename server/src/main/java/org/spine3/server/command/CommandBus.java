@@ -199,7 +199,7 @@ public class CommandBus implements AutoCloseable {
      * @param dispatcher the dispatcher to unregister
      */
     public void unregister(CommandDispatcher dispatcher) {
-        commandEndpoints.undregister(checkNotNull(dispatcher));
+        commandEndpoints.unregister(checkNotNull(dispatcher));
     }
 
     /**

@@ -88,12 +88,12 @@ class Given {
         }
 
         public static org.spine3.base.Command createProject(Duration delay) {
-            final org.spine3.base.Command cmd = Commands.createCommand(CommandMessage.createProject(), createCommandContext(delay));
+            final org.spine3.base.Command cmd = Commands.createCommand(CommandMessage.createProjectMessage(), createCommandContext(delay));
             return cmd;
         }
 
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-            final CreateProject command = CommandMessage.createProject(projectId);
+            final CreateProject command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
@@ -127,19 +127,19 @@ class Given {
                           .build();
         }
 
-        public static CreateProject createProject() {
+        public static CreateProject createProjectMessage() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
         }
 
-        public static CreateProject createProject(ProjectId id) {
+        public static CreateProject createProjectMessage(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        public static CreateProject createProject(String projectId) {
+        public static CreateProject createProjectMessage(String projectId) {
             return CreateProject.newBuilder()
                                 .setProjectId(
                                         ProjectId.newBuilder()

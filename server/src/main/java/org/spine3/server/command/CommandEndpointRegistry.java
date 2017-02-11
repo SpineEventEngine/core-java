@@ -72,7 +72,7 @@ class CommandEndpointRegistry {
         dispatcherRegistry.register(dispatcher);
     }
 
-    void undregister(CommandDispatcher dispatcher) {
+    void unregister(CommandDispatcher dispatcher) {
         dispatcherRegistry.unregister(dispatcher);
     }
 

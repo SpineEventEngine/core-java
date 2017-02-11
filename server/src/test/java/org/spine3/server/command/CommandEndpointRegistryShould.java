@@ -21,7 +21,6 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Message;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -48,7 +47,6 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
@@ -56,39 +54,22 @@ import static org.spine3.base.Identifiers.newUuid;
  */
 public class CommandEndpointRegistryShould {
 
-    private CommandBus commandBus;
-    private CommandStore commandStore;
-    private EventBus eventBus;
-    private CreateProjectHandler createProjectHandler;
-
     /**
      * The object we test.
      */
     private CommandEndpointRegistry registry;
 
+    /**
+     * The instance of {@code EventBus} that we need for stub command handler classes.
+     */
+    private EventBus eventBus;
+
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
-        commandBus = CommandBus.newBuilder()
-                               .setCommandStore(commandStore)
-                               .setThreadSpawnAllowed(true)
-                               .setAutoReschedule(false)
-                               .build();
-        eventBus = TestEventBusFactory.create(storageFactory);
-        createProjectHandler = new CreateProjectHandler(newUuid());
+        eventBus = TestEventBusFactory.create(InMemoryStorageFactory.getInstance());
 
         registry = new CommandEndpointRegistry();
     }
-
-    @After
-    public void tearDown() throws Exception {
-        if (commandStore.isOpen()) { // then command bus is opened, too
-            commandBus.close();
-        }
-        eventBus.close();
-    }
-
 
     @SafeVarargs
     private final void assertSupported(Class<? extends Message>... cmdClasses) {
@@ -102,9 +83,11 @@ public class CommandEndpointRegistryShould {
 
     @SafeVarargs
     private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
+        final Set<CommandClass> supportedClasses = registry.getSupportedCommandClasses();
+
         for (Class<? extends Message> clazz : cmdClasses) {
             final CommandClass cmdClass = CommandClass.of(clazz);
-            assertFalse(commandBus.isSupportedCommand(cmdClass));
+            assertFalse(supportedClasses.contains(cmdClass));
         }
     }
 
@@ -138,8 +121,8 @@ public class CommandEndpointRegistryShould {
     public void unregister_command_dispatcher() {
         final CommandDispatcher dispatcher = new AllCommandDispatcher();
 
-        commandBus.register(dispatcher);
-        commandBus.unregister(dispatcher);
+        registry.register(dispatcher);
+        registry.unregister(dispatcher);
 
         assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
@@ -155,34 +138,35 @@ public class CommandEndpointRegistryShould {
     public void unregister_command_handler() {
         final AllCommandHandler handler = new AllCommandHandler();
 
-        commandBus.register(handler);
-        commandBus.unregister(handler);
+        registry.register(handler);
+        registry.unregister(handler);
 
         assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_dispatchers() {
-        commandBus.register(new EmptyDispatcher());
+        registry.register(new EmptyDispatcher());
     }
 
+    //TODO:2017-02-11:alexander.yevsyukov: Why do we allow this?
     @Test
     public void accept_empty_process_manager_repository_dispatcher() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         final ProcessManagerRepoDispatcher pmRepo = new ProcessManagerRepoDispatcher(boundedContext);
-        commandBus.register(pmRepo);
+        registry.register(pmRepo);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_command_handlers_without_methods() {
-        commandBus.register(new EmptyCommandHandler());
+        registry.register(new EmptyCommandHandler());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_allow_another_dispatcher_for_already_registered_commands() {
-        commandBus.register(new AllCommandDispatcher());
-        commandBus.register(new AllCommandDispatcher());
+        registry.register(new AllCommandDispatcher());
+        registry.register(new AllCommandDispatcher());
     }
 
     /*
@@ -191,28 +175,27 @@ public class CommandEndpointRegistryShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
-        final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
-        commandBus.register(createProjectHandler);
-        commandBus.register(createProjectDispatcher);
+        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new CreateProjectDispatcher());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
-        final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
-        commandBus.register(createProjectDispatcher);
-        commandBus.register(createProjectHandler);
+        registry.register(new CreateProjectDispatcher());
+        registry.register(new CreateProjectHandler(newUuid()));
     }
 
     @Test
     public void unregister_handler() {
-        commandBus.register(createProjectHandler);
-        commandBus.unregister(createProjectHandler);
+        final CommandHandler handler = new CreateProjectHandler(newUuid());
+        registry.register(handler);
+        registry.unregister(handler);
         assertNotSupported(CreateProject.class);
     }
 
     @Test
-    public void validate_commands_both_dispatched_and_handled() {
-        registry.register(createProjectHandler);
+    public void return_commands_both_dispatched_and_handled() {
+        registry.register(new CreateProjectHandler(newUuid()));
         registry.register(new AddTaskDispatcher());
 
         assertSupported(CreateProject.class, AddTask.class);

@@ -146,7 +146,7 @@ public abstract class CommandStorageShould
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.createCommand(Given.CommandMessage.createProject(),
+        final Command command = Commands.createCommand(Given.CommandMessage.createProjectMessage(),
                                                        CommandContext.getDefaultInstance());
         final Error error = newError();
 
