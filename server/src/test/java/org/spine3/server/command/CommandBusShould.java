@@ -22,6 +22,7 @@ package org.spine3.server.command;
 
 import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -260,6 +261,14 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         responseObserver.assertResponseOkAndCompleted();
     }
 
+//TODO:2017-02-11:alexander.yevsyukov: Enable this test back when support for setting current tenant is made in repositories.
+// Make sure to update CommandBusShould.post_command_and_set_current_tenant_if_multitenant()
+// with checking that the tenant is set and restored. This cannot be done using Mockito. We need PowerMock for this.
+// See more at:
+//    http://stackoverflow.com/questions/21105403/mocking-static-methods-with-mockito
+//    https://github.com/powermock/powermock/wiki/MockitoUsage
+
+    @Ignore
     @SuppressWarnings("OptionalGetWithoutIsPresent") // we check in assertion
     @Test
     public void post_command_and_set_current_tenant_if_multitenant() {

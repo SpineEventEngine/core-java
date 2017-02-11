@@ -278,17 +278,11 @@ public class CommandBus implements AutoCloseable {
             doPost(commandEnvelope, commandEndpoint.get());
             responseObserver.onCompleted();
         } finally {
-//TODO:2017-02-11:alexander.yevsyukov: Uncomment when support for setting current tenant is made in repositories.
-// Make sure to update CommandBusShould.post_command_and_set_current_tenant_if_multitenant()
-// with checking that the tenant is set and restored. This cannot be done using Mockito. We need PowerMock for this.
-// See more at:
-//    http://stackoverflow.com/questions/21105403/mocking-static-methods-with-mockito
-//    https://github.com/powermock/powermock/wiki/MockitoUsage
-//            if (rememberTenant != null) {
-//                CurrentTenant.set(rememberTenant);
-//            } else {
-//                CurrentTenant.clear();
-//            }
+            if (rememberTenant != null) {
+                CurrentTenant.set(rememberTenant);
+            } else {
+                CurrentTenant.clear();
+            }
         }
     }
 
