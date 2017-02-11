@@ -36,7 +36,6 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.Durations;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
@@ -45,7 +44,6 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
-import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -84,14 +82,11 @@ import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.server.command.Given.Command.startProject;
-import static org.spine3.server.command.Given.CommandMessage.addTask;
-import static org.spine3.server.command.Given.CommandMessage.createProjectMessage;
 
 public class CommandBusShould {
 
     private CommandBus commandBus;
     private CommandStore commandStore;
-    private CommandFactory commandFactory;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -109,7 +104,6 @@ public class CommandBusShould {
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
         responseObserver = new TestResponseObserver();
     }
@@ -212,20 +206,20 @@ public class CommandBusShould {
 
     @Test
     public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
-        final Command cmd = commandFactory.create(addTask(newUuid()));
+        final Command command = addTask();
+        commandBus.post(command, responseObserver);
 
-        commandBus.post(cmd, responseObserver);
-
-        checkCommandError(responseObserver.getThrowable(), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(),
+                          UNSUPPORTED_COMMAND,
+                          UnsupportedCommandException.class, command);
         assertTrue(responseObserver.getResponses()
                                    .isEmpty());
     }
 
-    private static <E extends CommandException> void checkCommandError(
-            Throwable throwable,
-            CommandValidationError validationError,
-            Class<E> exceptionClass,
-            Command cmd) {
+    private static <E extends CommandException> void checkCommandError(Throwable throwable,
+                                                                       CommandValidationError validationError,
+                                                                       Class<E> exceptionClass,
+                                                                       Command cmd) {
         final Throwable cause = throwable.getCause();
         assertEquals(exceptionClass, cause.getClass());
         @SuppressWarnings("unchecked")
@@ -371,9 +365,8 @@ public class CommandBusShould {
     @Test
     public void invoke_handler_when_command_posted() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(createProjectMessage());
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(createProject(), responseObserver);
 
         assertTrue(createProjectHandler.wasHandlerInvoked());
     }
@@ -382,9 +375,8 @@ public class CommandBusShould {
     public void invoke_dispatcher_when_command_posted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(addTask(newUuid()));
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(addTask(), responseObserver);
 
         assertTrue(dispatcher.wasDispatcherInvoked());
     }
@@ -392,8 +384,8 @@ public class CommandBusShould {
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(createProjectMessage());
 
+        final Command command = createProject();
         commandBus.post(command, responseObserver);
 
         // See that we called CommandStore only once with the right command ID.
@@ -439,11 +431,10 @@ public class CommandBusShould {
     @Test
     public void not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler(newUuid()));
-        final Command cmd = commandFactory.create(createProjectMessage());
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(createProject(), responseObserver);
 
-        verify(scheduler, never()).schedule(cmd);
+        verify(scheduler, never()).schedule(createProject());
         assertResponseOkAndCompleted(responseObserver);
     }
 
