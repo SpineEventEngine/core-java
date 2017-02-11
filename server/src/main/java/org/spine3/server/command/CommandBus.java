@@ -31,6 +31,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
@@ -278,8 +279,19 @@ public class CommandBus implements AutoCloseable {
         // We are sure that we have an endpoint because this command passed checking in CommandBus.post().
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
-        final CommandEndpoint endpoint = getEndpoint(commandEnvelope.getCommandClass()).get();
-        doPost(commandEnvelope, endpoint);
+        final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
+        if (!endpoint.isPresent()) {
+            throw noEndpointFound(commandEnvelope);
+        }
+        final CommandEndpoint endpointVar = endpoint.get();
+        doPost(commandEnvelope, endpointVar);
+    }
+
+    private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
+        final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
+        final String msg = String.format("No endpoint found for the command (class: %s id: %s).",
+                                         commandEnvelope.getCommandClass(), idStr);
+        throw new IllegalStateException(msg);
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -358,7 +370,6 @@ public class CommandBus implements AutoCloseable {
      *     <li>{@code CommandStore} is closed.
      *     <li>{@code CommandScheduler} is shut down.
      * </ol>
-     * <li>
      *
      * @throws Exception if closing the {@code CommandStore} cases an exception
      */
