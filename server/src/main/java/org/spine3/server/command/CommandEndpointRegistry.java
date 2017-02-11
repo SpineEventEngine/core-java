@@ -30,22 +30,43 @@ import java.util.Set;
 import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
- * Manages registration, unregistration, and finding and caching endpoints for commands.
+ * Manages registration, unregistration, finding, and caching endpoints for commands.
  *
  * @author Alexander Yevsyukov
  */
 class CommandEndpointRegistry {
 
+    /**
+     * The registry of {@link CommandDispatcher}s.
+     */
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
+
+    /**
+     * The registry of {@link CommandHandler}s.
+     *
+     */
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
+
+    /**
+     * Cached endpoints.
+     */
     private final Map<CommandClass, CommandEndpoint> endpointMap = newConcurrentMap();
 
+    /**
+     * Obtains the set of all supported command classes.
+     */
     Set<CommandClass> getSupportedCommandClasses() {
         final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
                                                     handlerRegistry.getCommandClasses());
         return result;
     }
 
+    /**
+     * Obtains an endpoint for the passed command class or
+     * {@linkplain Optional#absent() empty Optional} if neither
+     * {@link CommandDispatcher} nor {@link CommandHandler} are registered
+     * for this command class.
+     */
     Optional<CommandEndpoint> get(CommandClass commandClass) {
         final CommandEndpoint endpoint = endpointMap.get(commandClass);
         if (endpoint != null) {
@@ -85,18 +106,11 @@ class CommandEndpointRegistry {
         handlerRegistry.unregister(handler);
     }
 
-    boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
-    }
-
-    CommandDispatcher getDispatcher(CommandClass commandClass) {
+    private CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
-    CommandHandler getHandler(CommandClass commandClass) {
+    private CommandHandler getHandler(CommandClass commandClass) {
         return handlerRegistry.getHandler(commandClass);
     }
 
