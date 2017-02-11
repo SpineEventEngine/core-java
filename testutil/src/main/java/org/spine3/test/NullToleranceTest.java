@@ -389,7 +389,7 @@ public class NullToleranceTest {
                 }
             }
 
-            checkState(result != null);
+            checkState(result != null, "No default value found for class %s", type);
             return result;
         }
 
