@@ -22,4 +22,4 @@ after_success:
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 
-script: ./gradlew check --debug
+script: ./gradlew check --stacktrace
