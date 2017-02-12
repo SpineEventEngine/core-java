@@ -136,7 +136,7 @@ public class NullToleranceTest {
         return true;
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression") //
+    @SuppressWarnings("OverlyComplexBooleanExpression")
     private boolean shouldSkipMethod(Method method) {
         final Class[] parameterTypes = method.getParameterTypes();
         final String methodName = method.getName();
@@ -401,7 +401,7 @@ public class NullToleranceTest {
             checkState(
                     result != null,
                     String.format(
-                            "Could not generate a default value for %s type. Please, use NullToleranceTest.Builder#addDefaultValue",
+                            "Could not generate a default value for %s type. Please, use addDefaultValue(I)",
                             type.getCanonicalName()));
             return result;
         }
