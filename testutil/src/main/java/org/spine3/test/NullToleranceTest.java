@@ -398,7 +398,11 @@ public class NullToleranceTest {
                 }
             }
 
-            checkState(result != null);
+            checkState(
+                    result != null,
+                    String.format(
+                            "Could not generate a default value for %s type. Please, use NullToleranceTest.Builder#addDefaultValue",
+                            type.getCanonicalName()));
             return result;
         }
 
