@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.Entity.STATE_CLASS_GENERIC_INDEX;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -160,10 +161,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void dispatch(Command command) {
-        DispatchOperation op = new DispatchOperation<>(this, command);
-        op.execute();
+        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this, command);
+        commandEndpoint.execute();
     }
 
+    /**
+     * Updates the state of the system after a command was dispatched to the
+     * passed aggregate.
+     *
+     * This method does the following:
+     * <ol>
+     *     <li>Stores the aggregate.
+     *     <li>Posts uncommitted events to {@code EventBus}.
+     *     <li>Updates the state of the aggregate at the {@code Stand}.
+     * </ol>
+     *
+     * <p>The operation must be performed under the tenant of the originating command.
+     *
+     * @see AggregateCommandEndpoint#run()
+     */
     void afterDispatch(A aggregate) {
         final List<Event> events = aggregate.getUncommittedEvents();
         storeAndPostToStand(aggregate);

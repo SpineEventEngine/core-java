@@ -25,6 +25,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.storage.TenantDataOperation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
@@ -32,21 +33,36 @@ import static org.spine3.base.Commands.getMessage;
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
  *
+ * <p>Loading and storing an aggregate is a tenant-sensitive operation,
+ * which depends on the tenant ID of the command we dispatch.
+ *
  * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by this repository
+ * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+        extends TenantDataOperation {
 
     private final AggregateRepository<I, A> repository;
+    private final Command command;
 
     static <I, A extends Aggregate<I, ?, ?>>
-            AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository) {
-        return new AggregateCommandEndpoint<>(repository);
+            AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository,
+                                                     Command command) {
+        return new AggregateCommandEndpoint<>(repository, command);
     }
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repository,
+                                     Command command) {
+        super(command.getContext().getTenantId());
         this.repository = repository;
+        this.command = command;
+    }
+
+    @Override
+    public void run() {
+        final A aggregate = dispatch(command);
+        repository.afterDispatch(aggregate);
     }
 
     /**
