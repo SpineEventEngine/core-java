@@ -202,6 +202,15 @@ public class NullToleranceTestShould {
         assertTrue(result);
     }
 
+    @Test
+    public void not_check_synthetic_methods() {
+        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
+                                                                     .setClass(ClassWithSyntheticMethods.class)
+                                                                     .build();
+        final boolean result = nullToleranceTest.check();
+        assertTrue(result);
+    }
+
     /*
      * Test utility classes
      ******************************/
@@ -321,5 +330,21 @@ public class NullToleranceTestShould {
             checkNotNull(obj);
             checkNotNull(args);
         }
+    }
+
+    @SuppressWarnings("unused") // accessed via reflection.
+    private static class ClassWithSyntheticMethods {
+
+        private Object withSyntheticAccessor;
+
+        private Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                // Simulate some work
+                if (withSyntheticAccessor == null) {
+                    withSyntheticAccessor = new Object();
+                }
+            }
+        };
     }
 }
