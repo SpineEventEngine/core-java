@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
 import org.spine3.SPI;
@@ -40,8 +40,20 @@ public class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
+    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
+    private static final TenantId singleTenant = TenantId.newBuilder()
+                                                        .setValue("SINGLE_TENANT")
+                                                        .build();
+
     /** Have only static methods for this class. */
     private CurrentTenant() {}
+
+    /**
+     * Returns a constant for single-tenant applications.
+     */
+    public static TenantId singleTenant() {
+        return singleTenant;
+    }
 
     /**
      * Sets the ID of the tenant served in the current thread.
@@ -71,4 +83,5 @@ public class CurrentTenant {
     public static void clear() {
         threadLocal.set(null);
     }
+
 }

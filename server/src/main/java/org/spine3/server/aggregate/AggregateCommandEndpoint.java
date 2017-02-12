@@ -40,7 +40,12 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
     private final AggregateRepository<I, A> repository;
 
-    AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
+    static <I, A extends Aggregate<I, ?, ?>>
+            AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository) {
+        return new AggregateCommandEndpoint<>(repository);
+    }
+
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
         this.repository = repository;
     }
 

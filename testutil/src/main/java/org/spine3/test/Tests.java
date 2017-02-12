@@ -27,11 +27,11 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.Values;
 import org.spine3.server.command.CommandBus;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
@@ -40,6 +40,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * Utilities for testing.
@@ -133,7 +134,16 @@ public class Tests {
      * Generates a new UUID-based {@code UserId}.
      */
     public static UserId newUserUuid() {
-        return newUserId(Identifiers.newUuid());
+        return newUserId(newUuid());
+    }
+
+    /**
+     * Generates a new UUID-based {@code TenantId}.
+     */
+    public static TenantId newTenantUuid() {
+        return TenantId.newBuilder()
+                       .setValue(newUuid())
+                       .build();
     }
 
     /**
@@ -143,7 +153,7 @@ public class Tests {
      * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
      */
     public static StringValue newUuidValue() {
-        return Values.newStringValue(Identifiers.newUuid());
+        return Values.newStringValue(newUuid());
     }
     /**
      * Asserts that the passed message has a field that matches the passed field mask.

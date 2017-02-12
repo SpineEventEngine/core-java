@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
-import org.spine3.server.entity.CurrentTenant;
+import org.spine3.server.storage.CurrentTenant;
 import org.spine3.users.TenantId;
 
 import java.util.Map;
@@ -37,10 +37,6 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
     /** The map from {@code TenantId} to its slice of data. */
     private final Map<TenantId, S> tenantSlices = newHashMap();
 
@@ -70,7 +66,7 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
     private TenantId currentTenant() {
         if (!isMultitenant()) {
-            return singleTenant;
+            return CurrentTenant.singleTenant();
         }
 
         final Optional<TenantId> currentTenant = CurrentTenant.get();
@@ -87,4 +83,5 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
     boolean isMultitenant() {
         return multitenant;
     }
+
 }

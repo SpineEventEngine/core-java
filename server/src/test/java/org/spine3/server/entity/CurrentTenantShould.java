@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import org.junit.Test;
+import org.spine3.server.storage.CurrentTenant;
 import org.spine3.test.Tests;
 import org.spine3.users.TenantId;
 
