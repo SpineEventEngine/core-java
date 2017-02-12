@@ -31,16 +31,15 @@ import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
-import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -262,51 +261,34 @@ public class CommandBus implements AutoCloseable {
             return;
         }
 
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
-        @Nullable
-        final TenantId rememberTenant = currentTenant.isPresent()
-                                        ? currentTenant.get()
-                                        : null;
-
         if (isMultitenant) {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
-        try {
-            commandStore.store(command);
-            responseObserver.onNext(Responses.ok());
-            doPost(commandEnvelope, commandEndpoint.get());
-            responseObserver.onCompleted();
-        } finally {
-            if (rememberTenant != null) {
-                CurrentTenant.set(rememberTenant);
-            } else {
-                CurrentTenant.clear();
-            }
-        }
+
+        commandStore.store(command);
+        responseObserver.onNext(Responses.ok());
+        doPost(commandEnvelope, commandEndpoint.get());
+        responseObserver.onCompleted();
     }
 
     /**
      * Passes a previously scheduled command to corresponding endpoint.
      */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // We are sure that we have an endpoint because this command passed checking in CommandBus.post().
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
-        final CommandEndpoint endpoint = getEndpoint(commandEnvelope.getCommandClass()).get();
-        doPost(commandEnvelope, endpoint);
+        final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
+        if (!endpoint.isPresent()) {
+            throw noEndpointFound(commandEnvelope);
+        }
+        doPost(commandEnvelope, endpoint.get());
     }
 
-    /**
-     * Checks if a command is supported by the {@code CommandBus}.
-     *
-     * @param commandClass a class of commands to check
-     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
-     *      for commands of this type, {@code false} otherwise
-     */
-    @VisibleForTesting
-    boolean isSupportedCommand(CommandClass commandClass) {
-        return commandEndpoints.isSupportedCommand(commandClass);
+    private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
+        final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
+        final String msg = String.format("No endpoint found for the command (class: %s id: %s).",
+                                         commandEnvelope.getCommandClass(), idStr);
+        throw new IllegalStateException(msg);
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -385,7 +367,6 @@ public class CommandBus implements AutoCloseable {
      *     <li>{@code CommandStore} is closed.
      *     <li>{@code CommandScheduler} is shut down.
      * </ol>
-     * <li>
      *
      * @throws Exception if closing the {@code CommandStore} cases an exception
      */

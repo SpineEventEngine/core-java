@@ -135,7 +135,6 @@ public class NullToleranceTest {
             if (!passed) {
                 return false;
             }
-
         }
         return true;
     }
@@ -389,7 +388,7 @@ public class NullToleranceTest {
                 }
             }
 
-            checkState(result != null);
+            checkState(result != null, "No default value found for type: %s", type);
             return result;
         }
 
@@ -432,20 +431,20 @@ public class NullToleranceTest {
         }
 
         /**
-         * Obtains the default value for the given {@code Message} {@code type}.
+         * Obtains the default value for the given {@code Message} class.
          *
-         * <p>The default instance of {@code Any} is used {@code type == Message.class}.
+         * <p>The default instance of {@code Any} is used if {@link Message Message.class} is passed.
          *
-         * @param type the type of {@code Message} to obtain a default value for
-         * @return the default instance of the given {@code Message}
+         * @param msgClass the class for which obtain a default value
+         * @return the default instance of the message class or default instance of {@code Any}
          */
-        private static Message getDefaultMessageInstance(Class<? extends Message> type) {
-            if (type.equals(Message.class)) {
+        private static Message getDefaultMessageInstance(Class<? extends Message> msgClass) {
+            if (msgClass.equals(Message.class)) {
                 return Any.getDefaultInstance();
             }
 
             try {
-                final Method method = type.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
+                final Method method = msgClass.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
                 final Message defaultInstance = (Message) method.invoke(null, EMPTY_ARGUMENTS);
                 return defaultInstance;
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
