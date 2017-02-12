@@ -46,6 +46,7 @@ import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
+import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.Task;
@@ -58,7 +59,6 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
-import org.spine3.test.Given;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;

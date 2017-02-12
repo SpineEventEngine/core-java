@@ -40,6 +40,7 @@ import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.command.AddTask;
@@ -49,7 +50,6 @@ import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
-import org.spine3.test.Given;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;

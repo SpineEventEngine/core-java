@@ -46,6 +46,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
+import org.spine3.test.Given;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
@@ -54,7 +55,6 @@ import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
-import org.spine3.test.Given;
 
 import java.util.Collection;
 import java.util.LinkedList;

@@ -33,6 +33,7 @@ import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.Given;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -42,7 +43,6 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
-import org.spine3.test.Given;
 
 import java.util.Map;
 import java.util.Set;
