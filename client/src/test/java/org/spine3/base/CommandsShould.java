@@ -32,6 +32,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
@@ -56,6 +57,8 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
+
+    private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor().getFile();
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
     private final StringValue stringValue = newStringValue(newUuid());
@@ -83,6 +86,8 @@ public class CommandsShould {
     public void pass_null_tolerance_test() {
         final boolean passed = NullToleranceTest.newBuilder()
                                                 .setClass(Commands.class)
+                                                .addDefaultValue(DEFAULT_FILE_DESCRIPTOR)
+                                                .addDefaultValue(Timestamps.getCurrentTime()) // to fulfil custom validation
                                                 .build()
                                                 .check();
         assertTrue(passed);
