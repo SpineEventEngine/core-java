@@ -81,10 +81,11 @@ public class CommandsShould {
 
     @Test
     public void pass_null_tolerance_test() {
-        NullToleranceTest.newBuilder()
-                         .setClass(Commands.class)
-                         .build()
-                         .check();
+        final boolean passed = NullToleranceTest.newBuilder()
+                                                .setClass(Commands.class)
+                                                .build()
+                                                .check();
+        assertTrue(passed);
     }
 
     @Test
