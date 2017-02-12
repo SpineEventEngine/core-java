@@ -36,8 +36,8 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.entity.CurrentTenant;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.users.CurrentTenant;
 import org.spine3.util.Environment;
 
 import java.util.Set;

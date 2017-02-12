@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.users;
+package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import org.junit.Test;

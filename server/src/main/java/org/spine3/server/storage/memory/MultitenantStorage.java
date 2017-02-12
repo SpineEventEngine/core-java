@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
-import org.spine3.server.users.CurrentTenant;
+import org.spine3.server.entity.CurrentTenant;
 import org.spine3.users.TenantId;
 
 import java.util.Map;

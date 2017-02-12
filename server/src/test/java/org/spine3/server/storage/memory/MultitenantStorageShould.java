@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.users.CurrentTenant;
+import org.spine3.server.entity.CurrentTenant;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertNotNull;

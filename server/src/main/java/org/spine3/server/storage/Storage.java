@@ -21,7 +21,6 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
-import org.spine3.server.users.CurrentTenant;
 
 /**
  * The base interface for storages.
@@ -32,13 +31,9 @@ import org.spine3.server.users.CurrentTenant;
 public interface Storage extends AutoCloseable {
 
     /**
-     * Verifies is the storage is multitenant.
-     *
-     * <p>A multitenant storage should take into account a current tenant (obtained via {@link CurrentTenant#get()})
-     * when performing operations with the data it stores.
+     * Verifies whether the storage is multitenant.
      *
      * @return {@code true} if the storage was created with multitenancy support, {@code false} otherwise
-     * @see CurrentTenant#get()
      */
     boolean isMultitenant();
 }
