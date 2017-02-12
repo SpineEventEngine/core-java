@@ -30,15 +30,8 @@ import static org.spine3.validate.Validate.isDefault;
 /**
  * An abstract base for operations on a tenant data.
  *
- * Such an operation goes through the following steps:
- * <ol>
- *     <li>The current tenant ID is obtained and remembered.
- *     <li>The tenant ID passed to the constructor is set as current.
- *     <li>The {@link #run()} method is called.
- *     <li>The previous tenant ID is set as current.
- * </ol>
- *
  * @author Alexander Yevsyukov
+ * @see #execute()
  */
 public abstract class TenantDataOperation implements Runnable {
 
@@ -52,7 +45,7 @@ public abstract class TenantDataOperation implements Runnable {
      * the application works in a single-tenant mode, the value
      * returned by {@link CurrentTenant#singleTenant()} will be substituted.
      *
-     * @param tenantId the tenant ID or default value
+     * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
      */
     protected TenantDataOperation(TenantId tenantId) {
         checkNotNull(tenantId);
@@ -66,6 +59,17 @@ public abstract class TenantDataOperation implements Runnable {
         return tenantId;
     }
 
+    /**
+     * Executes the operation.
+     *
+     * <p>The execution goes through the following steps:
+     * <ol>
+     *     <li>The current tenant ID is obtained and remembered.
+     *     <li>The tenant ID passed to the constructor is set as current.
+     *     <li>The {@link #run()} method is called.
+     *     <li>The previous tenant ID is set as current.
+     * </ol>
+     */
     public void execute() {
         final Optional<TenantId> remembered = CurrentTenant.get();
         try {
