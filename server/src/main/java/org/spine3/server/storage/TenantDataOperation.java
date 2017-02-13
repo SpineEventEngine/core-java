@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import org.spine3.base.Command;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,6 +53,16 @@ public abstract class TenantDataOperation implements Runnable {
         this.tenantId = isDefault(tenantId)
                         ? CurrentTenant.singleTenant()
                         : tenantId;
+    }
+
+    /**
+     * Creates and instance for the operation on the tenant data in
+     * response to the passed command
+     *
+     * @param command the command from which context to obtain the tenant ID
+     */
+    protected TenantDataOperation(Command command) {
+        this(command.getContext().getTenantId());
     }
 
     @VisibleForTesting

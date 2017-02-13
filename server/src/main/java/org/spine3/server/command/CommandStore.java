@@ -59,9 +59,17 @@ public class CommandStore implements AutoCloseable {
      * @param command the command to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command) {
+    public void store(final Command command) {
         checkNotClosed();
-        storage.store(command);
+
+        final TenantDataOperation op = new TenantDataOperation(command) {
+            @Override
+            public void run() {
+                storage.store(command);
+            }
+        };
+
+        op.execute();
     }
 
     /**
@@ -71,9 +79,17 @@ public class CommandStore implements AutoCloseable {
      * @param error an error occurred
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, Error error) {
+    public void store(final Command command, final Error error) {
         checkNotClosed();
-        storage.store(command, error);
+
+        final TenantDataOperation op = new TenantDataOperation(command) {
+            @Override
+            public void run() {
+                storage.store(command, error);
+            }
+        };
+
+        op.execute();
     }
 
     /**
@@ -97,7 +113,7 @@ public class CommandStore implements AutoCloseable {
     public void store(final Command command, final CommandStatus status) {
         checkNotClosed();
         
-        final TenantDataOperation op = new TenantDataOperation(command.getContext().getTenantId()) {
+        final TenantDataOperation op = new TenantDataOperation(command) {
             @Override
             public void run() {
                 storage.store(command, status);
