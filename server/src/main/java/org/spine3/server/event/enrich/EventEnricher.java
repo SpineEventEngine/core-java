@@ -40,8 +40,6 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nullable;
@@ -66,10 +64,10 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * Enterprise Integration pattern.
  *
  * <p>There is one instance of an {@code EventEnricher} per {@code BoundedContext}.
- * This instance is called by an {@link EventBus} to enrich a new event before it
+ * This instance is called by an {@link org.spine3.server.event.EventBus} to enrich a new event before it
  * is passed to further processing by dispatchers or handlers.
  *
- * <p>The event is passed to enrichment <em>after</em> it was passed to the {@link EventStore}.
+ * <p>The event is passed to enrichment <em>after</em> it was passed to the {@link org.spine3.server.event.EventStore}.
  * Therefore events are stored without attached enrichment information.
  *
  * @author Alexander Yevsyukov

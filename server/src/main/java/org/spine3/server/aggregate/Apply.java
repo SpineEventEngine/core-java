@@ -20,8 +20,6 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.protobuf.Message;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,7 +35,7 @@ import java.lang.annotation.Target;
  *     <li>is annotated with {@link Apply};
  *     <li>is {@code private};
  *     <li>is {@code void};
- *     <li>accepts an event derived from {@link Message} as the only parameter.
+ *     <li>accepts an event derived from {@link com.google.protobuf.Message} as the only parameter.
  * </ul>
  *
  * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.

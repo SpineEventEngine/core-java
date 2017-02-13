@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -150,7 +149,7 @@ public class Given {
 
         /**
          * Creates a new {@link Command} with the given command message, userId and timestamp using default
-         * {@link CommandId} instance.
+         * {@link org.spine3.base.CommandId} instance.
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);

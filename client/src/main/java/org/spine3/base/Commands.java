@@ -28,7 +28,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
@@ -82,14 +81,14 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link CommandFactory#create(Message)},
+     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
      * @param userId     the actor id
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
+     * @see org.spine3.client.CommandFactory#create(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
@@ -255,7 +254,8 @@ public class Commands {
                                          .getSchedule();
         final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
-            checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
+            checkArgument(delay.getSeconds() > 0,
+                          "Command delay seconds must be a positive value.");
             return true;
         }
         return false;

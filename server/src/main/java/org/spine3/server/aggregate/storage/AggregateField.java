@@ -18,28 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.aggregate.storage;
 
-import com.google.protobuf.Message;
-
-import java.util.Set;
+import org.spine3.SPI;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.storage.StorageField;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * A container for the storage fields specific for the {@link AggregateStorage} and its implementations.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} type
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
+@SPI
+public enum AggregateField implements StorageField {
 
     /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
-     *
-     * @param message an event or a command message
-     * @param context either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} instance
-     * @return a set of entity identifiers
+     * A field representing an ID of an {@link Aggregate}.
      */
-    Set<I> apply(M message, C context);
+    aggregate_id
 }

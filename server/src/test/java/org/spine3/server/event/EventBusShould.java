@@ -22,7 +22,6 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
@@ -65,7 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EventBusShould {
 
     private EventBus eventBus;
@@ -85,7 +84,8 @@ public class EventBusShould {
     private void setUp(@Nullable EventEnricher enricher) {
         this.storageFactory = InMemoryStorageFactory.getInstance();
         /**
-         * Cannot use {@link MoreExecutors#directExecutor()} because it's impossible to spy on {@code final} classes.
+         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()}
+         * because it's impossible to spy on {@code final} classes.
          */
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.delegateSubscriberExecutor = spy(directExecutor());

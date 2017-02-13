@@ -18,28 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
-
-import java.util.Set;
+import org.spine3.SPI;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * A marker interface for the {@code enum}s representing the names of the fields used by the framework to store
+ * its data.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} type
- * @author Alexander Yevsyukov
+ * <p>Naming conventions for the {@code enum}s' fields may be changed in favor of the field names to be represented
+ * accurately.
+ *
+ * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()} to get a valid field name.
+ *
+ * @author Dmytro Dashenkov
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
-
-    /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
-     *
-     * @param message an event or a command message
-     * @param context either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} instance
-     * @return a set of entity identifiers
-     */
-    Set<I> apply(M message, C context);
+@SPI
+public interface StorageField {
 }

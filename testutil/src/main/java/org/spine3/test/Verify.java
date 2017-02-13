@@ -12,7 +12,6 @@ package org.spine3.test;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import org.junit.Assert;
 
@@ -621,7 +620,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert the size of the given {@link ImmutableSet}. */
+    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet}. */
     public static void assertSize(int expectedSize, Collection<?> actualImmutableSet) {
         try {
             assertSize("immutable set", expectedSize, actualImmutableSet);
@@ -630,7 +629,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert the size of the given {@link ImmutableSet}. */
+    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet}. */
     public static void assertSize(String immutableSetName, int expectedSize, Collection<?> actualImmutableSet) {
         try {
             final int actualSize = actualImmutableSet.size();

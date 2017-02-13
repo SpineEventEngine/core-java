@@ -21,10 +21,6 @@
 package org.spine3.base;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import org.spine3.Internal;
 
 import java.util.UUID;
@@ -65,10 +61,10 @@ public class Identifiers {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     *      <li>For classes implementing {@link Message} — the value of the message itself
-     *      <li>For {@code String} — {@link StringValue}
-     *      <li>For {@code Long} — {@link UInt64Value}
-     *      <li>For {@code Integer} — {@link UInt32Value}
+     *      <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
+     *      <li>For {@code String} — {@link com.google.protobuf.StringValue}
+     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
+     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -90,9 +86,9 @@ public class Identifiers {
      *
      * @param any the ID value wrapped into {@code Any}
      * @return <ul>
-     * <li>{@code String} value if {@link StringValue} is unwrapped
-     * <li>{@code Integer} value if {@link UInt32Value} is unwrapped
-     * <li>{@code Long} value if {@link UInt64Value} is unwrapped
+     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped
+     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped
+     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      */

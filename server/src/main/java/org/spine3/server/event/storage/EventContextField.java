@@ -18,33 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.event.storage;
 
-import com.google.protobuf.Message;
+import org.spine3.SPI;
+import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
+import org.spine3.server.event.EventStorage;
+import org.spine3.server.storage.StorageField;
 
 /**
- * Obtains an event producer ID based on an event {@link Message} and context.
+ * A container for the storage fields specific for the {@link EventStorage} and its implementations
+ * and connected to the {@link EventContext}.
  *
- * <p>An ID must be the first field in event messages (in Protobuf definition).
- * Its name must end with the {@link org.spine3.base.Identifiers#ID_PROPERTY_SUFFIX}.
- *
- * @param <I> the type of target entity IDs
- * @param <M> the type of event messages to get IDs from
- * @author Alexander Litus
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
-class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
-
-    private GetProducerIdFromEvent(int idIndex) {
-        super(idIndex);
-    }
+@SPI
+public enum EventContextField implements StorageField {
 
     /**
-     * Creates a new instance.
-     *
-     * @param index a zero-based index of an ID field in this type of messages
+     * A field representing the {@link EventContext#getEventId() event ID} stored
+     * in the {@link EventContext}.
      */
-    static<I, M extends Message> GetProducerIdFromEvent<I, M> fromFieldIndex(int index) {
-        return new GetProducerIdFromEvent<>(index);
-    }
+    context_event_id,
+
+    /**
+     * A field representing the {@link EventContext#getTimestamp() event posting time}.
+     */
+    context_timestamp,
+
+    /**
+     * A field representing the serialized {@link CommandContext}.
+     *
+     * <p>This is not the only way to store it, but it's acceptable.
+     */
+    context_of_command,
+
+    /**
+     * A field representing the {@link EventContext#getVersion() producer entity version}.
+     */
+    context_version
+
 }
