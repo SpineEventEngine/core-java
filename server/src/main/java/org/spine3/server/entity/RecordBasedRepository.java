@@ -244,7 +244,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Field mask is applied according to
      * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
      * >FieldMask specs</a>.
      *
      * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported.

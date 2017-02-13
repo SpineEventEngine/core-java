@@ -84,7 +84,7 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     /**
-     * Data “slice” of a tenant that stores events.
+     * Data "slice" of a tenant that stores events.
      */
     private static class TenantEvents implements TenantStorage<String, EventStorageRecord> {
 
