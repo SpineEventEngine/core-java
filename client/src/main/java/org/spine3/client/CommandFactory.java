@@ -23,6 +23,7 @@ package org.spine3.client;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -102,7 +103,7 @@ public class CommandFactory {
      */
     public Command create(Message message) {
         checkNotNull(message);
-        final CommandContext context = createCommandContext();
+        final CommandContext context = createContext();
         final Command result = createCommand(message, context);
         return result;
     }
@@ -121,7 +122,7 @@ public class CommandFactory {
         checkNotNull(message);
         checkNotNull(targetVersion);
 
-        final CommandContext context = createCommandContext(targetVersion);
+        final CommandContext context = createContext(targetVersion);
         final Command result = createCommand(message, context);
         return result;
     }
@@ -129,15 +130,15 @@ public class CommandFactory {
     /**
      * Creates command context for a new command with entity ID.
      */
-    protected CommandContext createCommandContext(int targetVersion) {
-        return createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
+    protected CommandContext createContext(int targetVersion) {
+        return Commands.createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
     }
 
     /**
      * Creates command context for a new command.
      */
-    protected CommandContext createCommandContext() {
-        return createContext(getTenantId(), getActor(), getZoneOffset());
+    protected CommandContext createContext() {
+        return Commands.createContext(getTenantId(), getActor(), getZoneOffset());
     }
 
     public static class Builder {

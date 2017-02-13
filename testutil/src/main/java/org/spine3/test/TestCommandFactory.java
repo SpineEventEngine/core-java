@@ -68,7 +68,7 @@ public class TestCommandFactory extends CommandFactory {
      * <p>Overrides to open access to creating command contexts in tests.
      */
     @Override
-    public CommandContext createCommandContext() {
-        return super.createCommandContext();
+    public CommandContext createContext() {
+        return super.createContext();
     }
 }

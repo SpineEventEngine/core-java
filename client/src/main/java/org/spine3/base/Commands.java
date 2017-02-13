@@ -97,7 +97,7 @@ public class Commands {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
 
-        final CommandContext.Builder result = getContextBuilder(tenantId, userId, zoneOffset);
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         return result.build();
     }
 
@@ -105,7 +105,7 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link CommandFactory#create(Message)},
+     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
@@ -113,20 +113,20 @@ public class Commands {
      * @param zoneOffset    the offset of the timezone in which the user works
      * @param targetVersion the the ID of the entity for applying commands
      * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
+     * @see org.spine3.client.CommandFactory#create(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
                                                ZoneOffset zoneOffset,
                                                int targetVersion) {
-        final CommandContext.Builder result = getContextBuilder(tenantId, userId, zoneOffset);
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         result.setTargetVersion(targetVersion);
 
         return result.build();
     }
 
-    private static CommandContext.Builder getContextBuilder(@Nullable TenantId tenantId,
+    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
                                                             ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
