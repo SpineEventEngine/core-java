@@ -27,6 +27,7 @@ import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.server.command.error.CommandException;
+import org.spine3.server.storage.TenantDataOperation;
 
 import java.util.Iterator;
 
@@ -79,22 +80,10 @@ public class CommandStore implements AutoCloseable {
      * Stores the command with the error status.
      *
      * @param command the command to store
-     * @param exception an exception occurred to convert to {@link org.spine3.base.Error}
-     * @throws IllegalStateException if the storage is closed
-     */
-    public void store(Command command, Exception exception) {
-        checkNotClosed();
-        storage.store(command, Errors.fromException(exception));
-    }
-
-    /**
-     * Stores the command with the error status.
-     *
-     * @param command the command to store
      * @param exception the exception occurred, which encloses {@link org.spine3.base.Error} to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void storeWithError(Command command, CommandException exception) {
+    void storeWithError(Command command, CommandException exception) {
         store(command, exception.getError());
     }
 
@@ -105,9 +94,17 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(Command command, CommandStatus status) {
+    public void store(final Command command, final CommandStatus status) {
         checkNotClosed();
-        storage.store(command, status);
+        
+        final TenantDataOperation op = new TenantDataOperation(command.getContext().getTenantId()) {
+            @Override
+            public void run() {
+                storage.store(command, status);
+            }
+        };
+
+        op.execute();
     }
 
     /**
@@ -129,7 +126,7 @@ public class CommandStore implements AutoCloseable {
      * @param commandId an ID of the command
      * @throws IllegalStateException if the storage is closed
      */
-    public void setCommandStatusOk(CommandId commandId) {
+    void setCommandStatusOk(CommandId commandId) {
         checkNotClosed();
         storage.setOkStatus(commandId);
     }
@@ -141,7 +138,7 @@ public class CommandStore implements AutoCloseable {
      * @param exception the exception occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    public void updateStatus(CommandId commandId, Exception exception) {
+    void updateStatus(CommandId commandId, Exception exception) {
         checkNotClosed();
         storage.updateStatus(commandId, Errors.fromException(exception));
     }
@@ -153,7 +150,7 @@ public class CommandStore implements AutoCloseable {
      * @param error the error, which occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    public void updateStatus(CommandId commandId, Error error) {
+    void updateStatus(CommandId commandId, Error error) {
         checkNotClosed();
         storage.updateStatus(commandId, error);
     }
@@ -165,7 +162,7 @@ public class CommandStore implements AutoCloseable {
      * @param failure the business failure occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    public void updateStatus(CommandId commandId, Failure failure) {
+    void updateStatus(CommandId commandId, Failure failure) {
         checkNotClosed();
         storage.updateStatus(commandId, failure);
     }
@@ -176,16 +173,9 @@ public class CommandStore implements AutoCloseable {
     }
 
     /** Returns true if the store is open, false otherwise */
-    public boolean isOpen() {
+    boolean isOpen() {
         final boolean isOpened = storage.isOpen();
         return isOpened;
-    }
-
-    /** Returns true if the store is closed, false otherwise
-     */
-    public boolean isClosed() {
-        final boolean isClosed = !isOpen();
-        return isClosed;
     }
 
     private void checkNotClosed() {
