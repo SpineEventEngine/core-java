@@ -39,7 +39,6 @@ buildscript {
         // the version of the dependency below to `spineVersion` defined above.
         spineProtobufPluginVersion = '0.8.0'
     }
-
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
         classpath(group: 'com.google.protobuf', name: 'protobuf-gradle-plugin',
