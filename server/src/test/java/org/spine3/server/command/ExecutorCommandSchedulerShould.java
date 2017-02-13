@@ -78,7 +78,7 @@ public class ExecutorCommandSchedulerShould {
         verify(scheduler, never()).post(any(Command.class));
         verify(scheduler, timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(commandCaptor.capture());
         final Command actualCmd = commandCaptor.getValue();
-        final Command expectedCmd = Commands.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
+        final Command expectedCmd = CommandScheduler.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
         assertEquals(expectedCmd, actualCmd);
     }
 

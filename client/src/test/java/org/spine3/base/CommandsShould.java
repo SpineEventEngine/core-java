@@ -25,13 +25,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
@@ -48,14 +45,13 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
+@SuppressWarnings("MagicNumber")
 public class CommandsShould {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor().getFile();
@@ -189,28 +185,5 @@ public class CommandsShould {
         final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
-    }
-
-    @Test
-    public void update_schedule_options() {
-        final Command cmd = commandFactory.create(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations.ofMinutes(5);
-
-        final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
-
-        final CommandContext.Schedule schedule = cmdUpdated.getContext().getSchedule();
-        assertEquals(delay, schedule.getDelay());
-        assertEquals(schedulingTime, schedule.getSchedulingTime());
-    }
-
-    @Test
-    public void update_scheduling_time() {
-        final Command cmd = commandFactory.create(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-
-        final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);
-
-        assertEquals(schedulingTime, cmdUpdated.getContext().getSchedule().getSchedulingTime());
     }
 }

@@ -256,6 +256,7 @@ public class CommandBus implements AutoCloseable {
             return;
         }
 
+        //TODO:2017-02-13:alexander.yevsyukov: We need to set tenant before we store anything.
         if (isScheduled(command)) {
             scheduleAndStore(command, responseObserver);
             return;
