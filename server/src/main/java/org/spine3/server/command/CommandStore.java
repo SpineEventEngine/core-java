@@ -96,7 +96,7 @@ public class CommandStore implements AutoCloseable {
      * Stores the command with the error status.
      *
      * @param command the command to store
-     * @param exception the exception occurred, which encloses {@link org.spine3.base.Error} to store
+     * @param exception the exception occurred, which encloses {@link Error} to store
      * @throws IllegalStateException if the storage is closed
      */
     void storeWithError(Command command, CommandException exception) {
