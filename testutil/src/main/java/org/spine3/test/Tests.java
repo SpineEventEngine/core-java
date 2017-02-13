@@ -30,7 +30,6 @@ import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.Values;
-import org.spine3.server.command.CommandBus;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
