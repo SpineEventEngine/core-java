@@ -273,7 +273,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Passes a previously scheduled command to corresponding endpoint.
+     * Passes a previously scheduled command to the corresponding endpoint.
      */
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
@@ -312,7 +312,7 @@ public class CommandBus implements AutoCloseable {
      */
     void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
-            commandEndpoint.process(commandEnvelope);
+            commandEndpoint.receive(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
@@ -359,7 +359,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Closes the instance for further posting of commands.
+     * Closes the instance, preventing any for further posting of commands.
      *
      * <p>The following operations are performed:
      * <ol>

@@ -29,7 +29,7 @@ package org.spine3.server.command;
 interface CommandEndpoint {
 
     /**
-     * Delivers a command passed in the envelope.
+     * Receives a command packed into an envelope and passes it for the further processing.
      */
-    void process(CommandEnvelope commandEnvelope);
+    void receive(CommandEnvelope commandEnvelope);
 }

@@ -27,7 +27,7 @@ import org.spine3.users.TenantId;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * The multitenant storage
@@ -38,7 +38,7 @@ import static com.google.common.collect.Maps.newHashMap;
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
     /** The map from {@code TenantId} to its slice of data. */
-    private final Map<TenantId, S> tenantSlices = newHashMap();
+    private final Map<TenantId, S> tenantSlices = newConcurrentMap();
 
     /** If {@code true} the storage will contain a data slice for each tenant. */
     private final boolean multitenant;
