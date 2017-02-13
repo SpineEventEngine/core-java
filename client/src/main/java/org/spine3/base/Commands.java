@@ -254,7 +254,8 @@ public class Commands {
                                          .getSchedule();
         final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
-            checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
+            checkArgument(delay.getSeconds() > 0,
+                          "Command delay seconds must be a positive value.");
             return true;
         }
         return false;
