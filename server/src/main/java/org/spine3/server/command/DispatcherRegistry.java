@@ -50,21 +50,18 @@ class DispatcherRegistry {
     /**
      * Ensures that the dispatcher forwards at least one command.
      *
-     * <p>Note that {@link org.spine3.server.procman.ProcessManager} is allowed to have no commands handled,
-     * since its business flow may be designed to handle events only.
+     * <p>Note that a {@link org.spine3.server.procman.ProcessManager ProcessManager} is allowed
+     * to have no commands handled, since its business flow may be designed to handle events only.
+     * Therefore instances of {@link ProcessManagerRepository} passed to this method
+     * may not have command classes, and are excluded from the check.
      *
      * <p>We pass the {@code dispatcher} and the set as arguments instead of getting the set
-     * from the dispatcher because this operation is expensive and
+     * from the dispatcher because this operation is expensive.
      *
      * @throws IllegalArgumentException if the dispatcher returns empty set of command classes
      * @throws NullPointerException     if the dispatcher returns null set
      */
     private static void checkNotEmpty(CommandDispatcher dispatcher, Set<CommandClass> commandClasses) {
-
-        /**
-         * Instances of {@link ProcessManagerRepository} are excluded from the check,
-         * as long as {@link org.spine3.server.procman.ProcessManager}s may have no commands handled.
-         */
         final boolean criterionSatisfied = !commandClasses.isEmpty()
                 || (dispatcher instanceof ProcessManagerRepository);
 

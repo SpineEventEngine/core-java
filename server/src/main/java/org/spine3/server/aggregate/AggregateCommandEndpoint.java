@@ -36,11 +36,11 @@ import static org.spine3.base.Commands.getMessage;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
     private final AggregateRepository<I, A> repository;
 
-    CommandEndpoint(AggregateRepository<I, A> repository) {
+    AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
         this.repository = repository;
     }
 
@@ -68,7 +68,7 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private final CommandContext context;
         private final I aggregateId;
 
-        private Action(CommandEndpoint<I, A> commandEndpoint, Command command) {
+        private Action(AggregateCommandEndpoint<I, A> commandEndpoint, Command command) {
             this.repository = commandEndpoint.repository;
 
             this.commandMessage = getMessage(checkNotNull(command));

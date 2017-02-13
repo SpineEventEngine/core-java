@@ -26,6 +26,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.server.type.CommandClass;
 
+import java.util.Objects;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
@@ -33,43 +35,65 @@ import static org.spine3.base.Commands.getMessage;
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
  *
- * <p>The class is not meant for storage.
- *
  * @author Alexander Yevsyukov
  */
 final class CommandEnvelope {
 
+    /** The command that we wrap. */
     private final Command command;
+
+    // The below fields are calculated from the command.
+
+    /** The ID of the command. */
     private final CommandId commandId;
+
+    /** The command message. */
     private final Message commandMessage;
-    private final CommandContext commandContext;
+
+    /** The command class. */
     private final CommandClass commandClass;
 
     CommandEnvelope(Command command) {
         this.command = checkNotNull(command);
         this.commandId = getId(command);
         this.commandMessage = getMessage(command);
-        this.commandContext = command.getContext();
         this.commandClass = CommandClass.of(commandMessage);
     }
 
-    public Command getCommand() {
+    Command getCommand() {
         return command;
     }
 
-    public CommandId getCommandId() {
+    CommandId getCommandId() {
         return commandId;
     }
 
-    public Message getCommandMessage() {
+    Message getCommandMessage() {
         return commandMessage;
     }
 
-    public CommandContext getCommandContext() {
-        return commandContext;
+    CommandContext getCommandContext() {
+        return command.getContext();
     }
 
-    public CommandClass getCommandClass() {
+    CommandClass getCommandClass() {
         return commandClass;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CommandEnvelope)) {
+            return false;
+        }
+        CommandEnvelope that = (CommandEnvelope) o;
+        return Objects.equals(command, that.command);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(command);
     }
 }

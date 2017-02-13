@@ -20,12 +20,13 @@
 
 package org.spine3.server.users;
 
+import com.google.common.base.Optional;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
@@ -47,12 +48,16 @@ public class CurrentTenantShould {
         CurrentTenant.set(TenantId.getDefaultInstance());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // we check isPresent() in assertion
     @Test
     public void keep_set_value() {
         final TenantId expected = TenantId.newBuilder().setValue(getClass().getSimpleName()).build();
 
         CurrentTenant.set(expected);
-        assertEquals(expected, CurrentTenant.get());
+
+        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        assertTrue(currentTenant.isPresent());
+        assertEquals(expected, currentTenant.get());
     }
 
     @Test
@@ -62,6 +67,6 @@ public class CurrentTenantShould {
 
         CurrentTenant.clear();
 
-        assertNull(CurrentTenant.get());
+        assertFalse(CurrentTenant.get().isPresent());
     }
 }
