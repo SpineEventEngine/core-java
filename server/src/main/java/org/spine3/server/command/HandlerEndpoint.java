@@ -34,7 +34,7 @@ class HandlerEndpoint implements CommandEndpoint {
     }
 
     @Override
-    public void process(CommandEnvelope commandEnvelope) {
+    public void receive(CommandEnvelope commandEnvelope) {
         handler.handle(commandEnvelope.getCommandMessage(),
                        commandEnvelope.getCommandContext());
     }

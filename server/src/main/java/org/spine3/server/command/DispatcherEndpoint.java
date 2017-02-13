@@ -34,7 +34,7 @@ class DispatcherEndpoint implements CommandEndpoint {
     }
 
     @Override
-    public void process(CommandEnvelope commandEnvelope) {
+    public void receive(CommandEnvelope commandEnvelope) {
         dispatcher.dispatch(commandEnvelope.getCommand());
     }
 }

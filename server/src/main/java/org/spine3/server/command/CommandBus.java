@@ -312,7 +312,7 @@ public class CommandBus implements AutoCloseable {
      */
     void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
-            commandEndpoint.process(commandEnvelope);
+            commandEndpoint.receive(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
