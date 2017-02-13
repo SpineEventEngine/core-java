@@ -123,6 +123,9 @@ public class CommandStore implements AutoCloseable {
         op.execute();
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: have other writes as tenant-data ops.
+    //TODO:2017-02-14:alexander.yevsyukov: Have reads as tenant-data ops.
+
     /**
      * Returns an iterator over all commands with the given status.
      *

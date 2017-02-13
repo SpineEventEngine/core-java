@@ -20,35 +20,75 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
+import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
+import org.spine3.server.storage.TenantDataOperation;
+
+import static org.spine3.base.Commands.getId;
 
 /**
  * The service for updating a status of a command.
  *
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+class CommandStatusService {
 
     private final CommandStore commandStore;
+    private final Log log;
 
-    CommandStatusService(CommandStore commandStore) {
+    CommandStatusService(CommandStore commandStore, Log log) {
         this.commandStore = commandStore;
+        this.log = log;
     }
 
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
+    void setOk(final CommandEnvelope commandEnvelope) {
+        final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
+            @Override
+            public void run() {
+                commandStore.setCommandStatusOk(commandEnvelope.getCommandId());
+            }
+        };
+        op.execute();
     }
 
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
+    void setToError(CommandEnvelope commandEnvelope, final Error error) {
+        final Command command = commandEnvelope.getCommand();
+        final TenantDataOperation op = new TenantDataOperation(command) {
+            @Override
+            public void run() {
+                commandStore.updateStatus(getId(command), error);
+            }
+        };
+        op.execute();
     }
 
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toMessage());
-    }
+    void updateCommandStatus(final CommandEnvelope commandEnvelope, final Throwable cause) {
+        final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
+            @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
+            @Override
+            public void run() {
+                final Message commandMessage = commandEnvelope.getCommandMessage();
+                final CommandId commandId = commandEnvelope.getCommandId();
 
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
+                if (cause instanceof FailureThrowable) {
+                    final FailureThrowable failure = (FailureThrowable) cause;
+                    log.failureHandling(failure, commandMessage, commandId);
+                    commandStore.updateStatus(commandId, failure.toMessage());
+                } else if (cause instanceof Exception) {
+                    final Exception exception = (Exception) cause;
+                    log.errorHandling(exception, commandMessage, commandId);
+                    commandStore.updateStatus(commandId, exception);
+                } else {
+                    log.errorHandlingUnknown(cause, commandMessage, commandId);
+                    final Error error = Errors.fromThrowable(cause);
+                    commandStore.updateStatus(commandId, error);
+                }
+            }
+        };
+        op.execute();
     }
 }

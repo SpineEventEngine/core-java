@@ -25,10 +25,6 @@ import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandId;
-import org.spine3.base.Error;
-import org.spine3.base.Errors;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.base.Stringifiers;
@@ -56,7 +52,6 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for this central point of the framework.
 public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
@@ -127,7 +122,7 @@ public class CommandBus implements AutoCloseable {
                              Log log,
                              boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
-        this.commandStatusService = new CommandStatusService(commandStore);
+        this.commandStatusService = new CommandStatusService(commandStore, log);
         this.scheduler = checkNotNull(scheduler);
         this.log = checkNotNull(log);
         this.isThreadSpawnAllowed = threadSpawnAllowed;
@@ -313,38 +308,10 @@ public class CommandBus implements AutoCloseable {
     void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
             commandEndpoint.receive(commandEnvelope);
-            setStatusOk(commandEnvelope);
+            commandStatusService.setOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
-            updateCommandStatus(commandEnvelope, cause);
-        }
-    }
-
-    private void setStatusOk(CommandEnvelope envelope) {
-        final CommandId commandId = envelope.getCommandId();
-        commandStatusService.setOk(commandId);
-    }
-
-    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
-    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
-        if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-
-            log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-
-            commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
-        } else if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
-
-            log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-
-            commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
-        } else {
-
-            log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
-
-            final Error error = Errors.fromThrowable(cause);
-            commandStatusService.setToError(commandEnvelope.getCommandId(), error);
+            commandStatusService.updateCommandStatus(commandEnvelope, cause);
         }
     }
 

@@ -33,8 +33,6 @@ import java.util.Iterator;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.server.command.CommandScheduler.setSchedule;
@@ -101,11 +99,12 @@ class Rescheduler {
     }
 
     private void onScheduledCommandExpired(Command command) {
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         // We cannot post this command because there is no handler/dispatcher registered yet.
         // Also, posting it can be undesirable.
-        final Message msg = getMessage(command);
-        final CommandId id = getId(command);
+        final Message msg = commandEnvelope.getCommandMessage();
+        final CommandId id = commandEnvelope.getCommandId();
         commandBus.problemLog().errorExpiredCommand(msg, id);
-        commandBus.getCommandStatusService().setToError(id, commandExpiredError(msg));
+        commandBus.getCommandStatusService().setToError(commandEnvelope, commandExpiredError(msg));
     }
 }
