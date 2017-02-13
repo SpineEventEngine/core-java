@@ -31,7 +31,6 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.Values;
-import org.spine3.server.command.CommandBus;
 import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
@@ -220,7 +219,7 @@ public class Tests {
     /**
      * Returns {@code StringObserver} that does nothing.
      *
-     * <p>Use this method when you need to call {@link CommandBus#post(Command, StreamObserver)}
+     * <p>Use this method when you need to call {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)}
      * and observing results is not needed.
      */
     public static StreamObserver<Response> emptyObserver() {

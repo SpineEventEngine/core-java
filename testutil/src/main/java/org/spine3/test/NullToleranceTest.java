@@ -35,7 +35,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -525,11 +524,11 @@ public class NullToleranceTest {
          * <ul>
          *     <li>an empty string is used for the {@code String};
          *     <li>an empty array is used for the varargs and array parameters;
-         *     <li>the result of the {@link Collections#emptyList()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptyList()} call for the types
          *     derived from {@link List};</li>
-         *     <li>the result of the {@link Collections#emptySet()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptySet()} call for the types
          *     derived from {@link Set};</li>
-         *     <li>the result of the {@link Collections#emptyMap()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptyMap()} call for the types
          *     derived from {@link Map};</li>
          *     <li>the result of the {@link com.google.common.collect.Queues#newPriorityQueue()} call
          *     for the types derived from {@link Queue};</li>

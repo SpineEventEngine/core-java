@@ -28,7 +28,6 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
@@ -56,7 +55,7 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>To receive event messages a subscriber object should:
  * <ol>
  *    <li>Expose a {@code public} method that accepts an event message as the first parameter
- *        and an {@link EventContext} as the second (optional) parameter.
+ *        and an {@link org.spine3.base.EventContext} as the second (optional) parameter.
  *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
  *    <li>{@linkplain #subscribe(EventSubscriber) Register} with an instance of
  *    {@code EventBus} directly, or rely on message delivery from an {@link EventDispatcher}.

@@ -32,7 +32,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -248,7 +247,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
      * >FieldMask specs</a>.
      *
-     * <p>At this point only {@link EntityIdFilter} is supported.
+     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported.
      * All other filters are ignored.
      *
      * <p>Filtering by IDs set via {@code EntityIdFilter} is performed

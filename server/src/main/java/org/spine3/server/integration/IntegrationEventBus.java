@@ -29,7 +29,6 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Response;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.type.EventClass;
@@ -45,7 +44,7 @@ import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.
  * Allows to register {@link IntegrationEvent} subscribers and deliver events to them.
  *
  * <p>An integration event is sent between loosely coupled parts of a system.
- * Typically such parts would be implemented as {@link BoundedContext}s.
+ * Typically such parts would be implemented as {@link org.spine3.server.BoundedContext}s.
  *
  * @see Subscribe
  * @see EventBus
@@ -89,7 +88,7 @@ public class IntegrationEventBus {
     /**
      * Subscribes the passed object to receive {@link IntegrationEvent}s of the specified classes.
      *
-     * @param subscriber a subscriber to register (typically it is a {@link BoundedContext})
+     * @param subscriber a subscriber to register (typically it is a {@link org.spine3.server.BoundedContext})
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
     public void subscribe(IntegrationEventSubscriberImplBase subscriber, Iterable<Class<? extends Message>> eventClasses) {

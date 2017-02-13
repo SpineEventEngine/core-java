@@ -32,7 +32,6 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
@@ -75,7 +74,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * the same way as described in {@link CommandHandlingEntity}.
  *
  * <p>Event(s) returned by command handling methods are posted to
- * the {@link EventBus} automatically by {@link AggregateRepository}.
+ * the {@link org.spine3.server.event.EventBus} automatically by {@link AggregateRepository}.
  *
  * <h2>Adding event applier methods</h2>
  *
