@@ -35,6 +35,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Sample;
 import org.spine3.users.UserId;
 
 import java.util.List;
@@ -54,21 +55,9 @@ class Given {
     private Given() {
     }
 
-    static ProjectId newProjectId() {
-        final String uuid = newUuid();
-        return ProjectId.newBuilder()
-                        .setId(uuid)
-                        .build();
-    }
-
     static class EventMessage {
 
         private EventMessage() {
-        }
-
-        static ProjectCreated projectCreated() {
-            final ProjectId id = newProjectId();
-            return projectCreated(id, newUuid());
         }
 
         static ProjectCreated projectCreated(ProjectId id, String projectName) {
@@ -97,7 +86,7 @@ class Given {
         }
 
         static org.spine3.base.Event projectCreated() {
-            return projectCreated(newProjectId());
+            return projectCreated(Sample.messageOfType(ProjectId.class));
         }
 
         static org.spine3.base.Event projectCreated(ProjectId projectId) {
@@ -130,7 +119,7 @@ class Given {
     static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = newProjectId();
+        private static final ProjectId PROJECT_ID = Sample.messageOfType(ProjectId.class);
 
         private Command() {
         }

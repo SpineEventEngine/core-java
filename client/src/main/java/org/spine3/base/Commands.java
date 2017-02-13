@@ -94,6 +94,9 @@ public class Commands {
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
                                                ZoneOffset zoneOffset) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -152,6 +155,7 @@ public class Commands {
      * @return an unpacked message
      */
     public static <M extends Message> M getMessage(Command command) {
+        checkNotNull(command);
         final M result = AnyPacker.unpack(command.getMessage());
         return result;
     }
@@ -160,6 +164,7 @@ public class Commands {
      * Extracts a command ID from the passed {@code Command} instance.
      */
     public static CommandId getId(Command command) {
+        checkNotNull(command);
         final CommandId id = command.getContext()
                                     .getCommandId();
         return id;
@@ -169,6 +174,7 @@ public class Commands {
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
     public static Predicate<Command> wereAfter(final Timestamp from) {
+        checkNotNull(from);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
@@ -183,6 +189,8 @@ public class Commands {
      * Creates a predicate for filtering commands created withing given timerange.
      */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+        checkNotNull(from);
+        checkNotNull(to);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
@@ -194,6 +202,7 @@ public class Commands {
     }
 
     private static Timestamp getTimestamp(Command request) {
+        checkNotNull(request);
         final Timestamp result = request.getContext()
                                         .getTimestamp();
         return result;
@@ -205,6 +214,7 @@ public class Commands {
      * @param commands the command list to sort
      */
     public static void sort(List<Command> commands) {
+        checkNotNull(commands);
         Collections.sort(commands, new Comparator<Command>() {
             @Override
             public int compare(Command o1, Command o2) {
@@ -222,6 +232,8 @@ public class Commands {
      * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
+        checkNotNull(file);
+
         final String fqn = file.getName();
         final int startIndexOfFileName = fqn.lastIndexOf(FILE_PATH_SEPARATOR) + 1;
         final int endIndexOfFileName = fqn.lastIndexOf(FILE_EXTENSION_SEPARATOR);
@@ -237,6 +249,7 @@ public class Commands {
      * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
+        checkNotNull(command);
         final Schedule schedule = command.getContext()
                                          .getSchedule();
         final Duration delay = schedule.getDelay();
@@ -256,6 +269,9 @@ public class Commands {
      */
     @Internal
     public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
+        checkNotNull(command);
+        checkNotNull(schedulingTime);
+
         final Duration delay = command.getContext()
                                       .getSchedule()
                                       .getDelay();
@@ -273,7 +289,11 @@ public class Commands {
      */
     @Internal
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
+        checkNotNull(command);
+        checkNotNull(delay);
+        checkNotNull(schedulingTime);
         checkPositive(schedulingTime, "command scheduling time");
+
         final CommandContext context = command.getContext();
         final Schedule scheduleUpdated = context.getSchedule()
                                                 .toBuilder()
