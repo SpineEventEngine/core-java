@@ -60,9 +60,10 @@ public enum EntityField implements StorageField {
     timestamp_nanos,
 
     /**
-     * A field for storing the serialized {@link Message} bytes. This is the way to store objects of custom types within
-     * a strongly-typed storage (e.g. relational database) and make the read/write operations easy requiring
-     * no reflection.
+     * A field for storing the serialized {@link Message} bytes.
+     *
+     * <p>This is the way to store objects of custom types within a strongly-typed storage
+     * (e.g. relational database) and make the read/write operations easy requiring no reflection.
      *
      * @see Message#toByteArray()
      * @see Any#getValue()
@@ -70,8 +71,10 @@ public enum EntityField implements StorageField {
     value,
 
     /**
-     * A field representing a {@link TypeUrl} of a certain {@link Message} type. This field is commonly used in pair
-     * with {@link EntityField#value} to store the fully qualified type name with the type prefix.
+     * A field representing a {@link TypeUrl} of a certain {@link Message} type.
+     *
+     * <p>This field is commonly used in pair with {@link EntityField#value}
+     * to store the fully qualified type name with the type prefix.
      *
      * @see TypeUrl
      */

@@ -27,8 +27,8 @@ import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
 
 /**
- * A container for the storage fields specific for the {@link EventStorage} and its implementations and connected to
- * the {@link EventContext}.
+ * A container for the storage fields specific for the {@link EventStorage} and its implementations
+ * and connected to the {@link EventContext}.
  *
  * @author Dmytro Dashenkov
  * @see StorageField
@@ -37,7 +37,8 @@ import org.spine3.server.storage.StorageField;
 public enum EventContextField implements StorageField {
 
     /**
-     * A field representing the {@link EventContext#getEventId() event ID} stored in the {@link EventContext}.
+     * A field representing the {@link EventContext#getEventId() event ID} stored
+     * in the {@link EventContext}.
      */
     context_event_id,
 
@@ -47,8 +48,9 @@ public enum EventContextField implements StorageField {
     context_timestamp,
 
     /**
-     * A field representing the serialized {@link CommandContext}. This is not the only ay to store it, but it's
-     * acceptable.
+     * A field representing the serialized {@link CommandContext}.
+     *
+     * <p>This is not the only way to store it, but it's acceptable.
      */
     context_of_command,
 
