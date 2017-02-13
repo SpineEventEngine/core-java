@@ -21,8 +21,6 @@
 package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.MessageField;
 import org.spine3.server.error.MissingEntityIdException;
@@ -34,7 +32,7 @@ import org.spine3.server.error.MissingEntityIdException;
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @param <C> either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} type
  */
 abstract class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
 

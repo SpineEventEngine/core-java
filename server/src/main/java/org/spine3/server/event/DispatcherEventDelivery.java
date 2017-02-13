@@ -19,7 +19,6 @@
  */
 package org.spine3.server.event;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 
@@ -46,7 +45,8 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     }
 
     /**
-     * Creates an instance of event executor with a {@link MoreExecutors#directExecutor()} used for event dispatching.
+     * Creates an instance of event executor with a
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} used for event dispatching.
      *
      * @see EventDelivery#EventDelivery()
      */
@@ -66,7 +66,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
 
     /**
      * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT postpone any
-     * event dispatching and uses {@link MoreExecutors#directExecutor()} for operation.
+     * event dispatching and uses {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} for operation.
      *
      * @return the pre-configured default executor.
      */
@@ -79,7 +79,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
 
         /**
          * A pre-defined instance of the {@code DispatcherEventDelivery}, which does not postpone any event dispatching
-         * and uses {@link MoreExecutors#directExecutor()} for operation.
+         * and uses {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} for operation.
          */
         private static final DispatcherEventDelivery DIRECT_DELIVERY = new DispatcherEventDelivery() {
             @Override

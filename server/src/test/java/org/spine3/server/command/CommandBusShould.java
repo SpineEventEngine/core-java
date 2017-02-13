@@ -250,7 +250,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     /*
      * Command processing tests
      ***************************/
-    
+
     @Test
     public void post_command_and_return_OK_response() {
         commandBus.register(createProjectHandler);

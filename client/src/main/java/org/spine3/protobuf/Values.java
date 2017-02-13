@@ -25,7 +25,6 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
@@ -33,7 +32,7 @@ import com.google.protobuf.UInt64Value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for working with {@link Message} value wrapper objects.
+ * Utility class for working with {@link com.google.protobuf.Message} value wrapper objects.
  *
  * @author Alexander Litus
  */
