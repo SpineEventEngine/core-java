@@ -23,22 +23,31 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+import org.spine3.testdata.Sample;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 
 import java.lang.reflect.Constructor;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -49,15 +58,15 @@ import static org.spine3.test.Tests.currentTimeSeconds;
  */
 public class EntityShould {
 
-    private Project state = Given.newProject();
-    private Given.TestEntity entityNew;
-    private Given.TestEntity entityWithState;
+    private Project state = Sample.messageOfType(Project.class);
+    private TestEntity entityNew;
+    private TestEntity entityWithState;
 
     @Before
     public void setUp() {
-        state = Given.newProject();
-        entityNew = Given.TestEntity.newInstance(newUuid());
-        entityWithState = Given.TestEntity.withState();
+        state = Sample.messageOfType(Project.class);
+        entityNew = TestEntity.newInstance(newUuid());
+        entityWithState = TestEntity.withState();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
@@ -163,10 +172,9 @@ public class EntityShould {
 
     @Test
     public void validate_state_when_set_it() {
-        entityNew.setState(state, 0, getCurrentTime());
-
-        //TODO:2017-02-01:alexander.yevsyukov: Can we test it via Mockito spy?
-        assertTrue(entityNew.isValidateMethodCalled());
+        final TestEntity spyEntityNew = spy(entityNew);
+        spyEntityNew.setState(state, 0, getCurrentTime());
+        verify(spyEntityNew).validate(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
@@ -205,12 +213,10 @@ public class EntityShould {
 
     @Test
     public void record_modification_time_when_incrementing_version() {
+        final long timeBeforeincrement = currentTimeSeconds();
         entityNew.incrementVersion();
-        //TODO:2017-02-01:alexander.yevsyukov: This may not work if the code is executed on the bound of a second.
-        // Use Tests.FrozenMadHatterParty.
-        final long expectedTimeSec = currentTimeSeconds();
-
-        assertEquals(expectedTimeSec, entityNew.whenModified().getSeconds());
+        final long timeAfterIncrement = currentTimeSeconds();
+        assertThat(entityNew.whenModified().getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
     @Test
@@ -238,7 +244,7 @@ public class EntityShould {
 
     @Test
     public void return_id_class() {
-        final Class<String> actual = Entity.getIdClass(Given.TestEntity.class);
+        final Class<String> actual = Entity.getIdClass(TestEntity.class);
 
         assertEquals(String.class, actual);
     }
@@ -277,7 +283,7 @@ public class EntityShould {
 
     @Test
     public void generate_unique_hash_code_for_different_instances() {
-        final Given.TestEntity another = Given.TestEntity.withState();
+        final TestEntity another = TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
@@ -292,7 +298,7 @@ public class EntityShould {
     private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
-            super(Given.AggregateId.newProjectId());
+            super(Sample.messageOfType(ProjectId.class));
         }
     }
 
@@ -323,6 +329,22 @@ public class EntityShould {
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
+    }
+
+    private static Matcher<Long> isBetween(final Long lower, final Long higher) {
+        return new BaseMatcher<Long>() {
+            @Override
+            public boolean matches(Object o) {
+                assertThat(o, instanceOf(Long.class));
+                final Long number = (Long) o;
+                return number >= lower && number <= higher;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText(" must be between " + lower + " and " + higher +  ' ');
+            }
+        };
     }
 }
 

@@ -18,28 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
-
-import java.util.Set;
+import org.spine3.SPI;
+import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.status.EntityStatus;
 
 /**
- * Obtains a set of entity IDs based on an event/command message and its context.
+ * A container for the storage fields used to store the {@linkplain EntityStatus}.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} type
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
+@SPI
+public enum EntityStatusField implements StorageField {
 
     /**
-     * Obtains a set of entity IDs based on the passed event or command message and its context.
+     * A {@linkplain boolean} field representing weather the relevant record is {@code archived} or not.
      *
-     * @param message an event or a command message
-     * @param context either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} instance
-     * @return a set of entity identifiers
+     * @see Repository#markArchived
      */
-    Set<I> apply(M message, C context);
+    archived,
+
+    /**
+     * A {@linkplain boolean} field representing weather the relevant record is {@code deleted} or not.
+     *
+     * @see Repository#markDeleted
+     */
+    deleted
 }

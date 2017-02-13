@@ -48,6 +48,8 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
+import org.spine3.testdata.Sample;
+import org.spine3.test.Given;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -69,7 +71,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
 
-    private static final ProjectId ID = Given.AggregateId.newProjectId();
+    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
@@ -85,7 +87,11 @@ public class ProcessManagerShould {
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
-        processManager = new TestProcessManager(ID);
+        processManager = Given.processManagerOfClass(TestProcessManager.class)
+                              .withId(ID)
+                              .withVersion(2)
+                              .withState(Any.getDefaultInstance())
+                              .build();
     }
 
     @Test
@@ -95,14 +101,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreated());
+        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreated());
-        testDispatchEvent(Given.EventMessage.taskAdded());
-        testDispatchEvent(Given.EventMessage.projectStarted());
+        testDispatchEvent(Sample.messageOfType(ProjectCreated.class));
+        testDispatchEvent(Sample.messageOfType(TaskAdded.class));
+        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
@@ -112,7 +118,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(addTask());
     }
 
     @Test
@@ -120,9 +126,9 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        testDispatchCommand(Given.CommandMessage.createProject(ID));
-        testDispatchCommand(Given.CommandMessage.addTask(ID));
-        testDispatchCommand(Given.CommandMessage.startProject(ID));
+        testDispatchCommand(createProject());
+        testDispatchCommand(addTask());
+        testDispatchCommand(startProject());
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
@@ -134,7 +140,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final List<Event> events = testDispatchCommand(Given.CommandMessage.createProject(ID));
+        final List<Event> events = testDispatchCommand(createProject());
 
         assertEquals(1, events.size());
         final Event event = events.get(0);
@@ -154,7 +160,7 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        final List<Event> events = testDispatchCommand(Given.CommandMessage.startProject(ID));
+        final List<Event> events = testDispatchCommand(startProject());
 
         // There's only one event generated.
         assertEquals(1, events.size());
@@ -210,14 +216,15 @@ public class ProcessManagerShould {
         final CommandContext commandContext = commandFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
-        
+
         final IteratingCommandRouter router
                 = processManager.newIteratingRouterFor(commandMessage,
                                                        commandContext);
         assertNotNull(router);
 
         assertEquals(commandMessage, getMessage(router.getSource()));
-        assertEquals(commandContext, router.getSource().getContext());
+        assertEquals(commandContext, router.getSource()
+                                           .getContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -237,7 +244,44 @@ public class ProcessManagerShould {
         assertNotNull(router);
 
         assertEquals(commandMessage, getMessage(router.getSource()));
-        assertEquals(commandContext, router.getSource().getContext());
+        assertEquals(commandContext, router.getSource()
+                                           .getContext());
+    }
+
+    private static CreateProject createProject() {
+        return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static StartProject startProject() {
+        return ((StartProject.Builder) Sample.builderForType(StartProject.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static AddTask addTask() {
+        return ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static ProjectStarted projectStarted() {
+        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static ProjectCreated projectCreated() {
+        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static TaskAdded taskAdded() {
+        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+                .setProjectId(ID)
+                .build();
     }
 
     @SuppressWarnings("UnusedParameters") // OK for test class.
@@ -271,23 +315,29 @@ public class ProcessManagerShould {
         @Assign
         ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
-            return Given.EventMessage.projectCreated(command.getProjectId());
+            return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
 
         @Assign
         TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
-            return Given.EventMessage.taskAdded(command.getProjectId());
+            return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
 
         @Assign
         CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(AnyPacker.pack(command));
 
-            final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
+            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
             final CommandRouted route = newRouterFor(command, context)
-                                                     .add(addTask)
-                                                     .routeAll();
+                    .add(addTask)
+                    .routeAll();
             return route;
         }
     }

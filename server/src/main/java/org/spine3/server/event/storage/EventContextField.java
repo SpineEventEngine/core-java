@@ -18,26 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.event.storage;
 
 import org.spine3.SPI;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
+import org.spine3.server.event.EventStorage;
+import org.spine3.server.storage.StorageField;
 
 /**
- * The base interface for storages.
+ * A container for the storage fields specific for the {@link EventStorage} and its implementations
+ * and connected to the {@link EventContext}.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
 @SPI
-public interface Storage extends AutoCloseable {
+public enum EventContextField implements StorageField {
 
     /**
-     * Verifies is the storage is multitenant.
-     *
-     * <p>A multitenant storage should take into account a current tenant (obtained via {@link org.spine3.server.users.CurrentTenant#get()})
-     * when performing operations with the data it stores.
-     *
-     * @return {@code true} if the storage was created with multitenancy support, {@code false} otherwise
-     * @see org.spine3.server.users.CurrentTenant#get()
+     * A field representing the {@link EventContext#getEventId() event ID} stored
+     * in the {@link EventContext}.
      */
-    boolean isMultitenant();
+    context_event_id,
+
+    /**
+     * A field representing the {@link EventContext#getTimestamp() event posting time}.
+     */
+    context_timestamp,
+
+    /**
+     * A field representing the serialized {@link CommandContext}.
+     *
+     * <p>This is not the only way to store it, but it's acceptable.
+     */
+    context_of_command,
+
+    /**
+     * A field representing the {@link EventContext#getVersion() producer entity version}.
+     */
+    context_version
+
 }

@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.collect.MapMaker;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
@@ -36,7 +35,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 class DefaultStateRegistry {
 
     /**
-     * NOTE: The implementation is not customized with {@link MapMaker#makeMap()} options,
+     * NOTE: The implementation is not customized with {@link com.google.common.collect.MapMaker#makeMap()} options,
      * as it is difficult to predict which work best within the real end-user application scenarios.
      **/
     private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();

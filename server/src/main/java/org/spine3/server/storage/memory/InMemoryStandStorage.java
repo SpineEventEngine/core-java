@@ -32,7 +32,6 @@ import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -40,7 +39,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * In-memory implementation of {@link StandStorage}.
  *
- * <p>Uses a {@link ConcurrentMap} for internal storage.
+ * <p>Uses a {@link java.util.concurrent.ConcurrentMap} for internal storage.
  *
  * @author Alex Tymchenko
  */

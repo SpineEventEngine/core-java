@@ -35,7 +35,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -121,11 +120,7 @@ public class NullToleranceTest {
         final Iterable<Method> accessibleMethods = getAccessibleMethods(targetClass);
         final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
-            final Class[] parameterTypes = method.getParameterTypes();
-            final String methodName = method.getName();
-            final boolean excluded = excludedMethods.contains(methodName);
-            final boolean primitivesOnly = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
-            final boolean skipMethod = excluded || parameterTypes.length == 0 || primitivesOnly;
+            final boolean skipMethod = shouldSkipMethod(method);
             if (skipMethod) {
                 continue;
             }
@@ -138,6 +133,19 @@ public class NullToleranceTest {
 
         }
         return true;
+    }
+
+    @SuppressWarnings("OverlyComplexBooleanExpression")
+    private boolean shouldSkipMethod(Method method) {
+        final Class[] parameterTypes = method.getParameterTypes();
+        final String methodName = method.getName();
+        final boolean excluded = excludedMethods.contains(methodName);
+        final boolean primitivesOnly = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
+        final boolean syntheticMethod = method.isSynthetic();
+        return excluded
+                || parameterTypes.length == 0
+                || primitivesOnly
+                || syntheticMethod;
     }
 
     /**
@@ -389,7 +397,11 @@ public class NullToleranceTest {
                 }
             }
 
-            checkState(result != null);
+            checkState(
+                    result != null,
+                    String.format(
+                            "Could not generate a default value for %s type. Please, use addDefaultValue(I)",
+                            type.getCanonicalName()));
             return result;
         }
 
@@ -512,11 +524,11 @@ public class NullToleranceTest {
          * <ul>
          *     <li>an empty string is used for the {@code String};
          *     <li>an empty array is used for the varargs and array parameters;
-         *     <li>the result of the {@link Collections#emptyList()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptyList()} call for the types
          *     derived from {@link List};</li>
-         *     <li>the result of the {@link Collections#emptySet()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptySet()} call for the types
          *     derived from {@link Set};</li>
-         *     <li>the result of the {@link Collections#emptyMap()} call for the types
+         *     <li>the result of the {@link java.util.Collections#emptyMap()} call for the types
          *     derived from {@link Map};</li>
          *     <li>the result of the {@link com.google.common.collect.Queues#newPriorityQueue()} call
          *     for the types derived from {@link Queue};</li>
