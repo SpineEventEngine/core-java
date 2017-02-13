@@ -120,6 +120,9 @@ public class Commands {
                                                UserId userId,
                                                ZoneOffset zoneOffset,
                                                int targetVersion) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+
         final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         result.setTargetVersion(targetVersion);
 
