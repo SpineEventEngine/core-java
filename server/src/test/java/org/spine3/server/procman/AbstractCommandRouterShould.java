@@ -102,7 +102,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         });
 
         sourceMessage = newStringValue(getClass().getSimpleName());
-        sourceContext = commandFactory.createContext();
+        sourceContext = commandFactory.createCommandContext();
 
         router = createRouter(commandBus, sourceMessage, sourceContext);
         router.addAll(messages);
