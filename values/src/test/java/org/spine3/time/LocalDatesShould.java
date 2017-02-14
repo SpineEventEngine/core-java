@@ -81,7 +81,8 @@ public class LocalDatesShould {
         final LocalDate fewMonthsAgo = LocalDates.minusMonths(localDate, monthsToSubstract);
 
         assertTrue(year == fewMonthsAgo.getYear());
-        assertTrue(month.getNumber() - monthsToSubstract == fewMonthsAgo.getMonth().getNumber());
+        assertTrue(month.getNumber() - monthsToSubstract ==
+                   fewMonthsAgo.getMonth().getNumber());
         assertTrue(day == fewMonthsAgo.getDay());
     }
 

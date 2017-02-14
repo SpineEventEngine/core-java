@@ -71,7 +71,8 @@ public class OffsetTimesShould {
         assertEquals(seconds, time.getSeconds());
         assertEquals(millis, time.getMillis());
         assertEquals(nanos, time.getNanos());
-        assertEquals(ZONE_OFFSET.getAmountSeconds(), localTimeInDelhi.getOffset().getAmountSeconds());
+        assertEquals(ZONE_OFFSET.getAmountSeconds(),
+                     localTimeInDelhi.getOffset().getAmountSeconds());
     }
 
     @Test
