@@ -34,7 +34,6 @@ import org.spine3.server.storage.TenantDataOperation;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Commands.getId;
 
 /**
  * Manages commands received by the system.
@@ -145,9 +144,9 @@ public class CommandStore implements AutoCloseable {
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */
-    private void setCommandStatusOk(Command command) {
+    private void setCommandStatusOk(CommandId commandId) {
         checkNotClosed();
-        storage.setOkStatus(getId(command));
+        storage.setOkStatus(commandId);
     }
 
     /**
@@ -164,7 +163,7 @@ public class CommandStore implements AutoCloseable {
      * @param error the error, which occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    private void updateStatus(CommandId commandId, final Error error) {
+    private void updateStatus(CommandId commandId, Error error) {
         checkNotClosed();
         storage.updateStatus(commandId, error);
     }
@@ -176,7 +175,8 @@ public class CommandStore implements AutoCloseable {
      * @param failure the business failure occurred during command processing
      * @throws IllegalStateException if the storage is closed
      */
-    private void updateStatus(CommandId commandId, final Failure failure) {
+    private void updateStatus(CommandId commandId, Failure failure) {
+        checkNotClosed();
         storage.updateStatus(commandId, failure);
     }
 
@@ -185,7 +185,7 @@ public class CommandStore implements AutoCloseable {
         storage.close();
     }
 
-    /** Returns true if the store is open, false otherwise */
+    /** Returns {@code true} if the store is open, {@code false} otherwise */
     boolean isOpen() {
         final boolean isOpened = storage.isOpen();
         return isOpened;
@@ -212,7 +212,7 @@ public class CommandStore implements AutoCloseable {
             final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
                 @Override
                 public void run() {
-                    commandStore.setCommandStatusOk(commandEnvelope.getCommand());
+                    commandStore.setCommandStatusOk(commandEnvelope.getCommandId());
                 }
             };
             op.execute();
