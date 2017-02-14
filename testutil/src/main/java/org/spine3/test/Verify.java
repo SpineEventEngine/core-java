@@ -172,7 +172,8 @@ public final class Verify extends Assert {
     public static AssertionError mangledException(AssertionError e, int framesToPop) {
         e.fillInStackTrace();
         final StackTraceElement[] stackTrace = e.getStackTrace();
-        final StackTraceElement[] newStackTrace = new StackTraceElement[stackTrace.length - framesToPop];
+        final StackTraceElement[] newStackTrace =
+                new StackTraceElement[stackTrace.length - framesToPop];
         System.arraycopy(stackTrace, framesToPop, newStackTrace, 0, newStackTrace.length);
         e.setStackTrace(newStackTrace);
         throw e;
@@ -625,7 +626,9 @@ public final class Verify extends Assert {
         }
     }
 
-    private static void failOnSizeMismatch(String collectionName, int expectedSize, int actualSize) {
+    private static void failOnSizeMismatch(String collectionName,
+                                           int expectedSize,
+                                           int actualSize) {
         if (actualSize != expectedSize) {
             Assert.fail("Incorrect size for "
                     + collectionName
@@ -738,7 +741,8 @@ public final class Verify extends Assert {
     }
 
     /** Assert that the given {@link ImmutableCollection} contains the given item. */
-    public static void assertContains(Object expectedItem, ImmutableCollection<?> actualCollection) {
+    public static void assertContains(Object expectedItem,
+                                      ImmutableCollection<?> actualCollection) {
         try {
             assertContains("ImmutableCollection", expectedItem, actualCollection);
         } catch (AssertionError e) {
@@ -761,7 +765,8 @@ public final class Verify extends Assert {
             assertObjectNotNull(collectionName, actualCollection);
 
             if (!actualCollection.contains(expectedItem)) {
-                Assert.fail(collectionName + " did not contain expectedItem:<" + expectedItem + '>');
+                Assert.fail(collectionName + " did not contain expectedItem:<" +
+                            expectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1535,7 +1540,8 @@ public final class Verify extends Assert {
      * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of
      * the type {@code exceptionClass}, which contains a cause of type expectedCauseClass.
      * <p>
-     * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException} will be thrown.
+     * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException}
+     * will be thrown.
      * If a checked exception will be thrown, the form
      * {@link #assertThrowsWithCause(Class, Class, Callable)} may be more convenient.
      * <p>
