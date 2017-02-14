@@ -50,7 +50,7 @@ public class CommandBusBuilderShould {
                   .setCommandStore(Tests.<CommandStore>nullRef());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalStateException.class)
     public void not_allow_to_omit_setting_CommandStore() {
         CommandBus.newBuilder()
                   .build();
@@ -90,5 +90,24 @@ public class CommandBusBuilderShould {
         assertFalse(CommandBus.newBuilder()
                               .setThreadSpawnAllowed(false)
                               .isThreadSpawnAllowed());
+    }
+
+    @Test
+    public void verify_if_multitenant() {
+        assertTrue(CommandBus.newBuilder()
+                             .setMultitenant(true)
+                             .isMultitenant());
+        assertFalse(CommandBus.newBuilder()
+                              .setMultitenant(false)
+                              .isMultitenant());
+    }
+
+    @Test
+    public void set_command_store() {
+        final CommandStore commandStore = mock(CommandStore.class);
+
+        assertEquals(commandStore, CommandBus.newBuilder()
+                                             .setCommandStore(commandStore)
+                                             .getCommandStore());
     }
 }

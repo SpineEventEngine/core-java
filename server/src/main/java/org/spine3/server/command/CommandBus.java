@@ -38,6 +38,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -417,7 +418,9 @@ public class CommandBus implements AutoCloseable {
          * Builds an instance of {@link CommandBus}.
          */
         public CommandBus build() {
-            checkNotNull(commandStore, "CommandStore must be set");
+            checkState(commandStore != null,
+                       "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
+            );
 
             if(commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
