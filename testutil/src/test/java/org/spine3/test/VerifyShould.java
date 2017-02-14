@@ -137,7 +137,7 @@ public class VerifyShould {
     }
 
     @Test
-    public void pass_assertNotEquals_assertNotEquals_if_float_values_are_different_types_of_infinity() {
+    public void pass_assertNotEquals_if_float_values_are_different_types_of_infinity() {
         final float anyDeltaAcceptable = 0.0f;
         Verify.assertNotEquals(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, anyDeltaAcceptable);
         Verify.assertNotEquals(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, anyDeltaAcceptable);
@@ -1125,7 +1125,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(), throwsRuntimeException);
+        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(),
+                                     throwsRuntimeException);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -1138,7 +1139,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(EmptyStackException.class, null, throwsRuntimeException);
+        Verify.assertThrowsWithCause(EmptyStackException.class, null,
+                                     throwsRuntimeException);
     }
 
     @Test
@@ -1152,7 +1154,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(), throwsRuntimeException);
+        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(),
+                                     throwsRuntimeException);
     }
 
     @Test(expected = AssertionError.class)
@@ -1178,7 +1181,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(), throwsRuntimeException);
+        Verify.assertThrowsWithCause(runtimeException.getClass(), expectedCause.getClass(),
+                                     throwsRuntimeException);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -1191,7 +1195,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(EmptyStackException.class, null, throwsRuntimeException);
+        Verify.assertThrowsWithCause(EmptyStackException.class, null,
+                                     throwsRuntimeException);
     }
 
     @Test
@@ -1205,7 +1210,8 @@ public class VerifyShould {
             }
         };
 
-        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(), throwsRuntimeException);
+        Verify.assertThrowsWithCause(runtimeException.getClass(), cause.getClass(),
+                                     throwsRuntimeException);
     }
 
     @SuppressWarnings("EqualsAndHashcode")
@@ -1225,7 +1231,8 @@ public class VerifyShould {
                 return false;
             }
 
-            ClassThatViolateHashCodeAndCloneableContract that = (ClassThatViolateHashCodeAndCloneableContract) o;
+            ClassThatViolateHashCodeAndCloneableContract that =
+                    (ClassThatViolateHashCodeAndCloneableContract) o;
 
             return value == that.value;
         }
