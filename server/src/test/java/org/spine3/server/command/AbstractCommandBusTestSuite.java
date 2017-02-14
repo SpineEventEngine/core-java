@@ -26,9 +26,11 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
+import org.spine3.client.CommandFactory;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
@@ -51,14 +53,23 @@ public abstract class AbstractCommandBusTestSuite {
 
     private final boolean multitenant;
 
+    protected CommandFactory commandFactory;
+
     protected CommandBus commandBus;
     protected CommandStore commandStore;
+    protected CommandStore.StatusService commandStatusService;
+    protected Log log;
     protected EventBus eventBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected TestResponseObserver responseObserver;
 
-    protected AbstractCommandBusTestSuite(boolean multitenant) {
+    /**
+     * A public constructor for derived test cases.
+     *
+     * @param multitenant the multi-tenancy status of the {@code CommandBus} under tests
+     */
+    public AbstractCommandBusTestSuite(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
@@ -107,14 +118,17 @@ public abstract class AbstractCommandBusTestSuite {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
+        log = spy(new Log());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setThreadSpawnAllowed(true)
+                               .setLog(log)
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
+        commandFactory = TestCommandFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler(newUuid());
         responseObserver = new TestResponseObserver();
     }

@@ -42,8 +42,8 @@ public class CurrentTenant {
 
     /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder()
-                                                        .setValue("SINGLE_TENANT")
-                                                        .build();
+                                                         .setValue("SINGLE_TENANT")
+                                                         .build();
 
     /** Have only static methods for this class. */
     private CurrentTenant() {}

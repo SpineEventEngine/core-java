@@ -58,7 +58,7 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
-    private final CommandStatusService commandStatusService;
+    private final CommandStore.StatusService commandStatusService;
 
     private final CommandScheduler scheduler;
 
@@ -89,7 +89,7 @@ public class CommandBus implements AutoCloseable {
     private CommandBus(Builder builder) {
         this.multitenant = builder.multitenant;
         this.commandStore = builder.commandStore;
-        this.commandStatusService = new CommandStatusService(commandStore, builder.log);
+        this.commandStatusService = new CommandStore.StatusService(commandStore, builder.log);
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
@@ -149,9 +149,9 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     * Obtains the instance of the {@link CommandStore.StatusService} associated with this command bus.
      */
-    CommandStatusService getCommandStatusService() {
+    CommandStore.StatusService getCommandStatusService() {
         return commandStatusService;
     }
 
