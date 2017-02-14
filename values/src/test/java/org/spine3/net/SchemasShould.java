@@ -51,10 +51,11 @@ public class SchemasShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Schemas.class)
-                                                                     .addDefaultValue(Url.Record.Schema.UNDEFINED)
-                                                                     .build();
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(Schemas.class)
+                                 .addDefaultValue(Url.Record.Schema.UNDEFINED)
+                                 .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
     }

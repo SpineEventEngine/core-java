@@ -75,7 +75,8 @@ public class UrlParserShould {
         final String password = "root";
 
         final String userUrl = HTTP_PROTOCOL + "://" + userName + '@' + HOST;
-        final String userPasswordUrl = HTTP_PROTOCOL + "://" + userName + ':' + password + '@' + HOST;
+        final String userPasswordUrl = HTTP_PROTOCOL + "://" + userName + ':' +
+                                       password + '@' + HOST;
 
         final Url.Record record1 = new UrlParser(userUrl).parse()
                                                          .getRecord();
