@@ -28,6 +28,8 @@ import org.spine3.server.storage.CurrentTenant;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
+import static org.spine3.base.CommandValidationError.TENANT_INAPPLICABLE;
+import static org.spine3.server.command.Given.Command.createProject;
 
 /**
  * @author Alexander Yevsyukov
@@ -38,23 +40,38 @@ public class SingletenantCommandBusShould extends AbstractCommandBusTestSuite {
         super(false);
     }
 
+    @Override
     @Test
-    public void post_command_and_do_not_set_current_tenant_if_not_multitenant() {
+    public void setUp() {
+        super.setUp();
         commandBus.register(createProjectHandler);
+    }
 
+    @Test
+    public void post_command_and_do_not_set_current_tenant() {
         commandBus.post(newCommandWithoutTenantId(), responseObserver);
 
         assertFalse(CurrentTenant.get().isPresent());
     }
 
     @Test
-    public void return_InvalidCommandException_if_command_is_invalid() {
-        commandBus.register(createProjectHandler);
+    public void reject_invalid_command() {
         final Command cmd = newCommandWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
         checkCommandError(responseObserver.getThrowable(), INVALID_COMMAND, InvalidCommandException.class, cmd);
+        assertTrue(responseObserver.getResponses().isEmpty());
+    }
+
+    @Test
+    public void reject_multitenant_command_in_single_tenant_context() {
+        // Create a multi-tenant command.
+        final Command cmd = createProject();
+
+        commandBus.post(cmd, responseObserver);
+
+        checkCommandError(responseObserver.getThrowable(), TENANT_INAPPLICABLE, InvalidCommandException.class, cmd);
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 }
