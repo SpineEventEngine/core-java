@@ -20,25 +20,20 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.storage.CurrentTenant;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
-import org.spine3.users.TenantId;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
@@ -187,29 +182,6 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         responseObserver.assertResponseOkAndCompleted();
     }
-
-//TODO:2017-02-11:alexander.yevsyukov: Enable this test back when support for setting current tenant is made in repositories.
-// Make sure to update CommandBusShould.post_command_and_set_current_tenant_if_multitenant()
-// with checking that the tenant is set and restored. This cannot be done using Mockito. We need PowerMock for this.
-// See more at:
-//    http://stackoverflow.com/questions/21105403/mocking-static-methods-with-mockito
-//    https://github.com/powermock/powermock/wiki/MockitoUsage
-
-    @Ignore
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // we check in assertion
-    @Test
-    public void post_command_and_set_current_tenant_if_multitenant() {
-        commandBus.register(createProjectHandler);
-        final Command cmd = createProject();
-
-        commandBus.post(cmd, responseObserver);
-
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
-        assertTrue(currentTenant.isPresent());
-        assertEquals(cmd.getContext()
-                        .getTenantId(), currentTenant.get());
-    }
-
 
     @Test
     public void store_command_when_posted() {
