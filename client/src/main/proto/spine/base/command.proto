@@ -81,7 +81,7 @@ message CommandContext {
     // The zone offset from which the command is made.
     time.ZoneOffset zone_offset = 4 [(required) = true];
 
-    // The ID of a tenant in a multitenant application.
+    // The ID of a tenant in a multi-tenant application.
     //
     // This field is not populated in single-tenant applications.
     //
@@ -126,7 +126,7 @@ enum CommandValidationError {
     // The command message is invalid according to custom Protobuf options set.
     INVALID_COMMAND = 2;
 
-    // The command context does not have `tenant_id` attribute defined in a multitenant application.
+    // The command context does not have `tenant_id` attribute defined in a multi-tenant application.
     TENANT_UNKNOWN = 3;
 
     // The command context has non-default value of `tenant_id` in the command sent to a single-tenant application.

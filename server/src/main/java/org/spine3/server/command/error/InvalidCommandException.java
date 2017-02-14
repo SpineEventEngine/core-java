@@ -88,12 +88,12 @@ public class InvalidCommandException extends CommandException {
 
     /**
      * Creates an exception for a command with missing {@code tenant_id} attribute in the {@code CommandContext},
-     * which is required in a multitenant application.
+     * which is required in a multi-tenant application.
      */
     public static InvalidCommandException onMissingTenantId(Command command) {
         final CommandInfo cmd = CommandInfo.of(command);
         final String errMsg = format(
-                "The command (class: %s, type: %s, id: %s) was posted to multitenant CommandBus, " +
+                "The command (class: %s, type: %s, id: %s) was posted to multi-tenant CommandBus, " +
                 "but has no tenant_id attribute set in the command context.",
                 cmd.getCommandClass(),
                 cmd.getTypeName(),
@@ -104,7 +104,7 @@ public class InvalidCommandException extends CommandException {
 
     /**
      * Creates an error for a command with missing {@code CommandContext.tenant_id} attribute
-     * which is required in a multitenant application.
+     * which is required in a multi-tenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()

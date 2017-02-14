@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
 import org.junit.Test;
-import org.spine3.server.storage.CurrentTenant;
 import org.spine3.test.Tests;
 import org.spine3.users.TenantId;
 
@@ -30,8 +29,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newTenantId;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class CurrentTenantShould {
 
     @Test
@@ -52,7 +51,7 @@ public class CurrentTenantShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // we check isPresent() in assertion
     @Test
     public void keep_set_value() {
-        final TenantId expected = TenantId.newBuilder().setValue(getClass().getSimpleName()).build();
+        final TenantId expected = newTenantId(getClass());
 
         CurrentTenant.set(expected);
 
@@ -63,7 +62,7 @@ public class CurrentTenantShould {
 
     @Test
     public void clear_set_value() {
-        final TenantId value = TenantId.newBuilder().setValue(getClass().getSimpleName()).build();
+        final TenantId value = newTenantId(getClass());
         CurrentTenant.set(value);
 
         CurrentTenant.clear();

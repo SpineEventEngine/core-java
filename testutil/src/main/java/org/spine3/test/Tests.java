@@ -40,6 +40,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Utilities for testing.
@@ -140,9 +141,27 @@ public class Tests {
      * Generates a new UUID-based {@code TenantId}.
      */
     public static TenantId newTenantUuid() {
+        return newTenantId(newUuid());
+    }
+
+    /**
+     * Creates a new {@code TenantId} with the passed value.
+     *
+     * @param value must be non-null, not empty, and not-blank
+     * @return new {@code TenantId}
+     */
+    public static TenantId newTenantId(String value) {
+        checkNotEmptyOrBlank(value, TenantId.class.getSimpleName());
         return TenantId.newBuilder()
-                       .setValue(newUuid())
+                       .setValue(value)
                        .build();
+    }
+
+    /**
+     * Creates a test instance of {@code TenantId} with the simple name of the passed test class.
+     */
+    public static TenantId newTenantId(Class<?> testClass) {
+        return newTenantId(testClass.getSimpleName());
     }
 
     /**

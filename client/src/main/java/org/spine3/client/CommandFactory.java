@@ -158,7 +158,7 @@ public class CommandFactory {
         }
 
         /**
-         * Sets the ID of a tenant in a multitenant application to which this user belongs.
+         * Sets the ID of a tenant in a multi-tenant application to which this user belongs.
          *
          * @param tenantId the ID of the tenant or null for single-tenant applications
          */

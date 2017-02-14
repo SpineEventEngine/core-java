@@ -427,7 +427,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             if (commandBus == null) {
                 commandBus = createCommandBus(storageFactory);
             } else {
-                // Check that both either multitenant or not multitenant.
+                // Check that both either multi-tenant or single-tenant.
                 checkState(multitenant == commandBus.isMultitenant(),
                            "CommandBus must match multitenancy of BoundedContext. " +
                            "Status in BoundedContext.Builder: %s CommandBus: %s",

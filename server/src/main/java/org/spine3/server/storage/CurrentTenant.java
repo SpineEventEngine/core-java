@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * This class allows to set a tenant when handling a command or a query
- * in a multitenant application.
+ * This class allows to obtain a ID of the current tenant when handling
+ * a command or a query in a multi-tenant application.
  *
  * @author Alexander Yevsyukov
  * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
@@ -56,21 +56,10 @@ public class CurrentTenant {
     }
 
     /**
-     * Sets the ID of the tenant served in the current thread.
-     *
-     * @param tenantId a non-null and non-default instance of {@code TenantId}
-     */
-    public static void set(TenantId tenantId) {
-        checkNotNull(tenantId);
-        checkArgument(isNotDefault(tenantId));
-        threadLocal.set(tenantId);
-    }
-
-    /**
      * Obtains the ID of a tenant served in the current thread.
      *
      * @return ID of the tenant or {@linkplain Optional#absent() empty Optional} if
-     *         the current thread works not in a multitenant context
+     *         the current thread works not in a multi-tenant context
      */
     public static Optional<TenantId> get() {
         final TenantId result = threadLocal.get();
@@ -78,10 +67,36 @@ public class CurrentTenant {
     }
 
     /**
-     * Clears the stored value.
+     * Ensures that there is {@code TenantId} set for the current execution context.
+     *
+     * <p>If this is not the case, {@code IllegalStateException} will be thrown.
+     *
+     * @return the ID of the current tenant
+     * @throws IllegalStateException if the is no current tenant ID set
      */
-    public static void clear() {
-        threadLocal.set(null);
+    public static TenantId ensure() throws IllegalStateException {
+        final Optional<TenantId> currentTenant = get();
+        if (!currentTenant.isPresent()) {
+            throw new IllegalStateException("No current TenantId set in multi-tenant execution context.");
+        }
+        return currentTenant.get();
     }
 
+    /**
+     * Sets the ID of the tenant served in the current thread.
+     *
+     * @param tenantId a non-null and non-default instance of {@code TenantId}
+     */
+    static void set(TenantId tenantId) {
+        checkNotNull(tenantId);
+        checkArgument(isNotDefault(tenantId));
+        threadLocal.set(tenantId);
+    }
+
+    /**
+     * Clears the stored value.
+     */
+    static void clear() {
+        threadLocal.set(null);
+    }
 }

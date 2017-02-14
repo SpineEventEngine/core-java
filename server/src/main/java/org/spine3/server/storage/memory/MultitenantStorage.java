@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Optional;
 import org.spine3.server.storage.CurrentTenant;
 import org.spine3.users.TenantId;
 
@@ -68,14 +67,7 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
         if (!isMultitenant()) {
             return CurrentTenant.singleTenant();
         }
-
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
-
-        if (!currentTenant.isPresent()) {
-            throw new IllegalStateException("No current tenant found in multitenant execution context.");
-        }
-
-        return currentTenant.get();
+        return CurrentTenant.ensure();
     }
 
     abstract S createSlice();
@@ -83,5 +75,4 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
     boolean isMultitenant() {
         return multitenant;
     }
-
 }

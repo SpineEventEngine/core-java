@@ -38,9 +38,9 @@ import org.spine3.server.stand.StandStorage;
 public interface StorageFactory extends AutoCloseable {
 
     /**
-     * Verifies if the storage factory is configured to serve a multitenant application.
+     * Verifies if the storage factory is configured to serve a multi-tenant application.
      *
-     * @return {@code true} if the factory would produce multitenant storages, {@code false} otherwise
+     * @return {@code true} if the factory would produce multi-tenant storages, {@code false} otherwise
      */
     boolean isMultitenant();
 
