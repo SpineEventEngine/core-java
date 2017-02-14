@@ -80,9 +80,8 @@ public class UrlParserShould {
 
         final Url.Record record1 = new UrlParser(userUrl).parse()
                                                          .getRecord();
-        final String user1 = record1
-                .getAuth()
-                .getUserName();
+        final String user1 = record1.getAuth()
+                                    .getUserName();
         assertEquals(userName, user1);
 
         final Url.Record record2 = new UrlParser(userPasswordUrl).parse()
@@ -141,7 +140,7 @@ public class UrlParserShould {
         final Url url = new UrlParser(rawUrl).parse();
 
         final List<Url.Record.QueryParameter> queries = url.getRecord()
-                                                             .getQueryList();
+                                                           .getQueryList();
 
         assertEquals(2, queries.size());
 
