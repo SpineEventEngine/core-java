@@ -29,7 +29,7 @@ import java.lang.reflect.Constructor;
  */
 public abstract class ReflectiveBuilder<T> {
 
-    /** The class of the object we create. */
+    /** The class of the object we createCommand. */
     private Class<T> resultClass;
 
     /** Constructor for use by subclasses. */

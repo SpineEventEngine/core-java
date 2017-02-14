@@ -32,8 +32,6 @@ import org.spine3.users.UserId;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.createCommand;
-import static org.spine3.base.Commands.createContext;
 
 /**
  * The factory to generate new {@link Command} instances.
@@ -101,10 +99,10 @@ public class CommandFactory {
      * @param message the command message
      * @return new command instance
      */
-    public Command create(Message message) {
+    public Command createCommand(Message message) {
         checkNotNull(message);
-        final CommandContext context = createCommandContext();
-        final Command result = createCommand(message, context);
+        final CommandContext context = createContext();
+        final Command result = Commands.createCommand(message, context);
         return result;
     }
 
@@ -118,12 +116,12 @@ public class CommandFactory {
      *                      the commands can be applied to any entity
      * @return new command instance
      */
-    public Command create(Message message, int targetVersion) {
+    public Command createCommand(Message message, int targetVersion) {
         checkNotNull(message);
         checkNotNull(targetVersion);
 
         final CommandContext context = createContext(targetVersion);
-        final Command result = createCommand(message, context);
+        final Command result = Commands.createCommand(message, context);
         return result;
     }
 
@@ -137,7 +135,7 @@ public class CommandFactory {
     /**
      * Creates command context for a new command.
      */
-    protected CommandContext createCommandContext() {
+    protected CommandContext createContext() {
         return Commands.createContext(getTenantId(), getActor(), getZoneOffset());
     }
 

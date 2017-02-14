@@ -107,7 +107,7 @@ public class CommandFactoryShould {
         // into this range. The purpose of this test is to make sure it works with this precision
         // and to add coverage.
         final Timestamp beforeCall = Timestamps.secondsAgo(1);
-        final Command command = commandFactory.create(StringValue.getDefaultInstance());
+        final Command command = commandFactory.createCommand(StringValue.getDefaultInstance());
         final Timestamp afterCall = Timestamps.secondsFromNow(1);
 
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
@@ -115,7 +115,7 @@ public class CommandFactoryShould {
 
     @Test
     public void create_new_instance_with_entity_version() {
-        final Command command = commandFactory.create(StringValue.getDefaultInstance(), 2);
+        final Command command = commandFactory.createCommand(StringValue.getDefaultInstance(), 2);
 
         assertEquals(2, command.getContext().getTargetVersion());
     }
@@ -130,7 +130,7 @@ public class CommandFactoryShould {
                                                               .setActor(actor)
                                                               .setZoneOffset(zoneOffset)
                                                               .build();
-        final Command command = mtCommandFactory.create(StringValue.getDefaultInstance());
+        final Command command = mtCommandFactory.createCommand(StringValue.getDefaultInstance());
 
         assertEquals(tenantId, command.getContext().getTenantId());
     }

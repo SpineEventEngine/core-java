@@ -95,7 +95,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * <p>The context may optionally have custom attributes added by
      * {@link #extendEventContext(EventContext.Builder, Message, CommandContext)}.
      *
-     * @param event          the event for which to create the context
+     * @param event          the event for which to createCommand the context
      * @param commandContext the context of the command, execution of which produced the event
      * @return new instance of the {@code EventContext}
      * @see #extendEventContext(EventContext.Builder, Message, CommandContext)

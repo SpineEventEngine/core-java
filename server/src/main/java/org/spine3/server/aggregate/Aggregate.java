@@ -57,7 +57,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  *
  * <h2>Creating an aggregate class</h2>
  *
- * <p>In order to create a new aggregate class you need to:
+ * <p>In order to createCommand a new aggregate class you need to:
  * <ol>
  *     <li>Select a type for identifiers of the aggregate.
  *      If you select to use a typed identifier (which is recommended),

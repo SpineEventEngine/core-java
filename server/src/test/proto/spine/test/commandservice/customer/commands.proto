@@ -29,7 +29,7 @@ option java_multiple_files = true;
 import "spine/annotations.proto";
 import "spine/test/commandservice/customer/customer.proto";
 
-// A request to create a new customer record.
+// A request to createCommand a new customer record.
 message CreateCustomer {
     // The ID of the customer.
     // Even though we have an ID field defined in the `Customer` type, we need a separate ID field in the command

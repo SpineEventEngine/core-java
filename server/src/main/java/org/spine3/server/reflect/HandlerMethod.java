@@ -189,10 +189,10 @@ public abstract class HandlerMethod<C extends Message> {
 
     /**
      * The interface for factory objects that can filter {@link Method} objects
-     * that represent handler methods and create corresponding {@code HandlerMethod} instances
+     * that represent handler methods and createCommand corresponding {@code HandlerMethod} instances
      * that wrap those methods.
      *
-     * @param <H> the type of the handler method objects to create
+     * @param <H> the type of the handler method objects to createCommand
      */
     public interface Factory<H extends HandlerMethod> {
 

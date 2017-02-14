@@ -75,14 +75,14 @@ public abstract class CommandTest<C extends Message> {
      * <p>The created command and its content can be obtained via {@link #command()},
      * {@link #commandMessage()}, {@link #commandContext()}.
      *
-     * <p>Subsequent call to this method will create another command and
+     * <p>Subsequent call to this method will createCommand another command and
      * overwrite the previously stored one.
      *
      * @return created command instance
      */
     protected Command createCommand(C commandMessage) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = commandFactory.create(commandMessage);
+        this.command = commandFactory.createCommand(commandMessage);
         return this.command;
     }
 
@@ -92,11 +92,11 @@ public abstract class CommandTest<C extends Message> {
      * <p>Use this method for creating commands of types different than
      * one which is the subject of the test suite (defined by the generic type {@code <C>}.
      *
-     * @param commandMessage the message of the command to create
+     * @param commandMessage the message of the command to createCommand
      * @return new command instance
      */
     protected Command createDifferentCommand(Message commandMessage) {
-        return commandFactory.create(checkNotNull(commandMessage));
+        return commandFactory.createCommand(checkNotNull(commandMessage));
     }
 
     /**
@@ -105,7 +105,7 @@ public abstract class CommandTest<C extends Message> {
      * <p>Use this method for creating commands of types different than
      * one which is the subject of the test suite (defined by the generic type {@code <C>}.
      *
-     * @param commandMessage the message of the command to create
+     * @param commandMessage the message of the command to createCommand
      * @param timestamp the moment in time at which the command was created
      * @return new command instance
      */
@@ -119,14 +119,14 @@ public abstract class CommandTest<C extends Message> {
      * <p>The created command and its content can be obtained via {@link #command()},
      * {@link #commandMessage()}, {@link #commandContext()}.
      *
-     * <p>Subsequent call to this method will create another command and
+     * <p>Subsequent call to this method will createCommand another command and
      * overwrite the previously stored one.
      *
      * @return created command instance
      */
     protected Command createCommand(C commandMessage, Timestamp timestamp) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = adjustTimestamp(commandFactory.create(commandMessage), checkNotNull(timestamp));
+        this.command = adjustTimestamp(commandFactory.createCommand(commandMessage), checkNotNull(timestamp));
         return this.command;
     }
 
@@ -158,7 +158,7 @@ public abstract class CommandTest<C extends Message> {
     }
 
     /**
-     * Implement this method to create and store the reference to the object
+     * Implement this method to createCommand and store the reference to the object
      * which handles the command we test.
      *
      * <p>This method must be called in derived test suites in methods

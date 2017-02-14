@@ -150,14 +150,14 @@ public class CommandsShould {
 
     @Test
     public void extract_id_from_command() {
-        final Command command = commandFactory.create(stringValue);
+        final Command command = commandFactory.createCommand(stringValue);
 
         assertEquals(command.getContext().getCommandId(), getId(command));
     }
 
     @Test
     public void create_wereAfter_predicate() {
-        final Command command = commandFactory.create(BoolValue.getDefaultInstance());
+        final Command command = commandFactory.createCommand(BoolValue.getDefaultInstance());
         assertTrue(Commands.wereAfter(secondsAgo(5))
                            .apply(command));
     }
@@ -216,7 +216,7 @@ public class CommandsShould {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = commandFactory.create(stringValue);
+        final Command cmd = commandFactory.createCommand(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations.ofMinutes(5);
 
@@ -229,7 +229,7 @@ public class CommandsShould {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = commandFactory.create(stringValue);
+        final Command cmd = commandFactory.createCommand(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);

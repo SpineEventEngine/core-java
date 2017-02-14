@@ -213,7 +213,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * <p>Implementations are responsible for properly calling the factory
      * for creating the storage, which is compatible with the repository.
      *
-     * @param factory the factory to create the storage
+     * @param factory the factory to createCommand the storage
      * @return the created storage instance
      */
     protected abstract Storage createStorage(StorageFactory factory);

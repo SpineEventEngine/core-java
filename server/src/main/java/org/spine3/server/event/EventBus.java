@@ -405,7 +405,7 @@ public class EventBus implements AutoCloseable {
          * value is not used.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an instance of {@code EventBus}.
+         * to createCommand an instance of {@code EventBus}.
          */
         @Nullable
         private StorageFactory storageFactory;
@@ -417,7 +417,7 @@ public class EventBus implements AutoCloseable {
          * with the help of the {@code StorageFactory}.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an instance of {@code EventBus}.
+         * to createCommand an instance of {@code EventBus}.
          */
         @Nullable
         private EventStore eventStore;
@@ -470,12 +470,12 @@ public class EventBus implements AutoCloseable {
         /**
          * Specifies an {@code StorageFactory} to configure this {@code EventBus}.
          *
-         * <p>This {@code StorageFactory} instance will be used to create
+         * <p>This {@code StorageFactory} instance will be used to createCommand
          * an instance of {@code EventStore} for this {@code EventBus},
          * <em>if</em> {@code EventStore} was not explicitly set in the builder.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
-         * to create an {@code EventBus}.
+         * to createCommand an {@code EventBus}.
          *
          * @see #setEventStore(EventStore)
          */
@@ -496,7 +496,7 @@ public class EventBus implements AutoCloseable {
          * nor {@link #setStorageFactory(StorageFactory)} were called before.
          *
          * <p>Either a {@code StorageFactory} or an {@code EventStore} must be set
-         * to create an {@code EventBus}.
+         * to createCommand an {@code EventBus}.
          *
          * @see #setEventStoreStreamExecutor(Executor)
          * @see #setStorageFactory(StorageFactory)
