@@ -57,7 +57,6 @@ public abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected CommandStore commandStore;
-    protected CommandStore.StatusService commandStatusService;
     protected Log log;
     protected EventBus eventBus;
     protected ExecutorCommandScheduler scheduler;
