@@ -60,6 +60,7 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     apply plugin: 'idea'
+    apply plugin: 'java'
 
     group = 'org.spine3'
     version = spineVersion
@@ -100,7 +101,6 @@ subprojects {
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
     }
 
-    apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
 
     sourceCompatibility = 1.7
@@ -217,6 +217,13 @@ subprojects {
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
         classifier "test"
+    }
+
+    task noInternalJavadoc(type: Javadoc) {
+        source = sourceSets.main.allJava
+        classpath = sourceSets.main.compileClasspath
+        options.doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
+        options.docletpath(file(project(':tools').jar.archivePath))
     }
 
     idea.module.iml {
