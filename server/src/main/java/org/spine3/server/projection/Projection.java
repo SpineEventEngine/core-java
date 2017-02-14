@@ -30,6 +30,7 @@ import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static java.lang.String.format;
 import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
 
 /**
@@ -86,8 +87,8 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = String.format("Missing event handler for event class %s in the stream projection class %s",
-                                         eventClass, this.getClass());
+        final String msg = format("Missing event handler for event class %s in the stream projection class %s",
+                                   eventClass, this.getClass());
         return new IllegalStateException(msg);
     }
 
