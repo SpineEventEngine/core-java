@@ -24,6 +24,8 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
 
+import static java.lang.String.format;
+
 /**
  * A helper class for finding and checking {@code AggregatePartRepository}.
  *
@@ -74,7 +76,7 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // as this is the purpose of the method
     private AggregateRepository<?, ?> checkFound(Optional<? extends AggregateRepository<?, ?>> rawRepo) {
         if (!rawRepo.isPresent()) {
-            final String errMsg = String.format("Unable to find repository for the state class: %s", stateClass);
+            final String errMsg = format("Unable to find repository for the state class: %s", stateClass);
             throw new IllegalStateException(errMsg);
         } else {
             return rawRepo.get();
@@ -89,7 +91,7 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      */
     private static void checkIsAggregatePartRepository(AggregateRepository<?, ?> repo) {
         if (!(repo instanceof AggregatePartRepository)) {
-            final String errMsg = String.format("The repository `%s` is not an instance of `%s`",
+            final String errMsg = format("The repository `%s` is not an instance of `%s`",
                                                 repo, AggregatePartRepository.class);
             throw new IllegalStateException(errMsg);
         }
@@ -102,7 +104,7 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
             AggregatePartRepository<?, ?> repo) {
         final Class<?> repoIdClass = repo.getIdClass();
         if (!idClass.equals(repoIdClass)) {
-            final String errMsg = String.format(
+            final String errMsg = format(
                     "The ID class of the aggregate part repository (%s) " +
                             "does not match the ID class of the AggregateRoot (%s)",
                     repoIdClass, idClass);
