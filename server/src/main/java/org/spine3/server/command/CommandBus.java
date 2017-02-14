@@ -20,8 +20,8 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
@@ -31,6 +31,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
@@ -41,9 +42,11 @@ import org.spine3.util.Environment;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -58,9 +61,7 @@ public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
 
-    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
-
-    private final HandlerRegistry handlerRegistry = new HandlerRegistry();
+    private final CommandEndpointRegistry commandEndpoints = new CommandEndpointRegistry();
 
     private final CommandStore commandStore;
 
@@ -168,9 +169,7 @@ public class CommandBus implements AutoCloseable {
      * @return a set of classes of supported commands
      */
     public Set<CommandClass> getSupportedCommandClasses() {
-        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
-                                                    handlerRegistry.getCommandClasses());
-        return result;
+        return commandEndpoints.getSupportedCommandClasses();
     }
 
     /**
@@ -187,8 +186,7 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
      */
     public void register(CommandDispatcher dispatcher) {
-        handlerRegistry.checkNoHandlersRegisteredForCommandsOf(dispatcher);
-        dispatcherRegistry.register(dispatcher);
+        commandEndpoints.register(checkNotNull(dispatcher));
     }
 
     /**
@@ -200,7 +198,7 @@ public class CommandBus implements AutoCloseable {
      * @param dispatcher the dispatcher to unregister
      */
     public void unregister(CommandDispatcher dispatcher) {
-        dispatcherRegistry.unregister(dispatcher);
+        commandEndpoints.unregister(checkNotNull(dispatcher));
     }
 
     /**
@@ -210,8 +208,7 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if the handler does not have command handling methods
      */
     public void register(CommandHandler handler) {
-        dispatcherRegistry.checkNoDispatchersRegisteredForCommandsOf(handler);
-        handlerRegistry.register(handler);
+        commandEndpoints.register(checkNotNull(handler));
     }
 
     /**
@@ -220,7 +217,11 @@ public class CommandBus implements AutoCloseable {
      * @param handler the handler to unregister
      */
     public void unregister(CommandHandler handler) {
-        handlerRegistry.unregister(handler);
+        commandEndpoints.unregister(checkNotNull(handler));
+    }
+
+    private Optional<CommandEndpoint> getEndpoint(CommandClass commandClass) {
+        return commandEndpoints.get(commandClass);
     }
 
     /**
@@ -236,43 +237,58 @@ public class CommandBus implements AutoCloseable {
      * @param responseObserver the observer to return the result of the call
      */
     public void post(Command command, StreamObserver<Response> responseObserver) {
-        final CommandClass commandClass = CommandClass.of(command);
+        checkNotNull(command);
+        checkNotNull(responseObserver);
+        checkArgument(isNotDefault(command));
+
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
+
+        final Optional<CommandEndpoint> commandEndpoint = getEndpoint(commandClass);
 
         // If the command is not supported, return as error.
-        if (!isSupportedCommand(commandClass)) {
+        if (!commandEndpoint.isPresent()) {
             handleUnsupported(command, responseObserver);
             return;
         }
+
         if (!filter.handleValidation(command, responseObserver)) {
             return;
         }
+
         if (isScheduled(command)) {
             scheduleAndStore(command, responseObserver);
             return;
         }
+
         if (isMultitenant) {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
+
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
-        doPost(command);
+        doPost(commandEnvelope, commandEndpoint.get());
         responseObserver.onCompleted();
     }
 
     /**
-     * Checks if a command is supported by the {@code CommandBus}.
-     *
-     * @param commandClass a class of commands to check
-     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
-     *      for commands of this type, {@code false} otherwise
+     * Passes a previously scheduled command to the corresponding endpoint.
      */
-    @VisibleForTesting
-    boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
+    void postPreviouslyScheduled(Command command) {
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
+        if (!endpoint.isPresent()) {
+            throw noEndpointFound(commandEnvelope);
+        }
+        doPost(commandEnvelope, endpoint.get());
+    }
+
+    private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
+        final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
+        final String msg = String.format("No endpoint found for the command (class: %s id: %s).",
+                                         commandEnvelope.getCommandClass(), idStr);
+        throw new IllegalStateException(msg);
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -291,39 +307,12 @@ public class CommandBus implements AutoCloseable {
     /**
      * Directs a command to be dispatched or handled.
      *
-     * <p>Logs exceptions which may occur during dispatching or handling and
-     * sets the command status to {@code error} or {@code failure} in the storage.
-     *
-     * @param command a command to post
+     * @param commandEnvelope a command to post
+     * @param commandEndpoint the endpoint to process the command
      */
-    void doPost(Command command) {
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
-        final CommandClass commandClass = commandEnvelope.getCommandClass();
-        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
-            dispatch(commandEnvelope);
-        } else if (handlerRegistry.handlerRegistered(commandClass)) {
-            invokeHandler(commandEnvelope);
-        }
-    }
-
-    private void dispatch(CommandEnvelope envelope) {
-        final CommandClass commandClass = envelope.getCommandClass();
-        final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
+    void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
-            dispatcher.dispatch(envelope.getCommand());
-            setStatusOk(envelope);
-        } catch (RuntimeException e) {
-            final Throwable cause = Throwables.getRootCause(e);
-            updateCommandStatus(envelope, cause);
-        }
-    }
-
-    private void invokeHandler(CommandEnvelope commandEnvelope) {
-        final CommandClass commandClass = commandEnvelope.getCommandClass();
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        try {
-            handler.handle(commandEnvelope.getCommandMessage(),
-                           commandEnvelope.getCommandContext());
+            commandEndpoint.receive(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = Throwables.getRootCause(e);
@@ -369,10 +358,21 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
+    /**
+     * Closes the instance, preventing any for further posting of commands.
+     *
+     * <p>The following operations are performed:
+     * <ol>
+     *     <li>All command handlers and dispatchers are un-registered.
+     *     <li>{@code CommandStore} is closed.
+     *     <li>{@code CommandScheduler} is shut down.
+     * </ol>
+     *
+     * @throws Exception if closing the {@code CommandStore} cases an exception
+     */
     @Override
     public void close() throws Exception {
-        dispatcherRegistry.unregisterAll();
-        handlerRegistry.unregisterAll();
+        commandEndpoints.unregisterAll();
         commandStore.close();
         scheduler.shutdown();
     }

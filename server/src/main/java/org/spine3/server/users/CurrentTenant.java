@@ -20,10 +20,9 @@
 
 package org.spine3.server.users;
 
+import com.google.common.base.Optional;
 import org.spine3.SPI;
 import org.spine3.users.TenantId;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -58,12 +57,12 @@ public class CurrentTenant {
     /**
      * Obtains the ID of a tenant served in the current thread.
      *
-     * @return ID of the tenant or {@code null} if this thread works not in a multitenant context
+     * @return ID of the tenant or {@linkplain Optional#absent() empty Optional} if
+     *         the current thread works not in a multitenant context
      */
-    @Nullable
-    public static TenantId get() {
+    public static Optional<TenantId> get() {
         final TenantId result = threadLocal.get();
-        return result;
+        return Optional.fromNullable(result);
     }
 
     /**
