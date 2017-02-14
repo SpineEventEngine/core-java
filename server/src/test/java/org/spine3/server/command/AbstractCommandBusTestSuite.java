@@ -28,6 +28,7 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.CurrentTenant;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
@@ -117,6 +118,9 @@ public abstract class AbstractCommandBusTestSuite {
         eventBus = TestEventBusFactory.create(storageFactory);
         createProjectHandler = new CreateProjectHandler(newUuid());
         responseObserver = new TestResponseObserver();
+
+        // Clear the current tenant. This will be used in singe- and multi-tenant tests.
+        CurrentTenant.clear();
     }
 
     @After

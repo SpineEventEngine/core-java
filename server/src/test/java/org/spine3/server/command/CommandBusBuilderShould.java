@@ -26,7 +26,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -77,5 +79,16 @@ public class CommandBusBuilderShould {
 
         final CommandScheduler actualScheduler = commandBus.scheduler();
         assertEquals(expectedScheduler, actualScheduler);
+    }
+
+    @Test
+    public void specify_if_thread_spawn_allowed() {
+        assertTrue(CommandBus.newBuilder()
+                             .setThreadSpawnAllowed(true)
+                             .isThreadSpawnAllowed());
+
+        assertFalse(CommandBus.newBuilder()
+                              .setThreadSpawnAllowed(false)
+                              .isThreadSpawnAllowed());
     }
 }
