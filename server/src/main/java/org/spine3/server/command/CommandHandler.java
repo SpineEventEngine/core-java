@@ -26,6 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregatePartRepository;
 
 import java.util.List;
 
