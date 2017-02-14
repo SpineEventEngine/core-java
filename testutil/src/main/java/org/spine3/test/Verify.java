@@ -75,14 +75,14 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Mangles the stack trace of {@link AssertionError} so that it looks like its been thrown from the line that
-     * called to a custom assertion.
+     * Mangles the stack trace of {@link AssertionError} so that it looks like its been thrown from
+     * the line that called to a custom assertion.
      *
-     * <p>This method behaves identically to {@link #mangledException(AssertionError, int)} and is provided
-     * for convenience for assert methods that only want to pop two stack frames. The only time that you would want to
-     * call the other {@link #mangledException(AssertionError, int)} method is if you have a custom assert
-     * that calls another custom assert i.e. the source line calling the custom asserts is more than two stack frames
-     * away.
+     * <p>This method behaves identically to {@link #mangledException(AssertionError, int)} and is
+     * provided for convenience for assert methods that only want to pop two stack frames. The only
+     * time that you would want to call the other {@link #mangledException(AssertionError, int)}
+     * method is if you have a custom assert that calls another custom assert i.e. the source line
+     * calling the custom asserts is more than two stack frames away.
      *
      * @param e the exception to mangle
      * @see #mangledException(AssertionError, int)
@@ -130,8 +130,8 @@ public final class Verify extends Assert {
      * }
      * </pre>
      *
-     * <p>Without the {@code try ... catch} block around lines 11-13 the stack trace following a test failure
-     * would look a little like:
+     * <p>Without the {@code try ... catch} block around lines 11-13 the stack trace following a
+     * test failure would look a little like:
      *
      * <p><pre>
      * java.lang.AssertionError: ...
@@ -144,12 +144,13 @@ public final class Verify extends Assert {
      *  ...
      * </pre>
      *
-     * <p>Note that the source of the error isn't readily apparent as the first line in the stack trace
-     * is the code within the custom assert. If we were debugging the failure we would be more interested
-     * in the second line of the stack trace which shows us where in our tests the assert failed.
+     * <p>Note that the source of the error isn't readily apparent as the first line in the stack
+     * trace is the code within the custom assert. If we were debugging the failure we would be
+     * more interested in the second line of the stack trace which shows us where in our tests the
+     * assert failed.
      *
-     * <p>With the {@code try ... catch} block around lines 11-13 the stack trace would look like the
-     * following:
+     * <p>With the {@code try ... catch} block around lines 11-13 the stack trace would look like
+     * the following:
      *
      * <p><pre>
      * java.lang.AssertionError: ...
@@ -183,10 +184,11 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is {@code infinity} or
-     * {@code NaN} then the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is
+     * {@code infinity} or {@code NaN} then the delta value is ignored.
      */
-    public static void assertNotEquals(String itemName, float notExpected, float actual, float delta) {
+    public static void assertNotEquals(String itemName, float notExpected,
+                                       float actual, float delta) {
         try {
             // handle infinity specially since subtracting to infinite values gives NaN and the
             // the following test fails
@@ -210,8 +212,8 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Asserts that two floats are not equal concerning a delta. If the expected value is {@code infinity} or
-     * {@code NaN} then the delta value is ignored.
+     * Asserts that two floats are not equal concerning a delta. If the expected value is
+     * {@code infinity} or {@code NaN} then the delta value is ignored.
      */
     public static void assertNotEquals(float expected, float actual, float delta) {
         try {
@@ -317,7 +319,8 @@ public final class Verify extends Assert {
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (!fluentIterable.isEmpty()) {
-                Assert.fail(iterableName + " must be empty; actual size:<" + fluentIterable.size() + '>');
+                Assert.fail(iterableName + " must be empty; actual size:<" +
+                            fluentIterable.size() + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -335,7 +338,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert that the given object is an instanceof expectedClassType. */
-    public static void assertInstanceOf(String objectName, Class<?> expectedClassType, Object actualObject) {
+    public static void assertInstanceOf(String objectName,
+                                        Class<?> expectedClassType,
+                                        Object actualObject) {
         try {
             if (!expectedClassType.isInstance(actualObject)) {
                 Assert.fail(objectName + " is not an instance of " + expectedClassType.getName());
@@ -356,7 +361,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert that the given object is not an instanceof expectedClassType. */
-    public static void assertNotInstanceOf(String objectName, Class<?> expectedClassType, Object actualObject) {
+    public static void assertNotInstanceOf(String objectName,
+                                           Class<?> expectedClassType,
+                                           Object actualObject) {
         try {
             if (expectedClassType.isInstance(actualObject)) {
                 Assert.fail(objectName + " is an instance of " + expectedClassType.getName());
@@ -390,7 +397,8 @@ public final class Verify extends Assert {
             assertObjectNotNull(multimapName, actualMultimap);
 
             if (!actualMultimap.isEmpty()) {
-                Assert.fail(multimapName + MSG_SHOULD_BE_EMPTY_ACTUAL_SIZE + actualMultimap.size() + '>');
+                Assert.fail(multimapName + MSG_SHOULD_BE_EMPTY_ACTUAL_SIZE +
+                            actualMultimap.size() + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -444,7 +452,8 @@ public final class Verify extends Assert {
         try {
             assertObjectNotNull(iterableName, actualIterable);
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
-            Assert.assertFalse(iterableName + SHOULD_NOT_BE_EMPTY_MESSAGE, fluentIterable.isEmpty());
+            Assert.assertFalse(iterableName + SHOULD_NOT_BE_EMPTY_MESSAGE,
+                               fluentIterable.isEmpty());
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -473,12 +482,16 @@ public final class Verify extends Assert {
         try {
             assertObjectNotNull(mapName, actualMap);
             Assert.assertFalse(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, actualMap.isEmpty());
-            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.size());
-            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.keySet()
+            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
+                                   actualMap.size());
+            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
+                                   actualMap.keySet()
                                                                                       .size());
-            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.values()
+            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
+                                   actualMap.values()
                                                                                       .size());
-            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.entrySet()
+            Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
+                                   actualMap.entrySet()
                                                                                       .size());
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -498,8 +511,10 @@ public final class Verify extends Assert {
     public static void assertNotEmpty(String multimapName, Multimap<?, ?> actualMultimap) {
         try {
             assertObjectNotNull(multimapName, actualMultimap);
-            Assert.assertFalse(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, actualMultimap.isEmpty());
-            Assert.assertNotEquals(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMultimap.size());
+            Assert.assertFalse(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE,
+                               actualMultimap.isEmpty());
+            Assert.assertNotEquals(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
+                                   actualMultimap.size());
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -597,7 +612,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert the size of the given {@link Multimap}. */
-    public static void assertSize(String multimapName, int expectedSize, Multimap<?, ?> actualMultimap) {
+    public static void assertSize(String multimapName,
+                                  int expectedSize,
+                                  Multimap<?, ?> actualMultimap) {
         try {
             assertObjectNotNull(multimapName, actualMultimap);
 
@@ -630,7 +647,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert the size of the given {@link com.google.common.collect.ImmutableSet}. */
-    public static void assertSize(String immutableSetName, int expectedSize, Collection<?> actualImmutableSet) {
+    public static void assertSize(String immutableSetName,
+                                  int expectedSize,
+                                  Collection<?> actualImmutableSet) {
         try {
             final int actualSize = actualImmutableSet.size();
             failOnSizeMismatch(immutableSetName, expectedSize, actualSize);
@@ -648,7 +667,8 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}. */
+    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within
+     * the {@code stringToSearch}. */
     public static void assertNotContains(CharSequence unexpectedString, String stringToSearch) {
         try {
             assertNotContains(PARAM_STRING, unexpectedString, stringToSearch);
@@ -658,7 +678,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}. */
-    public static void assertContains(String stringName, CharSequence stringToFind, String stringToSearch) {
+    public static void assertContains(String stringName,
+                                      CharSequence stringToFind,
+                                      String stringToSearch) {
         try {
             Assert.assertNotNull("stringToFind should not be null", stringToFind);
             Assert.assertNotNull(MSG_STRING_TO_SEARCH_SHOULD_NOT_BE_NULL, stringToSearch);
@@ -676,8 +698,11 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}. */
-    public static void assertNotContains(String stringName, CharSequence unexpectedString, String stringToSearch) {
+    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within
+     * the {@code stringToSearch}. */
+    public static void assertNotContains(String stringName,
+                                         CharSequence unexpectedString,
+                                         String stringToSearch) {
         try {
             Assert.assertNotNull("unexpectedString should not be null", unexpectedString);
             Assert.assertNotNull(MSG_STRING_TO_SEARCH_SHOULD_NOT_BE_NULL, stringToSearch);
@@ -729,7 +754,9 @@ public final class Verify extends Assert {
         assertCollectionContains(collectionName, expectedItem, actualCollection);
     }
 
-    private static void assertCollectionContains(String collectionName, Object expectedItem, Collection<?> actualCollection) {
+    private static void assertCollectionContains(String collectionName,
+                                                 Object expectedItem,
+                                                 Collection<?> actualCollection) {
         try {
             assertObjectNotNull(collectionName, actualCollection);
 
@@ -759,7 +786,9 @@ public final class Verify extends Assert {
         }
     }
 
-    public static<K, V> void assertMapsEqual(Map<K, V> expectedMap, Map<K, V> actualMap, String actualMapName) {
+    public static<K, V> void assertMapsEqual(Map<K, V> expectedMap,
+                                             Map<K, V> actualMap,
+                                             String actualMapName) {
         try {
             //noinspection ConstantConditions
             if (expectedMap == null) {
@@ -775,7 +804,8 @@ public final class Verify extends Assert {
                 final V expectedValue = expectedEntry.getValue();
                 final V actualValue = actualMap.get(expectedKey);
                 if (!Objects.equals(actualValue, expectedValue)) {
-                    Assert.fail("Values differ at key " + expectedKey + " expected " + expectedValue + " but was " + actualValue);
+                    Assert.fail("Values differ at key " + expectedKey + " expected " +
+                                expectedValue + " but was " + actualValue);
                 }
             }
             assertSetsEqual(expectedMap.keySet(), actualMap.keySet());
@@ -839,7 +869,8 @@ public final class Verify extends Assert {
             Assert.assertNotNull(multimapName, actualMultimap);
 
             if (!actualMultimap.containsEntry(expectedKey, expectedValue)) {
-                Assert.fail(multimapName + " did not contain entry: <" + expectedKey + ", " + expectedValue + '>');
+                Assert.fail(multimapName + " did not contain entry: <" + expectedKey + ", "
+                            + expectedValue + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -948,7 +979,8 @@ public final class Verify extends Assert {
             assertObjectNotNull(collectionName, actualCollection);
 
             if (actualCollection.contains(unexpectedItem)) {
-                Assert.fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM + unexpectedItem + '>');
+                Assert.fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM +
+                            unexpectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -974,7 +1006,8 @@ public final class Verify extends Assert {
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (fluentIterable.contains(unexpectedItem)) {
-                Assert.fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM + unexpectedItem + '>');
+                Assert.fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM +
+                            unexpectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -991,7 +1024,9 @@ public final class Verify extends Assert {
     }
 
     /** Assert that the given {@link Collection} does <em>not</em> contain the given item. */
-    public static void assertNotContainsKey(String mapName, Object unexpectedKey, Map<?, ?> actualMap) {
+    public static void assertNotContainsKey(String mapName,
+                                            Object unexpectedKey,
+                                            Map<?, ?> actualMap) {
         try {
             assertObjectNotNull(mapName, actualMap);
 
@@ -1005,7 +1040,8 @@ public final class Verify extends Assert {
 
     /**
      * Assert that the formerItem appears before the latterItem in the given {@link Collection}.
-     * Both the formerItem and the latterItem must appear in the collection, or this assert will fail.
+     * Both the formerItem and the latterItem must appear in the collection, or this assert will
+     * fail.
      */
     public static<T> void assertBefore(T formerItem, T latterItem, List<T> actualList) {
         try {
@@ -1017,8 +1053,8 @@ public final class Verify extends Assert {
 
     /**
      * Assert that the formerItem appears before the latterItem in the given {@link Collection}.
-     * {@link #assertContains(String, Object, Collection)} will be called for both the formerItem and the
-     * latterItem, prior to the "before" assertion.
+     * {@link #assertContains(String, Object, Collection)} will be called for both the formerItem
+     * and the latterItem, prior to the "before" assertion.
      */
     public static<T> void assertBefore(
             String listName,
@@ -1028,22 +1064,17 @@ public final class Verify extends Assert {
         try {
             assertObjectNotNull(listName, actualList);
             Assert.assertNotEquals(
-                    "Bad test, formerItem and latterItem are equal, listName:<" + listName + '>',
+                    "Bad test, formerItem and latterItem are equal, listName:<" +
+                    listName + '>',
                     formerItem,
                     latterItem);
             assertContainsAll(actualList, formerItem, latterItem);
             final int formerPosition = actualList.indexOf(formerItem);
             final int latterPosition = actualList.indexOf(latterItem);
             if (latterPosition < formerPosition) {
-                Assert.fail("Items in "
-                        + listName
-                        + " are in incorrect order; "
-                        + "expected formerItem:<"
-                        + formerItem
-                        + '>'
-                        + " to appear before latterItem:<"
-                        + latterItem
-                        + ">, but didn't");
+                Assert.fail("Items in " + listName + " are in incorrect order; " +
+                            "expected formerItem:<" + formerItem + '>' +
+                            " to appear before latterItem:<" + latterItem + ">, but didn't");
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1190,8 +1221,9 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Assert that {@code objectA} and {@code objectB} are equal (via the {@link Object#equals(Object)} method,
-     * and that they both return the same {@link Object#hashCode()}.
+     * Assert that {@code objectA} and {@code objectB} are equal
+     * (via the {@link Object#equals(Object)} method, and that they both return
+     * the same {@link Object#hashCode()}.
      */
     public static void assertEqualsAndHashCode(Object objectA, Object objectB) {
         try {
@@ -1229,8 +1261,9 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Assert that {@code objectA} and {@code objectB} are equal (via the {@link Object#equals(Object)} method,
-     * and that they both return the same {@link Object#hashCode()}.
+     * Assert that {@code objectA} and {@code objectB} are equal
+     * (via the {@link Object#equals(Object)} method, and that they both return
+     * the same {@link Object#hashCode()}.
      */
     public static void assertEqualsAndHashCode(String itemNames, Object objectA, Object objectB) {
         try {
@@ -1250,7 +1283,8 @@ public final class Verify extends Assert {
             Assert.assertEquals(expectedEqual, objectA, objectB);
             Assert.assertEquals(expectedEqual, objectB, objectA);
 
-            final String expectedSameHashCode = String.format("Expected %s to have the same hashCode().", itemNames);
+            final String expectedSameHashCode =
+                    String.format("Expected %s to have the same hashCode().", itemNames);
             Assert.assertEquals(expectedSameHashCode, objectA.hashCode(), objectB.hashCode());
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1274,8 +1308,8 @@ public final class Verify extends Assert {
             final String prefix = itemName + " and its clone";
             Assert.assertNotSame(prefix, object, clone);
             assertEqualsAndHashCode(prefix, object, clone);
-        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                AssertionError | SecurityException e) {
+        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException |
+                IllegalAccessException | AssertionError | SecurityException e) {
             throw new AssertionError(e.getLocalizedMessage(), e);
         }
     }
@@ -1290,7 +1324,8 @@ public final class Verify extends Assert {
                 // pass
             } catch (IllegalAccessException ignored) {
                 if (canInstantiateThroughReflection(aClass)) {
-                    Assert.fail("Expected constructor of non-instantiable class '" + aClass + "' to throw an exception, but didn't");
+                    Assert.fail("Expected constructor of non-instantiable class '" + aClass +
+                                "' to throw an exception, but didn't");
                 }
             }
         } catch (AssertionError e) {
@@ -1341,8 +1376,8 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code exceptionClass}.
+     * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of
+     * the type {@code exceptionClass}.
      * <p>
      * {@code Callable} is most appropriate when a checked exception will be thrown.
      * If a subclass of {@link RuntimeException} will be thrown, the form
@@ -1386,7 +1421,8 @@ public final class Verify extends Assert {
         }
     }
 
-    private static String msgCaughtButExpectedWithMessage(Exception actual, Class<? extends Exception> expectedClass) {
+    private static String msgCaughtButExpectedWithMessage(Exception actual,
+                                                          Class<? extends Exception> expectedClass) {
         return msgCaughtButExpected(actual, expectedClass)
                 + LINE_SEPARATOR
                 + "Exception Message: " + actual.getMessage()
@@ -1394,12 +1430,13 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code expectedClass}.
+     * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of
+     * the type {@code expectedClass}.
      * <p>
-     * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException} will be thrown.
-     * If a checked exception will be thrown, the form {@link #assertThrows(Class, Callable)} may be more
-     * convenient.
+     * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException}
+     * will be thrown.
+     * If a checked exception will be thrown, the form {@link #assertThrows(Class, Callable)}
+     * may be more convenient.
      * <p>
      * e.g.
      * <pre>
@@ -1440,8 +1477,8 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code exceptionClass}, which contains a cause of type expectedCauseClass.
+     * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of
+     * the type {@code exceptionClass}, which contains a cause of type expectedCauseClass.
      * <p>
      * {@code Callable} is most appropriate when a checked exception will be thrown.
      * If a subclass of {@link RuntimeException} will be thrown, the form
@@ -1495,16 +1532,17 @@ public final class Verify extends Assert {
     }
 
     /**
-     * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code exceptionClass}, which contains a cause of type expectedCauseClass.
+     * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of
+     * the type {@code exceptionClass}, which contains a cause of type expectedCauseClass.
      * <p>
      * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException} will be thrown.
-     * If a checked exception will be thrown, the form {@link #assertThrowsWithCause(Class, Class, Callable)}
-     * may be more convenient.
+     * If a checked exception will be thrown, the form
+     * {@link #assertThrowsWithCause(Class, Class, Callable)} may be more convenient.
      * <p>
      * e.g.
      * <pre>
-     * Verify.assertThrowsWithCause(RuntimeException.class, StringIndexOutOfBoundsException.class, new Runnable()
+     * Verify.assertThrowsWithCause(RuntimeException.class,
+     * StringIndexOutOfBoundsException.class, new Runnable()
      * {
      *    public void run()
      *    {
@@ -1572,12 +1610,9 @@ public final class Verify extends Assert {
                 actualCauseClass.getClass());
     }
 
-    private static String msgCaughtButExpected(Exception actual, Class<? extends Exception> expectedClass) {
-        return "Caught exception of type <"
-                + actual.getClass()
-                        .getName()
-                + ">, expected one of type <"
-                + expectedClass.getName()
-                + '>';
+    private static String msgCaughtButExpected(Exception actual,
+                                               Class<? extends Exception> expectedClass) {
+        return "Caught exception of type <" + actual.getClass().getName()+
+               ">, expected one of type <" + expectedClass.getName() + '>';
     }
 }
