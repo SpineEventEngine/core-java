@@ -23,12 +23,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
-import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.base.Stringifiers;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -74,7 +72,7 @@ public class CommandBus implements AutoCloseable {
      * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the {@code tenant_id} attribute
      * defined.
      */
-    private boolean isMultitenant;
+    private final boolean multitenant;
 
     /**
      * Determines whether the manual thread spawning is allowed within current runtime environment.
@@ -87,11 +85,16 @@ public class CommandBus implements AutoCloseable {
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
-        this(builder.getCommandStore(),
-             builder.getCommandScheduler(),
-             builder.log,
-             builder.isThreadSpawnAllowed());
+        this.multitenant = builder.multitenant;
+        this.commandStore = builder.commandStore;
+        this.commandStatusService = new CommandStatusService(commandStore, builder.log);
+        this.scheduler = builder.commandScheduler;
+        this.log = builder.log;
+        this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
+        this.filter = new Filter(this);
+        this.rescheduler = new Rescheduler(this);
     }
 
     /**
@@ -108,30 +111,8 @@ public class CommandBus implements AutoCloseable {
         return new Builder();
     }
 
-    /**
-     * Creates a new instance.
-     *
-     * @param commandStore       a store to save commands
-     * @param scheduler          a command scheduler
-     * @param log                a problem logger
-     * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
-     */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only store the reference.
-    private CommandBus(CommandStore commandStore,
-                             CommandScheduler scheduler,
-                             Log log,
-                             boolean threadSpawnAllowed) {
-        this.commandStore = checkNotNull(commandStore);
-        this.commandStatusService = new CommandStatusService(commandStore, log);
-        this.scheduler = checkNotNull(scheduler);
-        this.log = checkNotNull(log);
-        this.isThreadSpawnAllowed = threadSpawnAllowed;
-        this.filter = new Filter(this);
-        this.rescheduler = new Rescheduler(this);
-    }
-
-    boolean isMultitenant() {
-        return isMultitenant;
+    public boolean isMultitenant() {
+        return multitenant;
     }
 
     boolean isThreadSpawnAllowed() {
@@ -256,7 +237,7 @@ public class CommandBus implements AutoCloseable {
             return;
         }
 
-        if (isMultitenant) {
+        if (multitenant) {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
@@ -316,16 +297,6 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Sets the multitenancy status of the {@link CommandBus}.
-     *
-     * <p>A {@link CommandBus} is multi-tenant if its {@link BoundedContext} is multi-tenant.
-     */
-    @Internal
-    public void setMultitenant(boolean isMultitenant) {
-        this.isMultitenant = isMultitenant;
-    }
-
-    /**
      * Closes the instance, preventing any for further posting of commands.
      *
      * <p>The following operations are performed:
@@ -348,6 +319,8 @@ public class CommandBus implements AutoCloseable {
      * The {@code Builder} for {@code CommandBus}.
      */
     public static class Builder {
+
+        private boolean multitenant;
 
         private CommandStore commandStore;
 
@@ -386,12 +359,21 @@ public class CommandBus implements AutoCloseable {
             return !appEngine;
         }
 
+        public boolean isMultitenant() {
+            return multitenant;
+        }
+
         public CommandStore getCommandStore() {
             return commandStore;
         }
 
         public CommandScheduler getCommandScheduler() {
             return commandScheduler;
+        }
+
+        public Builder setMultitenant(boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
         }
 
         public Builder setCommandStore(CommandStore commandStore) {

@@ -58,6 +58,10 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandSchedulingShould.class);
 
+    public CommandSchedulingShould() {
+        super(true);
+    }
+
     @Test
     public void store_scheduled_command_and_return_OK() {
         commandBus.register(createProjectHandler);

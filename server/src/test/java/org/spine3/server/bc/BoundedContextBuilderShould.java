@@ -60,6 +60,14 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
+    public void return_name_if_it_was_set() {
+        final String name = getClass().getName();
+        assertEquals(name, BoundedContext.newBuilder()
+                                         .setName(name)
+                                         .getName());
+    }
+
+    @Test
     public void return_storage_factory_supplier_if_it_was_set() {
         @SuppressWarnings("unchecked") // OK for mocks.
         Supplier<StorageFactory> mock = mock(Supplier.class);
@@ -155,5 +163,17 @@ public class BoundedContextBuilderShould {
         final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
         assertEquals(mock, builder.setStandUpdateDelivery(mock)
                                   .standUpdateDelivery().get());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setMultitenant(true)
+                                                .setCommandStore(mock(CommandStore.class))
+                                                .build();
+        BoundedContext.newBuilder()
+                       .setMultitenant(false)
+                       .setCommandBus(commandBus)
+                       .build();
     }
 }

@@ -55,12 +55,14 @@ public class TestCommandContextFactory {
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
+        final TenantId.Builder generatedTenantId = TenantId.newBuilder()
+                                                         .setValue(newUuid());
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)
                                                              .setActor(userId)
                                                              .setTimestamp(when)
                                                              .setZoneOffset(UTC)
-                                                             .setTenantId(TenantId.newBuilder().setValue(newUuid()));
+                                                             .setTenantId(generatedTenantId);
         return builder.build();
     }
 

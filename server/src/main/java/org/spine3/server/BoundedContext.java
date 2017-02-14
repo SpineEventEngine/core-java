@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
@@ -411,17 +412,29 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
-                throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
-                                                        ") returned null instance");
+                final String errMsg = String.format(
+                        "Supplier of StorageFactory (%s) returned null instance",
+                        storageFactorySupplier
+                );
+                throw new IllegalStateException(errMsg);
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
                 commandStore = createCommandStore(storageFactory);
             }
+
             if (commandBus == null) {
                 commandBus = createCommandBus(storageFactory);
+            } else {
+                // Check that both either multitenant or not multitenant.
+                checkState(multitenant == commandBus.isMultitenant(),
+                           "CommandBus must match multitenancy of BoundedContext. " +
+                           "Status in BoundedContext.Builder: %b CommandBus: %b",
+                           multitenant, commandBus.isMultitenant()
+                );
             }
+
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
             }
@@ -431,8 +444,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             }
 
             standFunnel = createStandFunnel(standUpdateDelivery);
-
-            commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 
@@ -459,6 +470,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                 this.commandStore = createCommandStore(storageFactory);
             }
             final CommandBus commandBus = CommandBus.newBuilder()
+                                                    .setMultitenant(this.multitenant)
                                                     .setCommandStore(commandStore)
                                                     .build();
             return commandBus;

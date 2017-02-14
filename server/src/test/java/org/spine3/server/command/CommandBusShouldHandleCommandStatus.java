@@ -88,7 +88,7 @@ public class CommandBusShouldHandleCommandStatus {
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
+        commandFactory = TestCommandFactory.newInstance(MultitenantCommandBusShould.class);
         responseObserver = new TestResponseObserver();
     }
 
