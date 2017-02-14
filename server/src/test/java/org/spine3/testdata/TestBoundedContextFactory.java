@@ -42,6 +42,7 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext() {
         return BoundedContext.newBuilder()
+                             .setMultitenant(true)
                              .build();
     }
 
@@ -55,6 +56,7 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(EventBus eventBus) {
         return BoundedContext.newBuilder()
+                             .setMultitenant(true)
                              .setEventBus(eventBus)
                              .build();
     }
@@ -67,12 +69,14 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(CommandBus commandBus) {
         return BoundedContext.newBuilder()
+                             .setMultitenant(true)
                              .setCommandBus(commandBus)
                              .build();
     }
 
     public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
         return BoundedContext.newBuilder()
+                             .setMultitenant(true)
                              .setCommandBus(commandBus)
                              .setEventBus(eventBus)
                              .build();
@@ -80,6 +84,7 @@ public class TestBoundedContextFactory {
 
     public static BoundedContext newBoundedContext(String name, Stand stand) {
         return BoundedContext.newBuilder()
+                             .setMultitenant(true)
                              .setStand(stand)
                              .setName(name)
                              .build();

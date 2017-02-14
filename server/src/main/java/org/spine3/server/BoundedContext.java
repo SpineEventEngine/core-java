@@ -430,8 +430,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                 // Check that both either multitenant or not multitenant.
                 checkState(multitenant == commandBus.isMultitenant(),
                            "CommandBus must match multitenancy of BoundedContext. " +
-                           "Status in BoundedContext.Builder: %b CommandBus: %b",
-                           multitenant, commandBus.isMultitenant()
+                           "Status in BoundedContext.Builder: %s CommandBus: %s",
+                           String.valueOf(multitenant), String.valueOf(commandBus.isMultitenant())
                 );
             }
 

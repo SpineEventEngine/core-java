@@ -46,6 +46,7 @@ public class TestCommandBusFactory {
     public static CommandBus create(StorageFactory storageFactory) {
         final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
         final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setMultitenant(true)
                                                 .setCommandStore(store)
                                                 .build();
         return commandBus;

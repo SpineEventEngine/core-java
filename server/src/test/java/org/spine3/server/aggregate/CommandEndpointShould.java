@@ -80,6 +80,7 @@ public class CommandEndpointShould {
         doReturn(emptyIterator()).when(commandStore)
                                  .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setMultitenant(true)
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
