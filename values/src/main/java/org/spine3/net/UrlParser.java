@@ -102,7 +102,8 @@ class UrlParser {
             return;
         }
         final String protocol = unProcessedInput.substring(0, protocolEndingIndex);
-        unProcessedInput = unProcessedInput.substring(protocolEndingIndex + PROTOCOL_ENDING.length());
+        unProcessedInput = unProcessedInput.substring(protocolEndingIndex +
+                                                      PROTOCOL_ENDING.length());
 
         final Schema schema = Schemas.parse(protocol);
 

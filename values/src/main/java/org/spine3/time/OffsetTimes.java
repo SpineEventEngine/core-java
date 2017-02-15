@@ -26,10 +26,6 @@ import static java.util.Calendar.HOUR;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
-import static org.spine3.time.Calendars.getHours;
-import static org.spine3.time.Calendars.getMillis;
-import static org.spine3.time.Calendars.getMinutes;
-import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
 
@@ -156,7 +152,8 @@ public class OffsetTimes {
      * Obtains offset time changed on specified amount of hours.
      *
      * @param offsetTime offset time that will be changed
-     * @param hoursDelta a number of hours that needs to be added or subtracted that can be either positive or negative
+     * @param hoursDelta a number of hours that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this offset time with new hours value
      */
     private static OffsetTime changeHours(OffsetTime offsetTime, int hoursDelta) {
@@ -168,7 +165,8 @@ public class OffsetTimes {
      * Obtains offset time changed on specified amount of minutes.
      *
      * @param offsetTime   offset time that will be changed
-     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be either positive or negative
+     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be
+     *                     either positive or negative
      * @return copy of this offset time with new minutes value
      */
     private static OffsetTime changeMinutes(OffsetTime offsetTime, int minutesDelta) {
@@ -180,7 +178,8 @@ public class OffsetTimes {
      * Obtains offset time changed on specified amount of seconds.
      *
      * @param offsetTime   offset time that will be changed
-     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be either positive or negative
+     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be
+     *                     either positive or negative
      * @return copy of this offset time with new seconds value
      */
     private static OffsetTime changeSeconds(OffsetTime offsetTime, int secondsDelta) {
@@ -192,7 +191,8 @@ public class OffsetTimes {
      * Obtains offset time changed on specified amount of milliseconds.
      *
      * @param offsetTime  offset time that will be changed
-     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
+     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be
+     *                    either positive or negative
      * @return copy of this offset time with new milliseconds value
      */
     private static OffsetTime changeMillis(OffsetTime offsetTime, int millisDelta) {

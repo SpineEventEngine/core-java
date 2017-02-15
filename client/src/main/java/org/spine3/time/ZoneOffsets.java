@@ -77,7 +77,8 @@ public class ZoneOffsets {
     }
 
     /**
-     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java virtual machine.
+     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java
+     * virtual machine.
      *
      * @see TimeZone#getDefault()
      */
@@ -114,7 +115,8 @@ public class ZoneOffsets {
                          .build();
     }
 
-    @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the arguments.
+    @SuppressWarnings("NumericCastThatLosesPrecision")
+    // It is safe, as we check bounds of the arguments.
     private static int toSeconds(Duration duration) {
         return (int) Durations.toSeconds(duration);
     }
@@ -122,7 +124,8 @@ public class ZoneOffsets {
     private static void checkHourOffset(int hours, boolean assumingMinutes) {
         // If the offset contains minutes too, we make the range smaller by one hour from each end.
         final int shift = (assumingMinutes ? 1 : 0);
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift, MAX_HOURS_OFFSET - shift);
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift,
+                    MAX_HOURS_OFFSET - shift);
     }
 
     private static void checkMinuteOffset(int minutes) {

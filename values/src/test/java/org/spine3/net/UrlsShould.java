@@ -41,7 +41,7 @@ public class UrlsShould {
         final Url url = Urls.of("http://convert-proper-url.com");
 
         assertEquals("convert-proper-url.com", url.getRecord()
-                                      .getHost());
+                                                  .getHost());
         assertEquals(Record.Schema.HTTP, url.getRecord()
                                             .getProtocol()
                                             .getSchema());

@@ -48,7 +48,8 @@ public class Intervals {
      * @throws IllegalArgumentException if the {@code end} is before the {@code start}
      */
     public static Interval between(Timestamp start, Timestamp end) {
-        checkArgument(isLaterThan(end, /*than*/ start), "The end must be after the start of the interval.");
+        checkArgument(isLaterThan(end, /*than*/ start),
+                      "The end must be after the start of the interval.");
         final Interval.Builder interval = Interval.newBuilder()
                                                   .setStart(start)
                                                   .setEnd(end);
