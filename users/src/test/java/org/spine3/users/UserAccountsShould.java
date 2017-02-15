@@ -32,6 +32,9 @@ public class UserAccountsShould {
         assertFalse(UserAccounts.getGoogleUid(UserAccount.getDefaultInstance()).isPresent());
     }
 
+    @SuppressWarnings("ConstantConditions")  /* As the {@code DUNBARS_NUMBER} value may change
+                                                a bit, it's still required to stay in certain
+                                                bounds */
     @Test
     public void declare_Dubars_number() {
         //noinspection MagicNumber
