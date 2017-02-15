@@ -39,8 +39,8 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.entity.RecordBasedRepository;
-import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.EntityWithStatusRepository;
+import org.spine3.server.entity.EntityWithStatusRepositoryShould;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -76,9 +76,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerRepositoryShould
-        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
+        extends EntityWithStatusRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
@@ -99,7 +99,7 @@ public class ProcessManagerRepositoryShould
     }
 
     @Override
-    protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
+    protected EntityWithStatusRepository<ProjectId, TestProcessManager, Project> createRepository() {
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(
                 TestBoundedContextFactory.newBoundedContext());
         repo.initStorage(InMemoryStorageFactory.getInstance());

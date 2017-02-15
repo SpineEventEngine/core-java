@@ -51,6 +51,7 @@ message CommandStorageRecord {
     // String representation of CommandId.
     string command_id = 3;
 
+    //TODO:2017-02-15:alexander.yevsyukov: Remove 4 to 6 after migrating to CommandStatusRecord
     // The status of the command processing.
     base.CommandStatus status = 4;
 
@@ -85,4 +86,22 @@ message CommandStorageRecord {
 
     // The context of the command.
     base.CommandContext context = 21;
+}
+
+// The record containing command handling status information.
+message CommandStatusRecord {
+
+    // The status of the command processing.
+    base.CommandStatus status = 1;
+
+    // `cause` provides additional information on what went wrong
+    // if the value of `status` is `ERROR` or `FAILURE`.
+    oneof cause {
+
+        // A technical error occurred during command processing.
+        base.Error error = 2;
+
+        // A business failure occurred during command processing.
+        base.Failure failure = 3;
+    }
 }

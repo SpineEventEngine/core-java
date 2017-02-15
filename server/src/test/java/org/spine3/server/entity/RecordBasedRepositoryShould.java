@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -30,16 +29,13 @@ import org.junit.Test;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -47,12 +43,12 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordBasedRepositoryShould<E extends EntityWithStatus<I, S>, I, S extends Message> {
+public abstract class RecordBasedRepositoryShould<E extends Entity<I, S, M>, I, S extends Message, M extends Message> {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
-    protected RecordBasedRepository<I, E, S> repository;
+    protected RecordBasedRepository<I, E, S, M> repository;
 
-    protected abstract RecordBasedRepository<I, E, S> createRepository();
+    protected abstract RecordBasedRepository<I, E, S, M> createRepository();
 
     protected abstract E createEntity();
 
@@ -65,7 +61,7 @@ public abstract class RecordBasedRepositoryShould<E extends EntityWithStatus<I, 
         this.repository = createRepository();
     }
 
-    private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S> repo, int count) {
+    private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S, M> repo, int count) {
         final List<E> entities = createEntities(count);
 
         for (E entity : entities) {
@@ -81,7 +77,7 @@ public abstract class RecordBasedRepositoryShould<E extends EntityWithStatus<I, 
         repository.store(entity);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
-        final Entity<?, ?, EntityStatus> found = repository.load(entity.getId()).get();
+        final Entity<?, ?, ?> found = repository.load(entity.getId()).get();
 
         assertEquals(found, entity);
     }
@@ -150,7 +146,7 @@ public abstract class RecordBasedRepositoryShould<E extends EntityWithStatus<I, 
             ids.add(entities.get(i)
                             .getId());
         }
-        final Entity<I, S, EntityStatus> sideEntity = createEntity();
+        final Entity<I, S, ?> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
         final Collection<E> found = repository.loadAll(ids);
@@ -197,47 +193,8 @@ public abstract class RecordBasedRepositoryShould<E extends EntityWithStatus<I, 
         }
     }
 
-    private static <E extends Entity<?, ?, EntityStatus>> void assertMatches(E entity, FieldMask fieldMask) {
+    private static <E extends Entity<?, ?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Test
-    public void mark_records_archived() {
-        final E entity = createEntity();
-        final I id = entity.getId();
-
-        repository.store(entity);
-
-        final Optional<E> loaded = repository.load(id);
-        assertTrue(loaded.isPresent());
-
-        repository.updateMetadata(id, loaded.get()
-                                            .getEntityStatus()
-                                            .toBuilder()
-                                            .setArchived(true)
-                                            .build());
-        assertFalse(repository.load(id).isPresent());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Test
-    public void mark_records_deleted() {
-        final E entity = createEntity();
-        final I id = entity.getId();
-
-        repository.store(entity);
-
-        final Optional<E> loaded = repository.load(id);
-        assertTrue(loaded.isPresent());
-
-        repository.updateMetadata(id, loaded.get()
-                                            .getEntityStatus()
-                                            .toBuilder()
-                                            .setDeleted(true)
-                                            .build());
-
-        assertFalse(repository.load(id).isPresent());
     }
 }

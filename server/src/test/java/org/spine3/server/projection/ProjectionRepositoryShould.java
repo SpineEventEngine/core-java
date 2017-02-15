@@ -36,8 +36,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.RecordBasedRepository;
-import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.EntityWithStatusRepository;
+import org.spine3.server.entity.EntityWithStatusRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
@@ -85,7 +85,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
-        extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
+        extends EntityWithStatusRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
@@ -107,7 +107,7 @@ public class ProjectionRepositoryShould
             };
 
     @Override
-    protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
+    protected EntityWithStatusRepository<ProjectId, TestProjection, Project> createRepository() {
         boundedContext = newBoundedContext();
         return new TestProjectionRepository(boundedContext);
     }
@@ -526,5 +526,4 @@ public class ProjectionRepositoryShould
             // NOP
         }
     }
-
 }

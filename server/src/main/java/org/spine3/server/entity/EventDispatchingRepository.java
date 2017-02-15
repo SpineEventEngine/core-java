@@ -41,7 +41,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I, E extends EntityWithStatus<I, S>, S extends Message>
-        extends RecordBasedRepository<I, E, S>
+                extends EntityWithStatusRepository<I, E, S>
                 implements EntityEventDispatcher<I> {
 
     private final IdSetFunctions<I> idSetFunctions;

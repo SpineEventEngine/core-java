@@ -24,15 +24,15 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link org.spine3.server.command.CommandStore}, {@link org.spine3.server.event.EventStore},
- * and {@link org.spine3.server.stand.Stand}.
+ * {@link org.spine3.server.command.CommandStore CommandStore},
+ * {@link org.spine3.server.event.EventStore EventStore},
+ * and {@link org.spine3.server.stand.Stand Stand}.
  *
  * @author Alexander Yevsyukov
  */
@@ -64,17 +64,16 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link RecordStorage} instance.
-     *
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?, EntityStatus>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?, ?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
      *
-     * @param projectionClass the class of projections to store
      * @param <I>             the type of stream projection IDs
+     * @param projectionClass the class of projections to store
      */
-    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?, EntityStatus>> projectionClass);
+    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?, ?>> projectionClass);
 }

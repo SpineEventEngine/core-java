@@ -34,7 +34,6 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -63,10 +62,12 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
  * @param <S> the type of entity state messages
+ * @param <M> the type of entity metadata messages
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public abstract class RecordBasedRepository<I, E extends EntityWithStatus<I, S>, S extends Message>
-                extends Repository<I, E, EntityStatus> {
+public abstract class RecordBasedRepository<I, E extends Entity<I, S, M>, S extends Message, M extends Message>
+                extends Repository<I, E, M> {
 
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -134,7 +135,7 @@ public abstract class RecordBasedRepository<I, E extends EntityWithStatus<I, S>,
     }
 
     @Override
-    protected void updateMetadata(I id, EntityStatus metadata) {
+    protected void updateMetadata(I id, M metadata) {
         final E entity = loadOrCreate(id);
         entity.setMetadata(metadata);
         store(entity);
@@ -308,7 +309,9 @@ public abstract class RecordBasedRepository<I, E extends EntityWithStatus<I, S>,
         @SuppressWarnings("unchecked")
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
-        entity.setMetadata(record.getEntityStatus());
+
+//TODO:2017-02-15:alexander.yevsyukov: Uncomment when metatadata is managed in separate records
+//        entity.setMetadata(record.getEntityStatus());
         return entity;
     }
 
@@ -320,7 +323,8 @@ public abstract class RecordBasedRepository<I, E extends EntityWithStatus<I, S>,
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                                                                        .setState(stateAny)
                                                                        .setWhenModified(whenModified)
-                                                                       .setEntityStatus(entity.getEntityStatus())
+//TODO:2017-02-15:alexander.yevsyukov: Uncomment when metatadata is managed in separate records
+//                                                                       .setEntityStatus(entity.getEntityStatus())
                                                                        .setVersion(version);
         return builder.build();
     }

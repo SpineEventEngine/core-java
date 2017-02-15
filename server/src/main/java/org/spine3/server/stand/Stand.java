@@ -87,7 +87,7 @@ public class Stand implements AutoCloseable {
      * The mapping between {@code TypeUrl} instances and repositories providing the entities of this type
      */
     private final ConcurrentMap<TypeUrl,
-                                RecordBasedRepository<?, ? extends Entity, ? extends Message>>
+                                RecordBasedRepository<?, ? extends Entity, ? extends Message, ? extends Message>>
                   typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
@@ -296,8 +296,8 @@ public class Stand implements AutoCloseable {
 
         if (repository instanceof RecordBasedRepository) {
             @SuppressWarnings("unchecked")
-            final RecordBasedRepository<I, EntityWithStatus<I, ?>, ?> repo =
-                    (RecordBasedRepository<I, EntityWithStatus<I, ?>, ?>) repository;
+            final RecordBasedRepository<I, EntityWithStatus<I, ?>, ?, ?> repo =
+                    (RecordBasedRepository<I, EntityWithStatus<I, ?>, ?, ?>) repository;
             typeToRepositoryMap.put(entityType, repo);
         }
         if (repository instanceof AggregateRepository) {
@@ -344,7 +344,8 @@ public class Stand implements AutoCloseable {
     private QueryProcessor processorFor(TypeUrl type) {
         final QueryProcessor result;
 
-        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(type);
+        final RecordBasedRepository<?, ? extends Entity, ? extends Message, ? extends Message> repository =
+                typeToRepositoryMap.get(type);
         if (repository != null) {
 
             // The query target is an {@code Entity}.
