@@ -39,7 +39,8 @@ import "spine/users/user_profile.proto";
 
 // Information exposed by an identity provider such as Google Sign-In or Facebook Login.
 //
-// Under Android this message will be populated from instances implementing `firebase.UserInfo` interface.
+// Under Android this message will be populated from instances implementing
+// `firebase.UserInfo` interface.
 //
 message UserInfo {
 
@@ -51,8 +52,8 @@ message UserInfo {
 
     // The domain of the user.
     //
-    // If the authentication provider is "google.com" then this attribute contains Google Apps domain
-    // of the user or "gmail.com" for normal Google account.
+    // If the authentication provider is "google.com" then this attribute contains
+    // Google Apps domain of the user or "gmail.com" for normal Google account.
     //
     // For authentication providers other than "google.com", this field is empty.
     //
@@ -134,7 +135,8 @@ message UserAccount {
 
     // The linked identities of the user obtained from different authentication providers.
     //
-    // For getting Google Account Id from Java, please use `org.spine3.users.UserAccounts.getGoogleUid()`
+    // For getting Google Account Id from Java,
+    // please use `org.spine3.users.UserAccounts.getGoogleUid()`
     //
     repeated UserInfo linked_identity = 20;
 
