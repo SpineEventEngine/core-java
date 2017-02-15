@@ -36,6 +36,7 @@ import java.util.List;
 
 /**
  * Extension of {@link Standard} doclet, which exclude {@link Internal} annotated components.
+ * Based on <a href="http://sixlegs.com/blog/java/exclude-javadoc-tag.html">this</a> topic.
  */
 @SuppressWarnings("ExtendsUtilityClass")
 public class ExcludeInternalDoclet extends Standard {
@@ -46,11 +47,22 @@ public class ExcludeInternalDoclet extends Standard {
         this.excludePrinciple = excludePrinciple;
     }
 
+    /**
+     * Entry point for the Javadoc tool.
+     *
+     * @param args the command-line parameters
+     */
     public static void main(String[] args) {
         final String name = ExcludeInternalDoclet.class.getName();
         Main.execute(name, name, args);
     }
 
+    /**
+     * The "start" method as required by Javadoc.
+     *
+     * @param root the root of the documentation tree.
+     * @return true if the doclet ran without encountering any errors.
+     */
     @SuppressWarnings("unused") // called by com.sun.tools.javadoc.Main
     public static boolean start(RootDoc root) {
         final ExcludePrinciple excludePrinciple = new ExcludeInternalPrinciple(root);
@@ -63,8 +75,8 @@ public class ExcludeInternalDoclet extends Standard {
             return null;
         }
 
-        final Class cls = obj.getClass();
-        if (cls.getName().startsWith("com.sun.")) {
+        if (obj.getClass().getName().startsWith("com.sun.")) {
+            final Class cls = obj.getClass();
             return Proxy.newProxyInstance(cls.getClassLoader(), cls.getInterfaces(), new ExcludeHandler(obj));
         } else if (obj instanceof Object[]) {
             final Class componentType = expect.getComponentType();
@@ -103,7 +115,7 @@ public class ExcludeInternalDoclet extends Standard {
             try {
                 return process(method.invoke(target, args), method.getReturnType());
             } catch (InvocationTargetException e) {
-                throw e.getTargetException();
+                throw e.getCause();
             }
         }
 

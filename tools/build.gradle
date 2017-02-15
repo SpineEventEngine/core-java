@@ -21,3 +21,11 @@ dependencies {
     compile files("${System.properties['java.home']}/../lib/tools.jar")
     compile project(path: ':client')
 }
+
+// We need to include module dependencies to jar.
+// In particular, we need @Internal Spine annotation.
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
