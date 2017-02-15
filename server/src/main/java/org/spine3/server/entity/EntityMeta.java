@@ -48,7 +48,7 @@ public abstract class EntityMeta<I, M extends Message> extends Entity<I, M, Enti
      */
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    protected Optional<Nothing<I>> getMetadata() {
+    public Optional<Nothing<I>> getMetadata() {
         throw unsupported();
     }
 

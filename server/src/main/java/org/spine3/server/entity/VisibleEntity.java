@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
@@ -36,7 +35,9 @@ import org.spine3.server.entity.status.EntityStatus;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class VisibleEntity<I, S extends Message> extends Entity<I, S, Visibility<I>> {
+public abstract class VisibleEntity<I, S extends Message>
+                extends Entity<I, S, Visibility<I>>
+                implements EntityWithVisibility<I> {
 
     /**
      * {@inheritDoc}
@@ -54,15 +55,7 @@ public abstract class VisibleEntity<I, S extends Message> extends Entity<I, S, V
      * @return an instance of entity metadata
      */
     protected Visibility<I> visibility() {
-        final Optional<Visibility<I>> metadata = getMetadata();
-        if (metadata.isPresent()) {
-            return metadata.get();
-        }
-
-        // Not set before — initialize.
-        final Visibility<I> result = new Visibility<>(getId());
-        setMetadata(result);
-        return result;
+        return Visibility.of(this);
     }
 
     /**

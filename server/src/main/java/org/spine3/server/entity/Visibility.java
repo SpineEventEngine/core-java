@@ -36,6 +36,17 @@ public class Visibility<I> extends EntityMeta<I, EntityStatus> {
         return new Visibility<>(id);
     }
 
+    public static <I> Visibility<I> of(Entity<I, ?, Visibility<I>> entity) {
+        final Optional<Visibility<I>> metadata = entity.getMetadata();
+        if (metadata.isPresent()) {
+            return metadata.get();
+        }
+        // Not set before — initialize.
+        final Visibility<I> result = new Visibility<>(entity.getId());
+        entity.setMetadata(result);
+        return result;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -53,7 +64,7 @@ public class Visibility<I> extends EntityMeta<I, EntityStatus> {
         return this;
     }
 
-    protected static <E extends VisibleEntity<?, ?>> boolean isArchived(E entity) {
+    protected static <E extends EntityWithVisibility<?>> boolean isArchived(E entity) {
         checkNotNull(entity);
         final Optional<? extends Visibility<?>> visible = entity.getMetadata();
         return visible.isPresent() && visible.get()
@@ -61,7 +72,7 @@ public class Visibility<I> extends EntityMeta<I, EntityStatus> {
                                              .getArchived();
     }
 
-    protected static <E extends VisibleEntity<?, ?>> boolean isDeleted(E entity) {
+    protected static <E extends EntityWithVisibility<?>> boolean isDeleted(E entity) {
         checkNotNull(entity);
         final Optional<? extends Visibility<?>> visible = entity.getMetadata();
         return visible.isPresent() && visible.get()

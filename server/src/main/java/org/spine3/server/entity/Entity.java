@@ -306,7 +306,7 @@ public abstract class Entity<I, S extends Message, M extends EntityMeta<I, ?>> {
     /**
      * Obtains the entity status.
      */
-    protected Optional<M> getMetadata() {
+    public Optional<M> getMetadata() {
         return Optional.fromNullable(this.metadata);
     }
 
