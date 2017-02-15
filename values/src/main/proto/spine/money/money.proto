@@ -66,7 +66,8 @@ extend google.protobuf.EnumValueOptions {
     CurrencyOptions currency = 1025;
 }
 
-// The set of ISO 4217 currency alphabetic codes with other currency options (such as currency name, numeric code etc).
+// The set of ISO 4217 currency alphabetic codes with other currency options (such as
+// currency name, numeric code etc).
 // NOTE: numeric codes must consist of 3 digits when displayed (e.g., "008", "050" etc).
 enum Currency {
     AED = 0 [(currency) = {
