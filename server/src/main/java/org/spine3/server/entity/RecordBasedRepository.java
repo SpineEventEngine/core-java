@@ -62,12 +62,14 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
  * @param <S> the type of entity state messages
- * @param <M> the type of entity metadata messages
+ * @param <M> the type of entity metadata
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class RecordBasedRepository<I, E extends Entity<I, S, M>, S extends Message, M extends Message>
-                extends Repository<I, E, M> {
+public abstract class RecordBasedRepository<I,
+                                            E extends Entity<I, S, M>,
+                                            S extends Message,
+                                            M extends EntityMeta<I, ?>> extends Repository<I, E, M> {
 
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);

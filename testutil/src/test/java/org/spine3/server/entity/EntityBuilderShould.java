@@ -24,7 +24,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
@@ -104,7 +103,7 @@ public class EntityBuilderShould {
         assertTrue(passed);
     }
 
-    private static class TestEntity extends Entity<Long, StringValue, EntityStatus> {
+    private static class TestEntity extends Entity<Long, StringValue, Visibility<Long>> {
         protected TestEntity(Long id) {
             super(id);
         }

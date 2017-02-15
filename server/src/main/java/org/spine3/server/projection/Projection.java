@@ -23,7 +23,7 @@ package org.spine3.server.projection;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.EntityWithStatus;
+import org.spine3.server.entity.VisibleEntity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
@@ -46,7 +46,7 @@ import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
  * @param <I> the type of the IDs
  * @param <M> the type of the state objects holding projection data
  */
-public abstract class Projection<I, M extends Message> extends EntityWithStatus<I, M> {
+public abstract class Projection<I, M extends Message> extends VisibleEntity<I, M> {
 
     /**
      * Creates a new instance.

@@ -35,7 +35,7 @@ import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
 import org.spine3.change.ValueMismatch;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.EntityWithStatus;
+import org.spine3.server.entity.VisibleEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.server.type.CommandClass;
@@ -72,7 +72,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message> extends EntityWithStatus<I, S> {
+public abstract class CommandHandlingEntity<I, S extends Message> extends VisibleEntity<I, S> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

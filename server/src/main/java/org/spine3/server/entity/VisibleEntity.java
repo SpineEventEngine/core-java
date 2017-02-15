@@ -28,24 +28,41 @@ import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 
 /**
+ * An abstract base for business entities that can be made invisible to
+ * general queries.
+ *
+ * <p>For example, a repository may not show entities that are marked as “archived”
+ * or “deleted”.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class EntityWithStatus<I, S extends Message> extends Entity<I, S, EntityStatus> {
+public abstract class VisibleEntity<I, S extends Message> extends Entity<I, S, Visibility<I>> {
 
     /**
      * {@inheritDoc}
      */
-    protected EntityWithStatus(I id) {
+    protected VisibleEntity(I id) {
         super(id);
     }
 
-    protected EntityStatus getEntityStatus() {
-        final Optional<EntityStatus> status = getMetadata();
-        if (status.isPresent()) {
-            return status.get();
+    /**
+     * Ensures that the visibility metadata is set in the entity.
+     *
+     * <p>If the metadata was not set before, it is created in the default state
+     * and set.
+     *
+     * @return an instance of entity metadata
+     */
+    protected Visibility<I> visibility() {
+        final Optional<Visibility<I>> metadata = getMetadata();
+        if (metadata.isPresent()) {
+            return metadata.get();
         }
-        return EntityStatus.getDefaultInstance();
+
+        // Not set before — initialize.
+        final Visibility<I> result = new Visibility<>(getId());
+        setMetadata(result);
+        return result;
     }
 
     /**
@@ -54,17 +71,14 @@ public abstract class EntityWithStatus<I, S extends Message> extends Entity<I, S
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
     protected boolean isArchived() {
-        return getEntityStatus().getArchived();
+        return Visibility.isArchived(this);
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        final EntityStatus newStatus = getEntityStatus().toBuilder()
-                                                        .setArchived(archived)
-                                                        .build();
-        setMetadata(newStatus);
+        visibility().setArchived(archived);
     }
 
     /**
@@ -73,17 +87,14 @@ public abstract class EntityWithStatus<I, S extends Message> extends Entity<I, S
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
     protected boolean isDeleted() {
-        return getEntityStatus().getDeleted();
+        return Visibility.isDeleted(this);
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        final EntityStatus newStatus = getEntityStatus().toBuilder()
-                                                        .setDeleted(deleted)
-                                                        .build();
-        setMetadata(newStatus);
+        visibility().setDeleted(deleted);
     }
 
     /**

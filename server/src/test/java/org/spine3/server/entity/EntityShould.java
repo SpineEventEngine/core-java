@@ -29,7 +29,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
@@ -129,31 +128,32 @@ public class EntityShould {
         new TestEntityWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
-    private static class TestEntityWithIdUnsupported extends Entity<UnsupportedClassVersionError, Project, EntityStatus> {
+    private static class TestEntityWithIdUnsupported
+            extends Entity<UnsupportedClassVersionError, Project, EntityMeta.Nothing<UnsupportedClassVersionError>> {
         private TestEntityWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdString extends Entity <String, Project, EntityStatus> {
+    private static class TestEntityWithIdString extends Entity<String, Project, EntityMeta.Nothing<String>> {
         private TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdMessage extends Entity <Message, Project, EntityStatus> {
+    private static class TestEntityWithIdMessage extends Entity<Message, Project, EntityMeta.Nothing<Message>> {
         private TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdInteger extends Entity <Integer, Project, EntityStatus> {
+    private static class TestEntityWithIdInteger extends Entity<Integer, Project, Visibility<Integer>> {
         private TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdLong extends Entity <Long, Project, EntityStatus> {
+    private static class TestEntityWithIdLong extends Entity<Long, Project, Visibility<Long>> {
         private TestEntityWithIdLong(Long id) {
             super(id);
         }
@@ -195,7 +195,7 @@ public class EntityShould {
     }
 
 
-    private static class BareBonesEntity extends Entity<Long, StringValue, EntityStatus> {
+    private static class BareBonesEntity extends Entity<Long, StringValue, Visibility<Long>> {
         private BareBonesEntity(Long id) {
             super(id);
         }
@@ -289,14 +289,14 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-    private static class EntityWithUnsupportedId extends Entity<Exception, Project, EntityStatus> {
+    private static class EntityWithUnsupportedId extends Entity<Exception, Project, Visibility<Exception>> {
 
         protected EntityWithUnsupportedId(Exception id) {
             super(id);
         }
     }
 
-    private static class EntityWithMessageId extends Entity<ProjectId, StringValue, EntityStatus> {
+    private static class EntityWithMessageId extends Entity<ProjectId, StringValue, Visibility<ProjectId>> {
 
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
@@ -317,7 +317,7 @@ public class EntityShould {
 
         // Create and init the entity.
         final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
-        final Entity<Long, StringValue, EntityStatus> entity = Entity.createEntity(ctor, id);
+        final Entity<Long, StringValue, Visibility<Long>> entity = Entity.createEntity(ctor, id);
 
         final Timestamp after = Timestamps.getCurrentTime();
 

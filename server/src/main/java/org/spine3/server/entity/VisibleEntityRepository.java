@@ -22,17 +22,16 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.status.EntityStatus;
 
 /**
- * The repository for managing {@link EntityWithStatus}.
+ * The repository for managing {@link VisibleEntity}.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class EntityWithStatusRepository<I, E extends EntityWithStatus<I, S>, S extends Message>
-        extends RecordBasedRepository<I, E, S, EntityStatus> {
+public abstract class VisibleEntityRepository<I, E extends VisibleEntity<I, S>, S extends Message>
+        extends RecordBasedRepository<I, E, S, Visibility<I>> {
 
-    protected EntityWithStatusRepository(BoundedContext boundedContext) {
+    protected VisibleEntityRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 }

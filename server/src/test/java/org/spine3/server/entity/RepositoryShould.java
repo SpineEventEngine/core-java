@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -45,7 +44,7 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 public class RepositoryShould {
 
     private BoundedContext boundedContext;
-    private Repository<ProjectId, ProjectEntity, EntityStatus> repository;
+    private Repository<ProjectId, ProjectEntity, Visibility<ProjectId>> repository;
     private StorageFactory storageFactory;
 
     @Before
@@ -69,14 +68,14 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithPrivateConstructor extends Entity<ProjectId, Project, EntityStatus> {
+    private static class EntityWithPrivateConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
     }
 
     private static class RepositoryForEntitiesWithPrivateConstructor
-            extends Repository<ProjectId, EntityWithPrivateConstructor, EntityStatus> {
+            extends Repository<ProjectId, EntityWithPrivateConstructor, Visibility<ProjectId>> {
         private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -92,7 +91,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, EntityStatus metadata) {
+        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
         }
 
         @Override
@@ -112,14 +111,14 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithProtectedConstructor extends Entity<ProjectId, Project, EntityStatus> {
+    private static class EntityWithProtectedConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
     }
 
     private static class RepositoryForEntitiesWithProtectedConstructor
-            extends Repository<ProjectId, EntityWithProtectedConstructor, EntityStatus> {
+            extends Repository<ProjectId, EntityWithProtectedConstructor, Visibility<ProjectId>> {
         public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -135,7 +134,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, EntityStatus metadata) {
+        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
         }
 
         @Override
@@ -155,14 +154,14 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project, EntityStatus> {
+    private static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
     }
 
     private static class RepositoryForEntitiesWithoutRequiredConstructor
-            extends Repository<ProjectId, EntityWithoutRequiredConstructor, EntityStatus> {
+            extends Repository<ProjectId, EntityWithoutRequiredConstructor, Visibility<ProjectId>> {
         private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -178,7 +177,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, EntityStatus metadata) {
+        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
         }
 
         @Override
@@ -192,13 +191,13 @@ public class RepositoryShould {
     // Tests of regular work
     //-----------------------
 
-    private static class ProjectEntity extends Entity<ProjectId, Project, EntityStatus> {
+    private static class ProjectEntity extends Entity<ProjectId, Project, Visibility<ProjectId>> {
         public ProjectEntity(ProjectId id) {
             super(id);
         }
     }
 
-    private static class TestRepo extends Repository<ProjectId, ProjectEntity, EntityStatus> {
+    private static class TestRepo extends Repository<ProjectId, ProjectEntity, Visibility<ProjectId>> {
 
         private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
@@ -208,7 +207,7 @@ public class RepositoryShould {
         protected void store(ProjectEntity obj) {}
 
         @Override
-        protected void updateMetadata(ProjectId id, EntityStatus metadata) {
+        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
         }
 
         @Override
@@ -277,18 +276,18 @@ public class RepositoryShould {
 
     @Test(expected = RuntimeException.class)
     public void propagate_exception_if_entity_construction_fails() {
-        final Repository<ProjectId, FailingEntity, EntityStatus> repo = new RepoForFailingEntities(boundedContext);
+        final Repository<ProjectId, FailingEntity, Visibility<ProjectId>> repo = new RepoForFailingEntities(boundedContext);
         repo.create(ProjectId.newBuilder().setId("works?").build());
     }
 
-    private static class FailingEntity extends Entity<ProjectId, Project, EntityStatus> {
+    private static class FailingEntity extends Entity<ProjectId, Project, Visibility<ProjectId>> {
         private FailingEntity(ProjectId id) {
             super(id);
             throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
         }
     }
 
-    private static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity, EntityStatus> {
+    private static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity, Visibility<ProjectId>> {
 
         private RepoForFailingEntities(BoundedContext boundedContext) {
             super(boundedContext);
@@ -299,7 +298,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, EntityStatus metadata) {
+        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
         }
 
         @SuppressWarnings("ReturnOfNull") // It's the purpose of the test.

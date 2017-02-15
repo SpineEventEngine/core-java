@@ -19,6 +19,7 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
@@ -31,6 +32,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -152,13 +154,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains entity status of the aggregate from its metadata.
      *
-     * <p>Overrides to expose the method to the package.
+     * <p>If the metadata was not set, the default instance of {@code EntityStatus}
+     * is returned.
+     *
+     * @return an entity status form metadata or the default instance
      */
-    @Override
-    protected EntityStatus getEntityStatus() {
-        return super.getEntityStatus();
+    protected EntityStatus entityStatus() {
+        final Optional<Visibility<I>> visibility = getMetadata();
+        if (visibility.isPresent()) {
+            return visibility.get().getState();
+        }
+        return EntityStatus.getDefaultInstance();
     }
 
     /**

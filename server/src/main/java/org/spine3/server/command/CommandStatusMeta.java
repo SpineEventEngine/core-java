@@ -18,34 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.procman;
+package org.spine3.server.command;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
-import org.spine3.server.entity.EntityBuilder;
+import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.server.command.storage.CommandStatusRecord;
+import org.spine3.server.entity.EntityMeta;
 
 /**
- * Utility class for building test instances of {@code ProcessManager}.
- *
- * @param <P> the type of process managers
- * @param <I> the type of process manager identifier
- * @param <S> the type of the process manager state
+ * The status of command handling.
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends Message>
-        extends EntityBuilder<P, I, S> {
+class CommandStatusMeta extends EntityMeta<CommandId, CommandStatusRecord> {
 
-    public ProcessManagerBuilder() {
-        super();
-        // Have the constructor for easier location of usages.
+    /**
+     * {@inheritDoc}
+     *
+     * @param id
+     */
+    protected CommandStatusMeta(CommandId id) {
+        super(id);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
-    @Override
-    public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
-        super.setResultClass(entityClass);
-        return this;
+    protected boolean isOk() {
+        return getStatus() == CommandStatus.OK;
+    }
+
+    protected boolean isError() {
+        return getStatus() == CommandStatus.ERROR;
+    }
+
+    protected boolean isFailure() {
+        return getStatus() == CommandStatus.FAILURE;
+    }
+
+    private CommandStatus getStatus() {
+        return getState().getStatus();
     }
 }

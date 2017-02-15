@@ -23,7 +23,6 @@ package org.spine3.server.command;
 import com.google.common.base.Optional;
 import org.spine3.base.CommandId;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.storage.CommandStatusRecord;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -35,7 +34,7 @@ import org.spine3.server.storage.StorageFactory;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandRepository extends Repository<CommandId, CommandEntity, CommandStatusRecord> {
+public class CommandRepository extends Repository<CommandId, CommandEntity, CommandStatusMeta> {
 
     /**
      * {@inheritDoc}
@@ -55,7 +54,7 @@ public class CommandRepository extends Repository<CommandId, CommandEntity, Comm
     }
 
     @Override
-    protected void updateMetadata(CommandId id, CommandStatusRecord metadata) {
+    protected void updateMetadata(CommandId id, CommandStatusMeta metadata) {
 
     }
 

@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.ReflectiveBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -43,8 +42,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends Entity<I, S, EntityStatus>, I, S extends Message>
-       extends ReflectiveBuilder<E> {
+public class EntityBuilder<E extends Entity<I, S, ?>,
+                           I,
+                           S extends Message> extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -72,6 +72,7 @@ public class EntityBuilder<E extends Entity<I, S, EntityStatus>, I, S extends Me
         // Have the constructor for finding usages easier.
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);

@@ -25,14 +25,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.entity.EntityStatusPresets.ARCHIVED;
 
 /**
  * Tests of working with entity status.
@@ -44,12 +42,12 @@ import static org.spine3.server.entity.EntityStatusPresets.ARCHIVED;
  */
 public class EntityStatusTests {
 
-    private EntityWithStatus<Long, StringValue> entity;
+    private VisibleEntity<Long, StringValue> entity;
 
     /**
      * A minimal entity class.
      */
-    private static class MiniEntity extends EntityWithStatus<Long, StringValue> {
+    private static class MiniEntity extends VisibleEntity<Long, StringValue> {
         private MiniEntity(Long id) {
             super(id);
         }
@@ -61,8 +59,8 @@ public class EntityStatusTests {
     }
 
     @Test
-    public void return_default_status_after_constructor() {
-        assertEquals(EntityStatus.getDefaultInstance(), new MiniEntity(1L).getEntityStatus());
+    public void have_no_meta_upon_construction() {
+        assertFalse(new MiniEntity(1L).getMetadata().isPresent());
     }
 
     @Test
@@ -107,21 +105,23 @@ public class EntityStatusTests {
     @Test
     public void assure_entities_with_different_status_are_not_equal() {
         // Create an entity with the same ID and the same (default) state.
-        final EntityWithStatus<?, ?> another = new MiniEntity(entity.getId());
+        final VisibleEntity<Long, ?> another = new MiniEntity(entity.getId());
 
-        another.setMetadata(ARCHIVED);
+        another.setMetadata(Visibility.of(entity.getId()).setArchived(true));
 
         assertFalse(entity.equals(another));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
-    public void assign_status() {
-        final EntityStatus status = EntityStatus.newBuilder()
-                                                .setArchived(true)
-                                                .setDeleted(false)
-                                                .build();
-        entity.setMetadata(status);
-        assertEquals(status, entity.getEntityStatus());
+    public void assign_visibility() {
+        final Visibility<Long> visibility = Visibility.of(entity.getId())
+                                                      .setArchived(true)
+                                                      .setDeleted(false);
+
+        entity.setMetadata(visibility);
+        assertEquals(visibility, entity.getMetadata()
+                                       .get());
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)

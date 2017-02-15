@@ -21,7 +21,6 @@
 package org.spine3.server.command;
 
 import org.spine3.base.CommandId;
-import org.spine3.server.command.storage.CommandStatusRecord;
 import org.spine3.server.command.storage.CommandStorageRecord;
 import org.spine3.server.entity.Entity;
 
@@ -30,7 +29,7 @@ import org.spine3.server.entity.Entity;
  *
  * @author Alexander Yevyukov
  */
-abstract class CommandEntity extends Entity<CommandId, CommandStorageRecord, CommandStatusRecord> {
+class CommandEntity extends Entity<CommandId, CommandStorageRecord, CommandStatusMeta> {
 
     /**
      * {@inheritDoc}

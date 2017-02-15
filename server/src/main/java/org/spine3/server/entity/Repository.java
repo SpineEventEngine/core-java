@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?, M>, M extends Message>
+public abstract class Repository<I, E extends Entity<I, ?, M>, M extends EntityMeta<I, ?>>
         implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */

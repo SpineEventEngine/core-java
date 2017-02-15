@@ -34,9 +34,9 @@ import org.spine3.server.entity.EntityBuilder;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message>
-       extends EntityBuilder<A, I, S> {
-
+public class AggregateBuilder<A extends Aggregate<I, S, ?>,
+                              I,
+                              S extends Message> extends EntityBuilder<A, I, S> {
     /**
      * {@inheritDoc}
      */

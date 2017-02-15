@@ -35,7 +35,6 @@ import java.lang.reflect.InvocationTargetException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
-import static org.spine3.validate.Validate.isDefault;
 
 /**
  * A server-side object with an identity.
@@ -67,7 +66,7 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class Entity<I, S extends Message, M extends Message> {
+public abstract class Entity<I, S extends Message, M extends EntityMeta<I, ?>> {
 
     /** The index of the declaration of the generic parameter type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -243,15 +242,9 @@ public abstract class Entity<I, S extends Message, M extends Message> {
 
     /**
      * Sets metadata for the entity.
-     *
-     * @param metadata entity metadata or {@code null} if no metadata available.
-     *                 If this parameter has a default value metadata will be set to {@code null}
      */
-    void setMetadata(@Nullable M metadata) {
-        if (metadata != null && isDefault(metadata)) {
-            this.metadata = null;
-            return;
-        }
+    void setMetadata(M metadata) {
+        checkNotNull(metadata);
         this.metadata = metadata;
     }
 

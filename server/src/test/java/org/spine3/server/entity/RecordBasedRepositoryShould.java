@@ -43,12 +43,14 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordBasedRepositoryShould<E extends Entity<I, S, M>, I, S extends Message, M extends Message> {
+public abstract class RecordBasedRepositoryShould<E extends Entity<I, S, Visibility<I>>,
+                                                  I,
+                                                  S extends Message> {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
-    protected RecordBasedRepository<I, E, S, M> repository;
+    protected RecordBasedRepository<I, E, S, Visibility<I>> repository;
 
-    protected abstract RecordBasedRepository<I, E, S, M> createRepository();
+    protected abstract RecordBasedRepository<I, E, S, Visibility<I>> createRepository();
 
     protected abstract E createEntity();
 
@@ -61,7 +63,7 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S, M>, I, 
         this.repository = createRepository();
     }
 
-    private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S, M> repo, int count) {
+    private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S, ?> repo, int count) {
         final List<E> entities = createEntities(count);
 
         for (E entity : entities) {

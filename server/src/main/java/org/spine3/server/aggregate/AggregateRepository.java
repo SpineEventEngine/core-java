@@ -34,6 +34,7 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.entity.status.EntityStatus;
@@ -76,7 +77,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                extends Repository<I, A, EntityStatus>
+                extends Repository<I, A, Visibility<I>>
                 implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
@@ -309,8 +310,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected void updateMetadata(I id, EntityStatus metadata) {
-        aggregateStorage().updateStatus(id, metadata);
+    protected void updateMetadata(I id, Visibility<I> metadata) {
+        aggregateStorage().updateStatus(id, metadata.getState());
     }
 
     private enum LogSingleton {
