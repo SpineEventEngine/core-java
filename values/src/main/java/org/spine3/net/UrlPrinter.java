@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
+@SuppressWarnings({"UtilityClass", "TypeMayBeWeakened", "StringBufferWithoutInitialCapacity"})
 class UrlPrinter {
 
     private UrlPrinter() {
@@ -48,7 +48,6 @@ class UrlPrinter {
             return url.getRaw();
         }
 
-        //noinspection StringBufferWithoutInitialCapacity
         // We don't know the capacity at this point
         final StringBuilder sb = new StringBuilder();
 
