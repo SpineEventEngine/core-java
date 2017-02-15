@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.test.Given;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
@@ -31,7 +32,7 @@ import static org.spine3.base.Identifiers.newUuid;
  *
  * @author Mikhail Mikhaylov
  */
-class TestEntity extends Entity<String, Project> {
+class TestEntity extends Entity<String, Project, EntityStatus> {
 
     static TestEntity newInstance(String id) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)

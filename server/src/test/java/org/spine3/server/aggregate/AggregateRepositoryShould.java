@@ -31,6 +31,7 @@ import org.spine3.base.Commands;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.Given;
@@ -193,7 +194,9 @@ public class AggregateRepositoryShould {
     public void marks_aggregate_archived() {
         final ProjectId id = createAndStoreAggregate();
 
-        repository.markArchived(id);
+        repository.updateMetadata(id, EntityStatus.newBuilder()
+                                                  .setArchived(true)
+                                                  .build());
 
         assertFalse(repository.load(id)
                               .isPresent());
@@ -203,7 +206,9 @@ public class AggregateRepositoryShould {
     public void mark_aggregate_deleted() {
         final ProjectId id = createAndStoreAggregate();
 
-        repository.markDeleted(id);
+        repository.updateMetadata(id, EntityStatus.newBuilder()
+                                                  .setDeleted(true)
+                                                  .build());
 
         assertFalse(repository.load(id)
                               .isPresent());

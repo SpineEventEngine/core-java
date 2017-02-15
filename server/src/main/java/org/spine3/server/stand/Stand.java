@@ -36,6 +36,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityWithStatus;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -86,7 +87,8 @@ public class Stand implements AutoCloseable {
      * The mapping between {@code TypeUrl} instances and repositories providing the entities of this type
      */
     private final ConcurrentMap<TypeUrl,
-            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
+                                RecordBasedRepository<?, ? extends Entity, ? extends Message>>
+                  typeToRepositoryMap = new ConcurrentHashMap<>();
 
     /**
      * Stores  known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
@@ -289,11 +291,14 @@ public class Stand implements AutoCloseable {
      * @see #update(Object, Any, int)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
+    public <I, E extends Entity<I, ?, ?>> void registerTypeSupplier(Repository<I, E, ?> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof RecordBasedRepository) {
-            typeToRepositoryMap.put(entityType, (RecordBasedRepository<I, E, ? extends Message>) repository);
+            @SuppressWarnings("unchecked")
+            final RecordBasedRepository<I, EntityWithStatus<I, ?>, ?> repo =
+                    (RecordBasedRepository<I, EntityWithStatus<I, ?>, ?>) repository;
+            typeToRepositoryMap.put(entityType, repo);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);

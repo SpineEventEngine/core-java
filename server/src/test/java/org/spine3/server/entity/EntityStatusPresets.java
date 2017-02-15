@@ -20,32 +20,22 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
-
-import javax.annotation.CheckReturnValue;
+import org.spine3.server.entity.status.EntityStatus;
 
 /**
- * A view on a repository.
+ * Utility class for tests with preset values for {@link EntityStatus}.
  *
- * <p>A {@link Repository} may have a view that provides a different set of entities.
- * For example, there can be views that represent archived or deleted entities (that are
- * not “visible” by default).
- *
- * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
- * “visible” entities.
- *
- * @param <I> the type of IDs of entities returned by the view
- * @param <E> the entity type
- * @author Alexander Yevsyukov
+ * @author Alexander Yevyukov
  */
-public interface RepositoryView<I, E extends Entity<I, ?, ?>> {
+public class EntityStatusPresets {
 
-    /**
-     * Loads the entity with the passed ID.
-     *
-     * @param id the ID of the entity to load
-     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
-     */
-    @CheckReturnValue
-    Optional<E> load(I id);
+    public static final EntityStatus ARCHIVED = EntityStatus.newBuilder()
+                                                             .setArchived(true)
+                                                             .build();
+    public static final EntityStatus DELETED = EntityStatus.newBuilder()
+                                                            .setDeleted(true)
+                                                            .build();
+
+    private EntityStatusPresets() {
+    }
 }

@@ -76,7 +76,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                extends Repository<I, A>
+                extends Repository<I, A, EntityStatus>
                 implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
@@ -309,13 +309,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected boolean markArchived(I id) {
-        return aggregateStorage().markArchived(id);
-    }
-
-    @Override
-    protected boolean markDeleted(I id) {
-        return aggregateStorage().markDeleted(id);
+    protected void updateMetadata(I id, EntityStatus metadata) {
+        aggregateStorage().updateStatus(id, metadata);
     }
 
     private enum LogSingleton {

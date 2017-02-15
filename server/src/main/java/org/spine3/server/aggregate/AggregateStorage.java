@@ -242,24 +242,16 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * Creates iterator of aggregate event history with the reverse traversal.
      * Records are sorted by timestamp descending (from newer to older).
      *
-     * @param id aggregate ID
+     * @param id the aggregate ID
      * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
     /**
-     * Marks the aggregate with the passed ID as {@code archived}.
+     * Updates the status for the aggregate with the passed ID.
      *
      * @param id the aggregate ID
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     * @param status new entity status for the aggreagate
      */
-    protected abstract boolean markArchived(I id);
-
-    /**
-     * Marks the aggregate with the passed ID as {@code deleted}.
-     *
-     * @param id the aggregate ID
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
-     */
-    protected abstract boolean markDeleted(I id);
+    protected abstract void updateStatus(I id, EntityStatus status);
 }

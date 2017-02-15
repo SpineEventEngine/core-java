@@ -40,7 +40,7 @@ import java.util.Set;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S extends Message>
+public abstract class EventDispatchingRepository<I, E extends EntityWithStatus<I, S>, S extends Message>
         extends RecordBasedRepository<I, E, S>
                 implements EntityEventDispatcher<I> {
 

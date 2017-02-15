@@ -32,6 +32,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.server.entity.EntityStatusPresets.ARCHIVED;
+import static org.spine3.server.entity.EntityStatusPresets.DELETED;
 
 /**
  * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link EntityStatus}.
@@ -81,66 +83,18 @@ public abstract class AggregateStorageStatusHandlingShould {
 
     @Test
     public void mark_aggregate_archived() {
-        final boolean success = storage.markArchived(id);
-        assertTrue(success);
+        storage.updateStatus(id, ARCHIVED);
+
         final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
         assertArchived(aggregateStatus);
     }
 
     @Test
     public void mark_aggregate_deleted() {
-        final boolean success = storage.markDeleted(id);
-        assertTrue(success);
+        storage.updateStatus(id, DELETED);
+
         final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
         assertDeleted(aggregateStatus);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_archived_twice() {
-        final boolean firstSuccessful = storage.markArchived(id);
-        assertTrue(firstSuccessful);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
-        assertArchived(firstRead);
-
-        final boolean secondSuccessful = storage.markArchived(id);
-        assertFalse(secondSuccessful);
-
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
-        assertArchived(secondRead);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_deleted_twice() {
-        final boolean firstSuccessful = storage.markDeleted(id);
-        assertTrue(firstSuccessful);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
-        assertDeleted(firstRead);
-
-        final boolean secondSuccessful = storage.markDeleted(id);
-        assertFalse(secondSuccessful);
-
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
-        assertDeleted(secondRead);
-    }
-
-    @Test
-    public void mark_archived_if_deleted() {
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
-        assertDeleted(storage.readStatus(id));
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
-        assertStatus(storage.readStatus(id), true, true);
-    }
-
-    @Test
-    public void mark_deleted_if_archived() {
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
-        assertArchived(storage.readStatus(id));
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
-        assertStatus(storage.readStatus(id), true, true);
     }
 
     @Test

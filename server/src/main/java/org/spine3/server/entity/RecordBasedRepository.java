@@ -34,6 +34,7 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -64,8 +65,8 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
-                extends Repository<I, E> {
+public abstract class RecordBasedRepository<I, E extends EntityWithStatus<I, S>, S extends Message>
+                extends Repository<I, E, EntityStatus> {
 
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -133,17 +134,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     @Override
-    protected boolean markArchived(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        final boolean result = storage.markArchived(id);
-        return result;
-    }
-
-    @Override
-    protected boolean markDeleted(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        final boolean result = storage.markDeleted(id);
-        return result;
+    protected void updateMetadata(I id, EntityStatus metadata) {
+        final E entity = loadOrCreate(id);
+        entity.setMetadata(metadata);
+        store(entity);
     }
 
     /**
@@ -242,12 +236,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds all the entities passing the given filters and
      * applies the given {@link FieldMask} to the results.
      *
-     * <p>Field mask is applied according to
-     * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
-     * >FieldMask specs</a>.
+     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported.
+     * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.
      * All other filters are ignored.
      *
      * <p>Filtering by IDs set via {@code EntityIdFilter} is performed
@@ -317,7 +308,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @SuppressWarnings("unchecked")
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
         entity.setState(state, record.getVersion(), record.getWhenModified());
-        entity.setStatus(record.getEntityStatus());
+        entity.setMetadata(record.getEntityStatus());
         return entity;
     }
 
@@ -329,7 +320,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                                                                        .setState(stateAny)
                                                                        .setWhenModified(whenModified)
-                                                                       .setEntityStatus(entity.getStatus())
+                                                                       .setEntityStatus(entity.getEntityStatus())
                                                                        .setVersion(version);
         return builder.build();
     }

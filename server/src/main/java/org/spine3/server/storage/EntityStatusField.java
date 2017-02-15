@@ -21,11 +21,10 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
-import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.status.EntityStatus;
 
 /**
- * A container for the storage fields used to store the {@linkplain EntityStatus}.
+ * A container for the storage fields used to store the
+ * {@link org.spine3.server.entity.status.EntityStatus EntityStatus}.
  *
  * @author Dmytro Dashenkov
  * @see StorageField
@@ -35,15 +34,11 @@ public enum EntityStatusField implements StorageField {
 
     /**
      * A {@linkplain boolean} field representing weather the relevant record is {@code archived} or not.
-     *
-     * @see Repository#markArchived
      */
     archived,
 
     /**
      * A {@linkplain boolean} field representing weather the relevant record is {@code deleted} or not.
-     *
-     * @see Repository#markDeleted
      */
     deleted
 }

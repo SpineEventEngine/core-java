@@ -135,12 +135,12 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final EntityStatus statusBefore = aggregate.getStatus();
+            final EntityStatus statusBefore = aggregate.getEntityStatus();
 
             aggregate.dispatchCommand(commandMessage, context);
 
             // Update status only if the command was handled successfully.
-            final EntityStatus statusAfter = aggregate.getStatus();
+            final EntityStatus statusAfter = aggregate.getEntityStatus();
             if (statusAfter != null && !statusBefore.equals(statusAfter)) {
                 storage().writeStatus(aggregateId, statusAfter);
             }

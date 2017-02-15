@@ -100,46 +100,8 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected boolean markArchived(I id) {
-        final Optional<EntityStatus> found = getStorage().getStatus(id);
-
-        if (!found.isPresent()) {
-            getStorage().putStatus(id, EntityStatus.newBuilder()
-                                                   .setArchived(true)
-                                                   .build());
-            return true;
-        }
-        final EntityStatus currentStatus = found.get();
-        if (currentStatus.getArchived()) {
-            return false; // Already archived.
-        }
-
-        getStorage().putStatus(id, currentStatus.toBuilder()
-                                                .setArchived(true)
-                                                .build());
-        return true;
+    protected void updateStatus(I id, EntityStatus status) {
+        getStorage().putStatus(id, status);
     }
 
-    @Override
-    protected boolean markDeleted(I id) {
-        final Optional<EntityStatus> found = getStorage().getStatus(id);
-
-        if (!found.isPresent()) {
-            getStorage().putStatus(id, EntityStatus.newBuilder()
-                                                   .setDeleted(true)
-                                                   .build());
-            return true;
-        }
-
-        final EntityStatus currentStatus = found.get();
-
-        if (currentStatus.getDeleted()) {
-            return false; // Already deleted.
-        }
-
-        getStorage().putStatus(id, currentStatus.toBuilder()
-                                                .setDeleted(true)
-                                                .build());
-        return true;
-    }
 }

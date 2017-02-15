@@ -153,11 +153,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
     /**
      * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
      */
-    @SuppressWarnings("RedundantMethodOverride") // Expose the method to this package.
     @Override
-    protected EntityStatus getStatus() {
-        return super.getStatus();
+    protected EntityStatus getEntityStatus() {
+        return super.getEntityStatus();
     }
 
     /**

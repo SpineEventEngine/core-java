@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
 
@@ -47,7 +48,7 @@ public class GivenShould {
                                           .getResultClass());
     }
 
-    private static class AnEntity extends Entity<String, Timestamp> {
+    private static class AnEntity extends Entity<String, Timestamp, EntityStatus> {
         protected AnEntity(String id) {
             super(id);
         }

@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -42,7 +43,8 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
+public abstract class Repository<I, E extends Entity<I, ?, M>, M extends Message>
+        implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -148,23 +150,12 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     protected abstract void store(E obj);
 
     /**
-     * Marks the entity with the passed ID as {@code archived}.
+     * Stores entity metadata.
      *
      * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
+     * @param metadata metadata message
      */
-    protected abstract boolean markArchived(I id);
-
-    /**
-     * Marks the entity with the passed ID as {@code deleted}.
-     *
-     * <p>This method does not delete information. Entities marked as {@code deleted}
-     * can be later physically removed from a storage by custom clean-up operation.
-     *
-     * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
-     */
-    protected abstract boolean markDeleted(I id);
+    protected abstract void updateMetadata(I id, M metadata);
 
     /**
      * Returns the storage assigned to this repository or {@code null} if

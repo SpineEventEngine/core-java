@@ -20,15 +20,12 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.entity.status.CannotModifyArchivedEntity;
-import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -38,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * A server-side object with an identity.
@@ -65,10 +63,11 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
+ * @param <M> the type of the entity metadata
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class Entity<I, S extends Message> {
+public abstract class Entity<I, S extends Message, M extends Message> {
 
     /** The index of the declaration of the generic parameter type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -86,7 +85,8 @@ public abstract class Entity<I, S extends Message> {
 
     private int version;
 
-    private EntityStatus status = EntityStatus.getDefaultInstance();
+    @Nullable
+    private M metadata;
 
     /**
      * Creates a new instance.
@@ -108,7 +108,6 @@ public abstract class Entity<I, S extends Message> {
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
      *   <li>The version number is set to zero.
      *   <li>The {@link #whenModified} field is set to the system time of the call.
-     *   <li>The {@link #status} field is set to the default instance.
      * </ul>
      *
      * <p>This method cannot be called from within {@code Entity} constructor because
@@ -117,7 +116,6 @@ public abstract class Entity<I, S extends Message> {
      */
     void init() {
         setState(getDefaultState(), 0, getCurrentTime());
-        this.status = EntityStatus.getDefaultInstance();
     }
 
     /**
@@ -141,7 +139,7 @@ public abstract class Entity<I, S extends Message> {
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+    static <E extends Entity<I, ?, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -166,7 +164,7 @@ public abstract class Entity<I, S extends Message> {
      * @param <E> the type of the entity
      * @return new entity
      */
-    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
+    static <I, E extends Entity<I, ?, ?>> E createEntity(Constructor<E> constructor, I id) {
         try {
             final E result = constructor.newInstance(id);
             result.init();
@@ -244,10 +242,17 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Sets status for the entity.
+     * Sets metadata for the entity.
+     *
+     * @param metadata entity metadata or {@code null} if no metadata available.
+     *                 If this parameter has a default value metadata will be set to {@code null}
      */
-    void setStatus(EntityStatus status) {
-        this.status = status;
+    void setMetadata(@Nullable M metadata) {
+        if (metadata != null && isDefault(metadata)) {
+            this.metadata = null;
+            return;
+        }
+        this.metadata = metadata;
     }
 
     /**
@@ -308,47 +313,8 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Obtains the entity status.
      */
-    protected EntityStatus getStatus() {
-        final EntityStatus result = this.status ==  null
-                ? EntityStatus.getDefaultInstance()
-                : this.status;
-        return result;
-    }
-
-    /**
-     * Tests whether the entity is marked as archived.
-     *
-     * @return {@code true} if the entity is archived, {@code false} otherwise
-     */
-    protected boolean isArchived() {
-        return getStatus().getArchived();
-    }
-
-    /**
-     * Sets {@code archived} status flag to the passed value.
-     */
-    protected void setArchived(boolean archived) {
-        this.status = getStatus().toBuilder()
-                                 .setArchived(archived)
-                                 .build();
-    }
-
-    /**
-     * Tests whether the entity is marked as deleted.
-     *
-     * @return {@code true} if the entity is deleted, {@code false} otherwise
-     */
-    protected boolean isDeleted() {
-        return getStatus().getDeleted();
-    }
-
-    /**
-     * Sets {@code deleted} status flag to the passed value.
-     */
-    protected void setDeleted(boolean deleted) {
-        this.status = getStatus().toBuilder()
-                                 .setDeleted(deleted)
-                                 .build();
+    protected Optional<M> getMetadata() {
+        return Optional.fromNullable(this.metadata);
     }
 
     /**
@@ -358,7 +324,7 @@ public abstract class Entity<I, S extends Message> {
      * @param <I> the entity ID type
      * @return the entity ID class
      */
-    public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+    public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?, ?>> entityClass) {
         checkNotNull(entityClass);
         final Class<I> idClass = getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
@@ -405,34 +371,6 @@ public abstract class Entity<I, S extends Message> {
         }
     }
 
-    /**
-     * Ensures that the entity is not marked as {@code archived}.
-     *
-     * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getStatus()
-     * @see EntityStatus#getArchived()
-     */
-    protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getStatus().getArchived()) {
-            final String idStr = Stringifiers.idToString(getId());
-            throw new CannotModifyArchivedEntity(idStr);
-        }
-    }
-
-    /**
-     * Ensures that the entity is not marked as {@code deleted}.
-     *
-     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getStatus()
-     * @see EntityStatus#getDeleted()
-     */
-    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getStatus().getDeleted()) {
-            final String idStr = Stringifiers.idToString(getId());
-            throw new CannotModifyDeletedEntity(idStr);
-        }
-    }
-
     @Override
     @SuppressWarnings("ConstantConditions" /* It is required to check for null. */)
     public boolean equals(Object anotherObj) {
@@ -444,7 +382,7 @@ public abstract class Entity<I, S extends Message> {
             return false;
         }
         @SuppressWarnings("unchecked") // parameter must have the same generics
-        final Entity<I, S> another = (Entity<I, S>) anotherObj;
+        final Entity<I, S, M> another = (Entity<I, S, M>) anotherObj;
         if (!getId().equals(another.getId())) {
             return false;
         }
@@ -454,7 +392,7 @@ public abstract class Entity<I, S extends Message> {
         if (getVersion() != another.getVersion()) {
             return false;
         }
-        if (!getStatus().equals(another.getStatus())) {
+        if (!getMetadata().equals(another.getMetadata())) {
             return false;
         }
 
@@ -468,7 +406,7 @@ public abstract class Entity<I, S extends Message> {
         result = 31 * result + getState().hashCode();
         result = 31 * result + whenModified().hashCode();
         result = 31 * result + getVersion();
-        result = 31 * result + getStatus().hashCode();
+        result = 31 * result + getMetadata().hashCode();
         return result;
     }
 }

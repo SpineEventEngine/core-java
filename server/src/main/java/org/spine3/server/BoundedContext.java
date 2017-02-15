@@ -91,7 +91,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     private final StandFunnel standFunnel;
 
     /** All the repositories registered with this bounded context */
-    private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
+    private final List<Repository<?, ?, ?>> repositories = Lists.newLinkedList();
 
     /**
      * The map from a type of aggregate state to an aggregate repository instance that
@@ -158,7 +158,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     }
 
     private void shutDownRepositories() throws Exception {
-        for (Repository<?, ?> repository : repositories) {
+        for (Repository<?, ?, ?> repository : repositories) {
             repository.close();
         }
         repositories.clear();
@@ -200,7 +200,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
-    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends Entity<I, ?, ?>> void register(Repository<I, E, ?> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
         if (repository instanceof CommandDispatcher) {
