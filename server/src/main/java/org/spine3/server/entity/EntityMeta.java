@@ -66,8 +66,8 @@ public abstract class EntityMeta<I, M extends Message> extends Entity<I, M, Enti
         throw unsupported();
     }
 
-    public static class Nothing<I> extends EntityMeta<I, Empty> {
-        protected Nothing(I id) {
+    public static final class Nothing<I> extends EntityMeta<I, Empty> {
+        private Nothing(I id) {
             super(id);
         }
     }
