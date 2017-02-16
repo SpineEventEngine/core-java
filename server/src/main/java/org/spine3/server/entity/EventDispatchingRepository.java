@@ -76,17 +76,20 @@ public abstract class EventDispatchingRepository<I,
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     *     <li>An event should be matched to more than one projection.</li>
-     *     <li>The type of an event producer ID (stored in {@code EventContext}) differs from {@code <I>}.</li>
+     *     <li>An event should be matched to more than one projection.
+     *     <li>The type of an event producer ID (stored in {@code EventContext})
+     *     differs from {@code <I>}.
      * </ul>
      *
      * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed with the event message.
+     * the repository will use the event producer ID from an {@code EventContext} passed
+     * with the event message.
      *
      * @param func the function instance
      * @param <M> the type of the event message handled by the function
      */
-    public <M extends Message> void addIdSetFunction(Class<M> eventClass, IdSetEventFunction<I, M> func) {
+    public <M extends Message> void addIdSetFunction(Class<M> eventClass,
+                                                     IdSetEventFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -101,7 +104,8 @@ public abstract class EventDispatchingRepository<I,
     }
 
     @Override
-    public <M extends Message> Optional<IdSetEventFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
+    public <M extends Message>
+           Optional<IdSetEventFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 
