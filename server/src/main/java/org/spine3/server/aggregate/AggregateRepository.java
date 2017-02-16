@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -76,15 +77,15 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class
-AggregateRepository<I, A extends Aggregate<I, ?, ?>>
+public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
-    private final IdCommandFunction<I, Message> defaultIdFunction = GetTargetIdFromCommand.newInstance();
+    private final IdCommandFunction<I, Message> defaultIdFunction =
+            GetTargetIdFromCommand.newInstance();
 
     /** The constructor for creating entity instances. */
     private final Constructor<A> entityConstructor;
@@ -136,8 +137,10 @@ AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Class<? extends Message> getAggregateStateClass() {
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = getGenericParameterType(aggregateClass,
-                                                                            EntityLite.GenericParamer.STATE.getIndex());
+        final Class<? extends Message> stateClass = getGenericParameterType(
+                aggregateClass,
+                EntityLite.GenericParamer.STATE.getIndex()
+        );
         return stateClass;
     }
 
@@ -146,7 +149,8 @@ AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result = CommandHandlingEntity.getCommandClasses(getAggregateClass());
+        final Set<CommandClass> result =
+                CommandHandlingEntity.getCommandClasses(getAggregateClass());
         return result;
     }
 
@@ -181,7 +185,7 @@ AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void dispatch(Command command) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint = new AggregateCommandEndpoint<>(this);
+        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
         final A aggregate = commandEndpoint.dispatch(command);
 
         final List<Event> events = aggregate.getUncommittedEvents();
@@ -281,15 +285,16 @@ AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Loads the aggregate by the passed ID.
      *
-     * <p>If the aggregate is not available in the repository this method returns
-     * a newly created aggregate.
+     * <p>If the aggregate is not available in the repository this method
+     * returns a newly created aggregate.
      *
-     * <p>If the aggregate is “invisible” to regular queries, {@code Optional.absent()}
-     * is returned
+     * <p>If the aggregate is “invisible” to regular queries,
+     * {@code Optional.absent()} is returned.
      *
      * @param id the ID of the aggregate to load
      * @return the loaded object
-     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
+     * @throws IllegalStateException if the repository wasn't configured
+     *                               prior to calling this method
      * @see AggregateEvents
      */
     @Override
