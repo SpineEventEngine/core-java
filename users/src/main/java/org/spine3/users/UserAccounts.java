@@ -30,9 +30,11 @@ public class UserAccounts {
     private static final String GOOGLE_AUTH_PROVIDER_ID = "google.com";
 
     /**
-     * A suggested congnitive limit to the number of people with whom one can maintain stable social relationships.
+     * A suggested congnitive limit to the number of people with whom one can maintain stable
+     * social relationships.
      *
-     * <p>This value should be used for calculating the cache size for storing {@code UserAccount} instances.
+     * <p>This value should be used for calculating the cache size for storing
+     * {@code UserAccount} instances.
      *
      * @see <a href="https://en.wikipedia.org/wiki/Dunbar%27s_number">Dunbar's number</a>
      */
