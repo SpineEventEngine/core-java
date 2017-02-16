@@ -78,6 +78,7 @@ public class CalendarsShould {
         int april = 3;
         calendar.set(Calendar.MONTH, april);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to expected result.
-        assertEquals(calendar.get(Calendar.MONTH) + 1, Calendars.getMonthOfYear(calendar).getNumber());
+        assertEquals(calendar.get(Calendar.MONTH) + 1,
+                     Calendars.getMonthOfYear(calendar).getNumber());
     }
 }

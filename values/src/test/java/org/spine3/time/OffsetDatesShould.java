@@ -78,7 +78,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_years() {
         final int yearsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate, yearsToSubstract);
+        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate,
+                                                                       yearsToSubstract);
 
         final LocalDate date = offsetDateMinusYears.getDate();
         assertEquals(year - yearsToSubstract, date.getYear());
@@ -93,7 +94,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_months() {
         final int monthsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate, monthsToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate,
+                                                                         monthsToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -109,7 +111,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_days() {
         final int daysToSubstract = 5;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate, daysToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate,
+                                                                       daysToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());

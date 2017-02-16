@@ -49,7 +49,8 @@ public class OffsetDateTimesShould {
     private static final int millis = 124;
     private static final long nanos = 122L;
     private static final LocalDate localDate = LocalDates.of(year, month, day);
-    private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+    private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds,
+                                                             millis, nanos);
 
     @Test
     public void have_private_constructor() {
@@ -98,7 +99,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_years() {
         final int yearsToSubtract = 3;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusYears = OffsetDateTimes.minusYears(offsetDateTime, yearsToSubtract);
+        final OffsetDateTime minusYears = OffsetDateTimes.minusYears(offsetDateTime,
+                                                                     yearsToSubtract);
 
         final LocalDate date = minusYears.getDate();
         assertEquals(year - yearsToSubtract, date.getYear());
@@ -119,7 +121,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_months() {
         final int monthsToSubtract = 3;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusYears = OffsetDateTimes.minusMonths(offsetDateTime, monthsToSubtract);
+        final OffsetDateTime minusYears = OffsetDateTimes.minusMonths(offsetDateTime,
+                                                                      monthsToSubtract);
 
         final LocalDate date = minusYears.getDate();
         assertEquals(year, date.getYear());
@@ -230,7 +233,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 4;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusHours = OffsetDateTimes.minusHours(offsetDateTime, hoursToSubtract);
+        final OffsetDateTime minusHours = OffsetDateTimes.minusHours(offsetDateTime,
+                                                                     hoursToSubtract);
 
         final LocalDate date = minusHours.getDate();
         assertEquals(year, date.getYear());
@@ -253,7 +257,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_minutes() {
         final int minutesToSubtract = 11;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusMinutes = OffsetDateTimes.minusMinutes(offsetDateTime, minutesToSubtract);
+        final OffsetDateTime minusMinutes = OffsetDateTimes.minusMinutes(offsetDateTime,
+                                                                         minutesToSubtract);
 
         final LocalDate date = minusMinutes.getDate();
         assertEquals(year, date.getYear());
@@ -276,7 +281,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_seconds() {
         final int secondsToSubtract = 18;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusSeconds = OffsetDateTimes.minusSeconds(offsetDateTime, secondsToSubtract);
+        final OffsetDateTime minusSeconds = OffsetDateTimes.minusSeconds(offsetDateTime,
+                                                                         secondsToSubtract);
 
         final LocalDate date = minusSeconds.getDate();
 
@@ -300,7 +306,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 118;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime minusMillis = OffsetDateTimes.minusMillis(offsetDateTime, millisToSubtract);
+        final OffsetDateTime minusMillis = OffsetDateTimes.minusMillis(offsetDateTime,
+                                                                       millisToSubtract);
 
         final LocalDate date = minusMillis.getDate();
         assertEquals(year, date.getYear());
@@ -345,7 +352,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_future_after_specified_number_of_minutes() {
         final int minutesToAdd = 11;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime plusMinutes = OffsetDateTimes.plusMinutes(offsetDateTime, minutesToAdd);
+        final OffsetDateTime plusMinutes = OffsetDateTimes.plusMinutes(offsetDateTime,
+                                                                       minutesToAdd);
 
         final LocalDate date = plusMinutes.getDate();
         assertEquals(year, date.getYear());
@@ -368,7 +376,8 @@ public class OffsetDateTimesShould {
     public void obtain_date_and_time_in_future_after_specified_number_of_seconds() {
         final int secondsToAdd = 18;
         final OffsetDateTime offsetDateTime = OffsetDateTimes.of(localDate, localTime, ZONE_OFFSET);
-        final OffsetDateTime plusSeconds = OffsetDateTimes.plusSeconds(offsetDateTime, secondsToAdd);
+        final OffsetDateTime plusSeconds = OffsetDateTimes.plusSeconds(offsetDateTime,
+                                                                       secondsToAdd);
 
         final LocalDate date = plusSeconds.getDate();
         assertEquals(year, date.getYear());
