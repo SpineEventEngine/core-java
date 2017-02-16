@@ -32,7 +32,7 @@ import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.AbstractEntityLite;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -112,13 +112,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Constructor<A> getEntityConstructor() {
         final Class<A> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
-        final Constructor<A> result = AbstractEntityLite.getConstructor(entityClass, idClass);
+        final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
         return result;
     }
 
     @Override
     public A create(I id) {
-        return AbstractEntityLite.createEntity(this.entityConstructor, id);
+        return AbstractEntity.createEntity(this.entityConstructor, id);
     }
 
     /**

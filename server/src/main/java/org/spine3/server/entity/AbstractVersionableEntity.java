@@ -45,7 +45,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Litus
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
-        extends AbstractEntityLite<I, S>
+        extends AbstractEntity<I, S>
         implements VersionableEntity<I, S> {
 
     private final Version version;

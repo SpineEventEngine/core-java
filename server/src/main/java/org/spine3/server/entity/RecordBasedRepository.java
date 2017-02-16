@@ -65,8 +65,9 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class RecordBasedRepository<I, E extends AbstractVersionableEntity<I, S>, S extends Message>
-                extends Repository<I, E> {
+public abstract class RecordBasedRepository<I,
+                                            E extends AbstractVersionableEntity<I, S>,
+                                            S extends Message> extends Repository<I, E> {
 
     /** The constructor for creating entity instances. */
     private final Constructor<E> entityConstructor;
@@ -80,7 +81,7 @@ public abstract class RecordBasedRepository<I, E extends AbstractVersionableEnti
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
-        final Constructor<E> result = AbstractEntityLite.getConstructor(entityClass, idClass);
+        final Constructor<E> result = AbstractEntity.getConstructor(entityClass, idClass);
         return result;
     }
 
@@ -106,7 +107,7 @@ public abstract class RecordBasedRepository<I, E extends AbstractVersionableEnti
 
     @Override
     public E create(I id) {
-        return AbstractEntityLite.createEntity(this.entityConstructor, id);
+        return AbstractEntity.createEntity(this.entityConstructor, id);
     }
 
     /** {@inheritDoc} */

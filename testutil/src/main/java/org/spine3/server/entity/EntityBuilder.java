@@ -150,7 +150,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = AbstractEntityLite.getConstructor(getResultClass(), idClass);
+        final Constructor<E> constructor = AbstractEntity.getConstructor(getResultClass(), idClass);
         constructor.setAccessible(true);
         return constructor;
     }
@@ -160,7 +160,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      */
     protected E createEntity(I id) {
         final Constructor<E> constructor = getConstructor();
-        final E result = AbstractEntityLite.createEntity(constructor, id);
+        final E result = AbstractEntity.createEntity(constructor, id);
         return result;
     }
 }

@@ -286,8 +286,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = AbstractEntityLite.getConstructor(BareBonesEntity.class,
-                                                                                    Long.class);
+        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class,
+                                                                                Long.class);
 
         assertNotNull(ctor);
     }
@@ -298,8 +298,8 @@ public class EntityShould {
         final Timestamp before = Timestamps.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor = AbstractEntityLite.getConstructor(BareBonesEntity.class, Long.class);
-        final AbstractVersionableEntity<Long, StringValue> entity = AbstractEntityLite.createEntity(ctor, id);
+        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
+        final AbstractVersionableEntity<Long, StringValue> entity = AbstractEntity.createEntity(ctor, id);
 
         final Timestamp after = Timestamps.getCurrentTime();
 

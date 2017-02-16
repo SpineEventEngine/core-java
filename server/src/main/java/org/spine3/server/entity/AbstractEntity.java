@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * @param <S> the type of entity state objects
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractEntityLite<I, S extends Message> implements Entity<I, S> {
+public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     private final I id;
 
@@ -49,7 +49,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
     /**
      * Creates new instance with the passed ID.
      */
-    protected AbstractEntityLite(I id) {
+    protected AbstractEntity(I id) {
         this.id = id;
     }
 
@@ -165,7 +165,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
      * @param <E> the type of the entity
      * @return new entity
      */
-    public static <I, E extends AbstractEntityLite<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         try {
             final E result = ctor.newInstance(id);
             result.init();
@@ -180,10 +180,10 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbstractEntityLite)) {
+        if (!(o instanceof AbstractEntity)) {
             return false;
         }
-        AbstractEntityLite<?, ?> that = (AbstractEntityLite<?, ?>) o;
+        AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
         return Objects.equals(getId(), that.getId()) &&
                Objects.equals(getState(), that.getState());
     }
