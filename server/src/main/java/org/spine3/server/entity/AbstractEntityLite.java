@@ -39,7 +39,7 @@ import static java.lang.String.format;
  * @param <S> the type of entity state objects
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractEntityLite<I, S extends Message> implements EntityLite<I, S> {
+public abstract class AbstractEntityLite<I, S extends Message> implements Entity<I, S> {
 
     private final I id;
 
@@ -99,7 +99,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
     @Override
     @CheckReturnValue
     public S getDefaultState() {
-        final Class<? extends EntityLite> entityClass = getClass();
+        final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
         if (!registry.contains(entityClass)) {
             final S state = createDefaultState();
@@ -137,7 +137,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends EntityLite<I, ?>, I>
+    public static <E extends Entity<I, ?>, I>
            Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);

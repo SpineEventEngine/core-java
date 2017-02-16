@@ -30,7 +30,7 @@ import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Version;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
@@ -220,7 +220,7 @@ public class SubscriptionServiceShould {
     }
 
     private static VersionableEntity mockEntity(ProjectId projectId, Message projectState, int version) {
-        final VersionableEntity entity = mock(AbstractEntity.class);
+        final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
         when(entity.getVersion()).thenReturn(Version.of(version, Timestamps.getCurrentTime()));

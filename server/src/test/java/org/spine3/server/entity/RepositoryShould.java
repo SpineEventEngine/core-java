@@ -66,7 +66,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithPrivateConstructor extends AbstractEntity<ProjectId, Project> {
+    private static class EntityWithPrivateConstructor extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
@@ -119,7 +119,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithProtectedConstructor extends AbstractEntity<ProjectId, Project> {
+    private static class EntityWithProtectedConstructor extends AbstractVersionableEntity<ProjectId, Project> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
@@ -172,7 +172,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithoutRequiredConstructor extends AbstractEntity<ProjectId, Project> {
+    private static class EntityWithoutRequiredConstructor extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
@@ -219,7 +219,7 @@ public class RepositoryShould {
     // Tests of regular work
     //-----------------------
 
-    private static class ProjectEntity extends AbstractEntity<ProjectId, Project> {
+    private static class ProjectEntity extends AbstractVersionableEntity<ProjectId, Project> {
         public ProjectEntity(ProjectId id) {
             super(id);
         }

@@ -44,7 +44,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class AbstractEntity<I, S extends Message>
+public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntityLite<I, S>
         implements VersionableEntity<I, S> {
 
@@ -57,9 +57,9 @@ public abstract class AbstractEntity<I, S extends Message>
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the
-     *         {@linkplain EntityLite supported types}
+     *         {@linkplain Entity supported types}
      */
-    protected AbstractEntity(I id) {
+    protected AbstractVersionableEntity(I id) {
         super(id);
         checkNotNull(id);
         Identifiers.checkSupported(id.getClass());
@@ -250,13 +250,13 @@ public abstract class AbstractEntity<I, S extends Message>
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbstractEntity)) {
+        if (!(o instanceof AbstractVersionableEntity)) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
-        AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
+        AbstractVersionableEntity<?, ?> that = (AbstractVersionableEntity<?, ?>) o;
         return Objects.equals(getVersion(), that.getVersion()) &&
                Objects.equals(getStatus(), that.getStatus());
     }

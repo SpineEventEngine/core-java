@@ -52,7 +52,7 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @param <S> the type of entity state
  * @author Alexander Yevsyukov
  */
-public interface EntityLite<I, S extends Message> {
+public interface Entity<I, S extends Message> {
 
     /**
      * Obtains the identifier of the entity.
@@ -83,13 +83,13 @@ public interface EntityLite<I, S extends Message> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
-         * in {@link EntityLite}.
+         * in {@link Entity}.
          */
         ID(0),
 
         /**
          * The index of the declaration of the generic parameter type {@code <S>}
-         * in {@link EntityLite}
+         * in {@link Entity}
          */
         STATE(1);
 
@@ -106,7 +106,7 @@ public interface EntityLite<I, S extends Message> {
     }
 
     /**
-     * Provides type information on classes implementing {@link EntityLite}.
+     * Provides type information on classes implementing {@link Entity}.
      */
     class TypeInfo {
 
@@ -121,7 +121,7 @@ public interface EntityLite<I, S extends Message> {
          * @param <I> the entity ID type
          * @return the entity ID class
          */
-        static <I> Class<I> getIdClass(Class<? extends EntityLite<I, ?>> entityClass) {
+        static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
             checkNotNull(entityClass);
             final Class<I> idClass = getGenericParameterType(entityClass,
                                                              GenericParamer.ID.getIndex());
@@ -136,7 +136,7 @@ public interface EntityLite<I, S extends Message> {
          * @return the entity state class
          */
         static <S extends Message> Class<S> getStateClass(
-                Class<? extends EntityLite> entityClass) {
+                Class<? extends Entity> entityClass) {
             final Class<S> result = getGenericParameterType(entityClass,
                                                             GenericParamer.STATE.getIndex());
             return result;

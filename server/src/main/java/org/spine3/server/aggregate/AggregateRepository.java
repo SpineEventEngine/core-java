@@ -33,7 +33,7 @@ import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.AbstractEntityLite;
-import org.spine3.server.entity.EntityLite;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
@@ -139,7 +139,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
         final Class<? extends Message> stateClass = getGenericParameterType(
                 aggregateClass,
-                EntityLite.GenericParamer.STATE.getIndex()
+                Entity.GenericParamer.STATE.getIndex()
         );
         return stateClass;
     }

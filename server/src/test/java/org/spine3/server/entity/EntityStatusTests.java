@@ -43,12 +43,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class EntityStatusTests {
 
-    private AbstractEntity<Long, StringValue> entity;
+    private AbstractVersionableEntity<Long, StringValue> entity;
 
     /**
      * A minimal entity class.
      */
-    private static class MiniEntity extends AbstractEntity<Long, StringValue> {
+    private static class MiniEntity extends AbstractVersionableEntity<Long, StringValue> {
         private MiniEntity(Long id) {
             super(id);
         }
@@ -106,7 +106,7 @@ public class EntityStatusTests {
     @Test
     public void assure_entities_with_different_status_are_not_equal() {
         // Create an entity with the same ID and the same (default) state.
-        final AbstractEntity another = new MiniEntity(entity.getId());
+        final AbstractVersionableEntity another = new MiniEntity(entity.getId());
 
         another.setArchived(true);
 

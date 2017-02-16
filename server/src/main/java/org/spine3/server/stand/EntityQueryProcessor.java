@@ -28,12 +28,12 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.VersionableEntity;
 
 /**
- * Processes the queries targeting {@link AbstractEntity} objects.
+ * Processes the queries targeting {@link AbstractVersionableEntity} objects.
  *
  * @author Alex Tymchenko
  */

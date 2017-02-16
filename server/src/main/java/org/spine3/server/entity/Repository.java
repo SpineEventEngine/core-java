@@ -107,7 +107,7 @@ public abstract class Repository<I, E extends VersionableEntity<I, ?>> implement
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
             final Class<Object> stateClass = Classes.getGenericParameterType(entityClass,
-                                                                             EntityLite.GenericParamer.STATE.getIndex());
+                                                                             Entity.GenericParamer.STATE.getIndex());
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }

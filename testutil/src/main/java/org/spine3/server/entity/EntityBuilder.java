@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
+public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
        extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
@@ -102,7 +102,7 @@ public class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
     @CheckReturnValue
     protected Class<I> getIdClass() {
         final Class<E> resultClass = getResultClass();
-        final Class<I> idClass = EntityLite.TypeInfo.getIdClass(resultClass);
+        final Class<I> idClass = Entity.TypeInfo.getIdClass(resultClass);
         return idClass;
     }
 

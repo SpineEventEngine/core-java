@@ -42,7 +42,7 @@ class DefaultStateRegistry {
      * end-user application scenarios.
      **/
 
-    private final Map<Class<? extends EntityLite>, Message> defaultStates = newConcurrentMap();
+    private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
 
     /**
      * Specifies if the entity state of this class is already registered.
@@ -51,7 +51,7 @@ class DefaultStateRegistry {
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
     @CheckReturnValue
-    boolean contains(Class<? extends EntityLite> entityClass) {
+    boolean contains(Class<? extends Entity> entityClass) {
         final boolean result = defaultStates.containsKey(entityClass);
         return result;
     }
@@ -63,7 +63,7 @@ class DefaultStateRegistry {
      * @param state a default state of the entity
      * @throws IllegalArgumentException if the state of this class is already registered
      */
-    void put(Class<? extends EntityLite> entityClass, Message state) {
+    void put(Class<? extends Entity> entityClass, Message state) {
         if (contains(entityClass)) {
             final String msg = format("This class is registered already: %s", entityClass);
             throw new IllegalArgumentException(msg);
@@ -77,7 +77,7 @@ class DefaultStateRegistry {
      * @param entityClass an entity class
      */
     @CheckReturnValue
-    Message get(Class<? extends EntityLite> entityClass) {
+    Message get(Class<? extends Entity> entityClass) {
         final Message state = defaultStates.get(entityClass);
         return state;
     }

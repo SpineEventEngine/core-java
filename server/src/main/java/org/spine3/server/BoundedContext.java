@@ -38,7 +38,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
@@ -199,7 +199,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
-    public <I, E extends AbstractEntity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends AbstractVersionableEntity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
         if (repository instanceof CommandDispatcher) {
