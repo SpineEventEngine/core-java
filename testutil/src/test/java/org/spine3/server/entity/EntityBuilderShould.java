@@ -69,7 +69,7 @@ public class EntityBuilderShould {
         final StringValue state = newStringValue(getClass().getName());
         final Timestamp timestamp = Timestamps.getCurrentTime();
 
-        final Entity entity = givenEntity()
+        final VersionableEntity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -85,7 +85,7 @@ public class EntityBuilderShould {
 
     @Test
     public void create_entity_with_default_values() {
-        final Entity entity = givenEntity().build();
+        final VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());

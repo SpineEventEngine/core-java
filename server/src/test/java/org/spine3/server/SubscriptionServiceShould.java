@@ -31,8 +31,8 @@ import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Version;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -211,7 +211,7 @@ public class SubscriptionServiceShould {
                                             .build();
         final int version = 1;
 
-        final Entity entity = mockEntity(projectId, projectState, version);
+        final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
                       .post(entity);
 
@@ -219,8 +219,8 @@ public class SubscriptionServiceShould {
         activationObserver.verifyState(false);
     }
 
-    private static Entity mockEntity(ProjectId projectId, Message projectState, int version) {
-        final Entity entity = mock(AbstractEntity.class);
+    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState, int version) {
+        final VersionableEntity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
         when(entity.getVersion()).thenReturn(Version.of(version, Timestamps.getCurrentTime()));
@@ -279,7 +279,7 @@ public class SubscriptionServiceShould {
                                             .setId(projectId)
                                             .build();
         final int version = 1;
-        final Entity entity = mockEntity(projectId, projectState, version);
+        final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
                       .post(entity);
 

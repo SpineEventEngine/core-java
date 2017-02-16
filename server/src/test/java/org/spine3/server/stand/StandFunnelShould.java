@@ -32,8 +32,8 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Version;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.projection.ProjectId;
@@ -122,7 +122,7 @@ public class StandFunnelShould {
         final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
             @Override
-            protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
                 return false;
             }
         });
@@ -136,7 +136,7 @@ public class StandFunnelShould {
         final Object id = new Object();
         final StringValue state = StringValue.getDefaultInstance();
 
-        final Entity entity = mock(AbstractEntity.class);
+        final VersionableEntity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
         when(entity.getVersion()).thenReturn(Version.of(17, Timestamps.getCurrentTime()));
@@ -327,7 +327,7 @@ public class StandFunnelShould {
         }
 
         @Override
-        protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+        protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
             return false;
         }
     }

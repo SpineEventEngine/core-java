@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
  *
  * @author Alexander Yevsyukov
  */
-public interface Entity<I, S extends Message> extends EntityLite<I, S> {
+public interface VersionableEntity<I, S extends Message> extends EntityLite<I, S> {
 
     /**
      * Obtains the version of the entity.

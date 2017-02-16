@@ -87,7 +87,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractEntity<I, S>
         repository.store(entity);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
-        final Entity<?,?> found = repository.load(entity.getId()).get();
+        final VersionableEntity<?,?> found = repository.load(entity.getId()).get();
 
         assertEquals(found, entity);
     }
@@ -156,7 +156,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractEntity<I, S>
             ids.add(entities.get(i)
                             .getId());
         }
-        final Entity<I,S> sideEntity = createEntity();
+        final VersionableEntity<I,S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
         final Collection<E> found = repository.loadAll(ids);
