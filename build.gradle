@@ -120,8 +120,8 @@ subprojects {
 
     dependencies {
         compile group: 'com.google.guava', name: 'guava', version: guavaVersion
-        //We need this in order to generate javadoc correctly. Remove it after update guava to 22.0.
-        //Details: https://github.com/google/guava/issues/2721
+        // We need this in order to generate javadoc correctly. Remove it after update guava to 22.0.
+        // Details: https://github.com/google/guava/issues/2721
         compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
