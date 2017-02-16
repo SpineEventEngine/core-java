@@ -40,35 +40,16 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
- * A server-side object with an identity.
+ * An abstract base for entities with versions.
  *
- * <p>An entity identifier can be of one of the following types:
- *   <ul>
- *      <li>String
- *      <li>Long
- *      <li>Integer
- *      <li>A class implementing {@link Message}
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes
- *      <li>ISBN
- *      <li>Phone number
- *      <li>email address as a couple of local-part and domain
- *   </ul>
- *
- *
- * <p>A state of an entity is defined as a protobuf message and basic versioning attributes.
- * The entity keeps only its latest state and meta information associated with this state.
+ * The entity keeps only its latest state and version information associated with this state.
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class Entity<I, S extends Message> {
+public abstract class Entity<I, S extends Message> implements EntityLite<I, S> {
 
     /** The index of the declaration of the generic parameter type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -123,7 +104,7 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Obtains the ID of the entity.
      */
-    @CheckReturnValue
+    @Override
     public I getId() {
         return id;
     }
@@ -177,12 +158,11 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Obtains the default entity state.
-     *
-     * @return an empty instance of the state class
+     * {@inheritDoc}
      */
+    @Override
     @CheckReturnValue
-    protected S getDefaultState() {
+    public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
         if (!registry.contains(entityClass)) {
@@ -201,11 +181,9 @@ public abstract class Entity<I, S extends Message> {
     }
 
     /**
-     * Obtains the entity state.
-     *
-     * @return the current state object or the value produced by {@link #getDefaultState()}
-     *         if the state wasn't set
+     * {@inheritDoc}
      */
+    @Override
     @CheckReturnValue
     public S getState() {
         final S result = state == null

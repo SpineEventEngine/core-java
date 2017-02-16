@@ -330,11 +330,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Override
-        protected Project getDefaultState() {
-            return super.getDefaultState();
-        }
-
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
