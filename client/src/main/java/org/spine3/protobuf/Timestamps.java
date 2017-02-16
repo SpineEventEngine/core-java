@@ -223,8 +223,8 @@ public class Timestamps {
      * @param timestamp the timestamp to check if it is between the {@code start} and {@code finish}
      * @param start     the first point in time, must be before the {@code finish} timestamp
      * @param finish    the second point in time, must be after the {@code start} timestamp
-     * @return true if the {@code timestamp} is after the {@code start} and before
-     * the {@code finish} timestamps, false otherwise
+     * @return {@code true} if the {@code timestamp} is after the {@code start} and before
+     * the {@code finish} timestamps, {@code false} otherwise
      */
     public static boolean isBetween(Timestamp timestamp, Timestamp start, Timestamp finish) {
         final boolean isAfterStart = compare(start, timestamp) < 0;
@@ -237,8 +237,8 @@ public class Timestamps {
      *
      * @param timestamp the timestamp to check if it is later then {@code thanTime}
      * @param thanTime  the first point in time which is supposed to be before the {@code timestamp}
-     * @return true if the {@code timestamp} is later than {@code thanTime} timestamp,
-     * false otherwise
+     * @return {@code true} if the {@code timestamp} is later than {@code thanTime} timestamp,
+     * {@code false} otherwise
      */
     public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
         final boolean isAfter = compare(timestamp, thanTime) > 0;

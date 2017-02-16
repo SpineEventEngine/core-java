@@ -81,8 +81,8 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code DispatcherEventDelivery}, which does not
-         * postpone any event dispatching and uses
+         * A pre-defined instance of the {@code DispatcherEventDelivery},
+         * which does not postpone any event dispatching and uses
          * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
          * for operation.
          */

@@ -95,8 +95,7 @@ public class Stand implements AutoCloseable {
 
     /**
      * Stores  known {@link org.spine3.server.aggregate.Aggregate Aggregate} types in order to
-     * distinguish them among all
-     * instances of {@code TypeUrl}.
+     * distinguish them among all instances of {@code TypeUrl}.
      *
      * <p>Once this instance of {@code Stand} receives an update as {@link Any},
      * the {@code Aggregate} states are persisted for further usage. The entities that are not
