@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
@@ -307,8 +308,10 @@ public abstract class RecordBasedRepository<I,
             private void checkIdClass(Class messageClass) {
                 final boolean classIsSame = expectedIdClass.equals(messageClass);
                 if (!classIsSame) {
-                    final String errMsg = String.format("Unexpected ID class encountered: %s. Expected: %s",
-                                                        messageClass, expectedIdClass);
+                    final String errMsg = format(
+                            "Unexpected ID class encountered: %s. Expected: %s",
+                            messageClass, expectedIdClass
+                    );
                     throw new IllegalStateException(errMsg);
                 }
             }
@@ -338,11 +341,12 @@ public abstract class RecordBasedRepository<I,
         final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion().getNumber();
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                                                                       .setState(stateAny)
-                                                                       .setWhenModified(whenModified)
-                                                                       .setEntityStatus(entity.getStatus())
-                                                                       .setVersion(version);
+        final EntityStorageRecord.Builder builder =
+                EntityStorageRecord.newBuilder()
+                                   .setState(stateAny)
+                                   .setWhenModified(whenModified)
+                                   .setEntityStatus(entity.getStatus())
+                                   .setVersion(version);
         return builder.build();
     }
 
