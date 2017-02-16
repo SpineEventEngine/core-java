@@ -75,7 +75,7 @@ public abstract class CommandTest<C extends Message> {
      * <p>The created command and its content can be obtained via {@link #command()},
      * {@link #commandMessage()}, {@link #commandContext()}.
      *
-     * <p>Subsequent call to this method will createCommand another command and
+     * <p>Subsequent call to this method will create another command and
      * overwrite the previously stored one.
      *
      * @return created command instance
@@ -92,7 +92,7 @@ public abstract class CommandTest<C extends Message> {
      * <p>Use this method for creating commands of types different than
      * one which is the subject of the test suite (defined by the generic type {@code <C>}.
      *
-     * @param commandMessage the message of the command to createCommand
+     * @param commandMessage the message of the command to create
      * @return new command instance
      */
     protected Command createDifferentCommand(Message commandMessage) {
@@ -105,7 +105,7 @@ public abstract class CommandTest<C extends Message> {
      * <p>Use this method for creating commands of types different than
      * one which is the subject of the test suite (defined by the generic type {@code <C>}.
      *
-     * @param commandMessage the message of the command to createCommand
+     * @param commandMessage the message of the command to create
      * @param timestamp the moment in time at which the command was created
      * @return new command instance
      */
@@ -119,7 +119,7 @@ public abstract class CommandTest<C extends Message> {
      * <p>The created command and its content can be obtained via {@link #command()},
      * {@link #commandMessage()}, {@link #commandContext()}.
      *
-     * <p>Subsequent call to this method will createCommand another command and
+     * <p>Subsequent call to this method will create another command and
      * overwrite the previously stored one.
      *
      * @return created command instance
@@ -132,7 +132,7 @@ public abstract class CommandTest<C extends Message> {
 
     /**
      * Obtains remembered command message or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<C> commandMessage() {
         return Optional.fromNullable(commandMessage);
@@ -140,7 +140,7 @@ public abstract class CommandTest<C extends Message> {
 
     /**
      * Obtains remembered command context or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<CommandContext> commandContext() {
         if (command().isPresent()) {
@@ -151,14 +151,14 @@ public abstract class CommandTest<C extends Message> {
 
     /**
      * Obtains remembered command or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<Command> command() {
         return Optional.fromNullable(command);
     }
 
     /**
-     * Implement this method to createCommand and store the reference to the object
+     * Implement this method to create and store the reference to the object
      * which handles the command we test.
      *
      * <p>This method must be called in derived test suites in methods

@@ -415,7 +415,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                                                         ") returned null instance");
             }
 
-            /* If some of the properties were not set, createCommand them using set StorageFactory. */
+            /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
                 commandStore = createCommandStore(storageFactory);
             }

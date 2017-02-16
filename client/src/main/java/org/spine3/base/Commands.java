@@ -85,7 +85,7 @@ public class Commands {
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId     the actor id
+     * @param userId     the actor ID
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
      * @see org.spine3.client.CommandFactory#createCommand(Message)

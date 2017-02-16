@@ -229,7 +229,7 @@ public class StandShould {
         checkTypesEmpty(stand);
 
         // Customer type was NOT registered.
-        // So createCommand a query for an unknown type.
+        // So create a query for an unknown type.
         final Query readAllCustomers = Queries.readAll(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();

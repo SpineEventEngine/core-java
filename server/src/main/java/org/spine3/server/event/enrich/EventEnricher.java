@@ -208,7 +208,7 @@ public class EventEnricher {
          *
          * <p>We suppress the {@code "unchecked"} because we ensure types when we...
          * <ol>
-         *      <li>createCommand enrichments,
+         *      <li>create enrichments,
          *      <li>put them into {@link #functions} by their event message class.
          * </ol>
          */
@@ -404,7 +404,7 @@ public class EventEnricher {
     }
 
     /**
-     * A utility method to createCommand an instance of {@link EnrichmentFunction} based on the {@link FieldEnricher}.
+     * A utility method to create an instance of {@link EnrichmentFunction} based on the {@link FieldEnricher}.
      */
     private static <S, T> EnrichmentFunction<S, T> fieldEnrichmentOf(Class<S> eventFieldClass,
                                                                      Class<T> enrichmentFieldClass,

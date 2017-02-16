@@ -159,7 +159,7 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     /**
      * Creates a new {@link CommandRouter}.
      *
-     * <p>A {@code CommandRouter} allows to createCommand and post one or more commands
+     * <p>A {@code CommandRouter} allows to create and post one or more commands
      * in response to a command received by the {@code ProcessManager}.
      *
      * <p>A typical usage looks like this:
@@ -194,7 +194,7 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     /**
      * Creates a new {@code IteratingCommandRouter}.
      *
-     * <p>An {@code IteratingCommandRouter} allows to createCommand several commands
+     * <p>An {@code IteratingCommandRouter} allows to create several commands
      * in response to a command received by the {@code ProcessManager} and
      * post these commands one by one.
      * .

@@ -60,7 +60,7 @@ public class FieldMasks {
      * Creates a new instance of {@code FieldMask} basing on the target type {@link Descriptors.Descriptor descriptor}
      * and field tags defined in the Protobuf message.
      *
-     * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to createCommand a mask for.
+     * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to create a mask for.
      * @param fieldTags      field tags to include into the mask.
      * @return an instance of {@code FieldMask} for the target type with the fields specified.
      */

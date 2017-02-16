@@ -557,7 +557,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
             return Durations.add(seconds(deltaSeconds), nanos(deltaNanos));
         }
 
-        // The params have the same sign, just createCommand a Duration instance using them.
+        // The params have the same sign, just create a Duration instance using them.
         return Duration.newBuilder()
                        .setSeconds(deltaSeconds)
                        .setNanos(deltaNanos)
