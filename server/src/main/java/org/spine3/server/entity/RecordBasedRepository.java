@@ -42,7 +42,6 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -69,20 +68,12 @@ public abstract class RecordBasedRepository<I,
                                             E extends AbstractVersionableEntity<I, S>,
                                             S extends Message> extends Repository<I, E> {
 
-    /** The constructor for creating entity instances. */
-    private final Constructor<E> entityConstructor;
+    private final EntityFactory<I, E> entityFactory;
 
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
-    }
-
-    private Constructor<E> getEntityConstructor() {
-        final Class<E> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        final Constructor<E> result = AbstractEntity.getConstructor(entityClass, idClass);
-        return result;
+        this.entityFactory = new DefaultEntityFactory<>(this);
     }
 
     /** {@inheritDoc} */
@@ -107,7 +98,8 @@ public abstract class RecordBasedRepository<I,
 
     @Override
     public E create(I id) {
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        final E result = entityFactory.create(id);
+        return result;
     }
 
     /** {@inheritDoc} */
