@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -51,8 +50,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
-import static com.google.common.collect.LinkedListMultimap.*;
-import static com.google.common.collect.Multimaps.*;
+import static com.google.common.collect.LinkedListMultimap.create;
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
@@ -113,9 +112,10 @@ public class EventEnricher {
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = toMessageClass(TypeUrl.of(eventType));
-                final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this,
-                                                                                          eventClass,
-                                                                                          enrichmentClass);
+                final EventMessageEnricher msgEnricher =
+                        EventMessageEnricher.newInstance(this,
+                                                         eventClass,
+                                                         enrichmentClass);
                 functionsMap.put(eventClass, msgEnricher);
             }
         }

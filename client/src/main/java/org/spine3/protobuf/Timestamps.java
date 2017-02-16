@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
