@@ -49,7 +49,7 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class Entity<I, S extends Message> implements EntityLite<I, S> {
+public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
 
     /** The index of the declaration of the generic parameter type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -249,10 +249,9 @@ public abstract class Entity<I, S extends Message> implements EntityLite<I, S> {
     }
 
     /**
-     * Obtains the version number of the entity.
-     *
-     * @return the version number or zero if the entity was not modified
+     * {@inheritDoc}
      */
+    @Override
     public int getVersion() {
         return version;
     }
@@ -269,12 +268,10 @@ public abstract class Entity<I, S extends Message> implements EntityLite<I, S> {
     }
 
     /**
-     * Obtains the timestamp of the last modification.
-     *
-     * @return the timestamp instance or the value produced by
-     *         {@link Timestamp#getDefaultInstance()} if the state wasn't set
+     * {@inheritDoc}
      * @see #setState(Message, int, Timestamp)
      */
+    @Override
     @CheckReturnValue
     public Timestamp whenModified() {
         final Timestamp result = whenModified == null
