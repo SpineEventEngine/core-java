@@ -244,7 +244,7 @@ public class EntityShould {
 
     @Test
     public void return_id_class() {
-        final Class<String> actual = Entity.getIdClass(TestEntity.class);
+        final Class<String> actual = EntityLite.TypeInfo.getIdClass(TestEntity.class);
 
         assertEquals(String.class, actual);
     }

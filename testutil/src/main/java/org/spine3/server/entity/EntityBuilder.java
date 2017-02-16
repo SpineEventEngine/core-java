@@ -102,7 +102,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
     @CheckReturnValue
     protected Class<I> getIdClass() {
         final Class<E> resultClass = getResultClass();
-        final Class<I> idClass = Entity.getIdClass(resultClass);
+        final Class<I> idClass = EntityLite.TypeInfo.getIdClass(resultClass);
         return idClass;
     }
 

@@ -35,7 +35,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * An abstract base for entities with versions.
@@ -270,19 +269,6 @@ public abstract class Entity<I, S extends Message>
         this.status = getStatus().toBuilder()
                                  .setDeleted(deleted)
                                  .build();
-    }
-
-    /**
-     * Retrieves the ID class of the entities of the given class using reflection.
-     *
-     * @param entityClass the entity class to inspect
-     * @param <I> the entity ID type
-     * @return the entity ID class
-     */
-    public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
-        checkNotNull(entityClass);
-        final Class<I> idClass = getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
-        return idClass;
     }
 
     /**

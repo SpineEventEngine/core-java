@@ -21,6 +21,10 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.server.reflect.GenericTypeIndex;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * A server-side object with an identity.
@@ -73,9 +77,9 @@ public interface EntityLite<I, S extends Message> {
     S getDefaultState();
 
     /**
-     * Enumeration of generic type index of this interface.
+     * Enumeration of generic type parameters of this interface.
      */
-    enum GenericType {
+    enum GenericParamer implements GenericTypeIndex {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
@@ -91,12 +95,51 @@ public interface EntityLite<I, S extends Message> {
 
         private final int index;
 
-        GenericType(int index) {
+        GenericParamer(int index) {
             this.index = index;
         }
 
-        int getIndex() {
+        @Override
+        public int getIndex() {
             return this.index;
+        }
+    }
+
+    /**
+     * Provides type information on classes implementing {@link EntityLite}.
+     */
+    class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        /**
+         * Retrieves the ID class of the entities of the given class using reflection.
+         *
+         * @param entityClass the entity class to inspect
+         * @param <I> the entity ID type
+         * @return the entity ID class
+         */
+        static <I> Class<I> getIdClass(Class<? extends EntityLite<I, ?>> entityClass) {
+            checkNotNull(entityClass);
+            final Class<I> idClass = getGenericParameterType(entityClass,
+                                                             GenericParamer.ID.getIndex());
+            return idClass;
+        }
+
+        /**
+         * Retrieves the state class of the passed entity class.
+         *
+         * @param entityClass the entity class to inspect
+         * @param <S> the entity state type
+         * @return the entity state class
+         */
+        static <S extends Message> Class<S> getStateClass(
+                Class<? extends EntityLite> entityClass) {
+            final Class<S> result = getGenericParameterType(entityClass,
+                                                            GenericParamer.STATE.getIndex());
+            return result;
         }
     }
 }

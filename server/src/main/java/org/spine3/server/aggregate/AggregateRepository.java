@@ -32,6 +32,7 @@ import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.EntityLite;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
@@ -48,7 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spine3.server.entity.Entity.STATE_CLASS_GENERIC_INDEX;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -116,7 +116,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Class<? extends Message> getAggregateStateClass() {
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = getGenericParameterType(aggregateClass, STATE_CLASS_GENERIC_INDEX);
+        final Class<? extends Message> stateClass = getGenericParameterType(aggregateClass,
+                                                                            EntityLite.GenericParamer.STATE.getIndex());
         return stateClass;
     }
 

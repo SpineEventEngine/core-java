@@ -27,7 +27,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Abstract base for lite entities.
@@ -37,10 +36,6 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @author Alexander Yevsyukov
  */
 public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I, S> {
-
-    static final int ID_CLASS_GENERIC_INDEX = GenericType.ID.getIndex();
-
-    public static final int STATE_CLASS_GENERIC_INDEX = GenericType.STATE.getIndex();
 
     private final I id;
 
@@ -52,19 +47,6 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
      */
     protected AnEntityLite(I id) {
         this.id = id;
-    }
-
-    /**
-     * Retrieves the state class of the passed entity class.
-     *
-     * @param entityClass the entity class to inspect
-     * @param <S> the entity state type
-     * @return the entity state class
-     */
-    private static <S extends Message> Class<S> getStateClass(
-            Class<? extends EntityLite> entityClass) {
-        final Class<S> result = getGenericParameterType(entityClass, STATE_CLASS_GENERIC_INDEX);
-        return result;
     }
 
     /**
@@ -106,7 +88,8 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
             final S state = createDefaultState();
             registry.put(entityClass, state);
         }
-        @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
+        @SuppressWarnings("unchecked")
+            // cast is safe because this type of messages is saved to the map
         final S defaultState = (S) registry.get(entityClass);
         return defaultState;
     }
@@ -121,7 +104,6 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
      * Obtains the class of the entity state.
      */
     protected Class<S> getStateClass() {
-        final Class<? extends EntityLite> clazz = getClass();
-        return getStateClass(clazz);
+        return TypeInfo.getStateClass(getClass());
     }
 }

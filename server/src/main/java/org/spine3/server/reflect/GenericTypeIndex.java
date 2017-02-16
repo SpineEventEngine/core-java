@@ -18,32 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
-
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+package org.spine3.server.reflect;
 
 /**
- * An entity with version and timestamp of the last modification.
+ * Base interface for enumerations on generic parameters of types.
  *
  * @author Alexander Yevsyukov
  */
-public interface IEntity<I, S extends Message> extends EntityLite<I, S> {
+public interface GenericTypeIndex {
 
     /**
-     * Obtains the version number of the entity.
-     *
-     * @return the version number or zero if the entity was not modified
+     * Obtains a zero-based index of a generic parameter of a type.
      */
-    int getVersion();
-
-    /**
-     * Obtains the timestamp of the last modification.
-     *
-     * <p>If the entity was not modified yet, the method should return
-     * the {@linkplain Timestamp#getDefaultInstance() default timestamp value}.
-     *
-     * @return the timestamp of the last modification, or default value
-     */
-    Timestamp whenModified();
+    int getIndex();
 }
