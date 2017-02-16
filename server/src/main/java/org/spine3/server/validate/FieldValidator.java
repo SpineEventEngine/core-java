@@ -91,7 +91,8 @@ abstract class FieldValidator<V> {
      * Checks if the field value is not set.
      *
      * <p>If the field type is {@link Message}, it must be set to a non-default instance;
-     * if it is {@link String} or {@link com.google.protobuf.ByteString}, it must be set to a non-empty string or array.
+     * if it is {@link String} or {@link com.google.protobuf.ByteString ByteString}, it must be
+     * set to a non-empty string or array.
      *
      * @param value a field value to check
      * @return {@code true} if the field is not set, {@code false} otherwise
@@ -99,7 +100,8 @@ abstract class FieldValidator<V> {
     protected abstract boolean isValueNotSet(V value);
 
     /**
-     * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
+     * Validates messages according to Spine custom protobuf options and returns validation
+     * constraint violations found.
      *
      * <p>The default implementation calls {@link #validateEntityId()} method if needed.
      *
@@ -125,10 +127,11 @@ abstract class FieldValidator<V> {
      */
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
-            final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                                                                     .setMsgFormat(ENTITY_ID_REPEATED_FIELD_MSG)
-                                                                     .setFieldPath(getFieldPath())
-                                                                     .build();
+            final ConstraintViolation violation =
+                    ConstraintViolation.newBuilder()
+                                       .setMsgFormat(ENTITY_ID_REPEATED_FIELD_MSG)
+                                       .setFieldPath(getFieldPath())
+                                       .build();
             addViolation(violation);
             return;
         }
@@ -157,7 +160,8 @@ abstract class FieldValidator<V> {
     /**
      * Checks if the field is required and not set and adds violations found.
      *
-     * <p>If the field is repeated, it must have at least one value set, and all its values must be valid.
+     * <p>If the field is repeated, it must have at least one value set, and all its values
+     * must be valid.
      *
      * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
      */

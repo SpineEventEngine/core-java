@@ -81,7 +81,8 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#create(Message)},
+     * Commands in client applications should be created by
+     * {@link org.spine3.client.CommandFactory#create(Message) CommandFactory.create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications

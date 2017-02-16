@@ -34,10 +34,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static java.lang.String.*;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
- * {@link com.google.protobuf.util.Timestamps}.
+ * {@link com.google.protobuf.util.Timestamps Timestamps}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -45,7 +46,7 @@ import static com.google.protobuf.util.Timestamps.subtract;
 public class Timestamps {
 
     /**
-     * The following constants are taken from {@link com.google.protobuf.util.Timestamps}
+     * The following constants are taken from {@link com.google.protobuf.util.Timestamps Timestamps}
      * in order to make them publicly visible to time management utils:
      * <ul>
      *   <li>{@link #TIMESTAMP_SECONDS_MIN}
@@ -117,7 +118,8 @@ public class Timestamps {
     /**
      * Obtains system time.
      *
-     * <p>Unlike {@link #getCurrentTime()} this method <strong>always</strong> uses system time millis.
+     * <p>Unlike {@link #getCurrentTime()} this method <strong>always</strong> uses
+     * system time millis.
      *
      * @return current system time
      */
@@ -215,13 +217,14 @@ public class Timestamps {
     }
 
     /**
-     * Calculates if the {@code timestamp} is between the {@code start} and {@code finish} timestamps.
+     * Calculates if the {@code timestamp} is between the {@code start} and
+     * {@code finish} timestamps.
      *
      * @param timestamp the timestamp to check if it is between the {@code start} and {@code finish}
      * @param start     the first point in time, must be before the {@code finish} timestamp
      * @param finish    the second point in time, must be after the {@code start} timestamp
-     * @return true if the {@code timestamp} is after the {@code start} and before the {@code finish} timestamps,
-     * false otherwise
+     * @return true if the {@code timestamp} is after the {@code start} and before
+     * the {@code finish} timestamps, false otherwise
      */
     public static boolean isBetween(Timestamp timestamp, Timestamp start, Timestamp finish) {
         final boolean isAfterStart = compare(start, timestamp) < 0;
@@ -234,7 +237,8 @@ public class Timestamps {
      *
      * @param timestamp the timestamp to check if it is later then {@code thanTime}
      * @param thanTime  the first point in time which is supposed to be before the {@code timestamp}
-     * @return true if the {@code timestamp} is later than {@code thanTime} timestamp, false otherwise
+     * @return true if the {@code timestamp} is later than {@code thanTime} timestamp,
+     * false otherwise
      */
     public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
         final boolean isAfter = compare(timestamp, thanTime) > 0;
@@ -270,7 +274,9 @@ public class Timestamps {
      * @return long value
      */
     public static long convertToNanos(TimestampOrBuilder timestamp) {
-        final long nanosFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND * NANOS_PER_MILLISECOND;
+        final long nanosFromSeconds = timestamp.getSeconds() *
+                                      MILLIS_PER_SECOND *
+                                      NANOS_PER_MILLISECOND;
         final long totalNanos = nanosFromSeconds + timestamp.getNanos();
         return totalNanos;
     }
@@ -316,7 +322,7 @@ public class Timestamps {
 
     private static void checkPositive(long value) {
         if (value <= 0) {
-            throw new IllegalArgumentException(String.format("value must be positive. Passed: %d", value));
+            throw new IllegalArgumentException(format("value must be positive. Passed: %d", value));
         }
     }
 

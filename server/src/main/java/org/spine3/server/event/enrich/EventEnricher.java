@@ -51,6 +51,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.LinkedListMultimap.*;
+import static com.google.common.collect.Multimaps.*;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
@@ -64,10 +66,11 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * Enterprise Integration pattern.
  *
  * <p>There is one instance of an {@code EventEnricher} per {@code BoundedContext}.
- * This instance is called by an {@link org.spine3.server.event.EventBus} to enrich a new event before it
- * is passed to further processing by dispatchers or handlers.
+ * This instance is called by an {@link org.spine3.server.event.EventBus EventBus} to enrich
+ * a new event before it is passed to further processing by dispatchers or handlers.
  *
- * <p>The event is passed to enrichment <em>after</em> it was passed to the {@link org.spine3.server.event.EventStore}.
+ * <p>The event is passed to enrichment <em>after</em> it was passed to the
+ * {@link org.spine3.server.event.EventStore EventStore}.
  * Therefore events are stored without attached enrichment information.
  *
  * @author Alexander Yevsyukov
@@ -90,8 +93,8 @@ public class EventEnricher {
      * <p>Also adds {@link EventMessageEnricher}s for all enrichments defined in Protobuf.
      */
     EventEnricher(Builder builder) {
-        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = LinkedListMultimap.create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = Multimaps.synchronizedMultimap(rawMap);
+        final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
             functionMap.put(function.getEventClass(), function);
         }

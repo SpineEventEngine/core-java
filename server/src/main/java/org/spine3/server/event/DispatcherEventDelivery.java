@@ -46,7 +46,8 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
 
     /**
      * Creates an instance of event executor with a
-     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} used for event dispatching.
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * used for event dispatching.
      *
      * @see EventDelivery#EventDelivery()
      */
@@ -65,8 +66,10 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     }
 
     /**
-     * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT postpone any
-     * event dispatching and uses {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} for operation.
+     * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT
+     * postpone any event dispatching and uses
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * for operation.
      *
      * @return the pre-configured default executor.
      */
@@ -78,8 +81,10 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code DispatcherEventDelivery}, which does not postpone any event dispatching
-         * and uses {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()} for operation.
+         * A pre-defined instance of the {@code DispatcherEventDelivery}, which does not
+         * postpone any event dispatching and uses
+         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+         * for operation.
          */
         private static final DispatcherEventDelivery DIRECT_DELIVERY = new DispatcherEventDelivery() {
             @Override
