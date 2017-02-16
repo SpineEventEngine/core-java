@@ -35,8 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Extension of {@link Standard} doclet, which exclude {@link Internal} annotated components.
+ * Extension of {@link Standard} doclet, which excludes {@linkplain Internal}-annotated components.
  * Based on <a href="http://sixlegs.com/blog/java/exclude-javadoc-tag.html">this</a> topic.
+ *
+ * @author Dmytro Grankin
  */
 @SuppressWarnings("ExtendsUtilityClass")
 public class ExcludeInternalDoclet extends Standard {
