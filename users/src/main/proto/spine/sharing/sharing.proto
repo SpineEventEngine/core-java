@@ -124,7 +124,8 @@ message Permissions {
 //
 // If a subject is not added to sharing settings of an object, the level is `AccessLevel.NONE`.
 //
-// In order to override a permission granted at the parent level, add a permission with the required level.
+// In order to override a permission granted at the parent level, add a permission with
+// the required level.
 // For example, to disable access granted at the parent, add the permission with `AccessLevel.NONE`.
 //
 message SharingSettings {
