@@ -25,8 +25,11 @@ import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * Abstract base for lite entities.
@@ -70,6 +73,17 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
     }
 
     /**
+     * Sets the object into the default state.
+     *
+     * <p>Default implementation does nothing. Override to customize initialization
+     * behaviour of instances of your entity classes.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // by design
+    protected void init() {
+        // Do nothing.
+    }
+
+    /**
      * Sets the entity state to the passed value.
      */
     void injectState(S newState) {
@@ -105,5 +119,56 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
      */
     protected Class<S> getStateClass() {
         return TypeInfo.getStateClass(getClass());
+    }
+
+    /**
+     * Obtains constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass the class of entity identifiers
+     * @param <E> the entity type
+     * @param <I> the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    static <E extends AnEntityLite<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                           Class<I> idClass) {
+        try {
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        }
+    }
+
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = format(
+                "%s class must declare a constructor with a single %s ID parameter.",
+                entityClass, idClass
+        );
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+    /**
+     * Creates new entity and sets it to the default state.
+     *
+     * @param constructor the constructor to use
+     * @param id the ID of the entity
+     * @param <I> the type of entity IDs
+     * @param <E> the type of the entity
+     * @return new entity
+     */
+    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
+        try {
+            final E result = constructor.newInstance(id);
+            result.init();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

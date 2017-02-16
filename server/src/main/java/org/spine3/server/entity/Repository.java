@@ -89,7 +89,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
-        final Constructor<E> result = Entity.getConstructor(entityClass, idClass);
+        final Constructor<E> result = AnEntityLite.getConstructor(entityClass, idClass);
         return result;
     }
 
@@ -136,7 +136,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     @CheckReturnValue
     public E create(I id) {
-        return Entity.createEntity(this.entityConstructor, id);
+        return AnEntityLite.createEntity(this.entityConstructor, id);
     }
 
     /**

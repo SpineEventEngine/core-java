@@ -150,7 +150,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = Entity.getConstructor(getResultClass(), idClass);
+        final Constructor<E> constructor = AnEntityLite.getConstructor(getResultClass(), idClass);
         constructor.setAccessible(true);
         return constructor;
     }
@@ -160,7 +160,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
      */
     protected E createEntity(I id) {
         final Constructor<E> constructor = getConstructor();
-        final E result = Entity.createEntity(constructor, id);
+        final E result = AnEntityLite.createEntity(constructor, id);
         return result;
     }
 }
