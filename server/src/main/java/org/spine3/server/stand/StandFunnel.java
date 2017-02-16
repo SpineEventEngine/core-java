@@ -26,7 +26,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Delivers the latest {@link VersionableEntity} states from the entity repositories to the {@link Stand}.
+ * Delivers the latest {@link VersionableEntity} states from
+ * the entity repositories to the {@link Stand}.
  *
  * <p><strong>Note:</strong> Unlike {@link org.spine3.server.event.EventBus EventBus} and
  * {@link org.spine3.server.command.CommandBus CommandBus}, which assume many publishers and

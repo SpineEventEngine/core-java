@@ -23,7 +23,7 @@ package org.spine3.server.storage;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
@@ -67,7 +67,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends VersionableEntity<I,?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
@@ -75,5 +75,5 @@ public interface StorageFactory extends AutoCloseable {
      * @param projectionClass the class of projections to store
      * @param <I>             the type of stream projection IDs
      */
-    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends VersionableEntity<I,?>> projectionClass);
+    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> projectionClass);
 }

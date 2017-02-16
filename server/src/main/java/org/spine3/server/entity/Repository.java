@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends VersionableEntity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
+public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;

@@ -329,11 +329,12 @@ public abstract class RecordBasedRepository<I, E extends AbstractVersionableEnti
     }
 
     private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
-        final E entity = create(id);
         final Message unpacked = unpack(record.getState());
         final TypeUrl entityStateType = getEntityStateType();
         @SuppressWarnings("unchecked")
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
+
+        final E entity = create(id);
         entity.setState(state, record.getVersion(), record.getWhenModified());
         entity.setStatus(record.getEntityStatus());
         return entity;

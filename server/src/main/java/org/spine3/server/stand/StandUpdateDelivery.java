@@ -34,8 +34,14 @@ import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Entity} state updates to the {@code Stand} from the
- * sources such as {@link org.spine3.server.aggregate.AggregateRepository} and {@link ProjectionRepository} via {@link StandFunnel}.
+ * A base class for the strategies on delivering the {@code Entity} state updates
+ * to the {@code Stand}.
+ *
+ * <p>Common delivery sources are
+ * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
+ * and {@link ProjectionRepository}.
+ *
+ * <p>Delivery is performed via {@link StandFunnel}.
  *
  * @author Alex Tymchenko
  */
@@ -58,7 +64,8 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
     }
 
     @Override
-    protected Runnable getDeliveryAction(final Stand consumer, final VersionableEntity deliverable) {
+    protected Runnable getDeliveryAction(final Stand consumer,
+                                         final VersionableEntity deliverable) {
         return new Runnable() {
             @Override
             public void run() {

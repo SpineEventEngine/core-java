@@ -28,20 +28,19 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
-import org.spine3.server.entity.VersionableEntity;
 
 /**
- * Processes the queries targeting {@link AbstractVersionableEntity} objects.
+ * Processes the queries targeting {@link Entity} objects.
  *
  * @author Alex Tymchenko
  */
 class EntityQueryProcessor implements QueryProcessor {
 
-    private final RecordBasedRepository<?, ? extends VersionableEntity, ? extends Message> repository;
+    private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
-    EntityQueryProcessor(RecordBasedRepository<?, ? extends VersionableEntity, ? extends Message> repository) {
+    EntityQueryProcessor(RecordBasedRepository<?, ? extends Entity, ? extends Message> repository) {
         this.repository = repository;
     }
 
@@ -52,7 +51,7 @@ class EntityQueryProcessor implements QueryProcessor {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        final ImmutableCollection<? extends VersionableEntity> entities;
+        final ImmutableCollection<? extends Entity> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             entities = repository.loadAll();
@@ -61,7 +60,7 @@ class EntityQueryProcessor implements QueryProcessor {
             entities = repository.find(filters, fieldMask);
         }
 
-        for (VersionableEntity entity : entities) {
+        for (Entity entity : entities) {
             final Message state = entity.getState();
             final Any packedState = AnyPacker.pack(state);
             resultBuilder.add(packedState);

@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
@@ -78,12 +78,12 @@ public class InMemoryStorageFactory implements StorageFactory {
      * NOTE: the parameter is unused.
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends VersionableEntity<I,?>> unused) {
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> unused) {
         return InMemoryRecordStorage.newInstance(isMultitenant());
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends VersionableEntity<I,?>> unused) {
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> unused) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage = InMemoryRecordStorage.newInstance(multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);

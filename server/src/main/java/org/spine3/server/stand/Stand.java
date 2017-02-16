@@ -36,6 +36,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
@@ -93,7 +94,7 @@ public class Stand implements AutoCloseable {
      * the entities of this type.
      */
     private final ConcurrentMap<TypeUrl,
-            RecordBasedRepository<?, ? extends VersionableEntity, ? extends Message>> typeToRepositoryMap =
+            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap =
             new ConcurrentHashMap<>();
 
     /**
@@ -362,7 +363,7 @@ public class Stand implements AutoCloseable {
     private QueryProcessor processorFor(TypeUrl type) {
         final QueryProcessor result;
 
-        final RecordBasedRepository<?, ? extends VersionableEntity, ? extends Message> repository =
+        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository =
                 typeToRepositoryMap.get(type);
 
         if (repository != null) {
