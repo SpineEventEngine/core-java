@@ -46,17 +46,19 @@ message OrganizationProfile {
     // A primary Internet domain of the organization, if available.
     //
     // An organization can possess a number of Internet domains. This field contains a domain that
-    // identifies it among other organizations. For example, for ”Spine Event Engine”, it would be `spine3.org`.
+    // identifies it among other organizations. For example, for ”Spine Event Engine”,
+    // it would be `spine3.org`.
     //
     net.InternetDomain primary_domain = 3;
 
     // The URL of the organization's logo picture, if available.
     net.Url logo_url = 4;
 
-    // The URL of the organization's site or another URL that represents the organization, if available.
+    // The URL of the organization's site or another URL that represents the organization,
+    // if available.
     //
-    // Unlike the `primary_domain` this field contains full URL, which may lead to a page with information
-    // about the organization. For example: `https://www.teamdev.com/contactus`.
+    // Unlike the `primary_domain` this field contains full URL, which may lead to a page with
+    // information about the organization. For example: `https://www.teamdev.com/contactus`.
     //
     net.Url url = 5;
 

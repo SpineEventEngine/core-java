@@ -54,7 +54,8 @@ service UserAccountService {
     //
     // If one of the user IDs is not found, the call will cause `NOT_FOUND` error.
     //
-    // If the user on behalf of whom the request is made is not authorized to obtain account information
+    // If the user on behalf of whom the request is made is not authorized to obtain
+    // account information
     // for one of the user IDs, the call will cause `PERMISSION_DENIED` error.
     //
     rpc GetMany(UserAccountRequest) returns (stream UserAccount);
