@@ -38,7 +38,7 @@ import javax.annotation.CheckReturnValue;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public interface RepositoryView<I, E extends AbstractEntity<I, ?>> {
+public interface RepositoryView<I, E extends Entity<I, ?>> {
 
     /**
      * Loads the entity with the passed ID.

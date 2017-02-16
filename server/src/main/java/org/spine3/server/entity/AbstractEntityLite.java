@@ -137,7 +137,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends AbstractEntityLite<I, ?>, I>
+    public static <E extends EntityLite<I, ?>, I>
            Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
@@ -165,7 +165,7 @@ public abstract class AbstractEntityLite<I, S extends Message> implements Entity
      * @param <E> the type of the entity
      * @return new entity
      */
-    static <I, E extends AbstractEntityLite<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+    public static <I, E extends AbstractEntityLite<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         try {
             final E result = ctor.newInstance(id);
             result.init();

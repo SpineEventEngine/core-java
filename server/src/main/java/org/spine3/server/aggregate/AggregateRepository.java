@@ -32,6 +32,7 @@ import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.AbstractEntityLite;
 import org.spine3.server.entity.EntityLite;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -45,6 +46,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
 
@@ -83,6 +85,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private final IdCommandFunction<I, Message> defaultIdFunction = GetTargetIdFromCommand.newInstance();
 
+    /** The constructor for creating entity instances. */
+    private final Constructor<A> entityConstructor;
+
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
 
@@ -98,6 +103,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
+        this.entityConstructor = getEntityConstructor();
+        this.entityConstructor.setAccessible(true);
+    }
+
+    private Constructor<A> getEntityConstructor() {
+        final Class<A> entityClass = getEntityClass();
+        final Class<I> idClass = getIdClass();
+        final Constructor<A> result = AbstractEntityLite.getConstructor(entityClass, idClass);
+        return result;
+    }
+
+    @Override
+    public A create(I id) {
+        return AbstractEntityLite.createEntity(this.entityConstructor, id);
     }
 
     /**

@@ -31,8 +31,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 
-import javax.annotation.Nullable;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -74,13 +72,18 @@ public class RepositoryShould {
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithPrivateConstructor
             extends Repository<ProjectId, EntityWithPrivateConstructor> {
         private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithPrivateConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -122,13 +125,18 @@ public class RepositoryShould {
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithProtectedConstructor
             extends Repository<ProjectId, EntityWithProtectedConstructor> {
         public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithProtectedConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -170,13 +178,18 @@ public class RepositoryShould {
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithoutRequiredConstructor
             extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
         private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithoutRequiredConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -216,6 +229,12 @@ public class RepositoryShould {
 
         private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public ProjectEntity create(ProjectId id) {
+            return null;
         }
 
         @Override
@@ -285,60 +304,5 @@ public class RepositoryShould {
         repository.close();
         assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
-    }
-
-    @Test
-    public void create_entities() {
-        final ProjectId id = ProjectId.newBuilder().setId("create_entities()").build();
-        final ProjectEntity projectEntity = repository.create(id);
-        assertNotNull(projectEntity);
-        assertEquals(id, projectEntity.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void propagate_exception_if_entity_construction_fails() {
-        final Repository<ProjectId, FailingEntity> repo = new RepoForFailingEntities(boundedContext);
-        repo.create(ProjectId.newBuilder().setId("works?").build());
-    }
-
-    private static class FailingEntity extends AbstractEntity<ProjectId, Project> {
-        private FailingEntity(ProjectId id) {
-            super(id);
-            throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
-        }
-    }
-
-    private static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity> {
-
-        private RepoForFailingEntities(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-
-        @Override
-        protected void store(FailingEntity obj) {
-        }
-
-        @SuppressWarnings("ReturnOfNull") // It's the purpose of the test.
-        @Nullable
-        @Override
-        public Optional<FailingEntity> load(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected boolean markArchived(ProjectId id) {
-            return false;
-        }
-
-        @Override
-        protected boolean markDeleted(ProjectId id) {
-            return false;
-        }
-
-        @SuppressWarnings("ReturnOfNull")
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return null;
-        }
     }
 }

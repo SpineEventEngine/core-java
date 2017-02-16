@@ -42,6 +42,7 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -67,8 +68,20 @@ import static org.spine3.protobuf.Messages.toMessageClass;
 public abstract class RecordBasedRepository<I, E extends AbstractEntity<I, S>, S extends Message>
                 extends Repository<I, E> {
 
+    /** The constructor for creating entity instances. */
+    private final Constructor<E> entityConstructor;
+
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
+        this.entityConstructor = getEntityConstructor();
+        this.entityConstructor.setAccessible(true);
+    }
+
+    private Constructor<E> getEntityConstructor() {
+        final Class<E> entityClass = getEntityClass();
+        final Class<I> idClass = getIdClass();
+        final Constructor<E> result = AbstractEntityLite.getConstructor(entityClass, idClass);
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -89,6 +102,11 @@ public abstract class RecordBasedRepository<I, E extends AbstractEntity<I, S>, S
         @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return checkStorage(storage);
+    }
+
+    @Override
+    public E create(I id) {
+        return AbstractEntityLite.createEntity(this.entityConstructor, id);
     }
 
     /** {@inheritDoc} */

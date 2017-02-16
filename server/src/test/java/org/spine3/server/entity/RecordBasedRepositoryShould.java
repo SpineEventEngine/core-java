@@ -73,6 +73,14 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractEntity<I, S>
     }
 
     @Test
+    public void create_entities() {
+        final I id = createId(5);
+        final E projectEntity = repository.create(id);
+        assertNotNull(projectEntity);
+        assertEquals(id, projectEntity.getId());
+    }
+
+    @Test
     public void find_single_entity_by_id() {
         final E entity = createEntity();
 
