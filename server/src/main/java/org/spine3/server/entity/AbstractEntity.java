@@ -38,7 +38,7 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 /**
  * An abstract base for entities with versions.
  *
- * The entity keeps only its latest state and version information associated with this state.
+ * <p>The entity keeps only its latest state and version information associated with this state.
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
