@@ -53,7 +53,7 @@ message UserInfo {
     // The domain of the user.
     //
     // If the authentication provider is "google.com" then this attribute contains
-    // Google Apps domain of the user or "gmail.com" for normal Google account.
+    // G Suite domain of the user or "gmail.com" for normal Google account.
     //
     // For authentication providers other than "google.com", this field is empty.
     //
