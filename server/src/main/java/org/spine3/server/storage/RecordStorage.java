@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.FieldMasks;
 
 import java.util.Map;
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
- * @see Entity
+ * @see AbstractEntity
  */
 @SPI
 public abstract class RecordStorage<I> extends AbstractStorage<I, EntityStorageRecord>

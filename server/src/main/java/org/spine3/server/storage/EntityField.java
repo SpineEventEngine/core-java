@@ -27,14 +27,14 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractEntity;
 
 /**
  * A container for the storage fields used in multiple {@link Storage storages}.
  *
  * <p>Basic usage is:
  * <ul>
- *     <li>Storing custom {@link Entity} state fields.
+ *     <li>Storing custom {@link AbstractEntity} state fields.
  *     <li>Storing custom {@link Event} and {@link Command} messages fields.
  * </ul>
  *

@@ -27,6 +27,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -38,17 +39,17 @@ import static java.lang.String.format;
  * @param <S> the type of entity state objects
  * @author Alexander Yevsyukov
  */
-public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I, S> {
+public abstract class AbstractEntityLite<I, S extends Message> implements EntityLite<I, S> {
 
     private final I id;
 
     @Nullable
-    private S state;
+    private volatile S state;
 
     /**
      * Creates new instance with the passed ID.
      */
-    protected AnEntityLite(I id) {
+    protected AbstractEntityLite(I id) {
         this.id = id;
     }
 
@@ -66,9 +67,11 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
     @Override
     @CheckReturnValue
     public S getState() {
-        final S result = state == null
-                         ? getDefaultState()
-                         : state;
+        S result = state;
+        if (result == null) {
+            state = getDefaultState();
+            result = state;
+        }
         return result;
     }
 
@@ -134,8 +137,8 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends AnEntityLite<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
-                                                                           Class<I> idClass) {
+    static <E extends AbstractEntityLite<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                                 Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -162,7 +165,7 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
      * @param <E> the type of the entity
      * @return new entity
      */
-    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
+    static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
         try {
             final E result = constructor.newInstance(id);
             result.init();
@@ -170,5 +173,23 @@ public abstract class AnEntityLite<I, S extends Message> implements EntityLite<I
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractEntityLite)) {
+            return false;
+        }
+        AbstractEntityLite<?, ?> that = (AbstractEntityLite<?, ?>) o;
+        return Objects.equals(getId(), that.getId()) &&
+               Objects.equals(getState(), that.getState());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getState());
     }
 }

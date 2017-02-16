@@ -128,31 +128,31 @@ public class EntityShould {
         new TestEntityWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
-    private static class TestEntityWithIdUnsupported extends Entity<UnsupportedClassVersionError, Project> {
+    private static class TestEntityWithIdUnsupported extends AbstractEntity<UnsupportedClassVersionError, Project> {
         private TestEntityWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdString extends Entity <String, Project> {
+    private static class TestEntityWithIdString extends AbstractEntity<String, Project> {
         private TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdMessage extends Entity <Message, Project> {
+    private static class TestEntityWithIdMessage extends AbstractEntity<Message, Project> {
         private TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdInteger extends Entity <Integer, Project> {
+    private static class TestEntityWithIdInteger extends AbstractEntity<Integer, Project> {
         private TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdLong extends Entity <Long, Project> {
+    private static class TestEntityWithIdLong extends AbstractEntity<Long, Project> {
         private TestEntityWithIdLong(Long id) {
             super(id);
         }
@@ -194,7 +194,7 @@ public class EntityShould {
     }
 
 
-    private static class BareBonesEntity extends Entity<Long, StringValue> {
+    private static class BareBonesEntity extends AbstractEntity<Long, StringValue> {
         private BareBonesEntity(Long id) {
             super(id);
         }
@@ -270,14 +270,14 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-    private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
+    private static class EntityWithUnsupportedId extends AbstractEntity<Exception, Project> {
 
         protected EntityWithUnsupportedId(Exception id) {
             super(id);
         }
     }
 
-    private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
+    private static class EntityWithMessageId extends AbstractEntity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
@@ -286,8 +286,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = AnEntityLite.getConstructor(BareBonesEntity.class,
-                                                                              Long.class);
+        final Constructor<BareBonesEntity> ctor = AbstractEntityLite.getConstructor(BareBonesEntity.class,
+                                                                                    Long.class);
 
         assertNotNull(ctor);
     }
@@ -298,8 +298,8 @@ public class EntityShould {
         final Timestamp before = Timestamps.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor = AnEntityLite.getConstructor(BareBonesEntity.class, Long.class);
-        final Entity<Long, StringValue> entity = AnEntityLite.createEntity(ctor, id);
+        final Constructor<BareBonesEntity> ctor = AbstractEntityLite.getConstructor(BareBonesEntity.class, Long.class);
+        final AbstractEntity<Long, StringValue> entity = AbstractEntityLite.createEntity(ctor, id);
 
         final Timestamp after = Timestamps.getCurrentTime();
 

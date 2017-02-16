@@ -22,271 +22,28 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Identifiers;
-import org.spine3.base.Stringifiers;
-import org.spine3.server.entity.status.CannotModifyArchivedEntity;
-import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
 
 /**
- * An abstract base for entities with versions.
+ * An entity with version and timestamp of the last modification.
  *
- * The entity keeps only its latest state and version information associated with this state.
- *
- * @param <I> the type of the entity ID
- * @param <S> the type of the entity state
- * @author Alexander Yevsyikov
- * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public abstract class Entity<I, S extends Message>
-        extends AnEntityLite<I, S>
-        implements IEntity<I, S> {
-
-    @Nullable
-    private Timestamp whenModified;
-
-    private int version;
-
-    private EntityStatus status = EntityStatus.getDefaultInstance();
+public interface Entity<I, S extends Message> extends EntityLite<I, S> {
 
     /**
-     * Creates a new instance.
+     * Obtains the version number of the entity.
      *
-     * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
+     * @return the version number or zero if the entity was not modified
      */
-    protected Entity(I id) {
-        super(id);
-        checkNotNull(id);
-        Identifiers.checkSupported(id.getClass());
-    }
+    int getVersion();
 
     /**
-     * Sets the object into the default state.
+     * Obtains the timestamp of the last modification.
      *
-     * <p>Results of this method call are:
-     * <ul>
-     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
-     *   <li>The version number is set to zero.
-     *   <li>The {@link #whenModified} field is set to the system time of the call.
-     *   <li>The {@link #status} field is set to the default instance.
-     * </ul>
+     * <p>If the entity was not modified yet, the method should return
+     * the {@linkplain Timestamp#getDefaultInstance() default timestamp value}.
      *
-     * <p>This method cannot be called from within {@code Entity} constructor because
-     * the call to {@link #getDefaultState()} relies on completed initialization
-     * of the instance.
+     * @return the timestamp of the last modification, or default value
      */
-    @Override
-    protected void init() {
-        super.init();
-        setState(getDefaultState(), 0, getCurrentTime());
-        this.status = EntityStatus.getDefaultInstance();
-    }
-
-    /**
-     * Validates the passed state.
-     *
-     * <p>Does nothing by default. Aggregates may override this method to
-     * specify logic of validating initial or intermediate state.
-     *
-     * @param state a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
-    // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
-        // Do nothing by default.
-    }
-
-    /**
-     * Validates and sets the state.
-     *
-     * @param state the state object to set
-     * @param version the entity version to set
-     * @param whenLastModified the time of the last modification to set
-     * @see #validate(S)
-     */
-    protected void setState(S state, int version, Timestamp whenLastModified) {
-        validate(state);
-        injectState(state);
-        setVersion(version, whenLastModified);
-    }
-
-    /**
-     * Sets status for the entity.
-     */
-    void setStatus(EntityStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Sets version information of the entity.
-     *
-     * @param version the version number of the entity
-     * @param whenLastModified the time of the last modification of the entity
-     */
-    protected void setVersion(int version, Timestamp whenLastModified) {
-        this.version = version;
-        this.whenModified = checkNotNull(whenLastModified);
-    }
-
-    /**
-     * Updates the state incrementing the version number and recording time of the modification.
-     *
-     * @param newState a new state to set
-     */
-    protected void incrementState(S newState) {
-        setState(newState, incrementVersion(), getCurrentTime());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getVersion() {
-        return version;
-    }
-
-    /**
-     * Advances the current version by one and records the time of the modification.
-     *
-     * @return new version number
-     */
-    protected int incrementVersion() {
-        ++version;
-        whenModified = getCurrentTime();
-        return version;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see #setState(Message, int, Timestamp)
-     */
-    @Override
-    @CheckReturnValue
-    public Timestamp whenModified() {
-        final Timestamp result = whenModified == null
-                                 ? Timestamp.getDefaultInstance()
-                                 : whenModified;
-        return result;
-    }
-
-    /**
-     * Obtains the entity status.
-     */
-    protected EntityStatus getStatus() {
-        final EntityStatus result = this.status ==  null
-                ? EntityStatus.getDefaultInstance()
-                : this.status;
-        return result;
-    }
-
-    /**
-     * Tests whether the entity is marked as archived.
-     *
-     * @return {@code true} if the entity is archived, {@code false} otherwise
-     */
-    protected boolean isArchived() {
-        return getStatus().getArchived();
-    }
-
-    /**
-     * Sets {@code archived} status flag to the passed value.
-     */
-    protected void setArchived(boolean archived) {
-        this.status = getStatus().toBuilder()
-                                 .setArchived(archived)
-                                 .build();
-    }
-
-    /**
-     * Tests whether the entity is marked as deleted.
-     *
-     * @return {@code true} if the entity is deleted, {@code false} otherwise
-     */
-    protected boolean isDeleted() {
-        return getStatus().getDeleted();
-    }
-
-    /**
-     * Sets {@code deleted} status flag to the passed value.
-     */
-    protected void setDeleted(boolean deleted) {
-        this.status = getStatus().toBuilder()
-                                 .setDeleted(deleted)
-                                 .build();
-    }
-
-    /**
-     * Ensures that the entity is not marked as {@code archived}.
-     *
-     * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getStatus()
-     * @see EntityStatus#getArchived()
-     */
-    protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getStatus().getArchived()) {
-            final String idStr = Stringifiers.idToString(getId());
-            throw new CannotModifyArchivedEntity(idStr);
-        }
-    }
-
-    /**
-     * Ensures that the entity is not marked as {@code deleted}.
-     *
-     * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getStatus()
-     * @see EntityStatus#getDeleted()
-     */
-    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getStatus().getDeleted()) {
-            final String idStr = Stringifiers.idToString(getId());
-            throw new CannotModifyDeletedEntity(idStr);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("ConstantConditions" /* It is required to check for null. */)
-    public boolean equals(Object anotherObj) {
-        if (this == anotherObj) {
-            return true;
-        }
-        if (anotherObj == null ||
-            getClass() != anotherObj.getClass()) {
-            return false;
-        }
-        @SuppressWarnings("unchecked") // parameter must have the same generics
-        final Entity<I, S> another = (Entity<I, S>) anotherObj;
-        if (!getId().equals(another.getId())) {
-            return false;
-        }
-        if (!getState().equals(another.getState())) {
-            return false;
-        }
-        if (getVersion() != another.getVersion()) {
-            return false;
-        }
-        if (!getStatus().equals(another.getStatus())) {
-            return false;
-        }
-
-        final boolean result = whenModified().equals(another.whenModified());
-        return result;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getId().hashCode();
-        result = 31 * result + getState().hashCode();
-        result = 31 * result + whenModified().hashCode();
-        result = 31 * result + getVersion();
-        result = 31 * result + getStatus().hashCode();
-        return result;
-    }
+    Timestamp whenModified();
 }

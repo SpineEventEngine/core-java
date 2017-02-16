@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
+public abstract class Repository<I, E extends AbstractEntity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
 
     /** The index of the declaration of the generic type {@code I} in this class. */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
@@ -89,7 +89,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
-        final Constructor<E> result = AnEntityLite.getConstructor(entityClass, idClass);
+        final Constructor<E> result = AbstractEntityLite.getConstructor(entityClass, idClass);
         return result;
     }
 
@@ -136,7 +136,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     @CheckReturnValue
     public E create(I id) {
-        return AnEntityLite.createEntity(this.entityConstructor, id);
+        return AbstractEntityLite.createEntity(this.entityConstructor, id);
     }
 
     /**

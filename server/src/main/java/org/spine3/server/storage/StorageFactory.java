@@ -67,7 +67,7 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
@@ -75,5 +75,5 @@ public interface StorageFactory extends AutoCloseable {
      * @param projectionClass the class of projections to store
      * @param <I>             the type of stream projection IDs
      */
-    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> projectionClass);
+    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> projectionClass);
 }

@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
+public class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends Message>
        extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
@@ -150,7 +150,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = AnEntityLite.getConstructor(getResultClass(), idClass);
+        final Constructor<E> constructor = AbstractEntityLite.getConstructor(getResultClass(), idClass);
         constructor.setAccessible(true);
         return constructor;
     }
@@ -160,7 +160,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
      */
     protected E createEntity(I id) {
         final Constructor<E> constructor = getConstructor();
-        final E result = AnEntityLite.createEntity(constructor, id);
+        final E result = AbstractEntityLite.createEntity(constructor, id);
         return result;
     }
 }

@@ -68,7 +68,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithPrivateConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithPrivateConstructor extends AbstractEntity<ProjectId, Project> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
@@ -116,7 +116,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithProtectedConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithProtectedConstructor extends AbstractEntity<ProjectId, Project> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
@@ -164,7 +164,7 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithoutRequiredConstructor extends AbstractEntity<ProjectId, Project> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
@@ -206,7 +206,7 @@ public class RepositoryShould {
     // Tests of regular work
     //-----------------------
 
-    private static class ProjectEntity extends Entity<ProjectId, Project> {
+    private static class ProjectEntity extends AbstractEntity<ProjectId, Project> {
         public ProjectEntity(ProjectId id) {
             super(id);
         }
@@ -301,7 +301,7 @@ public class RepositoryShould {
         repo.create(ProjectId.newBuilder().setId("works?").build());
     }
 
-    private static class FailingEntity extends Entity<ProjectId, Project> {
+    private static class FailingEntity extends AbstractEntity<ProjectId, Project> {
         private FailingEntity(ProjectId id) {
             super(id);
             throw new UnsupportedOperationException("This constructor does not finish by design of this test.");

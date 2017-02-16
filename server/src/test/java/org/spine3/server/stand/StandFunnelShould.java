@@ -30,6 +30,7 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -134,7 +135,7 @@ public class StandFunnelShould {
         final StringValue state = StringValue.getDefaultInstance();
         final int version = 17;
 
-        final Entity entity = mock(Entity.class);
+        final Entity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
         when(entity.getVersion()).thenReturn(version);
@@ -211,7 +212,7 @@ public class StandFunnelShould {
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(delivery, times(dispatchActions.length)).deliver(any(Entity.class));
+        verify(delivery, times(dispatchActions.length)).deliver(any(AbstractEntity.class));
 
         if (isConcurrent) {
             try {

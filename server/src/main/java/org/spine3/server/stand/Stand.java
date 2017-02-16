@@ -35,6 +35,7 @@ import org.spine3.client.Target;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
@@ -197,7 +198,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
+     * Read all {@link AbstractEntity} types exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
      *
@@ -289,7 +290,7 @@ public class Stand implements AutoCloseable {
      * @see #update(Object, Any, int)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
+    public <I, E extends AbstractEntity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof RecordBasedRepository) {

@@ -103,7 +103,7 @@ public class EntityBuilderShould {
         assertTrue(passed);
     }
 
-    private static class TestEntity extends Entity<Long, StringValue> {
+    private static class TestEntity extends AbstractEntity<Long, StringValue> {
         protected TestEntity(Long id) {
             super(id);
         }

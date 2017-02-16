@@ -33,7 +33,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
 
 /**
- * This test suite tests {@link Entity#equals(Object)}.
+ * This test suite tests {@link AbstractEntity#equals(Object)}.
  *
  * <p>When migrating to JUnit 5, this class may become a
  * {@code @Nested} class of {@link EntityShould}.

@@ -31,7 +31,7 @@ import static org.spine3.base.Identifiers.newUuid;
  *
  * @author Mikhail Mikhaylov
  */
-class TestEntity extends Entity<String, Project> {
+class TestEntity extends AbstractEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)

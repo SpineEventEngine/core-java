@@ -29,6 +29,7 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
@@ -217,7 +218,7 @@ public class SubscriptionServiceShould {
     }
 
     private static Entity mockEntity(ProjectId projectId, Message projectState, int version) {
-        final Entity entity = mock(Entity.class);
+        final Entity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
         when(entity.getVersion()).thenReturn(version);

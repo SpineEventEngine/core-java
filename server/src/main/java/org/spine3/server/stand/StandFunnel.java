@@ -20,13 +20,14 @@
 package org.spine3.server.stand;
 
 import org.spine3.Internal;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Delivers the latest {@link Entity} states from the entity repositories to the {@link Stand}.
+ * Delivers the latest {@link AbstractEntity} states from the entity repositories to the {@link Stand}.
  *
  * <p><strong>Note:</strong> Unlike {@link org.spine3.server.event.EventBus EventBus} and
  * {@link org.spine3.server.command.CommandBus CommandBus}, which assume many publishers and
@@ -58,7 +59,7 @@ public class StandFunnel {
     }
 
     /**
-     * Post the state of an {@link Entity} to an instance of {@link Stand}.
+     * Post the state of an {@link AbstractEntity} to an instance of {@link Stand}.
      *
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
