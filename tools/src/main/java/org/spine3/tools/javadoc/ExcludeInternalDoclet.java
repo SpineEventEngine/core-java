@@ -78,7 +78,7 @@ public class ExcludeInternalDoclet extends Standard {
         if (obj.getClass().getName().startsWith("com.sun.")) {
             final Class cls = obj.getClass();
             return Proxy.newProxyInstance(cls.getClassLoader(), cls.getInterfaces(), new ExcludeHandler(obj));
-        } else if (obj instanceof Object[]) {
+        } else if (obj instanceof Object[] && expect.getComponentType() != null) {
             final Class componentType = expect.getComponentType();
             final Object[] array = (Object[]) obj;
             final List<Object> list = new ArrayList<>();
