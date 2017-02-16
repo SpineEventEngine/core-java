@@ -69,12 +69,8 @@ public abstract class RecordBasedRepository<I,
                                             E extends AbstractVersionableEntity<I, S>,
                                             S extends Message> extends Repository<I, E> {
 
-    private final EntityFactory<I, E> entityFactory;
-
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.entityFactory = new DefaultEntityFactory<>(this);
     }
 
     /** {@inheritDoc} */
@@ -83,6 +79,8 @@ public abstract class RecordBasedRepository<I,
         final Storage result = factory.createRecordStorage(getEntityClass());
         return result;
     }
+
+    protected abstract EntityFactory<I, E> entityFactory();
 
     /**
      * Ensures that the repository has the storage.
@@ -99,7 +97,7 @@ public abstract class RecordBasedRepository<I,
 
     @Override
     public E create(I id) {
-        final E result = entityFactory.create(id);
+        final E result = entityFactory().create(id);
         return result;
     }
 

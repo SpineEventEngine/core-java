@@ -40,10 +40,13 @@ import java.util.Set;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EventDispatchingRepository<I, E extends AbstractVersionableEntity<I, S>, S extends Message>
+public abstract class EventDispatchingRepository<I,
+                                                 E extends AbstractVersionableEntity<I, S>,
+                                                 S extends Message>
         extends RecordBasedRepository<I, E, S>
-                implements EntityEventDispatcher<I> {
+        implements EntityEventDispatcher<I> {
 
+    private final EntityFactory<I, E> entityFactory;
     private final IdSetFunctions<I> idSetFunctions;
 
     /**
@@ -52,10 +55,17 @@ public abstract class EventDispatchingRepository<I, E extends AbstractVersionabl
      * @param boundedContext the {@code BoundedContext} in which the repository works
      * @param defaultFunction the default function for getting an target entity IDs
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
     protected EventDispatchingRepository(BoundedContext boundedContext,
                                          IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
+        this.entityFactory = new DefaultEntityFactory<>(this);
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
+    }
+
+    @Override
+    protected EntityFactory<I, E> entityFactory() {
+        return this.entityFactory;
     }
 
     /**
