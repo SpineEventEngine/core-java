@@ -26,10 +26,10 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
@@ -44,15 +44,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
+import static org.spine3.server.entity.EntityStorageConverter.tuple;
 
 /**
  * The base class for repositories that store entities as records.
@@ -66,7 +65,7 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @author Alexander Yevsyukov
  */
 public abstract class RecordBasedRepository<I,
-                                            E extends AbstractVersionableEntity<I, S>,
+                                            E extends Entity<I, S>,
                                             S extends Message> extends Repository<I, E> {
 
     protected RecordBasedRepository(BoundedContext boundedContext) {
@@ -82,6 +81,7 @@ public abstract class RecordBasedRepository<I,
 
     protected abstract EntityFactory<I, E> entityFactory();
 
+    protected abstract EntityStorageConverter<I, E, S> storageConverter();
     /**
      * Ensures that the repository has the storage.
      *
@@ -105,7 +105,7 @@ public abstract class RecordBasedRepository<I,
     @Override
     public void store(E entity) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityStorageRecord record = toEntityRecord(entity);
+        final EntityStorageRecord record = toRecord(entity);
         storage.write(entity.getId(), record);
     }
 
@@ -210,7 +210,8 @@ public abstract class RecordBasedRepository<I,
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
-        final List<E> entities = new LinkedList<>();
+        final List<E> entities = Lists.newLinkedList();
+        final EntityStorageConverter<I, E, S> converter = storageConverter().withFieldMask(fieldMask);
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
@@ -221,7 +222,9 @@ public abstract class RecordBasedRepository<I,
                 continue;
             }
 
-            final E entity = toEntity(id, record, fieldMask);
+            final EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
+            final E entity = converter.reverse()
+                                       .convert(tuple);
             entities.add(entity);
         }
 
@@ -318,34 +321,17 @@ public abstract class RecordBasedRepository<I,
         return result;
     }
 
+    protected EntityStorageRecord toRecord(E entity) {
+        final EntityStorageConverter.Tuple<I> tuple = storageConverter().convert(entity);
+        return tuple != null ? tuple.getState()
+                             : EntityStorageRecord.getDefaultInstance();
+    }
+
     private E toEntity(I id, EntityStorageRecord record) {
-        return toEntity(id, record, FieldMask.getDefaultInstance());
-    }
-
-    private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
-        final Message unpacked = unpack(record.getState());
-        final TypeUrl entityStateType = getEntityStateType();
-        @SuppressWarnings("unchecked")
-        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
-
-        final E entity = create(id);
-        entity.setState(state, record.getVersion(), record.getWhenModified());
-        entity.setStatus(record.getEntityStatus());
-        return entity;
-    }
-
-    protected EntityStorageRecord toEntityRecord(E entity) {
-        final S state = entity.getState();
-        final Any stateAny = pack(state);
-        final Timestamp whenModified = entity.whenModified();
-        final int version = entity.getVersion().getNumber();
-        final EntityStorageRecord.Builder builder =
-                EntityStorageRecord.newBuilder()
-                                   .setState(stateAny)
-                                   .setWhenModified(whenModified)
-                                   .setEntityStatus(entity.getStatus())
-                                   .setVersion(version);
-        return builder.build();
+        EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
+        final E result = storageConverter().reverse()
+                                           .convert(tuple);
+        return result;
     }
 
     /**

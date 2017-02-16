@@ -47,6 +47,7 @@ public abstract class EventDispatchingRepository<I,
         implements EntityEventDispatcher<I> {
 
     private final EntityFactory<I, E> entityFactory;
+    private final EntityStorageConverter<I, E, S> storageConverter;
     private final IdSetFunctions<I> idSetFunctions;
 
     /**
@@ -60,12 +61,18 @@ public abstract class EventDispatchingRepository<I,
                                          IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
         this.entityFactory = new DefaultEntityFactory<>(this);
+        this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
     }
 
     @Override
     protected EntityFactory<I, E> entityFactory() {
         return this.entityFactory;
+    }
+
+    @Override
+    protected EntityStorageConverter<I, E, S> storageConverter() {
+        return this.storageConverter;
     }
 
     /**
