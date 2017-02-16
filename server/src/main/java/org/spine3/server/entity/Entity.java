@@ -20,12 +20,10 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Stringifiers;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
@@ -49,18 +47,9 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  */
-public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
-
-    /** The index of the declaration of the generic parameter type {@code I} in this class. */
-    private static final int ID_CLASS_GENERIC_INDEX = 0;
-
-    /** The index of the declaration of the generic parameter type {@code S} in this class. */
-    public static final int STATE_CLASS_GENERIC_INDEX = 1;
-
-    private final I id;
-
-    @Nullable
-    private S state;
+public abstract class Entity<I, S extends Message>
+        extends AnEntityLite<I, S>
+        implements IEntity<I, S> {
 
     @Nullable
     private Timestamp whenModified;
@@ -76,9 +65,9 @@ public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
     protected Entity(I id) {
+        super(id);
         checkNotNull(id);
         Identifiers.checkSupported(id.getClass());
-        this.id = id;
     }
 
     /**
@@ -99,14 +88,6 @@ public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
     void init() {
         setState(getDefaultState(), 0, getCurrentTime());
         this.status = EntityStatus.getDefaultInstance();
-    }
-
-    /**
-     * Obtains the ID of the entity.
-     */
-    @Override
-    public I getId() {
-        return id;
     }
 
     /**
@@ -158,41 +139,6 @@ public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    @CheckReturnValue
-    public S getDefaultState() {
-        final Class<? extends Entity> entityClass = getClass();
-        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        if (!registry.contains(entityClass)) {
-            final S state = createDefaultState();
-            registry.put(entityClass, state);
-        }
-        @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
-        final S defaultState = (S) registry.get(entityClass);
-        return defaultState;
-    }
-
-    private S createDefaultState() {
-        final Class<S> stateClass = getStateClass();
-        final S result = Messages.newInstance(stateClass);
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @CheckReturnValue
-    public S getState() {
-        final S result = state == null
-                         ? getDefaultState()
-                         : state;
-        return result;
-    }
-
-    /**
      * Validates the passed state.
      *
      * <p>Does nothing by default. Aggregates may override this method to
@@ -217,7 +163,7 @@ public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
      */
     protected void setState(S state, int version, Timestamp whenLastModified) {
         validate(state);
-        this.state = checkNotNull(state);
+        injectState(state);
         setVersion(version, whenLastModified);
     }
 
@@ -337,47 +283,6 @@ public abstract class Entity<I, S extends Message> implements IEntity<I, S> {
         checkNotNull(entityClass);
         final Class<I> idClass = getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
-    }
-
-    /**
-     * Obtains the class of the entity state.
-     */
-    protected Class<S> getStateClass() {
-        final Class<? extends Entity> clazz = getClass();
-        return getStateClass(clazz);
-    }
-
-    /**
-     * Retrieves the state class of the passed entity class.
-     *
-     * @param entityClass the entity class to inspect
-     * @param <S> the entity state type
-     * @return the entity state class
-     */
-    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
-        final Class<S> result = getGenericParameterType(entityClass, STATE_CLASS_GENERIC_INDEX);
-        return result;
-    }
-
-    /**
-     * Returns the short name of the ID type.
-     *
-     * @return
-     *  <ul>
-     *      <li>Short Protobuf type name if ID is a {@link Message}.
-     *      <li>Simple class name of the value, otherwise.
-     *  </ul>
-     */
-    public String getShortIdTypeName() {
-        if (id instanceof Message) {
-            final Message message = (Message) id;
-            final Descriptors.Descriptor descriptor = message.getDescriptorForType();
-            final String result = descriptor.getName();
-            return result;
-        } else {
-            final String result = id.getClass().getSimpleName();
-            return result;
-        }
     }
 
     /**

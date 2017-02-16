@@ -250,24 +250,6 @@ public class EntityShould {
     }
 
     @Test
-    public void return_id_simple_class_name() {
-        final String expected = entityNew.getId()
-                                         .getClass()
-                                         .getSimpleName();
-        final String actual = entityNew.getShortIdTypeName();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void return_id_protobuf_type_name() {
-        final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-        final String expected = ProjectId.getDescriptor()
-                                         .getName();
-        final String actual = entityWithMessageId.getShortIdTypeName();
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
         assertFalse(entityWithState.getId().trim().isEmpty());
 
@@ -304,7 +286,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class,
+                                                                        Long.class);
 
         assertNotNull(ctor);
     }

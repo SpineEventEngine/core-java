@@ -26,6 +26,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static java.lang.String.format;
 
 /**
  * A wrapper for the map from entity classes to entity default states.
@@ -35,10 +36,13 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 class DefaultStateRegistry {
 
     /**
-     * NOTE: The implementation is not customized with {@link com.google.common.collect.MapMaker#makeMap()} options,
-     * as it is difficult to predict which work best within the real end-user application scenarios.
+     * NOTE: The implementation is not customized with
+     * {@link com.google.common.collect.MapMaker#makeMap()} options,
+     * as it is difficult to predict which work best within the real
+     * end-user application scenarios.
      **/
-    private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
+
+    private final Map<Class<? extends EntityLite>, Message> defaultStates = newConcurrentMap();
 
     /**
      * Specifies if the entity state of this class is already registered.
@@ -47,7 +51,7 @@ class DefaultStateRegistry {
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
     @CheckReturnValue
-    boolean contains(Class<? extends Entity> entityClass) {
+    boolean contains(Class<? extends EntityLite> entityClass) {
         final boolean result = defaultStates.containsKey(entityClass);
         return result;
     }
@@ -59,9 +63,10 @@ class DefaultStateRegistry {
      * @param state a default state of the entity
      * @throws IllegalArgumentException if the state of this class is already registered
      */
-    void put(Class<? extends Entity> entityClass, Message state) {
+    void put(Class<? extends EntityLite> entityClass, Message state) {
         if (contains(entityClass)) {
-            throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
+            final String msg = format("This class is registered already: %s", entityClass);
+            throw new IllegalArgumentException(msg);
         }
         defaultStates.put(entityClass, state);
     }
@@ -72,7 +77,7 @@ class DefaultStateRegistry {
      * @param entityClass an entity class
      */
     @CheckReturnValue
-    Message get(Class<? extends Entity> entityClass) {
+    Message get(Class<? extends EntityLite> entityClass) {
         final Message state = defaultStates.get(entityClass);
         return state;
     }

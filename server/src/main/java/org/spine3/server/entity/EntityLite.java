@@ -71,4 +71,32 @@ public interface EntityLite<I, S extends Message> {
      * @return an empty instance of the entity state
      */
     S getDefaultState();
+
+    /**
+     * Enumeration of generic type index of this interface.
+     */
+    enum GenericType {
+
+        /**
+         * The index of the declaration of the generic parameter type {@code <I>}
+         * in {@link EntityLite}.
+         */
+        ID(0),
+
+        /**
+         * The index of the declaration of the generic parameter type {@code <S>}
+         * in {@link EntityLite}
+         */
+        STATE(1);
+
+        private final int index;
+
+        GenericType(int index) {
+            this.index = index;
+        }
+
+        int getIndex() {
+            return this.index;
+        }
+    }
 }
