@@ -343,7 +343,7 @@ public abstract class RecordBasedRepository<I, E extends AbstractEntity<I, S>, S
         final S state = entity.getState();
         final Any stateAny = pack(state);
         final Timestamp whenModified = entity.whenModified();
-        final int version = entity.getVersion();
+        final int version = entity.getVersion().getNumber();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                                                                        .setState(stateAny)
                                                                        .setWhenModified(whenModified)

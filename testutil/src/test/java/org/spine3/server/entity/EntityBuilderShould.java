@@ -79,8 +79,8 @@ public class EntityBuilderShould {
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(id, entity.getId());
         assertEquals(state, entity.getState());
-        assertEquals(version, entity.getVersion());
-        assertEquals(timestamp, entity.whenModified());
+        assertEquals(version, entity.getVersion().getNumber());
+        assertEquals(timestamp, entity.getVersion().getTimestamp());
     }
 
     @Test
@@ -90,8 +90,7 @@ public class EntityBuilderShould {
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
         assertEquals(newStringValue(""), entity.getState());
-        assertEquals(0, entity.getVersion());
-        assertEquals(Timestamp.getDefaultInstance(), entity.whenModified());
+        assertEquals(0, entity.getVersion().getNumber());
     }
 
     @Test

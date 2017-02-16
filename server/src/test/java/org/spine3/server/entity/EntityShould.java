@@ -166,7 +166,7 @@ public class EntityShould {
         entityNew.setState(state, version, whenModified);
 
         assertEquals(state, entityNew.getState());
-        assertEquals(version, entityNew.getVersion());
+        assertEquals(version, entityNew.getVersion().getNumber());
         assertEquals(whenModified, entityNew.whenModified());
     }
 
@@ -202,7 +202,7 @@ public class EntityShould {
 
     @Test
     public void have_zero_version_by_default() {
-        assertEquals(0, entityNew.getVersion());
+        assertEquals(0, entityNew.getVersion().getNumber());
     }
 
     @Test
@@ -230,7 +230,7 @@ public class EntityShould {
     public void increment_version_when_updating_state() {
         entityNew.incrementState(state);
 
-        assertEquals(1, entityNew.getVersion());
+        assertEquals(1, entityNew.getVersion().getNumber());
     }
 
     @Test
@@ -307,7 +307,7 @@ public class EntityShould {
         final Interval whileWeCreate = Intervals.between(before, after);
 
         assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion());
+        assertEquals(0, entity.getVersion().getNumber());
         assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());

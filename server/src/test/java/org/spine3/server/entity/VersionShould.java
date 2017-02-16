@@ -80,4 +80,14 @@ public class VersionShould {
         // Check that the new timestamp
         assertEquals(currentTime, version.getTimestamp());
     }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_timestamp() {
+        Version.of(0, Tests.<Timestamp>nullRef());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_allow_copyFrom_null() {
+        Version.create().copyFrom(Tests.<Version>nullRef());
+    }
 }

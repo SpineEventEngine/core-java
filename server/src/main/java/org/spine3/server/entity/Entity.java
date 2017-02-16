@@ -21,7 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 
 /**
  * An entity with version and timestamp of the last modification.
@@ -31,19 +30,7 @@ import com.google.protobuf.Timestamp;
 public interface Entity<I, S extends Message> extends EntityLite<I, S> {
 
     /**
-     * Obtains the version number of the entity.
-     *
-     * @return the version number or zero if the entity was not modified
+     * Obtains the version of the entity.
      */
-    int getVersion();
-
-    /**
-     * Obtains the timestamp of the last modification.
-     *
-     * <p>If the entity was not modified yet, the method should return
-     * the {@linkplain Timestamp#getDefaultInstance() default timestamp value}.
-     *
-     * @return the timestamp of the last modification, or default value
-     */
-    Timestamp whenModified();
+    Version getVersion();
 }

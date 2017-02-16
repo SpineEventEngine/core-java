@@ -109,7 +109,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
                                                          .setTimestamp(whenModified)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(getIdAsAny())
-                                                         .setVersion(getVersion());
+                                                         .setVersion(getVersion().getNumber());
         extendEventContext(builder, event, commandContext);
         return builder.build();
     }
@@ -254,6 +254,10 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
         });
     }
 
+    private int versionNumber() {
+        return getVersion().getNumber();
+    }
+
     //
     // Helper methods for producing `ValueMismatch`es in command handling methods
     //-----------------------------------------------------------------------------
@@ -267,7 +271,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedDefault(Message actual, Message newValue) {
-        return MessageMismatch.expectedDefault(actual, newValue, getVersion());
+        return MessageMismatch.expectedDefault(actual, newValue, versionNumber());
     }
 
     /**
@@ -278,7 +282,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedNotDefault(Message expected) {
-        return MessageMismatch.expectedNotDefault(expected, getVersion());
+        return MessageMismatch.expectedNotDefault(expected, versionNumber());
     }
 
     /**
@@ -290,7 +294,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedNotDefault(Message expected, Message newValue) {
-        return MessageMismatch.expectedNotDefault(expected, newValue, getVersion());
+        return MessageMismatch.expectedNotDefault(expected, newValue, versionNumber());
     }
 
     /**
@@ -302,7 +306,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue) {
-        return MessageMismatch.unexpectedValue(expected, actual, newValue, getVersion());
+        return MessageMismatch.unexpectedValue(expected, actual, newValue, versionNumber());
     }
 
     /**
@@ -314,7 +318,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedEmpty(String actual, String newValue) {
-        return StringMismatch.expectedEmpty(actual, newValue, getVersion());
+        return StringMismatch.expectedEmpty(actual, newValue, versionNumber());
     }
 
     /**
@@ -325,7 +329,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new ValueMismatch instance
      */
     protected ValueMismatch expectedNotEmpty(String expected) {
-        return StringMismatch.expectedNotEmpty(expected, getVersion());
+        return StringMismatch.expectedNotEmpty(expected, versionNumber());
     }
 
     /**
@@ -338,6 +342,6 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
-        return StringMismatch.unexpectedValue(expected, actual, newValue, getVersion());
+        return StringMismatch.unexpectedValue(expected, actual, newValue, versionNumber());
     }
 }

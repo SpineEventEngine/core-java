@@ -64,7 +64,8 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
             public void run() {
                 final Message state = deliverable.getState();
                 final Any packedState = AnyPacker.pack(state);
-                consumer.update(deliverable.getId(), packedState, deliverable.getVersion());
+                consumer.update(deliverable.getId(), packedState, deliverable.getVersion()
+                                                                             .getNumber());
             }
         };
     }

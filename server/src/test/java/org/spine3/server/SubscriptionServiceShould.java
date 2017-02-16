@@ -29,8 +29,10 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.Version;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -221,7 +223,7 @@ public class SubscriptionServiceShould {
         final Entity entity = mock(AbstractEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(version);
+        when(entity.getVersion()).thenReturn(Version.of(version, Timestamps.getCurrentTime()));
         return entity;
     }
 
@@ -261,11 +263,13 @@ public class SubscriptionServiceShould {
         subscriptionService.subscribe(topic, subscribeObserver);
 
         // Activate subscription
-        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription = spy(new MemoizeStreamObserver<SubscriptionUpdate>());
+        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
+                spy(new MemoizeStreamObserver<SubscriptionUpdate>());
         subscriptionService.activate(subscribeObserver.streamFlowValue, activateSubscription);
 
         // Cancel subscription
-        subscriptionService.cancel(subscribeObserver.streamFlowValue, new MemoizeStreamObserver<Response>());
+        subscriptionService.cancel(subscribeObserver.streamFlowValue,
+                                   new MemoizeStreamObserver<Response>());
 
         // Post update to Stand
         final ProjectId projectId = ProjectId.newBuilder()
@@ -295,7 +299,8 @@ public class SubscriptionServiceShould {
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
                                  .build();
-        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        final MemoizeStreamObserver<Subscription> subscriptionObserver =
+                new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
 
         final String failureMessage = "Execution breaking exception";

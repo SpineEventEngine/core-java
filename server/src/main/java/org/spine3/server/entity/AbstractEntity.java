@@ -29,7 +29,6 @@ import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,10 +48,7 @@ public abstract class AbstractEntity<I, S extends Message>
         extends AbstractEntityLite<I, S>
         implements Entity<I, S> {
 
-    @Nullable
-    private Timestamp whenModified;
-
-    private int version;
+    private final Version version;
 
     private EntityStatus status = EntityStatus.getDefaultInstance();
 
@@ -67,6 +63,7 @@ public abstract class AbstractEntity<I, S extends Message>
         super(id);
         checkNotNull(id);
         Identifiers.checkSupported(id.getClass());
+        this.version = Version.create();
     }
 
     /**
@@ -111,13 +108,13 @@ public abstract class AbstractEntity<I, S extends Message>
      *
      * @param state the state object to set
      * @param version the entity version to set
-     * @param whenLastModified the time of the last modification to set
+     * @param timestamp the time of the last modification to set
      * @see #validate(S)
      */
-    protected void setState(S state, int version, Timestamp whenLastModified) {
+    protected void setState(S state, int version, Timestamp timestamp) {
         validate(state);
         injectState(state);
-        setVersion(version, whenLastModified);
+        setVersion(version, timestamp);
     }
 
     /**
@@ -130,12 +127,12 @@ public abstract class AbstractEntity<I, S extends Message>
     /**
      * Sets version information of the entity.
      *
-     * @param version the version number of the entity
-     * @param whenLastModified the time of the last modification of the entity
+     * @param number the version number of the entity
+     * @param timestamp the time of the last modification of the entity
      */
-    protected void setVersion(int version, Timestamp whenLastModified) {
-        this.version = version;
-        this.whenModified = checkNotNull(whenLastModified);
+    protected void setVersion(int number, Timestamp timestamp) {
+        checkNotNull(timestamp);
+        version.copyFrom(Version.of(number, timestamp));
     }
 
     /**
@@ -151,7 +148,7 @@ public abstract class AbstractEntity<I, S extends Message>
      * {@inheritDoc}
      */
     @Override
-    public int getVersion() {
+    public Version getVersion() {
         return version;
     }
 
@@ -161,22 +158,17 @@ public abstract class AbstractEntity<I, S extends Message>
      * @return new version number
      */
     protected int incrementVersion() {
-        ++version;
-        whenModified = getCurrentTime();
-        return version;
+        version.increment();
+        return version.getNumber();
     }
 
     /**
      * {@inheritDoc}
      * @see #setState(Message, int, Timestamp)
      */
-    @Override
     @CheckReturnValue
     public Timestamp whenModified() {
-        final Timestamp result = whenModified == null
-                                 ? Timestamp.getDefaultInstance()
-                                 : whenModified;
-        return result;
+        return version.getTimestamp();
     }
 
     /**
@@ -265,13 +257,12 @@ public abstract class AbstractEntity<I, S extends Message>
             return false;
         }
         AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
-        return getVersion() == that.getVersion() &&
-               Objects.equals(whenModified(), that.whenModified()) &&
+        return Objects.equals(getVersion(), that.getVersion()) &&
                Objects.equals(getStatus(), that.getStatus());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), whenModified(), getVersion(), getStatus());
+        return Objects.hash(super.hashCode(), getVersion(), getStatus());
     }
 }

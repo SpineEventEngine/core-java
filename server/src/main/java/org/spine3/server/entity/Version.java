@@ -23,8 +23,11 @@ package org.spine3.server.entity;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Version information on an entity.
@@ -61,6 +64,7 @@ public final class Version {
      * Creates a new instance with the passed number and the timestamp.
      */
     public static Version of(int number, Timestamp timestamp) {
+        checkNotNull(timestamp);
         return new Version(number, timestamp);
     }
 
@@ -87,5 +91,28 @@ public final class Version {
     public void increment() {
         number.incrementAndGet();
         timestamp.set(currentTime());
+    }
+
+    void copyFrom(Version another) {
+        number.set(another.getNumber());
+        timestamp.set(another.getTimestamp());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Version)) {
+            return false;
+        }
+        Version version = (Version) o;
+        return Objects.equals(getNumber(), version.getNumber()) &&
+               Objects.equals(getTimestamp(), version.getTimestamp());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getNumber(), getTimestamp());
     }
 }
