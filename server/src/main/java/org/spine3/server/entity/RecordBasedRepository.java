@@ -64,10 +64,10 @@ import static org.spine3.server.entity.EntityStorageConverter.tuple;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class RecordBasedRepository<I,
-                                            E extends Entity<I, S>,
-                                            S extends Message> extends Repository<I, E> {
+public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
+                extends Repository<I, E> {
 
+    /** {@inheritDoc} */
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
@@ -79,9 +79,16 @@ public abstract class RecordBasedRepository<I,
         return result;
     }
 
+    /**
+     * Obtains {@link EntityFactory} associated with this repository.
+     */
     protected abstract EntityFactory<I, E> entityFactory();
 
+    /**
+     * Obtains {@link EntityStorageConverter} associated with this repository.
+     */
     protected abstract EntityStorageConverter<I, E, S> storageConverter();
+
     /**
      * Ensures that the repository has the storage.
      *
@@ -95,6 +102,7 @@ public abstract class RecordBasedRepository<I,
         return checkStorage(storage);
     }
 
+    /** {@inheritDoc} */
     @Override
     public E create(I id) {
         final E result = entityFactory().create(id);
@@ -142,6 +150,7 @@ public abstract class RecordBasedRepository<I,
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean markArchived(I id) {
         final RecordStorage<I> storage = recordStorage();
@@ -149,6 +158,7 @@ public abstract class RecordBasedRepository<I,
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean markDeleted(I id) {
         final RecordStorage<I> storage = recordStorage();
@@ -321,6 +331,10 @@ public abstract class RecordBasedRepository<I,
         return result;
     }
 
+    /**
+     * Converts the passed entity into {@code EntityStorageRecord} that
+     * stores the entity data.
+     */
     protected EntityStorageRecord toRecord(E entity) {
         final EntityStorageConverter.Tuple<I> tuple = storageConverter().convert(entity);
         return tuple != null ? tuple.getState()
