@@ -523,16 +523,18 @@ public class NullToleranceTest {
          * <ul>
          *     <li>an empty string is used for the {@code String};
          *     <li>an empty array is used for the varargs and array parameters;
-         *     <li>the result of the {@link java.util.Collections#emptyList()} call for the types
-         *     derived from {@link List};</li>
-         *     <li>the result of the {@link java.util.Collections#emptySet()} call for the types
-         *     derived from {@link Set};</li>
-         *     <li>the result of the {@link java.util.Collections#emptyMap()} call for the types
-         *     derived from {@link Map};</li>
-         *     <li>the result of the {@link com.google.common.collect.Queues#newPriorityQueue()} call
-         *     for the types derived from {@link Queue};</li>
-         *     <li>the result of the {@link com.google.common.base.Defaults#defaultValue(Class)} call
-         *     is for the primitives and related wrapper types;</li>
+         *     <li>the result of the {@link java.util.Collections#emptyList() Collections.emptyList()}
+         *     call for the types derived from {@link List};</li>
+         *     <li>the result of the {@link java.util.Collections#emptySet() Collections.emptySet()}
+         *     call for the types derived from {@link Set};</li>
+         *     <li>the result of the {@link java.util.Collections#emptyMap() Collections.emptyMap()}
+         *     call for the types derived from {@link Map};</li>
+         *     <li>the result of the
+         *     {@link com.google.common.collect.Queues#newPriorityQueue() Queues.newPriorityQueue()}
+         *     call for the types derived from {@link Queue};</li>
+         *     <li>the result of the
+         *     {@link com.google.common.base.Defaults#defaultValue(Class) Defaults.defaultValue(Class)}
+         *     call is for the primitives and related wrapper types;</li>
          *     <li>the result of {@code getDefaultInstance} call for the types
          *     derived from {@link Message}.</li>
          * </ul>

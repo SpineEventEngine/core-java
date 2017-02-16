@@ -219,7 +219,8 @@ public class Tests {
     /**
      * Returns {@code StringObserver} that does nothing.
      *
-     * <p>Use this method when you need to call {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)}
+     * <p>Use this method when you need to call
+     * {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver) CommandBus.post(Command, StreamObserver)}
      * and observing results is not needed.
      */
     public static StreamObserver<Response> emptyObserver() {
