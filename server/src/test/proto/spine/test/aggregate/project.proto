@@ -50,6 +50,28 @@ message Project {
     Status status = 4;
 }
 
+message ProjectLifeCycle {
+
+    ProjectId id = 1;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+
+    Status status = 2;
+}
+
+message ProjectDefinition {
+
+    ProjectId id = 1;
+
+    string name = 2;
+}
+
 message TaskId {
     int32 id = 1;
 }
