@@ -50,10 +50,26 @@ import com.google.protobuf.Message;
  */
 public abstract class AggregatePart<I, S extends Message, B extends Message.Builder> extends Aggregate<I, S, B> {
 
+    private final AggregateRoot<I> root;
+
     /**
      * {@inheritDoc}
      */
-    protected AggregatePart(I id) {
+    protected AggregatePart(I id, AggregateRoot<I> root) {
         super(id);
+        this.root = root;
+    }
+
+    /**
+     * Obtains a part state by its class.
+     *
+     * @param partStateClass the class of the state of the part
+     * @param <P>            the type of the part state
+     * @return the state of the part or a default state if the state was not found
+     */
+    protected <P extends Message, A extends AggregatePart<I, P, ?>> P getPartState(
+            Class<P> partStateClass) {
+        final P partState = root.getPartState(partStateClass);
+        return partState;
     }
 }
