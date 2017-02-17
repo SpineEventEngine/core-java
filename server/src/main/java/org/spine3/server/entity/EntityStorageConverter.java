@@ -38,25 +38,41 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     private final FieldMask fieldMask;
 
     protected EntityStorageConverter(FieldMask fieldMask) {
+        super();
         this.fieldMask = checkNotNull(fieldMask);
     }
 
+    /**
+     * Obtains the field mask used by this converter.
+     */
     protected FieldMask getFieldMask() {
         return this.fieldMask;
     }
 
+    /**
+     * Creates a copy of this converter modified with the passed filed mask.
+     */
     public abstract EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
 
+    /**
+     * Creates new tuple of entity ID and corresponding storage record.
+     */
     public static <I> Tuple<I> tuple(I id, EntityStorageRecord record) {
         return new Tuple<>(id, record);
     }
 
+    /**
+     * The tuple of an entity ID and a storage record.
+     *
+     * <p>This data structure is needed for passing entity information to the reverse
+     * conversion.
+     *
+     * @param <I> type of the entity ID
+     */
     public static class Tuple<I> extends AbstractEntity<I, EntityStorageRecord> {
         private Tuple(I id, EntityStorageRecord record) {
             super(id);
             injectState(record);
         }
     }
-
-
 }
