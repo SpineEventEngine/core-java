@@ -46,6 +46,7 @@ public class ExcludeInternalDoclet extends Standard {
     private final ExcludePrinciple excludePrinciple;
 
     private ExcludeInternalDoclet(ExcludePrinciple excludePrinciple) {
+        super();
         this.excludePrinciple = excludePrinciple;
     }
 
@@ -107,10 +108,10 @@ public class ExcludeInternalDoclet extends Standard {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (args != null) {
                 String methodName = method.getName();
-                if (methodName.equals("compareTo")
-                        || methodName.equals("equals")
-                        || methodName.equals("overrides")
-                        || methodName.equals("subclassOf")) {
+                if ("compareTo".equals(methodName)
+                        || "equals".equals(methodName)
+                        || "overrides".equals(methodName)
+                        || "subclassOf".equals(methodName)) {
                     args[0] = unwrap(args[0]);
                 }
             }
