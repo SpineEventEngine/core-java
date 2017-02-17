@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * Abstract base for lite entities.
+ * Abstract base for entities.
  *
  * @param <I> the type of entity identifiers
  * @param <S> the type of entity state objects
