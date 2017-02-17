@@ -61,10 +61,11 @@ public class Identifiers {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     *      <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
-     *      <li>For {@code String} — {@link com.google.protobuf.StringValue}
-     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
-     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
+     *      <li>For classes implementing {@link com.google.protobuf.Message Message} — the value
+     *      of the message itself
+     *      <li>For {@code String} — {@link com.google.protobuf.StringValue StringValue}
+     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value UInt64Value}
+     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -86,9 +87,9 @@ public class Identifiers {
      *
      * @param any the ID value wrapped into {@code Any}
      * @return <ul>
-     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped
-     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped
-     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped
+     * <li>{@code String} value if {@link com.google.protobuf.StringValue StringValue} is unwrapped
+     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value StringValue} is unwrapped
+     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value StringValue} is unwrapped
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      */

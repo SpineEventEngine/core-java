@@ -20,9 +20,9 @@
 
 /**
  * This package contains classes and interfaces for storing
- * {@link org.spine3.server.aggregate.Aggregate}s.
+ * {@link org.spine3.server.aggregate.Aggregate Aggregate}s.
  *
- * @see org.spine3.server.aggregate.AggregateStorage
+ * @see org.spine3.server.aggregate.AggregateStorage AggregateStorage
  */
 
 @SPI

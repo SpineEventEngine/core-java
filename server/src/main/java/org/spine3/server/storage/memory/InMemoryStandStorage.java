@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * In-memory implementation of {@link StandStorage}.
  *
- * <p>Uses a {@link java.util.concurrent.ConcurrentMap} for internal storage.
+ * <p>Uses a {@link java.util.concurrent.ConcurrentMap ConcurrentMap} for internal storage.
  *
  * @author Alex Tymchenko
  */

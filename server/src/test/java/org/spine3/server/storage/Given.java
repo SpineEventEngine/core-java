@@ -148,8 +148,8 @@ public class Given {
         }
 
         /**
-         * Creates a new {@link Command} with the given command message, userId and timestamp using default
-         * {@link org.spine3.base.CommandId} instance.
+         * Creates a new {@link Command} with the given command message, userId and timestamp using
+         * default {@link org.spine3.base.CommandId CommandId} instance.
          */
         public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
