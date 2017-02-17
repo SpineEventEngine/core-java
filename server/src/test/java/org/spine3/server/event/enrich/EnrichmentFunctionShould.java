@@ -21,6 +21,7 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
@@ -32,7 +33,6 @@ import org.spine3.test.event.ProjectCreated;
 import javax.annotation.Nullable;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -146,8 +146,7 @@ public class EnrichmentFunctionShould {
             "EqualsBetweenInconvertibleTypes"}) // OK, it's the purpose of the method.
     @Test
     public void have_smart_equals() {
-        assertTrue(fieldEnricher.equals(fieldEnricher));
-        assertFalse(fieldEnricher.equals(Tests.<EnrichmentFunction<ProjectCreated, ProjectCreated.Enrichment>>nullRef()));
-        assertFalse(fieldEnricher.equals(Boolean.TRUE));
+        new EqualsTester().addEqualityGroup(fieldEnricher)
+                          .testEquals();
     }
 }
