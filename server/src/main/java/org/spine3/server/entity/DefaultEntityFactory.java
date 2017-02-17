@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 
 /**
  * Default factory that creates entities by invoking constructor that
- * accepts one ID parameter.
+ * accepts a single ID parameter.
  *
  * @param <I> the type of entity identifiers
  * @param <E> the type of entities to create
