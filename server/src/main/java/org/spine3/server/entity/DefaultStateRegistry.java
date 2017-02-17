@@ -35,7 +35,8 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 class DefaultStateRegistry {
 
     /**
-     * NOTE: The implementation is not customized with {@link com.google.common.collect.MapMaker#makeMap()} options,
+     * NOTE: The implementation is not customized with
+     * {@link com.google.common.collect.MapMaker#makeMap() MapMaker.makeMap()} options,
      * as it is difficult to predict which work best within the real end-user application scenarios.
      **/
     private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
@@ -61,7 +62,8 @@ class DefaultStateRegistry {
      */
     void put(Class<? extends Entity> entityClass, Message state) {
         if (contains(entityClass)) {
-            throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
+            throw new IllegalArgumentException("This class is registered already: " +
+                                               entityClass.getName());
         }
         defaultStates.put(entityClass, state);
     }

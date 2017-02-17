@@ -132,7 +132,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * <li>Closes {@link CommandBus}.
      * <li>Closes {@link EventBus}.
      * <li>Closes {@link CommandStore}.
-     * <li>Closes {@link org.spine3.server.event.EventStore}.
+     * <li>Closes {@link org.spine3.server.event.EventStore EventStore}.
      * <li>Closes {@link Stand}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>

@@ -33,12 +33,15 @@ import java.lang.annotation.Target;
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
- *     <li>accepts an event derived from {@link com.google.protobuf.Message} as the first parameter;
- *     <li>(optional) accepts an {@link org.spine3.base.EventContext} as the second parameter.
+ *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
+ *          as the first parameter;
+ *     <li>(optional) accepts an {@link org.spine3.base.EventContext EventContext}
+ *          as the second parameter.
  * </ul>
  *
- * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
- * considered as an event subscriber and is not registered for event delivery from {@link EventBus}.
+ * If the annotation is applied to a method which doesn't satisfy any of these requirements,
+ * this method is not considered as an event subscriber and is not registered for event delivery
+ * from {@link EventBus}.
  *
  * @author Alexander Yevsyukov
  */
