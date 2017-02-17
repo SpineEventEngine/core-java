@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Extension of {@link Standard} doclet, which excludes {@linkplain Internal}-annotated components.
+ * Extension of {@linkplain Standard} doclet, which excludes {@linkplain Internal}-annotated components.
  * Based on <a href="http://sixlegs.com/blog/java/exclude-javadoc-tag.html">this</a> topic.
  *
  * @author Dmytro Grankin
@@ -64,7 +64,7 @@ public class ExcludeInternalDoclet extends Standard {
      * The "start" method as required by Javadoc.
      *
      * @param root the root of the documentation tree.
-     * @return true if the doclet ran without encountering any errors.
+     * @return {@code true} if the doclet ran without encountering any errors.
      */
     @SuppressWarnings("unused") // called by com.sun.tools.javadoc.Main
     public static boolean start(RootDoc root) {

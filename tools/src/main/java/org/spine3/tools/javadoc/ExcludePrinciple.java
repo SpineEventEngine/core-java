@@ -23,7 +23,7 @@ package org.spine3.tools.javadoc;
 import com.sun.javadoc.Doc;
 
 /**
- * {@code ExcludePrinciple} solves either exclude or not {@code Doc} from javadoc.
+ * {@code ExcludePrinciple} solves either exclude or not {@linkplain Doc} from javadoc.
  *
  * @author Dmytro Grankin
  */
@@ -31,7 +31,7 @@ interface ExcludePrinciple {
 
     /**
      * @param doc the document to analyze
-     * @return true if document should be excluded
+     * @return {@code true} if document should be excluded
      */
     boolean exclude(Doc doc);
 }
