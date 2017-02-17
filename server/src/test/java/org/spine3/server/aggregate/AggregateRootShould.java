@@ -74,15 +74,17 @@ public class AggregateRootShould {
 
     @Test
     public void return_part_state_by_class() {
-        final Message part = aggregateRoot.getPartState(Project.class);
+        final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
+        assertNotNull(definitionPart);
 
-        assertNotNull(part);
+        final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifeCycle.class);
+        assertNotNull(lifeCyclePart);
     }
 
     @Test
     public void cache_repositories() {
         final AggregateRoot rootSpy = spy(aggregateRoot);
-        final Class<Project> partClass = Project.class;
+        final Class<ProjectDefinition> partClass = ProjectDefinition.class;
 
         rootSpy.getPartState(partClass);
         rootSpy.getPartState(partClass);
