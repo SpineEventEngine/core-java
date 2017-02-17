@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -28,12 +29,17 @@ import org.junit.Test;
  */
 public class DefaultStateRegistryShould {
 
-    @Test(expected = IllegalStateException.class)
+    private DefaultStateRegistry registry;
+
+    @Before
+    public void setUp() {
+        registry = new DefaultStateRegistry();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_same_entity_class_twice() {
-        DefaultStateRegistry.getInstance()
-                            .put(TimerSnapshot.class, Timestamp.getDefaultInstance());
-        DefaultStateRegistry.getInstance()
-                            .put(TimerSnapshot.class, Timestamp.getDefaultInstance());
+        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
+        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
     }
 
     private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
