@@ -74,7 +74,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
+public abstract class
+AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 extends Repository<I, A>
                 implements CommandDispatcher {
 

@@ -32,7 +32,7 @@ import com.google.protobuf.UInt64Value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for working with {@link com.google.protobuf.Message} value wrapper objects.
+ * Utility class for working with {@link com.google.protobuf.Message Message} value wrapper objects.
  *
  * @author Alexander Litus
  */

@@ -53,7 +53,7 @@ public enum EntityField implements StorageField {
 
     /**
      * A field for storing the part of a timestamp representing the amount of nanoseconds which is less then
-     * {@link org.spine3.protobuf.Timestamps#NANOS_PER_SECOND 10^9}.
+     * {@link org.spine3.protobuf.Timestamps#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
      *
      * @see Timestamp#getNanos()
      */

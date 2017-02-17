@@ -34,8 +34,9 @@ import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Entity} state updates to the {@code Stand} from the
- * sources such as {@link org.spine3.server.aggregate.AggregateRepository} and {@link ProjectionRepository} via {@link StandFunnel}.
+ * A base class for the strategies on delivering the {@code Entity} state updates to
+ * the {@code Stand} from the sources such as {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
+ * and {@link ProjectionRepository} via {@link StandFunnel}.
  *
  * @author Alex Tymchenko
  */
@@ -75,8 +76,8 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     }
 
     /**
-     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state update propagation
-     * and uses the specified {@code executor} for the operation.
+     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state
+     * update propagation and uses the specified {@code executor} for the operation.
      *
      * @param executor an instance of {@code Executor} to use for the delivery
      * @return the instance of {@code StandUpdateDelivery} with the given executor
@@ -99,8 +100,8 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any update delivery
-         * and uses a default executor for the operation.
+         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any
+         * update delivery and uses a default executor for the operation.
          */
         private static final StandUpdateDelivery DIRECT_DELIVERY = new StandUpdateDelivery() {
 
