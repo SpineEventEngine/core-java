@@ -270,7 +270,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
      * >FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter} is supported.
+     * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.
      * All other filters are ignored.
      *
      * <p>Filtering by IDs set via {@code EntityIdFilter} is performed

@@ -29,7 +29,8 @@ import java.util.Set;
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} type
+ * @param <C> either {@link org.spine3.base.EventContext EventContext} or \
+ *              {@link org.spine3.base.CommandContext CommandContext} type
  * @author Alexander Yevsyukov
  */
 public interface IdSetFunction<I, M extends Message, C extends Message> {
@@ -38,7 +39,8 @@ public interface IdSetFunction<I, M extends Message, C extends Message> {
      * Obtains a set of entity IDs based on the passed event or command message and its context.
      *
      * @param message an event or a command message
-     * @param context either {@link org.spine3.base.EventContext} or {@link org.spine3.base.CommandContext} instance
+     * @param context either {@link org.spine3.base.EventContext EventContext} or
+     *                  {@link org.spine3.base.CommandContext CommandContext} instance
      * @return a set of entity identifiers
      */
     Set<I> apply(M message, C context);

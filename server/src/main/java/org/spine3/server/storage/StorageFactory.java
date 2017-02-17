@@ -30,8 +30,9 @@ import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link org.spine3.server.command.CommandStore}, {@link org.spine3.server.event.EventStore},
- * and {@link org.spine3.server.stand.Stand}.
+ * {@link org.spine3.server.command.CommandStore CommandStore},
+ * {@link org.spine3.server.event.EventStore EventStore},
+ * and {@link org.spine3.server.stand.Stand Stand}.
  *
  * @author Alexander Yevsyukov
  */
@@ -40,7 +41,8 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Verifies if the storage factory is configured to serve a multitenant application.
      *
-     * @return {@code true} if the factory would produce multitenant storages, {@code false} otherwise
+     * @return {@code true} if the factory would produce multitenant storages,
+     *          {@code false} otherwise
      */
     boolean isMultitenant();
 

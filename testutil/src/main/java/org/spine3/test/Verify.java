@@ -640,7 +640,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet}. */
+    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet ImmutableSet}. */
     public static void assertSize(int expectedSize, Collection<?> actualImmutableSet) {
         try {
             assertSize("immutable set", expectedSize, actualImmutableSet);
@@ -649,7 +649,7 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet}. */
+    /** Assert the size of the given {@link com.google.common.collect.ImmutableSet ImmutableSet}. */
     public static void assertSize(String immutableSetName,
                                   int expectedSize,
                                   Collection<?> actualImmutableSet) {

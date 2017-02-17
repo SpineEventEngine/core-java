@@ -32,7 +32,7 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 
 /**
- * Processes the queries targeting {@link Entity} objects.
+ * Processes the queries targeting {@link org.spine3.server.entity.Entity Entity} objects.
  *
  * @author Alex Tymchenko
  */

@@ -66,7 +66,8 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * <p>The method returns an event message of the specific type, or {@code List} of messages
  * if it produces more than one event.
  *
- * <p>The method may throw one or more throwables derived from {@link org.spine3.base.FailureThrowable}.
+ * <p>The method may throw one or more throwables derived from
+ * {@link org.spine3.base.FailureThrowable FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
  * because of a {@linkplain org.spine3.base.FailureThrowable#getFailure() business failure}.
  *

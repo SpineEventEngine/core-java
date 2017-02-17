@@ -39,7 +39,6 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -216,7 +215,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link VersionableEntity} types exposed for reading by this instance of {@code Stand}.
+     * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
      *
@@ -235,8 +234,8 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link org.spine3.server.aggregate.Aggregate} entity types exposed for reading
-     * by this instance of {@code Stand}.
+     * Read all {@link org.spine3.server.aggregate.Aggregate Aggregate} entity types
+     * exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose an {@code Aggregate} type.
      *
@@ -250,7 +249,7 @@ public class Stand implements AutoCloseable {
 
     /**
      * Read a particular set of items from the read-side of the application and
-     * feed the result into an instance
+     * feed the result into an instance.
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
      *
@@ -299,13 +298,12 @@ public class Stand implements AutoCloseable {
      * Register a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link org.spine3.client.Query Query}.
      *
-     * <p>In case the supplier is an instance of {@link AggregateRepository},
-     * the {@code Repository} is not registered as type supplier, since
-     * the {@code Aggregate} reads are performed by accessing
-     * the latest state in the supplied {@code StandStorage}.
+     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
+     * is not registered as type supplier, since the {@code Aggregate} reads are performed
+     * by accessing the latest state in the supplied {@code StandStorage}.
      *
-     * <p>However, the type of the {@code AggregateRepository} instance is recorded
-     * for the postponed processing of updates.
+     * <p>However, the type of the {@code AggregateRepository} instance is recorded for
+     * the postponed processing of updates.
      *
      * @see #update(Object, Any, int)
      */

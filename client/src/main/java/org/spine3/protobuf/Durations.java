@@ -21,7 +21,7 @@ import static org.spine3.util.Math.safeMultiply;
 
 /**
  * Utility class for working with durations in addition to those available from
- * {@link com.google.protobuf.util.Durations}.
+ * {@link com.google.protobuf.util.Durations Durations}.
  *
  * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
  * <pre>
@@ -122,12 +122,14 @@ public class Durations {
         return ofSeconds(seconds);
     }
 
-    /** This method allows for more compact code of creation of {@code Duration} instance with minutes. */
+    /** This method allows for more compact code of creation of
+     * {@code Duration} instance with minutes. */
     public static Duration minutes(long minutes) {
         return ofMinutes(minutes);
     }
 
-    /** This method allows for more compact code of creation of {@code Duration} instance with hours. */
+    /** This method allows for more compact code of creation of
+     * {@code Duration} instance with hours. */
     public static Duration hours(long hours) {
         return ofHours(hours);
     }
@@ -167,7 +169,8 @@ public class Durations {
         return result;
     }
 
-    /** This method allows for more compact code of creation of {@code Duration} instance with hours and minutes. */
+    /** This method allows for more compact code of creation of
+     * {@code Duration} instance with hours and minutes. */
     public static Duration hoursAndMinutes(long hours, long minutes) {
         final Duration result = add(hours(hours), minutes(minutes));
         return result;
@@ -232,7 +235,8 @@ public class Durations {
         return result;
     }
 
-    /** Returns {@code true} of the passed value is greater or equal zero, {@code false} otherwise. */
+    /** Returns {@code true} of the passed value is greater or equal zero,
+     * {@code false} otherwise. */
     public static boolean isPositiveOrZero(Duration value) {
         checkNotNull(value);
         final long millis = toMillis(value);
@@ -240,7 +244,8 @@ public class Durations {
         return result;
     }
 
-    /** Returns {@code true} if the passed value is greater than zero, {@code false} otherwise. */
+    /** Returns {@code true} if the passed value is greater than zero,
+     * {@code false} otherwise. */
     public static boolean isPositive(DurationOrBuilder value) {
         checkNotNull(value);
         final boolean secondsPositive = value.getSeconds() > 0;
@@ -259,7 +264,8 @@ public class Durations {
         return result;
     }
 
-    /** Returns {@code true} if the first argument is greater than the second, {@code false} otherwise. */
+    /** Returns {@code true} if the first argument is greater than the second,
+     * {@code false} otherwise. */
     public static boolean isGreaterThan(Duration value, Duration another) {
         checkNotNull(value);
         checkNotNull(another);
@@ -269,7 +275,8 @@ public class Durations {
         return isGreater;
     }
 
-    /** Returns {@code true} if the first argument is less than the second, {@code false} otherwise. */
+    /** Returns {@code true} if the first argument is less than the second,
+     * {@code false} otherwise. */
     public static boolean isLessThan(Duration value, Duration another) {
         checkNotNull(value);
         checkNotNull(another);

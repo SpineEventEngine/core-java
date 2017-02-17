@@ -75,7 +75,8 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * the same way as described in {@link CommandHandlingEntity}.
  *
  * <p>Event(s) returned by command handling methods are posted to
- * the {@link org.spine3.server.event.EventBus} automatically by {@link AggregateRepository}.
+ * the {@link org.spine3.server.event.EventBus EventBus} automatically
+ * by {@link AggregateRepository}.
  *
  * <h2>Adding event applier methods</h2>
  *
@@ -183,7 +184,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     protected B getBuilder() {
         if (this.builder == null) {
             throw new IllegalStateException(
-                    "Builder is not available. Make sure to call getBuilder() only from an event applier method.");
+                    "Builder is not available. Make sure to call getBuilder() " +
+                    "only from an event applier method.");
         }
         return builder;
     }
@@ -275,7 +277,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Applies event messages.
      *
      * @param eventMessages the event message to apply
-     * @param commandContext the context of the command, execution of which produces the passed events
+     * @param commandContext the context of the command, execution of which produces
+     *                       the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
     private void apply(Iterable<? extends Message> eventMessages, CommandContext commandContext)
@@ -323,7 +326,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * is dispatched to corresponding applier method.
      *
      * @param eventOrSnapshot an event to apply or a snapshot to use to restore state
-     * @throws MissingEventApplierException if there is no applier method defined for this type of event
+     * @throws MissingEventApplierException if there is no applier method defined for
+     *                                      this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
     private void applyEventOrSnapshot(Message eventOrSnapshot) throws InvocationTargetException {
@@ -345,7 +349,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         // See if we're in the state update cycle.
         final B builder = this.builder;
 
-        // If the call to restore() is made during a reply (because the snapshot event was encountered)
+        // If the call to restore() is made during a reply
+        // (because the snapshot event was encountered)
         // use the currently initialized builder.
         if (builder != null) {
             builder.clear();

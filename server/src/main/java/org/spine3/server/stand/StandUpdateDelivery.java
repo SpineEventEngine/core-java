@@ -83,8 +83,8 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
     }
 
     /**
-     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state update propagation
-     * and uses the specified {@code executor} for the operation.
+     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state
+     * update propagation and uses the specified {@code executor} for the operation.
      *
      * @param executor an instance of {@code Executor} to use for the delivery
      * @return the instance of {@code StandUpdateDelivery} with the given executor
@@ -107,8 +107,8 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any update delivery
-         * and uses a default executor for the operation.
+         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any
+         * update delivery and uses a default executor for the operation.
          */
         private static final StandUpdateDelivery DIRECT_DELIVERY = new StandUpdateDelivery() {
 

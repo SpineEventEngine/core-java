@@ -27,12 +27,12 @@ import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 /**
- * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
+ * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate Aggregate} states.
  *
  * <p>Used by an instance of {@link Stand} to optimize the {@code Aggregate} state fetch performance.
  *
  * @author Alex Tymchenko
- * @see com.google.protobuf.Any#getTypeUrl()
+ * @see com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()
  * @see Stand
  */
 @SPI
@@ -46,7 +46,8 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * Reads all the state records by the given type.
      *
      * @param type a {@link TypeUrl} instance
-     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl()} equals the argument value
+     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
+     *          equals the argument value
      */
     public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type);
 
@@ -54,7 +55,8 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * Reads all the state records by the given type.
      *
      * @param type a {@link TypeUrl} instance
-     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl()} equals the argument value
+     * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
+     *          equals the argument value
      */
     public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
 }

@@ -142,9 +142,9 @@ public class EnrichmentFunctionShould {
         assertNull(fieldEnricher.apply(Tests.<ProjectCreated>nullRef()));
     }
 
+    @SuppressWarnings("EqualsWithItself")
     @Test
     public void have_smart_equals() {
-        //noinspection EqualsWithItself
         assertTrue(fieldEnricher.equals(fieldEnricher));
         assertFalse(fieldEnricher.equals(Tests.<EnrichmentFunction<ProjectCreated, ProjectCreated.Enrichment>>nullRef()));
     }
