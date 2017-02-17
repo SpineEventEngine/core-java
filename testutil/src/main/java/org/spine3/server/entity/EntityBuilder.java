@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
+import org.spine3.server.BoundedContext;
 import org.spine3.test.ReflectiveBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -38,12 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
-       extends ReflectiveBuilder<E> {
+        extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -160,7 +160,9 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
      */
     protected E createEntity(I id) {
         final Constructor<E> constructor = getConstructor();
-        final E result = Entity.createEntity(constructor, id);
+        final BoundedContext context = BoundedContext.newBuilder()
+                                                     .build();
+        final E result = Entity.createEntity(constructor, id, context);
         return result;
     }
 }

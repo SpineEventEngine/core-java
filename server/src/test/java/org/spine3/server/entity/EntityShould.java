@@ -29,6 +29,7 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.BoundedContext;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
@@ -134,25 +135,25 @@ public class EntityShould {
         }
     }
 
-    private static class TestEntityWithIdString extends Entity <String, Project> {
+    private static class TestEntityWithIdString extends Entity<String, Project> {
         private TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdMessage extends Entity <Message, Project> {
+    private static class TestEntityWithIdMessage extends Entity<Message, Project> {
         private TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdInteger extends Entity <Integer, Project> {
+    private static class TestEntityWithIdInteger extends Entity<Integer, Project> {
         private TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdLong extends Entity <Long, Project> {
+    private static class TestEntityWithIdLong extends Entity<Long, Project> {
         private TestEntityWithIdLong(Long id) {
             super(id);
         }
@@ -193,7 +194,6 @@ public class EntityShould {
         new EntityWithUnsupportedId(new Exception());
     }
 
-
     private static class BareBonesEntity extends Entity<Long, StringValue> {
         private BareBonesEntity(Long id) {
             super(id);
@@ -216,7 +216,8 @@ public class EntityShould {
         final long timeBeforeincrement = currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = currentTimeSeconds();
-        assertThat(entityNew.whenModified().getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
+        assertThat(entityNew.whenModified()
+                            .getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
     @Test
@@ -269,7 +270,9 @@ public class EntityShould {
 
     @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
-        assertFalse(entityWithState.getId().trim().isEmpty());
+        assertFalse(entityWithState.getId()
+                                   .trim()
+                                   .isEmpty());
 
         final int hashCode = entityWithState.hashCode();
 
@@ -304,7 +307,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class,
+                                                                        Long.class);
 
         assertNotNull(ctor);
     }
@@ -315,8 +319,11 @@ public class EntityShould {
         final Timestamp before = Timestamps.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class, Long.class);
-        final Entity<Long, StringValue> entity = Entity.createEntity(ctor, id);
+        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class,
+                                                                        Long.class);
+        final BoundedContext context = BoundedContext.newBuilder()
+                                                     .build();
+        final Entity<Long, StringValue> entity = Entity.createEntity(ctor, id, context);
 
         final Timestamp after = Timestamps.getCurrentTime();
 
@@ -342,7 +349,7 @@ public class EntityShould {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText(" must be between " + lower + " and " + higher +  ' ');
+                description.appendText(" must be between " + lower + " and " + higher + ' ');
             }
         };
     }

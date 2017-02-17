@@ -26,6 +26,9 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
@@ -135,13 +138,25 @@ public abstract class Entity<I, S extends Message> {
      * generic type {@code <I>}.
      *
      * @param entityClass the entity class
-     * @param idClass the class of entity identifiers
-     * @param <E> the entity type
-     * @param <I> the ID type
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+    static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                     Class<I> idClass) {
+        final boolean partClass = isAggregatePartClass(entityClass);
+        if (partClass) {
+            final Constructor<E> partConstructor = getPartConstructor(entityClass, idClass);
+            return partConstructor;
+        }
+        final Constructor<E> result = getTypeConstructor(entityClass, idClass);
+        return result;
+    }
+
+    private static <E extends Entity<I, ?>, I> Constructor<E> getTypeConstructor(
+            Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -151,22 +166,86 @@ public abstract class Entity<I, S extends Message> {
         }
     }
 
-    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
-        final String errMsg = String.format("%s class must declare a constructor with a single %s ID parameter.",
-                                            entityClass, idClass);
-        return new IllegalStateException(new NoSuchMethodException(errMsg));
+    private static <E extends Entity<I, ?>, I> Constructor<E> getPartConstructor(
+            Class<E> entityClass, Class<I> idClass) {
+        final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
+        for (Constructor<?> constructor : constructors) {
+            final Class<?>[] parameterTypes = constructor.getParameterTypes();
+            final int length = parameterTypes.length;
+            if (length != 2) {
+                continue;
+            }
+
+            final boolean correctConstructor = idClass.equals(parameterTypes[0]) &&
+                                               isAggregateRootClass(parameterTypes[1]);
+            if (correctConstructor) {
+                @SuppressWarnings("unchecked") // It is safe because arguments are checked before.
+                final Constructor<E> result = (Constructor<E>) constructor;
+                result.setAccessible(true);
+                return result;
+            }
+        }
+        final String errMessage = "AggregatePart class must declare a constructor " +
+                                  "with AggregateId and AggregateRoot parameters.";
+        throw new IllegalStateException(new NoSuchMethodException(errMessage));
+    }
+
+    static <E extends Entity<I, ?>, I> boolean isAggregatePartClass(Class<?> entityClass) {
+        final boolean result = AggregatePart.class.isAssignableFrom(entityClass);
+        return result;
+    }
+
+    static <E extends Entity<I, ?>, I> boolean isAggregateRootClass(Class<?> entityClass) {
+        final boolean result = AggregateRoot.class.isAssignableFrom(entityClass);
+        return result;
     }
 
     /**
      * Creates new entity and sets it to the default state.
      *
      * @param constructor the constructor to use
-     * @param id the ID of the entity
-     * @param <I> the type of entity IDs
-     * @param <E> the type of the entity
+     * @param id          the ID of the entity
+     * @param <I>         the type of entity IDs
+     * @param <E>         the type of the entity
      * @return new entity
      */
-    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
+    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id,
+                                                      BoundedContext boundedContext) {
+        final boolean partClass = isAggregatePartClass(constructor.getDeclaringClass());
+        if (partClass) {
+            final E result = createEntityPart(constructor, id, boundedContext);
+            return result;
+        }
+        final E result = createEntity(constructor, id);
+        return result;
+    }
+
+    private static <I, E extends Entity<I, ?>> E createEntityPart(
+            Constructor<E> constructor, I id, BoundedContext boundedContext) {
+        try {
+            final Class<?> rootClass = constructor.getParameterTypes()[1];
+            final Constructor<?> rootConstructor = rootClass.getDeclaredConstructor(
+                    boundedContext.getClass(), id.getClass());
+            rootConstructor.setAccessible(true);
+            final AggregateRoot root =
+                    (AggregateRoot) rootConstructor.newInstance(boundedContext, id);
+            final E result = constructor.newInstance(id, root);
+            result.init();
+            return result;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = String.format(
+                "%s class must declare a constructor with a single %s ID parameter.", entityClass,
+                idClass);
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+     private static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id) {
         try {
             final E result = constructor.newInstance(id);
             result.init();
@@ -189,7 +268,8 @@ public abstract class Entity<I, S extends Message> {
             final S state = createDefaultState();
             registry.put(entityClass, state);
         }
-        @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
+        @SuppressWarnings("unchecked")
+        // cast is safe because this type of messages is saved to the map
         final S defaultState = (S) registry.get(entityClass);
         return defaultState;
     }
@@ -204,7 +284,7 @@ public abstract class Entity<I, S extends Message> {
      * Obtains the entity state.
      *
      * @return the current state object or the value produced by {@link #getDefaultState()}
-     *         if the state wasn't set
+     * if the state wasn't set
      */
     @CheckReturnValue
     public S getState() {
@@ -232,8 +312,8 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Validates and sets the state.
      *
-     * @param state the state object to set
-     * @param version the entity version to set
+     * @param state            the state object to set
+     * @param version          the entity version to set
      * @param whenLastModified the time of the last modification to set
      * @see #validate(S)
      */
@@ -253,7 +333,7 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Sets version information of the entity.
      *
-     * @param version the version number of the entity
+     * @param version          the version number of the entity
      * @param whenLastModified the time of the last modification of the entity
      */
     protected void setVersion(int version, Timestamp whenLastModified) {
@@ -294,7 +374,7 @@ public abstract class Entity<I, S extends Message> {
      * Obtains the timestamp of the last modification.
      *
      * @return the timestamp instance or the value produced by
-     *         {@link Timestamp#getDefaultInstance()} if the state wasn't set
+     * {@link Timestamp#getDefaultInstance()} if the state wasn't set
      * @see #setState(Message, int, Timestamp)
      */
     @CheckReturnValue
@@ -309,9 +389,9 @@ public abstract class Entity<I, S extends Message> {
      * Obtains the entity status.
      */
     protected EntityStatus getStatus() {
-        final EntityStatus result = this.status ==  null
-                ? EntityStatus.getDefaultInstance()
-                : this.status;
+        final EntityStatus result = this.status == null
+                                    ? EntityStatus.getDefaultInstance()
+                                    : this.status;
         return result;
     }
 
@@ -355,7 +435,7 @@ public abstract class Entity<I, S extends Message> {
      * Retrieves the ID class of the entities of the given class using reflection.
      *
      * @param entityClass the entity class to inspect
-     * @param <I> the entity ID type
+     * @param <I>         the entity ID type
      * @return the entity ID class
      */
     public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
@@ -376,7 +456,7 @@ public abstract class Entity<I, S extends Message> {
      * Retrieves the state class of the passed entity class.
      *
      * @param entityClass the entity class to inspect
-     * @param <S> the entity state type
+     * @param <S>         the entity state type
      * @return the entity state class
      */
     public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
@@ -400,7 +480,8 @@ public abstract class Entity<I, S extends Message> {
             final String result = descriptor.getName();
             return result;
         } else {
-            final String result = id.getClass().getSimpleName();
+            final String result = id.getClass()
+                                    .getSimpleName();
             return result;
         }
     }
