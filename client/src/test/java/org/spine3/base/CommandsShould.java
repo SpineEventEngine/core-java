@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
@@ -71,6 +73,19 @@ public class CommandsShould {
     @Test
     public void have_private_ctor() {
         assertTrue(hasPrivateParameterlessCtor(Commands.class));
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() throws Descriptors.DescriptorValidationException {
+        final NullToleranceTest nullToleranceTest =
+                NullToleranceTest.newBuilder()
+                                 .setClass(Commands.class)
+                                 .addDefaultValue(FileDescriptor.buildFrom(
+                                         DescriptorProtos.FileDescriptorProto.getDefaultInstance() ,
+                                         new FileDescriptor[]{}))
+                                 .build();
+        final boolean passed = nullToleranceTest.check();
+        assertTrue(passed);
     }
 
     @Test

@@ -82,7 +82,7 @@ public class Commands {
      *
      * <p>This method is not supposed to be called from outside the framework.
      * Commands in client applications should be created by
-     * {@link org.spine3.client.CommandFactory#create(Message) CommandFactory.create(Message)},
+     * {@link org.spine3.client.CommandFactory#createCommand(Message) CommandFactory.create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
@@ -123,6 +123,7 @@ public class Commands {
                                                int targetVersion) {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
+        checkNotNull(targetVersion);
 
         final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
         result.setTargetVersion(targetVersion);
