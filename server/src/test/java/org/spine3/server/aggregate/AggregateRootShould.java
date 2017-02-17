@@ -21,38 +21,55 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
+import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandBus;
 import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.ProjectLifeCycle;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
-import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class AggregateRootShould {
 
+    private static final StreamObserver<Response> RESPONSE_OBSERVER = new MockStreamObserver();
     private AggregateRoot aggregateRoot;
+    private CommandBus commandBus;
+    private ProjectId projectId;
+    private CommandContext commandContext;
+    private static boolean exceptionOccurred;
 
     @Before
     public void setUp() {
+        commandContext = createCommandContext();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        boundedContext.register(new ProjectHeaderRepository(boundedContext));
+        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
+        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
 
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        aggregateRoot = new ProjectRoot(boundedContext, id);
+        commandBus = boundedContext.getCommandBus();
+        projectId = ProjectId.newBuilder()
+                             .setId(newUuid())
+                             .build();
+        aggregateRoot = new ProjectRoot(boundedContext, projectId);
     }
 
     @Test
@@ -74,7 +91,41 @@ public class AggregateRootShould {
         verify(rootSpy, atMost(1)).lookup(partClass);
     }
 
+    @Test
+    public void pass_the_test() {
+        final Command createProjectSmd = createProjectCmdInstance();
+        commandBus.post(createProjectSmd, RESPONSE_OBSERVER);
+
+        final Command startProjectCmd = createStartProjectCmd();
+        commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
+    }
+
+    @Test
+    public void not_pass_the_test() {
+        final Command startProjectCmd = createStartProjectCmd();
+        commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
+        assertTrue(exceptionOccurred);
+    }
+
+    private Command createProjectCmdInstance() {
+        final CreateProject createProject = CreateProject.newBuilder()
+                                                         .setProjectId(projectId)
+                                                         .build();
+        return Commands.createCommand(createProject, commandContext);
+    }
+
+    private Command createStartProjectCmd() {
+        final StartProject startProject = StartProject.newBuilder()
+                                                      .setProjectId(projectId)
+                                                      .build();
+        return Commands.createCommand(startProject, commandContext);
+    }
+
     /*
+       Test environment classes
+     ***************************/
+
+      /*
        Test environment classes
      ***************************/
 
@@ -86,18 +137,20 @@ public class AggregateRootShould {
     }
 
     @SuppressWarnings("TypeMayBeWeakened") // We need exact message classes, without OrBuilder.
-    private static class ProjectHeader extends AggregatePart<ProjectId, Project, Project.Builder> {
+    private static class ProjectDefinitionPart
+            extends AggregatePart<ProjectId, ProjectDefinition, ProjectDefinition.Builder> {
 
-        private ProjectHeader(ProjectId id, ProjectRoot root) {
+        private ProjectDefinitionPart(ProjectId id, ProjectRoot root) {
             super(id, root);
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject msg, CommandContext context) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+        ProjectCreated handle(CreateProject msg) {
+            final ProjectCreated result = ProjectCreated.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .setName(msg.getName())
+                                                        .build();
+            return result;
         }
 
         @Apply
@@ -105,35 +158,71 @@ public class AggregateRootShould {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
+    }
 
-        @Assign
-        public TaskAdded handle(AddTask msg, CommandContext context) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .build();
+    private static class ProjectLifeCyclePart
+            extends AggregatePart<ProjectId, ProjectLifeCycle, ProjectLifeCycle.Builder> {
+
+        /**
+         * {@inheritDoc}
+         *
+         * @param id
+         * @param root
+         */
+        protected ProjectLifeCyclePart(ProjectId id, ProjectRoot root) {
+            super(id, root);
         }
 
-        @Apply
-        private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId());
-        }
-
         @Assign
-        public ProjectStarted handle(StartProject msg, CommandContext context) {
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+        ProjectStarted handle(StartProject msg) {
+            final ProjectDefinition projectDefinition = getPartState(ProjectDefinition.class);
+            final boolean defaultId = projectDefinition.getId()
+                                                       .equals(ProjectId.getDefaultInstance());
+            if (defaultId) {
+                exceptionOccurred = true;
+            }
+            final ProjectStarted result = ProjectStarted.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .build();
+            return result;
         }
 
         @Apply
         private void apply(ProjectStarted event) {
+            getBuilder().setStatus(ProjectLifeCycle.Status.STARTED);
         }
     }
 
-    private static class ProjectHeaderRepository extends AggregatePartRepository<ProjectId, ProjectHeader> {
+    private static class ProjectDefinitionRepository
+            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart> {
 
-        private ProjectHeaderRepository(BoundedContext boundedContext) {
+        private ProjectDefinitionRepository(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+    }
+
+    private static class ProjectLifeCycleRepository
+            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart> {
+
+        private ProjectLifeCycleRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private static class MockStreamObserver implements StreamObserver<Response> {
+        @Override
+        public void onNext(Response value) {
+
+        }
+
+        @Override
+        public void onError(Throwable t) {
+
+        }
+
+        @Override
+        public void onCompleted() {
+
         }
     }
 }
