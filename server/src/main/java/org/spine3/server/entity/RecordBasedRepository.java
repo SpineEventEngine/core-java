@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
@@ -344,7 +345,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param <I> the target type of identifiers
      */
-    private static class EntityIdFunction<I> implements Function<EntityId, I> {
+    @VisibleForTesting
+    static class EntityIdFunction<I> implements Function<EntityId, I> {
 
         private final Class<I> expectedIdClass;
 
