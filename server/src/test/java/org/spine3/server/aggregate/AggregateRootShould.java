@@ -88,8 +88,8 @@ public class AggregateRootShould {
     @SuppressWarnings("TypeMayBeWeakened") // We need exact message classes, without OrBuilder.
     private static class ProjectHeader extends AggregatePart<ProjectId, Project, Project.Builder> {
 
-        private ProjectHeader(ProjectId id) {
-            super(id);
+        private ProjectHeader(ProjectId id, ProjectRoot root) {
+            super(id, root);
         }
 
         @Assign

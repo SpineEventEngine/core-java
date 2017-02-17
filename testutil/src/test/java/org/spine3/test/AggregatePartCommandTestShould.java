@@ -25,7 +25,9 @@ import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.CommandFactory;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 
@@ -47,11 +49,13 @@ public class AggregatePartCommandTestShould {
 
     @Test
     public void create_an_aggregate_part_in_setUp() {
-        assertFalse(aggregatePartCommandTest.aggregatePart().isPresent());
+        assertFalse(aggregatePartCommandTest.aggregatePart()
+                                            .isPresent());
 
         aggregatePartCommandTest.setUp();
 
-        assertTrue(aggregatePartCommandTest.aggregatePart().isPresent());
+        assertTrue(aggregatePartCommandTest.aggregatePart()
+                                           .isPresent());
     }
 
     /**
@@ -72,7 +76,8 @@ public class AggregatePartCommandTestShould {
      */
     private static final class TimerCounter extends AggregatePart<String, UInt32Value, UInt32Value.Builder> {
         private TimerCounter(String id) {
-            super(id);
+            super(id, new MockRoot(BoundedContext.newBuilder()
+                                                 .build(), id));
         }
 
         @Assign
@@ -102,13 +107,25 @@ public class AggregatePartCommandTestShould {
         @Override
         protected TimerCounter createAggregatePart() {
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
-                        .withId(getClass().getName())
-                        .withVersion(5)
-                        .withState(UInt32Value.newBuilder()
-                                              .setValue(42)
-                                              .build())
-                        .build();
+                                             .withId(getClass().getName())
+                                             .withVersion(5)
+                                             .withState(UInt32Value.newBuilder()
+                                                                   .setValue(42)
+                                                                   .build())
+                                             .build();
             return result;
+        }
+    }
+
+    static class MockRoot extends AggregateRoot<String> {
+        /**
+         * Creates an new instance.
+         *
+         * @param boundedContext the bounded context to which the aggregate belongs
+         * @param id             the ID of the aggregate
+         */
+        protected MockRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
         }
     }
 }
