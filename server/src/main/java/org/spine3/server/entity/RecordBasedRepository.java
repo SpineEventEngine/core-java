@@ -297,36 +297,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
 
-        final Collection<I> result = Collections2.transform(idsList, new Function<EntityId, I>() {
-            @Nullable
-            @Override
-            public I apply(@Nullable EntityId input) {
-                checkNotNull(input);
-                final Any idAsAny = input.getId();
-
-                final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-                final Class messageClass = toMessageClass(typeUrl);
-                checkIdClass(messageClass);
-
-                final Message idAsMessage = unpack(idAsAny);
-
-                // As the message class is the same as expected, the conversion is safe.
-                @SuppressWarnings("unchecked")
-                final I id = (I) idAsMessage;
-                return id;
-            }
-
-            private void checkIdClass(Class messageClass) {
-                final boolean classIsSame = expectedIdClass.equals(messageClass);
-                if (!classIsSame) {
-                    final String errMsg = format(
-                            "Unexpected ID class encountered: %s. Expected: %s",
-                            messageClass, expectedIdClass
-                    );
-                    throw new IllegalStateException(errMsg);
-                }
-            }
-        });
+        final Collection<I> result = Collections2.transform(idsList,
+                                                            new EntityIdFunction<>(expectedIdClass));
 
         return result;
     }
@@ -364,5 +336,49 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 return result;
             }
         };
+    }
+
+    /**
+     * Transforms an instance of {@link EntityId} into an identifier
+     * of the required type.
+     *
+     * @param <I> the target type of identifiers
+     */
+    private static class EntityIdFunction<I> implements Function<EntityId, I> {
+
+        private final Class<I> expectedIdClass;
+
+        public EntityIdFunction(Class<I> expectedIdClass) {
+            this.expectedIdClass = expectedIdClass;
+        }
+
+        @Nullable
+        @Override
+        public I apply(@Nullable EntityId input) {
+            checkNotNull(input);
+            final Any idAsAny = input.getId();
+
+            final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
+            final Class messageClass = toMessageClass(typeUrl);
+            checkIdClass(messageClass);
+
+            final Message idAsMessage = unpack(idAsAny);
+
+            // As the message class is the same as expected, the conversion is safe.
+            @SuppressWarnings("unchecked")
+            final I id = (I) idAsMessage;
+            return id;
+        }
+
+        private void checkIdClass(Class messageClass) {
+            final boolean classIsSame = expectedIdClass.equals(messageClass);
+            if (!classIsSame) {
+                final String errMsg = format(
+                        "Unexpected ID class encountered: %s. Expected: %s",
+                        messageClass, expectedIdClass
+                );
+                throw new IllegalStateException(errMsg);
+            }
+        }
     }
 }
