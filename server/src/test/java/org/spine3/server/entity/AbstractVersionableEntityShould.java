@@ -43,11 +43,6 @@ public class AbstractVersionableEntityShould {
                           .testEquals();
     }
 
-    @Test
-    public void have_hashCode() throws Exception {
-
-    }
-
     private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {
         protected AvEntity(Long id) {
             super(id);
