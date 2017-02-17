@@ -23,6 +23,8 @@ package org.spine3.server.entity;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -31,6 +33,7 @@ import org.spine3.type.ClassName;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -89,8 +92,34 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
+        final Constructor<E> result = getEntityConstructor(entityClass, idClass);
+        return result;
+    }
+
+    protected Constructor<E> getEntityConstructor(Class<E> entityClass, Class<I> idClass) {
+        if (AggregatePart.class.isAssignableFrom(entityClass)) {
+            return getConstructor(entityClass, idClass);
+        }
         final Constructor<E> result = Entity.getConstructor(entityClass, idClass);
         return result;
+    }
+
+    <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                              Class<I> idClass) {
+        final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
+        for (Constructor<?> constructor : constructors) {
+            final Class<?>[] parameterTypes = constructor.getParameterTypes();
+            final int length = parameterTypes.length;
+            if (length != 2) {
+                continue;
+            }
+            if (idClass.equals(parameterTypes[0]) &&
+                AggregateRoot.class.isAssignableFrom(parameterTypes[1])) {
+                constructor.setAccessible(true);
+                return (Constructor<E>) constructor;
+            }
+        }
+        throw new RuntimeException();
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -119,7 +148,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass, Entity.STATE_CLASS_GENERIC_INDEX);
+            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass,
+                                                                             Entity.STATE_CLASS_GENERIC_INDEX);
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -135,7 +165,25 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     @CheckReturnValue
     public E create(I id) {
+        if (AggregatePart.class.isAssignableFrom(entityClass)) {
+            return createEntity(this.entityConstructor, id, boundedContext);
+        }
         return Entity.createEntity(this.entityConstructor, id);
+    }
+
+    static <I, E extends Entity<I, ?>> E createEntity(Constructor<E> constructor, I id,
+                                                      BoundedContext boundedContext) {
+        try {
+            final Class<?> rootClass = constructor.getParameterTypes()[1];
+            final Constructor<?> rootConstructor = rootClass.getDeclaredConstructor(boundedContext.getClass(), id.getClass());
+            rootConstructor.setAccessible(true);
+            final AggregateRoot root = (AggregateRoot) rootConstructor.newInstance(boundedContext, id);
+            final E result = constructor.newInstance(id, root);
+            result.init();
+            return result;
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
