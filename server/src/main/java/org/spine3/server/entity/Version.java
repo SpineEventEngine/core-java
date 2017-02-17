@@ -93,9 +93,10 @@ public final class Version {
         timestamp.set(currentTime());
     }
 
-    void copyFrom(Version another) {
+    Version copyFrom(Version another) {
         number.set(another.getNumber());
         timestamp.set(another.getTimestamp());
+        return this;
     }
 
     @Override

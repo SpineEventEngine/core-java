@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
@@ -89,5 +90,15 @@ public class VersionShould {
     @Test(expected = NullPointerException.class)
     public void do_not_allow_copyFrom_null() {
         Version.create().copyFrom(Tests.<Version>nullRef());
+    }
+
+    @Test
+    public void have_equals() {
+        final Version version = Version.create();
+        final Version another = Version.create().copyFrom(version);
+
+        new EqualsTester().addEqualityGroup(Version.of(1, Timestamps.getCurrentTime()))
+                          .addEqualityGroup(version, another)
+                          .testEquals();
     }
 }
