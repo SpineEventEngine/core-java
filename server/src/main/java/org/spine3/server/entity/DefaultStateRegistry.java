@@ -36,12 +36,13 @@ import static java.lang.String.format;
 class DefaultStateRegistry {
 
     /**
-     * NOTE: The implementation is not customized with
-     * {@link com.google.common.collect.MapMaker#makeMap()} options,
+     * The map from class of entity to its default state.
+     *
+     * <p>NOTE: The implementation is not customized with
+     * {@link com.google.common.collect.MapMaker#makeMap() makeMap()} options,
      * as it is difficult to predict which work best within the real
      * end-user application scenarios.
-     **/
-
+     */
     private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
 
     /**
