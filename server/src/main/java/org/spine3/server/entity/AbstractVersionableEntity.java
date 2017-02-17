@@ -73,7 +73,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * <ul>
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
      *   <li>The version number is set to zero.
-     *   <li>The {@link #whenModified} field is set to the system time of the call.
      *   <li>The {@link #status} field is set to the default instance.
      * </ul>
      *
@@ -163,8 +162,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * {@inheritDoc}
-     * @see #setState(Message, int, Timestamp)
+     * Obtains timestamp of the entity version.
      */
     @CheckReturnValue
     public Timestamp whenModified() {

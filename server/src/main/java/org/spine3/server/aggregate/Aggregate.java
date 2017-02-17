@@ -31,6 +31,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.Version;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -194,7 +195,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             because otherwise it won't be possible to write the code of applier methods
             that make sense to the aggregate. */
         final S newState = (S) getBuilder().build();
-        setState(newState, getVersion().getNumber(), whenModified());
+        final Version version = getVersion();
+        setState(newState, version.getNumber(), version.getTimestamp());
         this.builder = null;
     }
 
@@ -384,7 +386,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     Snapshot toSnapshot() {
         final Any state = AnyPacker.pack(getState());
         final int version = getVersion().getNumber();
-        final Timestamp whenModified = whenModified();
+        final Timestamp whenModified = getVersion().getTimestamp();
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setWhenModified(whenModified)
