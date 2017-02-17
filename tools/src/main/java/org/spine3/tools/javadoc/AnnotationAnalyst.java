@@ -20,18 +20,41 @@
 
 package org.spine3.tools.javadoc;
 
-import com.sun.javadoc.Doc;
+import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.ProgramElementDoc;
+
+import java.lang.annotation.Annotation;
 
 /**
- * {@code ExcludePrinciple} solves either exclude or not {@code Doc} from javadoc.
+ * {@code AnnotationAnalyst} provides methods to check appurtenance to specified annotation.
+ *
+ * @param <C> the type of an annotation to analyze
  *
  * @author Dmytro Grankin
  */
-interface ExcludePrinciple {
+public class AnnotationAnalyst<C extends Class<? extends Annotation>> {
 
-    /**
-     * @param doc the document to analyze
-     * @return true if document should be excluded
-     */
-    boolean exclude(Doc doc);
+    private final C annotationClass;
+
+    AnnotationAnalyst(C annotationClass) {
+        this.annotationClass = annotationClass;
+    }
+
+    boolean hasAnnotation(ProgramElementDoc doc) {
+        return isAnnotationPresent(doc.annotations());
+    }
+
+    boolean isAnnotationPresent(AnnotationDesc[] annotations) {
+        for (AnnotationDesc annotation : annotations) {
+            if (isQualifiedAnnotation(annotation)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isQualifiedAnnotation(AnnotationDesc annotation) {
+        return annotation.annotationType().qualifiedTypeName().equals(annotationClass.getName());
+    }
 }

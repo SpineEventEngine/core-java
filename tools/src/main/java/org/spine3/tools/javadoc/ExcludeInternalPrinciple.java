@@ -20,8 +20,6 @@
 
 package org.spine3.tools.javadoc;
 
-import com.sun.javadoc.AnnotationDesc;
-import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.PackageDoc;
 import com.sun.javadoc.ProgramElementDoc;
@@ -29,29 +27,36 @@ import com.sun.javadoc.RootDoc;
 import org.spine3.Internal;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
+/**
+ * Implementation of the {@linkplain ExcludePrinciple} interface for {@linkplain Internal} annotation.
+ * Excludes all {@linkplain Internal}-annotated program elements, packages, and their subpackages.
+ *
+ * @author Dmytro Grankin
+ */
 class ExcludeInternalPrinciple implements ExcludePrinciple {
 
-    private final Collection<PackageDoc> exclusions = new HashSet<>();
+    private final Collection<PackageDoc> exclusions;
+    private final AnnotationAnalyst<Class<Internal>> internalAnalyst = new AnnotationAnalyst<>(Internal.class);
 
     ExcludeInternalPrinciple(RootDoc root) {
-        exclusions.addAll(getExclusions(root.specifiedPackages()));
-        exclusions.addAll(getExclusions(root.specifiedClasses()));
+        exclusions = getExclusions(root);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean exclude(Doc doc) {
         if (doc instanceof ProgramElementDoc) {
             final ProgramElementDoc programElement = (ProgramElementDoc) doc;
-            return inExclusionPackage(programElement) || hasInternalAnnotation(programElement);
+            return inExclusions(programElement) || internalAnalyst.hasAnnotation(programElement);
         }
 
         return false;
     }
 
-    private boolean inExclusionPackage(ProgramElementDoc doc) {
+    private boolean inExclusions(ProgramElementDoc doc) {
         final String docPackageName = doc.containingPackage().name();
 
         for (PackageDoc exclusion : exclusions) {
@@ -63,81 +68,8 @@ class ExcludeInternalPrinciple implements ExcludePrinciple {
         return false;
     }
 
-    private static Collection<PackageDoc> getExclusions(ClassDoc[] forClasses) {
-        final Set<PackageDoc> exclusions = getInternalPackages(forClasses);
-        final Set<PackageDoc> internalPackages = getInternalPackages(forClasses);
-
-        for (ClassDoc classDoc : forClasses) {
-            if (isInternalSubpackage(classDoc.containingPackage(), internalPackages)) {
-                exclusions.add(classDoc.containingPackage());
-            }
-        }
-
-        return exclusions;
-    }
-
-    private static Collection<PackageDoc> getExclusions(PackageDoc[] forPackages) {
-        final Set<PackageDoc> exclusions = getInternalPackages(forPackages);
-        final Set<PackageDoc> internalPackages = getInternalPackages(forPackages);
-
-        for (PackageDoc packageDoc : forPackages) {
-            if (isInternalSubpackage(packageDoc, internalPackages)) {
-                exclusions.add(packageDoc);
-            }
-        }
-
-        return exclusions;
-    }
-
-    private static Set<PackageDoc> getInternalPackages(PackageDoc[] forPackages) {
-        final Set<PackageDoc> internalPackages = new HashSet<>();
-
-        for (PackageDoc packageDoc : forPackages) {
-            if (isInternalAnnotationPresent(packageDoc.annotations())) {
-                internalPackages.add(packageDoc);
-            }
-        }
-
-        return internalPackages;
-    }
-
-    private static Set<PackageDoc> getInternalPackages(ClassDoc[] forClasses) {
-        final Set<PackageDoc> internalPackages = new HashSet<>();
-
-        for (ClassDoc classDoc : forClasses) {
-            if (isInternalAnnotationPresent(classDoc.containingPackage().annotations())) {
-                internalPackages.add(classDoc.containingPackage());
-            }
-        }
-
-        return internalPackages;
-    }
-
-    private static boolean isInternalSubpackage(PackageDoc packageDoc, Iterable<PackageDoc> internalPackages) {
-        for (PackageDoc internalPackage : internalPackages) {
-            if (packageDoc.name().startsWith(internalPackage.name())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean hasInternalAnnotation(ProgramElementDoc doc) {
-        return isInternalAnnotationPresent(doc.annotations());
-    }
-
-    private static boolean isInternalAnnotationPresent(AnnotationDesc[] annotations) {
-        for (AnnotationDesc annotation : annotations) {
-            if (isInternalAnnotation(annotation)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean isInternalAnnotation(AnnotationDesc annotation) {
-        return annotation.annotationType().qualifiedTypeName().equals(Internal.class.getName());
+    private Collection<PackageDoc> getExclusions(RootDoc root) {
+        final PackageCollector packageCollector = new PackageCollector(internalAnalyst);
+        return packageCollector.collect(root);
     }
 }
