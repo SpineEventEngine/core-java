@@ -221,15 +221,8 @@ subprojects {
         from sourceSets.test.output
         classifier "test"
     }
-
-    task noInternalJavadoc(type: Javadoc) {
-        source = sourceSets.main.allJava.filter {
-            !it.absolutePath.contains('generated')
-        }
-        classpath = javadoc.getClasspath()
-        options.doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
-        options.docletpath(file(project(':tools').jar.archivePath))
-    }
+    
+    apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"
 
     idea.module.iml {
         beforeMerged { final module ->
