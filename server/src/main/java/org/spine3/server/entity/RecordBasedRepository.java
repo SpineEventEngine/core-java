@@ -88,7 +88,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Obtains {@link EntityStorageConverter} associated with this repository.
      */
-    protected abstract EntityStorageConverter<I, E, S> storageConverter();
+    protected abstract EntityStorageConverter<I, E, S> entityConverter();
 
     /**
      * Ensures that the repository has the storage.
@@ -222,7 +222,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
         final List<E> entities = Lists.newLinkedList();
-        final EntityStorageConverter<I, E, S> converter = storageConverter().withFieldMask(fieldMask);
+        final EntityStorageConverter<I, E, S> converter = entityConverter().withFieldMask(fieldMask);
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
@@ -309,15 +309,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * stores the entity data.
      */
     protected EntityStorageRecord toRecord(E entity) {
-        final EntityStorageConverter.Tuple<I> tuple = storageConverter().convert(entity);
+        final EntityStorageConverter.Tuple<I> tuple = entityConverter().convert(entity);
         return tuple != null ? tuple.getState()
                              : EntityStorageRecord.getDefaultInstance();
     }
 
     private E toEntity(I id, EntityStorageRecord record) {
         EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
-        final E result = storageConverter().reverse()
-                                           .convert(tuple);
+        final E result = entityConverter().reverse()
+                                          .convert(tuple);
         return result;
     }
 

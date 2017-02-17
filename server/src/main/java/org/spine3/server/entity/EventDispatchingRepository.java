@@ -71,7 +71,7 @@ public abstract class EventDispatchingRepository<I,
     }
 
     @Override
-    protected EntityStorageConverter<I, E, S> storageConverter() {
+    protected EntityStorageConverter<I, E, S> entityConverter() {
         return this.storageConverter;
     }
 
