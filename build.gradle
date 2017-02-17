@@ -37,7 +37,7 @@ buildscript {
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.8.0'
+        spineToolsVersion = '0.8.1-SNAPSHOT'
     }
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
@@ -47,7 +47,7 @@ buildscript {
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                                             version: spineProtobufPluginVersion
+                                             version: spineToolsVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
     }
@@ -60,7 +60,6 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'jacoco'
     apply plugin: 'idea'
-    apply plugin: 'java'
 
     group = 'org.spine3'
     version = spineVersion
@@ -102,6 +101,7 @@ subprojects {
     }
 
     apply plugin: 'com.google.protobuf'
+    apply plugin: 'java'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -120,9 +120,6 @@ subprojects {
 
     dependencies {
         compile group: 'com.google.guava', name: 'guava', version: guavaVersion
-        // We need this in order to generate javadoc correctly. Remove it after update guava to 22.0.
-        // Details: https://github.com/google/guava/issues/2721
-        compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
         //As a Library, we provide logging facade API, not specific logger bindings.
