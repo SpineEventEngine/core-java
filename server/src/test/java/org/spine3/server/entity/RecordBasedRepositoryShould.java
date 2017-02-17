@@ -45,7 +45,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S extends Message> {
+public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>, I, S extends Message> {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -73,13 +73,21 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S e
     }
 
     @Test
+    public void create_entities() {
+        final I id = createId(5);
+        final E projectEntity = repository.create(id);
+        assertNotNull(projectEntity);
+        assertEquals(id, projectEntity.getId());
+    }
+
+    @Test
     public void find_single_entity_by_id() {
         final E entity = createEntity();
 
         repository.store(entity);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
-        final Entity<?, ?> found = repository.load(entity.getId()).get();
+        final Entity<?,?> found = repository.load(entity.getId()).get();
 
         assertEquals(found, entity);
     }
@@ -148,7 +156,7 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S e
             ids.add(entities.get(i)
                             .getId());
         }
-        final Entity<I, S> sideEntity = createEntity();
+        final Entity<I,S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
         final Collection<E> found = repository.loadAll(ids);
@@ -195,7 +203,7 @@ public abstract class RecordBasedRepositoryShould<E extends Entity<I, S>, I, S e
         }
     }
 
-    private static <E extends Entity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
+    private static <E extends AbstractVersionableEntity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
     }

@@ -18,27 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
+import com.google.common.testing.EqualsTester;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
 /**
- * Obtains an entity ID based on an event/command message and context.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext EventContext} or
- *          {@link org.spine3.base.CommandContext CommandContext} type
- * @see org.spine3.server.entity.Entity Entity
+ * @author Alexander Yevsyukov
  */
-interface IdFunction<I, M extends Message, C extends Message> {
+public class AbstractVersionableEntityShould {
 
-    /**
-     * Obtains an entity ID based on the passed message and its context.
-     *
-     * @param message a message from which to get the ID
-     * @param context context of the message
-     * @return an entity ID
-     */
-    I apply(M message, C context);
+    @SuppressWarnings("MagicNumber")
+    @Test
+    public void have_equals() throws Exception {
+        final AvEntity entity = new AvEntity(88L);
+        final AvEntity another = new AvEntity(88L);
+        another.setState(entity.getState(), entity.getVersion()
+                                                  .getNumber(), entity.getVersion()
+                                                                      .getTimestamp());
+
+        new EqualsTester().addEqualityGroup(entity, another)
+                          .addEqualityGroup(new AvEntity(42L))
+                          .testEquals();
+    }
+
+    private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {
+        protected AvEntity(Long id) {
+            super(id);
+        }
+    }
 }

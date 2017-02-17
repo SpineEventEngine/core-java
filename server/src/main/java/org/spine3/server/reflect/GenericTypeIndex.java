@@ -18,27 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
-
-import com.google.protobuf.Message;
+package org.spine3.server.reflect;
 
 /**
- * Obtains an entity ID based on an event/command message and context.
+ * Base interface for enumerations on generic parameters of types.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext EventContext} or
- *          {@link org.spine3.base.CommandContext CommandContext} type
- * @see org.spine3.server.entity.Entity Entity
+ * @author Alexander Yevsyukov
  */
-interface IdFunction<I, M extends Message, C extends Message> {
+public interface GenericTypeIndex {
 
     /**
-     * Obtains an entity ID based on the passed message and its context.
-     *
-     * @param message a message from which to get the ID
-     * @param context context of the message
-     * @return an entity ID
+     * Obtains a zero-based index of a generic parameter of a type.
      */
-    I apply(M message, C context);
+    int getIndex();
 }

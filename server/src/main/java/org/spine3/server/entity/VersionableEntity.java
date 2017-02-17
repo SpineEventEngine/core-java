@@ -18,27 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 
 /**
- * Obtains an entity ID based on an event/command message and context.
+ * An entity with version and timestamp of the last modification.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext EventContext} or
- *          {@link org.spine3.base.CommandContext CommandContext} type
- * @see org.spine3.server.entity.Entity Entity
+ * @author Alexander Yevsyukov
  */
-interface IdFunction<I, M extends Message, C extends Message> {
+public interface VersionableEntity<I, S extends Message> extends Entity<I, S> {
 
     /**
-     * Obtains an entity ID based on the passed message and its context.
-     *
-     * @param message a message from which to get the ID
-     * @param context context of the message
-     * @return an entity ID
+     * Obtains the version of the entity.
      */
-    I apply(M message, C context);
+    Version getVersion();
 }

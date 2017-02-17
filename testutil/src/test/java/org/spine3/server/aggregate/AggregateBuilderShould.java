@@ -51,7 +51,7 @@ public class AggregateBuilderShould {
         assertEquals(TestAggregate.class, aggregate.getClass());
         assertEquals(id, aggregate.getId());
         assertEquals(state, aggregate.getState());
-        assertEquals(version, aggregate.getVersion());
+        assertEquals(version, aggregate.getVersion().getNumber());
         assertEquals(whenModified, aggregate.whenModified());
     }
 
