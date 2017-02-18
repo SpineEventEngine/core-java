@@ -51,6 +51,7 @@ import static org.spine3.server.reflect.Classes.getGenericParameterType;
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
  * @author Alexander Yevsyukov
+ * @see VersionableEntity
  */
 public interface Entity<I, S extends Message> {
 
