@@ -408,7 +408,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
            use the currently initialized builder.
            Otherwise, just set the state and the version from the snapshot.
          */
-        final Version versionFromSnapshot = versionOf(snapshot);
+        final Version versionFromSnapshot = versionFrom(snapshot);
         if (builder != null) {
             builder.clear();
             builder.mergeFrom(stateToRestore);
@@ -418,7 +418,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    private static Version versionOf(Snapshot snapshot) {
+    private static Version versionFrom(Snapshot snapshot) {
         return newVersion(snapshot.getVersion(), snapshot.getWhenModified());
     }
 
