@@ -67,7 +67,11 @@ message AggregateStorageRecord {
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
-    // A Protobuf type name of the event.
+    // A short Protobuf type name of the event.
+    //
+    // Since events stored are for particular aggregate type, we are not likely to
+    // have a name clash because of not storing fully-qualified names.
+    //
     string event_type = 2;
 
     // String representation of `EventId`.
