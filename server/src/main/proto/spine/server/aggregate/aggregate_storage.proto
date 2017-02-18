@@ -24,7 +24,8 @@ package spine.server.aggregate;
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
 option java_package = "org.spine3.server.aggregate.storage";
-    // Put Java classes into sub-package so that we can annotate the whole package with @SPI via `package-info.java`.
+    // Put Java classes into sub-package `storage` so that we can annotate
+    // the whole package with @SPI via `package-info.java`.
 option java_outer_classname = "AggregateStorageProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
@@ -52,8 +53,10 @@ message Snapshot {
 
     // The moment the snapshot was created.
     //
-    // This value should normally be after the time the aggregate was modified (and timestamp of the
-    // corresponding event), and before the time of the next event in the aggregate history.
+    // This value should normally be after the time the aggregate was modified
+    // (and timestamp of the corresponding event), and before the time of
+    // the next event in the aggregate history.
+    //
     google.protobuf.Timestamp timestamp = 4;
 }
 
@@ -95,16 +98,19 @@ message AggregateStorageRecord {
 message AggregateEvents {
     option (SPI_type) = true;
 
-    // If the `snapshot` field is populated, it contains the last snapshot in the history
-    // of the aggregate.
+    // If the `snapshot` field is populated, it contains the last snapshot in
+    // the history of the aggregate.
     // This value will be used for restoring the aggregate state before playing
     // events that occurred after this snapshot was made.
+    //
     server.aggregate.Snapshot snapshot = 1;
 
     // Events of the aggregate.
     //
-    // If `snapshot` field is populated, events represent the 'tail' of the event history of the aggregate.
+    // If `snapshot` field is populated, events represent the 'tail' of
+    // the event history of the aggregate.
     // Otherwise, events are full history of the aggregate.
+    //
     repeated base.Event event = 2;
 }
 
