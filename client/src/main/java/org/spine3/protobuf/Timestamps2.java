@@ -38,15 +38,16 @@ import static java.lang.String.format;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
- * {@link com.google.protobuf.util.Timestamps Timestamps}.
+ * {@link com.google.protobuf.util.Timestamps Timestamps} class from Protobuf.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Timestamps {
+public class Timestamps2 {
 
     /**
-     * The following constants are taken from {@link com.google.protobuf.util.Timestamps Timestamps}
+     * The following constants are taken from the
+     * {@link com.google.protobuf.util.Timestamps Timestamps} class
      * in order to make them publicly visible to time management utils:
      * <ul>
      *   <li>{@link #TIMESTAMP_SECONDS_MIN}
@@ -101,7 +102,7 @@ public class Timestamps {
         }
     };
 
-    private Timestamps() {
+    private Timestamps2() {
     }
 
     /**
@@ -287,7 +288,7 @@ public class Timestamps {
 
         @Override
         public int compare(Timestamp t1, Timestamp t2) {
-            return Timestamps.compare(t1, t2);
+            return Timestamps2.compare(t1, t2);
         }
     }
 

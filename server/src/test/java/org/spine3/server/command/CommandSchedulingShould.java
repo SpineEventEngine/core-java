@@ -45,7 +45,7 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
+import static org.spine3.protobuf.Timestamps2.minutesAgo;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.server.command.Given.Command.startProject;

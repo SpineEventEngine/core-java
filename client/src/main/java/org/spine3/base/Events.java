@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeName;
 import org.spine3.users.UserId;
 
@@ -38,7 +38,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.isBetween;
+import static org.spine3.protobuf.Timestamps2.isBetween;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -57,7 +57,7 @@ public class Events {
         public int compare(Event o1, Event o2) {
             final Timestamp timestamp1 = getTimestamp(o1);
             final Timestamp timestamp2 = getTimestamp(o2);
-            return Timestamps.compare(timestamp1, timestamp2);
+            return Timestamps2.compare(timestamp1, timestamp2);
         }
     };
 
@@ -179,7 +179,7 @@ public class Events {
         checkNotNull(producerId);
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
-                                                         .setTimestamp(Timestamps.getCurrentTime())
+                                                         .setTimestamp(Timestamps2.getCurrentTime())
                                                          .setProducerId(AnyPacker.pack(producerId));
         return builder.build();
     }
@@ -199,7 +199,7 @@ public class Events {
                 return false;
             }
             final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
+            final boolean result = Timestamps2.compare(ts, this.timestamp) > 0;
             return result;
         }
     }
@@ -220,7 +220,7 @@ public class Events {
             }
 
             final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps.compare(ts, this.timestamp) < 0;
+            final boolean result = Timestamps2.compare(ts, this.timestamp) < 0;
             return result;
         }
     }
@@ -234,7 +234,7 @@ public class Events {
         public IsBetween(Timestamp start, Timestamp finish) {
             checkNotNull(start);
             checkNotNull(finish);
-            checkArgument(Timestamps.compare(start, finish) < 0, "`start` must be before `finish`");
+            checkArgument(Timestamps2.compare(start, finish) < 0, "`start` must be before `finish`");
             this.start = start;
             this.finish = finish;
         }

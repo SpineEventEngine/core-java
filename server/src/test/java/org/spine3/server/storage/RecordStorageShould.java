@@ -26,7 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.FieldMasks;
 
 import java.util.Collection;
@@ -65,7 +65,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Any wrappedState = AnyPacker.pack(state);
         final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                                                               .setState(wrappedState)
-                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setWhenModified(Timestamps2.getCurrentTime())
                                                               .setVersion(0)
                                                               .build();
         return record;

@@ -13,9 +13,9 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Durations.toMillis;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
+import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
+import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 

@@ -27,26 +27,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
- * A server-side object with an identity.
+ * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Object) identity}.
  *
- * <p>An entity identifier can be of one of the following types:
- *   <ul>
- *      <li>String
- *      <li>Long
- *      <li>Integer
- *      <li>A class implementing {@link Message}
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes
- *      <li>ISBN
- *      <li>Phone number
- *      <li>email address as a couple of local-part and domain
- *   </ul>
- *
- * <p>A state of an entity is defined as a protobuf message.
+ * <p>A state of an entity is defined as a Protobuf message.
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state

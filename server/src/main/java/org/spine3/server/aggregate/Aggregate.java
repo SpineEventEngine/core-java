@@ -19,6 +19,7 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
@@ -27,11 +28,12 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.Version;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -42,8 +44,10 @@ import java.util.List;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.base.Versions.newVersion;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Abstract base for aggregates.
@@ -198,7 +202,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             that make sense to the aggregate. */
         final S newState = (S) getBuilder().build();
         final Version version = getVersion();
-        setState(newState, version.getNumber(), version.getTimestamp());
+        setState(newState, version);
         this.builder = null;
     }
 
@@ -248,27 +252,51 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies passed events.
      *
-     * <p>The events passed to this method is the aggregate data loaded
-     * by a repository and passed to the aggregate so that it restores its state.
+     * <p>The events passed to this method is the aggregate data (which may include
+     * a {@code Snapshot} loaded by a repository and passed to the aggregate so that
+     * it restores its state.
      *
-     * @param events the list of the events
+     * @param aggregateEvents the events to play
      * @throws IllegalStateException if applying events caused an exception, which is set as
      *                               the {@code cause} for the thrown instance
      */
-    void play(Iterable<Event> events) {
+    void play(AggregateEvents aggregateEvents) {
         createBuilder();
+
+        final Snapshot snapshot = aggregateEvents.getSnapshot();
+        if (isNotDefault(snapshot)) {
+            restore(snapshot);
+        }
+
+        final List<Event> events = aggregateEvents.getEventList();
+
         try {
             for (Event event : events) {
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    applyEventOrSnapshot(message);
-                    setVersion(context.getVersion(), context.getTimestamp());
+                    applyEvent(message);
+                    final Version newVersion = newVersion(context.getVersion(),
+                                                          context.getTimestamp());
+                    advanceVersion(newVersion);
                 } catch (InvocationTargetException e) {
                     throw wrappedCause(e);
                 }
             }
         } finally {
+            /*
+                We perform updating the state of the aggregate in this `finally`
+                block (even if there was an exception in one of the appliers)
+                because we want to transit the aggregate out of the “applying events” mode
+                anyway. We do this to minimize the damage to the aggregate
+                in the case of an exception caused by an applier method.
+
+                In general, applier methods must not throw. Command handlers can
+                in case of business failures.
+
+                The exception thrown from an applier still will be seen because we
+                re-throw its cause in the `catch` block above.
+             */
             updateState();
         }
     }
@@ -293,30 +321,60 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    private void apply(Message eventOrMsg, CommandContext commandContext)
+    /**
+     * Applies the passed event message or {@code Event} to the aggregate.
+     *
+     * @param eventOrMessage an event message or {@code Event}
+     * @param commandContext the context of the command which handler generated the message or event
+     * @throws InvocationTargetException if the applier method throws the exception
+     * @see #ensureEventMessage(Message)
+     */
+    private void apply(Message eventOrMessage, CommandContext commandContext)
             throws InvocationTargetException {
-        final Message eventMsg;
+        final Message eventMessage = ensureEventMessage(eventOrMessage);
+
+        applyEvent(eventMessage);
+        incrementVersion();
+
         final EventContext eventContext;
+        if (eventOrMessage instanceof Event) {
+            final Event event = (Event) eventOrMessage;
+            eventContext = event.getContext()
+                                  .toBuilder()
+                                  .setCommandContext(commandContext)
+                                  .setTimestamp(getCurrentTime())
+                                  .setVersion(getVersion().getNumber())
+                                  .build();
+        } else {
+            eventContext = createEventContext(eventMessage, commandContext);
+        }
+
+        final Event event = createEvent(eventMessage, eventContext);
+        uncommittedEvents.add(event);
+    }
+
+    /**
+     * Ensures that an event applier gets an instance of an event message,
+     * not {@link Event}.
+     *
+     * <p>Instances of {@code Event} may be passed to an applier during
+     * importing events or processing integration events. This may happen because
+     * corresponding command handling method returned either {@code List<Event>}
+     * or {@code Event}.
+     *
+     * @param eventOrMsg an event message or {@code Event}
+     * @return the passed instance or an event message extracted from the passed
+     *         {@code Event} instance
+     */
+    private static Message ensureEventMessage(Message eventOrMsg) {
+        final Message eventMsg;
         if (eventOrMsg instanceof Event) {
-            /* We are receiving the event during import or integration.
-               This happened because an aggregate's command handler returned either
-               List<Event> or Event. */
             final Event event = (Event) eventOrMsg;
             eventMsg = getMessage(event);
-            eventContext = event.getContext()
-                                .toBuilder()
-                                .setCommandContext(commandContext)
-                                .setTimestamp(getCurrentTime())
-                                .setVersion(getVersion().getNumber())
-                                .build();
         } else {
             eventMsg = eventOrMsg;
-            eventContext = createEventContext(eventMsg, commandContext);
         }
-        applyEventOrSnapshot(eventMsg);
-        incrementVersion();
-        final Event event = createEvent(eventMsg, eventContext);
-        uncommittedEvents.add(event);
+        return eventMsg;
     }
 
     /**
@@ -325,17 +383,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
-     * @param eventOrSnapshot an event to apply or a snapshot to use to restore state
+     * @param eventMessage an event message
      * @throws MissingEventApplierException if there is no applier method defined for
      *                                      this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void applyEventOrSnapshot(Message eventOrSnapshot) throws InvocationTargetException {
-        if (eventOrSnapshot instanceof Snapshot) {
-            restore((Snapshot) eventOrSnapshot);
-        } else {
-            invokeApplier(eventOrSnapshot);
-        }
+    private void applyEvent(Message eventMessage) throws InvocationTargetException {
+        invokeApplier(eventMessage);
     }
 
     /**
@@ -349,16 +403,23 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         // See if we're in the state update cycle.
         final B builder = this.builder;
 
-        // If the call to restore() is made during a reply
-        // (because the snapshot event was encountered)
-        // use the currently initialized builder.
+        /* If the call to restore() is made during a replay
+           (because the snapshot event was encountered)
+           use the currently initialized builder.
+           Otherwise, just set the state and the version from the snapshot.
+         */
+        final Version versionFromSnapshot = versionOf(snapshot);
         if (builder != null) {
             builder.clear();
             builder.mergeFrom(stateToRestore);
-            setVersion(snapshot.getVersion(), snapshot.getWhenModified());
+            initVersion(versionFromSnapshot);
         } else {
-            setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
+            setState(stateToRestore, versionFromSnapshot);
         }
+    }
+
+    private static Version versionOf(Snapshot snapshot) {
+        return newVersion(snapshot.getVersion(), snapshot.getWhenModified());
     }
 
     /**
@@ -404,5 +465,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
+     */
+    @Override
+    @VisibleForTesting
+    protected int versionNumber() {
+        return super.versionNumber();
     }
 }

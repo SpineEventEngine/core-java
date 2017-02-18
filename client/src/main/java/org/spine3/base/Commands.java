@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -181,7 +181,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isLaterThan(timestamp, from);
+                return Timestamps2.isLaterThan(timestamp, from);
             }
         };
     }
@@ -197,7 +197,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isBetween(timestamp, from, to);
+                return Timestamps2.isBetween(timestamp, from, to);
             }
         };
     }
@@ -221,7 +221,7 @@ public class Commands {
             public int compare(Command o1, Command o2) {
                 final Timestamp timestamp1 = getTimestamp(o1);
                 final Timestamp timestamp2 = getTimestamp(o2);
-                return Timestamps.compare(timestamp1, timestamp2);
+                return Timestamps2.compare(timestamp1, timestamp2);
             }
         });
     }

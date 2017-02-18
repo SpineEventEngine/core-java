@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.status.EntityStatus;
@@ -171,7 +171,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
 
         @Override
         public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
-            final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
+            final int result = Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
     }

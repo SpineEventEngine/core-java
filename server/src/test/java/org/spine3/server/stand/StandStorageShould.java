@@ -31,7 +31,7 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.EntityStorageRecord;
@@ -182,7 +182,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     private static EntityStorageRecord newRecord(Message state) {
         final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                                                               .setState(AnyPacker.pack(state))
-                                                              .setWhenModified(Timestamps.getCurrentTime())
+                                                              .setWhenModified(Timestamps2.getCurrentTime())
                                                               .setVersion(1)
                                                               .build();
         return record;

@@ -47,7 +47,7 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**

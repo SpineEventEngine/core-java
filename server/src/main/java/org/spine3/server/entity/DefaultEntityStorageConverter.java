@@ -23,6 +23,8 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.EntityStorageRecord;
 
@@ -83,9 +85,13 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
 
         final EntityStorageRecord record = tuple.getState();
         if (entity != null) {
-            entity.setState(state, record.getVersion(), record.getWhenModified());
+            entity.setState(state, getVersion(record));
             entity.setStatus(record.getEntityStatus());
         }
         return entity;
+    }
+
+    private static Version getVersion(EntityStorageRecord record) {
+        return Versions.newVersion(record.getVersion(), record.getWhenModified());
     }
 }

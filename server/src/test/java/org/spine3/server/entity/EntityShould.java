@@ -28,7 +28,9 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
@@ -49,7 +51,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.currentTimeSeconds;
 
@@ -160,31 +162,24 @@ public class EntityShould {
 
     @Test
     public void have_state() {
-        final int version = 3;
-        final Timestamp whenModified = getCurrentTime();
+        final Version ver = Versions.newVersion(3, getCurrentTime());
 
-        entityNew.setState(state, version, whenModified);
+        entityNew.setState(state, ver);
 
         assertEquals(state, entityNew.getState());
-        assertEquals(version, entityNew.getVersion().getNumber());
-        assertEquals(whenModified, entityNew.whenModified());
+        assertEquals(ver, entityNew.getVersion());
     }
 
     @Test
     public void validate_state_when_set_it() {
         final TestEntity spyEntityNew = spy(entityNew);
-        spyEntityNew.setState(state, 0, getCurrentTime());
+        spyEntityNew.setState(state, Versions.create());
         verify(spyEntityNew).validate(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entityNew.setState(Tests.<Project>nullRef(), 0, getCurrentTime());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_null_modification_time() {
-        entityNew.setState(state, 0, Tests.<Timestamp>nullRef());
+        entityNew.setState(Tests.<Project>nullRef(), Versions.create());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -295,13 +290,13 @@ public class EntityShould {
     @Test
     public void create_and_initialize_entity_instance() {
         final Long id = 100L;
-        final Timestamp before = Timestamps.secondsAgo(1);
+        final Timestamp before = Timestamps2.secondsAgo(1);
 
         // Create and init the entity.
         final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
         final AbstractVersionableEntity<Long, StringValue> entity = AbstractEntity.createEntity(ctor, id);
 
-        final Timestamp after = Timestamps.getCurrentTime();
+        final Timestamp after = Timestamps2.getCurrentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         final Interval whileWeCreate = Intervals.between(before, after);

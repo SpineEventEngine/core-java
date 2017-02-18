@@ -22,8 +22,9 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Stringifiers;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
 import org.spine3.server.entity.status.EntityStatus;
@@ -32,7 +33,8 @@ import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static java.lang.String.format;
+import static org.spine3.base.Versions.checkIsIncrement;
 
 /**
  * An abstract base for entities with versions.
@@ -48,7 +50,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
         implements VersionableEntity<I, S> {
 
-    private final Version version;
+    private Version version;
 
     private EntityStatus status = EntityStatus.getDefaultInstance();
 
@@ -61,9 +63,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected AbstractVersionableEntity(I id) {
         super(id);
-        checkNotNull(id);
-        Identifiers.checkSupported(id.getClass());
-        this.version = Version.create();
+        this.version = Versions.create();
     }
 
     /**
@@ -83,8 +83,22 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     @Override
     protected void init() {
         super.init();
-        setState(getDefaultState(), 0, getCurrentTime());
+        injectState(getDefaultState());
+        initVersion(Versions.create());
         this.status = EntityStatus.getDefaultInstance();
+    }
+
+    /**
+     * Validates and sets the state.
+     *
+     * @param state the state object to set
+     * @param version the entity version to set
+     * @see #validate(S)
+     */
+    protected void setState(S state, Version version) {
+        validate(state);
+        injectState(state);
+        updateVersion(version);
     }
 
     /**
@@ -103,20 +117,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Validates and sets the state.
-     *
-     * @param state the state object to set
-     * @param version the entity version to set
-     * @param timestamp the time of the last modification to set
-     * @see #validate(S)
-     */
-    protected void setState(S state, int version, Timestamp timestamp) {
-        validate(state);
-        injectState(state);
-        setVersion(version, timestamp);
-    }
-
-    /**
      * Sets status for the entity.
      */
     void setStatus(EntityStatus status) {
@@ -124,15 +124,66 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Sets version information of the entity.
-     *
-     * @param number the version number of the entity
-     * @param timestamp the time of the last modification of the entity
+     * Obtains the version number of the entity.
      */
-    protected void setVersion(int number, Timestamp timestamp) {
-        checkNotNull(timestamp);
-        version.copyFrom(Version.of(number, timestamp));
+    protected int versionNumber() {
+        final int result = getVersion().getNumber();
+        return result;
     }
+
+    /**
+     * Initializes the entity with the passed version.
+     *
+     * <p>This method assumes that the entity version is zero.
+     * If this is not so, {@code IllegalStateException} will be thrown.
+     *
+     * <p>One of the usages for this method is for creating an entity instance
+     * from a storage.
+     *
+     * <p>To increment a version of the entity please call {@link #incrementVersion()}.
+     *
+     * <p>To set a new version which is several numbers ahead please use
+     * {@link #advanceVersion(Version)}.
+     *
+     * @param version the version to set.
+     */
+    protected void initVersion(Version version) {
+        if (versionNumber() > 0) {
+            final String errMsg = format(
+                    "initVersion() called on an entity with non-zero version number (%d).",
+                    versionNumber()
+            );
+            throw new IllegalStateException(errMsg);
+        }
+        this.version = version;
+    }
+
+    protected void advanceVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        checkIsIncrement(this.getVersion(), newVersion);
+        this.version = newVersion;
+    }
+
+    protected void updateVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        if (this.version.equals(newVersion)) {
+            return;
+        }
+
+        final int currentVersionNumber = versionNumber();
+        final int newVersionNumber = newVersion.getNumber();
+        if (currentVersionNumber > newVersionNumber) {
+            final String errMsg = format(
+                    "A version with the lower number (%d) passed to `updateVersion()` " +
+                    "of the entity with the version number %d.",
+                    newVersionNumber, currentVersionNumber
+            );
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        this.version = newVersion;
+    }
+
 
     /**
      * Updates the state incrementing the version number and recording time of the modification.
@@ -140,7 +191,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @param newState a new state to set
      */
     protected void incrementState(S newState) {
-        setState(newState, incrementVersion(), getCurrentTime());
+        setState(newState, Versions.increment(getVersion()));
     }
 
     /**
@@ -157,7 +208,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return new version number
      */
     protected int incrementVersion() {
-        version.increment();
+        version = Versions.increment(this.version);
         return version.getNumber();
     }
 

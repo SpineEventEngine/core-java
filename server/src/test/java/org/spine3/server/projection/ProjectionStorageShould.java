@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.Tests;
@@ -46,7 +46,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
@@ -83,6 +83,7 @@ public abstract class ProjectionStorageShould<I>
         close(storage);
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     protected EntityStorageRecord newStorageRecord() {
         return newEntityStorageRecord();
@@ -129,6 +130,8 @@ public abstract class ProjectionStorageShould<I>
         }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // because the behaviour to test is different
+    @Override
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
         final Map<I, EntityStorageRecord> noMaskEntiries = storage.readAll();
@@ -208,7 +211,7 @@ public abstract class ProjectionStorageShould<I>
 
             final EntityStorageRecord record = EntityStorageRecord.newBuilder()
                                                                   .setState(packedState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
+                                                                  .setWhenModified(Timestamps2.getCurrentTime())
                                                                   .setVersion(1)
                                                                   .build();
             storage.write(id, record);

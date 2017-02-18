@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,8 +38,8 @@ public class AggregateBuilderShould {
     public void create_aggregate() {
         final int id = 2048;
         final int version = 2017;
-        final Timestamp whenModified = Timestamps.getCurrentTime();
-        final Timestamp state = Timestamps.minutesAgo(60);
+        final Timestamp whenModified = Timestamps2.getCurrentTime();
+        final Timestamp state = Timestamps2.minutesAgo(60);
 
         final Aggregate aggregate = givenAggregate()
                 .withId(id)

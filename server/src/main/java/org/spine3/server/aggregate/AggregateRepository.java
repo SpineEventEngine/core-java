@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
@@ -51,9 +52,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -245,15 +246,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // The storage always returns events.
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id).get();
-        final Snapshot snapshot = aggregateEvents.getSnapshot();
-        final A result = create(id);
-        final List<Event> events = aggregateEvents.getEventList();
-        if (isNotDefault(snapshot)) {
-            result.restore(snapshot);
+        final Optional<AggregateEvents> eventsFromStorage = aggregateStorage().read(id);
+        if (!eventsFromStorage.isPresent()) {
+            throw unableToLoadEvents(id);
         }
-        result.play(events);
+        final AggregateEvents aggregateEvents = eventsFromStorage.get();
+        final A result = create(id);
+        result.play(aggregateEvents);
         return result;
     }
 
@@ -324,6 +323,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected boolean markDeleted(I id) {
         return aggregateStorage().markDeleted(id);
+    }
+
+    private IllegalStateException unableToLoadEvents(I id) {
+        final String errMsg = format(
+                "Unable to load events for the aggregate with ID: %s",
+                Stringifiers.idToString(id)
+        );
+        throw new IllegalStateException(errMsg);
     }
 
     private enum LogSingleton {

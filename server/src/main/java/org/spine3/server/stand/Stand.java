@@ -32,7 +32,7 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
@@ -160,7 +160,7 @@ public class Stand implements AutoCloseable {
             final EntityStorageRecord record =
                     EntityStorageRecord.newBuilder()
                                        .setState(entityState)
-                                       .setWhenModified(Timestamps.getCurrentTime())
+                                       .setWhenModified(Timestamps2.getCurrentTime())
                                        .setVersion(entityVersion)
                                        .build();
             storage.write(aggregateStateId, record);

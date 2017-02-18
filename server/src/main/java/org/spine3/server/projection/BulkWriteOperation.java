@@ -24,7 +24,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -67,7 +67,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
 
     BulkWriteOperation(Duration maximumDuration, FlushCallback<P> flushCallback) {
         this.flushCallback = checkNotNull(flushCallback);
-        this.expirationTime = add(Timestamps.getCurrentTime(), maximumDuration);
+        this.expirationTime = add(Timestamps2.getCurrentTime(), maximumDuration);
         this.active.set(true);
     }
 
@@ -92,8 +92,8 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
             return;
         }
 
-        final Timestamp currentTime = Timestamps.getCurrentTime();
-        if (Timestamps.compare(currentTime, expirationTime) > 0) {
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
+        if (Timestamps2.compare(currentTime, expirationTime) > 0) {
             log().warn("Completing bulk write operation before all the events are processed.");
 
             complete();

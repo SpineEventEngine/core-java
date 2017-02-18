@@ -34,7 +34,7 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -46,6 +46,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
+import org.spine3.test.Given;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
@@ -54,7 +55,6 @@ import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
-import org.spine3.test.Given;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -354,7 +354,7 @@ public class ProjectionRepositoryShould
                                                  .setEventId(EventId.newBuilder()
                                                                     .setUuid("mock-event"))
                                                  .setProducerId(AnyPacker.pack(projectId))
-                                                 .setTimestamp(Timestamps.getCurrentTime())
+                                                 .setTimestamp(Timestamps2.getCurrentTime())
                                                  .build();
         final Event event = Events.createEvent(eventMessage, context);
         boundedContext.getEventBus()
@@ -391,7 +391,7 @@ public class ProjectionRepositoryShould
                                                      .setEventId(EventId.newBuilder()
                                                                         .setUuid(String.valueOf(i)))
                                                      .setProducerId(AnyPacker.pack(projectId))
-                                                     .setTimestamp(Timestamps.getCurrentTime())
+                                                     .setTimestamp(Timestamps2.getCurrentTime())
                                                      .build();
             final Event event = Events.createEvent(eventMessage, context);
             eventStore.append(event);

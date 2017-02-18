@@ -26,8 +26,8 @@ import org.spine3.protobuf.Durations;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Timestamps.compare;
-import static org.spine3.protobuf.Timestamps.isLaterThan;
+import static org.spine3.protobuf.Timestamps2.compare;
+import static org.spine3.protobuf.Timestamps2.isLaterThan;
 
 /**
  * A utility class for working with {@link Interval}s.

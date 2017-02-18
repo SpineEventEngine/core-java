@@ -28,7 +28,7 @@ import java.util.TimeZone;
 import static com.google.common.base.Strings.nullToEmpty;
 import static org.spine3.protobuf.Durations.hours;
 import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**

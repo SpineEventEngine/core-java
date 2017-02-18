@@ -32,7 +32,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.commands.TestCommand;
@@ -48,9 +48,9 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.minutesAgo;
+import static org.spine3.protobuf.Timestamps2.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -87,7 +87,8 @@ public class CommandsShould {
         final boolean passed = NullToleranceTest.newBuilder()
                                                 .setClass(Commands.class)
                                                 .addDefaultValue(DEFAULT_FILE_DESCRIPTOR)
-                                                .addDefaultValue(Timestamps.getCurrentTime()) // to fulfil custom validation
+                                                .addDefaultValue(
+                                                        Timestamps2.getCurrentTime()) // to fulfil custom validation
                                                 .build()
                                                 .check();
         assertTrue(passed);

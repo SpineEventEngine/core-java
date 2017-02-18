@@ -33,9 +33,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.convertToDate;
-import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps2.convertToDate;
+import static org.spine3.protobuf.Timestamps2.convertToNanos;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -49,74 +49,74 @@ public class TimestampsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Timestamps.class));
+        assertTrue(hasPrivateParameterlessCtor(Timestamps2.class));
     }
 
     @Test
     public void not_throw_exception_if_timestamp_is_valid() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder()
-                                           .setSeconds(8)
-                                           .setNanos(7)
-                                           .build());
+        Timestamps2.checkTimestamp(Timestamp.newBuilder()
+                                            .setSeconds(8)
+                                            .setNanos(7)
+                                            .build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_have_negative_nanos() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder()
-                                           .setNanos(-1)
-                                           .build());
+        Timestamps2.checkTimestamp(Timestamp.newBuilder()
+                                            .setNanos(-1)
+                                            .build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_have_negative_greater_than_NANOS_PER_SECOND() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos((int) Timestamps.NANOS_PER_SECOND + 1).build());
+        Timestamps2.checkTimestamp(Timestamp.newBuilder().setNanos((int) Timestamps2.NANOS_PER_SECOND + 1).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void have_seconds_greater_than_TIMESTAMP_SECONDS_MIN() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps.TIMESTAMP_SECONDS_MIN).build());
+        Timestamps2.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps2.TIMESTAMP_SECONDS_MIN).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void have_seconds_lower_than_TIMESTAMP_SECONDS_MAX() {
-        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps.TIMESTAMP_SECONDS_MAX).build());
+        Timestamps2.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps2.TIMESTAMP_SECONDS_MAX).build());
     }
 
     @Test
     public void calculate_timestamp_of_moment_minute_ago() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, MINUTE);
 
-        final Timestamp actual = Timestamps.minutesAgo(1);
+        final Timestamp actual = Timestamps2.minutesAgo(1);
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }
 
     @Test
     public void calculate_timestamp_of_moment_seconds_ago() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, TEN_SECONDS);
 
-        final Timestamp actual = Timestamps.secondsAgo(TEN_SECONDS.getSeconds());
+        final Timestamp actual = Timestamps2.secondsAgo(TEN_SECONDS.getSeconds());
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }
 
     @Test
     public void compare_two_timestamps_return_negative_int_if_first_less_than_second_one() {
-        final Timestamp time1 = Timestamps.getCurrentTime();
+        final Timestamp time1 = Timestamps2.getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
-        final int result = Timestamps.compare(time1, time2);
+        final int result = Timestamps2.compare(time1, time2);
 
         assertTrue(result < 0);
     }
 
     @Test
     public void compare_two_timestamps_return_negative_int_if_first_is_null() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
 
-        final int result = Timestamps.compare(null, currentTime);
+        final int result = Timestamps2.compare(null, currentTime);
 
         assertTrue(result < 0);
     }
@@ -134,86 +134,86 @@ public class TimestampsShould {
                                          .setNanos(nanos)
                                          .build();
 
-        final int result = Timestamps.compare(time1, time2);
+        final int result = Timestamps2.compare(time1, time2);
 
         assertEquals(0, result);
     }
 
     @Test
     public void compare_two_timestamps_return_zero_if_pass_null() {
-        final int result = Timestamps.compare(null, null);
+        final int result = Timestamps2.compare(null, null);
 
         assertEquals(0, result);
     }
 
     @Test
     public void compare_two_timestamps_return_positive_int_if_first_greater_than_second_one() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp timeAfterCurrent = com.google.protobuf.util.Timestamps.add(currentTime, TEN_SECONDS);
 
-        final int result = Timestamps.compare(timeAfterCurrent, currentTime);
+        final int result = Timestamps2.compare(timeAfterCurrent, currentTime);
 
         assertTrue(result > 0);
     }
 
     @Test
     public void compare_two_timestamps_return_positive_int_if_second_one_is_null() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
 
-        final int result = Timestamps.compare(currentTime, null);
+        final int result = Timestamps2.compare(currentTime, null);
 
         assertTrue(result > 0);
     }
 
     @Test
     public void return_true_if_timestamp_is_between_two_timestamps() {
-        final Timestamp start = Timestamps.getCurrentTime();
+        final Timestamp start = Timestamps2.getCurrentTime();
         final Timestamp timeBetween = com.google.protobuf.util.Timestamps.add(start, TEN_SECONDS);
         final Timestamp finish = com.google.protobuf.util.Timestamps.add(timeBetween, TEN_SECONDS);
 
-        final boolean isBetween = Timestamps.isBetween(timeBetween, start, finish);
+        final boolean isBetween = Timestamps2.isBetween(timeBetween, start, finish);
 
         assertTrue(isBetween);
     }
 
     @Test
     public void return_false_if_timestamp_is_not_between_two_timestamps() {
-        final Timestamp start = Timestamps.getCurrentTime();
+        final Timestamp start = Timestamps2.getCurrentTime();
         final Timestamp finish = add(start, TEN_SECONDS);
         final Timestamp timeNotBetween = add(finish, TEN_SECONDS);
 
-        final boolean isBetween = Timestamps.isBetween(timeNotBetween, start, finish);
+        final boolean isBetween = Timestamps2.isBetween(timeNotBetween, start, finish);
 
         assertFalse(isBetween);
     }
 
     @Test
     public void return_true_if_timestamp_is_after_another_one() {
-        final Timestamp fromPoint = Timestamps.getCurrentTime();
+        final Timestamp fromPoint = Timestamps2.getCurrentTime();
         final Timestamp timeToCheck = add(fromPoint, TEN_SECONDS);
 
-        final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
+        final boolean isAfter = Timestamps2.isLaterThan(timeToCheck, fromPoint);
 
         assertTrue(isAfter);
     }
 
     @Test
     public void return_false_if_timestamp_is_not_after_another_one() {
-        final Timestamp fromPoint = Timestamps.getCurrentTime();
+        final Timestamp fromPoint = Timestamps2.getCurrentTime();
         final Timestamp timeToCheck = subtract(fromPoint, TEN_SECONDS);
 
-        final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
+        final boolean isAfter = Timestamps2.isLaterThan(timeToCheck, fromPoint);
 
         assertFalse(isAfter);
     }
 
     @Test
     public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
-        final Timestamp time1 = Timestamps.getCurrentTime();
+        final Timestamp time1 = Timestamps2.getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
-        final int result = Timestamps.comparator()
-                                     .compare(time1, time2);
+        final int result = Timestamps2.comparator()
+                                      .compare(time1, time2);
 
         assertTrue(result < 0);
     }
@@ -231,19 +231,19 @@ public class TimestampsShould {
                                          .setNanos(nanos)
                                          .build();
 
-        final int result = Timestamps.comparator()
-                                     .compare(time1, time2);
+        final int result = Timestamps2.comparator()
+                                      .compare(time1, time2);
 
         assertEquals(0, result);
     }
 
     @Test
     public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
-        final Timestamp currentTime = Timestamps.getCurrentTime();
+        final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
-        final int result = Timestamps.comparator()
-                                     .compare(timeAfterCurrent, currentTime);
+        final int result = Timestamps2.comparator()
+                                      .compare(timeAfterCurrent, currentTime);
 
         assertTrue(result > 0);
     }
@@ -251,7 +251,7 @@ public class TimestampsShould {
     @Test
     public void convert_timestamp_to_date_to_nearest_second() {
 
-        final Timestamp expectedTime = Timestamps.getCurrentTime();
+        final Timestamp expectedTime = Timestamps2.getCurrentTime();
 
         final Date actualDate = convertToDate(expectedTime);
         final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
@@ -261,7 +261,7 @@ public class TimestampsShould {
 
     @Test
     public void convert_timestamp_to_nanos() {
-        final Timestamp expectedTime = Timestamps.getCurrentTime();
+        final Timestamp expectedTime = Timestamps2.getCurrentTime();
 
         final long nanos = convertToNanos(expectedTime);
         final long expectedNanos = expectedTime.getSeconds() * NANOS_IN_SECOND + expectedTime.getNanos();
@@ -271,27 +271,27 @@ public class TimestampsShould {
 
     @Test
     public void accept_time_provider() {
-        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps2.getCurrentTime(), Durations.ofMinutes(5));
 
-        Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
+        Timestamps2.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
 
-        assertEquals(fiveMinutesAgo, Timestamps.getCurrentTime());
+        assertEquals(fiveMinutesAgo, Timestamps2.getCurrentTime());
     }
 
     @Test
     public void reset_time_provider_to_default() {
         final Timestamp aMinuteAgo = com.google.protobuf.util.Timestamps.subtract(
-                Timestamps.systemTime(),
+                Timestamps2.systemTime(),
                 Durations.ofMinutes(1));
 
-        Timestamps.setProvider(new Tests.FrozenMadHatterParty(aMinuteAgo));
-        Timestamps.resetProvider();
+        Timestamps2.setProvider(new Tests.FrozenMadHatterParty(aMinuteAgo));
+        Timestamps2.resetProvider();
 
-        assertNotEquals(aMinuteAgo, Timestamps.getCurrentTime());
+        assertNotEquals(aMinuteAgo, Timestamps2.getCurrentTime());
     }
 
     @Test
     public void obtain_system_time_millis() {
-        assertNotEquals(0, Timestamps.systemTime());
+        assertNotEquals(0, Timestamps2.systemTime());
     }
 }

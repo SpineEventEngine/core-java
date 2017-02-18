@@ -59,7 +59,7 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;

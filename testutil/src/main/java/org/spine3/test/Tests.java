@@ -25,11 +25,13 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.users.UserId;
 
@@ -39,6 +41,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Utilities for testing.
@@ -96,12 +99,12 @@ public class Tests {
     }
 
     /**
-     * Returns the current time in seconds via {@link Timestamps#getCurrentTime()}.
+     * Returns the current time in seconds via {@link Timestamps2#getCurrentTime()}.
      *
      * @return a seconds value
      */
     public static long currentTimeSeconds() {
-        final long secs = Timestamps.getCurrentTime().getSeconds();
+        final long secs = Timestamps2.getCurrentTime().getSeconds();
         return secs;
     }
 
@@ -181,7 +184,7 @@ public class Tests {
      * <p>Use this {@code Timestamps.Provider} in time-related tests that are sensitive to
      * bounds of minutes, hours, days, etc.
      */
-    public static class FrozenMadHatterParty implements Timestamps.Provider {
+    public static class FrozenMadHatterParty implements Timestamps2.Provider {
         private final Timestamp frozenTime;
 
         public FrozenMadHatterParty(Timestamp frozenTime) {
@@ -192,6 +195,44 @@ public class Tests {
         @Override
         public Timestamp getCurrentTime() {
             return frozenTime;
+        }
+    }
+
+    public static class BackToTheFuture implements Timestamps2.Provider {
+
+        private static final long THIRTY_YEARS_IN_HOURS = 262800L;
+
+        private Timestamp currentTime;
+
+        public BackToTheFuture() {
+            this.currentTime = Timestamps.add(
+                    Timestamps2.getCurrentTime(),
+                    Durations.hours(THIRTY_YEARS_IN_HOURS));
+        }
+
+        @Override
+        public synchronized Timestamp getCurrentTime() {
+            return this.currentTime;
+        }
+
+        private synchronized void setCurrentTime(Timestamp currentTime) {
+            this.currentTime = currentTime;
+        }
+
+        public synchronized Timestamp forward(int hoursDelta) {
+            checkPositive(hoursDelta);
+            final Timestamp newTime = Timestamps.add(this.currentTime,
+                                                     Durations.hours(hoursDelta));
+            setCurrentTime(newTime);
+            return newTime;
+        }
+
+        public synchronized Timestamp backward(int hoursDelta) {
+            checkPositive(hoursDelta);
+            final Timestamp newTime = Timestamps.subtract(this.currentTime,
+                                                          Durations.hours(hoursDelta));
+            setCurrentTime(newTime);
+            return newTime;
         }
     }
 

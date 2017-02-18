@@ -28,11 +28,10 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Version;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -55,6 +54,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.base.Versions.newVersion;
 
 /**
  * @author Alex Tymchenko
@@ -117,6 +117,7 @@ public class StandFunnelShould {
         verify(stand).update(entityId, packedState, version);
     }
 
+    @SuppressWarnings("MagicNumber")
     @Test
     public void use_delivery_from_builder() {
         final Stand stand = TestStandFactory.create();
@@ -139,7 +140,7 @@ public class StandFunnelShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(Version.of(17, Timestamps.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(17, Timestamps2.getCurrentTime()));
 
         standFunnel.post(entity);
 

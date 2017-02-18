@@ -25,7 +25,7 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
 import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -98,7 +98,7 @@ public class TestsShould {
 
     @Test
     public void have_frozen_time_provider() {
-        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp fiveMinutesAgo = subtract(Timestamps2.getCurrentTime(), Durations.ofMinutes(5));
 
         final Tests.FrozenMadHatterParty provider = new Tests.FrozenMadHatterParty(fiveMinutesAgo);
 

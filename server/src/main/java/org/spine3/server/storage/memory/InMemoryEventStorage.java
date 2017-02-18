@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.MatchesStreamQuery;
@@ -143,7 +143,7 @@ class InMemoryEventStorage extends EventStorage {
         public int compare(EventStorageRecord record1, EventStorageRecord record2) {
             final Timestamp time1 = record1.getTimestamp();
             final Timestamp time2 = record2.getTimestamp();
-            final int result = Timestamps.compare(time1, time2);
+            final int result = Timestamps2.compare(time1, time2);
             return result;
         }
     }

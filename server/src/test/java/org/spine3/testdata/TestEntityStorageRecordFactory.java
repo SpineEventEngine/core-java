@@ -24,7 +24,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.storage.EntityStorageRecord;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
