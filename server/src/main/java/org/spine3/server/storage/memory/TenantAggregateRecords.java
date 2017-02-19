@@ -27,7 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Visibility;
 
@@ -46,9 +46,9 @@ import static org.spine3.util.Exceptions.unsupported;
  * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
-class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageRecord> {
+class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
 
-    private final Multimap<I, AggregateStorageRecord> records = TreeMultimap.create(
+    private final Multimap<I, AggregateEventRecord> records = TreeMultimap.create(
             new AggregateStorageKeyComparator<I>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
@@ -66,7 +66,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
         }
     };
 
-    private final Multimap<I, AggregateStorageRecord> filtered = Multimaps.filterKeys(records, isVisible);
+    private final Multimap<I, AggregateEventRecord> filtered = Multimaps.filterKeys(records, isVisible);
 
     private final Map<I, Integer> eventCounts = newHashMap();
 
@@ -79,7 +79,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      */
     @Nullable
     @Override
-    public Optional<AggregateStorageRecord> get(I id) {
+    public Optional<AggregateEventRecord> get(I id) {
         throw unsupported("Returning single record by aggregate ID is not supported");
     }
 
@@ -88,7 +88,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      *
      * @return immutable list
      */
-    List<AggregateStorageRecord> getHistoryBackward(I id) {
+    List<AggregateEventRecord> getHistoryBackward(I id) {
         return ImmutableList.copyOf(filtered.get(id));
     }
 
@@ -119,7 +119,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
     }
 
     @Override
-    public void put(I id, AggregateStorageRecord record) {
+    public void put(I id, AggregateEventRecord record) {
         records.put(id, record);
     }
 
@@ -165,12 +165,12 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
     }
 
     /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateEventRecord>,
                                                                             Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override
-        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
+        public int compare(AggregateEventRecord first, AggregateEventRecord second) {
             final int result = Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }

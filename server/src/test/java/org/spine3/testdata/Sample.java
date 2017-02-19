@@ -39,7 +39,7 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.type.ClassName;
 
@@ -100,7 +100,7 @@ public class Sample {
     }
 
     /**
-     * Utility class for stubbing the {@link AggregateStorageRecord} instances.
+     * Utility class for stubbing the {@link AggregateEventRecord} instances.
      *
      * @see Sample
      */
@@ -109,8 +109,8 @@ public class Sample {
         private AggregateRecord() {
         }
 
-        public static AggregateStorageRecord withRandomFields() {
-            return messageOfType(AggregateStorageRecord.class);
+        public static AggregateEventRecord withRandomFields() {
+            return messageOfType(AggregateEventRecord.class);
         }
     }
 

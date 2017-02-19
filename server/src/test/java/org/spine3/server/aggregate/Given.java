@@ -27,7 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -192,16 +192,16 @@ class Given {
         private StorageRecord() {
         }
 
-        static AggregateStorageRecord create(Timestamp timestamp) {
-            final AggregateStorageRecord.Builder builder
-                    = AggregateStorageRecord.newBuilder()
-                                            .setEventId(Identifiers.newUuid())
-                                            .setTimestamp(timestamp);
+        static AggregateEventRecord create(Timestamp timestamp) {
+            final AggregateEventRecord.Builder builder
+                    = AggregateEventRecord.newBuilder()
+                                          .setEventId(Identifiers.newUuid())
+                                          .setTimestamp(timestamp);
             return builder.build();
         }
 
-        static AggregateStorageRecord create(Timestamp timestamp, org.spine3.base.Event event) {
-            final AggregateStorageRecord.Builder builder = create(timestamp)
+        static AggregateEventRecord create(Timestamp timestamp, org.spine3.base.Event event) {
+            final AggregateEventRecord.Builder builder = create(timestamp)
                     .toBuilder()
                     .setEvent(event);
             return builder.build();
@@ -217,7 +217,7 @@ class Given {
          * Returns several records sorted by timestamp ascending.
          * First record's timestamp is the current time.
          */
-        static List<AggregateStorageRecord> sequenceFor(ProjectId id) {
+        static List<AggregateEventRecord> sequenceFor(ProjectId id) {
             return sequenceFor(id, getCurrentTime());
         }
 
@@ -226,17 +226,17 @@ class Given {
          *
          * @param timestamp1 the timestamp of first record.
          */
-        static List<AggregateStorageRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
+        static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
             final Duration delta = seconds(10);
             final Timestamp timestamp2 = add(timestamp1, delta);
             final Timestamp timestamp3 = add(timestamp2, delta);
 
-            final AggregateStorageRecord record1 = StorageRecord.create(timestamp1,
-                                                                        Event.projectCreated(id, createEventContext(timestamp1)));
-            final AggregateStorageRecord record2 = StorageRecord.create(timestamp2,
-                                                                        Event.taskAdded(id, createEventContext(timestamp2)));
-            final AggregateStorageRecord record3 = StorageRecord.create(timestamp3,
-                                                                        Event.projectStarted(id, createEventContext(timestamp3)));
+            final AggregateEventRecord record1 = StorageRecord.create(timestamp1,
+                                                                      Event.projectCreated(id, createEventContext(timestamp1)));
+            final AggregateEventRecord record2 = StorageRecord.create(timestamp2,
+                                                                      Event.taskAdded(id, createEventContext(timestamp2)));
+            final AggregateEventRecord record3 = StorageRecord.create(timestamp3,
+                                                                      Event.projectStarted(id, createEventContext(timestamp3)));
 
             return newArrayList(record1, record2, record3);
         }

@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
+import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.server.entity.Visibility;
 
 import java.util.Iterator;
@@ -87,14 +87,14 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, AggregateStorageRecord record) {
+    protected void writeRecord(I id, AggregateEventRecord record) {
         getStorage().put(id, record);
     }
 
     @Override
-    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+    protected Iterator<AggregateEventRecord> historyBackward(I id) {
         checkNotNull(id);
-        final List<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
+        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(id);
         return records.iterator();
     }
 

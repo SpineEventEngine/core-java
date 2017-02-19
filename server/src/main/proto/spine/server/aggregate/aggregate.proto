@@ -39,7 +39,6 @@ import "spine/base/version.proto";
 
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {
-    option (SPI_type) = true;
 
     // The state of the aggregate.
     google.protobuf.Any state = 1;
@@ -62,8 +61,7 @@ message Snapshot {
 //
 // Different types of aggregates are managed by different storages.
 //
-message AggregateStorageRecord {
-    option (SPI_type) = true;
+message AggregateEventRecord {
 
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
@@ -99,7 +97,6 @@ message AggregateStorageRecord {
 
 // Event data for an aggregate returned by a storage managing the aggregate.
 message AggregateEvents {
-    option (SPI_type) = true;
 
     // If the `snapshot` field is populated, it contains the last snapshot in
     // the history of the aggregate.

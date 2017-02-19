@@ -30,8 +30,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
@@ -88,7 +88,7 @@ public abstract class AggregateStorageShould
 
     @Override
     protected AggregateEvents newStorageRecord() {
-        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final AggregateEvents aggregateEvents = AggregateEvents.newBuilder()
                                                                .addAllEvent(expectedEvents)
@@ -117,7 +117,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
 
         assertFalse(iterator.hasNext());
     }
@@ -175,25 +175,25 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_one_record() {
-        final AggregateStorageRecord expected = Given.StorageRecord.create(getCurrentTime());
+        final AggregateEventRecord expected = Given.StorageRecord.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
         assertTrue(iterator.hasNext());
-        final AggregateStorageRecord actual = iterator.next();
+        final AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
     }
 
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
-        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
 
         writeAll(id, records);
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
-        final List<AggregateStorageRecord> actual = newArrayList(iterator);
+        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
+        final List<AggregateEventRecord> actual = newArrayList(iterator);
         reverse(records); // expected records should be in a reverse order
         assertEquals(records, actual);
     }
@@ -204,9 +204,9 @@ public abstract class AggregateStorageShould
 
         storage.write(id, expected);
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
+        final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
         assertTrue(iterator.hasNext());
-        final AggregateStorageRecord actual = iterator.next();
+        final AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual.getSnapshot());
         assertFalse(iterator.hasNext());
     }
@@ -293,7 +293,7 @@ public abstract class AggregateStorageShould
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
-        final List<AggregateStorageRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
+        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 
@@ -304,16 +304,16 @@ public abstract class AggregateStorageShould
         assertEquals(expectedEvents, actualEvents);
     }
 
-    protected void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
-        for (AggregateStorageRecord record : records) {
+    protected void writeAll(ProjectId id, Iterable<AggregateEventRecord> records) {
+        for (AggregateEventRecord record : records) {
             storage.writeRecord(id, record);
         }
     }
 
-    protected static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
+    protected static final Function<AggregateEventRecord, Event> TO_EVENT = new Function<AggregateEventRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
-        public Event apply(@Nullable AggregateStorageRecord input) {
+        public Event apply(@Nullable AggregateEventRecord input) {
             return (input == null) ? null : input.getEvent();
         }
     };
