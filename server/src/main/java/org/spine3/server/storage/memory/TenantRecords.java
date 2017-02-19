@@ -35,6 +35,7 @@ import org.spine3.server.entity.Visibility;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.server.entity.Predicates.isRecordVisible;
 
 /**
  * The memory-based storage for {@code EntityStorageRecord} that represents
@@ -45,7 +46,7 @@ import static com.google.common.collect.Maps.newHashMap;
 class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
 
     private final Map<I, EntityRecord> records = newHashMap();
-    private final Map<I, EntityRecord> filtered = Maps.filterValues(records, org.spine3.server.entity.Predicates.isRecordVisible());
+    private final Map<I, EntityRecord> filtered = Maps.filterValues(records, isRecordVisible());
 
     @Override
     public void put(I id, EntityRecord record) {
