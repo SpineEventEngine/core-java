@@ -37,7 +37,7 @@ import "spine/annotations.proto";
 import "spine/base/event.proto";
 import "spine/base/version.proto";
 
-// Built-in event type for storing aggregate snapshots.
+// The message for storing an aggregate snapshot.
 message Snapshot {
 
     // The state of the aggregate.
@@ -52,15 +52,12 @@ message Snapshot {
     // (and timestamp of the corresponding event), and before the time of
     // the next event in the aggregate history.
     //
-    // This field is used when storing a snapshot in `AggregateStorageRecord`.
+    // This field is used when storing a snapshot in `AggregateEventRecord`.
     //
     google.protobuf.Timestamp timestamp = 3;
 }
 
-// A record in the storage of events and snapshots of an aggregate type.
-//
-// Different types of aggregates are managed by different storages.
-//
+// A record with information about an event or a snapshot of an aggregate.
 message AggregateEventRecord {
 
     // A timestamp of the event or snapshot in this record.
@@ -95,11 +92,12 @@ message AggregateEventRecord {
     }
 }
 
-// Event data for an aggregate returned by a storage managing the aggregate.
+// The message for restoring an aggregate state.
 message AggregateEvents {
 
     // If the `snapshot` field is populated, it contains the last snapshot in
     // the history of the aggregate.
+    //
     // This value will be used for restoring the aggregate state before playing
     // events that occurred after this snapshot was made.
     //
