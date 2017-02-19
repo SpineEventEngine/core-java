@@ -244,13 +244,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        final Optional<AggregateEvents> eventsFromStorage = aggregateStorage().read(id);
+        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
         if (!eventsFromStorage.isPresent()) {
             throw unableToLoadEvents(id);
         }
-        final AggregateEvents aggregateEvents = eventsFromStorage.get();
+        final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
         final A result = create(id);
-        result.play(aggregateEvents);
+        result.play(aggregateStateRecord);
         return result;
     }
 
@@ -292,7 +292,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured
      *                               prior to calling this method
-     * @see AggregateEvents
+     * @see AggregateStateRecord
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {

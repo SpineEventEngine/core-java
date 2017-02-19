@@ -56,7 +56,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould
-        extends AbstractStorageShould<ProjectId, AggregateEvents, AggregateStorage<ProjectId>> {
+        extends AbstractStorageShould<ProjectId, AggregateStateRecord, AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
@@ -84,13 +84,13 @@ public abstract class AggregateStorageShould
             Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
 
     @Override
-    protected AggregateEvents newStorageRecord() {
+    protected AggregateStateRecord newStorageRecord() {
         final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
-        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder()
-                                                               .addAllEvent(expectedEvents)
-                                                               .build();
-        return aggregateEvents;
+        final AggregateStateRecord aggregateStateRecord = AggregateStateRecord.newBuilder()
+                                                                              .addAllEvent(expectedEvents)
+                                                                              .build();
+        return aggregateStateRecord;
     }
 
     @Override
@@ -105,7 +105,7 @@ public abstract class AggregateStorageShould
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType",
             "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
     @Override
-    protected void assertResultForMissingId(Optional<AggregateEvents> record) {
+    protected void assertResultForMissingId(Optional<AggregateStateRecord> record) {
         assertTrue(record.isPresent());
         assertTrue(record.get()
                          .getEventList()
@@ -136,7 +136,7 @@ public abstract class AggregateStorageShould
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_snapshot() {
-        storage.write(id, Tests.<AggregateEvents>nullRef());
+        storage.write(id, Tests.<AggregateStateRecord>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
@@ -273,8 +273,8 @@ public abstract class AggregateStorageShould
 
         storage.writeEvent(id, expectedEvent);
 
-        final AggregateEvents events = storage.read(id)
-                                              .get();
+        final AggregateStateRecord events = storage.read(id)
+                                                   .get();
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
@@ -294,8 +294,8 @@ public abstract class AggregateStorageShould
 
         writeAll(id, records);
 
-        final AggregateEvents events = storage.read(id)
-                                              .get();
+        final AggregateStateRecord events = storage.read(id)
+                                                   .get();
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);

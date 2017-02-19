@@ -91,7 +91,7 @@ message AggregateEventRecord {
 }
 
 // The message for restoring an aggregate state.
-message AggregateEvents {
+message AggregateStateRecord {
 
     // If the `snapshot` field is populated, it contains the last snapshot in
     // the history of the aggregate.

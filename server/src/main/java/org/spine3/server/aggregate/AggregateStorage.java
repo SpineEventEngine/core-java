@@ -49,7 +49,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
+public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateStateRecord> {
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
                                                              .getName();
@@ -59,7 +59,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     @Override
-    public Optional<AggregateEvents> read(I aggregateId) {
+    public Optional<AggregateStateRecord> read(I aggregateId) {
         checkNotClosed();
         checkNotNull(aggregateId);
 
@@ -87,7 +87,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
             }
         }
 
-        final AggregateEvents.Builder builder = AggregateEvents.newBuilder();
+        final AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
@@ -107,7 +107,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
-    public void write(I id, AggregateEvents events)
+    public void write(I id, AggregateStateRecord events)
             throws IllegalStateException, IllegalArgumentException {
         checkNotClosed();
         checkNotNull(id);

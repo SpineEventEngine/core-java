@@ -253,19 +253,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * a {@code Snapshot} loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
-     * @param aggregateEvents the events to play
+     * @param aggregateStateRecord the events to play
      * @throws IllegalStateException if applying events caused an exception, which is set as
      *                               the {@code cause} for the thrown instance
      */
-    void play(AggregateEvents aggregateEvents) {
+    void play(AggregateStateRecord aggregateStateRecord) {
         createBuilder();
 
-        final Snapshot snapshot = aggregateEvents.getSnapshot();
+        final Snapshot snapshot = aggregateStateRecord.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
 
-        final List<Event> events = aggregateEvents.getEventList();
+        final List<Event> events = aggregateStateRecord.getEventList();
 
         try {
             for (Event event : events) {

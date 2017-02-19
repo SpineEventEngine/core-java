@@ -247,12 +247,12 @@ public class AggregateShould {
     @Test
     public void play_events() {
         final List<Event> events = getProjectEvents();
-        final AggregateEvents aggregateEvents =
-                AggregateEvents.newBuilder()
-                               .addAllEvent(events)
-                               .build();
+        final AggregateStateRecord aggregateStateRecord =
+                AggregateStateRecord.newBuilder()
+                                    .addAllEvent(events)
+                                    .build();
         
-        aggregate.play(aggregateEvents);
+        aggregate.play(aggregateStateRecord);
 
         assertTrue(aggregate.isProjectCreatedEventApplied);
         assertTrue(aggregate.isTaskAddedEventApplied);
@@ -267,9 +267,9 @@ public class AggregateShould {
 
         final TestAggregate anotherAggregate = newAggregate(aggregate.getId());
 
-        anotherAggregate.play(AggregateEvents.newBuilder()
-                                             .setSnapshot(snapshot)
-                                             .build());
+        anotherAggregate.play(AggregateStateRecord.newBuilder()
+                                                  .setSnapshot(snapshot)
+                                                  .build());
 
         assertEquals(aggregate, anotherAggregate);
     }
@@ -568,9 +568,9 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_play_raises_exception() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
         try {
-            faultyAggregate.play(AggregateEvents.newBuilder()
-                                                .addEvent(projectCreated())
-                                                .build());
+            faultyAggregate.play(AggregateStateRecord.newBuilder()
+                                                     .addEvent(projectCreated())
+                                                     .build());
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
