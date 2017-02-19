@@ -26,30 +26,30 @@ import org.spine3.test.NullToleranceTest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Durations.ZERO;
-import static org.spine3.protobuf.Durations.add;
-import static org.spine3.protobuf.Durations.compare;
-import static org.spine3.protobuf.Durations.getHours;
-import static org.spine3.protobuf.Durations.getMinutes;
-import static org.spine3.protobuf.Durations.hoursAndMinutes;
-import static org.spine3.protobuf.Durations.isGreaterThan;
-import static org.spine3.protobuf.Durations.isLessThan;
-import static org.spine3.protobuf.Durations.isNegative;
-import static org.spine3.protobuf.Durations.isPositive;
-import static org.spine3.protobuf.Durations.isPositiveOrZero;
-import static org.spine3.protobuf.Durations.isZero;
-import static org.spine3.protobuf.Durations.milliseconds;
-import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.protobuf.Durations.nanos;
-import static org.spine3.protobuf.Durations.ofHours;
-import static org.spine3.protobuf.Durations.ofMilliseconds;
-import static org.spine3.protobuf.Durations.ofMinutes;
-import static org.spine3.protobuf.Durations.ofSeconds;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Durations.subtract;
-import static org.spine3.protobuf.Durations.toMinutes;
-import static org.spine3.protobuf.Durations.toNanos;
-import static org.spine3.protobuf.Durations.toSeconds;
+import static org.spine3.protobuf.Durations2.ZERO;
+import static org.spine3.protobuf.Durations2.add;
+import static org.spine3.protobuf.Durations2.compare;
+import static org.spine3.protobuf.Durations2.getHours;
+import static org.spine3.protobuf.Durations2.getMinutes;
+import static org.spine3.protobuf.Durations2.hoursAndMinutes;
+import static org.spine3.protobuf.Durations2.isGreaterThan;
+import static org.spine3.protobuf.Durations2.isLessThan;
+import static org.spine3.protobuf.Durations2.isNegative;
+import static org.spine3.protobuf.Durations2.isPositive;
+import static org.spine3.protobuf.Durations2.isPositiveOrZero;
+import static org.spine3.protobuf.Durations2.isZero;
+import static org.spine3.protobuf.Durations2.milliseconds;
+import static org.spine3.protobuf.Durations2.minutes;
+import static org.spine3.protobuf.Durations2.nanos;
+import static org.spine3.protobuf.Durations2.ofHours;
+import static org.spine3.protobuf.Durations2.ofMilliseconds;
+import static org.spine3.protobuf.Durations2.ofMinutes;
+import static org.spine3.protobuf.Durations2.ofSeconds;
+import static org.spine3.protobuf.Durations2.seconds;
+import static org.spine3.protobuf.Durations2.subtract;
+import static org.spine3.protobuf.Durations2.toMinutes;
+import static org.spine3.protobuf.Durations2.toNanos;
+import static org.spine3.protobuf.Durations2.toSeconds;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
@@ -60,7 +60,7 @@ public class DurationsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Durations.class));
+        assertTrue(hasPrivateParameterlessCtor(Durations2.class));
     }
 
     @Test
@@ -405,7 +405,7 @@ public class DurationsShould {
     public void pass_the_null_tolerance_check() {
         final Duration.Builder defaultBuilder = Duration.newBuilder();
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Durations.class)
+                                                                     .setClass(Durations2.class)
                                                                      .addDefaultValue(defaultBuilder)
                                                                      .build();
         final boolean passed = nullToleranceTest.check();

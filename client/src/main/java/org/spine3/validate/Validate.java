@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.idToString;
 
@@ -206,7 +207,9 @@ public class Validate {
      * @param argumentName the name of the checked value to be used in the error message
      * @return the passed timestamp
      * @throws IllegalArgumentException if any of the requirements are not met
+     * @deprecated use {@link com.google.protobuf.util.Timestamps#isValid(Timestamp) Timestamps#isValid(Timestamp)}
      */
+    @Deprecated
     public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
         checkNotNull(timestamp, argumentName);
         checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
@@ -221,7 +224,9 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value) {
-        checkPositive(value, "");
+        if (value <= 0) {
+            throw new IllegalArgumentException(format("value must be positive. Passed: %d", value));
+        }
     }
 
     /**

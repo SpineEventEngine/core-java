@@ -23,7 +23,7 @@ package org.spine3.protobuf;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
+import org.spine3.test.TimeTests;
 
 import java.util.Date;
 
@@ -33,23 +33,35 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Timestamps2.HOURS_PER_DAY;
+import static org.spine3.protobuf.Timestamps2.MICROS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
+import static org.spine3.protobuf.Timestamps2.SECONDS_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.convertToDate;
 import static org.spine3.protobuf.Timestamps2.convertToNanos;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class TimestampsShould {
+public class Timestamps2Should {
 
-    private static final int NANOS_IN_SECOND = 1000000000;
+    private static final Duration TEN_SECONDS = Durations2.ofSeconds(10);
 
-    private static final Duration TEN_SECONDS = Durations.ofSeconds(10);
-
-    private static final Duration MINUTE = Durations.ofMinutes(1);
+    private static final Duration MINUTE = Durations2.ofMinutes(1);
 
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateParameterlessCtor(Timestamps2.class));
+    }
+
+    @Test
+    public void declare_unit_constants() {
+        // Make these useful constant used from our library code to prevent
+        // accidental removal.
+        assertNotEquals(0, NANOS_PER_MICROSECOND);
+        assertNotEquals(0, MICROS_PER_SECOND);
+        assertNotEquals(0, SECONDS_PER_HOUR);
+        assertNotEquals(0, HOURS_PER_DAY);
     }
 
     @Test
@@ -264,16 +276,16 @@ public class TimestampsShould {
         final Timestamp expectedTime = Timestamps2.getCurrentTime();
 
         final long nanos = convertToNanos(expectedTime);
-        final long expectedNanos = expectedTime.getSeconds() * NANOS_IN_SECOND + expectedTime.getNanos();
+        final long expectedNanos = expectedTime.getSeconds() * Timestamps2.NANOS_PER_SECOND + expectedTime.getNanos();
 
         assertEquals(expectedNanos, nanos);
     }
 
     @Test
     public void accept_time_provider() {
-        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps2.getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps2.getCurrentTime(), Durations2.ofMinutes(5));
 
-        Timestamps2.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
+        Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(fiveMinutesAgo));
 
         assertEquals(fiveMinutesAgo, Timestamps2.getCurrentTime());
     }
@@ -282,9 +294,9 @@ public class TimestampsShould {
     public void reset_time_provider_to_default() {
         final Timestamp aMinuteAgo = com.google.protobuf.util.Timestamps.subtract(
                 Timestamps2.systemTime(),
-                Durations.ofMinutes(1));
+                Durations2.ofMinutes(1));
 
-        Timestamps2.setProvider(new Tests.FrozenMadHatterParty(aMinuteAgo));
+        Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(aMinuteAgo));
         Timestamps2.resetProvider();
 
         assertNotEquals(aMinuteAgo, Timestamps2.getCurrentTime());

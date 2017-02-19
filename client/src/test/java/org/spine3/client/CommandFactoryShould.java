@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.protobuf.Timestamps2;
+import org.spine3.test.TimeTests;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -108,7 +109,7 @@ public class CommandFactoryShould {
         // and to add coverage.
         final Timestamp beforeCall = Timestamps2.secondsAgo(1);
         final Command command = commandFactory.create(StringValue.getDefaultInstance());
-        final Timestamp afterCall = Timestamps2.secondsFromNow(1);
+        final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
         assertTrue(Timestamps2.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
     }

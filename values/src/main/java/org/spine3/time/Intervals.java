@@ -22,7 +22,7 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -80,7 +80,7 @@ public class Intervals {
         final Timestamp start = interval.getStart();
         final Timestamp end = interval.getEnd();
         if (start.equals(end)) {
-            return Durations.ZERO;
+            return Durations2.ZERO;
         }
         final long secondsBetween = end.getSeconds() - start.getSeconds();
         final int nanosBetween = end.getNanos() - start.getNanos();

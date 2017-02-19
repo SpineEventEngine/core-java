@@ -37,7 +37,7 @@ import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.type.CommandClass;
-import org.spine3.test.Tests;
+import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -225,7 +225,7 @@ public class AggregateShould {
     public void record_modification_time_when_command_handled() {
         try {
             final Timestamp frozenTime = Timestamps2.getCurrentTime();
-            Timestamps2.setProvider(new Tests.FrozenMadHatterParty(frozenTime));
+            Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
 
             aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
@@ -479,7 +479,7 @@ public class AggregateShould {
     @Test
     public void record_modification_timestamp() throws InterruptedException {
         try {
-            final Tests.BackToTheFuture provider = new Tests.BackToTheFuture();
+            final TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
             Timestamps2.setProvider(provider);
 
             Timestamp currentTime = Timestamps2.getCurrentTime();

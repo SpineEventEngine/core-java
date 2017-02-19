@@ -20,22 +20,26 @@ import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 
 /**
- * Utility class for working with durations in addition to those available from
- * {@link com.google.protobuf.util.Durations Durations}.
+ * Utility class for working with durations in addition to those available from the
+ * {@link com.google.protobuf.util.Durations Durations} class in the Protobuf library.
  *
- * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
+ * <p>Use {@code import static org.spine3.protobuf.Durations2.*} for compact initialization
+ * like this:
  * <pre>
  *      Duration d = add(hours(2), minutes(30));
  * </pre>
  *
  * @author Alexander Yevsyukov
+ * @see com.google.protobuf.util.Durations Durations
  */
 @SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
-public class Durations {
+public class Durations2 {
 
     public static final Duration ZERO = fromMillis(0L);
 
-    private Durations() {}
+    private Durations2() {
+        // Prevent instantiation of this utility class.
+    }
 
     /*
      * The following group of factory methods is for mimicking javax.time (or java.time) API
@@ -87,9 +91,10 @@ public class Durations {
         return duration;
     }
 
-    // Methods for brief computations with Durations like
-    //       add(hours(2), minutes(30));
-    /////////////////////////////////////////////////////
+    /*
+     * Methods for brief computations with Durations like
+     *       add(hours(2), minutes(30));
+     ******************************************************/
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of nanoseconds.

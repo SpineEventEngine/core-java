@@ -31,10 +31,9 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static java.lang.String.format;
+import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -103,6 +102,7 @@ public class Timestamps2 {
     };
 
     private Timestamps2() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -183,7 +183,9 @@ public class Timestamps2 {
      * @param value the value to check
      * @return the passed value
      * @throws IllegalArgumentException if {@link Timestamp} field values are not valid
+     * @deprecated use {@link com.google.protobuf.util.Timestamps#isValid(Timestamp)}
      */
+    @Deprecated
     public static Timestamp checkTimestamp(Timestamp value) throws IllegalArgumentException {
         final long seconds = value.getSeconds();
         checkArgument(seconds > TIMESTAMP_SECONDS_MIN && seconds < TIMESTAMP_SECONDS_MAX,
@@ -252,7 +254,9 @@ public class Timestamps2 {
      *
      * @return a negative integer, zero, or a positive integer
      * if the first timestamp is less than, equal to, or greater than the second one
+     * @deprecated use {@link com.google.protobuf.util.Timestamps#comparator()}
      */
+    @Deprecated
     public static Comparator<? super Timestamp> comparator() {
         return new TimestampComparator();
     }
@@ -273,7 +277,9 @@ public class Timestamps2 {
      * Retrieves total nanoseconds from {@link Timestamp}.
      *
      * @return long value
+     * @deprecated use {@link com.google.protobuf.util.Timestamps#toNanos(Timestamp)}
      */
+    @Deprecated
     public static long convertToNanos(TimestampOrBuilder timestamp) {
         final long nanosFromSeconds = timestamp.getSeconds() *
                                       MILLIS_PER_SECOND *
@@ -282,6 +288,10 @@ public class Timestamps2 {
         return totalNanos;
     }
 
+    /**
+     * @deprecated use {@link com.google.protobuf.util.Timestamps#comparator()}
+     */
+    @Deprecated
     private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
 
         private static final long serialVersionUID = 0;
@@ -303,7 +313,7 @@ public class Timestamps2 {
     public static Timestamp minutesAgo(int value) {
         checkPositive(value);
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations.ofMinutes(value));
+        final Timestamp result = subtract(currentTime, Durations2.ofMinutes(value));
         return result;
     }
 
@@ -317,27 +327,7 @@ public class Timestamps2 {
     public static Timestamp secondsAgo(long value) {
         checkPositive(value);
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations.ofSeconds(value));
-        return result;
-    }
-
-    private static void checkPositive(long value) {
-        if (value <= 0) {
-            throw new IllegalArgumentException(format("value must be positive. Passed: %d", value));
-        }
-    }
-
-    /**
-     * Obtains timestamp in the future a number of seconds from current time.
-     *
-     * @param seconds a positive number of seconds
-     * @return the moment `value` seconds from now
-     */
-    @VisibleForTesting
-    public static Timestamp secondsFromNow(int seconds) {
-        checkPositive(seconds);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = add(currentTime, Durations.ofSeconds(seconds));
+        final Timestamp result = subtract(currentTime, Durations2.ofSeconds(value));
         return result;
     }
 }

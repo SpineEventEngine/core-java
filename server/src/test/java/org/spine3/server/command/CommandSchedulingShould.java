@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations.minutes;
+import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.protobuf.Timestamps2.minutesAgo;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
@@ -86,8 +86,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @Test
     public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations.ofMinutes(5);
-        final Duration newDelayExpected = Durations.ofMinutes(2); // = 5 - 3
+        final Duration delayPrimary = Durations2.ofMinutes(5);
+        final Duration newDelayExpected = Durations2.ofMinutes(2); // = 5 - 3
         final List<Command> commandsPrimary = newArrayList(createProject(), addTask(), startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
@@ -183,7 +183,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     private static Command createScheduledCommand() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations.ofMinutes(5);
+        final Duration delayPrimary = Durations2.ofMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 

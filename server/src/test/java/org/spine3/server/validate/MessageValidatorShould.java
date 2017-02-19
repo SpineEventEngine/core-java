@@ -29,7 +29,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Values;
 import org.spine3.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import org.spine3.test.validate.msg.CustomMessageRequiredEnumFieldValue;
@@ -867,12 +867,12 @@ public class MessageValidatorShould {
     }
 
     private static Timestamp getFuture() {
-        final Timestamp future = add(getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp future = add(getCurrentTime(), Durations2.ofMinutes(5));
         return future;
     }
 
     private static Timestamp getPast() {
-        final Timestamp past = subtract(getCurrentTime(), Durations.ofMinutes(5));
+        final Timestamp past = subtract(getCurrentTime(), Durations2.ofMinutes(5));
         return past;
     }
 

@@ -28,7 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorageShould;
@@ -196,7 +196,7 @@ public abstract class ProjectionStorageShould<I>
     @Test
     public void write_and_read_last_event_time_several_times() {
         final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, Durations.ofSeconds(10));
+        final Timestamp time2 = add(time1, Durations2.ofSeconds(10));
         writeAndReadLastEventTimeTest(time1);
         writeAndReadLastEventTimeTest(time2);
     }

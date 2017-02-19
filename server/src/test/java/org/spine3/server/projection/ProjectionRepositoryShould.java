@@ -33,7 +33,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
@@ -361,7 +361,7 @@ public class ProjectionRepositoryShould
                       .getEventStore()
                       .append(event);
         // Set up repository
-        final Duration duration = Durations.seconds(10L);
+        final Duration duration = Durations2.seconds(10L);
         final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
         repository.initStorage(InMemoryStorageFactory.getInstance());
         repository.catchUp();
@@ -397,7 +397,7 @@ public class ProjectionRepositoryShould
             eventStore.append(event);
         }
         // Set up repository
-        final Duration duration = Durations.nanos(1L);
+        final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
         repository.initStorage(InMemoryStorageFactory.getInstance());
         repository.catchUp();

@@ -31,7 +31,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Timestamps2.minutesAgo;
 import static org.spine3.protobuf.Timestamps2.secondsAgo;
@@ -196,7 +196,7 @@ public class CommandsShould {
     public void update_schedule_options() {
         final Command cmd = commandFactory.create(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.ofMinutes(5);
 
         final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
 
