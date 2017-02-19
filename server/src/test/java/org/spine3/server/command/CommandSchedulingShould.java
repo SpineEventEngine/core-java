@@ -86,8 +86,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @Test
     public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations2.ofMinutes(5);
-        final Duration newDelayExpected = Durations2.ofMinutes(2); // = 5 - 3
+        final Duration delayPrimary = Durations2.fromMinutes(5);
+        final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
         final List<Command> commandsPrimary = newArrayList(createProject(), addTask(), startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
@@ -183,7 +183,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     private static Command createScheduledCommand() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations2.ofMinutes(5);
+        final Duration delayPrimary = Durations2.fromMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 

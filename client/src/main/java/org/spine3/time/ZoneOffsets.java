@@ -93,7 +93,7 @@ public class ZoneOffsets {
     public static ZoneOffset ofHours(int hours) {
         checkHourOffset(hours, false);
 
-        final Duration hourDuration = Durations2.ofHours(hours);
+        final Duration hourDuration = Durations2.fromHours(hours);
         final int seconds = toSeconds(hourDuration);
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(seconds)

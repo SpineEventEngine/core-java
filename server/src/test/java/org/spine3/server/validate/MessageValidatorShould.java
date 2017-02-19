@@ -867,12 +867,12 @@ public class MessageValidatorShould {
     }
 
     private static Timestamp getFuture() {
-        final Timestamp future = add(getCurrentTime(), Durations2.ofMinutes(5));
+        final Timestamp future = add(getCurrentTime(), Durations2.fromMinutes(5));
         return future;
     }
 
     private static Timestamp getPast() {
-        final Timestamp past = subtract(getCurrentTime(), Durations2.ofMinutes(5));
+        final Timestamp past = subtract(getCurrentTime(), Durations2.fromMinutes(5));
         return past;
     }
 

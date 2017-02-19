@@ -31,6 +31,7 @@ import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.fromMillis;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.spine3.validate.Validate.checkPositive;
@@ -313,7 +314,7 @@ public class Timestamps2 {
     public static Timestamp minutesAgo(int value) {
         checkPositive(value);
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations2.ofMinutes(value));
+        final Timestamp result = subtract(currentTime, Durations2.fromMinutes(value));
         return result;
     }
 
@@ -327,7 +328,7 @@ public class Timestamps2 {
     public static Timestamp secondsAgo(long value) {
         checkPositive(value);
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations2.ofSeconds(value));
+        final Timestamp result = subtract(currentTime, fromSeconds(value));
         return result;
     }
 }

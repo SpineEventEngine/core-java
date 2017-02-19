@@ -196,7 +196,7 @@ public class CommandsShould {
     public void update_schedule_options() {
         final Command cmd = commandFactory.create(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations2.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
 
         final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
 

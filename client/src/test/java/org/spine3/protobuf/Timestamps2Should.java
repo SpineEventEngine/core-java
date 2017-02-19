@@ -27,6 +27,7 @@ import org.spine3.test.TimeTests;
 
 import java.util.Date;
 
+import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
@@ -45,9 +46,9 @@ import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class Timestamps2Should {
 
-    private static final Duration TEN_SECONDS = Durations2.ofSeconds(10);
+    private static final Duration TEN_SECONDS = fromSeconds(10L);
 
-    private static final Duration MINUTE = Durations2.ofMinutes(1);
+    private static final Duration MINUTE = Durations2.fromMinutes(1);
 
     @Test
     public void have_private_constructor() {
@@ -283,7 +284,7 @@ public class Timestamps2Should {
 
     @Test
     public void accept_time_provider() {
-        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps2.getCurrentTime(), Durations2.ofMinutes(5));
+        final Timestamp fiveMinutesAgo = com.google.protobuf.util.Timestamps.subtract(Timestamps2.getCurrentTime(), Durations2.fromMinutes(5));
 
         Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(fiveMinutesAgo));
 
@@ -294,7 +295,7 @@ public class Timestamps2Should {
     public void reset_time_provider_to_default() {
         final Timestamp aMinuteAgo = com.google.protobuf.util.Timestamps.subtract(
                 Timestamps2.systemTime(),
-                Durations2.ofMinutes(1));
+                Durations2.fromMinutes(1));
 
         Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(aMinuteAgo));
         Timestamps2.resetProvider();

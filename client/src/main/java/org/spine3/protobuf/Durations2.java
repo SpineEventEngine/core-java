@@ -7,11 +7,14 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
+import com.google.protobuf.util.Durations;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Durations.fromMillis;
+import static com.google.protobuf.util.Durations.fromNanos;
+import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Durations.toMillis;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
@@ -48,35 +51,13 @@ public class Durations2 {
      */
 
     /**
-     * Obtains an instance of {@code Duration} representing the passed number of milliseconds.
-     *
-     * @param milliseconds the number of milliseconds, positive or negative
-     * @return a non-null {@code Duration}
-     */
-    public static Duration ofMilliseconds(long milliseconds) {
-        final Duration result = fromMillis(milliseconds);
-        return result;
-    }
-
-    /**
-     * Obtains an instance of {@code Duration} from the number of seconds.
-     *
-     * @param seconds the number of seconds, positive or negative
-     * @return a non-null {@code Duration}
-     */
-    public static Duration ofSeconds(long seconds) {
-        final Duration result = fromMillis(safeMultiply(seconds, (int) MILLIS_PER_SECOND));
-        return result;
-    }
-
-    /**
      * Obtains an instance of {@code Duration} representing the passed number of minutes.
      *
      * @param minutes the number of minutes, positive or negative.
      * @return a non-null {@code Duration}
      */
-    public static Duration ofMinutes(long minutes) {
-        final Duration duration = ofSeconds(safeMultiply(minutes, SECONDS_PER_MINUTE));
+    public static Duration fromMinutes(long minutes) {
+        final Duration duration = fromSeconds(safeMultiply(minutes, SECONDS_PER_MINUTE));
         return duration;
     }
 
@@ -86,8 +67,8 @@ public class Durations2 {
      * @param hours the number of hours, positive or negative
      * @return a non-null {@code Duration}
      */
-    public static Duration ofHours(long hours) {
-        final Duration duration = ofMinutes(safeMultiply(hours, MINUTES_PER_HOUR));
+    public static Duration fromHours(long hours) {
+        final Duration duration = fromMinutes(safeMultiply(hours, MINUTES_PER_HOUR));
         return duration;
     }
 
@@ -103,7 +84,7 @@ public class Durations2 {
      * @return a non-null {@code Duration}
      */
     public static Duration nanos(long nanos) {
-        final Duration duration = com.google.protobuf.util.Durations.fromNanos(nanos);
+        final Duration duration = fromNanos(nanos);
         return duration;
     }
 
@@ -114,7 +95,7 @@ public class Durations2 {
      * @return a non-null {@code Duration}
      */
     public static Duration milliseconds(long milliseconds) {
-        return ofMilliseconds(milliseconds);
+        return fromMillis(milliseconds);
     }
 
     /**
@@ -124,19 +105,19 @@ public class Durations2 {
      * @return a non-null {@code Duration}
      */
     public static Duration seconds(long seconds) {
-        return ofSeconds(seconds);
+        return fromSeconds(seconds);
     }
 
     /** This method allows for more compact code of creation of
      * {@code Duration} instance with minutes. */
     public static Duration minutes(long minutes) {
-        return ofMinutes(minutes);
+        return fromMinutes(minutes);
     }
 
     /** This method allows for more compact code of creation of
      * {@code Duration} instance with hours. */
     public static Duration hours(long hours) {
-        return ofHours(hours);
+        return fromHours(hours);
     }
 
     /**
@@ -161,16 +142,6 @@ public class Durations2 {
             return d1;
         }
         final Duration result = com.google.protobuf.util.Durations.add(d1, d2);
-        return result;
-    }
-
-    /** Subtract a duration from another. */
-    public static Duration subtract(Duration d1, Duration d2) {
-        /* The sole purpose of this method is minimize the dependencies of the classes
-           working with durations. */
-        checkNotNull(d1);
-        checkNotNull(d2);
-        final Duration result = com.google.protobuf.util.Durations.subtract(d1, d2);
         return result;
     }
 
@@ -272,33 +243,20 @@ public class Durations2 {
     /** Returns {@code true} if the first argument is greater than the second,
      * {@code false} otherwise. */
     public static boolean isGreaterThan(Duration value, Duration another) {
-        checkNotNull(value);
-        checkNotNull(another);
-        final long nanos = toNanos(value);
-        final long anotherNanos = toNanos(another);
-        final boolean isGreater = nanos > anotherNanos;
-        return isGreater;
+        final boolean result = compare(value, another) > 0;
+        return result;
     }
 
     /** Returns {@code true} if the first argument is less than the second,
      * {@code false} otherwise. */
     public static boolean isLessThan(Duration value, Duration another) {
-        checkNotNull(value);
-        checkNotNull(another);
-        final long nanos = toNanos(value);
-        final long anotherNanos = toNanos(another);
-        final boolean isLessThan = nanos < anotherNanos;
-        return isLessThan;
+        final boolean result = compare(value, another) < 0;
+        return result;
     }
 
     /** Numerically compare passed durations as nanosecond values. */
     public static int compare(Duration d1, Duration d2) {
-        checkNotNull(d1);
-        checkNotNull(d2);
-        final long nanos = toNanos(d1);
-        final long otherNanos = toNanos(d2);
-        final int result = Long.compare(nanos, otherNanos);
-        return result;
+        return Durations.comparator().compare(d1, d2);
     }
 
     /** Returns {@code true} if the passed duration is negative, {@code false} otherwise. */

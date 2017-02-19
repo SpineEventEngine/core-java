@@ -27,7 +27,7 @@ import org.spine3.protobuf.Timestamps2;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.spine3.protobuf.Durations2.ofMinutes;
+import static org.spine3.protobuf.Durations2.fromMinutes;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -43,7 +43,7 @@ public class TimeTestsShould {
     @Test
     public void have_frozen_time_provider() {
         final Timestamp fiveMinutesAgo = subtract(getCurrentTime(),
-                                                  ofMinutes(5));
+                                                  fromMinutes(5));
 
         final Timestamps2.Provider provider =
                 new TimeTests.FrozenMadHatterParty(fiveMinutesAgo);

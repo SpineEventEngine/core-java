@@ -27,6 +27,7 @@ import org.spine3.base.Command;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 
+import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.validate.Validate.checkPositive;
 
@@ -148,7 +149,7 @@ public class TimeTests {
         public static Timestamp secondsFromNow(int seconds) {
             checkPositive(seconds);
             final Timestamp currentTime = Timestamps2.getCurrentTime();
-            final Timestamp result = add(currentTime, Durations2.ofSeconds(seconds));
+            final Timestamp result = add(currentTime, fromSeconds((long) seconds));
             return result;
         }
 

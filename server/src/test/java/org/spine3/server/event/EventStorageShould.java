@@ -549,7 +549,8 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
         // If deltaNanos is negative, subtract its value from seconds.
         if (deltaSeconds > 0 && deltaNanos < 0) {
-            return Durations2.subtract(seconds(deltaSeconds), nanos(deltaNanos));
+            return com.google.protobuf.util.Durations.subtract(seconds(deltaSeconds),
+                                                               nanos(deltaNanos));
         }
 
         // If deltaSeconds is negative and nanos are positive, add nanos.

@@ -157,7 +157,7 @@ public class CommandBusShouldHandleCommandStatus {
         final List<Command> commands = newArrayList(Given.Command.createProject(),
                                                     Given.Command.addTask(),
                                                     Given.Command.startProject());
-        final Duration delay = Durations2.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
