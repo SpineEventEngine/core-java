@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 
 import java.util.Map;

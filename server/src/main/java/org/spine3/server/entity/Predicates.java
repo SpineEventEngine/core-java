@@ -21,8 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Predicate;
-import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.storage.EntityRecord;
 
 import javax.annotation.Nullable;
 
@@ -33,9 +31,9 @@ import javax.annotation.Nullable;
  */
 public class Predicates {
 
-    private static final Predicate<EntityStatus> isEntityVisible = new Predicate<EntityStatus>() {
+    private static final Predicate<Visibility> isEntityVisible = new Predicate<Visibility>() {
         @Override
-        public boolean apply(@Nullable EntityStatus input) {
+        public boolean apply(@Nullable org.spine3.server.entity.Visibility input) {
             return input == null ||
                     !(input.getArchived() || input.getDeleted());
         }
@@ -46,7 +44,7 @@ public class Predicates {
             if (input == null) {
                 return true;
             }
-            final EntityStatus entityStatus = input.getEntityStatus();
+            final Visibility entityStatus = input.getVisibility();
             return !(entityStatus.getArchived() || entityStatus.getDeleted());
         }
     };
@@ -62,10 +60,10 @@ public class Predicates {
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code AggregateStatus}es
-     * @see EntityStatus#getArchived()
-     * @see EntityStatus#getDeleted()
+     * @see Visibility#getArchived()
+     * @see Visibility#getDeleted()
      */
-    public static Predicate<EntityStatus> isEntityVisible() {
+    public static Predicate<Visibility> isEntityVisible() {
         return isEntityVisible;
     }
 
@@ -76,7 +74,7 @@ public class Predicates {
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
-     * @see EntityRecord#getEntityStatus()
+     * @see EntityRecord#getVisibility()
      */
     public static Predicate<EntityRecord> isRecordVisible() {
         return isRecordVisible;

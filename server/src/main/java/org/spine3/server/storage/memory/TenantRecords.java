@@ -28,9 +28,9 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.storage.EntityRecord;
+import org.spine3.server.entity.Visibility;
 
 import java.util.Map;
 
@@ -63,13 +63,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         if (record == null) {
             return false;
         }
-        final EntityStatus currentStatus = record.getEntityStatus();
+        final Visibility currentStatus = record.getVisibility();
         if (currentStatus.getArchived()) {
             return false;
         }
         final EntityRecord archivedRecord = record.toBuilder()
-                                                  .setEntityStatus(currentStatus.toBuilder()
-                                                                                       .setArchived(true))
+                                                  .setVisibility(currentStatus.toBuilder()
+                                                                              .setArchived(true))
                                                   .build();
         records.put(id, archivedRecord);
         return true;
@@ -81,13 +81,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
             return false;
         }
 
-        final EntityStatus currentStatus = record.getEntityStatus();
+        final Visibility currentStatus = record.getVisibility();
         if (currentStatus.getDeleted()) {
             return false;
         }
         final EntityRecord deletedRecord = record.toBuilder()
-                                                 .setEntityStatus(currentStatus.toBuilder()
-                                                                                      .setDeleted(true))
+                                                 .setVisibility(currentStatus.toBuilder()
+                                                                             .setDeleted(true))
                                                  .build();
         records.put(id, deletedRecord);
         return true;

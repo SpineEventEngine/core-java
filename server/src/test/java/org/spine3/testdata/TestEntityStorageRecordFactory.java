@@ -21,7 +21,7 @@
 package org.spine3.testdata;
 
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.storage.EntityRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
 import static org.spine3.base.Identifiers.newUuid;

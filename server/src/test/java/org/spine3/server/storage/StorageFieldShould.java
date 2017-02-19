@@ -67,8 +67,8 @@ public class StorageFieldShould {
 
     @Test
     public void enclose_all_entity_status_fields() {
-        assertField(EntityStatusField.archived);
-        assertField(EntityStatusField.deleted);
+        assertField(VisibilityField.archived);
+        assertField(VisibilityField.deleted);
     }
 
     @Test

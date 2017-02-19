@@ -47,8 +47,6 @@ public class Timestamps2 {
      * {@link com.google.protobuf.util.Timestamps Timestamps} class
      * in order to make them publicly visible to time management utils:
      * <ul>
-     *   <li>{@link #TIMESTAMP_SECONDS_MIN}
-     *   <li>{@link #TIMESTAMP_SECONDS_MAX}
      *   <li>{@link #NANOS_PER_SECOND}
      *   <li>{@link #NANOS_PER_MILLISECOND}
      *   <li>{@link #NANOS_PER_MICROSECOND}
@@ -57,12 +55,6 @@ public class Timestamps2 {
      * </ul>
      * Consider removing these constants if they become public in the Protobuf utils API.
      **/
-
-    /** Timestamp for "0001-01-01T00:00:00Z" */
-    public static final long TIMESTAMP_SECONDS_MIN = -62135596800L;
-
-    /** Timestamp for "9999-12-31T23:59:59Z" */
-    public static final long TIMESTAMP_SECONDS_MAX = 253402300799L;
 
     /** The count of nanoseconds in one second. */
     public static final long NANOS_PER_SECOND = 1_000_000_000L;

@@ -36,7 +36,7 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityRecord;
+import org.spine3.server.entity.EntityRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

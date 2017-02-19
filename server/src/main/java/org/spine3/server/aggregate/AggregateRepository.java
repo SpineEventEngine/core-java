@@ -37,9 +37,9 @@ import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
@@ -298,7 +298,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
-        final Optional<EntityStatus> status = aggregateStorage().readStatus(id);
+        final Optional<Visibility> status = aggregateStorage().readVisibility(id);
         if (status.isPresent() && !Predicates.isEntityVisible()
                                              .apply(status.get())) {
             // If there is a status that hides the aggregate, return nothing.

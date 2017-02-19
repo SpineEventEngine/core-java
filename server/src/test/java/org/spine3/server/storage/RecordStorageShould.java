@@ -26,6 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.test.Tests;
 
@@ -145,7 +146,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See it is not archived.
         assertFalse(storage.read(id)
                            .get()
-                           .getEntityStatus()
+                           .getVisibility()
                            .getArchived());
 
         // Mark archived.
@@ -154,7 +155,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See that the record is marked.
         assertTrue(storage.read(id)
                           .get()
-                          .getEntityStatus()
+                          .getVisibility()
                           .getArchived());
 
         // Check that another attempt to mark archived returns `false`.
@@ -177,7 +178,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See it is not deleted.
         assertFalse(storage.read(id)
                            .get()
-                           .getEntityStatus()
+                           .getVisibility()
                            .getDeleted());
 
         // Mark deleted.
@@ -186,7 +187,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See that the record is marked.
         assertTrue(storage.read(id)
                           .get()
-                          .getEntityStatus()
+                          .getVisibility()
                           .getDeleted());
 
         // Check that another attempt to mark deleted returns `false`.

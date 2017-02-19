@@ -29,7 +29,7 @@ import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.entity.Predicates;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -53,12 +53,12 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, EntityStatus> statuses = newHashMap();
+    private final Map<I, Visibility> statuses = newHashMap();
 
     private final Predicate<I> isVisible = new Predicate<I>() {
         @Override
         public boolean apply(@Nullable I input) {
-            final EntityStatus entityStatus = statuses.get(input);
+            final Visibility entityStatus = statuses.get(input);
 
             return entityStatus == null
                     || Predicates.isEntityVisible()
@@ -113,8 +113,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
      *
      * <p>If no status stored, the default instance is returned.
      */
-    Optional<EntityStatus> getStatus(I id) {
-        final EntityStatus entityStatus = statuses.get(id);
+    Optional<Visibility> getStatus(I id) {
+        final Visibility entityStatus = statuses.get(id);
         return Optional.fromNullable(entityStatus);
     }
 
@@ -134,7 +134,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateStorageReco
         eventCounts.put(id, eventCount);
     }
 
-    void putStatus(I id, EntityStatus status) {
+    void putStatus(I id, Visibility status) {
         statuses.put(id, status);
     }
 

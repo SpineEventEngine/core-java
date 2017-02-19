@@ -23,7 +23,6 @@ package org.spine3.server.entity;
 import com.google.common.base.Converter;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.server.storage.EntityRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

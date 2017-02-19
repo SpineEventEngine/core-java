@@ -27,7 +27,6 @@ import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Objects;
@@ -52,7 +51,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
 
     private Version version;
 
-    private EntityStatus status = EntityStatus.getDefaultInstance();
+    private Visibility visibility = Visibility.getDefaultInstance();
 
     /**
      * Creates a new instance.
@@ -73,7 +72,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * <ul>
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
      *   <li>The version number is set to zero.
-     *   <li>The {@link #status} field is set to the default instance.
+     *   <li>The {@link #visibility} field is set to the default instance.
      * </ul>
      *
      * <p>This method cannot be called from within {@code Entity} constructor because
@@ -85,7 +84,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         super.init();
         injectState(getDefaultState());
         initVersion(Versions.create());
-        this.status = EntityStatus.getDefaultInstance();
+        this.visibility = Visibility.getDefaultInstance();
     }
 
     /**
@@ -119,8 +118,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Sets status for the entity.
      */
-    void setStatus(EntityStatus status) {
-        this.status = status;
+    void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 
     /**
@@ -223,10 +222,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Obtains the entity status.
      */
-    protected EntityStatus getStatus() {
-        final EntityStatus result = this.status ==  null
-                ? EntityStatus.getDefaultInstance()
-                : this.status;
+    protected Visibility getVisibility() {
+        final Visibility result = this.visibility == null
+                ? Visibility.getDefaultInstance()
+                : this.visibility;
         return result;
     }
 
@@ -236,16 +235,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
     protected boolean isArchived() {
-        return getStatus().getArchived();
+        return getVisibility().getArchived();
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        this.status = getStatus().toBuilder()
-                                 .setArchived(archived)
-                                 .build();
+        this.visibility = getVisibility().toBuilder()
+                                         .setArchived(archived)
+                                         .build();
     }
 
     /**
@@ -254,27 +253,27 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
     protected boolean isDeleted() {
-        return getStatus().getDeleted();
+        return getVisibility().getDeleted();
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        this.status = getStatus().toBuilder()
-                                 .setDeleted(deleted)
-                                 .build();
+        this.visibility = getVisibility().toBuilder()
+                                         .setDeleted(deleted)
+                                         .build();
     }
 
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getStatus()
-     * @see EntityStatus#getArchived()
+     * @see #getVisibility()
+     * @see Visibility#getArchived()
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getStatus().getArchived()) {
+        if (getVisibility().getArchived()) {
             final String idStr = Stringifiers.idToString(getId());
             throw new CannotModifyArchivedEntity(idStr);
         }
@@ -284,11 +283,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Ensures that the entity is not marked as {@code deleted}.
      *
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getStatus()
-     * @see EntityStatus#getDeleted()
+     * @see #getVisibility()
+     * @see Visibility#getDeleted()
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getStatus().getDeleted()) {
+        if (getVisibility().getDeleted()) {
             final String idStr = Stringifiers.idToString(getId());
             throw new CannotModifyDeletedEntity(idStr);
         }
@@ -307,11 +306,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         }
         AbstractVersionableEntity<?, ?> that = (AbstractVersionableEntity<?, ?>) o;
         return Objects.equals(getVersion(), that.getVersion()) &&
-               Objects.equals(getStatus(), that.getStatus());
+               Objects.equals(getVisibility(), that.getVisibility());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getVersion(), getStatus());
+        return Objects.hash(super.hashCode(), getVersion(), getVisibility());
     }
 }

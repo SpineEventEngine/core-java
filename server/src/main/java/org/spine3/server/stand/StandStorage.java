@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 
 /**

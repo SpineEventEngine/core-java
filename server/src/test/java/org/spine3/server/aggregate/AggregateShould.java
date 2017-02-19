@@ -345,7 +345,7 @@ public class AggregateShould {
         anotherAggregate.restore(snapshotNewProject);
         assertEquals(aggregate.getState(), anotherAggregate.getState());
         assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
-        assertEquals(aggregate.getStatus(), anotherAggregate.getStatus());
+        assertEquals(aggregate.getVisibility(), anotherAggregate.getVisibility());
     }
 
     @Test

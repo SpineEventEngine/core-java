@@ -35,7 +35,6 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.storage.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -128,7 +127,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        if (!Predicates.isEntityVisible().apply(record.getEntityStatus())) {
+        if (!Predicates.isEntityVisible().apply(record.getVisibility())) {
             return Optional.absent();
         }
         final E entity = toEntity(id, record);

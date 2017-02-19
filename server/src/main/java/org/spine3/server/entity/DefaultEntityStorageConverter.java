@@ -25,7 +25,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.Version;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityRecord;
 
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -65,7 +64,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
                 EntityRecord.newBuilder()
                             .setState(stateAny)
                             .setVersion(version)
-                            .setEntityStatus(entity.getStatus());
+                            .setVisibility(entity.getVisibility());
 
         final Tuple<I> result = tuple(entity.getId(), builder.build());
         return result;
@@ -84,7 +83,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
         final EntityRecord record = tuple.getState();
         if (entity != null) {
             entity.setState(state, record.getVersion());
-            entity.setStatus(record.getEntityStatus());
+            entity.setVisibility(record.getVisibility());
         }
         return entity;
     }

@@ -29,7 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.server.aggregate.storage.Snapshot;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
@@ -185,15 +185,15 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param id the ID of the aggregate
      * @return the aggregate status record or {@code Optional.absent()}
      */
-    protected abstract Optional<EntityStatus> readStatus(I id);
+    protected abstract Optional<Visibility> readVisibility(I id);
 
     /**
      * Writes the {@code EntityStatus} for the aggregate with the passed ID.
      *
      * @param id the ID of the aggregate for which we update the status
-     * @param status the status to write
+     * @param visibility the status to write
      */
-    protected abstract void writeStatus(I id, EntityStatus status);
+    protected abstract void writeVisibility(I id, Visibility visibility);
 
     /**
      * Writes a count of events which were saved to the storage after the last snapshot was created,

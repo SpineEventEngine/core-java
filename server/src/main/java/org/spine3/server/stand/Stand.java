@@ -37,9 +37,9 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.storage.EntityRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.CheckReturnValue;

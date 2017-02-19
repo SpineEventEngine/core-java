@@ -55,6 +55,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     private final AtomicBoolean active = new AtomicBoolean(false);
 
     private final Set<P> pendingProjections = Collections.synchronizedSet(new HashSet<P>());
+    //TODO:2017-02-19:alexander.yevsyukov: Address warning about synchronization.
     private Timestamp lastHandledEventTime = Timestamp.getDefaultInstance();
 
     /**

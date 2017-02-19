@@ -33,7 +33,7 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
@@ -157,11 +157,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
     /**
      * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
      */
-    @SuppressWarnings("RedundantMethodOverride") // Expose the method to this package.
     @Override
-    protected EntityStatus getStatus() {
-        return super.getStatus();
+    protected Visibility getVisibility() {
+        return super.getVisibility();
     }
 
     /**

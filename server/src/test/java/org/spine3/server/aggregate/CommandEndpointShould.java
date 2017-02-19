@@ -127,7 +127,7 @@ public class CommandEndpointShould {
         doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
         doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage).read(projectId);
         doReturn(storage).when(repositorySpy).aggregateStorage();
-        doReturn(Optional.absent()).when(storage).readStatus(projectId);
+        doReturn(Optional.absent()).when(storage).readVisibility(projectId);
 
         repositorySpy.dispatch(cmd);
 
