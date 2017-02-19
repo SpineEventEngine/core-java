@@ -26,9 +26,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.aggregate.storage.AggregateEventRecord;
-import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.entity.Visibility;
 import org.spine3.server.storage.AbstractStorage;
 

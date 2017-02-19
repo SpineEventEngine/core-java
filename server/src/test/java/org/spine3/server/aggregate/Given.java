@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;

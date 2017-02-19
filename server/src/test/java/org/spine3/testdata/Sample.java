@@ -29,7 +29,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -39,8 +38,6 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.aggregate.storage.AggregateEventRecord;
-import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.type.ClassName;
 
 import java.lang.reflect.InvocationTargetException;
@@ -65,55 +62,6 @@ public class Sample {
     private Sample() {
     }
 
-    /**
-     * Utility class for stubbing the {@link EventStorageRecord} instances.
-     *
-     * @see Sample
-     */
-    public static class EventRecord {
-
-        private EventRecord() {
-        }
-
-        public static EventStorageRecord withRandomFields() {
-            return Sample.messageOfType(EventStorageRecord.class);
-        }
-
-        public static EventStorageRecord with(Timestamp timestamp) {
-            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
-            builder.setTimestamp(timestamp);
-            return builder.build();
-        }
-
-        public static EventStorageRecord with(String eventId) {
-            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
-            builder.setEventId(eventId);
-            return builder.build();
-        }
-
-        public static EventStorageRecord with(String eventId, Timestamp timestamp) {
-            final EventStorageRecord.Builder builder = Sample.builderForType(EventStorageRecord.class);
-            builder.setEventId(eventId)
-                   .setTimestamp(timestamp);
-            return builder.build();
-        }
-    }
-
-    /**
-     * Utility class for stubbing the {@link AggregateEventRecord} instances.
-     *
-     * @see Sample
-     */
-    public static class AggregateRecord {
-
-        private AggregateRecord() {
-        }
-
-        public static AggregateEventRecord withRandomFields() {
-            return messageOfType(AggregateEventRecord.class);
-        }
-    }
-
     public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
         final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
         final Message eventMessage = messageOfType(eventClass);
@@ -125,13 +73,6 @@ public class Sample {
         final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
-    }
-
-    public static Command commandOfType(Class<? extends Message> commandClass) {
-        final CommandContext commandContext = TestCommandContextFactory.createCommandContext();
-        final Message commandMessage = messageOfType(commandClass);
-        final Command command = Commands.createCommand(commandMessage, commandContext);
-        return command;
     }
 
     public static Command command(Message commandMessage) {
@@ -216,6 +157,7 @@ public class Sample {
      * @param field {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
+    @SuppressWarnings("OverlyComplexMethod")
     private static Object valueFor(FieldDescriptor field) {
         final Type type = field.getType();
         final JavaType javaType = type.getJavaType();
@@ -265,7 +207,7 @@ public class Sample {
     private static Message messageValueFor(FieldDescriptor field) {
         final TypeUrl messageType = TypeUrl.from(field.getMessageType());
         final Class<? extends Message> javaClass = classFor(messageType);
-        final Message fieldValue = Sample.messageOfType(javaClass);
+        final Message fieldValue = messageOfType(javaClass);
         return fieldValue;
     }
 
@@ -288,10 +230,9 @@ public class Sample {
             final B result = (B) factoryMethod.invoke(null);
             return result;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException(
-                    format("Class %s must be a generated proto message",
-                           clazz.getCanonicalName()),
-                    e);
+            final String errMsg = format("Class %s must be a generated proto message",
+                                         clazz.getCanonicalName());
+            throw new IllegalArgumentException(errMsg, e);
         }
 
     }

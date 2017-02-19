@@ -33,8 +33,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.TimeTests;

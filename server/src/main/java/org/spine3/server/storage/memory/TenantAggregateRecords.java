@@ -27,7 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.server.aggregate.storage.AggregateEventRecord;
+import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Visibility;
 

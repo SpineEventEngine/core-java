@@ -32,7 +32,6 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;

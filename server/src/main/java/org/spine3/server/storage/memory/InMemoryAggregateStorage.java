@@ -21,8 +21,8 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
+import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateEventRecord;
 import org.spine3.server.entity.Visibility;
 
 import java.util.Iterator;

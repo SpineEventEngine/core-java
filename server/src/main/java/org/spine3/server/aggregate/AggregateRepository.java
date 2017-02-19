@@ -29,8 +29,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.AbstractEntity;
