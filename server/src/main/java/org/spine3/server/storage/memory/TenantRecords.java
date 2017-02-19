@@ -22,19 +22,20 @@ package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.Visibility;
 
 import java.util.Map;
 
+import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.FieldMasks.applyMask;
 import static org.spine3.server.entity.Predicates.isRecordVisible;
 
 /**
@@ -46,7 +47,7 @@ import static org.spine3.server.entity.Predicates.isRecordVisible;
 class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
 
     private final Map<I, EntityRecord> records = newHashMap();
-    private final Map<I, EntityRecord> filtered = Maps.filterValues(records, isRecordVisible());
+    private final Map<I, EntityRecord> filtered = filterValues(records, isRecordVisible());
 
     @Override
     public void put(I id, EntityRecord record) {
@@ -119,9 +120,9 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
                 EntityRecord.Builder matchingRecord = record.get().toBuilder();
                 final Any state = matchingRecord.getState();
                 final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
-                final Message wholeState = AnyPacker.unpack(state);
-                final Message maskedState = FieldMasks.applyMask(fieldMask, wholeState, typeUrl);
-                final Any processed = AnyPacker.pack(maskedState);
+                final Message wholeState = unpack(state);
+                final Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
+                final Any processed = pack(maskedState);
 
                 matchingRecord.setState(processed);
                 matchingResult = matchingRecord.build();
@@ -148,9 +149,9 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
             final TypeUrl type = TypeUrl.of(rawRecord.getState()
                                                      .getTypeUrl());
             final Any recordState = rawRecord.getState();
-            final Message stateAsMessage = AnyPacker.unpack(recordState);
-            final Message processedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
-            final Any packedState = AnyPacker.pack(processedState);
+            final Message stateAsMessage = unpack(recordState);
+            final Message processedState = applyMask(fieldMask, stateAsMessage, type);
+            final Any packedState = pack(processedState);
             final EntityRecord resultingRecord = EntityRecord.newBuilder()
                                                              .setState(packedState)
                                                              .build();
