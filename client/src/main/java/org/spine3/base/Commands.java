@@ -42,10 +42,10 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -293,8 +293,7 @@ public class Commands {
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
         checkNotNull(command);
         checkNotNull(delay);
-        checkNotNull(schedulingTime);
-        checkPositive(schedulingTime, "command scheduling time");
+        checkValid(schedulingTime);
 
         final CommandContext context = command.getContext();
         final Schedule scheduleUpdated = context.getSchedule()

@@ -25,11 +25,8 @@ import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.Internal;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Date;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.fromMillis;
@@ -174,30 +171,6 @@ public class Timestamps2 {
     }
 
     /**
-     * Verifies if the passed {@code Timestamp} instance is valid.
-     *
-     * <p>The {@code seconds} field value must be within the range
-     * {@code (TIMESTAMP_SECONDS_MIN, TIMESTAMP_SECONDS_MAX)}.
-     *
-     * <p>The {@code nanos} field value must be withing the range {@code (0, NANOS_PER_SECOND]}.
-     *
-     * @param value the value to check
-     * @return the passed value
-     * @throws IllegalArgumentException if {@link Timestamp} field values are not valid
-     * @deprecated use {@link com.google.protobuf.util.Timestamps#isValid(Timestamp)}
-     */
-    @Deprecated
-    public static Timestamp checkTimestamp(Timestamp value) throws IllegalArgumentException {
-        final long seconds = value.getSeconds();
-        checkArgument(seconds > TIMESTAMP_SECONDS_MIN && seconds < TIMESTAMP_SECONDS_MAX,
-                      "Timestamp is out of range.");
-        final int nanos = value.getNanos();
-        checkArgument(nanos >= 0 && nanos <= NANOS_PER_SECOND,
-                      "Timestamp has invalid nanos value.");
-        return value;
-    }
-
-    /**
      * Compares two timestamps. Returns a negative integer, zero, or a positive integer
      * if the first timestamp is less than, equal to, or greater than the second one.
      *
@@ -250,19 +223,6 @@ public class Timestamps2 {
     }
 
     /**
-     * Compares two timestamps. Returns a negative integer, zero, or a positive integer
-     * if the first timestamp is less than, equal to, or greater than the second one.
-     *
-     * @return a negative integer, zero, or a positive integer
-     * if the first timestamp is less than, equal to, or greater than the second one
-     * @deprecated use {@link com.google.protobuf.util.Timestamps#comparator()}
-     */
-    @Deprecated
-    public static Comparator<? super Timestamp> comparator() {
-        return new TimestampComparator();
-    }
-
-    /**
      * Converts a {@link Timestamp} to {@link Date} to the nearest millisecond.
      *
      * @return a {@link Date} instance
@@ -272,35 +232,6 @@ public class Timestamps2 {
         final long millisecsFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
-    }
-
-    /**
-     * Retrieves total nanoseconds from {@link Timestamp}.
-     *
-     * @return long value
-     * @deprecated use {@link com.google.protobuf.util.Timestamps#toNanos(Timestamp)}
-     */
-    @Deprecated
-    public static long convertToNanos(TimestampOrBuilder timestamp) {
-        final long nanosFromSeconds = timestamp.getSeconds() *
-                                      MILLIS_PER_SECOND *
-                                      NANOS_PER_MILLISECOND;
-        final long totalNanos = nanosFromSeconds + timestamp.getNanos();
-        return totalNanos;
-    }
-
-    /**
-     * @deprecated use {@link com.google.protobuf.util.Timestamps#comparator()}
-     */
-    @Deprecated
-    private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
-
-        private static final long serialVersionUID = 0;
-
-        @Override
-        public int compare(Timestamp t1, Timestamp t2) {
-            return Timestamps2.compare(t1, t2);
-        }
     }
 
     /**

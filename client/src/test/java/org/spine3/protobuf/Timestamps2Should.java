@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.test.TimeTests;
 
@@ -30,6 +31,7 @@ import java.util.Date;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static com.google.protobuf.util.Timestamps.toNanos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -40,10 +42,8 @@ import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
 import static org.spine3.protobuf.Timestamps2.SECONDS_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.convertToDate;
-import static org.spine3.protobuf.Timestamps2.convertToNanos;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class Timestamps2Should {
 
     private static final Duration TEN_SECONDS = fromSeconds(10L);
@@ -63,36 +63,6 @@ public class Timestamps2Should {
         assertNotEquals(0, MICROS_PER_SECOND);
         assertNotEquals(0, SECONDS_PER_HOUR);
         assertNotEquals(0, HOURS_PER_DAY);
-    }
-
-    @Test
-    public void not_throw_exception_if_timestamp_is_valid() {
-        Timestamps2.checkTimestamp(Timestamp.newBuilder()
-                                            .setSeconds(8)
-                                            .setNanos(7)
-                                            .build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void not_have_negative_nanos() {
-        Timestamps2.checkTimestamp(Timestamp.newBuilder()
-                                            .setNanos(-1)
-                                            .build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void not_have_negative_greater_than_NANOS_PER_SECOND() {
-        Timestamps2.checkTimestamp(Timestamp.newBuilder().setNanos((int) Timestamps2.NANOS_PER_SECOND + 1).build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void have_seconds_greater_than_TIMESTAMP_SECONDS_MIN() {
-        Timestamps2.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps2.TIMESTAMP_SECONDS_MIN).build());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void have_seconds_lower_than_TIMESTAMP_SECONDS_MAX() {
-        Timestamps2.checkTimestamp(Timestamp.newBuilder().setSeconds(Timestamps2.TIMESTAMP_SECONDS_MAX).build());
     }
 
     @Test
@@ -225,8 +195,8 @@ public class Timestamps2Should {
         final Timestamp time1 = Timestamps2.getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
-        final int result = Timestamps2.comparator()
-                                      .compare(time1, time2);
+        final int result = Timestamps.comparator()
+                                     .compare(time1, time2);
 
         assertTrue(result < 0);
     }
@@ -244,8 +214,8 @@ public class Timestamps2Should {
                                          .setNanos(nanos)
                                          .build();
 
-        final int result = Timestamps2.comparator()
-                                      .compare(time1, time2);
+        final int result = Timestamps.comparator()
+                                     .compare(time1, time2);
 
         assertEquals(0, result);
     }
@@ -255,8 +225,8 @@ public class Timestamps2Should {
         final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
-        final int result = Timestamps2.comparator()
-                                      .compare(timeAfterCurrent, currentTime);
+        final int result = Timestamps.comparator()
+                                     .compare(timeAfterCurrent, currentTime);
 
         assertTrue(result > 0);
     }
@@ -276,7 +246,7 @@ public class Timestamps2Should {
     public void convert_timestamp_to_nanos() {
         final Timestamp expectedTime = Timestamps2.getCurrentTime();
 
-        final long nanos = convertToNanos(expectedTime);
+        final long nanos = toNanos(expectedTime);
         final long expectedNanos = expectedTime.getSeconds() * Timestamps2.NANOS_PER_SECOND + expectedTime.getNanos();
 
         assertEquals(expectedNanos, nanos);

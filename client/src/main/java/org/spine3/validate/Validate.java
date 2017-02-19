@@ -21,7 +21,6 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.TypeName;
@@ -43,9 +42,9 @@ import static org.spine3.base.Stringifiers.idToString;
 public class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
-    private static final String MUST_BE_IN_BOUNDS = "%s should be in bounds of %d and %d values inclusive. Found: %d";
 
     private Validate() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -100,6 +99,8 @@ public class Validate {
                                                         String errorMessageTemplate,
                                                         Object... errorMessageArgs) {
         checkNotNull(object);
+        checkNotNull(errorMessageTemplate);
+        checkNotNull(errorMessageArgs);
         checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
@@ -143,6 +144,8 @@ public class Validate {
                                                      String errorMessageTemplate,
                                                      Object... errorMessageArgs) {
         checkNotNull(object);
+        checkNotNull(errorMessageTemplate);
+        checkNotNull(errorMessageArgs);
         checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
@@ -167,14 +170,18 @@ public class Validate {
      * Ensures the truth of an expression involving one parameter to the calling method.
      *
      * @param expression         a boolean expression with the parameter we check
-     * @param parameterName      the name of the parameter
      * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
      *                           the parameter name
+     * @param parameterName      the name of the parameter
      * @throws IllegalArgumentException if {@code expression} is false
      */
-    public static void checkParameter(boolean expression, String parameterName, String errorMessageFormat) {
+    public static void checkParameter(boolean expression,
+                                      String errorMessageFormat,
+                                      String parameterName) {
+        checkNotNull(errorMessageFormat);
+        checkNotNull(parameterName);
         if (!expression) {
-            final String errorMessage = String.format(errorMessageFormat, parameterName);
+            final String errorMessage = format(errorMessageFormat, parameterName);
             throw new IllegalArgumentException(errorMessage);
         }
     }
@@ -188,33 +195,16 @@ public class Validate {
      * @throws IllegalArgumentException if the string is empty or blank
      */
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
-        checkNotNull(stringToCheck, fieldName + " must not be null.");
-        checkParameter(!stringToCheck.isEmpty(), fieldName, "%s must not be an empty string.");
+        checkNotNull(stringToCheck);
+        checkNotNull(fieldName);
+        checkParameter(!stringToCheck.isEmpty(),
+                       "Field %s must not be an empty string.", fieldName
+        );
         final String trimmed = stringToCheck.trim();
-        checkParameter(trimmed.length() > 0, fieldName, "%s must not be a blank string.");
+        checkParameter(trimmed.length() > 0,
+                       "Field %s must not be a blank string.", fieldName
+        );
         return stringToCheck;
-    }
-
-    /**
-     * Ensures that the passed timestamp:
-     * <ul>
-     * <li>is not {@code null};
-     * <li>{@code seconds} > 0;
-     * <li>{@code nanos} >= 0.
-     * </ul>
-     *
-     * @param timestamp    the timestamp to check
-     * @param argumentName the name of the checked value to be used in the error message
-     * @return the passed timestamp
-     * @throws IllegalArgumentException if any of the requirements are not met
-     * @deprecated use {@link com.google.protobuf.util.Timestamps#isValid(Timestamp) Timestamps#isValid(Timestamp)}
-     */
-    @Deprecated
-    public static Timestamp checkPositive(Timestamp timestamp, String argumentName) {
-        checkNotNull(timestamp, argumentName);
-        checkParameter(timestamp.getSeconds() > 0, argumentName, "%s must have a positive number of seconds.");
-        checkParameter(timestamp.getNanos() >= 0, argumentName, "%s must not have a negative number of nanoseconds.");
-        return timestamp;
     }
 
     /**
@@ -225,7 +215,8 @@ public class Validate {
      */
     public static void checkPositive(long value) {
         if (value <= 0) {
-            throw new IllegalArgumentException(format("value must be positive. Passed: %d", value));
+            final String errMsg = format("value (%d) must be positive", value);
+            throw new IllegalArgumentException(errMsg);
         }
     }
 
@@ -237,7 +228,8 @@ public class Validate {
      * @throws IllegalArgumentException if requirement is not met
      */
     public static void checkPositive(long value, String argumentName) {
-        checkParameter(value > 0L, argumentName, MUST_BE_A_POSITIVE_VALUE);
+        checkNotNull(argumentName);
+        checkParameter(value > 0L, MUST_BE_A_POSITIVE_VALUE, argumentName);
     }
 
     /**
@@ -259,9 +251,11 @@ public class Validate {
      * @param highBound higher bound
      */
     public static void checkBounds(int value, String paramName, int lowBound, int highBound) {
+        checkNotNull(paramName);
         if (!isBetween(value, lowBound, highBound)) {
-            final String errMsg = String.format(MUST_BE_IN_BOUNDS,
-                                                paramName, lowBound, highBound, value);
+            final String errMsg = format(
+                    "%s (%d) should be in bounds [%d, %d] inclusive",
+                    paramName, value, lowBound, highBound);
             throw new IllegalArgumentException(errMsg);
         }
     }

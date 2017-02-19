@@ -40,10 +40,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
@@ -151,7 +151,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        final Timestamp timestamp = checkPositive(snapshot.getTimestamp(), "Snapshot timestamp");
+        final Timestamp timestamp = checkValid(snapshot.getTimestamp());
 
         final AggregateStorageRecord record =
                 AggregateStorageRecord.newBuilder()
@@ -218,7 +218,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         final String eventType = ofEnclosed(eventMsg).getTypeName();
         checkNotEmptyOrBlank(eventType, "Event type");
 
-        final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
+        final Timestamp timestamp = checkValid(context.getTimestamp());
 
         return AggregateStorageRecord.newBuilder()
                                      .setEvent(event)
