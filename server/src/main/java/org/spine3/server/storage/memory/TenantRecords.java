@@ -30,7 +30,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 
 import java.util.Map;
 
@@ -42,24 +42,24 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Yevsyukov
  */
-class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
+class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
 
-    private final Map<I, EntityStorageRecord> records = newHashMap();
-    private final Map<I, EntityStorageRecord> filtered = Maps.filterValues(records, org.spine3.server.entity.Predicates.isRecordVisible());
+    private final Map<I, EntityRecord> records = newHashMap();
+    private final Map<I, EntityRecord> filtered = Maps.filterValues(records, org.spine3.server.entity.Predicates.isRecordVisible());
 
     @Override
-    public void put(I id, EntityStorageRecord record) {
+    public void put(I id, EntityRecord record) {
         records.put(id, record);
     }
 
     @Override
-    public Optional<EntityStorageRecord> get(I id) {
-        final EntityStorageRecord record = records.get(id);
+    public Optional<EntityRecord> get(I id) {
+        final EntityRecord record = records.get(id);
         return Optional.fromNullable(record);
     }
 
     boolean markArchived(I id) {
-        final EntityStorageRecord record = records.get(id);
+        final EntityRecord record = records.get(id);
         if (record == null) {
             return false;
         }
@@ -67,16 +67,16 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         if (currentStatus.getArchived()) {
             return false;
         }
-        final EntityStorageRecord archivedRecord = record.toBuilder()
-                                                         .setEntityStatus(currentStatus.toBuilder()
+        final EntityRecord archivedRecord = record.toBuilder()
+                                                  .setEntityStatus(currentStatus.toBuilder()
                                                                                        .setArchived(true))
-                                                         .build();
+                                                  .build();
         records.put(id, archivedRecord);
         return true;
     }
 
     boolean markDeleted(I id) {
-        final EntityStorageRecord record = records.get(id);
+        final EntityRecord record = records.get(id);
         if (record == null) {
             return false;
         }
@@ -85,10 +85,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         if (currentStatus.getDeleted()) {
             return false;
         }
-        final EntityStorageRecord deletedRecord = record.toBuilder()
-                                                        .setEntityStatus(currentStatus.toBuilder()
+        final EntityRecord deletedRecord = record.toBuilder()
+                                                 .setEntityStatus(currentStatus.toBuilder()
                                                                                       .setDeleted(true))
-                                                        .build();
+                                                 .build();
         records.put(id, deletedRecord);
         return true;
     }
@@ -97,25 +97,25 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityStorageRecord> filtered() {
+    private Map<I, EntityRecord> filtered() {
         return filtered;
     }
 
-    Map<I, EntityStorageRecord> readAllRecords() {
-        final Map<I, EntityStorageRecord> filtered = filtered();
-        final ImmutableMap<I, EntityStorageRecord> result = ImmutableMap.copyOf(filtered);
+    Map<I, EntityRecord> readAllRecords() {
+        final Map<I, EntityRecord> filtered = filtered();
+        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(filtered);
         return result;
     }
 
-    EntityStorageRecord findAndApplyFieldMask(I givenId, FieldMask fieldMask) {
-        EntityStorageRecord matchingResult = null;
+    EntityRecord findAndApplyFieldMask(I givenId, FieldMask fieldMask) {
+        EntityRecord matchingResult = null;
         for (I recordId : filtered.keySet()) {
             if (recordId.equals(givenId)) {
-                final Optional<EntityStorageRecord> record = get(recordId);
+                final Optional<EntityRecord> record = get(recordId);
                 if (!record.isPresent()) {
                     continue;
                 }
-                EntityStorageRecord.Builder matchingRecord = record.get().toBuilder();
+                EntityRecord.Builder matchingRecord = record.get().toBuilder();
                 final Any state = matchingRecord.getState();
                 final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
                 final Message wholeState = AnyPacker.unpack(state);
@@ -129,7 +129,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         return matchingResult;
     }
 
-    Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+    Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         if (fieldMask.getPathsList()
                      .isEmpty()) {
             return readAllRecords();
@@ -139,20 +139,20 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
             return ImmutableMap.of();
         }
 
-        final ImmutableMap.Builder<I, EntityStorageRecord> result = ImmutableMap.builder();
+        final ImmutableMap.Builder<I, EntityRecord> result = ImmutableMap.builder();
 
-        for (Map.Entry<I, EntityStorageRecord> storageEntry : filtered.entrySet()) {
+        for (Map.Entry<I, EntityRecord> storageEntry : filtered.entrySet()) {
             final I id = storageEntry.getKey();
-            final EntityStorageRecord rawRecord = storageEntry.getValue();
+            final EntityRecord rawRecord = storageEntry.getValue();
             final TypeUrl type = TypeUrl.of(rawRecord.getState()
                                                      .getTypeUrl());
             final Any recordState = rawRecord.getState();
             final Message stateAsMessage = AnyPacker.unpack(recordState);
             final Message processedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
             final Any packedState = AnyPacker.pack(processedState);
-            final EntityStorageRecord resultingRecord = EntityStorageRecord.newBuilder()
-                                                                           .setState(packedState)
-                                                                           .build();
+            final EntityRecord resultingRecord = EntityRecord.newBuilder()
+                                                             .setState(packedState)
+                                                             .build();
             result.put(id, resultingRecord);
         }
 

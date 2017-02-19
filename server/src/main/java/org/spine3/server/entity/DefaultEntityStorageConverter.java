@@ -24,9 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.Version;
-import org.spine3.base.Versions;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -62,12 +61,11 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
     protected Tuple<I> doForward(E entity) {
         final Any stateAny = pack(entity.getState());
         final Version version = entity.getVersion();
-        final EntityStorageRecord.Builder builder =
-                EntityStorageRecord.newBuilder()
-                                   .setState(stateAny)
-                                   .setVersion(version.getNumber())
-                                   .setWhenModified(version.getTimestamp())
-                                   .setEntityStatus(entity.getStatus());
+        final EntityRecord.Builder builder =
+                EntityRecord.newBuilder()
+                            .setState(stateAny)
+                            .setVersion(version)
+                            .setEntityStatus(entity.getStatus());
 
         final Tuple<I> result = tuple(entity.getId(), builder.build());
         return result;
@@ -83,15 +81,11 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
 
         final E entity = repository.create(tuple.getId());
 
-        final EntityStorageRecord record = tuple.getState();
+        final EntityRecord record = tuple.getState();
         if (entity != null) {
-            entity.setState(state, getVersion(record));
+            entity.setState(state, record.getVersion());
             entity.setStatus(record.getEntityStatus());
         }
         return entity;
-    }
-
-    private static Version getVersion(EntityStorageRecord record) {
-        return Versions.newVersion(record.getVersion(), record.getWhenModified());
     }
 }

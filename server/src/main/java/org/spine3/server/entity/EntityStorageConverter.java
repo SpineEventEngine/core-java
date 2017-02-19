@@ -23,12 +23,12 @@ package org.spine3.server.entity;
 import com.google.common.base.Converter;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An abstract base for converters of entities into {@link EntityStorageRecord}.
+ * An abstract base for converters of entities into {@link EntityRecord}.
  *
  * @author Alexander Yevsyukov
  */
@@ -57,7 +57,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     /**
      * Creates new tuple of entity ID and corresponding storage record.
      */
-    public static <I> Tuple<I> tuple(I id, EntityStorageRecord record) {
+    public static <I> Tuple<I> tuple(I id, EntityRecord record) {
         return new Tuple<>(id, record);
     }
 
@@ -69,8 +69,8 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
      *
      * @param <I> type of the entity ID
      */
-    public static class Tuple<I> extends AbstractEntity<I, EntityStorageRecord> {
-        private Tuple(I id, EntityStorageRecord record) {
+    public static class Tuple<I> extends AbstractEntity<I, EntityRecord> {
+        private Tuple(I id, EntityRecord record) {
             super(id);
             injectState(record);
         }

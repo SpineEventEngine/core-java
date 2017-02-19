@@ -19,39 +19,40 @@
 //
 syntax = "proto3";
 
-package spine.server.storage;
+package spine.server.entity;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "RecordStorageProto";
+
+//TODO:2017-02-19:alexander.yevsyukov: Have this type put into entity.dto or something not-storage-named.
 option java_package = "org.spine3.server.storage";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
+import "spine/base/version.proto";
 import "spine/server/entity/entity_status.proto";
 
-// The record for passing information about an entity to its storages.
-//
-// The actual format of storing entities depend on the storage implementation.
-//
-message EntityStorageRecord {
+// The record for passing information about an entity.
+message EntityRecord {
     option (SPI_type) = true;
 
-    // The timestamp of the last entity modification.
-    google.protobuf.Timestamp when_modified = 1;
-
-    // The version of the entity.
-    int32 version = 2;
-
-    // The visibility status of the entity.
-    entity.EntityStatus entity_status = 3;
-
-    reserved 4 to 19;
+    //TODO:2017-02-19:alexander.yevsyukov: find usages and fill in this field
+    // The ID of the entity.
+    google.protobuf.Any entity_id = 1;
 
     // The state of the entity.
-    google.protobuf.Any state = 20;
+    google.protobuf.Any state = 2;
+
+    // The version of the entity.
+    base.Version version = 3;
+
+    //TODO:2017-02-19:alexander.yevsyukov: Rename to visibility
+
+    // The visibility status of the entity.
+    EntityStatus entity_status = 4;
 }

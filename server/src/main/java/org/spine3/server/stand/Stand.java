@@ -28,18 +28,18 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Queries;
 import org.spine3.base.Responses;
+import org.spine3.base.Version;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -143,12 +143,11 @@ public class Stand implements AutoCloseable {
      * by the entity {@code TypeUrl}.
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
-     *
-     * @param id            the entity identifier
+     *  @param id            the entity identifier
      * @param entityState   the entity state
      * @param entityVersion the version of the entity
      */
-    void update(Object id, Any entityState, int entityVersion) {
+    void update(Object id, Any entityState, Version entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
@@ -157,12 +156,11 @@ public class Stand implements AutoCloseable {
         if (isAggregateUpdate) {
             final AggregateStateId aggregateStateId = AggregateStateId.of(id, typeUrl);
 
-            final EntityStorageRecord record =
-                    EntityStorageRecord.newBuilder()
-                                       .setState(entityState)
-                                       .setWhenModified(Timestamps2.getCurrentTime())
-                                       .setVersion(entityVersion)
-                                       .build();
+            final EntityRecord record =
+                    EntityRecord.newBuilder()
+                                .setState(entityState)
+                                .setVersion(entityVersion)
+                                .build();
             storage.write(aggregateStateId, record);
         }
 
@@ -305,7 +303,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update(Object, Any, int)
+     * @see #update(Object, Any, Version)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends AbstractVersionableEntity<I, ?>>

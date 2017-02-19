@@ -37,7 +37,7 @@ import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -304,10 +304,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @VisibleForTesting
     void store(Collection<P> projections) {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityStorageRecord> records = new HashMap<>(projections.size());
+        final Map<I, EntityRecord> records = new HashMap<>(projections.size());
         for (P projection : projections) {
             final I id = projection.getId();
-            final EntityStorageRecord record = toRecord(projection);
+            final EntityRecord record = toRecord(projection);
             records.put(id, record);
         }
         storage.write(records);

@@ -31,12 +31,12 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
+import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
@@ -90,7 +90,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         final StandStorage storage = getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
-        final Map<AggregateStateId, EntityStorageRecord> allRecords = storage.readAll();
+        final Map<AggregateStateId, EntityRecord> allRecords = storage.readAll();
         checkIds(ids, allRecords.values());
     }
 
@@ -100,7 +100,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
-        final Collection<EntityStorageRecord> records = (Collection<EntityStorageRecord>) storage.readMultiple(ids);
+        final Collection<EntityRecord> records = (Collection<EntityRecord>) storage.readMultiple(ids);
         checkIds(ids, records);
     }
 
@@ -135,18 +135,18 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
                                   .setTitle("Test task")
                                   .setDescription("With description")
                                   .build();
-            final EntityStorageRecord record = newRecord(task);
+            final EntityRecord record = newRecord(task);
             storage.write(id, record);
         }
 
-        final ImmutableCollection<EntityStorageRecord> readRecords
+        final ImmutableCollection<EntityRecord> readRecords
                 = withFieldMask
                   ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
                   : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
-        final Set<EntityStorageRecord> readDistinct = Sets.newHashSet(readRecords);
+        final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
         assertSize(projectsCount, readDistinct);
 
-        for (EntityStorageRecord record : readDistinct) {
+        for (EntityRecord record : readDistinct) {
             final Any state = record.getState();
             final Project project = AnyPacker.unpack(state);
             final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
@@ -171,7 +171,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         for (int i = 0; i < count; i++) {
             final AggregateStateId genericId = idSupplier.get();
             final Message state = newState(genericId);
-            final EntityStorageRecord record = newRecord(state);
+            final EntityRecord record = newRecord(state);
             storage.write(genericId, record);
             ids.add(genericId);
         }
@@ -179,16 +179,15 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return ids;
     }
 
-    private static EntityStorageRecord newRecord(Message state) {
-        final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                              .setState(AnyPacker.pack(state))
-                                                              .setWhenModified(Timestamps2.getCurrentTime())
-                                                              .setVersion(1)
-                                                              .build();
+    private static EntityRecord newRecord(Message state) {
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(AnyPacker.pack(state))
+                                                .setVersion(Tests.newVersionWithNumber(1))
+                                                .build();
         return record;
     }
 
-    protected void checkIds(List<AggregateStateId> ids, Collection<EntityStorageRecord> records) {
+    protected void checkIds(List<AggregateStateId> ids, Collection<EntityRecord> records) {
         assertSize(ids.size(), records);
 
         final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
@@ -202,7 +201,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             }
         });
 
-        for (EntityStorageRecord record : records) {
+        for (EntityRecord record : records) {
             final Any packedState = record.getState();
             final Project state = AnyPacker.unpack(packedState);
             final ProjectId id = state.getId();

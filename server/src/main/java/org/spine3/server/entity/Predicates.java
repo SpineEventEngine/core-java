@@ -22,7 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Predicate;
 import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.EntityRecord;
 
 import javax.annotation.Nullable;
 
@@ -40,9 +40,9 @@ public class Predicates {
                     !(input.getArchived() || input.getDeleted());
         }
     };
-    private static final Predicate<EntityStorageRecord> isRecordVisible = new Predicate<EntityStorageRecord>() {
+    private static final Predicate<EntityRecord> isRecordVisible = new Predicate<EntityRecord>() {
         @Override
-        public boolean apply(@Nullable EntityStorageRecord input) {
+        public boolean apply(@Nullable EntityRecord input) {
             if (input == null) {
                 return true;
             }
@@ -76,9 +76,9 @@ public class Predicates {
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
-     * @see EntityStorageRecord#getEntityStatus()
+     * @see EntityRecord#getEntityStatus()
      */
-    public static Predicate<EntityStorageRecord> isRecordVisible() {
+    public static Predicate<EntityRecord> isRecordVisible() {
         return isRecordVisible;
     }
 }

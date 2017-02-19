@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
@@ -46,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -104,7 +104,7 @@ public class StandFunnelShould {
         final Given.StandTestAggregate entity = repository.create(entityId);
         final StringValue state = entity.getState();
         final Any packedState = AnyPacker.pack(state);
-        final int version = entity.getVersion().getNumber();
+        final Version version = entity.getVersion();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
@@ -223,7 +223,8 @@ public class StandFunnelShould {
             }
         }
 
-        verify(stand, times(dispatchActions.length)).update(ArgumentMatchers.any(), any(Any.class), anyInt());
+        verify(stand, times(dispatchActions.length))
+                .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
@@ -279,7 +280,7 @@ public class StandFunnelShould {
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(ArgumentMatchers.any(), any(Any.class), anyInt());
+                   .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
 
         final StandFunnel standFunnel = StandFunnel.newBuilder()
                                                    .setStand(stand)
