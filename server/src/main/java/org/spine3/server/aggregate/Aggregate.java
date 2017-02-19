@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -44,7 +43,6 @@ import java.util.List;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Versions.newVersion;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -276,8 +274,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 final EventContext context = event.getContext();
                 try {
                     applyEvent(message);
-                    final Version newVersion = newVersion(context.getVersion(),
-                                                          context.getTimestamp());
+                    final Version newVersion = context.getVersion();
                     advanceVersion(newVersion);
                 } catch (InvocationTargetException e) {
                     throw wrappedCause(e);
@@ -343,7 +340,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                                   .toBuilder()
                                   .setCommandContext(commandContext)
                                   .setTimestamp(getCurrentTime())
-                                  .setVersion(getVersion().getNumber())
+                                  .setVersion(getVersion())
                                   .build();
         } else {
             eventContext = createEventContext(eventMessage, commandContext);
@@ -408,7 +405,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
            use the currently initialized builder.
            Otherwise, just set the state and the version from the snapshot.
          */
-        final Version versionFromSnapshot = versionFrom(snapshot);
+        final Version versionFromSnapshot = snapshot.getVersion();
         if (builder != null) {
             builder.clear();
             builder.mergeFrom(stateToRestore);
@@ -416,10 +413,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         } else {
             setState(stateToRestore, versionFromSnapshot);
         }
-    }
-
-    private static Version versionFrom(Snapshot snapshot) {
-        return newVersion(snapshot.getVersion(), snapshot.getWhenModified());
     }
 
     /**
@@ -451,12 +444,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @CheckReturnValue
     Snapshot toSnapshot() {
         final Any state = AnyPacker.pack(getState());
-        final int version = getVersion().getNumber();
-        final Timestamp whenModified = getVersion().getTimestamp();
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
-                .setWhenModified(whenModified)
-                .setVersion(version)
+                .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }

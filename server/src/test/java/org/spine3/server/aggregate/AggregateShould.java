@@ -23,6 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -55,13 +56,16 @@ import java.util.Set;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.aggregate.Given.Event.projectCreated;
+import static org.spine3.server.aggregate.Given.Event.projectStarted;
+import static org.spine3.server.aggregate.Given.Event.taskAdded;
 import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
+import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -112,15 +116,15 @@ public class AggregateShould {
     }
 
     @Test
-    public void writes_its_version_into_event_context() {
+    public void write_its_version_into_event_context() {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
+        // Get the first event since the command handler produces only one event message.
         final Event event = aggregate.getUncommittedEvents()
                                      .get(0);
-        assertEquals(aggregate.getVersion()
-                              .getNumber(),
-                     event.getContext()
-                          .getVersion());
+
+        assertEquals(aggregate.getVersion(), event.getContext()
+                                                  .getVersion());
     }
 
     @Test
@@ -348,8 +352,8 @@ public class AggregateShould {
     public void import_events() {
         final ImportEvents importCmd =
                 ImportEvents.newBuilder()
-                            .addEvent(Given.Event.projectCreated(aggregate.getId()))
-                            .addEvent(Given.Event.taskAdded(aggregate.getId()))
+                            .addEvent(projectCreated(aggregate.getId()))
+                            .addEvent(taskAdded(aggregate.getId()))
                             .build();
         aggregate.dispatchCommands(importCmd);
 
@@ -567,7 +571,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
         try {
             faultyAggregate.play(AggregateEvents.newBuilder()
-                                                .addEvent(Given.Event.projectCreated())
+                                                .addEvent(projectCreated())
                                                 .build());
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
@@ -607,16 +611,22 @@ public class AggregateShould {
     }
 
     private static List<Event> getProjectEvents() {
-        final List<Event> events = newLinkedList();
-        events.add(Given.Event.projectCreated(ID, EVENT_CONTEXT.toBuilder()
-                                                               .setVersion(2)
-                                                               .build()));
-        events.add(Given.Event.taskAdded(ID, EVENT_CONTEXT.toBuilder()
-                                                          .setVersion(3)
-                                                          .build()));
-        events.add(Given.Event.projectStarted(ID, EVENT_CONTEXT.toBuilder()
-                                                               .setVersion(4)
-                                                               .build()));
+
+        //TODO:2017-02-19:alexander.yevsyukov: Use TestCommandFactory instead of
+        // ”re-using” EVENT_CONTEXT.
+        // We need to have increasing version numbers in event contexts.
+
+        final List<Event> events = ImmutableList.<Event>builder()
+                .add(projectCreated(ID, EVENT_CONTEXT.toBuilder()
+                                                     .setVersion(newVersionWithNumber(2))
+                                                     .build()))
+                .add(taskAdded(ID, EVENT_CONTEXT.toBuilder()
+                                                .setVersion(newVersionWithNumber(3))
+                                                .build()))
+                .add(projectStarted(ID, EVENT_CONTEXT.toBuilder()
+                                                     .setVersion(newVersionWithNumber(4))
+                                                     .build()))
+                .build();
         return events;
     }
 }

@@ -30,6 +30,8 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
@@ -266,5 +268,12 @@ public class Tests {
      */
     public static StreamObserver<Response> emptyObserver() {
         return emptyObserver;
+    }
+
+    /**
+     * Factory method for creating versions from tests.
+     */
+    public static Version newVersionWithNumber(int number) {
+        return Versions.newVersion(number, Timestamps2.getCurrentTime());
     }
 }

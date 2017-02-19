@@ -105,13 +105,12 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
     protected EventContext createEventContext(Message event, CommandContext commandContext) {
         final EventId eventId = generateId();
         final Timestamp timestamp = getCurrentTime();
-        final int versionNumber = getVersion().getNumber();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(getIdAsAny())
-                                                         .setVersion(versionNumber);
+                                                         .setVersion(getVersion());
         extendEventContext(builder, event, commandContext);
         return builder.build();
     }

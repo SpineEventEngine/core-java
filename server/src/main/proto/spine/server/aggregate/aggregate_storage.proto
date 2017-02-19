@@ -35,6 +35,7 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
 import "spine/base/event.proto";
+import "spine/base/version.proto";
 
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {
@@ -43,13 +44,8 @@ message Snapshot {
     // The state of the aggregate.
     google.protobuf.Any state = 1;
 
-    // Time when the stored state of the aggregate was modified.
-    //
-    // This value is copied to the aggregated when the snapshot is restored.
-    google.protobuf.Timestamp when_modified = 2;
-
-    // The version of the aggregate at which the snapshot was made.
-    int32 version = 3;
+    // The version of the aggregate.
+    spine.base.Version version = 2;
 
     // The moment the snapshot was created.
     //
@@ -57,7 +53,9 @@ message Snapshot {
     // (and timestamp of the corresponding event), and before the time of
     // the next event in the aggregate history.
     //
-    google.protobuf.Timestamp timestamp = 4;
+    // This field is used when storing a snapshot in `AggregateStorageRecord`.
+    //
+    google.protobuf.Timestamp timestamp = 3;
 }
 
 // A record in the storage of events and snapshots of an aggregate type.
@@ -75,21 +73,26 @@ message AggregateStorageRecord {
     // Since events stored are for particular aggregate type, we are not likely to
     // have a name clash because of not storing fully-qualified names.
     //
+    // This field is blank if the record stores a snapshot.
+    //
     string event_type = 2;
 
     // String representation of `EventId`.
+    //
+    // When storing a snapshot this field contains the string `Snapshot`.
+    //
     string event_id = 3;
 
     // The version of the aggregate after the event was applied.
-    int32 version = 4;
+    spine.base.Version version = 4;
 
     reserved 5 to 19;
 
     oneof kind {
-        // Event stored in the record, or...
+        // An event stored in the record.
         base.Event event = 20;
 
-        // Snapshot of the aggregate.
+        // A snapshot of the aggregate.
         server.aggregate.Snapshot snapshot = 21;
     }
 }
