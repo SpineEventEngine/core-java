@@ -24,7 +24,9 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntity;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+
+import static org.spine3.server.entity.AbstractEntity.createAggregateRootEntity;
+import static org.spine3.server.entity.AbstractEntity.getAggregatePartConstructor;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
@@ -40,6 +42,9 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         super(boundedContext);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override // to expose this method in the same package.
     protected Class<I> getIdClass() {
         return super.getIdClass();
@@ -48,23 +53,16 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super metho is not needed.
     @Override
     public A create(I id) {
-        try {
-            final Constructor<A> entityConstructor =
-                    AbstractEntity.getAggregatePartConstructor(getEntityClass(), getIdClass());
-            @SuppressWarnings("unchecked")
-            // It is OK because it is checked above,
-            // in the AbstractEntity.getAggregatePartConstructor method
-            final Class<AggregateRoot<I>> rootClass =
-                    (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
-            final Constructor<AggregateRoot<I>> rootConstructor =
-                    rootClass.getDeclaredConstructor(getBoundedContext().getClass(), id.getClass());
-            rootConstructor.setAccessible(true);
-            final AggregateRoot<I> root = rootConstructor.newInstance(getBoundedContext(), id);
-            final A result = AbstractEntity.createEntity(entityConstructor, id, root);
-            return result;
-        } catch (NoSuchMethodException | InvocationTargetException |
-                InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
+        final Constructor<A> entityConstructor =
+                getAggregatePartConstructor(getEntityClass(), getIdClass());
+        @SuppressWarnings("unchecked")
+        // It is OK because it is checked above,
+        // in the AbstractEntity.getAggregatePartConstructor method
+        final Class<AggregateRoot<I>> rootClass =
+                (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
+        final AggregateRoot<I> root = createAggregateRootEntity(id, getBoundedContext(), rootClass);
+        final A result = AbstractEntity.createAggregatePartEntity(entityConstructor, id, root);
+        return result;
+
     }
 }
