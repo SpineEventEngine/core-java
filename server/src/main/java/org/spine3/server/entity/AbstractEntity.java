@@ -205,15 +205,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param <I>            the type of entity IDs
      * @return new entity
      */
-    public static <I> AggregateRoot<I>
-    createAggregateRootEntity(I id,
-                              BoundedContext boundedContext,
-                              Class<AggregateRoot<I>> rootClass) {
+    public static <I, R extends  AggregateRoot<I>> R
+    createAggregateRootEntity(I id, BoundedContext boundedContext, Class<R> rootClass) {
         try {
-            final Constructor<AggregateRoot<I>> rootConstructor =
+            final Constructor<R> rootConstructor =
                     rootClass.getDeclaredConstructor(boundedContext.getClass(), id.getClass());
             rootConstructor.setAccessible(true);
-            AggregateRoot<I> root = rootConstructor.newInstance(boundedContext, id);
+            R root = rootConstructor.newInstance(boundedContext, id);
             return root;
         } catch (NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {
