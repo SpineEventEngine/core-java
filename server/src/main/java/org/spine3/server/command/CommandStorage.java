@@ -107,7 +107,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         }
         final CommandRecord record = newRecordBuilder(command, ERROR)
                 .setError(error)
-                .setCommandId(idToString(id))
+                .setCommandId(id)
                 .build();
         write(id, record);
     }
@@ -157,8 +157,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         final CommandContext context = command.getContext();
 
         final CommandId commandId = context.getCommandId();
-        final String commandIdString = idToString(commandId);
-
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeUrl.of(commandMessage).getSimpleName();
 
@@ -179,7 +177,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
                                                            .setMessage(command.getMessage())
                                                            .setTimestamp(getCurrentTime())
                                                            .setCommandType(commandType)
-                                                           .setCommandId(commandIdString)
+                                                           .setCommandId(commandId)
                                                            .setStatus(status)
                                                            .setTargetIdType(targetIdType)
                                                            .setTargetId(targetIdString)

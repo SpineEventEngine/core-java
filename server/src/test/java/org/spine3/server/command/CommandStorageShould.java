@@ -99,7 +99,7 @@ public abstract class CommandStorageShould
         final CommandRecord.Builder builder = CommandRecord.newBuilder()
                                                            .setTimestamp(getCurrentTime())
                                                            .setCommandType(commandType)
-                                                           .setCommandId(idToString(context.getCommandId()))
+                                                           .setCommandId(context.getCommandId())
                                                            .setStatus(RECEIVED)
                                                            .setTargetId(newUuid())
                                                            .setTargetIdType(String.class.getName())
@@ -153,10 +153,9 @@ public abstract class CommandStorageShould
         final List<CommandRecord> records = Lists.newArrayList(storage.read(ERROR));
 
         assertEquals(1, records.size());
-        assertFalse(records.get(0)
-                           .getCommandId()
-                           .trim()
-                           .isEmpty());
+        final String commandIdStr = idToString(records.get(0)
+                                                      .getCommandId());
+        assertFalse(commandIdStr.isEmpty());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
@@ -366,7 +365,7 @@ public abstract class CommandStorageShould
         assertEquals(cmd.getMessage(), record.getMessage());
         assertTrue(record.getTimestamp().getSeconds() > 0);
         assertEquals(message.getClass().getSimpleName(), record.getCommandType());
-        assertEquals(idToString(commandId), record.getCommandId());
+        assertEquals(commandId, record.getCommandId());
         assertEquals(statusExpected, record.getStatus());
         assertEquals(ProjectId.class.getName(), record.getTargetIdType());
         assertEquals(message.getProjectId().getId(), record.getTargetId());

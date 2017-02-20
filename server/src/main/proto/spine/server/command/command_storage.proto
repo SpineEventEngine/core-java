@@ -44,14 +44,14 @@ import "spine/base/failure.proto";
 message CommandRecord {
     option (SPI_type) = true;
 
-    // A moment of time when this storage record was created.
-    google.protobuf.Timestamp timestamp = 1;
+    // The ID of the command.
+    base.CommandId command_id = 1;
 
     // A short name of Protobuf command type.
     string command_type = 2;
 
-    // String representation of CommandId.
-    string command_id = 3;
+    // A moment of time when this storage record was created.
+    google.protobuf.Timestamp timestamp = 3;
 
     // The status of the command processing.
     base.CommandStatus status = 4;
