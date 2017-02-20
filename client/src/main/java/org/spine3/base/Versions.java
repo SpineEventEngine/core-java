@@ -21,10 +21,10 @@
 package org.spine3.base;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Utilities for working with {@link Version}.
@@ -44,15 +44,11 @@ public class Versions {
                       .build();
     }
 
-    private static Timestamp currentTime() {
-        return Timestamps2.getCurrentTime();
-    }
-
     /**
-     * Creates new instance with the zero number and current system time.
+     * Creates a new instance with the zero number and current system time.
      */
     public static Version create() {
-        return create(0, currentTime());
+        return create(0, getCurrentTime());
     }
 
     /**
@@ -68,7 +64,7 @@ public class Versions {
      * and the timestamp of the current system time.
      */
     public static Version increment(Version version) {
-        final Version result = create(version.getNumber() + 1, currentTime());
+        final Version result = create(version.getNumber() + 1, getCurrentTime());
         return result;
     }
 
