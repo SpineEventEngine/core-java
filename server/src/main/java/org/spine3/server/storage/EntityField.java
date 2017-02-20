@@ -51,8 +51,8 @@ public enum EntityField implements StorageField {
     timestamp,
 
     /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds which is less then
-     * {@link Timestamps2#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
+     * A field for storing the part of a timestamp representing the amount of nanoseconds
+     * which is less than {@link Timestamps2#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
      *
      * @see Timestamp#getNanos()
      */
@@ -78,5 +78,4 @@ public enum EntityField implements StorageField {
      * @see TypeUrl
      */
     type_url
-
 }
