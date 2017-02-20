@@ -24,18 +24,22 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
+import static org.spine3.protobuf.Durations2.hours;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.systemTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
- * Utlity class for working with time-related tests.
+ * Utility class for working with time-related tests.
  *
  * @author Alexander Yevsykov
  */
+@VisibleForTesting
 public class TimeTests {
 
     private TimeTests() {
@@ -43,12 +47,12 @@ public class TimeTests {
     }
 
     /**
-     * Returns the current time in seconds via {@link Timestamps2#getCurrentTime()}.
+     * Returns the {@linkplain Timestamps2#getCurrentTime() current time} in seconds.
      *
      * @return a seconds value
      */
     public static long currentTimeSeconds() {
-        final long secs = Timestamps2.getCurrentTime().getSeconds();
+        final long secs = getCurrentTime().getSeconds();
         return secs;
     }
 
@@ -69,8 +73,8 @@ public class TimeTests {
     /**
      * The provider of current time, which is always the same.
      *
-     * <p>Use this {@code Timestamps.Provider} in time-related tests that are sensitive to
-     * bounds of minutes, hours, days, etc.
+     * <p>Use this {@code Timestamps.Provider} in time-related tests that are
+     * sensitive to bounds of minutes, hours, days, etc.
      */
     public static class FrozenMadHatterParty implements Timestamps2.Provider {
         private final Timestamp frozenTime;
@@ -90,7 +94,7 @@ public class TimeTests {
      * The time provider that can rewind current time.
      *
      * <p>Created in the future, {@linkplain #THIRTY_YEARS_IN_HOURS 30 years} from
-     * the {@link #getCurrentTime() current time}.
+     * the {@link Timestamps2#systemTime() current system time}.
      */
     public static class BackToTheFuture implements Timestamps2.Provider {
 
@@ -99,9 +103,7 @@ public class TimeTests {
         private Timestamp currentTime;
 
         public BackToTheFuture() {
-            this.currentTime = Timestamps.add(
-                    Timestamps2.getCurrentTime(),
-                    Durations2.hours(THIRTY_YEARS_IN_HOURS));
+            this.currentTime = add(systemTime(), hours(THIRTY_YEARS_IN_HOURS));
         }
 
         @Override
@@ -113,18 +115,24 @@ public class TimeTests {
             this.currentTime = currentTime;
         }
 
+        /**
+         * Rewinds the {@linkplain #getCurrentTime() “current time”} forward
+         * by the passed amount of hours.
+         */
         public synchronized Timestamp forward(long hoursDelta) {
             checkPositive(hoursDelta);
-            final Timestamp newTime = Timestamps.add(this.currentTime,
-                                                     Durations2.hours(hoursDelta));
+            final Timestamp newTime = add(this.currentTime, hours(hoursDelta));
             setCurrentTime(newTime);
             return newTime;
         }
 
+        /**
+         * Rewinds the {@linkplain #getCurrentTime() “current time”} backward
+         * by the passed amount of hours.
+         */
         public synchronized Timestamp backward(long hoursDelta) {
             checkPositive(hoursDelta);
-            final Timestamp newTime = Timestamps.subtract(this.currentTime,
-                                                          Durations2.hours(hoursDelta));
+            final Timestamp newTime = subtract(this.currentTime, hours(hoursDelta));
             setCurrentTime(newTime);
             return newTime;
         }
@@ -133,7 +141,6 @@ public class TimeTests {
     /**
      * Utility class for working with timestamps of the the future.
      */
-    @VisibleForTesting
     public static class Future {
 
         private Future() {
@@ -144,19 +151,23 @@ public class TimeTests {
          * Obtains timestamp in the future a number of seconds from current time.
          *
          * @param seconds a positive number of seconds
-         * @return the moment `value` seconds from now
+         * @return the moment which is {@code seconds} from now
          */
         public static Timestamp secondsFromNow(int seconds) {
             checkPositive(seconds);
-            final Timestamp currentTime = Timestamps2.getCurrentTime();
-            final Timestamp result = add(currentTime, fromSeconds((long) seconds));
+            final Timestamp currentTime = getCurrentTime();
+            final Timestamp result = add(currentTime, fromSeconds(seconds));
             return result;
         }
 
+        /**
+         * Verifies if the passed timestamp is in the future comparing it
+         * with {@linkplain Timestamps2#systemTime() system time}.
+         */
         public static boolean isFuture(Timestamp timestamp) {
             // Do not use `getCurrentTime()` as we may use custom `TimestampProvider` already.
             // Get time from metal.
-            final Timestamp currentSystemTime = Timestamps2.systemTime();
+            final Timestamp currentSystemTime = systemTime();
 
             // NOTE: we have the risk of having these two timestamps too close to each other
             // so that the passed timestamp becomes “the past” around the time of this call.
