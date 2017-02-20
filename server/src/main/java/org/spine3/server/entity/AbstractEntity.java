@@ -190,8 +190,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
                 return result;
             }
         }
-        final String errMsg = String.format("%s class must declare a constructor " +
-                                            "with ID and AggregateRoot parameters.", entityClass);
+        final String errMsg = format("%s class must declare a constructor " +
+                                     "with ID and AggregateRoot parameters.", entityClass);
         throw new IllegalStateException(errMsg);
     }
 
