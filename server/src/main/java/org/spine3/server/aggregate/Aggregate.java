@@ -399,8 +399,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         // See if we're in the state update cycle.
         final B builder = this.builder;
 
-        /* If the call to restore() is made during a replay
-           (because the snapshot event was encountered)
+        /* If the call to restore() is made during a replay (because the snapshot was encountered)
            use the currently initialized builder.
            Otherwise, just set the state and the version from the snapshot.
          */
