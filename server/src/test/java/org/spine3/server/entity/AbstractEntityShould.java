@@ -72,7 +72,7 @@ public class AbstractEntityShould {
 
     @SuppressWarnings("unchecked") // It is needed for testing.
     @Test(expected = IllegalStateException.class)
-    public void exc(){
+    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor(){
         AbstractEntity.getConstructor(AggregatePart.class, id.getClass());
     }
 
