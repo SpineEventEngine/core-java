@@ -59,10 +59,24 @@ public class AbstractEntityShould {
     }
 
     @Test
-    public void create_aggregate_root_entity(){
+    public void create_aggregate_root_entity() {
         final AnAggregateRoot aggregateRoot =
                 AbstractEntity.createAggregateRootEntity(id, boundedContext, AnAggregateRoot.class);
         assertNotNull(aggregateRoot);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_part_does_not_have_appropriate_constructor() {
+        AbstractEntity.getAggregatePartConstructor(IncorrectAggregatePart.class, id.getClass());
+    }
+
+    private static class IncorrectAggregatePart
+            extends AggregatePart<String, StringValue, StringValue.Builder> {
+
+        @SuppressWarnings("ConstantConditions") // It is needed for testing.
+        protected IncorrectAggregatePart() {
+            super(null, null);
+        }
     }
 
     static class AnAggregatePart extends AggregatePart<String, StringValue, StringValue.Builder> {

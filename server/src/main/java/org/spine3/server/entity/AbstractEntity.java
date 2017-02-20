@@ -140,8 +140,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends Entity<I, ?>, I>
-    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+    public static <E extends Entity<I, ?>, I> Constructor<E>
+    getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -171,7 +171,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends AggregatePart<I, ?, ?>, I> Constructor<E>
+    public static <E extends AggregatePart, I> Constructor<E>
     getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
         final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
         for (Constructor<?> constructor : constructors) {
