@@ -307,7 +307,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final Map<I, EntityStorageRecord> records = new HashMap<>(projections.size());
         for (P projection : projections) {
             final I id = projection.getId();
-            final EntityStorageRecord record = toEntityRecord(projection);
+            final EntityStorageRecord record = toRecord(projection);
             records.put(id, record);
         }
         storage.write(records);

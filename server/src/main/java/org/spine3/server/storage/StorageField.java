@@ -23,13 +23,14 @@ package org.spine3.server.storage;
 import org.spine3.SPI;
 
 /**
- * A marker interface for the {@code enum}s representing the names of the fields used by the framework to store
- * its data.
+ * A marker interface for the {@code enum}s representing the names of the fields
+ * used by the framework to store its data.
  *
- * <p>Naming conventions for the {@code enum}s' fields may be changed in favor of the field names to be represented
- * accurately.
+ * <p>Naming conventions for the {@code enum}s' fields may be changed in favor of
+ * the field names to be represented accurately.
  *
- * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()} to get a valid field name.
+ * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()}
+ * to get a valid field name.
  *
  * @author Dmytro Dashenkov
  */

@@ -110,7 +110,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
-    public void write(I id, AggregateEvents events) throws IllegalStateException, IllegalArgumentException {
+    public void write(I id, AggregateEvents events)
+            throws IllegalStateException, IllegalArgumentException {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(events);
@@ -243,7 +244,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * Records are sorted by timestamp descending (from newer to older).
      *
      * @param id aggregate ID
-     * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
+     * @return new iterator instance, the iterator is empty if there's no history for
+     *         the aggregate with passed ID
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 

@@ -69,7 +69,7 @@ public class EntityBuilderShould {
         final StringValue state = newStringValue(getClass().getName());
         final Timestamp timestamp = Timestamps.getCurrentTime();
 
-        final Entity entity = givenEntity()
+        final VersionableEntity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -79,19 +79,18 @@ public class EntityBuilderShould {
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(id, entity.getId());
         assertEquals(state, entity.getState());
-        assertEquals(version, entity.getVersion());
-        assertEquals(timestamp, entity.whenModified());
+        assertEquals(version, entity.getVersion().getNumber());
+        assertEquals(timestamp, entity.getVersion().getTimestamp());
     }
 
     @Test
     public void create_entity_with_default_values() {
-        final Entity entity = givenEntity().build();
+        final VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
         assertEquals(newStringValue(""), entity.getState());
-        assertEquals(0, entity.getVersion());
-        assertEquals(Timestamp.getDefaultInstance(), entity.whenModified());
+        assertEquals(0, entity.getVersion().getNumber());
     }
 
     @Test
@@ -103,7 +102,7 @@ public class EntityBuilderShould {
         assertTrue(passed);
     }
 
-    private static class TestEntity extends Entity<Long, StringValue> {
+    private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
         protected TestEntity(Long id) {
             super(id);
         }

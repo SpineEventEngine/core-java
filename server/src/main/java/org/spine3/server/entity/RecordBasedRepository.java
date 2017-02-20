@@ -20,16 +20,17 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
@@ -44,14 +45,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.AnyPacker.pack;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
+import static org.spine3.server.entity.EntityStorageConverter.tuple;
 
 /**
  * The base class for repositories that store entities as records.
@@ -67,6 +68,7 @@ import static org.spine3.protobuf.Messages.toMessageClass;
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends Message>
                 extends Repository<I, E> {
 
+    /** {@inheritDoc} */
     protected RecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
@@ -77,6 +79,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Storage result = factory.createRecordStorage(getEntityClass());
         return result;
     }
+
+    /**
+     * Obtains {@link EntityFactory} associated with this repository.
+     */
+    protected abstract EntityFactory<I, E> entityFactory();
+
+    /**
+     * Obtains {@link EntityStorageConverter} associated with this repository.
+     */
+    protected abstract EntityStorageConverter<I, E, S> entityConverter();
 
     /**
      * Ensures that the repository has the storage.
@@ -93,9 +105,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /** {@inheritDoc} */
     @Override
+    public E create(I id) {
+        final E result = entityFactory().create(id);
+        return result;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void store(E entity) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityStorageRecord record = toEntityRecord(entity);
+        final EntityStorageRecord record = toRecord(entity);
         storage.write(entity.getId(), record);
     }
 
@@ -132,6 +151,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean markArchived(I id) {
         final RecordStorage<I> storage = recordStorage();
@@ -139,6 +159,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected boolean markDeleted(I id) {
         final RecordStorage<I> storage = recordStorage();
@@ -200,7 +221,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
-        final List<E> entities = new LinkedList<>();
+        final List<E> entities = Lists.newLinkedList();
+        final EntityStorageConverter<I, E, S> converter = entityConverter().withFieldMask(fieldMask);
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
@@ -211,7 +233,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 continue;
             }
 
-            final E entity = toEntity(id, record, fieldMask);
+            final EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
+            final E entity = converter.reverse()
+                                       .convert(tuple);
             entities.add(entity);
         }
 
@@ -274,64 +298,27 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
 
-        final Collection<I> result = Collections2.transform(idsList, new Function<EntityId, I>() {
-            @Nullable
-            @Override
-            public I apply(@Nullable EntityId input) {
-                checkNotNull(input);
-                final Any idAsAny = input.getId();
-
-                final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-                final Class messageClass = toMessageClass(typeUrl);
-                checkIdClass(messageClass);
-
-                final Message idAsMessage = unpack(idAsAny);
-
-                // As the message class is the same as expected, the conversion is safe.
-                @SuppressWarnings("unchecked")
-                final I id = (I) idAsMessage;
-                return id;
-            }
-
-            private void checkIdClass(Class messageClass) {
-                final boolean classIsSame = expectedIdClass.equals(messageClass);
-                if (!classIsSame) {
-                    final String errMsg = String.format("Unexpected ID class encountered: %s. Expected: %s",
-                                                        messageClass, expectedIdClass);
-                    throw new IllegalStateException(errMsg);
-                }
-            }
-        });
+        final Collection<I> result = Collections2.transform(idsList,
+                                                            new EntityIdFunction<>(expectedIdClass));
 
         return result;
     }
 
+    /**
+     * Converts the passed entity into {@code EntityStorageRecord} that
+     * stores the entity data.
+     */
+    protected EntityStorageRecord toRecord(E entity) {
+        final EntityStorageConverter.Tuple<I> tuple = entityConverter().convert(entity);
+        return tuple != null ? tuple.getState()
+                             : EntityStorageRecord.getDefaultInstance();
+    }
+
     private E toEntity(I id, EntityStorageRecord record) {
-        return toEntity(id, record, FieldMask.getDefaultInstance());
-    }
-
-    private E toEntity(I id, EntityStorageRecord record, FieldMask fieldMask) {
-        final E entity = create(id);
-        final Message unpacked = unpack(record.getState());
-        final TypeUrl entityStateType = getEntityStateType();
-        @SuppressWarnings("unchecked")
-        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
-        entity.setState(state, record.getVersion(), record.getWhenModified());
-        entity.setStatus(record.getEntityStatus());
-        return entity;
-    }
-
-    protected EntityStorageRecord toEntityRecord(E entity) {
-        final S state = entity.getState();
-        final Any stateAny = pack(state);
-        final Timestamp whenModified = entity.whenModified();
-        final int version = entity.getVersion();
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                                                                       .setState(stateAny)
-                                                                       .setWhenModified(whenModified)
-                                                                       .setEntityStatus(entity.getStatus())
-                                                                       .setVersion(version);
-        return builder.build();
+        EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
+        final E result = entityConverter().reverse()
+                                          .convert(tuple);
+        return result;
     }
 
     /**
@@ -350,5 +337,50 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 return result;
             }
         };
+    }
+
+    /**
+     * Transforms an instance of {@link EntityId} into an identifier
+     * of the required type.
+     *
+     * @param <I> the target type of identifiers
+     */
+    @VisibleForTesting
+    static class EntityIdFunction<I> implements Function<EntityId, I> {
+
+        private final Class<I> expectedIdClass;
+
+        public EntityIdFunction(Class<I> expectedIdClass) {
+            this.expectedIdClass = expectedIdClass;
+        }
+
+        @Nullable
+        @Override
+        public I apply(@Nullable EntityId input) {
+            checkNotNull(input);
+            final Any idAsAny = input.getId();
+
+            final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
+            final Class messageClass = toMessageClass(typeUrl);
+            checkIdClass(messageClass);
+
+            final Message idAsMessage = unpack(idAsAny);
+
+            // As the message class is the same as expected, the conversion is safe.
+            @SuppressWarnings("unchecked")
+            final I id = (I) idAsMessage;
+            return id;
+        }
+
+        private void checkIdClass(Class messageClass) {
+            final boolean classIsSame = expectedIdClass.equals(messageClass);
+            if (!classIsSame) {
+                final String errMsg = format(
+                        "Unexpected ID class encountered: %s. Expected: %s",
+                        messageClass, expectedIdClass
+                );
+                throw new IllegalStateException(errMsg);
+            }
+        }
     }
 }
