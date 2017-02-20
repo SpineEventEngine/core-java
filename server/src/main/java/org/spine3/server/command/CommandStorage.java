@@ -99,7 +99,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         checkNotClosed();
         checkNotDefault(error);
 
-        CommandId id = getOrGenerateCommandId(command);
+        final CommandId id = getOrGenerateCommandId(command);
 
         final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
