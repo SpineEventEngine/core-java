@@ -77,12 +77,13 @@ public class CommandsShould {
 
     @Test
     public void pass_the_null_tolerance_check() throws Descriptors.DescriptorValidationException {
+        final FileDescriptor fileDescriptor = FileDescriptor.buildFrom(
+                DescriptorProtos.FileDescriptorProto.getDefaultInstance() ,
+                new FileDescriptor[]{});
         final NullToleranceTest nullToleranceTest =
                 NullToleranceTest.newBuilder()
                                  .setClass(Commands.class)
-                                 .addDefaultValue(FileDescriptor.buildFrom(
-                                         DescriptorProtos.FileDescriptorProto.getDefaultInstance() ,
-                                         new FileDescriptor[]{}))
+                                 .addDefaultValue(fileDescriptor)
                                  .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
