@@ -50,7 +50,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         return super.getIdClass();
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super metho is not needed.
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor =
