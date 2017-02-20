@@ -44,6 +44,11 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
         // Have the constructor for easier location of usages.
     }
 
+    public EntityBuilder<A, I, S> withRoot(AggregateRoot<I> aggregateRoot) {
+        this.aggregateRoot = aggregateRoot;
+        return this;
+    }
+
     @Override
     public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
@@ -53,7 +58,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     @Override
     protected A createEntity(I id) {
         final Constructor<A> constructor = getConstructor();
-        final AggregateRoot<I> root = getAggregateRoot();
+        final AggregateRoot<I> root = aggregateRoot;
         final A result = AbstractEntity.createEntity(constructor, id, root);
         return result;
     }
@@ -64,14 +69,5 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
                 getResultClass(), getIdClass());
         constructor.setAccessible(true);
         return constructor;
-    }
-
-    public EntityBuilder<A, I, S> withRoot(AggregateRoot<I> root) {
-        this.aggregateRoot = root;
-        return this;
-    }
-
-    public AggregateRoot<I> getAggregateRoot() {
-        return aggregateRoot;
     }
 }
