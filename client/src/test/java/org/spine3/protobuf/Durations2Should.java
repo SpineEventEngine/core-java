@@ -23,6 +23,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
 
+import static com.google.protobuf.util.Durations.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -135,7 +136,7 @@ public class Durations2Should {
     public void fail_to_subtract_too_big_values() {
         final Duration duration1 = seconds(Long.MAX_VALUE);
         final Duration duration2 = seconds(Long.MAX_VALUE / 2);
-        com.google.protobuf.util.Durations.subtract(duration1, duration2);
+        subtract(duration1, duration2);
     }
 
     @Test
