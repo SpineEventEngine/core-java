@@ -70,6 +70,12 @@ public class AbstractEntityShould {
         AbstractEntity.getAggregatePartConstructor(WrongAggregatePart.class, id.getClass());
     }
 
+    @SuppressWarnings("unchecked") // It is needed for testing.
+    @Test(expected = IllegalStateException.class)
+    public void exc(){
+        AbstractEntity.getConstructor(AggregatePart.class, id.getClass());
+    }
+
     /*
      Test environment classes
     ***************************/
