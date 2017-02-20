@@ -22,6 +22,8 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateRoot;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -106,7 +108,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             registry.put(entityClass, state);
         }
         @SuppressWarnings("unchecked")
-            // cast is safe because this type of messages is saved to the map
+        // cast is safe because this type of messages is saved to the map
         final S defaultState = (S) registry.get(entityClass);
         return defaultState;
     }
@@ -124,21 +126,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return TypeInfo.getStateClass(getClass());
     }
 
-    /**
-     * Obtains constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @param entityClass the entity class
-     * @param idClass the class of entity identifiers
-     * @param <E> the entity type
-     * @param <I> the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
-    public static <E extends Entity<I, ?>, I>
-           Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+    private static <E extends Entity<I, ?>, I>
+    Constructor<E> getConstructorType(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -157,17 +146,71 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
+     * Obtains constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    public static <E extends Entity<I, ?>, I>
+    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+        if (AggregatePart.class.isAssignableFrom(entityClass)) {
+            return getAggregatePartConstructor(entityClass, idClass);
+        }
+        return getConstructorType(entityClass, idClass);
+    }
+
+    private static <E extends Entity<I, ?>, I>
+    Constructor<E> getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
+        final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
+        for (Constructor<?> constructor : constructors) {
+            final Class<?>[] parameterTypes = constructor.getParameterTypes();
+            final int length = parameterTypes.length;
+            if (length != 2) {
+                continue;
+            }
+            final boolean correctConstructor = idClass.equals(parameterTypes[0]) &&
+                                               AggregateRoot.class.isAssignableFrom(
+                                                       parameterTypes[1]);
+            if (correctConstructor) {
+                @SuppressWarnings("unchecked") // It is safe because arguments are checked before.
+                final Constructor<E> result = (Constructor<E>) constructor;
+                result.setAccessible(true);
+                return result;
+            }
+        }
+        throw new RuntimeException();
+    }
+
+    /**
      * Creates new entity and sets it to the default state.
      *
      * @param ctor the constructor to use
-     * @param id the ID of the entity
-     * @param <I> the type of entity IDs
-     * @param <E> the type of the entity
+     * @param id   the ID of the entity
+     * @param <I>  the type of entity IDs
+     * @param <E>  the type of the entity
      * @return new entity
      */
     public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         try {
             final E result = ctor.newInstance(id);
+            result.init();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
+                                                                     AggregateRoot<I> root) {
+        try {
+            final E result = ctor.newInstance(id, root);
             result.init();
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {

@@ -22,12 +22,17 @@ package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
  * @author Alexander Yevsyukov
  */
 public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
+
+    private AggregateRoot<I> root;
 
     /**
      * {@inheritDoc}
@@ -36,11 +41,24 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         super(boundedContext);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override // to expose this method in the same package.
     protected Class<I> getIdClass() {
         return super.getIdClass();
+    }
+
+    @Override
+    public A create(I id) {
+        try {
+            final Class<?> rootClass = getConstructor().getParameterTypes()[1];
+            final Constructor<?> rootConstructor = rootClass.getDeclaredConstructor(
+                    getBoundedContext().getClass(), id.getClass());
+            rootConstructor.setAccessible(true);
+            final AggregateRoot root = (AggregateRoot) rootConstructor.newInstance(getBoundedContext(), id);
+            final A result = getConstructor().newInstance(id, root);
+            return result;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

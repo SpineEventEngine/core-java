@@ -40,6 +40,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atMost;
@@ -51,7 +52,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class AggregateRootShould {
 
     private static final StreamObserver<Response> RESPONSE_OBSERVER = new MockStreamObserver();
-    private AggregateRoot aggregateRoot;
+    private ProjectRoot aggregateRoot;
     private CommandBus commandBus;
     private ProjectId projectId;
     private CommandContext commandContext;
@@ -62,14 +63,15 @@ public class AggregateRootShould {
         commandContext = createCommandContext();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
-        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
-
-        commandBus = boundedContext.getCommandBus();
         projectId = ProjectId.newBuilder()
                              .setId(newUuid())
                              .build();
         aggregateRoot = new ProjectRoot(boundedContext, projectId);
+        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
+        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
+
+        commandBus = boundedContext.getCommandBus();
+
     }
 
     @Test
@@ -94,16 +96,18 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void pass_the_test() {
+    public void start_the_project() {
         final Command createProjectSmd = createProjectCmdInstance();
         commandBus.post(createProjectSmd, RESPONSE_OBSERVER);
 
         final Command startProjectCmd = createStartProjectCmd();
         commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
+        
+        assertFalse(exceptionOccurred);
     }
 
     @Test
-    public void not_pass_the_test() {
+    public void set_variable_to_true_when_it_is_trying_to_start_uncreated_project() {
         final Command startProjectCmd = createStartProjectCmd();
         commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
         assertTrue(exceptionOccurred);

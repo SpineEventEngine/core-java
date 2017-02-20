@@ -139,7 +139,6 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-
     private static class TaskAggregatePart extends AggregatePart<TaskId, Task, Task.Builder> {
         private TaskAggregatePart(TaskId id, TaskRoot root) {
             super(id, root);

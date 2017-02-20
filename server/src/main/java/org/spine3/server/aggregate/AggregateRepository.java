@@ -78,8 +78,8 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                extends Repository<I, A>
-                implements CommandDispatcher {
+        extends Repository<I, A>
+        implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -106,7 +106,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
         this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
     }
 
     private Constructor<A> getEntityConstructor() {
@@ -114,6 +113,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Class<I> idClass = getIdClass();
         final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
         return result;
+    }
+
+    protected Constructor<A> getConstructor(){
+        return entityConstructor;
     }
 
     @Override
@@ -246,7 +249,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @VisibleForTesting
     A loadOrCreate(I id) {
         @SuppressWarnings("OptionalGetWithoutIsPresent") // The storage always returns events.
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id).get();
+        final AggregateEvents aggregateEvents = aggregateStorage().read(id)
+                                                                  .get();
         final Snapshot snapshot = aggregateEvents.getSnapshot();
         final A result = create(id);
         final List<Event> events = aggregateEvents.getEventList();
