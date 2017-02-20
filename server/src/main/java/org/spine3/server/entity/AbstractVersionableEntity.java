@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Stringifiers;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
@@ -33,6 +32,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.base.Versions.checkIsIncrement;
 
 /**
@@ -51,7 +51,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
 
     private Version version;
 
-    private Visibility visibility = Visibility.getDefaultInstance();
+    private Visibility visibility;
 
     /**
      * Creates a new instance.
@@ -62,7 +62,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected AbstractVersionableEntity(I id) {
         super(id);
-        this.version = Versions.create();
+        setVersion(Versions.create());
+        setVisibility(Visibility.getDefaultInstance());
     }
 
     /**
@@ -84,7 +85,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         super.init();
         injectState(getDefaultState());
         initVersion(Versions.create());
-        this.visibility = Visibility.getDefaultInstance();
+        setVisibility(Visibility.getDefaultInstance());
     }
 
     /**
@@ -154,18 +155,18 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
             );
             throw new IllegalStateException(errMsg);
         }
-        this.version = version;
+        setVersion(version);
     }
 
     protected void advanceVersion(Version newVersion) {
         checkNotNull(newVersion);
         checkIsIncrement(this.getVersion(), newVersion);
-        this.version = newVersion;
+        setVersion(newVersion);
     }
 
-    protected void updateVersion(Version newVersion) {
+    private void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
-        if (this.version.equals(newVersion)) {
+        if (version.equals(newVersion)) {
             return;
         }
 
@@ -180,7 +181,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
             throw new IllegalArgumentException(errMsg);
         }
 
-        this.version = newVersion;
+        setVersion(newVersion);
     }
 
 
@@ -190,7 +191,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @param newState a new state to set
      */
     protected void incrementState(S newState) {
-        setState(newState, Versions.increment(getVersion()));
+        setState(newState, incrementedVersion());
     }
 
     /**
@@ -201,13 +202,21 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         return version;
     }
 
+    private void setVersion(Version version) {
+        this.version = version;
+    }
+
+    private Version incrementedVersion() {
+        return Versions.increment(getVersion());
+    }
+
     /**
      * Advances the current version by one and records the time of the modification.
      *
      * @return new version number
      */
     protected int incrementVersion() {
-        version = Versions.increment(this.version);
+        setVersion(incrementedVersion());
         return version.getNumber();
     }
 
@@ -242,9 +251,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        this.visibility = getVisibility().toBuilder()
-                                         .setArchived(archived)
-                                         .build();
+        setVisibility(getVisibility().toBuilder()
+                                     .setArchived(archived)
+                                     .build());
     }
 
     /**
@@ -260,9 +269,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        this.visibility = getVisibility().toBuilder()
-                                         .setDeleted(deleted)
-                                         .build();
+        setVisibility(getVisibility().toBuilder()
+                                     .setDeleted(deleted)
+                                     .build());
     }
 
     /**
@@ -274,7 +283,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getVisibility().getArchived()) {
-            final String idStr = Stringifiers.idToString(getId());
+            final String idStr = idToString(getId());
             throw new CannotModifyArchivedEntity(idStr);
         }
     }
@@ -288,7 +297,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getVisibility().getDeleted()) {
-            final String idStr = Stringifiers.idToString(getId());
+            final String idStr = idToString(getId());
             throw new CannotModifyDeletedEntity(idStr);
         }
     }
