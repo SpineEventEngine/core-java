@@ -37,6 +37,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.ImportEvents;
@@ -173,18 +174,18 @@ public class AggregateShould {
         final Project state = aggregate.getState();
 
         assertEquals(ID, state.getId());
-        assertEquals(Project.Status.CREATED, state.getStatus());
+        assertEquals(Status.CREATED, state.getStatus());
     }
 
     @Test
     public void return_current_state_after_several_dispatches() {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.CREATED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.CREATED, aggregate.getState()
+                                              .getStatus());
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.STARTED, aggregate.getState()
+                                              .getStatus());
     }
 
     @Test
@@ -221,13 +222,13 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.STARTED, aggregate.getState()
+                                              .getStatus());
 
         final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
         aggregate.play(events);
-        assertEquals(Project.Status.CREATED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.CREATED, aggregate.getState()
+                                              .getStatus());
     }
 
     @Test
@@ -284,7 +285,7 @@ public class AggregateShould {
         final Project state = unpack(snapshot.getState());
 
         assertEquals(ID, state.getId());
-        assertEquals(Project.Status.CREATED, state.getStatus());
+        assertEquals(Status.CREATED, state.getStatus());
     }
 
     @Test
@@ -295,19 +296,21 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.STARTED, aggregate.getState()
+                                              .getStatus());
 
         aggregate.restore(snapshotNewProject);
-        assertEquals(Project.Status.CREATED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.CREATED, aggregate.getState()
+                                              .getStatus());
     }
 
     @Test
     public void import_events() {
         final ImportEvents importCmd = ImportEvents.newBuilder()
-                                                   .addEvent(Given.Event.projectCreated(aggregate.getId()))
-                                                   .addEvent(Given.Event.taskAdded(aggregate.getId()))
+                                                   .addEvent(Given.Event.projectCreated(
+                                                           aggregate.getId()))
+                                                   .addEvent(
+                                                           Given.Event.taskAdded(aggregate.getId()))
                                                    .build();
         aggregate.dispatchCommands(importCmd);
 
@@ -338,7 +341,8 @@ public class AggregateShould {
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
+            final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(),
+                                                                           cmd.getName());
             return event;
         }
 
@@ -365,7 +369,7 @@ public class AggregateShould {
         private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+                    .setStatus(Status.CREATED);
 
             isProjectCreatedEventApplied = true;
         }
@@ -379,7 +383,7 @@ public class AggregateShould {
         private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED);
+                    .setStatus(Status.STARTED);
 
             isProjectStartedEventApplied = true;
         }

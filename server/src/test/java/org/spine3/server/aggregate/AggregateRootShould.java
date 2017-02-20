@@ -31,10 +31,10 @@ import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
-import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.ProjectLifeCycle;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
@@ -191,7 +191,7 @@ public class AggregateRootShould {
 
         @Apply
         private void apply(ProjectStarted event) {
-            getBuilder().setStatus(ProjectLifeCycle.Status.STARTED);
+            getBuilder().setStatus(Status.STARTED);
         }
     }
 
