@@ -76,7 +76,7 @@ public class StorageFieldShould {
         assertField(EntityField.timestamp);
         assertField(EntityField.timestamp_nanos);
         assertField(EntityField.type_url);
-        assertField(EntityField.value);
+        assertField(EntityField.bytes);
     }
 
     private static void assertField(Enum field) {

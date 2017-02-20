@@ -65,12 +65,12 @@ public enum EntityField implements StorageField {
      * @see Message#toByteArray()
      * @see Any#getValue()
      */
-    value,
+    bytes,
 
     /**
      * A field representing a {@link TypeUrl} of a certain {@link Message} type.
      *
-     * <p>This field is commonly used in pair with {@link EntityField#value}
+     * <p>This field is commonly used in pair with {@link EntityField#bytes}
      * to store the fully qualified type name with the type prefix.
      *
      * @see TypeUrl
