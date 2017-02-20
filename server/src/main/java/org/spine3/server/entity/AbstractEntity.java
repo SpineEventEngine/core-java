@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
 
@@ -195,8 +196,42 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         throw new IllegalStateException(errMsg);
     }
 
-    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
-                                                                     AggregateRoot<I> root) {
+    /**
+     * Creates new {@code AggregateRoot} entity and sets it to the default state.
+     *
+     * @param id             the ID of the entity
+     * @param boundedContext the {@code BoundedContext} to use
+     * @param rootClass      the class of the {@code AggregateRoot}
+     * @param <I>            the type of entity IDs
+     * @return new entity
+     */
+    public static <I> AggregateRoot<I>
+    createAggregateRootEntity(I id,
+                              BoundedContext boundedContext,
+                              Class<AggregateRoot<I>> rootClass) {
+        try {
+            final Constructor<AggregateRoot<I>> rootConstructor =
+                    rootClass.getDeclaredConstructor(boundedContext.getClass(), id.getClass());
+            rootConstructor.setAccessible(true);
+            AggregateRoot<I> root = rootConstructor.newInstance(boundedContext, id);
+            return root;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Creates new {@code AggregatePart} entity and sets it to the default state.
+     *
+     * @param ctor the constructor to use
+     * @param id   the ID of the entity
+     * @param <I>  the type of entity IDs
+     * @param <E>  the type of the entity
+     * @return new entity
+     */
+    public static <I, E extends AbstractEntity<I, ?>> E
+    createAggregatePartEntity(Constructor<E> ctor, I id, AggregateRoot<I> root) {
         try {
             final E result = ctor.newInstance(id, root);
             result.init();

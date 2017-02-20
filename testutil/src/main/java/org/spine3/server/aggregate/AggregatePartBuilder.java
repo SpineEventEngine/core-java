@@ -60,7 +60,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     protected A createEntity(I id) {
         final Constructor<A> constructor = getConstructor();
         final AggregateRoot<I> root = aggregateRoot;
-        final A result = AbstractEntity.createEntity(constructor, id, root);
+        final A result = AbstractEntity.createAggregatePartEntity(constructor, id, root);
         return result;
     }
 
