@@ -189,14 +189,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
     }
 
-//    public static <E extends Entity<I, ?>, I>
-//    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
-//        if (AggregatePart.class.isAssignableFrom(entityClass)) {
-//            return getAggregatePartConstructor(entityClass, idClass);
-//        }
-//        return getConstructorType(entityClass, idClass);
-//    }
-
     /**
      * Creates new entity and sets it to the default state.
      *
@@ -215,27 +207,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             throw new IllegalStateException(e);
         }
     }
-
-//    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
-//        final Constructor<A> entityConstructor = AbstractEntity.getAggregatePartConstructor(
-//                getEntityClass(), getIdClass());
-//        entityConstructor.setAccessible(true);
-//        final Class<AggregateRoot<I>> rootClass = (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
-//        final Constructor<AggregateRoot<I>> rootConstructor =
-//                rootClass.getDeclaredConstructor(getBoundedContext().getClass(), id.getClass());
-//        rootConstructor.setAccessible(true);
-//        final AggregateRoot<I> root = rootConstructor.newInstance(getBoundedContext(), id);
-//    }
-//    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
-//                                                                     AggregateRoot<I> root) {
-//        try {
-//            final E result = ctor.newInstance(id, root);
-//            result.init();
-//            return result;
-//        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-//            throw new IllegalStateException(e);
-//        }
-//    }
 
     @Override
     public boolean equals(Object o) {
