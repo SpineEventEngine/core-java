@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 
 /**
@@ -51,8 +50,7 @@ public enum EntityField implements StorageField {
     timestamp,
 
     /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds
-     * which is less than {@link Timestamps2#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
+     * A field for storing the part of a timestamp representing the amount of nanoseconds.
      *
      * @see Timestamp#getNanos()
      */
