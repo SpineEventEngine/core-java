@@ -36,7 +36,6 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Values;
-import org.spine3.server.command.storage.CommandStorageRecord;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
@@ -70,7 +69,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class CommandStorageShould
-        extends AbstractStorageShould<CommandId, CommandStorageRecord, CommandStorage> {
+        extends AbstractStorageShould<CommandId, CommandRecord, CommandStorage> {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
@@ -78,7 +77,7 @@ public abstract class CommandStorageShould
     private CommandStorage storage;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private CommandStorageRecord record;
+    private CommandRecord record;
 
     private CommandId id;
 
@@ -93,19 +92,19 @@ public abstract class CommandStorageShould
     }
 
     @Override
-    protected CommandStorageRecord newStorageRecord() {
+    protected CommandRecord newStorageRecord() {
         final Any command = AnyPacker.pack(Given.Command.createProject());
         final String commandType = ofEnclosed(command).getTypeName();
         final CommandContext context = createCommandContext();
-        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setTimestamp(getCurrentTime())
-                .setCommandType(commandType)
-                .setCommandId(idToString(context.getCommandId()))
-                .setStatus(RECEIVED)
-                .setTargetId(newUuid())
-                .setTargetIdType(String.class.getName())
-                .setMessage(command)
-                .setContext(context);
+        final CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                           .setTimestamp(getCurrentTime())
+                                                           .setCommandType(commandType)
+                                                           .setCommandId(idToString(context.getCommandId()))
+                                                           .setStatus(RECEIVED)
+                                                           .setTargetId(newUuid())
+                                                           .setTargetIdType(String.class.getName())
+                                                           .setMessage(command)
+                                                           .setContext(context);
         return builder.build();
     }
 
@@ -125,7 +124,7 @@ public abstract class CommandStorageShould
         final CommandId commandId = getId(command);
 
         storage.store(command);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, RECEIVED);
     }
@@ -138,7 +137,7 @@ public abstract class CommandStorageShould
         final Error error = newError();
 
         storage.store(command, error);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, ERROR);
         assertEquals(error, record.getError());
@@ -151,7 +150,7 @@ public abstract class CommandStorageShould
         final Error error = newError();
 
         storage.store(command, error);
-        final List<CommandStorageRecord> records = Lists.newArrayList(storage.read(ERROR));
+        final List<CommandRecord> records = Lists.newArrayList(storage.read(ERROR));
 
         assertEquals(1, records.size());
         assertFalse(records.get(0)
@@ -168,7 +167,7 @@ public abstract class CommandStorageShould
         final CommandStatus status = SCHEDULED;
 
         storage.store(command, status);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, status);
     }
@@ -203,7 +202,7 @@ public abstract class CommandStorageShould
 
         storage.setOkStatus(id);
 
-        final CommandStorageRecord actual = storage.read(id).get();
+        final CommandRecord actual = storage.read(id).get();
         assertEquals(OK, actual.getStatus());
     }
 
@@ -215,7 +214,7 @@ public abstract class CommandStorageShould
 
         storage.updateStatus(id, error);
 
-        final CommandStorageRecord actual = storage.read(id).get();
+        final CommandRecord actual = storage.read(id).get();
         assertEquals(ERROR, actual.getStatus());
         assertEquals(error, actual.getError());
     }
@@ -228,7 +227,7 @@ public abstract class CommandStorageShould
 
         storage.updateStatus(id, failure);
 
-        final CommandStorageRecord actual = storage.read(id).get();
+        final CommandRecord actual = storage.read(id).get();
         assertEquals(FAILURE, actual.getStatus());
         assertEquals(failure, actual.getFailure());
     }
@@ -242,7 +241,7 @@ public abstract class CommandStorageShould
         final Command command = Given.Command.createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, status).build();
+        final CommandRecord record = CommandStorage.newRecordBuilder(command, status).build();
 
         checkRecord(record, command, status);
     }
@@ -251,7 +250,7 @@ public abstract class CommandStorageShould
     public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
         final StringValue message = StringValue.getDefaultInstance();
         final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
-        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
+        final CommandRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
 
         assertEquals("", record.getTargetId());
         assertEquals("", record.getTargetIdType());
@@ -360,7 +359,7 @@ public abstract class CommandStorageShould
                       .build();
     }
 
-    private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {
+    private static void checkRecord(CommandRecord record, Command cmd, CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
         final CreateProject message = unpack(cmd.getMessage());

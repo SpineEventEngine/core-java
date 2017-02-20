@@ -23,9 +23,9 @@ package spine.server.command;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.command.storage";
+option java_package = "org.spine3.server.command";
 option java_multiple_files = true;
-option java_outer_classname = "CommandStorageProto";
+option java_outer_classname = "CommandRecordProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
@@ -37,9 +37,11 @@ import "spine/base/error.proto";
 import "spine/base/failure.proto";
 
 // This type defines the way commands are stored in command storage.
+//
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
-message CommandStorageRecord {
+//
+message CommandRecord {
     option (SPI_type) = true;
 
     // A moment of time when this storage record was created.
@@ -71,16 +73,18 @@ message CommandStorageRecord {
     // If the command is not for an entity, this field is an empty string.
     // We store the type of entity ID, not the type of the entity itself,
     // because it is not available at the level of commands.
+    //
     string target_id_type = 10;
 
     // String representation of the command target entity ID.
     //
-    // If the command is not for an entity, this field is an empty string.
+    // If the command is not for an entity, this field is empty.
+    //
     string target_id = 11;
 
     reserved 12 to 19;
 
-    // The command instance.
+    // The command message.
     google.protobuf.Any message = 20;
 
     // The context of the command.

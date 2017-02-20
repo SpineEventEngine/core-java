@@ -25,8 +25,8 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.server.command.CommandRecord;
 import org.spine3.server.command.CommandStorage;
-import org.spine3.server.command.storage.CommandStorageRecord;
 
 import java.util.Iterator;
 
@@ -56,7 +56,7 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
-    public void write(CommandId id, CommandStorageRecord record) {
+    public void write(CommandId id, CommandRecord record) {
         checkNotClosed();
         checkNotDefault(id);
         checkNotDefault(record);
@@ -64,10 +64,10 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
-    public Optional<CommandStorageRecord> read(CommandId id) {
+    public Optional<CommandRecord> read(CommandId id) {
         checkNotClosed();
         checkNotDefault(id);
-        final Optional<CommandStorageRecord> record = get(id);
+        final Optional<CommandRecord> record = get(id);
         return record;
     }
 
@@ -76,7 +76,7 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
-    protected Iterator<CommandStorageRecord> read(final CommandStatus status) {
+    protected Iterator<CommandRecord> read(final CommandStatus status) {
         checkNotClosed();
         return getStorage().getByStatus(status);
     }
@@ -86,11 +86,11 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
-        final CommandStorageRecord record = checkFound(get(id), id);
-        final CommandStorageRecord updatedRecord = record.toBuilder()
-                                                         .setStatus(CommandStatus.ERROR)
-                                                         .setError(error)
-                                                         .build();
+        final CommandRecord record = checkFound(get(id), id);
+        final CommandRecord updatedRecord = record.toBuilder()
+                                                  .setStatus(CommandStatus.ERROR)
+                                                  .setError(error)
+                                                  .build();
         put(id, updatedRecord);
     }
 
@@ -99,11 +99,11 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
-        final CommandStorageRecord record = checkFound(get(id), id);
-        final CommandStorageRecord updatedRecord = record.toBuilder()
-                                                         .setStatus(CommandStatus.FAILURE)
-                                                         .setFailure(failure)
-                                                         .build();
+        final CommandRecord record = checkFound(get(id), id);
+        final CommandRecord updatedRecord = record.toBuilder()
+                                                  .setStatus(CommandStatus.FAILURE)
+                                                  .setFailure(failure)
+                                                  .build();
         put(id, updatedRecord);
     }
 
@@ -111,24 +111,24 @@ class InMemoryCommandStorage extends CommandStorage {
     public void setOkStatus(CommandId id) {
         checkNotClosed();
         checkNotNull(id);
-        final CommandStorageRecord record = checkFound(get(id), id);
-        final CommandStorageRecord updatedRecord = record.toBuilder()
-                                                         .setStatus(CommandStatus.OK)
-                                                         .build();
+        final CommandRecord record = checkFound(get(id), id);
+        final CommandRecord updatedRecord = record.toBuilder()
+                                                  .setStatus(CommandStatus.OK)
+                                                  .build();
         put(id, updatedRecord);
     }
 
-    private void put(CommandId id, CommandStorageRecord record) {
+    private void put(CommandId id, CommandRecord record) {
         getStorage().put(id, record);
     }
 
-    private Optional<CommandStorageRecord> get(CommandId id) {
+    private Optional<CommandRecord> get(CommandId id) {
         return getStorage().get(id);
     }
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "OptionalUsedAsFieldOrParameterType"})
         // We do check. It's the purpose of this method.
-    private static CommandStorageRecord checkFound(Optional<CommandStorageRecord> record, CommandId id) {
+    private static CommandRecord checkFound(Optional<CommandRecord> record, CommandId id) {
         checkState(record.isPresent(), "No record found for command ID: " + idToString(id));
         return record.get();
     }

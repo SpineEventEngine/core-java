@@ -25,7 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.server.command.storage.CommandStorageRecord;
+import org.spine3.server.command.CommandRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -39,25 +39,25 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Yevsyukov
  */
-class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
+class TenantCommands implements TenantStorage<CommandId, CommandRecord> {
 
-    private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
+    private final Map<CommandId, CommandRecord> storage = newHashMap();
 
     @Nullable
     @Override
-    public Optional<CommandStorageRecord> get(CommandId id) {
-        final Optional<CommandStorageRecord> record = Optional.fromNullable(storage.get(id));
+    public Optional<CommandRecord> get(CommandId id) {
+        final Optional<CommandRecord> record = Optional.fromNullable(storage.get(id));
         return record;
     }
 
-    Iterator<CommandStorageRecord> getByStatus(CommandStatus status) {
-        final Collection<CommandStorageRecord> records = storage.values();
-        final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
+    Iterator<CommandRecord> getByStatus(CommandStatus status) {
+        final Collection<CommandRecord> records = storage.values();
+        final Iterator<CommandRecord> filteredRecords = filterByStatus(records.iterator(), status);
         return filteredRecords;
     }
 
     @Override
-    public void put(CommandId id, CommandStorageRecord record) {
+    public void put(CommandId id, CommandRecord record) {
         storage.put(id, record);
     }
 
@@ -66,11 +66,11 @@ class TenantCommands implements TenantStorage<CommandId, CommandStorageRecord> {
         return storage.isEmpty();
     }
 
-    private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
-                                                                 final CommandStatus status) {
-        return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
+    private static Iterator<CommandRecord> filterByStatus(Iterator<CommandRecord> records,
+                                                          final CommandStatus status) {
+        return Iterators.filter(records, new Predicate<CommandRecord>() {
             @Override
-            public boolean apply(@Nullable CommandStorageRecord record) {
+            public boolean apply(@Nullable CommandRecord record) {
                 if (record == null) {
                     return false;
                 }

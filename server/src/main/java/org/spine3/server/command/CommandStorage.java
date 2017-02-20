@@ -34,7 +34,6 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.command.storage.CommandStorageRecord;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.storage.AbstractStorage;
 
@@ -56,7 +55,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
+public abstract class CommandStorage extends AbstractStorage<CommandId, CommandRecord> {
 
     protected CommandStorage(boolean multitenant) {
         super(multitenant);
@@ -84,7 +83,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     protected void store(Command command, CommandStatus status) {
         checkNotClosed();
 
-        final CommandStorageRecord record = newRecordBuilder(command, status).build();
+        final CommandRecord record = newRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
     }
@@ -106,7 +105,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
-        final CommandStorageRecord record = newRecordBuilder(command, ERROR)
+        final CommandRecord record = newRecordBuilder(command, ERROR)
                 .setError(error)
                 .setCommandId(idToString(id))
                 .build();
@@ -122,7 +121,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      */
     protected Iterator<Command> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<CommandStorageRecord> recordIterator = read(status);
+        final Iterator<CommandRecord> recordIterator = read(status);
         final Iterator<Command> commandIterator = toCommandIterator(recordIterator);
         return commandIterator;
     }
@@ -133,7 +132,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @param status a command status to search by
      * @return records with the given status
      */
-    protected abstract Iterator<CommandStorageRecord> read(CommandStatus status);
+    protected abstract Iterator<CommandRecord> read(CommandStatus status);
 
     /** Updates the status of the command to {@link CommandStatus#OK}. */
     protected abstract void setOkStatus(CommandId commandId);
@@ -154,7 +153,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * @return a storage record
      */
     @VisibleForTesting
-    static CommandStorageRecord.Builder newRecordBuilder(Command command, CommandStatus status) {
+    static CommandRecord.Builder newRecordBuilder(Command command, CommandStatus status) {
         final CommandContext context = command.getContext();
 
         final CommandId commandId = context.getCommandId();
@@ -176,27 +175,27 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
             targetIdType = "";
         }
 
-        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                                                                         .setMessage(command.getMessage())
-                                                                         .setTimestamp(getCurrentTime())
-                                                                         .setCommandType(commandType)
-                                                                         .setCommandId(commandIdString)
-                                                                         .setStatus(status)
-                                                                         .setTargetIdType(targetIdType)
-                                                                         .setTargetId(targetIdString)
-                                                                         .setContext(context);
+        final CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                           .setMessage(command.getMessage())
+                                                           .setTimestamp(getCurrentTime())
+                                                           .setCommandType(commandType)
+                                                           .setCommandId(commandIdString)
+                                                           .setStatus(status)
+                                                           .setTargetIdType(targetIdType)
+                                                           .setTargetId(targetIdString)
+                                                           .setContext(context);
         return builder;
     }
 
     /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
     @VisibleForTesting
-    static Iterator<Command> toCommandIterator(Iterator<CommandStorageRecord> records) {
+    static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
         return Iterators.transform(records, TO_COMMAND);
     }
 
-    private static final Function<CommandStorageRecord, Command> TO_COMMAND = new Function<CommandStorageRecord, Command>() {
+    private static final Function<CommandRecord, Command> TO_COMMAND = new Function<CommandRecord, Command>() {
         @Override
-        public Command apply(@Nullable CommandStorageRecord record) {
+        public Command apply(@Nullable CommandRecord record) {
             if (record == null) {
                 return Command.getDefaultInstance();
             }
