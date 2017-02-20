@@ -30,6 +30,7 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 
 // A version number with timestamp of the version creation.
 message Version {
@@ -39,8 +40,8 @@ message Version {
     // When numbering versions of entities the zero value is reserved for
     // the “pre-initialization” version of an entity.
     //
-    int32 number = 1;
+    int32 number = 1 [(required) = true];
 
     // A moment in time when the new version was created.
-    google.protobuf.Timestamp timestamp = 2;
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 }

@@ -55,7 +55,7 @@ message CommandId {
 // A command can hold any valid Protobuf message, but in most cases, it would be a type
 // defined in `commands.proto` file of the corresponding aggregate or process manager.
 //
-// There should be <strong>one and only one</strong> command handler associated with the type of the command.
+// There should be one and only one command handler associated with the type of the command.
 //
 message Command {
 
