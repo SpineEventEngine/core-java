@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,6 @@ import org.spine3.protobuf.Values;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
-import org.spine3.test.command.ProjectId;
 
 import java.util.Iterator;
 import java.util.List;
@@ -55,7 +53,6 @@ import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -102,11 +99,7 @@ public abstract class CommandStorageShould
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
                              .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(RECEIVED))
-                             .setTargetId(TargetId.newBuilder()
-                                                  .setType(String.class.getName())
-                                                  .setValue(newUuid())
-                             );
+                                                        .setCode(RECEIVED));
         return builder.build();
     }
 
@@ -251,18 +244,6 @@ public abstract class CommandStorageShould
         checkRecord(record, command, status);
     }
 
-    @Test
-    public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
-        final StringValue message = StringValue.getDefaultInstance();
-        final Command command =
-                Commands.createCommand(message, CommandContext.getDefaultInstance());
-        final CommandRecord record =
-                CommandStorage.newRecordBuilder(command, RECEIVED, null).build();
-
-        assertEquals("", record.getTargetId().getValue());
-        assertEquals("", record.getTargetId().getType());
-    }
-
     /*
      * Check that exception is thrown if try to pass null to methods.
      **************************************************************/
@@ -381,11 +362,6 @@ public abstract class CommandStorageShould
         assertEquals(commandId, record.getCommandId());
         assertEquals(statusExpected, record.getStatus()
                                            .getCode());
-        assertEquals(ProjectId.class.getName(), record.getTargetId()
-                                                      .getType());
-        assertEquals(message.getProjectId()
-                            .getId(), record.getTargetId()
-                                            .getValue());
         assertEquals(context, record.getCommand()
                                     .getContext());
         switch (statusExpected) {

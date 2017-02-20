@@ -50,11 +50,8 @@ message CommandRecord {
     // A short name of Protobuf command type.
     string command_type = 2;
 
-    // Description of the command target.
-    TargetId target_id = 3;
-
     // The command.
-    base.Command command = 4;
+    base.Command command = 3;
 
     // The status of command processing.
     //
@@ -65,24 +62,6 @@ message CommandRecord {
 
     // A moment of time when this storage record was created.
     google.protobuf.Timestamp timestamp = 6;
-}
-
-// Description of a command target identifier.
-message TargetId {
-
-    // A short Protobuf type name of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is an empty string.
-    // We store the type of entity ID, not the type of the entity itself,
-    // because it is not available at the level of commands.
-    //
-    string type = 1;
-
-    // String representation of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is empty.
-    //
-    string value = 2;
 }
 
 // The status of command processing.

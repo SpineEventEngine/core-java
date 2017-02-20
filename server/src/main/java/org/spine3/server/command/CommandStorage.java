@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
@@ -34,7 +33,6 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.storage.AbstractStorage;
 
 import javax.annotation.Nullable;
@@ -101,6 +99,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         checkNotClosed();
         checkNotDefault(error);
 
+        //TODO:2017-02-20:alexander.yevsyukov: Extract method
         CommandId id = getId(command);
         if (idToString(id).equals(EMPTY_ID)) {
             /*
@@ -185,19 +184,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeUrl.of(commandMessage).getSimpleName();
 
-        final Optional targetIdOptional = GetTargetIdFromCommand.asOptional(commandMessage);
-        final String targetIdString;
-        final String targetIdType;
-        if (targetIdOptional.isPresent()) {
-            final Object targetId = targetIdOptional.get();
-            targetIdString = idToString(targetId);
-            targetIdType = targetId.getClass()
-                                   .getName();
-        } else { // the command is not for an entity
-            targetIdString = "";
-            targetIdType = "";
-        }
-
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
                              .setCommandId(commandId)
@@ -205,10 +191,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
                              .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(status))
-                             .setTargetId(TargetId.newBuilder()
-                                                  .setType(targetIdType)
-                                                  .setValue(targetIdString));
+                                                        .setCode(status));
         return builder;
     }
 

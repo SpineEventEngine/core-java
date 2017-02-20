@@ -43,7 +43,6 @@ message QueryContext {
 
     //TODO:2015-12-16:alexander.yevsyukov: Finish
     // extend with (see CommandContext for details):
-    //    users.TenantId tenant_id = 1;
     //    users.UserId actor = 2 [(required) = true];
     //    time.ZoneOffset zone_offset = 4 [(required) = true];
     //              here should come language with index 5.
@@ -80,6 +79,7 @@ message QueryResponse {
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
+    //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
     // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
 }
