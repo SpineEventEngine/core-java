@@ -63,6 +63,5 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         final AggregateRoot<I> root = createAggregateRootEntity(id, getBoundedContext(), rootClass);
         final A result = AbstractEntity.createAggregatePartEntity(entityConstructor, id, root);
         return result;
-
     }
 }
