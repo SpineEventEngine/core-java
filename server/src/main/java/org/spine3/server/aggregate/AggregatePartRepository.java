@@ -45,13 +45,17 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
         return super.getIdClass();
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super metho is not needed.
     @Override
     public A create(I id) {
         try {
-            final Constructor<A> entityConstructor = AbstractEntity.getAggregatePartConstructor(
-                    getEntityClass(), getIdClass());
-            entityConstructor.setAccessible(true);
-            final Class<AggregateRoot<I>> rootClass = (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
+            final Constructor<A> entityConstructor =
+                    AbstractEntity.getAggregatePartConstructor(getEntityClass(), getIdClass());
+            @SuppressWarnings("unchecked")
+            // It is OK because it is checked above,
+            // in the AbstractEntity.getAggregatePartConstructor method
+            final Class<AggregateRoot<I>> rootClass =
+                    (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
             final Constructor<AggregateRoot<I>> rootConstructor =
                     rootClass.getDeclaredConstructor(getBoundedContext().getClass(), id.getClass());
             rootConstructor.setAccessible(true);

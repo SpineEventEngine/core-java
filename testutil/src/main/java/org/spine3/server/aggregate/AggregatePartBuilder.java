@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
  *
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
         extends AggregateBuilder<A, I, S> {
 
@@ -67,7 +68,6 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     protected Constructor<A> getConstructor() {
         final Constructor<A> constructor = AbstractEntity.getAggregatePartConstructor(
                 getResultClass(), getIdClass());
-        constructor.setAccessible(true);
         return constructor;
     }
 }

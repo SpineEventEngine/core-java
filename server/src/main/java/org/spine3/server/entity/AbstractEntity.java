@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
 
 import javax.annotation.CheckReturnValue;
@@ -157,8 +158,20 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
-    public static <E extends Entity<I, ?>, I>
-    Constructor<E> getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
+    /**
+     * Obtains constructor for the passed aggregate part class.
+     *
+     * <p>The part class must have a constructor with ID and {@code AggregateRoot} parameters.
+     *
+     * @param entityClass the {@code AggregatePart} class
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    public static <E extends AggregatePart<I, ?, ?>, I> Constructor<E>
+    getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
         final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
         for (Constructor<?> constructor : constructors) {
             final Class<?>[] parameterTypes = constructor.getParameterTypes();
@@ -166,12 +179,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             if (length != 2) {
                 continue;
             }
-            final boolean correctConstructor = idClass.equals(parameterTypes[0]) &&
-                                               AggregateRoot.class.isAssignableFrom(
-                                                       parameterTypes[1]);
+
+            final boolean correctConstructor =
+                    idClass.equals(parameterTypes[0]) &&
+                    AggregateRoot.class.isAssignableFrom(parameterTypes[1]);
             if (correctConstructor) {
-                @SuppressWarnings("unchecked") // It is safe because arguments are checked before.
+                @SuppressWarnings("unchecked") // It is safe because arguments are checked above.
                 final Constructor<E> result = (Constructor<E>) constructor;
+                result.setAccessible(true);
                 return result;
             }
         }
