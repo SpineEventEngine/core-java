@@ -66,20 +66,25 @@ public class AbstractEntityShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_part_does_not_have_appropriate_constructor() {
-        AbstractEntity.getAggregatePartConstructor(IncorrectAggregatePart.class, id.getClass());
+    public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
+        AbstractEntity.getAggregatePartConstructor(WrongAggregatePart.class, id.getClass());
     }
 
-    private static class IncorrectAggregatePart
+    /*
+     Test environment classes
+    ***************************/
+
+    private static class WrongAggregatePart
             extends AggregatePart<String, StringValue, StringValue.Builder> {
 
         @SuppressWarnings("ConstantConditions") // It is needed for testing.
-        protected IncorrectAggregatePart() {
+        protected WrongAggregatePart() {
             super(null, null);
         }
     }
 
-    static class AnAggregatePart extends AggregatePart<String, StringValue, StringValue.Builder> {
+    private static class AnAggregatePart
+            extends AggregatePart<String, StringValue, StringValue.Builder> {
 
         /**
          * {@inheritDoc}
