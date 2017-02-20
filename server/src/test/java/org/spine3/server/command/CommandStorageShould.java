@@ -101,7 +101,8 @@ public abstract class CommandStorageShould
                              .setCommandId(command.getContext().getCommandId())
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
-                             .setStatus(RECEIVED)
+                             .setStatus(ProcessingStatus.newBuilder()
+                                                        .setCode(RECEIVED))
                              .setTargetId(TargetId.newBuilder()
                                                   .setType(String.class.getName())
                                                   .setValue(newUuid())
@@ -141,7 +142,8 @@ public abstract class CommandStorageShould
         final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, ERROR);
-        assertEquals(error, record.getError());
+        assertEquals(error, record.getStatus()
+                                  .getError());
     }
 
     @Test
@@ -203,7 +205,8 @@ public abstract class CommandStorageShould
         storage.setOkStatus(id);
 
         final CommandRecord actual = storage.read(id).get();
-        assertEquals(OK, actual.getStatus());
+        assertEquals(OK, actual.getStatus()
+                               .getCode());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
@@ -215,8 +218,8 @@ public abstract class CommandStorageShould
         storage.updateStatus(id, error);
 
         final CommandRecord actual = storage.read(id).get();
-        assertEquals(ERROR, actual.getStatus());
-        assertEquals(error, actual.getError());
+        assertEquals(ERROR, actual.getStatus().getCode());
+        assertEquals(error, actual.getStatus().getError());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
@@ -228,8 +231,10 @@ public abstract class CommandStorageShould
         storage.updateStatus(id, failure);
 
         final CommandRecord actual = storage.read(id).get();
-        assertEquals(FAILURE, actual.getStatus());
-        assertEquals(failure, actual.getFailure());
+        assertEquals(FAILURE, actual.getStatus()
+                                    .getCode());
+        assertEquals(failure, actual.getStatus()
+                                    .getFailure());
     }
 
     /*
@@ -365,29 +370,38 @@ public abstract class CommandStorageShould
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
         final CreateProject message = unpack(cmd.getMessage());
-        assertEquals(cmd.getMessage(), record.getCommand().getMessage());
-        assertTrue(record.getTimestamp().getSeconds() > 0);
-        assertEquals(message.getClass().getSimpleName(), record.getCommandType());
+        assertEquals(cmd.getMessage(), record.getCommand()
+                                             .getMessage());
+        assertTrue(record.getTimestamp()
+                         .getSeconds() > 0);
+        assertEquals(message.getClass()
+                            .getSimpleName(), record.getCommandType());
         assertEquals(commandId, record.getCommandId());
-        assertEquals(statusExpected, record.getStatus());
+        assertEquals(statusExpected, record.getStatus()
+                                           .getCode());
         assertEquals(ProjectId.class.getName(), record.getTargetId()
                                                       .getType());
         assertEquals(message.getProjectId()
                             .getId(), record.getTargetId()
                                             .getValue());
-        assertEquals(context, record.getCommand().getContext());
+        assertEquals(context, record.getCommand()
+                                    .getContext());
         switch (statusExpected) {
             case RECEIVED:
             case OK:
             case SCHEDULED:
-                assertTrue(isDefault(record.getError()));
-                assertTrue(isDefault(record.getFailure()));
+                assertTrue(isDefault(record.getStatus()
+                                           .getError()));
+                assertTrue(isDefault(record.getStatus()
+                                           .getFailure()));
                 break;
             case ERROR:
-                assertTrue(isNotDefault(record.getError()));
+                assertTrue(isNotDefault(record.getStatus()
+                                              .getError()));
                 break;
             case FAILURE:
-                assertTrue(isNotDefault(record.getFailure()));
+                assertTrue(isNotDefault(record.getStatus()
+                                              .getFailure()));
                 break;
             case UNDEFINED:
             case UNRECOGNIZED:

@@ -93,8 +93,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      * Stores a command with the {@link CommandStatus#ERROR} status by
      * a command ID from a command context.
      *
-     * <p>If there is no ID, a new one is generated is used.
-     *
      * @param command a command to store
      * @param error   an error occurred
      * @throws IllegalStateException if the storage is closed
@@ -105,12 +103,23 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
 
         CommandId id = getId(command);
         if (idToString(id).equals(EMPTY_ID)) {
+            /*
+               We don't have a command ID in the passed command.
+               We need an ID to store the error in the record.
+               So, it will be generated.
+
+               We do not use this ID in the record, because it does not
+               belong to the command. Therefore, id-less commands can be
+               identified at the storage level by records with `command_id` field.
+             */
             id = generateId();
         }
-        final CommandRecord record = newRecordBuilder(command, ERROR)
-                .setError(error)
-                .setCommandId(id)
-                .build();
+
+        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR);
+        builder.getStatusBuilder()
+               .setError(error);
+        final CommandRecord record = builder.build();
+
         write(id, record);
     }
 
@@ -182,7 +191,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
                              .setCommandType(commandType)
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
-                             .setStatus(status)
+                             .setStatus(ProcessingStatus.newBuilder()
+                                                        .setCode(status))
                              .setTargetId(TargetId.newBuilder()
                                                   .setType(targetIdType)
                                                   .setValue(targetIdString));

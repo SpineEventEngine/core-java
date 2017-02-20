@@ -74,7 +74,8 @@ class TenantCommands implements TenantStorage<CommandId, CommandRecord> {
                 if (record == null) {
                     return false;
                 }
-                final boolean statusMatches = record.getStatus() == status;
+                final boolean statusMatches = record.getStatus()
+                                                    .getCode() == status;
                 return statusMatches;
             }
         });

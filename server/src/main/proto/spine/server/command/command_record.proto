@@ -51,26 +51,20 @@ message CommandRecord {
     string command_type = 2;
 
     // Description of the command target.
-    TargetId target_id = 10;
+    TargetId target_id = 3;
 
     // The command.
-    base.Command command = 3;
+    base.Command command = 4;
+
+    // The status of command processing.
+    //
+    // This field is empty upon arrival of a command.
+    // It is populated later during the command processing cycle.
+    //
+    ProcessingStatus status = 5;
 
     // A moment of time when this storage record was created.
-    google.protobuf.Timestamp timestamp = 4;
-
-    // The status of the command processing.
-    base.CommandStatus status = 5;
-
-    // `status_data` provides additional information on what went wrong
-    // if the value of `status` is `ERROR` or `FAILURE`.
-    oneof status_data {
-        // The technical error occurred during command processing.
-        base.Error error = 6;
-
-        // A business failure occurred during command processing.
-        base.Failure failure = 7;
-    }
+    google.protobuf.Timestamp timestamp = 6;
 }
 
 // Description of a command target identifier.
@@ -89,4 +83,21 @@ message TargetId {
     // If the command is not for an entity, this field is empty.
     //
     string value = 2;
+}
+
+// The status of command processing.
+message ProcessingStatus {
+
+    // The code of the status.
+    base.CommandStatus code = 1;
+
+    // The `cause` provides additional information on what went wrong
+    // if the value of `status` is `ERROR` or `FAILURE`.
+    oneof cause {
+        // The technical error occurred during command processing.
+        base.Error error = 2;
+
+        // A business failure occurred during command processing.
+        base.Failure failure = 3;
+    }
 }
