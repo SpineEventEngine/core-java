@@ -70,7 +70,7 @@ public class Timestamps2Should {
         final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, MINUTE);
 
-        final Timestamp actual = Timestamps2.minutesAgo(1);
+        final Timestamp actual = TimeTests.Past.minutesAgo(1);
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }
@@ -80,7 +80,7 @@ public class Timestamps2Should {
         final Timestamp currentTime = Timestamps2.getCurrentTime();
         final Timestamp expected = com.google.protobuf.util.Timestamps.subtract(currentTime, TEN_SECONDS);
 
-        final Timestamp actual = Timestamps2.secondsAgo(TEN_SECONDS.getSeconds());
+        final Timestamp actual = TimeTests.Past.secondsAgo(TEN_SECONDS.getSeconds());
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }

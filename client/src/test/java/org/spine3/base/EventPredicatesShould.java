@@ -32,10 +32,10 @@ import static org.spine3.base.EventPredicates.isAfter;
 import static org.spine3.base.EventPredicates.isBefore;
 import static org.spine3.base.EventPredicates.isBetween;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.minutesAgo;
-import static org.spine3.protobuf.Timestamps2.secondsAgo;
 import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 
 /**
  * @author Alexander Yevsyukov

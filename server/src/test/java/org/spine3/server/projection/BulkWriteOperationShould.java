@@ -24,8 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
+import org.spine3.test.TimeTests;
 import org.spine3.test.projection.Project;
 
 import java.util.HashSet;
@@ -133,7 +133,7 @@ public class BulkWriteOperationShould {
     @Test
     public void store_given_timestamp_in_memory() {
         final Set<TestProjection> projections = emptySet();
-        final Timestamp whenHandled = Timestamps2.secondsAgo(5L);
+        final Timestamp whenHandled = TimeTests.Past.secondsAgo(5L);
         final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
         assertTrue(operation.isInProgress());
 
@@ -146,9 +146,9 @@ public class BulkWriteOperationShould {
     @Test
     public void store_the_very_last_timestamp_only() {
         final Set<TestProjection> projections = emptySet();
-        final Timestamp firstEvent = Timestamps2.secondsAgo(5L);
-        final Timestamp secondEvent = Timestamps2.secondsAgo(5L);
-        final Timestamp lastEvent = Timestamps2.secondsAgo(5L);
+        final Timestamp firstEvent = TimeTests.Past.secondsAgo(5L);
+        final Timestamp secondEvent = TimeTests.Past.secondsAgo(5L);
+        final Timestamp lastEvent = TimeTests.Past.secondsAgo(5L);
 
         final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, lastEvent);
         assertTrue(operation.isInProgress());

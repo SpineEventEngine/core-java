@@ -28,10 +28,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static com.google.protobuf.util.Timestamps.subtract;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -224,34 +221,5 @@ public class Timestamps2 {
         final long millisecsFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
-    }
-
-    /**
-     * The testing assistance utility, which returns a timestamp of the moment
-     * of the passed number of minutes from now.
-     *
-     * @param value a positive number of minutes
-     * @return a timestamp instance
-     */
-    @VisibleForTesting
-    public static Timestamp minutesAgo(int value) {
-        checkPositive(value);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations2.fromMinutes(value));
-        return result;
-    }
-
-    /**
-     * Obtains timestamp in the past a number of seconds ago.
-     *
-     * @param value a positive number of seconds
-     * @return the moment `value` seconds ago
-     */
-    @VisibleForTesting
-    public static Timestamp secondsAgo(long value) {
-        checkPositive(value);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, fromSeconds(value));
-        return result;
     }
 }

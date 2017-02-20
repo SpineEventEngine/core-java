@@ -53,10 +53,10 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.minutesAgo;
-import static org.spine3.protobuf.Timestamps2.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class CommandsShould {

@@ -24,12 +24,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Command;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.spine3.protobuf.Durations2.hours;
+import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Timestamps2.systemTime;
 import static org.spine3.validate.Validate.checkPositive;
@@ -135,6 +137,43 @@ public class TimeTests {
             final Timestamp newTime = subtract(this.currentTime, hours(hoursDelta));
             setCurrentTime(newTime);
             return newTime;
+        }
+    }
+
+    /**
+     * Utility class for working with timestamps in the past.
+     */
+    public static class Past {
+
+        private Past() {
+            // Do not allow creating instances of this utility class.
+        }
+
+        /**
+         * The testing assistance utility, which returns a timestamp of the moment
+         * of the passed number of minutes from now.
+         *
+         * @param value a positive number of minutes
+         * @return a timestamp instance
+         */
+        public static Timestamp minutesAgo(int value) {
+            checkPositive(value);
+            final Timestamp currentTime = getCurrentTime();
+            final Timestamp result = subtract(currentTime, Durations2.fromMinutes(value));
+            return result;
+        }
+
+        /**
+         * Obtains timestamp in the past a number of seconds ago.
+         *
+         * @param value a positive number of seconds
+         * @return the moment `value` seconds ago
+         */
+        public static Timestamp secondsAgo(long value) {
+            checkPositive(value);
+            final Timestamp currentTime = getCurrentTime();
+            final Timestamp result = subtract(currentTime, seconds(value));
+            return result;
         }
     }
 

@@ -32,6 +32,7 @@ import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.Tests;
+import org.spine3.test.TimeTests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
@@ -272,7 +273,7 @@ public class EntityShould {
     @Test
     public void create_and_initialize_entity_instance() {
         final Long id = 100L;
-        final Timestamp before = Timestamps2.secondsAgo(1);
+        final Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
         final Constructor<BareBonesEntity> ctor =

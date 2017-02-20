@@ -107,7 +107,7 @@ public class CommandFactoryShould {
         // We are creating a range of +/- second between the call to make sure the timestamp would fit
         // into this range. The purpose of this test is to make sure it works with this precision
         // and to add coverage.
-        final Timestamp beforeCall = Timestamps2.secondsAgo(1);
+        final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
         final Command command = commandFactory.create(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 

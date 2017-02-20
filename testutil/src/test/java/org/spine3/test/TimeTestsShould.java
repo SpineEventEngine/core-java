@@ -38,6 +38,8 @@ public class TimeTestsShould {
     @Test
     public void have_private_utility_ctor() {
         Tests.hasPrivateParameterlessCtor(TimeTests.class);
+        Tests.hasPrivateParameterlessCtor(TimeTests.Future.class);
+        Tests.hasPrivateParameterlessCtor(TimeTests.Past.class);
     }
 
     @Test

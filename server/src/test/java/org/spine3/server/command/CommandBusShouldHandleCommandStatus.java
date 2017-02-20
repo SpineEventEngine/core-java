@@ -61,8 +61,8 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.minutesAgo;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShouldHandleCommandStatus {

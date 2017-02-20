@@ -132,7 +132,7 @@ public class CommandTestShould {
     @Test
     public void create_command_with_custom_Timestamp() {
         final StringValue commandMessage = newUuidValue();
-        final Timestamp timestamp = Timestamps2.minutesAgo(5);
+        final Timestamp timestamp = TimeTests.Past.minutesAgo(5);
         final Command command = commandTest.createCommand(commandMessage, timestamp);
 
         assertEquals(timestamp, command.getContext()
@@ -156,7 +156,7 @@ public class CommandTestShould {
     @Test
     public void create_different_command_with_timestamp() {
         final Message anotherCommandMsg = Timestamps2.getCurrentTime();
-        final Timestamp timestamp = Timestamps2.minutesAgo(30);
+        final Timestamp timestamp = TimeTests.Past.minutesAgo(30);
         final Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));

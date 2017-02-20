@@ -48,12 +48,12 @@ import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps2.minutesAgo;
-import static org.spine3.protobuf.Timestamps2.secondsAgo;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
