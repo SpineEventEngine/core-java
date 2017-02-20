@@ -62,7 +62,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
     }
 
     /**
-     * Stores a command with the {@link CommandStatus#RECEIVED} status by a command ID from a command context.
+     * Stores a command with the {@link CommandStatus#RECEIVED} status by
+     * a command ID from a command context.
      *
      * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
@@ -89,7 +90,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
     }
 
     /**
-     * Stores a command with the {@link CommandStatus#ERROR} status by a command ID from a command context.
+     * Stores a command with the {@link CommandStatus#ERROR} status by
+     * a command ID from a command context.
      *
      * <p>If there is no ID, a new one is generated is used.
      *
@@ -146,7 +148,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
     /**
      * Creates a command storage record builder passed on the passed parameters.
      *
-     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if the command is not for an entity.
+     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
+     * the command is not for an entity.
      *
      * @param command a command to convert to a record
      * @param status  a command status to set to a record
@@ -173,15 +176,17 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
             targetIdType = "";
         }
 
-        final CommandRecord.Builder builder = CommandRecord.newBuilder()
-                                                           .setMessage(command.getMessage())
-                                                           .setTimestamp(getCurrentTime())
-                                                           .setCommandType(commandType)
-                                                           .setCommandId(commandId)
-                                                           .setStatus(status)
-                                                           .setTargetIdType(targetIdType)
-                                                           .setTargetId(targetIdString)
-                                                           .setContext(context);
+        final CommandRecord.Builder builder =
+                CommandRecord.newBuilder()
+                             .setMessage(command.getMessage())
+                             .setTimestamp(getCurrentTime())
+                             .setCommandType(commandType)
+                             .setCommandId(commandId)
+                             .setStatus(status)
+                             .setTargetId(TargetId.newBuilder()
+                                                  .setType(targetIdType)
+                                                  .setValue(targetIdString))
+                             .setContext(context);
         return builder;
     }
 

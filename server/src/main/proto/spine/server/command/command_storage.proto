@@ -68,19 +68,7 @@ message CommandRecord {
 
     reserved 7 to 9;
 
-    // A short Protobuf type name of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is an empty string.
-    // We store the type of entity ID, not the type of the entity itself,
-    // because it is not available at the level of commands.
-    //
-    string target_id_type = 10;
-
-    // String representation of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is empty.
-    //
-    string target_id = 11;
+    TargetId target_id = 10;
 
     reserved 12 to 19;
 
@@ -89,4 +77,22 @@ message CommandRecord {
 
     // The context of the command.
     base.CommandContext context = 21;
+}
+
+// Description of a command target identifier.
+message TargetId {
+
+    // A short Protobuf type name of the command target entity ID.
+    //
+    // If the command is not for an entity, this field is an empty string.
+    // We store the type of entity ID, not the type of the entity itself,
+    // because it is not available at the level of commands.
+    //
+    string type = 1;
+
+    // String representation of the command target entity ID.
+    //
+    // If the command is not for an entity, this field is empty.
+    //
+    string value = 2;
 }

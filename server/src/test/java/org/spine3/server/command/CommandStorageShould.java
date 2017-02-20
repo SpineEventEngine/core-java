@@ -96,15 +96,17 @@ public abstract class CommandStorageShould
         final Any command = AnyPacker.pack(Given.Command.createProject());
         final String commandType = ofEnclosed(command).getTypeName();
         final CommandContext context = createCommandContext();
-        final CommandRecord.Builder builder = CommandRecord.newBuilder()
-                                                           .setTimestamp(getCurrentTime())
-                                                           .setCommandType(commandType)
-                                                           .setCommandId(context.getCommandId())
-                                                           .setStatus(RECEIVED)
-                                                           .setTargetId(newUuid())
-                                                           .setTargetIdType(String.class.getName())
-                                                           .setMessage(command)
-                                                           .setContext(context);
+        final CommandRecord.Builder builder =
+                CommandRecord.newBuilder()
+                             .setTimestamp(getCurrentTime())
+                             .setCommandType(commandType)
+                             .setCommandId(context.getCommandId())
+                             .setStatus(RECEIVED)
+                             .setTargetId(TargetId.newBuilder()
+                                                  .setType(String.class.getName())
+                                                  .setValue(newUuid()))
+                             .setMessage(command)
+                             .setContext(context);
         return builder.build();
     }
 
@@ -251,8 +253,8 @@ public abstract class CommandStorageShould
         final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
         final CommandRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
 
-        assertEquals("", record.getTargetId());
-        assertEquals("", record.getTargetIdType());
+        assertEquals("", record.getTargetId().getValue());
+        assertEquals("", record.getTargetId().getType());
     }
 
     /*
@@ -367,8 +369,11 @@ public abstract class CommandStorageShould
         assertEquals(message.getClass().getSimpleName(), record.getCommandType());
         assertEquals(commandId, record.getCommandId());
         assertEquals(statusExpected, record.getStatus());
-        assertEquals(ProjectId.class.getName(), record.getTargetIdType());
-        assertEquals(message.getProjectId().getId(), record.getTargetId());
+        assertEquals(ProjectId.class.getName(), record.getTargetId()
+                                                      .getType());
+        assertEquals(message.getProjectId()
+                            .getId(), record.getTargetId()
+                                            .getValue());
         assertEquals(context, record.getContext());
         switch (statusExpected) {
             case RECEIVED:
