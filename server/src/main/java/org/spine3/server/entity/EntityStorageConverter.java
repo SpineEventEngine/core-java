@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An abstract base for converters of entities into {@link EntityRecord}.
  *
  * @author Alexander Yevsyukov
+ * @see Tuple
  */
 public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends Converter<E, EntityStorageConverter.Tuple<I>> {

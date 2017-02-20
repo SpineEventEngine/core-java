@@ -33,6 +33,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
  *
  * @author Alexander Yevsyukov
+ * @see Tuple
  */
 class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
