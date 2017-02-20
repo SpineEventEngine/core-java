@@ -33,7 +33,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
 
 /**
- * This test suite tests {@link Entity#equals(Object)}.
+ * This test suite tests {@link AbstractVersionableEntity#equals(Object)}.
  *
  * <p>When migrating to JUnit 5, this class may become a
  * {@code @Nested} class of {@link EntityShould}.
@@ -85,7 +85,9 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_states_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setState(Sample.messageOfType(Project.class), another.getVersion(), another.whenModified());
+        another.setState(Sample.messageOfType(Project.class), another.getVersion()
+                                                                     .getNumber(),
+                         another.whenModified());
 
         assertNotEquals(entity.getState(), another.getState());
         assertFalse(entity.equals(another));
@@ -94,7 +96,8 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_versions_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setVersion(entity.getVersion() + 5, another.whenModified());
+        another.setVersion(entity.getVersion()
+                                 .getNumber() + 5, another.whenModified());
 
         assertFalse(entity.equals(another));
     }
@@ -102,7 +105,10 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_modification_times_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
+        another.setVersion(another.getVersion()
+                                  .getNumber(), Timestamp.newBuilder()
+                                                         .setSeconds(5)
+                                                         .build());
 
         assertNotEquals(entity.whenModified(), another.whenModified());
         assertFalse(entity.equals(another));

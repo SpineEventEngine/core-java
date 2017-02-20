@@ -31,6 +31,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.Version;
 import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -191,12 +192,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
     /** Updates the aggregate state and closes the update phase of the aggregate. */
     private void updateState() {
-        @SuppressWarnings("unchecked") // It is safe to assume that correct builder type is passed to aggregate,
-         // because otherwise it won't be possible to write the code
-         // of applier methods that make sense to the aggregate.
+        @SuppressWarnings("unchecked")
+         /* It is safe to assume that correct builder type is passed to the aggregate,
+            because otherwise it won't be possible to write the code of applier methods
+            that make sense to the aggregate. */
         final S newState = (S) getBuilder().build();
-        setState(newState, getVersion(), whenModified());
-
+        final Version version = getVersion();
+        setState(newState, version.getNumber(), version.getTimestamp());
         this.builder = null;
     }
 
@@ -296,15 +298,16 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         final Message eventMsg;
         final EventContext eventContext;
         if (eventOrMsg instanceof Event) {
-            // We are receiving the event during import or integration. This happened because
-            // an aggregate's command handler returned either List<Event> or Event.
+            /* We are receiving the event during import or integration.
+               This happened because an aggregate's command handler returned either
+               List<Event> or Event. */
             final Event event = (Event) eventOrMsg;
             eventMsg = getMessage(event);
             eventContext = event.getContext()
                                 .toBuilder()
                                 .setCommandContext(commandContext)
                                 .setTimestamp(getCurrentTime())
-                                .setVersion(getVersion())
+                                .setVersion(getVersion().getNumber())
                                 .build();
         } else {
             eventMsg = eventOrMsg;
@@ -387,8 +390,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @CheckReturnValue
     Snapshot toSnapshot() {
         final Any state = AnyPacker.pack(getState());
-        final int version = getVersion();
-        final Timestamp whenModified = whenModified();
+        final int version = getVersion().getNumber();
+        final Timestamp whenModified = getVersion().getTimestamp();
         final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setWhenModified(whenModified)

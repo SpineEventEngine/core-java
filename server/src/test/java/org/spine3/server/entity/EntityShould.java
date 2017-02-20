@@ -29,7 +29,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.BoundedContext;
 import org.spine3.test.Tests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
@@ -129,31 +128,31 @@ public class EntityShould {
         new TestEntityWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
-    private static class TestEntityWithIdUnsupported extends Entity<UnsupportedClassVersionError, Project> {
+    private static class TestEntityWithIdUnsupported extends AbstractVersionableEntity<UnsupportedClassVersionError, Project> {
         private TestEntityWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdString extends Entity<String, Project> {
+    private static class TestEntityWithIdString extends AbstractVersionableEntity<String, Project> {
         private TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdMessage extends Entity<Message, Project> {
+    private static class TestEntityWithIdMessage extends AbstractVersionableEntity<Message, Project> {
         private TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdInteger extends Entity<Integer, Project> {
+    private static class TestEntityWithIdInteger extends AbstractVersionableEntity<Integer, Project> {
         private TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdLong extends Entity<Long, Project> {
+    private static class TestEntityWithIdLong extends AbstractVersionableEntity<Long, Project> {
         private TestEntityWithIdLong(Long id) {
             super(id);
         }
@@ -167,7 +166,7 @@ public class EntityShould {
         entityNew.setState(state, version, whenModified);
 
         assertEquals(state, entityNew.getState());
-        assertEquals(version, entityNew.getVersion());
+        assertEquals(version, entityNew.getVersion().getNumber());
         assertEquals(whenModified, entityNew.whenModified());
     }
 
@@ -194,7 +193,8 @@ public class EntityShould {
         new EntityWithUnsupportedId(new Exception());
     }
 
-    private static class BareBonesEntity extends Entity<Long, StringValue> {
+
+    private static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {
         private BareBonesEntity(Long id) {
             super(id);
         }
@@ -202,7 +202,7 @@ public class EntityShould {
 
     @Test
     public void have_zero_version_by_default() {
-        assertEquals(0, entityNew.getVersion());
+        assertEquals(0, entityNew.getVersion().getNumber());
     }
 
     @Test
@@ -216,8 +216,7 @@ public class EntityShould {
         final long timeBeforeincrement = currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = currentTimeSeconds();
-        assertThat(entityNew.whenModified()
-                            .getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
+        assertThat(entityNew.whenModified().getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
     @Test
@@ -231,7 +230,7 @@ public class EntityShould {
     public void increment_version_when_updating_state() {
         entityNew.incrementState(state);
 
-        assertEquals(1, entityNew.getVersion());
+        assertEquals(1, entityNew.getVersion().getNumber());
     }
 
     @Test
@@ -245,34 +244,14 @@ public class EntityShould {
 
     @Test
     public void return_id_class() {
-        final Class<String> actual = Entity.getIdClass(TestEntity.class);
+        final Class<String> actual = Entity.TypeInfo.getIdClass(TestEntity.class);
 
         assertEquals(String.class, actual);
     }
 
     @Test
-    public void return_id_simple_class_name() {
-        final String expected = entityNew.getId()
-                                         .getClass()
-                                         .getSimpleName();
-        final String actual = entityNew.getShortIdTypeName();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void return_id_protobuf_type_name() {
-        final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-        final String expected = ProjectId.getDescriptor()
-                                         .getName();
-        final String actual = entityWithMessageId.getShortIdTypeName();
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
-        assertFalse(entityWithState.getId()
-                                   .trim()
-                                   .isEmpty());
+        assertFalse(entityWithState.getId().trim().isEmpty());
 
         final int hashCode = entityWithState.hashCode();
 
@@ -291,14 +270,14 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-    private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
+    private static class EntityWithUnsupportedId extends AbstractVersionableEntity<Exception, Project> {
 
         protected EntityWithUnsupportedId(Exception id) {
             super(id);
         }
     }
 
-    private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
+    private static class EntityWithMessageId extends AbstractVersionableEntity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
@@ -307,8 +286,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class,
-                                                                        Long.class);
+        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class,
+                                                                                Long.class);
 
         assertNotNull(ctor);
     }
@@ -319,11 +298,8 @@ public class EntityShould {
         final Timestamp before = Timestamps.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor = Entity.getConstructor(BareBonesEntity.class,
-                                                                        Long.class);
-        final BoundedContext context = BoundedContext.newBuilder()
-                                                     .build();
-        final Entity<Long, StringValue> entity = Entity.createEntity(ctor, id, context);
+        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
+        final AbstractVersionableEntity<Long, StringValue> entity = AbstractEntity.createEntity(ctor, id);
 
         final Timestamp after = Timestamps.getCurrentTime();
 
@@ -331,7 +307,7 @@ public class EntityShould {
         final Interval whileWeCreate = Intervals.between(before, after);
 
         assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion());
+        assertEquals(0, entity.getVersion().getNumber());
         assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
@@ -349,7 +325,7 @@ public class EntityShould {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText(" must be between " + lower + " and " + higher + ' ');
+                description.appendText(" must be between " + lower + " and " + higher +  ' ');
             }
         };
     }

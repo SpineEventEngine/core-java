@@ -333,11 +333,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Override
-        protected Project getDefaultState() {
-            return super.getDefaultState();
-        }
-
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
@@ -420,11 +415,13 @@ public class AggregateShould {
 
     @Test
     public void increment_version_when_applying_state_changing_event() {
-        final int version = aggregate.getVersion();
+        final int version = aggregate.getVersion()
+                                     .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(createProject, startProject);
 
-        assertEquals(version + 2, aggregate.getVersion());
+        assertEquals(version + 2, aggregate.getVersion()
+                                           .getNumber());
     }
 
     @Test

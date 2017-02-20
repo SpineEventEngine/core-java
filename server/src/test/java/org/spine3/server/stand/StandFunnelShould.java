@@ -28,9 +28,12 @@ import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.Version;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.projection.ProjectId;
@@ -101,7 +104,7 @@ public class StandFunnelShould {
         final Given.StandTestAggregate entity = repository.create(entityId);
         final StringValue state = entity.getState();
         final Any packedState = AnyPacker.pack(state);
-        final int version = entity.getVersion();
+        final int version = entity.getVersion().getNumber();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
@@ -119,7 +122,7 @@ public class StandFunnelShould {
         final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
             @Override
-            protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
                 return false;
             }
         });
@@ -132,12 +135,11 @@ public class StandFunnelShould {
 
         final Object id = new Object();
         final StringValue state = StringValue.getDefaultInstance();
-        final int version = 17;
 
-        final Entity entity = mock(Entity.class);
+        final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(version);
+        when(entity.getVersion()).thenReturn(Version.of(17, Timestamps.getCurrentTime()));
 
         standFunnel.post(entity);
 
@@ -211,7 +213,7 @@ public class StandFunnelShould {
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(delivery, times(dispatchActions.length)).deliver(any(Entity.class));
+        verify(delivery, times(dispatchActions.length)).deliver(any(AbstractVersionableEntity.class));
 
         if (isConcurrent) {
             try {
@@ -325,7 +327,7 @@ public class StandFunnelShould {
         }
 
         @Override
-        protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+        protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
             return false;
         }
     }

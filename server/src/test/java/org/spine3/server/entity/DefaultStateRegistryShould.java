@@ -18,27 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.idfunc;
+package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * Obtains an entity ID based on an event/command message and context.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @param <C> either {@link org.spine3.base.EventContext EventContext} or
- *          {@link org.spine3.base.CommandContext CommandContext} type
- * @see org.spine3.server.entity.Entity Entity
+ * @author Alexander Yevsyukov
  */
-interface IdFunction<I, M extends Message, C extends Message> {
+public class DefaultStateRegistryShould {
 
-    /**
-     * Obtains an entity ID based on the passed message and its context.
-     *
-     * @param message a message from which to get the ID
-     * @param context context of the message
-     * @return an entity ID
-     */
-    I apply(M message, C context);
+    private DefaultStateRegistry registry;
+
+    @Before
+    public void setUp() {
+        registry = new DefaultStateRegistry();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_same_entity_class_twice() {
+        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
+        registry.put(TimerSnapshot.class, Timestamp.getDefaultInstance());
+    }
+
+    private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
+        protected TimerSnapshot(Long id) {
+            super(id);
+        }
+    }
 }

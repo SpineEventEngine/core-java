@@ -30,12 +30,9 @@ import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.entity.Entity.createEntity;
-import static org.spine3.server.entity.Entity.getConstructor;
 
 /**
  * Abstract base class for repositories.
@@ -56,9 +53,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
 
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
-
-    /** The constructor for creating entity instances. */
-    private final Constructor<E> entityConstructor;
 
     /** The data storage for this repository. */
     private Storage storage;
@@ -84,15 +78,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     protected Repository(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
-    }
-
-    private Constructor<E> getEntityConstructor() {
-        final Class<E> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        final Constructor<E> result = getConstructor(entityClass, idClass);
-        return result;
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -116,16 +101,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         return entityClass;
     }
 
-    /**
-     * Returns the {@link TypeUrl} for the state objects
-     * wrapped by entities managed by this repository
-     */
+    /** Returns the {@link TypeUrl} for the state objects wrapped by entities managed by this repository */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass =
-                    Classes.getGenericParameterType(entityClass, Entity.STATE_CLASS_GENERIC_INDEX);
+            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass,
+                                                                             Entity.GenericParamer.STATE.getIndex());
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -140,10 +122,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * @return new entity instance
      */
     @CheckReturnValue
-    public E create(I id) {
-        final E result = createEntity(entityConstructor, id, boundedContext);
-        return result;
-    }
+    public abstract E create(I id);
 
     /**
      * Stores the passed object.
