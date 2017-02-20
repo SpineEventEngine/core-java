@@ -125,10 +125,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    protected Constructor<A> getConstructor() {
-        return entityConstructor;
-    }
-
     @Override
     public A create(I id) {
         return AbstractEntity.createEntity(this.entityConstructor, id);
