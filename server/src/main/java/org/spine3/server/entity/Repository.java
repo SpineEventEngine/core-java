@@ -107,7 +107,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
             final Class<Object> stateClass = Classes.getGenericParameterType(entityClass,
-                                                                             Entity.GenericParamer.STATE.getIndex());
+                                                                             Entity.GenericParameter.STATE.getIndex());
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }

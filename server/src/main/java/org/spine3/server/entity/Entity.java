@@ -63,7 +63,7 @@ public interface Entity<I, S extends Message> {
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParamer implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
@@ -79,7 +79,7 @@ public interface Entity<I, S extends Message> {
 
         private final int index;
 
-        GenericParamer(int index) {
+        GenericParameter(int index) {
             this.index = index;
         }
 
@@ -108,7 +108,7 @@ public interface Entity<I, S extends Message> {
         static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
             checkNotNull(entityClass);
             final Class<I> idClass = getGenericParameterType(entityClass,
-                                                             GenericParamer.ID.getIndex());
+                                                             GenericParameter.ID.getIndex());
             return idClass;
         }
 
@@ -122,7 +122,7 @@ public interface Entity<I, S extends Message> {
         static <S extends Message> Class<S> getStateClass(
                 Class<? extends Entity> entityClass) {
             final Class<S> result = getGenericParameterType(entityClass,
-                                                            GenericParamer.STATE.getIndex());
+                                                            GenericParameter.STATE.getIndex());
             return result;
         }
     }

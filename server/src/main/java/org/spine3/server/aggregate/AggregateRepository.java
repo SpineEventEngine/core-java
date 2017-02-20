@@ -138,7 +138,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
         final Class<? extends Message> stateClass = getGenericParameterType(
                 aggregateClass,
-                Entity.GenericParamer.STATE.getIndex()
+                Entity.GenericParameter.STATE.getIndex()
         );
         return stateClass;
     }
