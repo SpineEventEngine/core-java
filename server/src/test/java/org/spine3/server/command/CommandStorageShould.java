@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
@@ -35,6 +34,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.Values;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
@@ -59,8 +59,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -93,20 +92,20 @@ public abstract class CommandStorageShould
 
     @Override
     protected CommandRecord newStorageRecord() {
-        final Any command = AnyPacker.pack(Given.Command.createProject());
-        final String commandType = ofEnclosed(command).getTypeName();
-        final CommandContext context = createCommandContext();
+        final Command command = createProject();
+        final String commandType = TypeName.ofCommand(command);
+
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
-                             .setTimestamp(getCurrentTime())
                              .setCommandType(commandType)
-                             .setCommandId(context.getCommandId())
+                             .setCommandId(command.getContext().getCommandId())
+                             .setCommand(command)
+                             .setTimestamp(getCurrentTime())
                              .setStatus(RECEIVED)
                              .setTargetId(TargetId.newBuilder()
                                                   .setType(String.class.getName())
-                                                  .setValue(newUuid()))
-                             .setMessage(command)
-                             .setContext(context);
+                                                  .setValue(newUuid())
+                             );
         return builder.build();
     }
 
@@ -122,7 +121,7 @@ public abstract class CommandStorageShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_and_read_command() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
 
         storage.store(command);
@@ -134,7 +133,7 @@ public abstract class CommandStorageShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_error() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
         final Error error = newError();
 
@@ -163,7 +162,7 @@ public abstract class CommandStorageShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_status() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
         final CommandStatus status = SCHEDULED;
 
@@ -175,14 +174,14 @@ public abstract class CommandStorageShould
 
     @Test
     public void load_commands_by_status() {
-        final List<Command> commands = ImmutableList.of(Given.Command.createProject(),
+        final List<Command> commands = ImmutableList.of(createProject(),
                                                         Given.Command.addTask(),
                                                         Given.Command.startProject());
         final CommandStatus status = SCHEDULED;
 
         store(commands, status);
         // store an extra command with another status
-        storage.store(Given.Command.createProject(), ERROR);
+        storage.store(createProject(), ERROR);
 
         final Iterator<Command> iterator = storage.iterator(status);
         final List<Command> actualCommands = newArrayList(iterator);
@@ -239,7 +238,7 @@ public abstract class CommandStorageShould
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandStatus status = RECEIVED;
 
         final CommandRecord record = CommandStorage.newRecordBuilder(command, status).build();
@@ -288,19 +287,19 @@ public abstract class CommandStorageShould
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject());
+        storage.store(createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject(), newError());
+        storage.store(createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject(), OK);
+        storage.store(createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -339,7 +338,7 @@ public abstract class CommandStorageShould
 
     private void givenNewRecord() {
         record = newStorageRecord();
-        id = record.getContext().getCommandId();
+        id = record.getCommandId();
         storage.write(id, record);
     }
 
@@ -360,11 +359,13 @@ public abstract class CommandStorageShould
                       .build();
     }
 
-    private static void checkRecord(CommandRecord record, Command cmd, CommandStatus statusExpected) {
+    private static void checkRecord(CommandRecord record,
+                                    Command cmd,
+                                    CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
         final CreateProject message = unpack(cmd.getMessage());
-        assertEquals(cmd.getMessage(), record.getMessage());
+        assertEquals(cmd.getMessage(), record.getCommand().getMessage());
         assertTrue(record.getTimestamp().getSeconds() > 0);
         assertEquals(message.getClass().getSimpleName(), record.getCommandType());
         assertEquals(commandId, record.getCommandId());
@@ -374,7 +375,7 @@ public abstract class CommandStorageShould
         assertEquals(message.getProjectId()
                             .getId(), record.getTargetId()
                                             .getValue());
-        assertEquals(context, record.getContext());
+        assertEquals(context, record.getCommand().getContext());
         switch (statusExpected) {
             case RECEIVED:
             case OK:

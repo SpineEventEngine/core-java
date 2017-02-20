@@ -178,15 +178,14 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
-                             .setMessage(command.getMessage())
-                             .setTimestamp(getCurrentTime())
-                             .setCommandType(commandType)
                              .setCommandId(commandId)
+                             .setCommandType(commandType)
+                             .setCommand(command)
+                             .setTimestamp(getCurrentTime())
                              .setStatus(status)
                              .setTargetId(TargetId.newBuilder()
                                                   .setType(targetIdType)
-                                                  .setValue(targetIdString))
-                             .setContext(context);
+                                                  .setValue(targetIdString));
         return builder;
     }
 
@@ -202,7 +201,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
             if (record == null) {
                 return Command.getDefaultInstance();
             }
-            final Command cmd = Commands.createCommand(record.getMessage(), record.getContext());
+            final Command cmd = record.getCommand();
             return cmd;
         }
     };
