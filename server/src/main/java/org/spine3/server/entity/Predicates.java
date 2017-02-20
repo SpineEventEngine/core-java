@@ -33,7 +33,7 @@ public class Predicates {
 
     private static final Predicate<Visibility> isEntityVisible = new Predicate<Visibility>() {
         @Override
-        public boolean apply(@Nullable org.spine3.server.entity.Visibility input) {
+        public boolean apply(@Nullable Visibility input) {
             return input == null ||
                     !(input.getArchived() || input.getDeleted());
         }
