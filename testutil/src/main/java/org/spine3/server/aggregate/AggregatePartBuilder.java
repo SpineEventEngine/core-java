@@ -21,6 +21,10 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.EntityBuilder;
+
+import java.lang.reflect.Constructor;
 
 /**
  * Utility class for building {@code AggregatePart}s for tests.
@@ -29,6 +33,8 @@ import com.google.protobuf.Message;
  */
 public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
         extends AggregateBuilder<A, I, S> {
+
+    private AggregateRoot<I> aggregateRoot;
 
     /**
      * {@inheritDoc}
@@ -42,5 +48,30 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
         return this;
+    }
+
+    @Override
+    protected A createEntity(I id) {
+        final Constructor<A> constructor = getConstructor();
+        final AggregateRoot<I> root = getAggregateRoot();
+        final A result = AbstractEntity.createEntity(constructor, id, root);
+        return result;
+    }
+
+    @Override
+    protected Constructor<A> getConstructor() {
+        final Constructor<A> constructor = AbstractEntity.getAggregatePartConstructor(
+                getResultClass(), getIdClass());
+        constructor.setAccessible(true);
+        return constructor;
+    }
+
+    public EntityBuilder<A, I, S> withRoot(AggregateRoot<I> root) {
+        this.aggregateRoot = root;
+        return this;
+    }
+
+    public AggregateRoot<I> getAggregateRoot() {
+        return aggregateRoot;
     }
 }

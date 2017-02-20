@@ -33,6 +33,7 @@ import org.spine3.server.command.Assign;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.CommandTestShould.newCommandFactory;
 
 /**
@@ -105,7 +106,10 @@ public class AggregatePartCommandTestShould {
 
         @Override
         protected TimerCounter createAggregatePart() {
+            final MockRoot root = new MockRoot(BoundedContext.newBuilder()
+                                                             .build(), newUuid());
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
+                                             .withRoot(root)
                                              .withId(getClass().getName())
                                              .withVersion(5)
                                              .withState(UInt32Value.newBuilder()
