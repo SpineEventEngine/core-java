@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Throwables;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -88,7 +90,33 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
+        final Class<I> idClass = Classes.getGenericParameterType(getClass(),
+                                                                 ID_CLASS_GENERIC_INDEX);
+        checkIdClass(idClass);
+
+        return idClass;
+    }
+
+    /**
+     *  Check that this class of identifiers is supported by the framework.
+     *
+     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
+     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
+     * {@code Message}.
+     *
+     * <p>We perform the check to to detect possible programming error
+     * in declarations of entity and repository classes <em>Integer</em> we have
+     * compile-time model check.
+     *
+     * @throws IllegalStateException of unsupported ID class passed
+     */
+    private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
+        try {
+            Identifiers.checkSupported(idClass);
+        } catch (IllegalArgumentException e) {
+            final Throwable cause = Throwables.getRootCause(e);
+            throw new IllegalStateException(cause);
+        }
     }
 
     /** Returns the class of entities managed by this repository. */
@@ -101,13 +129,17 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         return entityClass;
     }
 
-    /** Returns the {@link TypeUrl} for the state objects wrapped by entities managed by this repository */
+    /**
+     * Returns the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository
+     */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass,
-                                                                             Entity.GenericParameter.STATE.getIndex());
+            final Class<Object> stateClass =
+                    Classes.getGenericParameterType(entityClass,
+                                                    Entity.GenericParameter.STATE.getIndex());
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }

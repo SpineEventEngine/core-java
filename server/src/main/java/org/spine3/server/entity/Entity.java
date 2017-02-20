@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
- * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Object) identity}.
+ * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Class) identity}.
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *

@@ -21,7 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
@@ -51,7 +50,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
-        this.id = Identifiers.checkSupported(id);
+        this.id = checkNotNull(id);
     }
 
     /**

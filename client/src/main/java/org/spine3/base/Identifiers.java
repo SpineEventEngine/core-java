@@ -43,21 +43,9 @@ public class Identifiers {
     }
 
     /**
-     * Verifies if the passed class of identifiers is supported.
+     * Ensures that the passed class of identifiers is supported.
      *
-     * @param <I> the type of the ID
-     * @param idClass the class of IDs
-     * @throws IllegalArgumentException if the class of IDs is not of supported type
-     */
-    private static <I> void checkSupported(Class<I> idClass) {
-        checkNotNull(idClass);
-        Identifier.Type.getType(idClass);
-    }
-
-    /**
-     * Ensures that the passed ID is of supported type.
-     *
-     * <p>The following types are supported:
+     * <p>The following types of IDs are supported:
      *   <ul>
      *      <li>{@code String}
      *      <li>{@code Long}
@@ -67,22 +55,21 @@ public class Identifiers {
      *
      * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code,
      * and/or if you need to have IDs with some structure inside.
-     * Examples of such structural IDs are:
+     *
+     * <p>Examples of such structural IDs are:
      *   <ul>
      *      <li>EAN value used in bar codes
      *      <li>ISBN
      *      <li>Phone number
-     *      <li>email address as a couple of local-part and domain
+     *      <li>Email address as a couple of local-part and domain
      *   </ul>
-     *
-     * @param id the identifier
-     * @param <I> the type of the identifier
-     * @return the passed value
-     * @throws IllegalArgumentException if the ID is not of supported type
+     * @param <I> the type of the ID
+     * @param idClass the class of IDs
+     * @throws IllegalArgumentException if the class of IDs is not of supported type
      */
-    public static <I> I checkSupported(I id) {
-        checkSupported(id.getClass());
-        return id;
+    public static <I> void checkSupported(Class<I> idClass) {
+        checkNotNull(idClass);
+        Identifier.Type.getType(idClass);
     }
 
     /**
