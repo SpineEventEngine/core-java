@@ -56,7 +56,6 @@ public class AggregateRootShould {
     private CommandBus commandBus;
     private ProjectId projectId;
     private CommandContext commandContext;
-    private static boolean exceptionOccurred;
 
     @Before
     public void setUp() {
@@ -71,7 +70,6 @@ public class AggregateRootShould {
         boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
 
         commandBus = boundedContext.getCommandBus();
-
     }
 
     @Test
@@ -102,15 +100,15 @@ public class AggregateRootShould {
 
         final Command startProjectCmd = createStartProjectCmd();
         commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
-        
-        assertFalse(exceptionOccurred);
+
+        assertFalse(ProjectLifeCyclePart.exceptionOccurred);
     }
 
     @Test
     public void set_variable_to_true_when_it_is_trying_to_start_uncreated_project() {
         final Command startProjectCmd = createStartProjectCmd();
         commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
-        assertTrue(exceptionOccurred);
+        assertTrue(ProjectLifeCyclePart.exceptionOccurred);
     }
 
     private Command createProjectCmdInstance() {
@@ -128,10 +126,6 @@ public class AggregateRootShould {
     }
 
     /*
-       Test environment classes
-     ***************************/
-
-      /*
        Test environment classes
      ***************************/
 
@@ -166,8 +160,11 @@ public class AggregateRootShould {
         }
     }
 
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod") // It is needed for testing.
     private static class ProjectLifeCyclePart
             extends AggregatePart<ProjectId, ProjectLifeCycle, ProjectLifeCycle.Builder> {
+
+        private static boolean exceptionOccurred = false;
 
         /**
          * {@inheritDoc}
