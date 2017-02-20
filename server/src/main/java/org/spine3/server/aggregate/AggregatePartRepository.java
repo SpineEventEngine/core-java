@@ -21,6 +21,7 @@
 package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.AbstractEntity;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,8 +32,6 @@ import java.lang.reflect.InvocationTargetException;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
-
-    private AggregateRoot<I> root;
 
     /**
      * {@inheritDoc}
@@ -49,12 +48,15 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @Override
     public A create(I id) {
         try {
-            final Class<?> rootClass = getConstructor().getParameterTypes()[1];
-            final Constructor<?> rootConstructor = rootClass.getDeclaredConstructor(
-                    getBoundedContext().getClass(), id.getClass());
+            final Constructor<A> entityConstructor = AbstractEntity.getAggregatePartConstructor(
+                    getEntityClass(), getIdClass());
+            entityConstructor.setAccessible(true);
+            final Class<AggregateRoot<I>> rootClass = (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
+            final Constructor<AggregateRoot<I>> rootConstructor =
+                    rootClass.getDeclaredConstructor(getBoundedContext().getClass(), id.getClass());
             rootConstructor.setAccessible(true);
-            final AggregateRoot root = (AggregateRoot) rootConstructor.newInstance(getBoundedContext(), id);
-            final A result = getConstructor().newInstance(id, root);
+            final AggregateRoot<I> root = rootConstructor.newInstance(getBoundedContext(), id);
+            final A result = AbstractEntity.createEntity(entityConstructor, id, root);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {

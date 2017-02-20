@@ -88,7 +88,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             GetTargetIdFromCommand.newInstance();
 
     /** The constructor for creating entity instances. */
-    private final Constructor<A> entityConstructor;
+    private Constructor<A> entityConstructor;
 
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
@@ -106,16 +106,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
         this.entityConstructor = getEntityConstructor();
+        this.entityConstructor.setAccessible(true);
     }
 
     private Constructor<A> getEntityConstructor() {
         final Class<A> entityClass = getEntityClass();
         final Class<I> idClass = getIdClass();
+        if (AggregatePart.class.isAssignableFrom(entityClass)) {
+            final Constructor<A> result = AbstractEntity.getAggregatePartConstructor(entityClass,
+                                                                                     idClass);
+            return result;
+        }
         final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
         return result;
     }
 
-    protected Constructor<A> getConstructor(){
+    protected Constructor<A> getConstructor() {
         return entityConstructor;
     }
 

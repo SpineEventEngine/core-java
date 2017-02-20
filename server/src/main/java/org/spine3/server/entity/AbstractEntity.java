@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
 
 import javax.annotation.CheckReturnValue;
@@ -126,8 +125,21 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return TypeInfo.getStateClass(getClass());
     }
 
-    private static <E extends Entity<I, ?>, I>
-    Constructor<E> getConstructorType(Class<E> entityClass, Class<I> idClass) {
+    /**
+     * Obtains constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    public static <E extends Entity<I, ?>, I>
+    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -145,28 +157,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
-    /**
-     * Obtains constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @param entityClass the entity class
-     * @param idClass     the class of entity identifiers
-     * @param <E>         the entity type
-     * @param <I>         the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
     public static <E extends Entity<I, ?>, I>
-    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
-        if (AggregatePart.class.isAssignableFrom(entityClass)) {
-            return getAggregatePartConstructor(entityClass, idClass);
-        }
-        return getConstructorType(entityClass, idClass);
-    }
-
-    private static <E extends Entity<I, ?>, I>
     Constructor<E> getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
         final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
         for (Constructor<?> constructor : constructors) {
@@ -181,12 +172,30 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             if (correctConstructor) {
                 @SuppressWarnings("unchecked") // It is safe because arguments are checked before.
                 final Constructor<E> result = (Constructor<E>) constructor;
-                result.setAccessible(true);
                 return result;
             }
         }
-        throw new RuntimeException();
+        throw new RuntimeException("w");
     }
+
+    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
+                                                                     AggregateRoot<I> root) {
+        try {
+            final E result = ctor.newInstance(id, root);
+            result.init();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+//    public static <E extends Entity<I, ?>, I>
+//    Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+//        if (AggregatePart.class.isAssignableFrom(entityClass)) {
+//            return getAggregatePartConstructor(entityClass, idClass);
+//        }
+//        return getConstructorType(entityClass, idClass);
+//    }
 
     /**
      * Creates new entity and sets it to the default state.
@@ -207,16 +216,26 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
     }
 
-    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
-                                                                     AggregateRoot<I> root) {
-        try {
-            final E result = ctor.newInstance(id, root);
-            result.init();
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+//    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+//        final Constructor<A> entityConstructor = AbstractEntity.getAggregatePartConstructor(
+//                getEntityClass(), getIdClass());
+//        entityConstructor.setAccessible(true);
+//        final Class<AggregateRoot<I>> rootClass = (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
+//        final Constructor<AggregateRoot<I>> rootConstructor =
+//                rootClass.getDeclaredConstructor(getBoundedContext().getClass(), id.getClass());
+//        rootConstructor.setAccessible(true);
+//        final AggregateRoot<I> root = rootConstructor.newInstance(getBoundedContext(), id);
+//    }
+//    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id,
+//                                                                     AggregateRoot<I> root) {
+//        try {
+//            final E result = ctor.newInstance(id, root);
+//            result.init();
+//            return result;
+//        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+//            throw new IllegalStateException(e);
+//        }
+//    }
 
     @Override
     public boolean equals(Object o) {
