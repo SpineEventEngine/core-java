@@ -76,7 +76,7 @@ public class AggregatePartCommandTestShould {
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
     private static final class TimerCounter extends AggregatePart<String, UInt32Value, UInt32Value.Builder> {
-        private TimerCounter(String id, MockRoot root) {
+        private TimerCounter(String id, TimerCounterRoot root) {
             super(id, root);
         }
 
@@ -106,8 +106,8 @@ public class AggregatePartCommandTestShould {
 
         @Override
         protected TimerCounter createAggregatePart() {
-            final MockRoot root = new MockRoot(BoundedContext.newBuilder()
-                                                             .build(), newUuid());
+            final TimerCounterRoot root = new TimerCounterRoot(BoundedContext.newBuilder()
+                                                                             .build(), newUuid());
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
                                              .withRoot(root)
                                              .withId(getClass().getName())
@@ -120,14 +120,14 @@ public class AggregatePartCommandTestShould {
         }
     }
 
-    private static class MockRoot extends AggregateRoot<String> {
+    private static class TimerCounterRoot extends AggregateRoot<String> {
         /**
          * Creates an new instance.
          *
          * @param boundedContext the bounded context to which the aggregate belongs
          * @param id             the ID of the aggregate
          */
-        protected MockRoot(BoundedContext boundedContext, String id) {
+        protected TimerCounterRoot(BoundedContext boundedContext, String id) {
             super(boundedContext, id);
         }
     }

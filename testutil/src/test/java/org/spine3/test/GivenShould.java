@@ -28,7 +28,6 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
@@ -75,9 +74,8 @@ public class GivenShould {
     }
 
     private static class AnAggregatePart extends AggregatePart<Long, Timestamp, Timestamp.Builder> {
-        protected AnAggregatePart(Long id) {
-            super(id, new MockRoot(BoundedContext.newBuilder()
-                                                 .build(), id));
+        protected AnAggregatePart(Long id, AnAggregateRoot root) {
+            super(id, root);
         }
     }
 
@@ -116,14 +114,14 @@ public class GivenShould {
         }
     }
 
-    private static class MockRoot extends AggregateRoot<Long> {
+    private static class AnAggregateRoot extends AggregateRoot<Long> {
         /**
          * Creates an new instance.
          *
          * @param boundedContext the bounded context to which the aggregate belongs
          * @param id             the ID of the aggregate
          */
-        protected MockRoot(BoundedContext boundedContext, Long id) {
+        protected AnAggregateRoot(BoundedContext boundedContext, Long id) {
             super(boundedContext, id);
         }
     }
