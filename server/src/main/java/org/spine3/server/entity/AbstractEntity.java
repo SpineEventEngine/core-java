@@ -197,7 +197,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Creates new {@code AggregateRoot} entity and sets it to the default state.
+     * Creates a new {@code AggregateRoot} entity and sets it to the default state.
      *
      * @param id             the ID of the entity
      * @param boundedContext the {@code BoundedContext} to use
@@ -205,7 +205,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param <I>            the type of entity IDs
      * @return new entity
      */
-    public static <I, R extends  AggregateRoot<I>> R
+    public static <I, R extends AggregateRoot<I>> R
     createAggregateRootEntity(I id, BoundedContext boundedContext, Class<R> rootClass) {
         try {
             final Constructor<R> rootConstructor =
@@ -220,13 +220,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Creates new {@code AggregatePart} entity and sets it to the default state.
+     * Creates a new {@code AggregatePart} entity and sets it to the default state.
      *
      * @param ctor the constructor to use
      * @param id   the ID of the entity
      * @param <I>  the type of entity IDs
      * @param <E>  the type of the entity
-     * @return new entity
+     * @return a new entity
      */
     public static <I, E extends AbstractEntity<I, ?>> E
     createAggregatePartEntity(Constructor<E> ctor, I id, AggregateRoot<I> root) {
