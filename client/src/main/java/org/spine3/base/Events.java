@@ -20,7 +20,6 @@
 package org.spine3.base;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -29,16 +28,13 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeName;
 import org.spine3.users.UserId;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps2.isBetween;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -49,10 +45,11 @@ import static org.spine3.protobuf.Timestamps2.isBetween;
 public class Events {
 
     private Events() {
+        // Prevent instantiation of this utility class.
     }
 
     /** Compares two events by their timestamps. */
-    public static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
+    private static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
         @Override
         public int compare(Event o1, Event o2) {
             final Timestamp timestamp1 = getTimestamp(o1);
@@ -76,7 +73,15 @@ public class Events {
      */
     public static void sort(List<Event> events) {
         checkNotNull(events);
-        Collections.sort(events, EVENT_TIMESTAMP_COMPARATOR);
+        Collections.sort(events, eventComparator());
+    }
+
+    /**
+     * Returns comparator which compares events by their timestamp
+     * in chronological order.
+     */
+    public static Comparator<Event> eventComparator() {
+        return EVENT_TIMESTAMP_COMPARATOR;
     }
 
     /** Obtains the timestamp of the event. */
@@ -184,73 +189,6 @@ public class Events {
         return builder.build();
     }
 
-    /** The predicate to filter event records after some point in time. */
-    public static class IsAfter implements Predicate<Event> {
-
-        private final Timestamp timestamp;
-
-        public IsAfter(Timestamp timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event record) {
-            if (record == null) {
-                return false;
-            }
-            final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps2.compare(ts, this.timestamp) > 0;
-            return result;
-        }
-    }
-
-    /** The predicate to filter event records before some point in time. */
-    public static class IsBefore implements Predicate<Event> {
-
-        private final Timestamp timestamp;
-
-        public IsBefore(Timestamp timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event record) {
-            if (record == null) {
-                return false;
-            }
-
-            final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps2.compare(ts, this.timestamp) < 0;
-            return result;
-        }
-    }
-
-    /** The predicate to filter event records within a given time range. */
-    public static class IsBetween implements Predicate<Event> {
-
-        private final Timestamp start;
-        private final Timestamp finish;
-
-        public IsBetween(Timestamp start, Timestamp finish) {
-            checkNotNull(start);
-            checkNotNull(finish);
-            checkArgument(Timestamps2.compare(start, finish) < 0, "`start` must be before `finish`");
-            this.start = start;
-            this.finish = finish;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event event) {
-            if (event == null) {
-                return false;
-            }
-
-            final Timestamp ts = getTimestamp(event);
-            final boolean result = isBetween(ts, start, finish);
-            return result;
-        }
-    }
-
     /** Verifies if the enrichment is not disabled in the passed event. */
     public static boolean isEnrichmentEnabled(Event event) {
         checkNotNull(event);
@@ -283,7 +221,8 @@ public class Events {
      * @param <E>             a type of the event enrichment
      * @return an optional of the enrichment
      */
-    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
+    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
+                                                                EventContext context) {
         checkNotNull(enrichmentClass);
         checkNotNull(context);
         final Optional<Enrichments> value = getEnrichments(context);
