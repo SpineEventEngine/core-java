@@ -84,7 +84,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
     protected void store(Command command, CommandStatus status) {
         checkNotClosed();
 
-        final CommandRecord record = newRecordBuilder(command, status).build();
+        final CommandRecord record = newRecordBuilder(command, status, null).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
     }
@@ -105,17 +105,19 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         if (idToString(id).equals(EMPTY_ID)) {
             /*
                We don't have a command ID in the passed command.
-               We need an ID to store the error in the record.
-               So, it will be generated.
+               But need an ID to store the error in the record associated
+               with this command. So, the ID will be generated.
 
-               We do not use this ID in the record, because it does not
-               belong to the command. Therefore, id-less commands can be
-               identified at the storage level by records with `command_id` field.
+               We pass this ID to the record, so that it has an identity.
+               But this ID does not belong to the command.
+
+               Therefore, commands without ID can be found by records
+               where `command.context.command_id` field is empty.
              */
             id = generateId();
         }
 
-        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR);
+        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
                .setError(error);
         final CommandRecord record = builder.build();
@@ -160,15 +162,26 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
      * the command is not for an entity.
      *
-     * @param command a command to convert to a record
-     * @param status  a command status to set to a record
+     * @param command
+     *            a command to convert to a record. This includes instances of faulty commands.
+     *            One of example of such a fault is missing command ID.
+     * @param status
+     *            a command status to set in the record
+     * @param generatedCommandId
+     *            a command ID to used because the passed command does not have own ID.
+     *            If the command has own ID this parameter is {@code null}
      * @return a storage record
      */
     @VisibleForTesting
-    static CommandRecord.Builder newRecordBuilder(Command command, CommandStatus status) {
+    static CommandRecord.Builder newRecordBuilder(Command command,
+                                                  CommandStatus status,
+                                                  @Nullable CommandId generatedCommandId) {
         final CommandContext context = command.getContext();
 
-        final CommandId commandId = context.getCommandId();
+        final CommandId commandId = generatedCommandId != null
+                                    ? generatedCommandId
+                                    : context.getCommandId();
+
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeUrl.of(commandMessage).getSimpleName();
 

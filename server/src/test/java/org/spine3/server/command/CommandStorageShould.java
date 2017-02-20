@@ -246,7 +246,7 @@ public abstract class CommandStorageShould
         final Command command = createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandRecord record = CommandStorage.newRecordBuilder(command, status).build();
+        final CommandRecord record = CommandStorage.newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
     }
@@ -254,8 +254,10 @@ public abstract class CommandStorageShould
     @Test
     public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
         final StringValue message = StringValue.getDefaultInstance();
-        final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
-        final CommandRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
+        final Command command =
+                Commands.createCommand(message, CommandContext.getDefaultInstance());
+        final CommandRecord record =
+                CommandStorage.newRecordBuilder(command, RECEIVED, null).build();
 
         assertEquals("", record.getTargetId().getValue());
         assertEquals("", record.getTargetId().getType());
