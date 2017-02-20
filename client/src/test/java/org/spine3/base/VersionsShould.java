@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
@@ -31,6 +32,13 @@ public class VersionsShould {
     @Test
     public void have_private_utility_ctor() {
         Tests.hasPrivateParameterlessCtor(Versions.class);
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Version.class, Versions.create())
+                .testAllPublicStaticMethods(Versions.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

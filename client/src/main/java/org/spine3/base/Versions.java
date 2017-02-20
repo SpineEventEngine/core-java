@@ -64,6 +64,7 @@ public class Versions {
      * and the timestamp of the current system time.
      */
     public static Version increment(Version version) {
+        checkNotNull(version);
         final Version result = create(version.getNumber() + 1, getCurrentTime());
         return result;
     }
@@ -77,6 +78,8 @@ public class Versions {
      *                                  number with the {@code currentVersion}
      */
     public static void checkIsIncrement(Version currentVersion, Version newVersion) {
+        checkNotNull(currentVersion);
+        checkNotNull(newVersion);
         final int currentNumber = currentVersion.getNumber();
         final int newNumber = newVersion.getNumber();
         if (newNumber <= currentNumber) {
