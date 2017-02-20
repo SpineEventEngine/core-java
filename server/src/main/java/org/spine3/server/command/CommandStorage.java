@@ -99,22 +99,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         checkNotClosed();
         checkNotDefault(error);
 
-        //TODO:2017-02-20:alexander.yevsyukov: Extract method
-        CommandId id = getId(command);
-        if (idToString(id).equals(EMPTY_ID)) {
-            /*
-               We don't have a command ID in the passed command.
-               But need an ID to store the error in the record associated
-               with this command. So, the ID will be generated.
-
-               We pass this ID to the record, so that it has an identity.
-               But this ID does not belong to the command.
-
-               Therefore, commands without ID can be found by records
-               where `command.context.command_id` field is empty.
-             */
-            id = generateId();
-        }
+        CommandId id = getOrGenerateCommandId(command);
 
         final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
@@ -122,6 +107,27 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
         final CommandRecord record = builder.build();
 
         write(id, record);
+    }
+
+    /**
+     * Obtains or generates a {@code CommandId} from the passed command.
+     *
+     * <p>We don't have a command ID in the passed command.
+     * But need an ID to store the error in the record associated
+     * with this command. So, the ID will be generated.
+     *
+     * <p>We pass this ID to the record, so that it has an identity.
+     * But this ID does not belong to the command.
+     *
+     * <p>Therefore, commands without ID can be found by records
+     * where `command.context.command_id` field is empty.
+     */
+    private static CommandId getOrGenerateCommandId(Command command) {
+        CommandId id = getId(command);
+        if (idToString(id).equals(EMPTY_ID)) {
+            id = generateId();
+        }
+        return id;
     }
 
     /**
