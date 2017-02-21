@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.server.entity.status.CannotModifyArchivedEntity;
-import org.spine3.server.entity.status.CannotModifyDeletedEntity;
+import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
+import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Objects;
