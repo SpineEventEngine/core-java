@@ -207,7 +207,6 @@ public class Given {
                     .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
                     .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
                     .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING)
                     .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
                     .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
                     .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
@@ -289,15 +288,6 @@ public class Given {
                     @Nullable
                     @Override
                     public String apply(@Nullable Integer input) {
-                        return input == null ? "" : input.toString();
-                    }
-                };
-
-        private static final Function<EventContext.Attributes, String> ATTRIBUTES_TO_STRING =
-                new Function<EventContext.Attributes, String>() {
-                    @Nullable
-                    @Override
-                    public String apply(@Nullable EventContext.Attributes input) {
                         return input == null ? "" : input.toString();
                     }
                 };

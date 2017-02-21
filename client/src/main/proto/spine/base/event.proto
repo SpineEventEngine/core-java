@@ -81,8 +81,8 @@ message EventContext {
 
     // The ID of the entity which generated the event.
     //
-    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`),
-    // bounded contexts (for integration events).
+    // Examples of event producers are: aggregates, process managers
+    // (which generate `CommandRouted`), bounded contexts (for integration events).
     //
     google.protobuf.Any producer_id = 4;
 
@@ -98,14 +98,6 @@ message EventContext {
 
         // The instruction not to enrich the event.
         bool do_not_enrich = 7;
-    }
-
-    // Service attributes that the system wants to store in addition to
-    // the domain attributes defined in the event message.
-    Attributes attributes = 8;
-
-    message Attributes {
-        map<string, google.protobuf.Any> entries = 1;
     }
 }
 
