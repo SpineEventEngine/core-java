@@ -98,14 +98,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     }
 
     /**
-     *  Check that this class of identifiers is supported by the framework.
+     * Checks that this class of identifiers is supported by the framework.
      *
      * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
      * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
      * {@code Message}.
      *
      * <p>We perform the check to to detect possible programming error
-     * in declarations of entity and repository classes <em>Integer</em> we have
+     * in declarations of entity and repository classes <em>until</em> we have
      * compile-time model check.
      *
      * @throws IllegalStateException of unsupported ID class passed

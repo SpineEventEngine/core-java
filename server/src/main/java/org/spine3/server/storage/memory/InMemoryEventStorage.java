@@ -110,8 +110,8 @@ class InMemoryEventStorage extends EventStorage {
         }
 
         private Iterator<Event> iterator(EventStreamQuery query) {
-            final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
             final Iterator<Event> transformed = toEventIterator(storage.iterator());
+            final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
             final Iterator<Event> result = filter(transformed, matchesQuery);
             return result;
         }
