@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
@@ -51,6 +50,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
@@ -323,10 +323,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return aggregateStorage().markDeleted(id);
     }
 
-    private IllegalStateException unableToLoadEvents(I id) {
+    private static <I> IllegalStateException unableToLoadEvents(I id) {
         final String errMsg = format(
                 "Unable to load events for the aggregate with ID: %s",
-                Stringifiers.idToString(id)
+                idToString(id)
         );
         throw new IllegalStateException(errMsg);
     }
