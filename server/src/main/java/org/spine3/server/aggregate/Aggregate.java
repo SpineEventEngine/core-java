@@ -250,7 +250,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Applies passed events.
      *
      * <p>The events passed to this method is the aggregate data (which may include
-     * a {@code Snapshot} loaded by a repository and passed to the aggregate so that
+     * a {@code Snapshot}) loaded by a repository and passed to the aggregate so that
      * it restores its state.
      *
      * @param aggregateStateRecord the events to play
@@ -389,7 +389,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Restores state from the passed snapshot.
+     * Restores the state and version from the passed snapshot.
+     *
+     * <p>If this method is called during a {@linkplain #play(AggregateStateRecord) replay}
+     * (because the snapshot was encountered) the method uses the state
+     * {@linkplain #getBuilder() builder}, which is used during the replay.
+     *
+     * <p>If not in replay, the method sets the state and version directly to the aggregate.
      *
      * @param snapshot the snapshot with the state to restore
      */
@@ -399,10 +405,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         // See if we're in the state update cycle.
         final B builder = this.builder;
 
-        /* If the call to restore() is made during a replay (because the snapshot was encountered)
-           use the currently initialized builder.
-           Otherwise, just set the state and the version from the snapshot.
-         */
         final Version versionFromSnapshot = snapshot.getVersion();
         if (builder != null) {
             builder.clear();
