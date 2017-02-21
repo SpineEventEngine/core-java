@@ -20,8 +20,10 @@
 
 package org.spine3.test;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.protobuf.Timestamps2;
 
 import static com.google.protobuf.util.Timestamps.subtract;
@@ -40,6 +42,14 @@ public class TimeTestsShould {
         Tests.hasPrivateParameterlessCtor(TimeTests.class);
         Tests.hasPrivateParameterlessCtor(TimeTests.Future.class);
         Tests.hasPrivateParameterlessCtor(TimeTests.Past.class);
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Timestamp.class, getCurrentTime())
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .testAllPublicStaticMethods(TimeTests.class);
     }
 
     @Test
