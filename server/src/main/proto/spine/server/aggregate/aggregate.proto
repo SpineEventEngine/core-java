@@ -61,32 +61,12 @@ message AggregateEventRecord {
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
-    // A short Protobuf type name of the event.
-    //
-    // Since events stored are for particular aggregate type, we are not likely to
-    // have a name clash because of not storing fully-qualified names.
-    //
-    // This field is blank if the record stores a snapshot.
-    //
-    string event_type = 2;
-
-    // String representation of `EventId`.
-    //
-    // When storing a snapshot this field contains the string `Snapshot`.
-    //
-    string event_id = 3;
-
-    // The version of the aggregate after the event was applied.
-    spine.base.Version version = 4;
-
-    reserved 5 to 19;
-
     oneof kind {
         // An event stored in the record.
-        base.Event event = 20;
+        base.Event event = 2;
 
         // A snapshot of the aggregate.
-        server.aggregate.Snapshot snapshot = 21;
+        server.aggregate.Snapshot snapshot = 3;
     }
 }
 

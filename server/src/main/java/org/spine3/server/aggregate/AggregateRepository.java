@@ -271,7 +271,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
                 final Snapshot snapshot = aggregate.toSnapshot();
-                storage.write(id, snapshot);
+                storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
             }
         }

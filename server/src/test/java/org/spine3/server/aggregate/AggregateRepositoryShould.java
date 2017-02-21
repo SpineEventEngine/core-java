@@ -136,7 +136,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), eq(0));
     }
 
@@ -147,7 +147,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage, never()).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
     }
 

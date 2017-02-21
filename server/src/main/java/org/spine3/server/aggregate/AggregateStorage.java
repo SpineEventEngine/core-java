@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
@@ -39,7 +38,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -50,9 +48,6 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  */
 @SPI
 public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateStateRecord> {
-
-    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
-                                                             .getName();
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -126,9 +121,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
      *
      * @param id    the aggregate ID
      * @param event the event to write
-     * @throws IllegalStateException if the storage is closed
      */
-    protected void writeEvent(I id, Event event) {
+    void writeEvent(I id, Event event) {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(event);
@@ -144,21 +138,38 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
      * @param snapshot    the snapshot of the aggregate
      * @throws IllegalStateException if the storage is closed
      */
-    protected void write(I aggregateId, Snapshot snapshot) {
+    void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        final Timestamp timestamp = checkValid(snapshot.getTimestamp());
 
-        final AggregateEventRecord record =
-                AggregateEventRecord.newBuilder()
-                                    .setTimestamp(timestamp)
-                                    .setEventType(SNAPSHOT_TYPE_NAME)
-                                    .setEventId("") // No event ID for snapshots because it's not a domain event.
-                                    .setVersion(snapshot.getVersion())
-                                    .setSnapshot(snapshot)
-                                    .build();
+        final AggregateEventRecord record = toStorageRecord(snapshot);
         writeRecord(aggregateId, record);
+    }
+
+    protected static AggregateEventRecord toStorageRecord(Event event) {
+        checkArgument(event.hasContext(), "Event context must be set.");
+        final EventContext context = event.getContext();
+
+        final String eventIdStr = idToString(context.getEventId());
+        checkNotEmptyOrBlank(eventIdStr, "Event ID");
+
+        checkArgument(event.hasMessage(), "Event message must be set.");
+
+        final Timestamp timestamp = checkValid(context.getTimestamp());
+
+        return AggregateEventRecord.newBuilder()
+                                   .setTimestamp(timestamp)
+                                   .setEvent(event)
+                                   .build();
+    }
+
+    protected static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
+        final Timestamp value = checkValid(snapshot.getTimestamp());
+        return AggregateEventRecord.newBuilder()
+                                   .setTimestamp(value)
+                                   .setSnapshot(snapshot)
+                                   .build();
     }
 
     /**
@@ -201,30 +212,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
      * @throws IllegalStateException if the storage is closed
      */
     protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
-
-    private static AggregateEventRecord toStorageRecord(Event event) {
-        checkArgument(event.hasContext(), "Event context must be set.");
-        final EventContext context = event.getContext();
-
-        final String eventIdStr = idToString(context.getEventId());
-        checkNotEmptyOrBlank(eventIdStr, "Event ID");
-
-        checkArgument(event.hasMessage(), "Event message must be set.");
-        final Any eventMsg = event.getMessage();
-
-        final String eventType = ofEnclosed(eventMsg).getTypeName();
-        checkNotEmptyOrBlank(eventType, "Event type");
-
-        final Timestamp timestamp = checkValid(context.getTimestamp());
-
-        return AggregateEventRecord.newBuilder()
-                                   .setEvent(event)
-                                   .setTimestamp(timestamp)
-                                   .setEventId(eventIdStr)
-                                   .setEventType(eventType)
-                                   .setVersion(context.getVersion())
-                                   .build();
-    }
 
     // Storage implementation API.
 

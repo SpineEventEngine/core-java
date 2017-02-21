@@ -141,7 +141,7 @@ public abstract class AggregateStorageShould
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_snapshot_by_null_id() {
-        storage.write(Tests.<ProjectId>nullRef(), Snapshot.getDefaultInstance());
+        storage.writeSnapshot(Tests.<ProjectId>nullRef(), Snapshot.getDefaultInstance());
     }
 
     @Test
@@ -199,7 +199,7 @@ public abstract class AggregateStorageShould
     public void write_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
-        storage.write(id, expected);
+        storage.writeSnapshot(id, expected);
 
         final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
         assertTrue(iterator.hasNext());
@@ -221,7 +221,7 @@ public abstract class AggregateStorageShould
         final Timestamp time3 = add(time2, delta);
 
         storage.writeRecord(id, Given.StorageRecord.create(time1));
-        storage.write(id, newSnapshot(time2));
+        storage.writeSnapshot(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
     }

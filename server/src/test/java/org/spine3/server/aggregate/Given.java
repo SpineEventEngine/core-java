@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
-import org.spine3.base.Identifiers;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -198,7 +197,6 @@ class Given {
         static AggregateEventRecord create(Timestamp timestamp) {
             final AggregateEventRecord.Builder builder
                     = AggregateEventRecord.newBuilder()
-                                          .setEventId(Identifiers.newUuid())
                                           .setTimestamp(timestamp);
             return builder.build();
         }
