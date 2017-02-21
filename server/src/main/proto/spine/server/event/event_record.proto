@@ -23,7 +23,7 @@ package spine.server.event;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.event.storage";
+option java_package = "org.spine3.server.event";
 option java_multiple_files = true;
 option java_outer_classname = "EventRecordProto";
 option java_generate_equals_and_hash = true;
@@ -34,12 +34,12 @@ import "google/protobuf/timestamp.proto";
 import "spine/annotations.proto";
 import "spine/base/event.proto";
 
-//TODO:2017-02-21:alexander.yevsyukov: Rename to EventRecord
-
 // This type defines the way events are stored in event storage.
+//
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
-message EventStorageRecord {
+//
+message EventRecord {
     option (SPI_type) = true;
 
     // A moment of time when the event occurred.
@@ -56,7 +56,7 @@ message EventStorageRecord {
 
     reserved 5 to 19;
 
-    //TODO:2017-02-21:alexander.yevsyukov: Have Event
+    //TODO:2017-02-21:alexander.yevsyukov: Have Event instead of couple of fields.
     // Make sure to update spine.test.event.EnrichmentByContextFields when migrating.
 
     // Event instance.

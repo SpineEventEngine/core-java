@@ -29,6 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
+import org.spine3.server.event.EventRecord;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -45,6 +46,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 public class Given {
+
+    private Given() {
+        // Prevent instantiation of this utility class from outside.
+    }
 
     public static class AggregateId {
 
@@ -230,11 +235,11 @@ public class Given {
         private EventStorageRecord() {
         }
 
-        public static org.spine3.server.event.storage.EventStorageRecord projectCreated() {
+        public static EventRecord projectCreated() {
             final Timestamp time = getCurrentTime();
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.event.storage.EventStorageRecord.Builder builder =
-                    org.spine3.server.event.storage.EventStorageRecord
+            final EventRecord.Builder builder =
+                    EventRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(time)
@@ -245,10 +250,10 @@ public class Given {
             return builder.build();
         }
 
-        public static org.spine3.server.event.storage.EventStorageRecord projectCreated(Timestamp when) {
+        public static EventRecord projectCreated(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.event.storage.EventStorageRecord
+            final EventRecord.Builder result =
+                    EventRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectCreatedAny())
                             .setTimestamp(when)
@@ -259,10 +264,10 @@ public class Given {
             return result.build();
         }
 
-        public static org.spine3.server.event.storage.EventStorageRecord taskAdded(Timestamp when) {
+        public static EventRecord taskAdded(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.event.storage.EventStorageRecord
+            final EventRecord.Builder result =
+                    EventRecord
                             .newBuilder()
                             .setMessage(EventMessage.taskAddedAny())
                             .setTimestamp(when)
@@ -273,10 +278,10 @@ public class Given {
             return result.build();
         }
 
-        public static org.spine3.server.event.storage.EventStorageRecord projectStarted(Timestamp when) {
+        public static EventRecord projectStarted(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final org.spine3.server.event.storage.EventStorageRecord.Builder result =
-                    org.spine3.server.event.storage.EventStorageRecord
+            final EventRecord.Builder result =
+                    EventRecord
                             .newBuilder()
                             .setMessage(EventMessage.projectStartedAny())
                             .setTimestamp(when)

@@ -33,7 +33,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.storage.AbstractStorage;
 
 import javax.annotation.Nullable;
@@ -55,9 +54,9 @@ import static org.spine3.validate.Validate.checkValid;
 @SPI
 public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
-    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
+    private static final Function<EventRecord, Event> TO_EVENT = new Function<EventRecord, Event>() {
         @Override
-        public Event apply(@Nullable EventStorageRecord input) {
+        public Event apply(@Nullable EventRecord input) {
             if (input == null) {
                 return Event.getDefaultInstance();
             }
@@ -75,7 +74,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotClosed();
         checkNotNull(event);
 
-        final EventStorageRecord record = toEventStorageRecord(id, event);
+        final EventRecord record = toEventStorageRecord(id, event);
         writeRecord(record);
     }
 
@@ -84,7 +83,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotClosed();
         checkNotNull(id);
 
-        final Optional<EventStorageRecord> record = readRecord(id);
+        final Optional<EventRecord> record = readRecord(id);
         if (!record.isPresent()) {
             return Optional.absent();
         }
@@ -105,7 +104,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      *
      * @param record the record to write
      */
-    protected abstract void writeRecord(EventStorageRecord record);
+    protected abstract void writeRecord(EventRecord record);
 
     /**
      * Reads storage format record.
@@ -113,35 +112,35 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * @param eventId the ID of the event to read
      * @return the record instance of null if there's not record with such ID
      */
-    protected abstract Optional<EventStorageRecord> readRecord(EventId eventId);
+    protected abstract Optional<EventRecord> readRecord(EventId eventId);
 
     /** Converts EventStorageRecord to Event. */
-    protected static Event toEvent(EventStorageRecord record) {
+    protected static Event toEvent(EventRecord record) {
         final Event event = Events.createEvent(record.getMessage(), record.getContext());
         return event;
     }
 
     /** Converts EventStorageRecords to Events. */
     @VisibleForTesting
-    static List<Event> toEventList(List<EventStorageRecord> records) {
+    static List<Event> toEventList(List<EventRecord> records) {
         return Lists.transform(records, TO_EVENT);
     }
 
     /** Converts EventStorageRecords to Events. */
     @SuppressWarnings("OverloadedVarargsMethod")
     @VisibleForTesting
-    static List<Event> toEventList(EventStorageRecord... records) {
+    static List<Event> toEventList(EventRecord... records) {
         return toEventList(ImmutableList.copyOf(records));
     }
 
     /** Converts {@code EventStorageRecord}s to {@code Event}s. */
-    protected static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
+    protected static Iterator<Event> toEventIterator(Iterator<EventRecord> records) {
         return Iterators.transform(records, TO_EVENT);
     }
 
     /** Creates storage record for the passed {@link Event}. */
     @VisibleForTesting
-    static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
+    static EventRecord toEventStorageRecord(EventId eventId, Event event) {
         final String eventIdString = checkValid(eventId).getUuid();
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
@@ -150,13 +149,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
         final Timestamp timestamp = checkValid(context.getTimestamp());
-        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                                                                     .setTimestamp(timestamp)
-                                                                     .setEventType(eventType)
-                                                                     .setProducerId(producerId)
-                                                                     .setEventId(eventIdString)
-                                                                     .setMessage(message)
-                                                                     .setContext(context);
+        final EventRecord.Builder builder = EventRecord.newBuilder()
+                                                       .setTimestamp(timestamp)
+                                                       .setEventType(eventType)
+                                                       .setProducerId(producerId)
+                                                       .setEventId(eventIdString)
+                                                       .setMessage(message)
+                                                       .setContext(context);
         return builder.build();
     }
 }

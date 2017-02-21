@@ -38,7 +38,6 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
@@ -60,6 +59,9 @@ import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.EventStorage.toEvent;
 import static org.spine3.server.event.EventStorage.toEventList;
+import static org.spine3.server.storage.Given.AggregateId.newProjectId;
+import static org.spine3.server.storage.Given.EventMessage.projectCreated;
+import static org.spine3.server.storage.Given.EventStorageRecord.projectCreated;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
@@ -74,16 +76,16 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     /** The point in time when the first event happened. */
     private Timestamp time1;
-    private EventStorageRecord record1;
+    private EventRecord record1;
 
     /** The point in time when the second event happened. */
     @SuppressWarnings("FieldCanBeLocal") // to be consistent
     private Timestamp time2;
-    private EventStorageRecord record2;
+    private EventRecord record2;
 
     /** The point in time when the third event happened. */
     private Timestamp time3;
-    private EventStorageRecord record3;
+    private EventRecord record3;
 
     private EventStorage storage;
 
@@ -117,7 +119,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void writeInternal_and_read_one_event() {
-        final EventStorageRecord recordToStore = org.spine3.server.storage.Given.EventStorageRecord.projectCreated();
+        final EventRecord recordToStore = projectCreated();
         final EventId id = EventId.newBuilder()
                                   .setUuid(recordToStore.getEventId())
                                   .build();
@@ -168,7 +170,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = idToAny(org.spine3.server.storage.Given.AggregateId.newProjectId(record1.getProducerId()));
+        final Any id = idToAny(newProjectId(record1.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder()
                                               .addAggregateId(id)
                                               .build();
@@ -188,7 +190,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final ProjectId uid = ProjectId.newBuilder()
                                        .setId(Identifiers.newUuid())
                                        .build();
-        final ProjectCreated projectCreated = org.spine3.server.storage.Given.EventMessage.projectCreated(uid);
+        final ProjectCreated projectCreated = projectCreated(uid);
         final Any projectCreatedAny = AnyPacker.pack(projectCreated);
         final EventId eventId = EventId.newBuilder()
                                        .setUuid(Identifiers.newUuid())
@@ -197,26 +199,28 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final EventContext context = EventContext.newBuilder()
                                                  .setProducerId(eventProducerId)
                                                  .build();
-        final EventStorageRecord record = EventStorageRecord.newBuilder()
-                                                            .setContext(context)
-                                                            .setEventId(eventId.getUuid())
-                                                            .setEventType(TypeUrl.of(ProjectCreated.class)
+        final EventRecord record = EventRecord.newBuilder()
+                                              .setContext(context)
+                                              .setEventId(eventId.getUuid())
+                                              .setEventType(TypeUrl.of(ProjectCreated.class)
                                                                                  .value())
-                                                            .setMessage(projectCreatedAny)
-                                                            .setTimestamp(Timestamps2.getCurrentTime())
-                                                            .build();
+                                              .setMessage(projectCreatedAny)
+                                              .setTimestamp(Timestamps2.getCurrentTime())
+                                              .build();
         // Uses protected method to avoid vast mocking
         storage.writeRecord(record);
 
         final Any projectIdPacked = AnyPacker.pack(uid);
-        final FieldFilter fieldFilter = FieldFilter.newBuilder()
-                                                   .setFieldPath(projectCreated.getClass()
-                                                                               .getCanonicalName() + ".projectId")
-                                                   .addValue(projectIdPacked)
-                                                   .build();
-        final EventFilter eventFilter = EventFilter.newBuilder()
-                                                   .addEventFieldFilter(fieldFilter)
-                                                   .build();
+        final FieldFilter fieldFilter =
+                FieldFilter.newBuilder()
+                           .setFieldPath(projectCreated.getClass()
+                                                       .getCanonicalName() + ".projectId")
+                           .addValue(projectIdPacked)
+                           .build();
+        final EventFilter eventFilter
+                = EventFilter.newBuilder()
+                             .addEventFieldFilter(fieldFilter)
+                             .build();
         final EventStreamQuery streamQuery = EventStreamQuery.newBuilder()
                                                              .addFilter(eventFilter)
                                                              .build();
@@ -249,19 +253,20 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final EventContext context = EventContext.newBuilder()
                                                  .setProducerId(eventProducerId)
                                                  .build();
-        final EventStorageRecord record = EventStorageRecord.newBuilder()
-                                                            .setMessage(eventAny)
-                                                            .setContext(context)
-                                                            .setTimestamp(Timestamps2.getCurrentTime())
-                                                            .setEventId(Identifiers.newUuid())
-                                                            .build();
+        final EventRecord record = EventRecord.newBuilder()
+                                              .setMessage(eventAny)
+                                              .setContext(context)
+                                              .setTimestamp(Timestamps2.getCurrentTime())
+                                              .setEventId(Identifiers.newUuid())
+                                              .build();
         storage.writeRecord(record);
 
-        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
-                                                          .setFieldPath(
-                                                                  EventContext.class.getCanonicalName() + ".producerId")
-                                                          .addValue(eventProducerId)
-                                                          .build();
+        final FieldFilter contextFieldFilter =
+                FieldFilter.newBuilder()
+                           .setFieldPath(
+                                   EventContext.class.getCanonicalName() + ".producerId")
+                           .addValue(eventProducerId)
+                           .build();
         final EventFilter eventFilter = EventFilter.newBuilder()
                                                    .addContextFieldFilter(contextFieldFilter)
                                                    .build();
@@ -283,11 +288,12 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_filter_events_by_empty_field_name() {
         givenSequentialRecords();
-        final FieldFilter contextFieldFilter = FieldFilter.newBuilder()
-                                                          .setFieldPath(
-                                                                  EventContext.class.getCanonicalName() + '.') // empty field name
-                                                          .addValue(Any.getDefaultInstance())
-                                                          .build();
+        final FieldFilter contextFieldFilter =
+                FieldFilter.newBuilder()
+                           .setFieldPath(
+                                   EventContext.class.getCanonicalName() + '.') // empty field name
+                           .addValue(Any.getDefaultInstance())
+                           .build();
         final EventFilter eventFilter = EventFilter.newBuilder()
                                                    .addContextFieldFilter(contextFieldFilter)
                                                    .build();
@@ -305,7 +311,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void convert_record_list_to_events() {
         givenSequentialRecords();
-        final ImmutableList<EventStorageRecord> records = ImmutableList.of(record1, record2, record3);
+        final ImmutableList<EventRecord> records = ImmutableList.of(record1, record2, record3);
 
         final List<Event> events = toEventList(records);
 
@@ -525,9 +531,9 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertEquals(expected, newArrayList(actual));
     }
 
-    private static EventFilter newEventFilterFor(EventStorageRecord record) {
+    private static EventFilter newEventFilterFor(EventRecord record) {
         final String typeName = record.getEventType();
-        final Any id = idToAny(org.spine3.server.storage.Given.AggregateId.newProjectId(record.getProducerId()));
+        final Any id = idToAny(newProjectId(record.getProducerId()));
         return EventFilter.newBuilder()
                           .setEventType(typeName)
                           .addAggregateId(id)
@@ -570,7 +576,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         time1 = getCurrentTime().toBuilder()
                                 .setNanos(POSITIVE_DELTA * 10)
                                 .build(); // to be sure that nanos are bigger than delta
-        record1 = org.spine3.server.storage.Given.EventStorageRecord.projectCreated(time1);
+        record1 = projectCreated(time1);
         time2 = add(time1, delta);
         record2 = org.spine3.server.storage.Given.EventStorageRecord.taskAdded(time2);
         time3 = add(time2, delta);
@@ -579,8 +585,8 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         writeAll(record1, record2, record3);
     }
 
-    protected void writeAll(EventStorageRecord... records) {
-        for (EventStorageRecord r : records) {
+    protected void writeAll(EventRecord... records) {
+        for (EventRecord r : records) {
             storage.writeRecord(r);
         }
     }
@@ -591,11 +597,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         assertEquals(expectedRecords, actual);
     }
 
-    private static void assertAreSame(ImmutableList<EventStorageRecord> records, List<Event> events) {
+    private static void assertAreSame(ImmutableList<EventRecord> records, List<Event> events) {
         assertEquals(records.size(), events.size());
         for (int i = 0; i < records.size(); i++) {
             final Event event = events.get(i);
-            final EventStorageRecord record = records.get(i);
+            final EventRecord record = records.get(i);
             assertEquals(event.getMessage(), record.getMessage());
             assertEquals(event.getContext(), record.getContext());
         }

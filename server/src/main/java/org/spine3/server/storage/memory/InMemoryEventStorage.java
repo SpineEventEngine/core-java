@@ -27,10 +27,10 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.event.EventRecord;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.MatchesStreamQuery;
-import org.spine3.server.event.storage.EventStorageRecord;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -69,13 +69,13 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    protected void writeRecord(EventStorageRecord record) {
+    protected void writeRecord(EventRecord record) {
         checkNotNull(record);
         getStorage().addRecord(record);
     }
 
     @Override
-    protected Optional<EventStorageRecord> readRecord(EventId eventId) {
+    protected Optional<EventRecord> readRecord(EventId eventId) {
         return getStorage().readRecord(eventId);
     }
 
@@ -86,26 +86,26 @@ class InMemoryEventStorage extends EventStorage {
     /**
      * Data “slice” of a tenant that stores events.
      */
-    private static class TenantEvents implements TenantStorage<String, EventStorageRecord> {
+    private static class TenantEvents implements TenantStorage<String, EventRecord> {
 
         private static final int INITIAL_CAPACITY = 100;
 
         @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
-        private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
+        private final PriorityQueue<EventRecord> storage = new PriorityQueue<>(
                 INITIAL_CAPACITY,
                 new EventStorageRecordComparator());
         /**
          * The index of records where keys are string values of {@code EventId}s. */
-        private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
+        private final Map<String, EventRecord> index = Maps.newConcurrentMap();
 
         @Nullable
         @Override
-        public Optional<EventStorageRecord> get(String id) {
+        public Optional<EventRecord> get(String id) {
             return Optional.fromNullable(index.get(id));
         }
 
-        private Optional<EventStorageRecord> readRecord(EventId eventId) {
-            final Optional<EventStorageRecord> result = get(eventId.getUuid());
+        private Optional<EventRecord> readRecord(EventId eventId) {
+            final Optional<EventRecord> result = get(eventId.getUuid());
             return result;
         }
 
@@ -116,14 +116,14 @@ class InMemoryEventStorage extends EventStorage {
             return result;
         }
 
-        private void addRecord(EventStorageRecord record) {
+        private void addRecord(EventRecord record) {
             final String eventId = record.getEventId();
             checkState(!eventId.isEmpty(), "eventId cannot be empty");
             put(eventId, record);
         }
 
         @Override
-        public void put(String id, EventStorageRecord record) {
+        public void put(String id, EventRecord record) {
             index.put(id, record);
             storage.add(record);
         }
@@ -135,12 +135,12 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     /** Compares event records by timestamps of events. */
-    private static class EventStorageRecordComparator implements Comparator<EventStorageRecord>, Serializable {
+    private static class EventStorageRecordComparator implements Comparator<EventRecord>, Serializable {
 
         private static final long serialVersionUID = 0L;
 
         @Override
-        public int compare(EventStorageRecord record1, EventStorageRecord record2) {
+        public int compare(EventRecord record1, EventRecord record2) {
             final Timestamp time1 = record1.getTimestamp();
             final Timestamp time2 = record2.getTimestamp();
             final int result = Timestamps2.compare(time1, time2);
