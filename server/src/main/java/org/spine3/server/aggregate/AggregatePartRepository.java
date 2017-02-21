@@ -21,10 +21,10 @@
 package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.AbstractEntity;
 
 import java.lang.reflect.Constructor;
 
+import static org.spine3.server.entity.AbstractEntity.createAggregatePartEntity;
 import static org.spine3.server.entity.AbstractEntity.getAggregatePartConstructor;
 
 /**
@@ -59,15 +59,15 @@ public abstract class AggregatePartRepository
     public A create(I id) {
         final Constructor<A> entityConstructor =
                 getAggregatePartConstructor(getEntityClass(), root.getClass(), getIdClass());
-        final A result = AbstractEntity.createAggregatePartEntity(entityConstructor, id, root);
+        final A result = createAggregatePartEntity(entityConstructor, id, root);
         return result;
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
     @Override
     protected Constructor<A> getEntityConstructor() {
-        final Constructor<A> result = AbstractEntity.getAggregatePartConstructor(
-                getEntityClass(), root.getClass(), getIdClass());
+        final Constructor<A> result =
+                getAggregatePartConstructor(getEntityClass(), root.getClass(), getIdClass());
         return result;
     }
 }
