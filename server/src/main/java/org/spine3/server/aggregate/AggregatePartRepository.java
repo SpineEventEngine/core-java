@@ -57,7 +57,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
                 getAggregatePartConstructor(getEntityClass(), getIdClass());
         @SuppressWarnings("unchecked")
         // It is OK because it is checked above,
-        // in the AbstractEntity.getAggregatePartConstructor method
+        // in the AbstractEntity.getAggregatePartConstructor method.
         final Class<AggregateRoot<I>> rootClass =
                 (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
         final AggregateRoot<I> root = createAggregateRootEntity(id, getBoundedContext(), rootClass);

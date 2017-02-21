@@ -168,7 +168,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param idClass     the class of entity identifiers
      * @param <E>         the entity type
      * @param <I>         the ID type
-     * @return the constructor
+     * @return the {@code AggregatePart} constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
     public static <E extends AggregatePart, I> Constructor<E>
@@ -203,7 +203,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param boundedContext the {@code BoundedContext} to use
      * @param rootClass      the class of the {@code AggregateRoot}
      * @param <I>            the type of entity IDs
-     * @return new entity
+     * @return a {@code AggregateRoot} instance
      */
     public static <I, R extends AggregateRoot<I>> R
     createAggregateRootEntity(I id, BoundedContext boundedContext, Class<R> rootClass) {
@@ -226,7 +226,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param id   the ID of the entity
      * @param <I>  the type of entity IDs
      * @param <E>  the type of the entity
-     * @return a new entity
+     * @return a {@code AggregatePart} instance
      */
     public static <I, E extends AbstractEntity<I, ?>> E
     createAggregatePartEntity(Constructor<E> ctor, I id, AggregateRoot<I> root) {
