@@ -209,8 +209,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the obtained constructor, otherwise {@code null}
      */
     @Nullable
-    @SuppressWarnings("unchecked") // It is OK because the constructor arguments are checked,
-    // before returning the constructor.
+    @SuppressWarnings("unchecked")
+    // It is OK because the constructor arguments are checked, before returning the constructor.
     private static <E extends AggregatePart, I> Constructor<E> getAggregatePartSupertypeCtr
     (Class<E> entityClass, Class<I> idClass) {
         final Constructor[] constructors = entityClass.getDeclaredConstructors();
