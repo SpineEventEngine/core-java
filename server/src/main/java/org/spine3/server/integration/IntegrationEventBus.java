@@ -28,10 +28,10 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.EventClass;
 import org.spine3.base.Response;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 

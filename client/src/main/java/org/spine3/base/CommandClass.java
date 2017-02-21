@@ -18,12 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.type;
+package org.spine3.base;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
-import org.spine3.base.Commands;
 
 import java.util.Set;
 

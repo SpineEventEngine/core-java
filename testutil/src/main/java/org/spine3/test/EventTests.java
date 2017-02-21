@@ -20,13 +20,18 @@
 
 package org.spine3.test;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUuidValue;
@@ -36,6 +41,7 @@ import static org.spine3.test.Tests.newUuidValue;
  *
  * @author Alexander Yevsyukov
  */
+@VisibleForTesting
 public class EventTests {
 
     private static final TestCommandFactory factory =
@@ -59,5 +65,16 @@ public class EventTests {
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();
+    }
+
+    public static Event newEvent(Message eventMessage) {
+        checkNotNull(eventMessage);
+        return Events.createEvent(eventMessage, newEventContext());
+    }
+
+    public static Event newEvent(Message eventMessage, Timestamp when) {
+        checkNotNull(eventMessage);
+        checkNotNull(when);
+        return Events.createEvent(eventMessage, newEventContext(when));
     }
 }

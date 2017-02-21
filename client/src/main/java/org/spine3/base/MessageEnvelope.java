@@ -18,11 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.base;
+
+import com.google.protobuf.Message;
+
 /**
- * This package contains commonly used server-side data classes.
+ * A common interface for obtaining messages from wrapping objects.
+ *
+ * @param <T> the type of the object that wraps a message
+ * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
+public interface MessageEnvelope<T> {
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.type;
+    T getOuterObject();
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    Message getMessage();
+}

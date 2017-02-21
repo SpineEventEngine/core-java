@@ -18,28 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.test;
+package org.spine3.base;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class EventTestsShould {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventClassShould {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(EventTests.class);
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Timestamp.class, getCurrentTime())
-                .testAllPublicStaticMethods(EventTests.class);
+    public void create_set_on_varargs() {
+        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
     }
 }
