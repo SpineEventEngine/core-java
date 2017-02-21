@@ -143,7 +143,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
                                || !active.get();
         checkState(
             !closed,
-            format("Can not complete the %s. Already closed.",
+            format("Cannot complete the %s. Already closed.",
                    BulkWriteOperation.class.getSimpleName())
         );
 

@@ -33,13 +33,13 @@ import org.spine3.SPI;
 public enum VisibilityField implements StorageField {
 
     /**
-     * A {@linkplain boolean} field representing weather
+     * A {@linkplain boolean} field representing whether
      * the relevant record is {@code archived} or not.
      */
     archived,
 
     /**
-     * A {@linkplain boolean} field representing weather
+     * A {@linkplain boolean} field representing whether
      * the relevant record is {@code deleted} or not.
      */
     deleted
