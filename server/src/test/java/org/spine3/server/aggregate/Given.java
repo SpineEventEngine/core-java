@@ -135,7 +135,9 @@ class Given {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        static org.spine3.base.Command createProject(UserId userId,
+                                                     ProjectId projectId,
+                                                     Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
@@ -151,11 +153,13 @@ class Given {
         }
 
         /**
-         * Creates a new {@link Command} with the given command message, userId and timestamp using default
+         * Creates a new {@link Command} with the given command message,
+         * userId and timestamp using default
          * {@link org.spine3.base.CommandId CommandId} instance.
          */
         static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final CommandContext context =
+                    createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.createCommand(command, context);
             return result;
         }
@@ -230,12 +234,16 @@ class Given {
             final Timestamp timestamp2 = add(timestamp1, delta);
             final Timestamp timestamp3 = add(timestamp2, delta);
 
-            final AggregateEventRecord record1 = StorageRecord.create(timestamp1,
-                                                                      Event.projectCreated(id, createEventContext(timestamp1)));
-            final AggregateEventRecord record2 = StorageRecord.create(timestamp2,
-                                                                      Event.taskAdded(id, createEventContext(timestamp2)));
-            final AggregateEventRecord record3 = StorageRecord.create(timestamp3,
-                                                                      Event.projectStarted(id, createEventContext(timestamp3)));
+            final AggregateEventRecord record1 =
+                    StorageRecord.create(timestamp1,
+                                         Event.projectCreated(id, createEventContext(timestamp1)));
+            final AggregateEventRecord record2
+                    = StorageRecord.create(timestamp2,
+                                           Event.taskAdded(id, createEventContext(timestamp2)));
+            final AggregateEventRecord record3
+                    = StorageRecord.create(timestamp3,
+                                           Event.projectStarted(id,
+                                                                createEventContext(timestamp3)));
 
             return newArrayList(record1, record2, record3);
         }
