@@ -67,7 +67,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     @Override
     protected Constructor<A> getConstructor() {
         final Constructor<A> constructor = AbstractEntity.getAggregatePartConstructor(
-                getResultClass(), getIdClass());
+                getResultClass(), aggregateRoot.getClass(), getIdClass());
         return constructor;
     }
 }

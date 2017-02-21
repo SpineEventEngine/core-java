@@ -38,6 +38,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 
 public class AggregatePartRepositoryLookupShould {
@@ -48,7 +49,9 @@ public class AggregatePartRepositoryLookupShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        boundedContext.register(new ProjectPartRepository(boundedContext));
+        final ProjectId id = ProjectId.newBuilder().setId(newUuid()).build();
+        final ProjectRoot root = new ProjectRoot(boundedContext, id);
+        boundedContext.register(new ProjectPartRepository(boundedContext, root));
         boundedContext.register(new TaskAggregateRepository(boundedContext));
     }
 
@@ -120,9 +123,9 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class ProjectPartRepository extends AggregatePartRepository<ProjectId, ProjectPart> {
-        private ProjectPartRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+    private static class ProjectPartRepository extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
+        private ProjectPartRepository(BoundedContext boundedContext, ProjectRoot root) {
+            super(boundedContext, root);
         }
     }
 

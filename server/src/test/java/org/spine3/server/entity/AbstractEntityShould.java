@@ -65,14 +65,16 @@ public class AbstractEntityShould {
         assertNotNull(aggregateRoot);
     }
 
+    @SuppressWarnings("unchecked") // It is needed for testing.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        AbstractEntity.getAggregatePartConstructor(WrongAggregatePart.class, id.getClass());
+        AbstractEntity.getAggregatePartConstructor(
+                WrongAggregatePart.class, AggregateRoot.class, id.getClass());
     }
 
     @SuppressWarnings("unchecked") // It is needed for testing.
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor(){
+    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
         AbstractEntity.getConstructor(AggregatePart.class, id.getClass());
     }
 

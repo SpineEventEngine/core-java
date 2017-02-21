@@ -171,29 +171,63 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the {@code AggregatePart} constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends AggregatePart, I> Constructor<E>
-    getAggregatePartConstructor(Class<E> entityClass, Class<I> idClass) {
-        final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
-        for (Constructor<?> constructor : constructors) {
-            final Class<?>[] parameterTypes = constructor.getParameterTypes();
-            final int length = parameterTypes.length;
+    public static <E extends AggregatePart, I, R extends AggregateRoot<I>> Constructor<E>
+    getAggregatePartConstructor(Class<E> entityClass, Class<R> rootClass, Class<I> idClass) {
+        final Constructor<E> result = getAggregatePartSupertypeCtr(entityClass, idClass);
+        if (result != null) {
+            return result;
+        }
+
+        try {
+            final Constructor<E> constructor =
+                    entityClass.getDeclaredConstructor(idClass, rootClass);
+            constructor.setAccessible(true);
+            return constructor;
+        } catch (NoSuchMethodException e) {
+            final String errMsg = format("%s class must declare a constructor " +
+                                         "with ID and AggregateRoot parameters.", entityClass);
+            throw new IllegalStateException(errMsg, e);
+        }
+    }
+
+    /**
+     * Obtains the constructor for the passed aggregate part class.
+     *
+     * <p>Constructor will be returned if the first argument is aggregate ID
+     * and the second is {@code AggregateRoot}. For example:
+     * AggregatePartConstr(AnAggregateId id, AggregateRoot root).
+     *
+     * <p>Constructor won't be returned if the second constructor parameter
+     * is subtype of the {@code AggregateRoot}. For example:
+     * SubAggregateRoot extends AggregateRoot{...};
+     * AggregatePartConstr(AnAggregateId id, SubAggregateRoot root).
+     *
+     * @param entityClass the {@code AggregatePart} class
+     * @param idClass     the ID class
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the obtained constructor, otherwise {@code null}
+     */
+    @Nullable
+    @SuppressWarnings("unchecked") // It is OK because the constructor arguments are checked,
+    // before returning the constructor.
+    private static <E extends AggregatePart, I> Constructor<E> getAggregatePartSupertypeCtr
+    (Class<E> entityClass, Class<I> idClass) {
+        final Constructor[] constructors = entityClass.getDeclaredConstructors();
+        for (Constructor constructor : constructors) {
+            final Class[] parameters = constructor.getParameterTypes();
+            final int length = parameters.length;
             if (length != 2) {
                 continue;
             }
-
-            final boolean correctConstructor =
-                    idClass.equals(parameterTypes[0]) &&
-                    AggregateRoot.class.isAssignableFrom(parameterTypes[1]);
-            if (correctConstructor) {
-                @SuppressWarnings("unchecked") // It is safe because arguments are checked above.
-                final Constructor<E> result = (Constructor<E>) constructor;
-                result.setAccessible(true);
-                return result;
+            final boolean isSuperType = parameters[0].equals(idClass) &&
+                                        parameters[1].equals(AggregateRoot.class);
+            if (isSuperType) {
+                constructor.setAccessible(true);
+                return constructor;
             }
         }
-        final String errMsg = format("%s class must declare a constructor " +
-                                     "with ID and AggregateRoot parameters.", entityClass);
-        throw new IllegalStateException(errMsg);
+        return null;
     }
 
     /**

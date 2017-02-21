@@ -66,8 +66,8 @@ public class AggregateRootShould {
                              .setId(newUuid())
                              .build();
         aggregateRoot = new ProjectRoot(boundedContext, projectId);
-        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
-        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
+        boundedContext.register(new ProjectDefinitionRepository(boundedContext, aggregateRoot));
+        boundedContext.register(new ProjectLifeCycleRepository(boundedContext, aggregateRoot));
 
         commandBus = boundedContext.getCommandBus();
     }
@@ -140,7 +140,7 @@ public class AggregateRootShould {
     private static class ProjectDefinitionPart
             extends AggregatePart<ProjectId, ProjectDefinition, ProjectDefinition.Builder> {
 
-        private ProjectDefinitionPart(ProjectId id, ProjectRoot root) {
+        private ProjectDefinitionPart(ProjectId id, AggregateRoot root) {
             super(id, root);
         }
 
@@ -197,18 +197,18 @@ public class AggregateRootShould {
     }
 
     private static class ProjectDefinitionRepository
-            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart> {
+            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
 
-        private ProjectDefinitionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+        private ProjectDefinitionRepository(BoundedContext boundedContext, ProjectRoot root) {
+            super(boundedContext, root);
         }
     }
 
     private static class ProjectLifeCycleRepository
-            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart> {
+            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
 
-        private ProjectLifeCycleRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+        private ProjectLifeCycleRepository(BoundedContext boundedContext, ProjectRoot root) {
+            super(boundedContext, root);
         }
     }
 

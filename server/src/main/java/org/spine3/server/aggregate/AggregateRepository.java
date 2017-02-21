@@ -88,8 +88,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             GetTargetIdFromCommand.newInstance();
 
     /** The constructor for creating entity instances. */
-    private final Constructor<A> entityConstructor;
-
+    private Constructor<A> entityConstructor;
+    private final Class<A> entityClass;
+    private final Class<I> idClass;
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
 
@@ -105,28 +106,29 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        this.entityConstructor = getEntityConstructor();
+        entityClass = getEntityClass();
+        idClass = getIdClass();
     }
 
-    private Constructor<A> getEntityConstructor() {
-        final Class<A> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        if (AggregatePart.class.isAssignableFrom(entityClass)) {
-            @SuppressWarnings("unchecked") // It is OK because it is checked above.
-            final Class<AggregatePart<I, ?, ?>> aggregatePartClass =
-                    (Class<AggregatePart<I, ?, ?>>) entityClass;
-            @SuppressWarnings("unchecked") // It is OK because AggregatePart is Aggregate too.
-            final Constructor<A> result =
-                    (Constructor<A>) AbstractEntity.getAggregatePartConstructor(aggregatePartClass,
-                                                                                idClass);
-            return result;
-        }
+    /**
+     * Obtains constructor for the passed entity class.
+     *
+     * @return the entity constructor
+     */
+    protected Constructor<A> getEntityConstructor() {
         final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
         return result;
     }
 
+    private void initEntityConstructorIfNeeded() {
+        if (this.entityConstructor == null) {
+            this.entityConstructor = getEntityConstructor();
+        }
+    }
+
     @Override
     public A create(I id) {
+        initEntityConstructorIfNeeded();
         return AbstractEntity.createEntity(this.entityConstructor, id);
     }
 

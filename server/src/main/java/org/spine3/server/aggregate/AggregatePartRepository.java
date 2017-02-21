@@ -25,7 +25,6 @@ import org.spine3.server.entity.AbstractEntity;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.entity.AbstractEntity.createAggregateRootEntity;
 import static org.spine3.server.entity.AbstractEntity.getAggregatePartConstructor;
 
 /**
@@ -33,13 +32,18 @@ import static org.spine3.server.entity.AbstractEntity.getAggregatePartConstructo
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
+public abstract class AggregatePartRepository
+        <I, A extends AggregatePart<I, ?, ?>, R extends AggregateRoot<I>>
+        extends AggregateRepository<I, A> {
+
+    private final R root;
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartRepository(BoundedContext boundedContext) {
+    protected AggregatePartRepository(BoundedContext boundedContext, R root) {
         super(boundedContext);
+        this.root = root;
     }
 
     /**
@@ -54,14 +58,16 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor =
-                getAggregatePartConstructor(getEntityClass(), getIdClass());
-        @SuppressWarnings("unchecked")
-        // It is OK because it is checked above,
-        // in the AbstractEntity.getAggregatePartConstructor method.
-        final Class<AggregateRoot<I>> rootClass =
-                (Class<AggregateRoot<I>>) entityConstructor.getParameterTypes()[1];
-        final AggregateRoot<I> root = createAggregateRootEntity(id, getBoundedContext(), rootClass);
+                getAggregatePartConstructor(getEntityClass(), root.getClass(), getIdClass());
         final A result = AbstractEntity.createAggregatePartEntity(entityConstructor, id, root);
+        return result;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+    @Override
+    protected Constructor<A> getEntityConstructor() {
+        final Constructor<A> result = AbstractEntity.getAggregatePartConstructor(
+                getEntityClass(), root.getClass(), getIdClass());
         return result;
     }
 }
