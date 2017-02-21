@@ -169,12 +169,12 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      *
      * @param command
      *            a command to convert to a record. This includes instances of faulty commands.
-     *            One of example of such a fault is missing command ID.
+     *            An example of such a fault is missing command ID.
      * @param status
      *            a command status to set in the record
      * @param generatedCommandId
      *            a command ID to used because the passed command does not have own ID.
-     *            If the command has own ID this parameter is {@code null}
+     *            If the command has own ID this parameter is {@code null}.
      * @return a storage record
      */
     @VisibleForTesting
