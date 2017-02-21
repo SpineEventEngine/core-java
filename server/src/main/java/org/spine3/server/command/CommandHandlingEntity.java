@@ -49,7 +49,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
 
@@ -104,13 +104,13 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
     @CheckReturnValue
     protected EventContext createEventContext(Message event, CommandContext commandContext) {
         final EventId eventId = generateId();
-        final Timestamp whenModified = getCurrentTime();
+        final Timestamp timestamp = getCurrentTime();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
-                                                         .setTimestamp(whenModified)
+                                                         .setTimestamp(timestamp)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(getIdAsAny())
-                                                         .setVersion(getVersion().getNumber());
+                                                         .setVersion(getVersion());
         extendEventContext(builder, event, commandContext);
         return builder.build();
     }
@@ -215,6 +215,12 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      */
     protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
+        final CommandHandlerMethod method = getCommandHandlerMethod(commandMessage);
+        final List<? extends Message> result = method.invoke(this, commandMessage, context);
+        return result;
+    }
+
+    private CommandHandlerMethod getCommandHandlerMethod(Message commandMessage) {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                                                           .get(getClass(),
@@ -223,8 +229,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final List<? extends Message> result = method.invoke(this, commandMessage, context);
-        return result;
+        return method;
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
@@ -253,10 +258,6 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
                 return result;
             }
         });
-    }
-
-    private int versionNumber() {
-        return getVersion().getNumber();
     }
 
     //

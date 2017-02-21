@@ -22,17 +22,18 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Identifiers;
-import org.spine3.base.Stringifiers;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static java.lang.String.format;
+import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Versions.checkIsIncrement;
 
 /**
  * An abstract base for entities with versions.
@@ -48,9 +49,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
         implements VersionableEntity<I, S> {
 
-    private final Version version;
+    private Version version;
 
-    private EntityStatus status = EntityStatus.getDefaultInstance();
+    private Visibility visibility;
 
     /**
      * Creates a new instance.
@@ -61,9 +62,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected AbstractVersionableEntity(I id) {
         super(id);
-        checkNotNull(id);
-        Identifiers.checkSupported(id.getClass());
-        this.version = Version.create();
+        setVersion(Versions.create());
+        setVisibility(Visibility.getDefaultInstance());
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * <ul>
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
      *   <li>The version number is set to zero.
-     *   <li>The {@link #status} field is set to the default instance.
+     *   <li>The {@link #visibility} field is set to the default instance.
      * </ul>
      *
      * <p>This method cannot be called from within {@code Entity} constructor because
@@ -83,8 +83,27 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     @Override
     protected void init() {
         super.init();
-        setState(getDefaultState(), 0, getCurrentTime());
-        this.status = EntityStatus.getDefaultInstance();
+        injectState(getDefaultState());
+        initVersion(Versions.create());
+        setVisibility(Visibility.getDefaultInstance());
+    }
+
+    /**
+     * Validates and sets the state.
+     *
+     * @param state   the state object to set
+     * @param version the entity version to set
+     * @throws IllegalStateException
+     *                if the passed state is not {@linkplain #validate(S) valid}
+     * @throws IllegalArgumentException
+     *                if the passed version has the number which is greater than the current
+     *                version of the entity
+     * @see #validate(S)
+     */
+    protected void setState(S state, Version version) {
+        validate(state);
+        injectState(state);
+        updateVersion(version);
     }
 
     /**
@@ -103,36 +122,73 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Validates and sets the state.
-     *
-     * @param state the state object to set
-     * @param version the entity version to set
-     * @param timestamp the time of the last modification to set
-     * @see #validate(S)
-     */
-    protected void setState(S state, int version, Timestamp timestamp) {
-        validate(state);
-        injectState(state);
-        setVersion(version, timestamp);
-    }
-
-    /**
      * Sets status for the entity.
      */
-    void setStatus(EntityStatus status) {
-        this.status = status;
+    void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 
     /**
-     * Sets version information of the entity.
-     *
-     * @param number the version number of the entity
-     * @param timestamp the time of the last modification of the entity
+     * Obtains the version number of the entity.
      */
-    protected void setVersion(int number, Timestamp timestamp) {
-        checkNotNull(timestamp);
-        version.copyFrom(Version.of(number, timestamp));
+    protected int versionNumber() {
+        final int result = getVersion().getNumber();
+        return result;
     }
+
+    /**
+     * Initializes the entity with the passed version.
+     *
+     * <p>This method assumes that the entity version is zero.
+     * If this is not so, {@code IllegalStateException} will be thrown.
+     *
+     * <p>One of the usages for this method is for creating an entity instance
+     * from a storage.
+     *
+     * <p>To increment a version of the entity please call {@link #incrementVersion()}.
+     *
+     * <p>To set a new version which is several numbers ahead please use
+     * {@link #advanceVersion(Version)}.
+     *
+     * @param version the version to set.
+     */
+    protected void initVersion(Version version) {
+        if (versionNumber() > 0) {
+            final String errMsg = format(
+                    "initVersion() called on an entity with non-zero version number (%d).",
+                    versionNumber()
+            );
+            throw new IllegalStateException(errMsg);
+        }
+        setVersion(version);
+    }
+
+    protected void advanceVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        checkIsIncrement(this.getVersion(), newVersion);
+        setVersion(newVersion);
+    }
+
+    private void updateVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        if (version.equals(newVersion)) {
+            return;
+        }
+
+        final int currentVersionNumber = versionNumber();
+        final int newVersionNumber = newVersion.getNumber();
+        if (currentVersionNumber > newVersionNumber) {
+            final String errMsg = format(
+                    "A version with the lower number (%d) passed to `updateVersion()` " +
+                    "of the entity with the version number %d.",
+                    newVersionNumber, currentVersionNumber
+            );
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        setVersion(newVersion);
+    }
+
 
     /**
      * Updates the state incrementing the version number and recording time of the modification.
@@ -140,7 +196,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @param newState a new state to set
      */
     protected void incrementState(S newState) {
-        setState(newState, incrementVersion(), getCurrentTime());
+        setState(newState, incrementedVersion());
     }
 
     /**
@@ -151,13 +207,21 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         return version;
     }
 
+    private void setVersion(Version version) {
+        this.version = version;
+    }
+
+    private Version incrementedVersion() {
+        return Versions.increment(getVersion());
+    }
+
     /**
      * Advances the current version by one and records the time of the modification.
      *
      * @return new version number
      */
     protected int incrementVersion() {
-        version.increment();
+        setVersion(incrementedVersion());
         return version.getNumber();
     }
 
@@ -172,10 +236,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Obtains the entity status.
      */
-    protected EntityStatus getStatus() {
-        final EntityStatus result = this.status ==  null
-                ? EntityStatus.getDefaultInstance()
-                : this.status;
+    protected Visibility getVisibility() {
+        final Visibility result = this.visibility == null
+                ? Visibility.getDefaultInstance()
+                : this.visibility;
         return result;
     }
 
@@ -185,16 +249,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
     protected boolean isArchived() {
-        return getStatus().getArchived();
+        return getVisibility().getArchived();
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        this.status = getStatus().toBuilder()
-                                 .setArchived(archived)
-                                 .build();
+        setVisibility(getVisibility().toBuilder()
+                                     .setArchived(archived)
+                                     .build());
     }
 
     /**
@@ -203,28 +267,28 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
     protected boolean isDeleted() {
-        return getStatus().getDeleted();
+        return getVisibility().getDeleted();
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        this.status = getStatus().toBuilder()
-                                 .setDeleted(deleted)
-                                 .build();
+        setVisibility(getVisibility().toBuilder()
+                                     .setDeleted(deleted)
+                                     .build());
     }
 
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getStatus()
-     * @see EntityStatus#getArchived()
+     * @see #getVisibility()
+     * @see Visibility#getArchived()
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
-        if (getStatus().getArchived()) {
-            final String idStr = Stringifiers.idToString(getId());
+        if (getVisibility().getArchived()) {
+            final String idStr = idToString(getId());
             throw new CannotModifyArchivedEntity(idStr);
         }
     }
@@ -233,12 +297,12 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Ensures that the entity is not marked as {@code deleted}.
      *
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getStatus()
-     * @see EntityStatus#getDeleted()
+     * @see #getVisibility()
+     * @see Visibility#getDeleted()
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
-        if (getStatus().getDeleted()) {
-            final String idStr = Stringifiers.idToString(getId());
+        if (getVisibility().getDeleted()) {
+            final String idStr = idToString(getId());
             throw new CannotModifyDeletedEntity(idStr);
         }
     }
@@ -256,11 +320,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         }
         AbstractVersionableEntity<?, ?> that = (AbstractVersionableEntity<?, ?>) o;
         return Objects.equals(getVersion(), that.getVersion()) &&
-               Objects.equals(getStatus(), that.getStatus());
+               Objects.equals(getVisibility(), that.getVisibility());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getVersion(), getStatus());
+        return Objects.hash(super.hashCode(), getVersion(), getVisibility());
     }
 }

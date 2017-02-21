@@ -36,7 +36,7 @@ import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -76,7 +76,7 @@ class AggregateQueryProcessor implements QueryProcessor {
 
         final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
 
-        ImmutableCollection<EntityStorageRecord> stateRecords;
+        ImmutableCollection<EntityRecord> stateRecords;
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
         final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
@@ -89,7 +89,7 @@ class AggregateQueryProcessor implements QueryProcessor {
             stateRecords = doFetchWithFilters(target, fieldMask);
         }
 
-        for (EntityStorageRecord record : stateRecords) {
+        for (EntityRecord record : stateRecords) {
             final Any state = record.getState();
             resultBuilder.add(state);
         }
@@ -98,7 +98,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
+    private ImmutableCollection<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
         final EntityFilters filters = target.getFilters();
         final boolean idsAreDefined = !filters.getIdFilter()
                                               .getIdsList()
@@ -111,7 +111,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         final Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
                                                                              stateIdTransformer);
 
-        final ImmutableCollection<EntityStorageRecord> result = stateIds.size() == 1
+        final ImmutableCollection<EntityRecord> result = stateIds.size() == 1
                  ? readOne(stateIds.iterator()
                                    .next(), fieldMask)
                  : readMany(stateIds, fieldMask);
@@ -119,13 +119,13 @@ class AggregateQueryProcessor implements QueryProcessor {
         return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> readOne(AggregateStateId singleId,
-                                                             FieldMask fieldMask) {
+    private ImmutableCollection<EntityRecord> readOne(AggregateStateId singleId,
+                                                      FieldMask fieldMask) {
         final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
                                                        .isEmpty();
 
-        ImmutableCollection<EntityStorageRecord> result;
-        final Optional<EntityStorageRecord> singleResult = shouldApplyFieldMask
+        ImmutableCollection<EntityRecord> result;
+        final Optional<EntityRecord> singleResult = shouldApplyFieldMask
                                                            ? standStorage.read(singleId, fieldMask)
                                                            : standStorage.read(singleId);
         if (!singleResult.isPresent()) {
@@ -136,18 +136,18 @@ class AggregateQueryProcessor implements QueryProcessor {
         return result;
     }
 
-    private ImmutableCollection<EntityStorageRecord> readMany(Collection<AggregateStateId> stateIds,
-                                                              FieldMask fieldMask) {
+    private ImmutableCollection<EntityRecord> readMany(Collection<AggregateStateId> stateIds,
+                                                       FieldMask fieldMask) {
         final boolean applyFieldMask = !fieldMask.getPathsList()
                                                  .isEmpty();
-        final Iterable<EntityStorageRecord> bulkReadResults = applyFieldMask
+        final Iterable<EntityRecord> bulkReadResults = applyFieldMask
                                                               ? standStorage.readMultiple(stateIds, fieldMask)
                                                               : standStorage.readMultiple(stateIds);
-        final ImmutableCollection<EntityStorageRecord> result
+        final ImmutableCollection<EntityRecord> result
                 = FluentIterable.from(bulkReadResults)
-                               .filter(new Predicate<EntityStorageRecord>() {
+                               .filter(new Predicate<EntityRecord>() {
                                    @Override
-                                   public boolean apply(@Nullable EntityStorageRecord input) {
+                                   public boolean apply(@Nullable EntityRecord input) {
                                        return input != null;
                                    }
                                })

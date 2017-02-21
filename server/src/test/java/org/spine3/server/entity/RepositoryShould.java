@@ -56,6 +56,60 @@ public class RepositoryShould {
     // Tests of initialization checks
     //-------------------------
 
+    @Test(expected = IllegalStateException.class)
+    public void check_for_entity_id_class() {
+        new RepoForEntityWithUnsupportedId(boundedContext).getIdClass();
+    }
+
+    private static class EntityWithUnsupportedId extends AbstractVersionableEntity<Exception, Project> {
+        protected EntityWithUnsupportedId(Exception id) {
+            super(id);
+        }
+    }
+
+    @SuppressWarnings("ReturnOfNull")
+    private static class RepoForEntityWithUnsupportedId extends Repository<Exception, EntityWithUnsupportedId> {
+
+        /**
+         * Creates the repository in the passed {@link BoundedContext}.
+         *
+         * @param boundedContext the {@link BoundedContext} in which this repository works
+         */
+        protected RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
+        @Override
+        public Optional<EntityWithUnsupportedId> load(Exception id) {
+            return null;
+        }
+
+        @Override
+        public EntityWithUnsupportedId create(Exception id) {
+            return null;
+        }
+
+        @Override
+        protected void store(EntityWithUnsupportedId obj) {
+
+        }
+
+        @Override
+        protected boolean markArchived(Exception id) {
+            return false;
+        }
+
+        @Override
+        protected boolean markDeleted(Exception id) {
+            return false;
+        }
+
+        @Override
+        protected Storage createStorage(StorageFactory factory) {
+            return null;
+        }
+    }
+
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
     public void throw_exception_if_entity_constructor_is_private() {
