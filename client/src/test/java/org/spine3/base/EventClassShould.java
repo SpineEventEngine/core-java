@@ -18,11 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains commonly used server-side data classes.
- */
+package org.spine3.base;
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.type;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static org.junit.Assert.assertEquals;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventClassShould {
+
+    @Test
+    public void create_set_on_varargs() {
+        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+    }
+}
