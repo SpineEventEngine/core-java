@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.Visibility;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -168,7 +169,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test
     public void mark_record_archived_multiple_times() {
         final I id = newId();
-        final EntityStorageRecord record = newStorageRecord(id);
+        final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
 
         // Write the record.
@@ -177,7 +178,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See it is not archived.
         assertFalse(storage.read(id)
                            .get()
-                           .getEntityStatus()
+                           .getVisibility()
                            .getArchived());
 
         markArchivedAndCheck(storage, id);
@@ -193,7 +194,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See that the record is marked.
         assertTrue(storage.read(id)
                           .get()
-                          .getEntityStatus()
+                          .getVisibility()
                           .getArchived());
     }
 
@@ -237,7 +238,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @Test
     public void mark_record_deleted_multiple_times() {
         final I id = newId();
-        final EntityStorageRecord record = newStorageRecord(id);
+        final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
 
         // Write the record.
@@ -246,7 +247,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See it is not archived.
         assertFalse(storage.read(id)
                            .get()
-                           .getEntityStatus()
+                           .getVisibility()
                            .getDeleted());
 
         markDeletedAndCheck(storage, id);
@@ -262,7 +263,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // See that the record is marked.
         assertTrue(storage.read(id)
                           .get()
-                          .getEntityStatus()
+                          .getVisibility()
                           .getArchived());
     }
 
@@ -287,24 +288,24 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void mark_deleted_after_archived() {
         final RecordStorage<I> storage = getStorage();
         final I id = newId();
-        final EntityStorageRecord record = newStorageRecord(id);
+        final EntityRecord record = newStorageRecord(id);
 
         // Write the record.
         storage.write(id, record);
 
         storage.markArchived(id);
 
-        final EntityStatus archived = storage.read(id)
-                                             .get()
-                                             .getEntityStatus();
+        final Visibility archived = storage.read(id)
+                                           .get()
+                                           .getVisibility();
         assertTrue(archived.getArchived());
         assertFalse(archived.getDeleted());
 
         storage.markDeleted(id);
 
-        final EntityStatus archivedAndDeleted = storage.read(id)
+        final Visibility archivedAndDeleted = storage.read(id)
                                                        .get()
-                                                       .getEntityStatus();
+                                                       .getVisibility();
         assertTrue(archivedAndDeleted.getArchived());
         assertTrue(archivedAndDeleted.getDeleted());
     }
@@ -314,24 +315,24 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void mark_archived_after_deleted() {
         final RecordStorage<I> storage = getStorage();
         final I id = newId();
-        final EntityStorageRecord record = newStorageRecord(id);
+        final EntityRecord record = newStorageRecord(id);
 
         // Write the record.
         storage.write(id, record);
 
         storage.markDeleted(id);
 
-        final EntityStatus deleted = storage.read(id)
+        final Visibility deleted = storage.read(id)
                                              .get()
-                                             .getEntityStatus();
+                                             .getVisibility();
         assertTrue(deleted.getDeleted());
         assertFalse(deleted.getArchived());
 
         storage.markArchived(id);
 
-        final EntityStatus archivedAndDeleted = storage.read(id)
+        final Visibility archivedAndDeleted = storage.read(id)
                                                        .get()
-                                                       .getEntityStatus();
+                                                       .getVisibility();
         assertTrue(archivedAndDeleted.getArchived());
         assertTrue(archivedAndDeleted.getDeleted());
     }

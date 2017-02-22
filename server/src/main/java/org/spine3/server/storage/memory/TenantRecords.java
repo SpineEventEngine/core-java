@@ -74,7 +74,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         records.put(id, archivedRecord);
     }
 
-    void markArchived(I id) {
+    void markDeleted(I id) {
         final EntityRecord record = records.get(id);
         checkNotNull(record, "Can't mark a non-existing record deleted.");
         final Visibility status = record.getVisibility()
