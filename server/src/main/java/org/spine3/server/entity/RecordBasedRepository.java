@@ -35,7 +35,6 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -58,7 +57,7 @@ import static org.spine3.server.entity.EntityStorageConverter.tuple;
  * The base class for repositories that store entities as records.
  *
  * <p>Such a repository is backed by {@link RecordStorage}.
- * Entity states are stored as {@link EntityStorageRecord}s.
+ * Entity states are stored as {@link EntityRecord}s.
  *
  * @param <I> the type of IDs of entities
  * @param <E> the type of entities
@@ -114,7 +113,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public void store(E entity) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityStorageRecord record = toRecord(entity);
+        final EntityRecord record = toRecord(entity);
         storage.write(entity.getId(), record);
     }
 
@@ -123,12 +122,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public Optional<E> load(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final Optional<EntityStorageRecord> found = storage.read(id);
+        final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
             return Optional.absent();
         }
-        final EntityStorageRecord record = found.get();
-        if (!Predicates.isEntityVisible().apply(record.getEntityStatus())) {
+        final EntityRecord record = found.get();
+        if (!Predicates.isEntityVisible().apply(record.getVisibility())) {
             return Optional.absent();
         }
         final E entity = toEntity(id, record);
@@ -215,16 +214,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
-        final Iterable<EntityStorageRecord> entityStorageRecords = storage.readMultiple(ids);
+        final Iterable<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
 
         final Iterator<I> idIterator = ids.iterator();
-        final Iterator<EntityStorageRecord> recordIterator = entityStorageRecords.iterator();
+        final Iterator<EntityRecord> recordIterator = entityStorageRecords.iterator();
         final List<E> entities = Lists.newLinkedList();
         final EntityStorageConverter<I, E, S> converter = entityConverter().withFieldMask(fieldMask);
 
         while (idIterator.hasNext() && recordIterator.hasNext()) {
             final I id = idIterator.next();
-            final EntityStorageRecord record = recordIterator.next();
+            final EntityRecord record = recordIterator.next();
 
             if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
                                    *    returns an `Iterable` that may contain nulls.             */
@@ -251,7 +250,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public ImmutableCollection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityStorageRecord> recordMap = storage.readAll();
+        final Map<I, EntityRecord> recordMap = storage.readAll();
 
         final ImmutableCollection<E> entities =
                 FluentIterable.from(recordMap.entrySet())
@@ -306,13 +305,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Converts the passed entity into {@code EntityStorageRecord} that
      * stores the entity data.
      */
-    protected EntityStorageRecord toRecord(E entity) {
+    protected EntityRecord toRecord(E entity) {
         final EntityStorageConverter.Tuple<I> tuple = entityConverter().convert(entity);
         return tuple != null ? tuple.getState()
-                             : EntityStorageRecord.getDefaultInstance();
+                             : EntityRecord.getDefaultInstance();
     }
 
-    private E toEntity(I id, EntityStorageRecord record) {
+    private E toEntity(I id, EntityRecord record) {
         EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
         final E result = entityConverter().reverse()
                                           .convert(tuple);
@@ -325,11 +324,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @return new instance of the transforming function
      */
-    private Function<Map.Entry<I, EntityStorageRecord>, E> storageRecordToEntity() {
-        return new Function<Map.Entry<I, EntityStorageRecord>, E>() {
+    private Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
+        return new Function<Map.Entry<I, EntityRecord>, E>() {
             @Nullable
             @Override
-            public E apply(@Nullable Map.Entry<I, EntityStorageRecord> input) {
+            public E apply(@Nullable Map.Entry<I, EntityRecord> input) {
                 checkNotNull(input);
                 final E result = toEntity(input.getKey(), input.getValue());
                 return result;

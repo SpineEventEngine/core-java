@@ -23,12 +23,12 @@ package org.spine3.server.command;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.HandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.reflect.MethodRegistry;
-import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;

@@ -50,8 +50,7 @@ public enum EntityField implements StorageField {
     timestamp,
 
     /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds which is less then
-     * {@link org.spine3.protobuf.Timestamps#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
+     * A field for storing the part of a timestamp representing the amount of nanoseconds.
      *
      * @see Timestamp#getNanos()
      */
@@ -66,16 +65,15 @@ public enum EntityField implements StorageField {
      * @see Message#toByteArray()
      * @see Any#getValue()
      */
-    value,
+    bytes,
 
     /**
      * A field representing a {@link TypeUrl} of a certain {@link Message} type.
      *
-     * <p>This field is commonly used in pair with {@link EntityField#value}
+     * <p>This field is commonly used in pair with {@link EntityField#bytes}
      * to store the fully qualified type name with the type prefix.
      *
      * @see TypeUrl
      */
     type_url
-
 }

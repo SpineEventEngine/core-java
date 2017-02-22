@@ -23,9 +23,9 @@ package org.spine3.server.event;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.EventClass;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.type.EventClass;
 
 import java.util.Map;
 import java.util.Set;

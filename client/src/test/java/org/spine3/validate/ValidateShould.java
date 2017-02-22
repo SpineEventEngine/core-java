@@ -20,16 +20,15 @@
 
 package org.spine3.validate;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.TypeName;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
@@ -37,6 +36,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -67,12 +67,12 @@ public class ValidateShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_value_out_of_bounds() {
-        checkBounds(10, "value", -5, 9);
+        checkBounds(10, "checked value", -5, 9);
     }
 
     @Test
     public void verify_that_message_is_in_default_state() {
-        final Message nonDefault = newStringValue("check_if_message_is_in_default_state");
+        final Message nonDefault = newUuidValue();
 
         assertTrue(Validate.isDefault(StringValue.getDefaultInstance()));
         assertFalse(Validate.isDefault(nonDefault));
@@ -80,13 +80,13 @@ public class ValidateShould {
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default_state_throwing_exception_if_not() {
-        final StringValue nonDefault = newStringValue("check_if_message_is_in_default_state_throwing_exception_if_not");
+        final StringValue nonDefault = newUuidValue();
         Validate.checkDefault(nonDefault);
     }
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default_state_throwing_exception_with_parameterized_error_message() {
-        final StringValue nonDefault = newStringValue("check_if_message_is_in_default_state_with_template");
+        final StringValue nonDefault = newUuidValue();
         Validate.checkDefault(nonDefault,
                               "Message value: %s, Type name: %s", nonDefault, TypeName.of(nonDefault));
     }
@@ -105,41 +105,9 @@ public class ValidateShould {
 
     @Test
     public void return_non_default_value_on_check() {
-        final StringValue nonDefault = newStringValue("return_non_default_value_on_check");
+        final StringValue nonDefault = newUuidValue();
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault));
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault, "with error message"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_timestamp_seconds_value_is_zero() {
-        Validate.checkPositive(Timestamp.newBuilder()
-                                        .setSeconds(0)
-                                        .setNanos(5)
-                                        .build(), "");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_timestamp_seconds_value_is_negative() {
-        Validate.checkPositive(Timestamp.newBuilder()
-                                        .setSeconds(-5)
-                                        .setNanos(5)
-                                        .build(), "");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_timestamp_nanos_value_is_negative() {
-        Validate.checkPositive(Timestamp.newBuilder()
-                                        .setSeconds(5)
-                                        .setNanos(-5)
-                                        .build(), "");
-    }
-
-    @Test
-    public void do_not_throw_exception_if_timestamp_seconds_and_nanos_are_positive() {
-        Validate.checkPositive(Timestamp.newBuilder()
-                                        .setSeconds(5)
-                                        .setNanos(5)
-                                        .build(), "");
     }
 
     @Test(expected = NullPointerException.class)
@@ -207,10 +175,7 @@ public class ValidateShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(ConstraintViolations.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Validate.class);
     }
 }

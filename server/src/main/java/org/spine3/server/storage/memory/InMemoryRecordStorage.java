@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Collection;
@@ -66,31 +66,31 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection, since {@code null} may be present in it.
-        final Collection<EntityStorageRecord> result = new LinkedList<>();
+        final Collection<EntityRecord> result = new LinkedList<>();
 
         for (I givenId : givenIds) {
-            final EntityStorageRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
+            final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
         return result;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords() {
+    protected Map<I, EntityRecord> readAllRecords() {
         return getStorage().readAllRecords();
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return getStorage().readAllRecords(fieldMask);
     }
 
@@ -103,19 +103,19 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Optional<EntityStorageRecord> readRecord(I id) {
+    protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id);
     }
 
     @Override
-    protected void writeRecord(I id, EntityStorageRecord record) {
+    protected void writeRecord(I id, EntityRecord record) {
         getStorage().put(id, record);
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityStorageRecord> records) {
+    protected void writeRecords(Map<I, EntityRecord> records) {
         final TenantRecords<I> storage = getStorage();
-        for (Map.Entry<I, EntityStorageRecord> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecord> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }
     }

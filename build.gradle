@@ -33,7 +33,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.8.9-SNAPSHOT'
+        spineVersion = '0.8.11-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.

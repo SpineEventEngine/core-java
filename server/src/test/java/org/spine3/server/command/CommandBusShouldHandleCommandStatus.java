@@ -29,16 +29,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.client.CommandFactory;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -61,8 +62,8 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShouldHandleCommandStatus {
@@ -109,8 +110,8 @@ public class CommandBusShouldHandleCommandStatus {
         commandBus.post(command, responseObserver);
 
         verify(commandStore, atMost(1)).updateStatus(getId(command), dispatcher.exception);
-        final CommandEnvelope envelope = new CommandEnvelope(command);
-        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getMessage(), envelope.getCommandId());
     }
 
     @Test
@@ -122,7 +123,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toFailure()));
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
@@ -157,7 +158,7 @@ public class CommandBusShouldHandleCommandStatus {
         final List<Command> commands = newArrayList(Given.Command.createProject(),
                                                     Given.Command.addTask(),
                                                     Given.Command.startProject());
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 

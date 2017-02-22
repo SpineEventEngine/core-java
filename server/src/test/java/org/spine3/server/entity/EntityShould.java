@@ -28,8 +28,11 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.Tests;
+import org.spine3.test.TimeTests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
@@ -49,9 +52,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.currentTimeSeconds;
+import static org.spine3.test.TimeTests.currentTimeSeconds;
 
 /**
  * @author Alexander Litus
@@ -122,37 +125,29 @@ public class EntityShould {
         assertEquals(messageId, entityWithMessageID.getId());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void not_accept_to_constructor_id_of_unsupported_type() {
-        new TestEntityWithIdUnsupported(new UnsupportedClassVersionError());
-    }
-
-    private static class TestEntityWithIdUnsupported extends AbstractVersionableEntity<UnsupportedClassVersionError, Project> {
-        private TestEntityWithIdUnsupported(UnsupportedClassVersionError id) {
-            super(id);
-        }
-    }
-
-    private static class TestEntityWithIdString extends AbstractVersionableEntity<String, Project> {
+    private static class TestEntityWithIdString
+            extends AbstractVersionableEntity<String, Project> {
         private TestEntityWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdMessage extends AbstractVersionableEntity<Message, Project> {
+    private static class TestEntityWithIdMessage
+            extends AbstractVersionableEntity<Message, Project> {
         private TestEntityWithIdMessage(Message id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdInteger extends AbstractVersionableEntity<Integer, Project> {
+    private static class TestEntityWithIdInteger
+            extends AbstractVersionableEntity<Integer, Project> {
         private TestEntityWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestEntityWithIdLong extends AbstractVersionableEntity<Long, Project> {
+    private static class TestEntityWithIdLong
+            extends AbstractVersionableEntity<Long, Project> {
         private TestEntityWithIdLong(Long id) {
             super(id);
         }
@@ -160,39 +155,25 @@ public class EntityShould {
 
     @Test
     public void have_state() {
-        final int version = 3;
-        final Timestamp whenModified = getCurrentTime();
+        final Version ver = Versions.newVersion(3, getCurrentTime());
 
-        entityNew.setState(state, version, whenModified);
+        entityNew.setState(state, ver);
 
         assertEquals(state, entityNew.getState());
-        assertEquals(version, entityNew.getVersion().getNumber());
-        assertEquals(whenModified, entityNew.whenModified());
+        assertEquals(ver, entityNew.getVersion());
     }
 
     @Test
     public void validate_state_when_set_it() {
         final TestEntity spyEntityNew = spy(entityNew);
-        spyEntityNew.setState(state, 0, getCurrentTime());
+        spyEntityNew.setState(state, Versions.create());
         verify(spyEntityNew).validate(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entityNew.setState(Tests.<Project>nullRef(), 0, getCurrentTime());
+        entityNew.setState(Tests.<Project>nullRef(), Versions.create());
     }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_null_modification_time() {
-        entityNew.setState(state, 0, Tests.<Timestamp>nullRef());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    @SuppressWarnings({"ResultOfObjectAllocationIgnored", "NewExceptionWithoutArguments"})
-    public void throw_exception_if_try_to_create_entity_with_id_of_unsupported_type() {
-        new EntityWithUnsupportedId(new Exception());
-    }
-
 
     private static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {
         private BareBonesEntity(Long id) {
@@ -216,7 +197,8 @@ public class EntityShould {
         final long timeBeforeincrement = currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = currentTimeSeconds();
-        assertThat(entityNew.whenModified().getSeconds(), isBetween(timeBeforeincrement, timeAfterIncrement));
+        assertThat(entityNew.whenModified().getSeconds(),
+                   isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
     @Test
@@ -270,14 +252,9 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-    private static class EntityWithUnsupportedId extends AbstractVersionableEntity<Exception, Project> {
 
-        protected EntityWithUnsupportedId(Exception id) {
-            super(id);
-        }
-    }
-
-    private static class EntityWithMessageId extends AbstractVersionableEntity<ProjectId, StringValue> {
+    private static class EntityWithMessageId
+            extends AbstractVersionableEntity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
@@ -286,8 +263,9 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class,
-                                                                                Long.class);
+        final Constructor<BareBonesEntity> ctor =
+                AbstractEntity.getConstructor(BareBonesEntity.class,
+                                              Long.class);
 
         assertNotNull(ctor);
     }
@@ -295,13 +273,15 @@ public class EntityShould {
     @Test
     public void create_and_initialize_entity_instance() {
         final Long id = 100L;
-        final Timestamp before = Timestamps.secondsAgo(1);
+        final Timestamp before = TimeTests.Past.secondsAgo(1);
 
         // Create and init the entity.
-        final Constructor<BareBonesEntity> ctor = AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
-        final AbstractVersionableEntity<Long, StringValue> entity = AbstractEntity.createEntity(ctor, id);
+        final Constructor<BareBonesEntity> ctor =
+                AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
+        final AbstractVersionableEntity<Long, StringValue> entity =
+                AbstractEntity.createEntity(ctor, id);
 
-        final Timestamp after = Timestamps.getCurrentTime();
+        final Timestamp after = Timestamps2.getCurrentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         final Interval whileWeCreate = Intervals.between(before, after);

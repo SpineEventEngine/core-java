@@ -20,25 +20,21 @@
 package org.spine3.base;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeName;
 import org.spine3.users.UserId;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.isBetween;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -49,21 +45,22 @@ import static org.spine3.protobuf.Timestamps.isBetween;
 public class Events {
 
     private Events() {
+        // Prevent instantiation of this utility class.
     }
 
     /** Compares two events by their timestamps. */
-    public static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
+    private static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
         @Override
         public int compare(Event o1, Event o2) {
             final Timestamp timestamp1 = getTimestamp(o1);
             final Timestamp timestamp2 = getTimestamp(o2);
-            return Timestamps.compare(timestamp1, timestamp2);
+            return Timestamps2.compare(timestamp1, timestamp2);
         }
     };
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
-        final String value = UUID.randomUUID().toString();
+        final String value = Identifiers.newUuid();
         return EventId.newBuilder()
                       .setUuid(value)
                       .build();
@@ -76,31 +73,41 @@ public class Events {
      */
     public static void sort(List<Event> events) {
         checkNotNull(events);
-        Collections.sort(events, EVENT_TIMESTAMP_COMPARATOR);
+        Collections.sort(events, eventComparator());
     }
 
-    /** Obtains the timestamp of the event. */
+    /**
+     * Returns comparator which compares events by their timestamp
+     * in chronological order.
+     */
+    public static Comparator<Event> eventComparator() {
+        return EVENT_TIMESTAMP_COMPARATOR;
+    }
+
+    /**
+     * Obtains the timestamp of the event.
+     */
     public static Timestamp getTimestamp(Event event) {
         checkNotNull(event);
         final Timestamp result = event.getContext().getTimestamp();
         return result;
     }
 
-    /** Creates a new {@code Event} instance. */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static Event createEvent(Message event, EventContext context) {
-        checkNotNull(event);
+    /**
+     * Creates a new {@code Event} instance.
+     *
+     * @param messageOrAny the event message or {@code Any} containing the message
+     * @param context      the event context
+     * @return created event instance
+     */
+    public static Event createEvent(Message messageOrAny, EventContext context) {
+        checkNotNull(messageOrAny);
         checkNotNull(context);
-        return createEvent(AnyPacker.pack(event), context);
-    }
-
-    /** Creates a new {@code Event} instance. */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-    public static Event createEvent(Any eventAny, EventContext context) {
-        checkNotNull(eventAny);
-        checkNotNull(context);
+        final Any packed = (messageOrAny instanceof Any)
+                           ? (Any)messageOrAny
+                           : pack(messageOrAny);
         final Event result = Event.newBuilder()
-                                  .setMessage(eventAny)
+                                  .setMessage(packed)
                                   .setContext(context)
                                   .build();
         return result;
@@ -169,8 +176,8 @@ public class Events {
      *
      * <p>The method does not set {@code CommandContext} because there was no command.
      *
-     * <p>The {@code version} attribute is not populated either. It is the responsiblity of the
-     * target aggregate to populate the missing fields.
+     * <p>The {@code version} attribute is not populated either.
+     * It is the responsibility of the target aggregate to populate the missing fields.
      *
      * @param producerId the ID of the producer which generates the event
      * @return new instance of {@code EventContext} for the imported event
@@ -179,84 +186,20 @@ public class Events {
         checkNotNull(producerId);
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
-                                                         .setTimestamp(Timestamps.getCurrentTime())
-                                                         .setProducerId(AnyPacker.pack(producerId));
+                                                         .setTimestamp(getCurrentTime())
+                                                         .setProducerId(pack(producerId));
         return builder.build();
     }
 
-    /** The predicate to filter event records after some point in time. */
-    public static class IsAfter implements Predicate<Event> {
-
-        private final Timestamp timestamp;
-
-        public IsAfter(Timestamp timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event record) {
-            if (record == null) {
-                return false;
-            }
-            final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
-            return result;
-        }
-    }
-
-    /** The predicate to filter event records before some point in time. */
-    public static class IsBefore implements Predicate<Event> {
-
-        private final Timestamp timestamp;
-
-        public IsBefore(Timestamp timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event record) {
-            if (record == null) {
-                return false;
-            }
-
-            final Timestamp ts = getTimestamp(record);
-            final boolean result = Timestamps.compare(ts, this.timestamp) < 0;
-            return result;
-        }
-    }
-
-    /** The predicate to filter event records within a given time range. */
-    public static class IsBetween implements Predicate<Event> {
-
-        private final Timestamp start;
-        private final Timestamp finish;
-
-        public IsBetween(Timestamp start, Timestamp finish) {
-            checkNotNull(start);
-            checkNotNull(finish);
-            checkArgument(Timestamps.compare(start, finish) < 0, "`start` must be before `finish`");
-            this.start = start;
-            this.finish = finish;
-        }
-
-        @Override
-        public boolean apply(@Nullable Event event) {
-            if (event == null) {
-                return false;
-            }
-
-            final Timestamp ts = getTimestamp(event);
-            final boolean result = isBetween(ts, start, finish);
-            return result;
-        }
-    }
-
-    /** Verifies if the enrichment is not disabled in the passed event. */
+    /**
+     * Verifies if the enrichment is not disabled in the passed event.
+     */
     public static boolean isEnrichmentEnabled(Event event) {
         checkNotNull(event);
         final EventContext context = event.getContext();
-        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
-        final boolean isEnabled = mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+        final boolean isEnabled =
+                context.getEnrichment()
+                       .getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return isEnabled;
     }
 
@@ -266,11 +209,11 @@ public class Events {
      * @param context a context to get enrichments from
      * @return an optional of enrichments
      */
-    public static Optional<Enrichments> getEnrichments(EventContext context) {
+    public static Optional<Enrichment.Container> getEnrichments(EventContext context) {
         checkNotNull(context);
-        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
-        if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
-            return Optional.of(context.getEnrichments());
+        if (context.getEnrichment()
+                   .getModeCase() == Enrichment.ModeCase.CONTAINER) {
+            return Optional.of(context.getEnrichment().getContainer());
         }
         return Optional.absent();
     }
@@ -283,16 +226,17 @@ public class Events {
      * @param <E>             a type of the event enrichment
      * @return an optional of the enrichment
      */
-    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
+    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
+                                                                EventContext context) {
         checkNotNull(enrichmentClass);
         checkNotNull(context);
-        final Optional<Enrichments> value = getEnrichments(context);
+        final Optional<Enrichment.Container> value = getEnrichments(context);
         if (!value.isPresent()) {
             return Optional.absent();
         }
-        final Enrichments enrichments = value.get();
+        final Enrichment.Container enrichments = value.get();
         final String typeName = TypeName.of(enrichmentClass);
-        final Any any = enrichments.getMapMap()
+        final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {
             return Optional.absent();

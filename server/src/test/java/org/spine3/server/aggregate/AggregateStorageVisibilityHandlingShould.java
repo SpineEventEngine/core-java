@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 
@@ -34,11 +34,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link EntityStatus}.
+ * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link Visibility}.
  *
  * @author Dmytro Dashenkov.
  */
-public abstract class AggregateStorageStatusHandlingShould {
+public abstract class AggregateStorageVisibilityHandlingShould {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
@@ -57,11 +57,11 @@ public abstract class AggregateStorageStatusHandlingShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
     public void write_entity_status_of_aggregate() {
-        final EntityStatus status = EntityStatus.newBuilder()
-                                                .setArchived(true)
-                                                .build();
-        storage.writeStatus(id, status);
-        final Optional<EntityStatus> readStatus = storage.readStatus(id);
+        final Visibility status = Visibility.newBuilder()
+                                            .setArchived(true)
+                                            .build();
+        storage.writeVisibility(id, status);
+        final Optional<Visibility> readStatus = storage.readVisibility(id);
         assertTrue(readStatus.isPresent());
         assertEquals(status, readStatus.get());
     }
@@ -70,90 +70,92 @@ public abstract class AggregateStorageStatusHandlingShould {
     public void save_whole_status() {
         final boolean archived = true;
         final boolean deleted = true;
-        final EntityStatus expected = EntityStatus.newBuilder()
+        final Visibility expected = Visibility.newBuilder()
                                                   .setArchived(archived)
                                                   .setDeleted(deleted)
                                                   .build();
-        storage.writeStatus(id, expected);
-        final Optional<EntityStatus> optionalActual = storage.readStatus(id);
+        storage.writeVisibility(id, expected);
+        final Optional<Visibility> optionalActual = storage.readVisibility(id);
         assertStatus(optionalActual, true, true);
     }
 
     @Test
     public void mark_aggregate_archived() {
         storage.markArchived(id);
-        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
+        final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
         assertArchived(aggregateStatus);
     }
 
     @Test
     public void mark_aggregate_deleted() {
         storage.markDeleted(id);
-        final Optional<EntityStatus> aggregateStatus = storage.readStatus(id);
+        final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
         assertDeleted(aggregateStatus);
     }
 
     @Test
     public void do_not_mark_aggregate_archived_twice() {
         storage.markArchived(id);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
+        final Optional<Visibility> firstRead = storage.readVisibility(id);
         assertArchived(firstRead);
 
         storage.markArchived(id);
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
+        final Optional<Visibility> secondRead = storage.readVisibility(id);
         assertArchived(secondRead);
     }
 
     @Test
     public void do_not_mark_aggregate_deleted_twice() {
         storage.markDeleted(id);
-        final Optional<EntityStatus> firstRead = storage.readStatus(id);
+        final Optional<Visibility> firstRead = storage.readVisibility(id);
         assertDeleted(firstRead);
 
         storage.markDeleted(id);
 
-        final Optional<EntityStatus> secondRead = storage.readStatus(id);
+        final Optional<Visibility> secondRead = storage.readVisibility(id);
         assertDeleted(secondRead);
     }
 
     @Test
     public void mark_archived_if_deleted() {
         storage.markDeleted(id);
-        assertDeleted(storage.readStatus(id));
+        assertDeleted(storage.readVisibility(id));
         storage.markArchived(id);
-        assertStatus(storage.readStatus(id), true, true);
+        assertStatus(storage.readVisibility(id), true, true);
     }
 
     @Test
     public void mark_deleted_if_archived() {
         storage.markArchived(id);
-        assertArchived(storage.readStatus(id));
+        assertArchived(storage.readVisibility(id));
         storage.markDeleted(id);
-        assertStatus(storage.readStatus(id), true, true);
+        assertStatus(storage.readVisibility(id), true, true);
     }
 
     @Test
     public void retrieve_empty_status_if_never_written() {
-        final Optional<EntityStatus> entityStatus = storage.readStatus(id);
+        final Optional<Visibility> entityStatus = storage.readVisibility(id);
         assertNotNull(entityStatus);
         assertFalse(entityStatus.isPresent());
     }
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static void assertArchived(Optional<EntityStatus> entityStatus) {
+    private static void assertArchived(Optional<Visibility> entityStatus) {
         assertStatus(entityStatus, true, false);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static void assertDeleted(Optional<EntityStatus> entityStatus) {
+    private static void assertDeleted(Optional<Visibility> entityStatus) {
         assertStatus(entityStatus, false, true);
     }
 
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
-    private static void assertStatus(Optional<EntityStatus> entityStatus, boolean archived, boolean deleted) {
+    private static void assertStatus(Optional<Visibility> entityStatus,
+                                     boolean archived,
+                                     boolean deleted) {
         assertTrue(entityStatus.isPresent());
-        final EntityStatus status = entityStatus.get();
+        final Visibility status = entityStatus.get();
         assertEquals(archived, status.getArchived());
         assertEquals(deleted, status.getDeleted());
     }

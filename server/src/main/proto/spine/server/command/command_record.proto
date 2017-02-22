@@ -23,9 +23,9 @@ package spine.server.command;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.command.storage";
+option java_package = "org.spine3.server.command";
 option java_multiple_files = true;
-option java_outer_classname = "CommandStorageProto";
+option java_outer_classname = "CommandRecordProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
@@ -37,52 +37,46 @@ import "spine/base/error.proto";
 import "spine/base/failure.proto";
 
 // This type defines the way commands are stored in command storage.
+//
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
-message CommandStorageRecord {
+//
+message CommandRecord {
     option (SPI_type) = true;
 
-    // A moment of time when this storage record was created.
-    google.protobuf.Timestamp timestamp = 1;
+    // The ID of the command.
+    base.CommandId command_id = 1;
 
     // A short name of Protobuf command type.
     string command_type = 2;
 
-    // String representation of CommandId.
-    string command_id = 3;
+    // The command.
+    base.Command command = 3;
 
-    // The status of the command processing.
-    base.CommandStatus status = 4;
+    // The status of command processing.
+    //
+    // This field is empty upon arrival of a command.
+    // It is populated later during the command processing cycle.
+    //
+    ProcessingStatus status = 5;
 
-    // `status_data` provides additional information on what went wrong
+    // A moment of time when this storage record was created.
+    google.protobuf.Timestamp timestamp = 6;
+}
+
+// The status of command processing.
+message ProcessingStatus {
+
+    // The code of the status.
+    base.CommandStatus code = 1;
+
+    // The `cause` provides additional information on what went wrong
     // if the value of `status` is `ERROR` or `FAILURE`.
-    oneof status_data {
+    oneof cause {
         // The technical error occurred during command processing.
-        base.Error error = 5;
+        base.Error error = 2;
 
         // A business failure occurred during command processing.
-        base.Failure failure = 6;
+        base.Failure failure = 3;
     }
-
-    reserved 7 to 9;
-
-    // A short Protobuf type name of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is an empty string.
-    // We store the type of entity ID, not the type of the entity itself,
-    // because it is not available at the level of commands.
-    string target_id_type = 10;
-
-    // String representation of the command target entity ID.
-    //
-    // If the command is not for an entity, this field is an empty string.
-    string target_id = 11;
-
-    reserved 12 to 19;
-
-    // The command instance.
-    google.protobuf.Any message = 20;
-
-    // The context of the command.
-    base.CommandContext context = 21;
 }
