@@ -31,7 +31,13 @@ import com.google.protobuf.Message;
  */
 public interface MessageEnvelope<T> {
 
+    /**
+     * Obtains the object which contains the message of interest.
+     */
     T getOuterObject();
 
+    /**
+     * Obtains the message.
+     */
     Message getMessage();
 }

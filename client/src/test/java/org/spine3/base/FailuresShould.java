@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
@@ -33,6 +34,12 @@ public class FailuresShould {
     @Test
     public void have_utility_ctor() {
         Tests.hasPrivateParameterlessCtor(Failures.class);
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Failures.class);
     }
 
     @Test
