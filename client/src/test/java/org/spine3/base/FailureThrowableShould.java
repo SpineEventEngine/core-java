@@ -75,6 +75,9 @@ public class FailureThrowableShould {
                                   .isEmpty());
         assertTrue(Timestamps.isValid(failureWrapper.getContext()
                                                     .getTimestamp()));
+        final Command wrappedCommand = failureWrapper.getContext()
+                                                     .getCommand();
+        assertEquals(command, wrappedCommand);
     }
 
     private static class TestFailure extends FailureThrowable {
