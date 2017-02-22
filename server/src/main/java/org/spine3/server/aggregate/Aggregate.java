@@ -225,8 +225,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>Overrides to expose the method to the package.
      */
     @Override
-    protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
-        return super.dispatchCommand(command, context);
+    protected List<? extends Message> dispatchCommand(Message commandMessage, CommandContext context) {
+        return super.dispatchCommand(commandMessage, context);
     }
 
     /**

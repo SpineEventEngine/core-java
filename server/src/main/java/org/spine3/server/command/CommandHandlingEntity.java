@@ -39,6 +39,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
+import org.spine3.util.Environment;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -142,19 +144,19 @@ public abstract class CommandHandlingEntity<I, S extends Message>
     /**
      * Returns the set of the command classes handled by the passed class.
      *
-     * @param clazz the class of objects that handle commands
+     * @param cls the class of objects that handle commands
      * @return immutable set of command classes
      */
-    public static Set<CommandClass> getCommandClasses(Class<? extends CommandHandlingEntity> clazz) {
+    public static Set<CommandClass> getCommandClasses(Class<? extends CommandHandlingEntity> cls) {
         final Set<CommandClass> result = CommandClass.setOf(
-                getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE));
+                getHandledMessageClasses(cls, CommandHandlerMethod.PREDICATE));
         return result;
     }
 
     /**
      * Dispatches the passed command to appropriate handler.
      *
-     * @param command the command message to be handled.
+     * @param commandMessage the command message to be handled.
      *                If this parameter is passed as {@link Any} the enclosing
      *                message will be unwrapped.
      * @param context the context of the command
@@ -163,14 +165,15 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      *                               with this exception as the cause
      * @see #dispatchForTest(Message, CommandContext)
      */
-    protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
-        checkNotNull(command);
+    protected List<? extends Message> dispatchCommand(Message commandMessage,
+                                                      CommandContext context) {
+        checkNotNull(commandMessage);
         checkNotNull(context);
 
-        final Message commandMessage = ensureCommandMessage(command);
+        final Message cmdMsg = ensureCommandMessage(commandMessage);
 
         try {
-            final List<? extends Message> eventMessages = invokeHandler(commandMessage, context);
+            final List<? extends Message> eventMessages = invokeHandler(cmdMsg, context);
             return eventMessages;
         } catch (InvocationTargetException e) {
             throw wrappedCause(e);
@@ -185,7 +188,17 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      * which is called automatically.
      */
     @VisibleForTesting
-    public final List<? extends Message> dispatchForTest(Message command, CommandContext context) {
+    public final List<? extends Message> dispatchForTest(Message command,
+                                                         CommandContext context) {
+        if (Environment.getInstance().isProduction()) {
+            final String errMsg = format(
+               "dispatchForTest() is called in the production mode. " +
+               "Class: %s Command message: %s",
+               getClass(), command
+            );
+            throw new IllegalStateException(errMsg);
+        }
+
         return dispatchCommand(command, context);
     }
 
@@ -193,20 +206,20 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      * Ensures that the passed instance of {@code Message} is not an {@code Any},
      * and unwraps the command message if {@code Any} is passed.
      */
-    private static Message ensureCommandMessage(Message command) {
-        Message commandMessage;
-        if (command instanceof Any) {
+    private static Message ensureCommandMessage(Message commandMessage) {
+        Message result;
+        if (commandMessage instanceof Any) {
             /* It looks that we're getting the result of `command.getMessage()`
                because the calling code did not bother to unwrap it.
                Extract the wrapped message (instead of treating this as an error).
                There may be many occasions of such a call especially from the
                testing code. */
-            final Any any = (Any) command;
-            commandMessage = AnyPacker.unpack(any);
+            final Any any = (Any) commandMessage;
+            result = AnyPacker.unpack(any);
         } else {
-            commandMessage = command;
+            result = commandMessage;
         }
-        return commandMessage;
+        return result;
     }
 
     /**
@@ -238,7 +251,7 @@ public abstract class CommandHandlingEntity<I, S extends Message>
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
         return new IllegalStateException(
-                String.format("Missing handler for command class %s in the class %s.",
+                format("Missing handler for command class %s in the class %s.",
                         commandClass.getName(), getClass().getName()));
     }
 

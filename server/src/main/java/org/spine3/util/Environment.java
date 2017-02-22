@@ -131,7 +131,8 @@ public final class Environment {
         }
 
         // Check the environment variable. We may run under unknown testing framework or
-        // tests may require production-like mode, which they simulate by setting the property to `false`.
+        // tests may require production-like mode, which they simulate by setting
+        // the property to `false`.
         String testProp = System.getProperty(ENV_KEY_TESTS);
         if (testProp != null) {
             testProp = testProp.replaceAll("\"' ", "");

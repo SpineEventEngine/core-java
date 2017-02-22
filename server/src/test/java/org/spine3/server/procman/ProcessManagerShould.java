@@ -68,7 +68,7 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
+@SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
@@ -83,7 +83,8 @@ public class ProcessManagerShould {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        final CommandStore commandStore =
+                spy(new CommandStore(storageFactory.createCommandStorage()));
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
@@ -132,8 +133,8 @@ public class ProcessManagerShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<Event> events = processManager.dispatchCommand(command,
-                                                                  commandFactory.createCommandContext());
+        final List<Event> events =
+                processManager.dispatchCommand(command, commandFactory.createCommandContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -184,9 +185,11 @@ public class ProcessManagerShould {
 
     @SuppressWarnings("unchecked")
     private void verifyPostedCmd(Command cmd) {
-        // The produced command was posted to CommandBus once, and the same command is in the generated event.
+        // The produced command was posted to CommandBus once, and the same command is
+        // in the generated event.
         // We are not interested in observer instance here.
-        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
+        verify(commandBus, times(1))
+                .post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -203,7 +206,8 @@ public class ProcessManagerShould {
 
     @Test
     public void return_handled_event_classes() {
-        final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(TestProcessManager.class);
+        final Set<Class<? extends Message>> classes =
+                ProcessManager.getEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
         assertTrue(classes.contains(ProjectCreated.class));
         assertTrue(classes.contains(TaskAdded.class));

@@ -119,8 +119,8 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      */
     @SuppressWarnings("unchecked") // See Javadoc above
     @Override
-    protected List<Event> dispatchCommand(Message command, CommandContext context) {
-        final List<? extends Message> messages = super.dispatchCommand(command, context);
+    protected List<Event> dispatchCommand(Message commandMessage, CommandContext context) {
+        final List<? extends Message> messages = super.dispatchCommand(commandMessage, context);
         return (List<Event>)messages;
     }
 
@@ -151,7 +151,7 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @param pmClass the process manager class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(
+    public static ImmutableSet<Class<? extends Message>> getEventClasses(
             Class<? extends ProcessManager> pmClass) {
         return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
     }
