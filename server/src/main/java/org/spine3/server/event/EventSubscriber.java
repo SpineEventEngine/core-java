@@ -28,9 +28,11 @@ import org.spine3.server.reflect.MethodRegistry;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
+ * The abstract base for objects that can be subscribed to receive
+ * events from {@link EventBus}.
  *
- * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
+ * <p>Objects may also receive events via {@link EventDispatcher}s that can be
+ * registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
  * @see EventBus#subscribe(EventSubscriber)
@@ -38,14 +40,17 @@ import java.lang.reflect.InvocationTargetException;
  */
 public abstract class EventSubscriber {
 
-    public void handle(Message eventMessage, EventContext context) throws InvocationTargetException {
+    public void handle(Message eventMessage, EventContext context)
+            throws InvocationTargetException {
         final EventSubscriberMethod method = getSubscriberMethod(eventMessage.getClass());
         method.invoke(this, eventMessage, context);
     }
 
     private EventSubscriberMethod getSubscriberMethod(Class<? extends Message> eventClass) {
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventSubscriberMethod method = registry.get(getClass(), eventClass, EventSubscriberMethod.factory());
+        final EventSubscriberMethod method = registry.get(getClass(),
+                                                          eventClass,
+                                                          EventSubscriberMethod.factory());
         return method;
     }
 }

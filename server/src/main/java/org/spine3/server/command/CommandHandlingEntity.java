@@ -60,20 +60,24 @@ import static org.spine3.util.Exceptions.wrappedCause;
  *
  * <p>A command handling method is a {@code public} method that accepts two parameters.
  * The first parameter is a command message of an <strong>exact</strong> type
- * derived from {@code Message}
- * The second (optional) parameter is {@link CommandContext}.
+ * derived from {@code Message}.
+ *
+ * <p>The second (optional) parameter is {@link CommandContext}.
  *
  * <p>The method returns an event message of the specific type, or {@code List} of messages
  * if it produces more than one event.
  *
- * <p>The method may throw one or more throwables derived from
+ * <p>The method may throw one or more {@code Throwable}s derived from
  * {@link org.spine3.base.FailureThrowable FailureThrowable}.
- * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a {@linkplain org.spine3.base.FailureThrowable#getFailureMessage() business failure}.
+ * When it does, it it indicates that the passed command cannot be handled
+ * because of certain conditions of the business model. The reason for the failure
+ * should be specified in a {@linkplain org.spine3.base.FailureThrowable#getFailure()
+ * failure message} instance.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message> extends AbstractVersionableEntity<I, S> {
+public abstract class CommandHandlingEntity<I, S extends Message>
+        extends AbstractVersionableEntity<I, S> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
