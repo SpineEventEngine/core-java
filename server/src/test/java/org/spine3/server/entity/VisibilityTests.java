@@ -24,9 +24,6 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.Identifiers;
-import org.spine3.client.CommandFactory;
-import org.spine3.protobuf.Values;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
 import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
 import org.spine3.test.TestCommandFactory;
@@ -68,7 +65,7 @@ public class VisibilityTests {
                                                  .nextLong());
         final TestCommandFactory factory =
                 TestCommandFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
-        modificationCommand = factory.create(newStringValue("Entity modification command" ));
+        modificationCommand = factory.create(newStringValue("Entity modification command"));
     }
 
     @Test
