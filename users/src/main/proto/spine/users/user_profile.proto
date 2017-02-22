@@ -46,7 +46,8 @@ message UserProfile {
     // The user's display name, if available.
     string display_name = 1;
 
-    // The email address corresponding to the user's account in the specified provider, if available.
+    // The email address corresponding to the user's account in the specified provider,
+    // if available.
     net.EmailAddress email = 2;
 
     // The URL to the user's profile picture, if available.

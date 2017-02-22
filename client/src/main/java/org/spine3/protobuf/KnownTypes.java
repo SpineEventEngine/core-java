@@ -46,7 +46,6 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.ListValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.Method;
 import com.google.protobuf.Mixin;
 import com.google.protobuf.NullValue;
@@ -135,7 +134,7 @@ public class KnownTypes {
 
     /**
      * Retrieves a Java class name generated for the Protobuf type by its type url
-     * to be used to parse {@link Message} from {@link Any}.
+     * to be used to parse {@link com.google.protobuf.Message Message} from {@link Any}.
      *
      * @param typeUrl {@link Any} type url
      * @return Java class name
@@ -160,7 +159,8 @@ public class KnownTypes {
         final TypeUrl result = knownTypes.inverse()
                                          .get(className);
         if (result == null) {
-            throw new IllegalStateException("No Protobuf type URL found for the Java class " + className);
+            throw new IllegalStateException("No Protobuf type URL found for the Java class " +
+                                            className);
         }
         return result;
     }
@@ -180,7 +180,8 @@ public class KnownTypes {
      */
     public static Set<TypeUrl> getTypesFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
-        final Collection<TypeUrl> resultCollection = Collections2.filter(knownTypeUrls, new Predicate<TypeUrl>() {
+        final Collection<TypeUrl> resultCollection = Collections2.filter(
+                knownTypeUrls, new Predicate<TypeUrl>() {
             @Override
             public boolean apply(@Nullable TypeUrl input) {
                 if (input == null) {
@@ -222,7 +223,8 @@ public class KnownTypes {
             final java.lang.reflect.Method descriptorGetter = clazz.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
             descriptor = (Descriptors.Descriptor) descriptorGetter.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Type " + typeName + " is not a protobuf Message", e);
+            throw new IllegalArgumentException("Type " + typeName +
+                                               " is not a protobuf Message", e);
         }
         return descriptor;
     }
@@ -383,8 +385,10 @@ public class KnownTypes {
         private void put(TypeUrl typeUrl, ClassName className) {
             if (resultMap.containsKey(typeUrl)) {
                 log().warn("Duplicate key in the {} map: {}. " +
-                                   "It may be caused by the `task.descriptorSetOptions.includeImports` option " +
-                                   "set to `true` in the `build.gradle`.", KnownTypes.class.getName(), typeUrl);
+                           "It may be caused by the " +
+                           "`task.descriptorSetOptions.includeImports` option " +
+                           "set to `true` in the `build.gradle`.", KnownTypes.class.getName(),
+                           typeUrl);
                 return;
             }
             resultMap.put(typeUrl, className);

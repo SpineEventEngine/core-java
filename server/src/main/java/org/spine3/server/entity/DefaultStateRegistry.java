@@ -20,13 +20,13 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.collect.MapMaker;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static java.lang.String.format;
 
 /**
  * A wrapper for the map from entity classes to entity default states.
@@ -36,9 +36,13 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 class DefaultStateRegistry {
 
     /**
-     * NOTE: The implementation is not customized with {@link MapMaker#makeMap()} options,
-     * as it is difficult to predict which work best within the real end-user application scenarios.
-     **/
+     * The map from class of entity to its default state.
+     *
+     * <p>NOTE: The implementation is not customized with
+     * {@link com.google.common.collect.MapMaker#makeMap() makeMap()} options,
+     * as it is difficult to predict which work best within the real
+     * end-user application scenarios.
+     */
     private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
 
     /**
@@ -62,7 +66,8 @@ class DefaultStateRegistry {
      */
     void put(Class<? extends Entity> entityClass, Message state) {
         if (contains(entityClass)) {
-            throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
+            final String msg = format("This class is registered already: %s", entityClass);
+            throw new IllegalArgumentException(msg);
         }
         defaultStates.put(entityClass, state);
     }

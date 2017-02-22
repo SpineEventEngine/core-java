@@ -19,13 +19,12 @@
  */
 package org.spine3.server.error;
 
-import org.spine3.base.Identifiers;
-
 import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
- * This exception is thrown if the corresponding Protobuf command/event message definition does not have
- * an entity ID field whose name ends with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ * This exception is thrown if the corresponding Protobuf command/event message definition
+ * does not have an entity ID field whose name ends with
+ * the {@link org.spine3.base.Identifiers#ID_PROPERTY_SUFFIX Identifiers.ID_PROPERTY_SUFFIX}.
  *
  * @author Alexander Litus
  */
@@ -37,10 +36,14 @@ public class MissingEntityIdException extends RuntimeException {
         super(createMessage(messageClassName, propertyName, fieldIndex));
     }
 
-    private static String createMessage(String messageClassName, String propertyName, int fieldIndex) {
-        final String message = "The property with the index '" + fieldIndex + "' of the entity message " + messageClassName +
-                " must define an entity ID with the name ending with '" + ID_PROPERTY_SUFFIX +
-                "'. Found property with the name: " + propertyName;
+    private static String createMessage(String messageClassName,
+                                        String propertyName,
+                                        int fieldIndex) {
+        final String message = "The property with the index '" + fieldIndex +
+                               "' of the entity message " + messageClassName +
+                               " must define an entity ID with the name ending with '" +
+                               ID_PROPERTY_SUFFIX +
+                               "'. Found property with the name: " + propertyName;
         return message;
     }
 }

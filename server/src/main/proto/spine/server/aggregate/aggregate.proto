@@ -23,9 +23,8 @@ package spine.server.aggregate;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.aggregate.storage";
-    // Put Java classes into sub-package so that we can annotate the whole package with @SPI via `package-info.java`.
-option java_outer_classname = "AggregateStorageProto";
+option java_package = "org.spine3.server.aggregate";
+option java_outer_classname = "AggregateProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
@@ -34,73 +33,60 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
 import "spine/base/event.proto";
+import "spine/base/version.proto";
 
-// Built-in event type for storing aggregate snapshots.
+// The message for storing an aggregate snapshot.
 message Snapshot {
-    option (SPI_type) = true;
 
     // The state of the aggregate.
     google.protobuf.Any state = 1;
 
-    // Time when the stored state of the aggregate was modified.
-    //
-    // This value is copied to the aggregated when the snapshot is restored.
-    google.protobuf.Timestamp when_modified = 2;
-
-    // The version of the aggregate at which the snapshot was made.
-    int32 version = 3;
+    // The version of the aggregate.
+    spine.base.Version version = 2;
 
     // The moment the snapshot was created.
     //
-    // This value should normally be after the time the aggregate was modified (and timestamp of the
-    // corresponding event), and before the time of the next event in the aggregate history.
-    google.protobuf.Timestamp timestamp = 4;
+    // This value should normally be after the time the aggregate was modified
+    // (and timestamp of the corresponding event), and before the time of
+    // the next event in the aggregate history.
+    //
+    // This field is used when storing a snapshot in `AggregateEventRecord`.
+    //
+    google.protobuf.Timestamp timestamp = 3;
 }
 
-// A record in the storage of events and snapshots of an aggregate type.
-//
-// Different types of aggregates are managed by different storages.
-//
-message AggregateStorageRecord {
-    option (SPI_type) = true;
+// A record with information about an event or a snapshot of an aggregate.
+message AggregateEventRecord {
 
     // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
-    // A short Protobuf type name of the event.
-    string event_type = 2;
-
-    // String representation of `EventId`.
-    string event_id = 3;
-
-    // The version of the aggregate after the event was applied.
-    int32 version = 4;
-
-    reserved 5 to 19;
-
     oneof kind {
-        // Event stored in the record, or...
-        base.Event event = 20;
+        // An event stored in the record.
+        base.Event event = 2;
 
-        // Snapshot of the aggregate.
-        server.aggregate.Snapshot snapshot = 21;
+        // A snapshot of the aggregate.
+        server.aggregate.Snapshot snapshot = 3;
     }
 }
 
-// Event data for an aggregate returned by a storage managing the aggregate.
-message AggregateEvents {
-    option (SPI_type) = true;
+// The message for restoring an aggregate state.
+message AggregateStateRecord {
 
-    // If the `snapshot` field is populated, it contains the last snapshot in the history
-    // of the aggregate.
+    // If the `snapshot` field is populated, it contains the last snapshot in
+    // the history of the aggregate.
+    //
     // This value will be used for restoring the aggregate state before playing
     // events that occurred after this snapshot was made.
+    //
     server.aggregate.Snapshot snapshot = 1;
 
     // Events of the aggregate.
     //
-    // If `snapshot` field is populated, events represent the 'tail' of the event history of the aggregate.
+    // If `snapshot` field is populated, events represent the 'tail' of
+    // the event history of the aggregate.
     // Otherwise, events are full history of the aggregate.
+    //
     repeated base.Event event = 2;
 }
 

@@ -22,8 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
-import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +33,11 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.Values;
-import org.spine3.server.command.storage.CommandStorageRecord;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
-import org.spine3.test.command.ProjectId;
 
 import java.util.Iterator;
 import java.util.List;
@@ -56,12 +53,10 @@ import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.TypeUrl.ofEnclosed;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -70,7 +65,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class CommandStorageShould
-        extends AbstractStorageShould<CommandId, CommandStorageRecord, CommandStorage> {
+        extends AbstractStorageShould<CommandId, CommandRecord, CommandStorage> {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
@@ -78,7 +73,7 @@ public abstract class CommandStorageShould
     private CommandStorage storage;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private CommandStorageRecord record;
+    private CommandRecord record;
 
     private CommandId id;
 
@@ -93,19 +88,18 @@ public abstract class CommandStorageShould
     }
 
     @Override
-    protected CommandStorageRecord newStorageRecord() {
-        final Any command = AnyPacker.pack(Given.Command.createProject());
-        final String commandType = ofEnclosed(command).getTypeName();
-        final CommandContext context = createCommandContext();
-        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setTimestamp(getCurrentTime())
-                .setCommandType(commandType)
-                .setCommandId(idToString(context.getCommandId()))
-                .setStatus(RECEIVED)
-                .setTargetId(newUuid())
-                .setTargetIdType(String.class.getName())
-                .setMessage(command)
-                .setContext(context);
+    protected CommandRecord newStorageRecord() {
+        final Command command = createProject();
+        final String commandType = TypeName.ofCommand(command);
+
+        final CommandRecord.Builder builder =
+                CommandRecord.newBuilder()
+                             .setCommandType(commandType)
+                             .setCommandId(command.getContext().getCommandId())
+                             .setCommand(command)
+                             .setTimestamp(getCurrentTime())
+                             .setStatus(ProcessingStatus.newBuilder()
+                                                        .setCode(RECEIVED));
         return builder.build();
     }
 
@@ -121,11 +115,11 @@ public abstract class CommandStorageShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_and_read_command() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
 
         storage.store(command);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, RECEIVED);
     }
@@ -133,56 +127,56 @@ public abstract class CommandStorageShould
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_error() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
         final Error error = newError();
 
         storage.store(command, error);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, ERROR);
-        assertEquals(error, record.getError());
+        assertEquals(error, record.getStatus()
+                                  .getError());
     }
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.createCommand(Given.CommandMessage.createProject(),
+        final Command command = Commands.createCommand(Given.CommandMessage.createProjectMessage(),
                                                        CommandContext.getDefaultInstance());
         final Error error = newError();
 
         storage.store(command, error);
-        final List<CommandStorageRecord> records = Lists.newArrayList(storage.read(ERROR));
+        final List<CommandRecord> records = Lists.newArrayList(storage.read(ERROR));
 
         assertEquals(1, records.size());
-        assertFalse(records.get(0)
-                           .getCommandId()
-                           .trim()
-                           .isEmpty());
+        final String commandIdStr = idToString(records.get(0)
+                                                      .getCommandId());
+        assertFalse(commandIdStr.isEmpty());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_status() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandId commandId = getId(command);
         final CommandStatus status = SCHEDULED;
 
         storage.store(command, status);
-        final CommandStorageRecord record = storage.read(commandId).get();
+        final CommandRecord record = storage.read(commandId).get();
 
         checkRecord(record, command, status);
     }
 
     @Test
     public void load_commands_by_status() {
-        final List<Command> commands = ImmutableList.of(Given.Command.createProject(),
+        final List<Command> commands = ImmutableList.of(createProject(),
                                                         Given.Command.addTask(),
                                                         Given.Command.startProject());
         final CommandStatus status = SCHEDULED;
 
         store(commands, status);
         // store an extra command with another status
-        storage.store(Given.Command.createProject(), ERROR);
+        storage.store(createProject(), ERROR);
 
         final Iterator<Command> iterator = storage.iterator(status);
         final List<Command> actualCommands = newArrayList(iterator);
@@ -203,8 +197,9 @@ public abstract class CommandStorageShould
 
         storage.setOkStatus(id);
 
-        final CommandStorageRecord actual = storage.read(id).get();
-        assertEquals(OK, actual.getStatus());
+        final CommandRecord actual = storage.read(id).get();
+        assertEquals(OK, actual.getStatus()
+                               .getCode());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
@@ -215,9 +210,9 @@ public abstract class CommandStorageShould
 
         storage.updateStatus(id, error);
 
-        final CommandStorageRecord actual = storage.read(id).get();
-        assertEquals(ERROR, actual.getStatus());
-        assertEquals(error, actual.getError());
+        final CommandRecord actual = storage.read(id).get();
+        assertEquals(ERROR, actual.getStatus().getCode());
+        assertEquals(error, actual.getStatus().getError());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we update status.
@@ -228,9 +223,11 @@ public abstract class CommandStorageShould
 
         storage.updateStatus(id, failure);
 
-        final CommandStorageRecord actual = storage.read(id).get();
-        assertEquals(FAILURE, actual.getStatus());
-        assertEquals(failure, actual.getFailure());
+        final CommandRecord actual = storage.read(id).get();
+        assertEquals(FAILURE, actual.getStatus()
+                                    .getCode());
+        assertEquals(failure, actual.getStatus()
+                                    .getFailure());
     }
 
     /*
@@ -239,22 +236,12 @@ public abstract class CommandStorageShould
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = Given.Command.createProject();
+        final Command command = createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, status).build();
+        final CommandRecord record = CommandStorage.newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
-    }
-
-    @Test
-    public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
-        final StringValue message = StringValue.getDefaultInstance();
-        final Command command = Commands.createCommand(message, CommandContext.getDefaultInstance());
-        final CommandStorageRecord record = CommandStorage.newRecordBuilder(command, RECEIVED).build();
-
-        assertEquals("", record.getTargetId());
-        assertEquals("", record.getTargetIdType());
     }
 
     /*
@@ -288,19 +275,19 @@ public abstract class CommandStorageShould
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject());
+        storage.store(createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject(), newError());
+        storage.store(createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
         close(storage);
-        storage.store(Given.Command.createProject(), OK);
+        storage.store(createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -339,7 +326,7 @@ public abstract class CommandStorageShould
 
     private void givenNewRecord() {
         record = newStorageRecord();
-        id = record.getContext().getCommandId();
+        id = record.getCommandId();
         storage.write(id, record);
     }
 
@@ -360,30 +347,39 @@ public abstract class CommandStorageShould
                       .build();
     }
 
-    private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {
+    private static void checkRecord(CommandRecord record,
+                                    Command cmd,
+                                    CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
         final CreateProject message = unpack(cmd.getMessage());
-        assertEquals(cmd.getMessage(), record.getMessage());
-        assertTrue(record.getTimestamp().getSeconds() > 0);
-        assertEquals(message.getClass().getSimpleName(), record.getCommandType());
-        assertEquals(idToString(commandId), record.getCommandId());
-        assertEquals(statusExpected, record.getStatus());
-        assertEquals(ProjectId.class.getName(), record.getTargetIdType());
-        assertEquals(message.getProjectId().getId(), record.getTargetId());
-        assertEquals(context, record.getContext());
+        assertEquals(cmd.getMessage(), record.getCommand()
+                                             .getMessage());
+        assertTrue(record.getTimestamp()
+                         .getSeconds() > 0);
+        assertEquals(message.getClass()
+                            .getSimpleName(), record.getCommandType());
+        assertEquals(commandId, record.getCommandId());
+        assertEquals(statusExpected, record.getStatus()
+                                           .getCode());
+        assertEquals(context, record.getCommand()
+                                    .getContext());
         switch (statusExpected) {
             case RECEIVED:
             case OK:
             case SCHEDULED:
-                assertTrue(isDefault(record.getError()));
-                assertTrue(isDefault(record.getFailure()));
+                assertTrue(isDefault(record.getStatus()
+                                           .getError()));
+                assertTrue(isDefault(record.getStatus()
+                                           .getFailure()));
                 break;
             case ERROR:
-                assertTrue(isNotDefault(record.getError()));
+                assertTrue(isNotDefault(record.getStatus()
+                                              .getError()));
                 break;
             case FAILURE:
-                assertTrue(isNotDefault(record.getFailure()));
+                assertTrue(isNotDefault(record.getStatus()
+                                              .getFailure()));
                 break;
             case UNDEFINED:
             case UNRECOGNIZED:

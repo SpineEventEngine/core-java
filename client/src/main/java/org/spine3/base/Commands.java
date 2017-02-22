@@ -28,10 +28,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
-import org.spine3.protobuf.TypeName;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -44,12 +42,10 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
-import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkPositive;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -85,19 +81,23 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link CommandFactory#create(Message)},
+     * Commands in client applications should be created by
+     * {@link org.spine3.client.CommandFactory#create(Message) CommandFactory.create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
      * @param userId     the actor id
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
+     * @see org.spine3.client.CommandFactory#create(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
                                                UserId userId,
                                                ZoneOffset zoneOffset) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -156,6 +156,7 @@ public class Commands {
      * @return an unpacked message
      */
     public static <M extends Message> M getMessage(Command command) {
+        checkNotNull(command);
         final M result = AnyPacker.unpack(command.getMessage());
         return result;
     }
@@ -164,6 +165,7 @@ public class Commands {
      * Extracts a command ID from the passed {@code Command} instance.
      */
     public static CommandId getId(Command command) {
+        checkNotNull(command);
         final CommandId id = command.getContext()
                                     .getCommandId();
         return id;
@@ -173,12 +175,13 @@ public class Commands {
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
     public static Predicate<Command> wereAfter(final Timestamp from) {
+        checkNotNull(from);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isLaterThan(timestamp, from);
+                return Timestamps2.isLaterThan(timestamp, from);
             }
         };
     }
@@ -187,17 +190,20 @@ public class Commands {
      * Creates a predicate for filtering commands created withing given timerange.
      */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+        checkNotNull(from);
+        checkNotNull(to);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isBetween(timestamp, from, to);
+                return Timestamps2.isBetween(timestamp, from, to);
             }
         };
     }
 
     private static Timestamp getTimestamp(Command request) {
+        checkNotNull(request);
         final Timestamp result = request.getContext()
                                         .getTimestamp();
         return result;
@@ -209,51 +215,15 @@ public class Commands {
      * @param commands the command list to sort
      */
     public static void sort(List<Command> commands) {
+        checkNotNull(commands);
         Collections.sort(commands, new Comparator<Command>() {
             @Override
             public int compare(Command o1, Command o2) {
                 final Timestamp timestamp1 = getTimestamp(o1);
                 final Timestamp timestamp2 = getTimestamp(o2);
-                return Timestamps.compare(timestamp1, timestamp2);
+                return Timestamps2.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Creates a formatted string with type and ID of the passed command.
-     *
-     * <p>The {@code format} string must have two {@code %s} format specifiers.
-     * The first specifier is for command type name. The second is for command ID.
-     *
-     * @param format  the format string with two parameters
-     * @param command the command to log
-     * @return formatted string
-     */
-    public static String formatCommandTypeAndId(String format, Command command) {
-        final CommandId commandId = getId(command);
-        final Message commandMessage = getMessage(command);
-        final String msg = formatMessageTypeAndId(format, commandMessage, commandId);
-        return msg;
-    }
-
-    /**
-     * Creates a formatted string with type of the command message and command ID.
-     *
-     * <p>The {@code format} string must have two {@code %s} format specifiers.
-     * The first specifier is for message type name. The second is for command ID.
-     *
-     * @param format    the format string
-     * @param commandId the ID of the command
-     * @return formatted string
-     */
-    public static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
-        checkNotNull(format);
-        checkNotEmptyOrBlank(format, "format string");
-
-        final String cmdType = TypeName.of(commandMessage);
-        final String id = idToString(commandId);
-        final String result = String.format(format, cmdType, id);
-        return result;
     }
 
     /**
@@ -263,6 +233,8 @@ public class Commands {
      * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
+        checkNotNull(file);
+
         final String fqn = file.getName();
         final int startIndexOfFileName = fqn.lastIndexOf(FILE_PATH_SEPARATOR) + 1;
         final int endIndexOfFileName = fqn.lastIndexOf(FILE_EXTENSION_SEPARATOR);
@@ -278,11 +250,13 @@ public class Commands {
      * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
+        checkNotNull(command);
         final Schedule schedule = command.getContext()
                                          .getSchedule();
         final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
-            checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
+            checkArgument(delay.getSeconds() > 0,
+                          "Command delay seconds must be a positive value.");
             return true;
         }
         return false;
@@ -297,6 +271,9 @@ public class Commands {
      */
     @Internal
     public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
+        checkNotNull(command);
+        checkNotNull(schedulingTime);
+
         final Duration delay = command.getContext()
                                       .getSchedule()
                                       .getDelay();
@@ -314,7 +291,10 @@ public class Commands {
      */
     @Internal
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
-        checkPositive(schedulingTime, "command scheduling time");
+        checkNotNull(command);
+        checkNotNull(delay);
+        checkValid(schedulingTime);
+
         final CommandContext context = command.getContext();
         final Schedule scheduleUpdated = context.getSchedule()
                                                 .toBuilder()

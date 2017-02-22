@@ -46,6 +46,7 @@ import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
+import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.Task;
@@ -55,6 +56,7 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
+import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
@@ -74,11 +76,12 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerRepositoryShould
-        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
+                                            ProjectId,
+                                            Project> {
 
-    private static final ProjectId ID = Given.AggregateId.newProjectId();
+    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
     private static final CommandContext CMD_CONTEXT = createCommandContext();
 
@@ -109,7 +112,10 @@ public class ProcessManagerRepositoryShould
         final ProjectId id = ProjectId.newBuilder()
                                       .setId("123-id")
                                       .build();
-        return new TestProcessManager(id);
+        final TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
+                                    .withId(id)
+                                    .build();
+        return result;
     }
 
     @Override
@@ -137,7 +143,7 @@ public class ProcessManagerRepositoryShould
                           }
 
                           @Override
-                          public void dispatch(Command request) throws Exception {
+                          public void dispatch(Command request) {
                               // Simply swallow the command. We need this dispatcher for allowing Process Manager
                               // under test to route the AddTask command.
                           }
@@ -158,14 +164,14 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_event_and_load_manager() {
-        testDispatchEvent(Given.EventMessage.projectCreated(ID));
+        testDispatchEvent(projectCreated());
     }
 
     @Test
     public void dispatch_several_events() {
-        testDispatchEvent(Given.EventMessage.projectCreated(ID));
-        testDispatchEvent(Given.EventMessage.taskAdded(ID));
-        testDispatchEvent(Given.EventMessage.projectStarted(ID));
+        testDispatchEvent(projectCreated());
+        testDispatchEvent(taskAdded());
+        testDispatchEvent(projectStarted());
     }
 
     private void testDispatchEvent(Message eventMessage) {
@@ -176,14 +182,14 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(addTask());
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException {
-        testDispatchCommand(Given.CommandMessage.createProject(ID));
-        testDispatchCommand(Given.CommandMessage.addTask(ID));
-        testDispatchCommand(Given.CommandMessage.startProject(ID));
+        testDispatchCommand(createProject());
+        testDispatchCommand(addTask());
+        testDispatchCommand(startProject());
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
@@ -194,7 +200,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_and_post_events() throws InvocationTargetException {
-        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(addTask());
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -237,6 +243,42 @@ public class ProcessManagerRepositoryShould
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
     }
 
+    private static CreateProject createProject() {
+        return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static StartProject startProject() {
+        return ((StartProject.Builder) Sample.builderForType(StartProject.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static AddTask addTask() {
+        return ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static ProjectStarted projectStarted() {
+        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static ProjectCreated projectCreated() {
+        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+                .setProjectId(ID)
+                .build();
+    }
+
+    private static TaskAdded taskAdded() {
+        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+                .setProjectId(ID)
+                .build();
+    }
+
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
@@ -272,12 +314,6 @@ public class ProcessManagerRepositoryShould
 
         static void clearMessageDeliveryHistory() {
             messagesDelivered.clear();
-        }
-
-        @Override // is overridden to make it accessible from tests
-        @SuppressWarnings("MethodDoesntCallSuperMethod")
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
 
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
@@ -334,7 +370,10 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            return Given.EventMessage.projectCreated(command.getProjectId());
+            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
+            return event;
         }
 
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
@@ -344,7 +383,10 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleTaskAdded(command.getTask());
-            return Given.EventMessage.taskAdded(command.getProjectId());
+            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
+            return event;
         }
 
         @Assign
@@ -352,8 +394,9 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
-
+            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();

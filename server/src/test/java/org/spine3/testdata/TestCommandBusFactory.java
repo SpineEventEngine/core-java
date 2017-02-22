@@ -26,7 +26,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
- * Creates {@link org.spine3.server.command.CommandBus}s for tests.
+ * Creates {@link org.spine3.server.command.CommandBus CommandBus}s for tests.
  *
  * @author Andrey Lavrov
  */

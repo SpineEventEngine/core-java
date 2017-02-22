@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.entity.status.CannotModifyArchivedEntity;
 import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -41,14 +40,14 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class EntityStatusTests {
+public class VisibilityTests {
 
-    private Entity<Long, StringValue> entity;
+    private AbstractVersionableEntity<Long, StringValue> entity;
 
     /**
      * A minimal entity class.
      */
-    private static class MiniEntity extends Entity<Long, StringValue> {
+    private static class MiniEntity extends AbstractVersionableEntity<Long, StringValue> {
         private MiniEntity(Long id) {
             super(id);
         }
@@ -61,7 +60,7 @@ public class EntityStatusTests {
 
     @Test
     public void return_default_status_after_constructor() {
-        assertEquals(EntityStatus.getDefaultInstance(), new MiniEntity(1L).getStatus());
+        assertEquals(Visibility.getDefaultInstance(), new MiniEntity(1L).getVisibility());
     }
 
     @Test
@@ -106,7 +105,7 @@ public class EntityStatusTests {
     @Test
     public void assure_entities_with_different_status_are_not_equal() {
         // Create an entity with the same ID and the same (default) state.
-        final Entity another = new MiniEntity(entity.getId());
+        final AbstractVersionableEntity another = new MiniEntity(entity.getId());
 
         another.setArchived(true);
 
@@ -115,12 +114,12 @@ public class EntityStatusTests {
 
     @Test
     public void assign_status() {
-        final EntityStatus status = EntityStatus.newBuilder()
-                                                .setArchived(true)
-                                                .setDeleted(false)
-                                                .build();
-        entity.setStatus(status);
-        assertEquals(status, entity.getStatus());
+        final Visibility status = Visibility.newBuilder()
+                                            .setArchived(true)
+                                            .setDeleted(false)
+                                            .build();
+        entity.setVisibility(status);
+        assertEquals(status, entity.getVisibility());
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)

@@ -98,18 +98,14 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     /**
      * Dispatches the command to a corresponding process manager.
      *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed command.
+     * <p>If there is no stored process manager with such an ID,
+     * a new process manager is created and stored after it handles the passed command.
      *
      * @param command a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
-     * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws IllegalStateException if no command handler method found for a command
-     * @throws IllegalArgumentException if commands of this type are not handled by the process manager
      */
     @Override
-    public void dispatch(Command command)
-            throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
+    public void dispatch(Command command) {
         final Message commandMessage = getMessage(checkNotNull(command));
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(commandMessage);
@@ -121,7 +117,9 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         postEvents(events);
     }
 
-    /** Posts passed events to {@link EventBus}. */
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
     private void postEvents(Iterable<Event> events) {
         final EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {

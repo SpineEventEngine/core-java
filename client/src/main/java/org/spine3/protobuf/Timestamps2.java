@@ -25,31 +25,25 @@ import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.Internal;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Date;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static com.google.protobuf.util.Timestamps.subtract;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
- * {@link com.google.protobuf.util.Timestamps}.
+ * {@link com.google.protobuf.util.Timestamps Timestamps} class from Protobuf.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Timestamps {
+public class Timestamps2 {
 
     /**
-     * The following constants are taken from {@link com.google.protobuf.util.Timestamps}
+     * The following constants are taken from the
+     * {@link com.google.protobuf.util.Timestamps Timestamps} class
      * in order to make them publicly visible to time management utils:
      * <ul>
-     *   <li>{@link #TIMESTAMP_SECONDS_MIN}
-     *   <li>{@link #TIMESTAMP_SECONDS_MAX}
      *   <li>{@link #NANOS_PER_SECOND}
      *   <li>{@link #NANOS_PER_MILLISECOND}
      *   <li>{@link #NANOS_PER_MICROSECOND}
@@ -58,12 +52,6 @@ public class Timestamps {
      * </ul>
      * Consider removing these constants if they become public in the Protobuf utils API.
      **/
-
-    /** Timestamp for "0001-01-01T00:00:00Z" */
-    public static final long TIMESTAMP_SECONDS_MIN = -62135596800L;
-
-    /** Timestamp for "9999-12-31T23:59:59Z" */
-    public static final long TIMESTAMP_SECONDS_MAX = 253402300799L;
 
     /** The count of nanoseconds in one second. */
     public static final long NANOS_PER_SECOND = 1_000_000_000L;
@@ -100,7 +88,8 @@ public class Timestamps {
         }
     };
 
-    private Timestamps() {
+    private Timestamps2() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -117,7 +106,8 @@ public class Timestamps {
     /**
      * Obtains system time.
      *
-     * <p>Unlike {@link #getCurrentTime()} this method <strong>always</strong> uses system time millis.
+     * <p>Unlike {@link #getCurrentTime()} this method <strong>always</strong> uses
+     * system time millis.
      *
      * @return current system time
      */
@@ -170,28 +160,6 @@ public class Timestamps {
     }
 
     /**
-     * Verifies if the passed {@code Timestamp} instance is valid.
-     *
-     * <p>The {@code seconds} field value must be within the range
-     * {@code (TIMESTAMP_SECONDS_MIN, TIMESTAMP_SECONDS_MAX)}.
-     *
-     * <p>The {@code nanos} field value must be withing the range {@code (0, NANOS_PER_SECOND]}.
-     *
-     * @param value the value to check
-     * @return the passed value
-     * @throws IllegalArgumentException if {@link Timestamp} field values are not valid
-     */
-    public static Timestamp checkTimestamp(Timestamp value) throws IllegalArgumentException {
-        final long seconds = value.getSeconds();
-        checkArgument(seconds > TIMESTAMP_SECONDS_MIN && seconds < TIMESTAMP_SECONDS_MAX,
-                      "Timestamp is out of range.");
-        final int nanos = value.getNanos();
-        checkArgument(nanos >= 0 && nanos <= NANOS_PER_SECOND,
-                      "Timestamp has invalid nanos value.");
-        return value;
-    }
-
-    /**
      * Compares two timestamps. Returns a negative integer, zero, or a positive integer
      * if the first timestamp is less than, equal to, or greater than the second one.
      *
@@ -215,13 +183,14 @@ public class Timestamps {
     }
 
     /**
-     * Calculates if the {@code timestamp} is between the {@code start} and {@code finish} timestamps.
+     * Calculates if the {@code timestamp} is between the {@code start} and
+     * {@code finish} timestamps.
      *
      * @param timestamp the timestamp to check if it is between the {@code start} and {@code finish}
      * @param start     the first point in time, must be before the {@code finish} timestamp
      * @param finish    the second point in time, must be after the {@code start} timestamp
-     * @return true if the {@code timestamp} is after the {@code start} and before the {@code finish} timestamps,
-     * false otherwise
+     * @return {@code true} if the {@code timestamp} is after the {@code start} and before
+     * the {@code finish} timestamps, {@code false} otherwise
      */
     public static boolean isBetween(Timestamp timestamp, Timestamp start, Timestamp finish) {
         final boolean isAfterStart = compare(start, timestamp) < 0;
@@ -234,22 +203,12 @@ public class Timestamps {
      *
      * @param timestamp the timestamp to check if it is later then {@code thanTime}
      * @param thanTime  the first point in time which is supposed to be before the {@code timestamp}
-     * @return true if the {@code timestamp} is later than {@code thanTime} timestamp, false otherwise
+     * @return {@code true} if the {@code timestamp} is later than {@code thanTime} timestamp,
+     * {@code false} otherwise
      */
     public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
         final boolean isAfter = compare(timestamp, thanTime) > 0;
         return isAfter;
-    }
-
-    /**
-     * Compares two timestamps. Returns a negative integer, zero, or a positive integer
-     * if the first timestamp is less than, equal to, or greater than the second one.
-     *
-     * @return a negative integer, zero, or a positive integer
-     * if the first timestamp is less than, equal to, or greater than the second one
-     */
-    public static Comparator<? super Timestamp> comparator() {
-        return new TimestampComparator();
     }
 
     /**
@@ -262,75 +221,5 @@ public class Timestamps {
         final long millisecsFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
-    }
-
-    /**
-     * Retrieves total nanoseconds from {@link Timestamp}.
-     *
-     * @return long value
-     */
-    public static long convertToNanos(TimestampOrBuilder timestamp) {
-        final long nanosFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND * NANOS_PER_MILLISECOND;
-        final long totalNanos = nanosFromSeconds + timestamp.getNanos();
-        return totalNanos;
-    }
-
-    private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
-
-        private static final long serialVersionUID = 0;
-
-        @Override
-        public int compare(Timestamp t1, Timestamp t2) {
-            return Timestamps.compare(t1, t2);
-        }
-    }
-
-    /**
-     * The testing assistance utility, which returns a timestamp of the moment
-     * of the passed number of minutes from now.
-     *
-     * @param value a positive number of minutes
-     * @return a timestamp instance
-     */
-    @VisibleForTesting
-    public static Timestamp minutesAgo(int value) {
-        checkPositive(value);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations.ofMinutes(value));
-        return result;
-    }
-
-    /**
-     * Obtains timestamp in the past a number of seconds ago.
-     *
-     * @param value a positive number of seconds
-     * @return the moment `value` seconds ago
-     */
-    @VisibleForTesting
-    public static Timestamp secondsAgo(long value) {
-        checkPositive(value);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, Durations.ofSeconds(value));
-        return result;
-    }
-
-    private static void checkPositive(long value) {
-        if (value <= 0) {
-            throw new IllegalArgumentException(String.format("value must be positive. Passed: %d", value));
-        }
-    }
-
-    /**
-     * Obtains timestamp in the future a number of seconds from current time.
-     *
-     * @param seconds a positive number of seconds
-     * @return the moment `value` seconds from now
-     */
-    @VisibleForTesting
-    public static Timestamp secondsFromNow(int seconds) {
-        checkPositive(seconds);
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = add(currentTime, Durations.ofSeconds(seconds));
-        return result;
     }
 }

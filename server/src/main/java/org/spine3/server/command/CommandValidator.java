@@ -23,6 +23,7 @@ package org.spine3.server.command;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -35,7 +36,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkValid;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -122,7 +122,7 @@ class CommandValidator {
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
         checkValid(context.getCommandId());
-        checkPositive(context.getTimestamp(), "Command time");
+        Timestamps.checkValid(context.getTimestamp());
         final Message commandMessage = Commands.getMessage(command);
         final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
         if (targetId.isPresent()) { // else - consider the command is not for an entity

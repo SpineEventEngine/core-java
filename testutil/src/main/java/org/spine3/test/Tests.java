@@ -24,14 +24,14 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
-import org.spine3.server.command.CommandBus;
 import org.spine3.users.UserId;
 
 import java.lang.reflect.Constructor;
@@ -48,7 +48,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class Tests {
 
-    private Tests() {}
+    private Tests() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Verifies if the passed class has private parameter-less constructor and invokes it
@@ -97,18 +99,9 @@ public class Tests {
     }
 
     /**
-     * Returns the current time in seconds via {@link Timestamps#getCurrentTime()}.
-     *
-     * @return a seconds value
-     */
-    public static long currentTimeSeconds() {
-        final long secs = Timestamps.getCurrentTime().getSeconds();
-        return secs;
-    }
-
-    /**
      * Returns {@code null}.
-     * Use it when it is needed to pass {@code null} to a method in tests so that no warnings suppression is needed.
+     * Use it when it is needed to pass {@code null} to a method in tests so that no
+     * warnings suppression is needed.
      */
     public static <T> T nullRef() {
         final T nullRef = null;
@@ -163,40 +156,6 @@ public class Tests {
     }
 
     /**
-     * Adjusts a timestamp in the context of the passed command.
-     *
-     * @return new command instance with the modified timestamp
-     */
-    public static Command adjustTimestamp(Command command, Timestamp timestamp) {
-        final Command.Builder commandBuilder =
-                command.toBuilder()
-                       .setContext(command.getContext()
-                                          .toBuilder()
-                                          .setTimestamp(timestamp));
-        return commandBuilder.build();
-    }
-
-    /**
-     * The provider of current time, which is always the same.
-     *
-     * <p>Use this {@code Timestamps.Provider} in time-related tests that are sensitive to
-     * bounds of minutes, hours, days, etc.
-     */
-    public static class FrozenMadHatterParty implements Timestamps.Provider {
-        private final Timestamp frozenTime;
-
-        public FrozenMadHatterParty(Timestamp frozenTime) {
-            this.frozenTime = frozenTime;
-        }
-
-        /** Returns the value passed to the constructor. */
-        @Override
-        public Timestamp getCurrentTime() {
-            return frozenTime;
-        }
-    }
-
-    /**
      * The {@code StreamObserver} which does nothing.
      * @see #emptyObserver()
      */
@@ -220,10 +179,19 @@ public class Tests {
     /**
      * Returns {@code StringObserver} that does nothing.
      *
-     * <p>Use this method when you need to call {@link CommandBus#post(Command, StreamObserver)}
-     * and observing results is not needed.
+     * <p>Use this method when you need to call
+     * {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)
+     *  CommandBus.post()} and observing results is not needed.
      */
     public static StreamObserver<Response> emptyObserver() {
         return emptyObserver;
     }
+
+    /**
+     * Factory method for creating versions from tests.
+     */
+    public static Version newVersionWithNumber(int number) {
+        return Versions.newVersion(number, Timestamps2.getCurrentTime());
+    }
+
 }

@@ -96,7 +96,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
             }
 
             @Override
-            public void dispatch(Command request) throws Exception {
+            public void dispatch(Command request) {
                 // Do nothing.
             }
         });

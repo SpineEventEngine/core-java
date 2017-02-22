@@ -23,13 +23,8 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.Errors;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandStatusService;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
@@ -41,16 +36,17 @@ import static org.spine3.base.Commands.getMessage;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
     private final AggregateRepository<I, A> repository;
-    private final CommandStatusService commandStatusService;
 
-    CommandEndpoint(AggregateRepository<I, A> repository) {
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
         this.repository = repository;
-        final BoundedContext boundedContext = repository.getBoundedContext();
-        this.commandStatusService = boundedContext.getCommandBus()
-                                                  .getCommandStatusService();
+    }
+
+    static <I, A extends Aggregate<I, ?, ?>> AggregateCommandEndpoint<I, A> createFor(
+            AggregateRepository<I, A> repository) {
+        return new AggregateCommandEndpoint<>(repository);
     }
 
     /**
@@ -72,20 +68,16 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
      */
     private static class Action<I, A extends Aggregate<I, ?, ?>> {
 
-        private final CommandEndpoint<I, A> commandEndpoint;
         private final AggregateRepository<I, A> repository;
-        private final CommandId commandId;
         private final Message commandMessage;
         private final CommandContext context;
         private final I aggregateId;
 
-        private Action(CommandEndpoint<I, A> commandEndpoint, Command command) {
-            this.commandEndpoint = commandEndpoint;
+        private Action(AggregateCommandEndpoint<I, A> commandEndpoint, Command command) {
             this.repository = commandEndpoint.repository;
 
             this.commandMessage = getMessage(checkNotNull(command));
             this.context = command.getContext();
-            this.commandId = context.getCommandId();
             this.aggregateId = commandEndpoint.getAggregateId(commandMessage, context);
         }
 
@@ -127,18 +119,16 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final EntityStatus statusBefore = aggregate.getStatus();
-            EntityStatus statusAfter = null;
-            try {
-                aggregate.dispatchCommand(commandMessage, context);
-                statusAfter = aggregate.getStatus();
-            } catch (RuntimeException e) {
-                commandEndpoint.updateCommandStatus(commandId, e);
-            } finally {
-                if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                    storage().writeStatus(aggregateId, statusAfter);
-                }
+            final Visibility statusBefore = aggregate.getVisibility();
+
+            aggregate.dispatchCommand(commandMessage, context);
+
+            // Update status only if the command was handled successfully.
+            final Visibility statusAfter = aggregate.getVisibility();
+            if (statusAfter != null && !statusBefore.equals(statusAfter)) {
+                storage().writeVisibility(aggregateId, statusAfter);
             }
+
             return aggregate;
         }
 
@@ -163,19 +153,5 @@ class CommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
 
     private I getAggregateId(Message commandMessage, CommandContext commandContext) {
         return repository.getAggregateId(commandMessage, commandContext);
-    }
-
-    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case of handing an exception.
-    private void updateCommandStatus(CommandId commandId, RuntimeException e) {
-        final Throwable cause = e.getCause();
-        if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
-            commandStatusService.setToError(commandId, exception);
-        } else if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-            commandStatusService.setToFailure(commandId, failure);
-        } else {
-            commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-        }
     }
 }

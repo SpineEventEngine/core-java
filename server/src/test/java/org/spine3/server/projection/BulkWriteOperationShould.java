@@ -23,9 +23,9 @@ package org.spine3.server.projection;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Durations2;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
+import org.spine3.test.TimeTests;
 import org.spine3.test.projection.Project;
 
 import java.util.HashSet;
@@ -47,7 +47,7 @@ public class BulkWriteOperationShould {
 
     @Test
     public void initialize_with_proper_delay_and_callback() {
-        final Duration duration = Durations.seconds(60);
+        final Duration duration = Durations2.seconds(60);
         final BulkWriteOperation operation = new BulkWriteOperation<>(duration, new EmptyCallback());
         assertNotNull(operation);
     }
@@ -95,9 +95,10 @@ public class BulkWriteOperationShould {
         assertFalse(operation.isInProgress());
     }
 
+    @SuppressWarnings("MagicNumber")
     @Test
     public void complete_on_timeout() throws InterruptedException {
-        final Duration duration = Durations.nanos(1L);
+        final Duration duration = Durations2.nanos(1L);
         final FlushCallback callback = spy(new EmptyCallback());
         @SuppressWarnings("unchecked") // Due to `spy` usage
         final BulkWriteOperation operation = spy(new BulkWriteOperation(duration, callback));
@@ -111,6 +112,7 @@ public class BulkWriteOperationShould {
         verify(callback).onFlushResults(any(Set.class), any(Timestamp.class));
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void store_given_projections_in_memory() {
         final int projectionsCount = 5;
@@ -131,7 +133,7 @@ public class BulkWriteOperationShould {
     @Test
     public void store_given_timestamp_in_memory() {
         final Set<TestProjection> projections = emptySet();
-        final Timestamp whenHandled = Timestamps.secondsAgo(5L);
+        final Timestamp whenHandled = TimeTests.Past.secondsAgo(5L);
         final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
         assertTrue(operation.isInProgress());
 
@@ -144,9 +146,9 @@ public class BulkWriteOperationShould {
     @Test
     public void store_the_very_last_timestamp_only() {
         final Set<TestProjection> projections = emptySet();
-        final Timestamp firstEvent = Timestamps.secondsAgo(5L);
-        final Timestamp secondEvent = Timestamps.secondsAgo(5L);
-        final Timestamp lastEvent = Timestamps.secondsAgo(5L);
+        final Timestamp firstEvent = TimeTests.Past.secondsAgo(5L);
+        final Timestamp secondEvent = TimeTests.Past.secondsAgo(5L);
+        final Timestamp lastEvent = TimeTests.Past.secondsAgo(5L);
 
         final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, lastEvent);
         assertTrue(operation.isInProgress());
@@ -160,7 +162,7 @@ public class BulkWriteOperationShould {
     }
 
     private static BulkWriteOperation<Object, TestProjection> newOperation() {
-        final Duration duration = Durations.seconds(100);
+        final Duration duration = Durations2.seconds(100);
         final BulkWriteOperation<Object, TestProjection> operation
                 = new BulkWriteOperation<>(duration, new EmptyCallback());
         return operation;
@@ -169,7 +171,7 @@ public class BulkWriteOperationShould {
     private static BulkWriteOperation<Object, TestProjection> newOperation(
             Set<TestProjection> projections,
             Timestamp lastHandldEventTime) {
-        final Duration duration = Durations.seconds(100);
+        final Duration duration = Durations2.seconds(100);
         final BulkWriteOperation<Object, TestProjection> operation
                 = new BulkWriteOperation<>(duration, new AssertResults(projections, lastHandldEventTime));
         return operation;

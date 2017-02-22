@@ -35,7 +35,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -121,11 +120,7 @@ public class NullToleranceTest {
         final Iterable<Method> accessibleMethods = getAccessibleMethods(targetClass);
         final String targetClassName = targetClass.getName();
         for (Method method : accessibleMethods) {
-            final Class[] parameterTypes = method.getParameterTypes();
-            final String methodName = method.getName();
-            final boolean excluded = excludedMethods.contains(methodName);
-            final boolean primitivesOnly = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
-            final boolean skipMethod = excluded || parameterTypes.length == 0 || primitivesOnly;
+            final boolean skipMethod = shouldSkipMethod(method);
             if (skipMethod) {
                 continue;
             }
@@ -135,9 +130,21 @@ public class NullToleranceTest {
             if (!passed) {
                 return false;
             }
-
         }
         return true;
+    }
+
+    @SuppressWarnings("OverlyComplexBooleanExpression")
+    private boolean shouldSkipMethod(Method method) {
+        final Class[] parameterTypes = method.getParameterTypes();
+        final String methodName = method.getName();
+        final boolean excluded = excludedMethods.contains(methodName);
+        final boolean primitivesOnly = allPrimitiveTypes().containsAll(Arrays.asList(parameterTypes));
+        final boolean syntheticMethod = method.isSynthetic();
+        return excluded
+                || parameterTypes.length == 0
+                || primitivesOnly
+                || syntheticMethod;
     }
 
     /**
@@ -389,7 +396,11 @@ public class NullToleranceTest {
                 }
             }
 
-            checkState(result != null);
+            checkState(
+                    result != null,
+                    String.format(
+                            "Could not generate a default value for %s type. Please, use addDefaultValue(I)",
+                            type.getCanonicalName()));
             return result;
         }
 
@@ -432,20 +443,20 @@ public class NullToleranceTest {
         }
 
         /**
-         * Obtains the default value for the given {@code Message} {@code type}.
+         * Obtains the default value for the given {@code Message} class.
          *
-         * <p>The default instance of {@code Any} is used {@code type == Message.class}.
+         * <p>The default instance of {@code Any} is used if {@link Message Message.class} is passed.
          *
-         * @param type the type of {@code Message} to obtain a default value for
-         * @return the default instance of the given {@code Message}
+         * @param msgClass the class for which obtain a default value
+         * @return the default instance of the message class or default instance of {@code Any}
          */
-        private static Message getDefaultMessageInstance(Class<? extends Message> type) {
-            if (type.equals(Message.class)) {
+        private static Message getDefaultMessageInstance(Class<? extends Message> msgClass) {
+            if (msgClass.equals(Message.class)) {
                 return Any.getDefaultInstance();
             }
 
             try {
-                final Method method = type.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
+                final Method method = msgClass.getMethod(METHOD_NAME, EMPTY_PARAMETER_TYPES);
                 final Message defaultInstance = (Message) method.invoke(null, EMPTY_ARGUMENTS);
                 return defaultInstance;
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
@@ -512,16 +523,18 @@ public class NullToleranceTest {
          * <ul>
          *     <li>an empty string is used for the {@code String};
          *     <li>an empty array is used for the varargs and array parameters;
-         *     <li>the result of the {@link Collections#emptyList()} call for the types
-         *     derived from {@link List};</li>
-         *     <li>the result of the {@link Collections#emptySet()} call for the types
-         *     derived from {@link Set};</li>
-         *     <li>the result of the {@link Collections#emptyMap()} call for the types
-         *     derived from {@link Map};</li>
-         *     <li>the result of the {@link com.google.common.collect.Queues#newPriorityQueue()} call
-         *     for the types derived from {@link Queue};</li>
-         *     <li>the result of the {@link com.google.common.base.Defaults#defaultValue(Class)} call
-         *     is for the primitives and related wrapper types;</li>
+         *     <li>the result of the {@link java.util.Collections#emptyList() Collections.emptyList()}
+         *     call for the types derived from {@link List};</li>
+         *     <li>the result of the {@link java.util.Collections#emptySet() Collections.emptySet()}
+         *     call for the types derived from {@link Set};</li>
+         *     <li>the result of the {@link java.util.Collections#emptyMap() Collections.emptyMap()}
+         *     call for the types derived from {@link Map};</li>
+         *     <li>the result of the
+         *     {@link com.google.common.collect.Queues#newPriorityQueue() Queues.newPriorityQueue()}
+         *     call for the types derived from {@link Queue};</li>
+         *     <li>the result of the
+         *     {@link com.google.common.base.Defaults#defaultValue(Class) Defaults.defaultValue(Class)}
+         *     call is for the primitives and related wrapper types;</li>
          *     <li>the result of {@code getDefaultInstance} call for the types
          *     derived from {@link Message}.</li>
          * </ul>

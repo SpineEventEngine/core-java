@@ -36,8 +36,8 @@ import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.isLaterThan;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.internal.Time.FUTURE;
 import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
@@ -112,7 +112,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
      * @return {@code true} if the option {@code 'if_invalid'} is set to a non-default value.
      */
     private boolean hasCustomInvalidMessage() {
-        final boolean result = isDefault(ifInvalidOption);
+        final boolean result = !isDefault(ifInvalidOption);
         return result;
     }
 

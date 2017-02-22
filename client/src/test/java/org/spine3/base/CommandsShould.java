@@ -23,6 +23,7 @@ package org.spine3.base;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Duration;
@@ -31,11 +32,14 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.TypeName;
-import org.spine3.test.NullToleranceTest;
+import org.spine3.protobuf.Durations2;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TestCommandFactory;
+import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
+import org.spine3.users.UserId;
 
 import java.util.List;
 
@@ -47,16 +51,17 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Durations2.seconds;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
+
+    private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor().getFile();
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
     private final StringValue stringValue = newStringValue(newUuid());
@@ -82,10 +87,17 @@ public class CommandsShould {
 
     @Test
     public void pass_null_tolerance_test() {
-        NullToleranceTest.newBuilder()
-                         .setClass(Commands.class)
-                         .build()
-                         .check();
+        new NullPointerTester()
+                .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
+                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Duration.class, Durations2.ZERO)
+                .setDefault(Command.class,
+                            commandFactory.create(StringValue.getDefaultInstance(),
+                                                  minutesAgo(1)))
+                .setDefault(CommandContext.class, commandFactory.createCommandContext())
+                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
+                .setDefault(UserId.class, Tests.newUserUuid())
+                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -150,29 +162,6 @@ public class CommandsShould {
     }
 
     @Test
-    public void create_logging_message_for_command_with_type_and_id() {
-        final Command command = commandFactory.create(stringValue);
-        final String typeName = TypeName.ofCommand(command);
-        final String commandId = idToString(getId(command));
-
-        @SuppressWarnings("QuestionableName") // is OK for this test.
-        final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);
-
-        assertTrue(string.contains(typeName));
-        assertTrue(string.contains(commandId));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_create_logging_message_and_format_string_is_empty() {
-        Commands.formatCommandTypeAndId("", commandFactory.create(stringValue));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
-        Commands.formatCommandTypeAndId("  ", commandFactory.create(stringValue));
-    }
-
-    @Test
     public void return_true_if_file_is_for_commands() {
         final FileDescriptor file = TestCommand.getDescriptor().getFile();
 
@@ -213,7 +202,7 @@ public class CommandsShould {
     public void update_schedule_options() {
         final Command cmd = commandFactory.create(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
 
         final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
 

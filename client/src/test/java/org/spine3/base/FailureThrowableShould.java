@@ -22,13 +22,14 @@ package org.spine3.base;
 
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.checkTimestamp;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class FailureThrowableShould {
@@ -40,7 +41,7 @@ public class FailureThrowableShould {
         final FailureThrowable failureThrowable = new TestFailure(failure);
 
         assertEquals(failure, failureThrowable.getFailure());
-        checkTimestamp(failureThrowable.getTimestamp());
+        assertTrue(Timestamps.isValid(failureThrowable.getTimestamp()));
     }
 
     @Test
@@ -51,7 +52,7 @@ public class FailureThrowableShould {
 
         assertEquals(failure, AnyPacker.unpack(failureWrapper.getInstance()));
         assertFalse(failureWrapper.getStacktrace().isEmpty());
-        checkTimestamp(failureWrapper.getTimestamp());
+        assertTrue(Timestamps.isValid(failureWrapper.getTimestamp()));
     }
 
     private static class TestFailure extends FailureThrowable {

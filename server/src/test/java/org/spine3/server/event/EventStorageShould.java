@@ -35,8 +35,8 @@ import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Durations2;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.storage.EventStorageRecord;
 import org.spine3.server.storage.AbstractStorageShould;
@@ -55,9 +55,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.protobuf.Durations.nanos;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Durations2.nanos;
+import static org.spine3.protobuf.Durations2.seconds;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.EventStorage.toEvent;
 import static org.spine3.server.event.EventStorage.toEventList;
 
@@ -203,7 +203,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
                                                             .setEventType(TypeUrl.of(ProjectCreated.class)
                                                                                  .value())
                                                             .setMessage(projectCreatedAny)
-                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .setTimestamp(Timestamps2.getCurrentTime())
                                                             .build();
         // Uses protected method to avoid vast mocking
         storage.writeRecord(record);
@@ -252,7 +252,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final EventStorageRecord record = EventStorageRecord.newBuilder()
                                                             .setMessage(eventAny)
                                                             .setContext(context)
-                                                            .setTimestamp(Timestamps.getCurrentTime())
+                                                            .setTimestamp(Timestamps2.getCurrentTime())
                                                             .setEventId(Identifiers.newUuid())
                                                             .build();
         storage.writeRecord(record);
@@ -549,12 +549,13 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
         // If deltaNanos is negative, subtract its value from seconds.
         if (deltaSeconds > 0 && deltaNanos < 0) {
-            return Durations.subtract(seconds(deltaSeconds), nanos(deltaNanos));
+            return com.google.protobuf.util.Durations.subtract(seconds(deltaSeconds),
+                                                               nanos(deltaNanos));
         }
 
         // If deltaSeconds is negative and nanos are positive, add nanos.
         if (deltaSeconds < 0 && deltaNanos > 0) {
-            return Durations.add(seconds(deltaSeconds), nanos(deltaNanos));
+            return Durations2.add(seconds(deltaSeconds), nanos(deltaNanos));
         }
 
         // The params have the same sign, just create a Duration instance using them.

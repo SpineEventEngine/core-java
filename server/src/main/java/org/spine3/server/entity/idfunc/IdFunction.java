@@ -21,25 +21,23 @@
 package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-import org.spine3.server.entity.Entity;
 
 /**
  * Obtains an entity ID based on an event/command message and context.
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext} or {@link CommandContext} type
- * @see Entity
+ * @param <C> either {@link org.spine3.base.EventContext EventContext} or
+ *          {@link org.spine3.base.CommandContext CommandContext} type
+ * @see org.spine3.server.entity.Entity Entity
  */
 interface IdFunction<I, M extends Message, C extends Message> {
 
     /**
-     * Obtains an entity ID based on the passed event or command message and its context.
+     * Obtains an entity ID based on the passed message and its context.
      *
-     * @param message an event or command message to use to get an ID
-     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @param message a message from which to get the ID
+     * @param context context of the message
      * @return an entity ID
      */
     I apply(M message, C context);

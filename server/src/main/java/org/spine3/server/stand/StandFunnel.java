@@ -20,30 +20,30 @@
 package org.spine3.server.stand;
 
 import org.spine3.Internal;
-import org.spine3.base.Command;
-import org.spine3.base.Event;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.entity.VersionableEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Delivers the latest {@link Entity} states from the entity repositories to the {@link Stand}.
+ * Delivers the latest {@link VersionableEntity} states from
+ * the entity repositories to the {@link Stand}.
  *
- * <p>Note: Unlike {@link EventBus} and {@link CommandBus}, which assume many publishers and many subscribers,
- * the funnel may have zero or more publishers (typically, instances of {@link AggregateRepository} or
- * {@link ProjectionRepository}), but the only subscriber, the instance of {@code Stand}.
+ * <p><strong>Note:</strong> Unlike {@link org.spine3.server.event.EventBus EventBus} and
+ * {@link org.spine3.server.command.CommandBus CommandBus}, which assume many publishers and
+ * many subscribers, the funnel may have zero or more publishers (typically, instances of
+ * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository} or
+ * {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}),
+ * but the only subscriber, the instance of {@code Stand}.
  *
- * <p>In scope of a single {@link BoundedContext} there can be the only instance of {@code StandFunnel}.
+ * <p>In scope of a single {@link org.spine3.server.BoundedContext BoundedContext}
+ * there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
- * @see AggregateRepository#dispatch(Command)
- * @see ProjectionRepository#dispatch(Event)
+ * @see org.spine3.server.aggregate.AggregateRepository#dispatch(org.spine3.base.Command)
+ *      AggregateRepository.dispatch(Command)
+ * @see org.spine3.server.projection.ProjectionRepository#dispatch(org.spine3.base.Event)
+ *      ProjectionRepository.dispatch(Event)
  */
 @Internal
 public class StandFunnel {
@@ -59,11 +59,11 @@ public class StandFunnel {
     }
 
     /**
-     * Post the state of an {@link Entity} to an instance of {@link Stand}.
+     * Post the state of an {@link VersionableEntity} to an instance of {@link Stand}.
      *
      * @param entity the entity which state should be delivered to the {@code Stand}
      */
-    public void post(Entity entity) {
+    public void post(VersionableEntity entity) {
         delivery.deliver(entity);
     }
 
@@ -86,7 +86,8 @@ public class StandFunnel {
         /**
          * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
          *
-         * <p>If not set, a {@link StandUpdateDelivery#directDelivery()} value will be set by the builder.
+         * <p>If not set, a {@link StandUpdateDelivery#directDelivery() directDelivery()}
+         * value will be set by the builder.
          */
         private StandUpdateDelivery delivery;
 
@@ -116,7 +117,8 @@ public class StandFunnel {
          *
          * <p>The value must not be {@code null}.
          *
-         * <p> If this method is not used, a {@link StandUpdateDelivery#directDelivery()} value will be used.
+         * <p> If this method is not used, a
+         * {@link StandUpdateDelivery#directDelivery() directDelivery()} value will be used.
          *
          * @param delivery the instance of {@code StandUpdateDelivery}.
          * @return {@code this} instance of {@code Builder}
@@ -127,7 +129,8 @@ public class StandFunnel {
         }
 
         public StandFunnel build() {
-            checkState(stand != null, "Stand must be defined for the funnel");
+            checkState(stand != null,
+                       "Stand must be defined for the funnel");
 
             if (delivery == null) {
                 delivery = StandUpdateDelivery.directDelivery();

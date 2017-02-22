@@ -29,7 +29,6 @@ import org.spine3.base.Error;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -46,7 +45,8 @@ public abstract class EventException extends RuntimeException {
     /**
      * The event message or the message packed into {@link Any}.
      *
-     * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because it is {@link Serializable}.
+     * <p>We use {@link GeneratedMessageV3} (not {@code Message}) because
+     * it is {@link java.io.Serializable Serializable}.
      */
     private final GeneratedMessageV3 eventMessage;
 
@@ -67,7 +67,8 @@ public abstract class EventException extends RuntimeException {
         if (eventMessage instanceof GeneratedMessageV3) {
             this.eventMessage = (GeneratedMessageV3) eventMessage;
         } else {
-            // In an unlikely case on encountering a message, which is not `GeneratedMessageV3`, wrap it into `Any`.
+            // In an unlikely case on encountering a message, which is not `GeneratedMessageV3`,
+            // wrap it into `Any`.
             this.eventMessage = AnyPacker.pack(eventMessage);
         }
         this.error = error;

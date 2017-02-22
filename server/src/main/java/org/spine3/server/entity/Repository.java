@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Throwables;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -30,7 +32,6 @@ import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -54,9 +55,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
 
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
-
-    /** The constructor for creating entity instances. */
-    private final Constructor<E> entityConstructor;
 
     /** The data storage for this repository. */
     private Storage storage;
@@ -82,15 +80,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     protected Repository(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
-    }
-
-    private Constructor<E> getEntityConstructor() {
-        final Class<E> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        final Constructor<E> result = Entity.getConstructor(entityClass, idClass);
-        return result;
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
@@ -101,7 +90,33 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
+        final Class<I> idClass = Classes.getGenericParameterType(getClass(),
+                                                                 ID_CLASS_GENERIC_INDEX);
+        checkIdClass(idClass);
+
+        return idClass;
+    }
+
+    /**
+     * Checks that this class of identifiers is supported by the framework.
+     *
+     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
+     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
+     * {@code Message}.
+     *
+     * <p>We perform the check to to detect possible programming error
+     * in declarations of entity and repository classes <em>until</em> we have
+     * compile-time model check.
+     *
+     * @throws IllegalStateException of unsupported ID class passed
+     */
+    private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
+        try {
+            Identifiers.checkSupported(idClass);
+        } catch (IllegalArgumentException e) {
+            final Throwable cause = Throwables.getRootCause(e);
+            throw new IllegalStateException(cause);
+        }
     }
 
     /** Returns the class of entities managed by this repository. */
@@ -114,12 +129,17 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         return entityClass;
     }
 
-    /** Returns the {@link TypeUrl} for the state objects wrapped by entities managed by this repository */
+    /**
+     * Returns the {@link TypeUrl} for the state objects wrapped by entities
+     * managed by this repository
+     */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass = Classes.getGenericParameterType(entityClass, Entity.STATE_CLASS_GENERIC_INDEX);
+            final Class<Object> stateClass =
+                    Classes.getGenericParameterType(entityClass,
+                                                    Entity.GenericParameter.STATE.getIndex());
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -134,9 +154,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * @return new entity instance
      */
     @CheckReturnValue
-    public E create(I id) {
-        return Entity.createEntity(this.entityConstructor, id);
-    }
+    public abstract E create(I id);
 
     /**
      * Stores the passed object.

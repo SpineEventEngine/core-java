@@ -133,7 +133,8 @@ public class OffsetDates {
      * Obtains offset date changed on specified amount of years.
      *
      * @param offsetDate offset date that will be changed
-     * @param yearsDelta a number of years that needs to be added or subtracted that can be either positive or negative
+     * @param yearsDelta a number of years that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this offset date with new years value
      */
     private static OffsetDate changeYear(OffsetDate offsetDate, int yearsDelta) {
@@ -145,7 +146,8 @@ public class OffsetDates {
      * Obtains offset date changed on specified amount of months.
      *
      * @param offsetDate offset date that will be changed
-     * @param monthDelta a number of months that needs to be added or subtracted that can be either positive or negative
+     * @param monthDelta a number of months that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this offset date with new months value
      */
     private static OffsetDate changeMonth(OffsetDate offsetDate, int monthDelta) {
@@ -157,7 +159,8 @@ public class OffsetDates {
      * Obtains offset date changed on specified amount of days.
      *
      * @param offsetDate offset date that will be changed
-     * @param daysDelta  a number of days that needs to be added or subtracted that can be either positive or negative
+     * @param daysDelta  a number of days that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this offset date with new days value
      */
     private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {

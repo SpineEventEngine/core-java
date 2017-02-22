@@ -22,7 +22,6 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
@@ -65,7 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EventBusShould {
 
     private EventBus eventBus;
@@ -85,12 +84,15 @@ public class EventBusShould {
     private void setUp(@Nullable EventEnricher enricher) {
         this.storageFactory = InMemoryStorageFactory.getInstance();
         /**
-         * Cannot use {@link MoreExecutors#directExecutor()} because it's impossible to spy on {@code final} classes.
+         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+         * because it's impossible to spy on {@code final} classes.
          */
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.delegateSubscriberExecutor = spy(directExecutor());
-        this.postponedDispatcherDelivery = new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
-        this.postponedSubscriberDelivery = new PostponedSubscriberEventDelivery(delegateSubscriberExecutor);
+        this.postponedDispatcherDelivery =
+                new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
+        this.postponedSubscriberDelivery =
+                new PostponedSubscriberEventDelivery(delegateSubscriberExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
         this.responseObserver = new TestResponseObserver();
@@ -107,10 +109,11 @@ public class EventBusShould {
     }
 
     private void buildEventBusWithPostponedExecution(@Nullable EventEnricher enricher) {
-        final EventBus.Builder busBuilder = EventBus.newBuilder()
-                                                    .setStorageFactory(storageFactory)
-                                                    .setDispatcherEventDelivery(postponedDispatcherDelivery)
-                                                    .setSubscriberEventDelivery(postponedSubscriberDelivery);
+        final EventBus.Builder busBuilder =
+                EventBus.newBuilder()
+                        .setStorageFactory(storageFactory)
+                        .setDispatcherEventDelivery(postponedDispatcherDelivery)
+                        .setSubscriberEventDelivery(postponedSubscriberDelivery);
 
         if (enricher != null) {
             busBuilder.setEnricher(enricher);
@@ -314,7 +317,8 @@ public class EventBusShould {
     public void assure_that_event_is_valid_and_subscriber_registered() {
         eventBus.subscribe(new ProjectCreatedSubscriber());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
+                                                  responseObserver);
         assertTrue(isValid);
         assertResponseIsOk(responseObserver);
     }
@@ -323,7 +327,8 @@ public class EventBusShould {
     public void assure_that_event_is_valid_and_dispatcher_registered() {
         eventBus.register(new BareDispatcher());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
+                                                  responseObserver);
         assertTrue(isValid);
         assertResponseIsOk(responseObserver);
     }
@@ -341,7 +346,8 @@ public class EventBusShould {
                                           .build();
         eventBus.subscribe(new ProjectCreatedSubscriber());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
+                                                  responseObserver);
 
         assertFalse(isValid);
         assertReturnedExceptionAndNoResponse(InvalidEventException.class, responseObserver);
@@ -349,7 +355,8 @@ public class EventBusShould {
 
     @Test
     public void call_onError_if_event_is_unsupported() {
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
+                                                  responseObserver);
 
         assertFalse(isValid);
         assertReturnedExceptionAndNoResponse(UnsupportedEventException.class, responseObserver);
@@ -449,7 +456,9 @@ public class EventBusShould {
             }
         };
         eventBus.addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
-        verify(enricher).registerFieldEnrichment(eq(eventFieldClass), eq(enrichmentFieldClass), eq(function));
+        verify(enricher).registerFieldEnrichment(eq(eventFieldClass),
+                                                 eq(enrichmentFieldClass),
+                                                 eq(function));
     }
 
 
@@ -508,8 +517,9 @@ public class EventBusShould {
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             methodCalled = true;
-            throw new UnsupportedOperationException("What did you expect from " +
-                                                            FaultySubscriber.class.getSimpleName() + '?');
+            throw new UnsupportedOperationException(
+                    "What did you expect from " +
+                    FaultySubscriber.class.getSimpleName() + '?');
         }
 
         boolean isMethodCalled() {
@@ -517,7 +527,8 @@ public class EventBusShould {
         }
     }
 
-    /** A simple dispatcher class, which only dispatch and does not have own event subscribing methods. */
+    /** A simple dispatcher class, which only dispatch and does not have own event
+     * subscribing methods. */
     private static class BareDispatcher implements EventDispatcher {
 
         private boolean dispatchCalled = false;

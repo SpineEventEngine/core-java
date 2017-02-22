@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -117,18 +116,21 @@ public class BoundedContextShould {
 
     @Test
     public void register_AggregateRepository() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
 
     @Test(expected = IllegalStateException.class)
     public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
 
-        final AnotherProjectAggregateRepository anotherRepo = new AnotherProjectAggregateRepository(boundedContext);
+        final AnotherProjectAggregateRepository anotherRepo =
+                new AnotherProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(anotherRepo);
     }
@@ -196,14 +198,16 @@ public class BoundedContextShould {
 
     @Test
     public void assign_storage_during_registration_if_repository_does_not_have_storage() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository(boundedContext);
         boundedContext.register(repository);
         assertTrue(repository.storageAssigned());
     }
 
     @Test
     public void not_change_storage_during_registration_if_a_repository_has_one() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
 
         final Repository spy = spy(repository);
@@ -217,12 +221,13 @@ public class BoundedContextShould {
         final BoundedContext boundedContext = newBoundedContext(stand);
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repository =
+                new ProjectAggregateRepository(boundedContext);
         boundedContext.register(repository);
         verify(stand).registerTypeSupplier(eq(repository));
     }
 
-    /** Returns {@link Mockito#any()} matcher for response observer. */
+    /** Returns {@link org.mockito.Mockito#any() Mockito.any()} matcher for response observer. */
     @SuppressWarnings("unchecked")
     private static StreamObserver<Response> anyResponseObserver() {
         return (StreamObserver<Response>) any();
@@ -309,7 +314,8 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+    private static class ProjectAggregateRepository
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
         private ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -355,7 +361,8 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+    private static class ProjectPmRepo
+            extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
 
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
@@ -373,11 +380,13 @@ public class BoundedContextShould {
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
-            // Do nothing. We have the method so that there's one event class exposed by the repository.
+            // Do nothing. We have the method so that there's one event class exposed
+            // by the repository.
         }
     }
 
-    private static class ProjectReportRepository extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
+    private static class ProjectReportRepository
+            extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }

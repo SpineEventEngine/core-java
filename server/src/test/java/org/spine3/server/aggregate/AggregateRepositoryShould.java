@@ -29,10 +29,10 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.Given;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -41,6 +41,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Sample;
 
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +88,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
     public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Given.newProjectId())
+        final ProjectAggregate aggregate = repository.load(Sample.messageOfType(ProjectId.class))
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -96,7 +97,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = Given.newProjectId();
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
@@ -111,7 +112,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void restore_aggregate_using_snapshot() {
-        final ProjectId id = Given.newProjectId();
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.getUncommittedEvents()
@@ -135,7 +136,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), eq(0));
     }
 
@@ -146,7 +147,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage, never()).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
     }
 
@@ -212,20 +213,36 @@ public class AggregateRepositoryShould {
      ****************************/
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents() {
-        return givenAggregateWithUncommittedEvents(Given.newProjectId());
+        return givenAggregateWithUncommittedEvents(Sample.messageOfType(ProjectId.class));
     }
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
-        final ProjectAggregate aggregate = new ProjectAggregate(id);
+        final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
+                                                .withId(id)
+                                                .build();
+
         final CommandContext context = createCommandContext();
-        aggregate.dispatchForTest(Given.CommandMessage.createProject(id), context);
-        aggregate.dispatchForTest(Given.CommandMessage.addTask(id), context);
-        aggregate.dispatchForTest(Given.CommandMessage.startProject(id), context);
+        final CreateProject createProject =
+                ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+                        .setProjectId(id)
+                        .build();
+        final AddTask addTask =
+                ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                        .setProjectId(id)
+                        .build();
+        final StartProject startProject =
+                ((StartProject.Builder) Sample.builderForType(StartProject.class))
+                        .setProjectId(id)
+                        .build();
+
+        aggregate.dispatchForTest(createProject, context);
+        aggregate.dispatchForTest(addTask, context);
+        aggregate.dispatchForTest(startProject, context);
         return aggregate;
     }
 
     private ProjectId createAndStoreAggregate() {
-        final ProjectId id = Given.newProjectId();
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
 
         repository.store(aggregate);

@@ -20,18 +20,18 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
+import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
@@ -42,11 +42,11 @@ import org.spine3.util.Environment;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.isScheduled;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -56,13 +56,12 @@ import static org.spine3.base.Commands.isScheduled;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for this central point of the framework.
 public class CommandBus implements AutoCloseable {
 
     private final Filter filter;
 
-    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
-
-    private final HandlerRegistry handlerRegistry = new HandlerRegistry();
+    private final CommandEndpointRegistry commandEndpoints = new CommandEndpointRegistry();
 
     private final CommandStore commandStore;
 
@@ -136,153 +135,6 @@ public class CommandBus implements AutoCloseable {
         this.rescheduler = new Rescheduler(this);
     }
 
-    /**
-     * Registers the passed command dispatcher.
-     *
-     * @param dispatcher the dispatcher to register
-     * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
-     */
-    public void register(CommandDispatcher dispatcher) {
-        handlerRegistry.checkNoHandlersRegisteredForCommandsOf(dispatcher);
-        dispatcherRegistry.register(dispatcher);
-    }
-
-    /**
-     * Unregisters dispatching for command classes by the passed dispatcher.
-     *
-     * <p>If the passed dispatcher deals with commands for which another dispatcher already registered
-     * the dispatch entries for such commands will not be unregistered, and warning will be logged.
-     *
-     * @param dispatcher the dispatcher to unregister
-     */
-    public void unregister(CommandDispatcher dispatcher) {
-        dispatcherRegistry.unregister(dispatcher);
-    }
-
-    /**
-     * Registers the passed command handler.
-     *
-     * @param handler a {@code non-null} handler object
-     * @throws IllegalArgumentException if the handler does not have command handling methods
-     */
-    public void register(CommandHandler handler) {
-        dispatcherRegistry.checkNoDispatchersRegisteredForCommandsOf(handler);
-        handlerRegistry.register(handler);
-    }
-
-    /**
-     * Unregisters the command handler from the command bus.
-     *
-     * @param handler the handler to unregister
-     */
-    public void unregister(CommandHandler handler) {
-        handlerRegistry.unregister(handler);
-    }
-
-    /**
-     * Directs the command to be dispatched or handled.
-     *
-     * <p>If the command has scheduling attributes, it will be posted for execution by the configured
-     * scheduler according to values of those scheduling attributes.
-     *
-     * <p>If a command does not have neither dispatcher nor handler, the error is returned via
-     * {@link StreamObserver#onError(Throwable)} call with {@link UnsupportedCommandException} as the cause.
-     *
-     * @param command the command to be processed
-     * @param responseObserver the observer to return the result of the call
-     */
-    public void post(Command command, StreamObserver<Response> responseObserver) {
-        final CommandClass commandClass = CommandClass.of(command);
-
-        // If the command is not supported, return as error.
-        if (!isSupportedCommand(commandClass)) {
-            handleUnsupported(command, responseObserver);
-            return;
-        }
-        if (!filter.handleValidation(command, responseObserver)) {
-            return;
-        }
-        if (isScheduled(command)) {
-            scheduleAndStore(command, responseObserver);
-            return;
-        }
-        if (isMultitenant) {
-            CurrentTenant.set(command.getContext()
-                                     .getTenantId());
-        }
-        commandStore.store(command);
-        responseObserver.onNext(Responses.ok());
-        doPost(command);
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * Directs a command to be dispatched or handled.
-     *
-     * <p>Logs exceptions which may occur during dispatching or handling and
-     * sets the command status to {@code error} or {@code failure} in the storage.
-     *
-     * @param command a command to post
-     */
-    void doPost(Command command) {
-        final Message message = getMessage(command);
-        final CommandClass commandClass = CommandClass.of(message);
-        final CommandContext commandContext = command.getContext();
-        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
-            dispatch(command);
-        } else if (handlerRegistry.handlerRegistered(commandClass)) {
-            invokeHandler(message, commandContext);
-        }
-    }
-
-    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final CommandException unsupported = new UnsupportedCommandException(command);
-        commandStore.storeWithError(command, unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
-    }
-
-    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
-        scheduler.schedule(command);
-        commandStore.store(command, SCHEDULED);
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * Checks if a command is supported by the Command Bus.
-     *
-     * @param commandClass a class of commands to check
-     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
-     *      for commands of this type, {@code false} otherwise
-     */
-    @VisibleForTesting
-    boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
-        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
-        final boolean isSupported = dispatcherRegistered || handlerRegistered;
-        return isSupported;
-    }
-
-    /**
-     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
-     *
-     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
-     *
-     * @return a set of classes of supported commands
-     */
-    public Set<CommandClass> getSupportedCommandClasses() {
-        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
-                                                    handlerRegistry.getCommandClasses());
-        return result;
-    }
-
-    /**
-     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
-     */
-    public CommandStatusService getCommandStatusService() {
-        return commandStatusService;
-    }
-
     boolean isMultitenant() {
         return isMultitenant;
     }
@@ -309,47 +161,190 @@ public class CommandBus implements AutoCloseable {
         return scheduler;
     }
 
-    private void dispatch(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
-        final CommandId commandId = getId(command);
-        try {
-            dispatcher.dispatch(command);
-        } catch (Exception e) {
-            log.errorDispatching(e, command);
-            commandStatusService.setToError(commandId, e);
-        }
+    /**
+     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     *
+     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported commands
+     */
+    public Set<CommandClass> getSupportedCommandClasses() {
+        return commandEndpoints.getSupportedCommandClasses();
     }
 
-    private void invokeHandler(Message msg, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        final CommandId commandId = context.getCommandId();
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    CommandStatusService getCommandStatusService() {
+        return commandStatusService;
+    }
+
+    /**
+     * Registers the passed command dispatcher.
+     *
+     * @param dispatcher the dispatcher to register
+     * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
+     */
+    public void register(CommandDispatcher dispatcher) {
+        commandEndpoints.register(checkNotNull(dispatcher));
+    }
+
+    /**
+     * Unregisters dispatching for command classes by the passed dispatcher.
+     *
+     * <p>If the passed dispatcher deals with commands for which another dispatcher already registered
+     * the dispatch entries for such commands will not be unregistered, and warning will be logged.
+     *
+     * @param dispatcher the dispatcher to unregister
+     */
+    public void unregister(CommandDispatcher dispatcher) {
+        commandEndpoints.unregister(checkNotNull(dispatcher));
+    }
+
+    /**
+     * Registers the passed command handler.
+     *
+     * @param handler a {@code non-null} handler object
+     * @throws IllegalArgumentException if the handler does not have command handling methods
+     */
+    public void register(CommandHandler handler) {
+        commandEndpoints.register(checkNotNull(handler));
+    }
+
+    /**
+     * Unregisters the command handler from the command bus.
+     *
+     * @param handler the handler to unregister
+     */
+    public void unregister(CommandHandler handler) {
+        commandEndpoints.unregister(checkNotNull(handler));
+    }
+
+    private Optional<CommandEndpoint> getEndpoint(CommandClass commandClass) {
+        return commandEndpoints.get(commandClass);
+    }
+
+    /**
+     * Directs the command to be dispatched or handled.
+     *
+     * <p>If the command has scheduling attributes, it will be posted for execution by the configured
+     * scheduler according to values of those scheduling attributes.
+     *
+     * <p>If a command does not have neither dispatcher nor handler, the error is returned via
+     * {@link StreamObserver#onError(Throwable)} call with {@link UnsupportedCommandException} as the cause.
+     *
+     * @param command the command to be processed
+     * @param responseObserver the observer to return the result of the call
+     */
+    public void post(Command command, StreamObserver<Response> responseObserver) {
+        checkNotNull(command);
+        checkNotNull(responseObserver);
+        checkArgument(isNotDefault(command));
+
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandClass commandClass = commandEnvelope.getCommandClass();
+
+        final Optional<CommandEndpoint> commandEndpoint = getEndpoint(commandClass);
+
+        // If the command is not supported, return as error.
+        if (!commandEndpoint.isPresent()) {
+            handleUnsupported(command, responseObserver);
+            return;
+        }
+
+        if (!filter.handleValidation(command, responseObserver)) {
+            return;
+        }
+
+        if (isScheduled(command)) {
+            scheduleAndStore(command, responseObserver);
+            return;
+        }
+
+        if (isMultitenant) {
+            CurrentTenant.set(command.getContext()
+                                     .getTenantId());
+        }
+
+        commandStore.store(command);
+        responseObserver.onNext(Responses.ok());
+        doPost(commandEnvelope, commandEndpoint.get());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Passes a previously scheduled command to the corresponding endpoint.
+     */
+    void postPreviouslyScheduled(Command command) {
+        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
+        if (!endpoint.isPresent()) {
+            throw noEndpointFound(commandEnvelope);
+        }
+        doPost(commandEnvelope, endpoint.get());
+    }
+
+    private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
+        final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
+        final String msg = String.format("No endpoint found for the command (class: %s id: %s).",
+                                         commandEnvelope.getCommandClass(), idStr);
+        throw new IllegalStateException(msg);
+    }
+
+    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
+        final CommandException unsupported = new UnsupportedCommandException(command);
+        commandStore.storeWithError(command, unsupported);
+        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+    }
+
+    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+        scheduler.schedule(command);
+        commandStore.store(command, SCHEDULED);
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Directs a command to be dispatched or handled.
+     *
+     * @param commandEnvelope a command to post
+     * @param commandEndpoint the endpoint to process the command
+     */
+    void doPost(CommandEnvelope commandEnvelope, CommandEndpoint commandEndpoint) {
         try {
-            handler.handle(msg, context);
-            commandStatusService.setOk(commandId);
-        } catch (IllegalStateException e) {
-            final Throwable cause = e.getCause();
-            onHandlerException(msg, commandId, cause);
+            commandEndpoint.receive(commandEnvelope);
+            setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
-            onHandlerException(msg, commandId, e);
+            final Throwable cause = Throwables.getRootCause(e);
+            updateCommandStatus(commandEnvelope, cause);
         }
     }
 
-    private void onHandlerException(Message msg, CommandId commandId, Throwable cause) {
-        //noinspection ChainOfInstanceofChecks
-        if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
-            log.errorHandling(exception, msg, commandId);
-            commandStatusService.setToError(commandId, exception);
-        } else if (cause instanceof FailureThrowable){
+    private void setStatusOk(CommandEnvelope envelope) {
+        final CommandId commandId = envelope.getCommandId();
+        commandStatusService.setOk(commandId);
+    }
+
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
+    private void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
+        if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
-            log.failureHandling(failure, msg, commandId);
-            commandStatusService.setToFailure(commandId, failure);
+
+            log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
+            commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
+        } else if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+
+            log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
+            commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
-            log.errorHandlingUnknown(cause, msg, commandId);
+
+            log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+
             final Error error = Errors.fromThrowable(cause);
-            commandStatusService.setToError(commandId, error);
+            commandStatusService.setToError(commandEnvelope.getCommandId(), error);
         }
     }
 
@@ -363,10 +358,21 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
+    /**
+     * Closes the instance, preventing any for further posting of commands.
+     *
+     * <p>The following operations are performed:
+     * <ol>
+     *     <li>All command handlers and dispatchers are un-registered.
+     *     <li>{@code CommandStore} is closed.
+     *     <li>{@code CommandScheduler} is shut down.
+     * </ol>
+     *
+     * @throws Exception if closing the {@code CommandStore} cases an exception
+     */
     @Override
     public void close() throws Exception {
-        dispatcherRegistry.unregisterAll();
-        handlerRegistry.unregisterAll();
+        commandEndpoints.unregisterAll();
         commandStore.close();
         scheduler.shutdown();
     }

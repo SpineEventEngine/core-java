@@ -20,7 +20,6 @@
 package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,8 @@ import static com.google.common.base.Throwables.throwIfUnchecked;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @param <C> the type of the message context or {@link Empty} if a context parameter is never used
+ * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
+ *           a context parameter is never used
  */
 public abstract class HandlerMethod<C extends Message> {
 

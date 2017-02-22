@@ -21,8 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,11 +30,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
-import org.spine3.base.Errors;
 import org.spine3.base.Event;
-import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregateEvents;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
@@ -50,6 +45,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Sample;
 
 import java.util.Map;
 
@@ -59,15 +55,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 public class CommandEndpointShould {
@@ -76,15 +68,14 @@ public class CommandEndpointShould {
 
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repositorySpy;
-    private CommandStore commandStore;
     private EventBus eventBus;
 
-    private final ProjectId projectId = Given.newProjectId();
+    private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
 
     @Before
     public void setUp() {
         eventBus = mock(EventBus.class);
-        commandStore = mock(CommandStore.class);
+        final CommandStore commandStore = mock(CommandStore.class);
         doReturn(emptyIterator()).when(commandStore)
                                  .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
@@ -113,53 +104,29 @@ public class CommandEndpointShould {
     }
 
     @Test
-    public void set_ok_command_status_on_command_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final CommandId commandId = getId(cmd);
-
-        repository.dispatch(cmd);
-
-        verify(commandStore).setCommandStatusOk(commandId);
-    }
-
-    @Test
     public void store_aggregate_on_command_dispatching() {
-        final ProjectId id = Given.newProjectId();
-        final Command cmd = Given.Command.createProject(id);
+        final Command cmd = Given.Command.createProject(projectId);
         final CreateProject msg = Commands.getMessage(cmd);
 
         repositorySpy.dispatch(cmd);
 
         final ProjectAggregate aggregate = verifyAggregateStored(repositorySpy);
-        assertEquals(id, aggregate.getId());
+        assertEquals(projectId, aggregate.getId());
         assertEquals(msg.getName(), aggregate.getState()
                                              .getName());
-    }
-
-    @Test
-    public void set_cmd_status_to_error_if_failed_to_store_aggregate_on_dispatching() {
-        final Command cmd = Given.Command.createProject();
-        final RuntimeException exception = new RuntimeException(newUuid());
-        doThrow(exception).when(repositorySpy)
-                          .store(any(ProjectAggregate.class));
-
-        repositorySpy.dispatch(cmd);
-
-        verify(commandStore).updateStatus(getId(cmd), exception);
     }
 
     @Test
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        final ProjectId projectId = Given.newProjectId();
         final Command cmd = Given.Command.createProject(projectId);
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
-        doReturn(Optional.of(AggregateEvents.getDefaultInstance())).when(storage).read(projectId);
+        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance())).when(storage).read(projectId);
         doReturn(storage).when(repositorySpy).aggregateStorage();
-        doReturn(Optional.absent()).when(storage).readStatus(projectId);
+        doReturn(Optional.absent()).when(storage).readVisibility(projectId);
 
         repositorySpy.dispatch(cmd);
 
@@ -177,37 +144,9 @@ public class CommandEndpointShould {
 
     @Test
     public void dispatch_several_commands() {
-        final ProjectId id = Given.newProjectId();
-        assertDispatches(Given.Command.createProject(id));
-        assertDispatches(Given.Command.addTask(id));
-        assertDispatches(Given.Command.startProject(id));
-    }
-
-    @Test
-    public void set_cmd_status_to_error_if_got_exception_on_dispatching() {
-        final Exception exception = new Exception(newUuid());
-
-        final CommandId id = dispatchCmdToAggregateThrowing(exception);
-
-        verify(commandStore).updateStatus(id, exception);
-    }
-
-    @Test
-    public void set_cmd_status_to_failure_if_got_failure_on_dispatching() {
-        final TestFailure failure = new TestFailure();
-
-        final CommandId id = dispatchCmdToAggregateThrowing(failure);
-
-        verify(commandStore).updateStatus(id, failure.toMessage());
-    }
-
-    @Test
-    public void set_cmd_status_to_error_if_got_unknown_throwable_on_dispatching() {
-        final TestThrowable throwable = new TestThrowable();
-
-        final CommandId id = dispatchCmdToAggregateThrowing(throwable);
-
-        verify(commandStore).updateStatus(id, Errors.fromThrowable(throwable));
+        assertDispatches(Given.Command.createProject(projectId));
+        assertDispatches(Given.Command.addTask(projectId));
+        assertDispatches(Given.Command.startProject(projectId));
     }
 
     /*
@@ -218,25 +157,6 @@ public class CommandEndpointShould {
         final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).post(eventCaptor.capture());
         return eventCaptor.getValue();
-    }
-
-    private CommandId dispatchCmdToAggregateThrowing(Throwable throwable) {
-        final Command cmd = Given.Command.createProject();
-        givenThrowingAggregate(throwable, cmd, repositorySpy);
-        repositorySpy.dispatch(cmd);
-        final CommandId commandId = getId(cmd);
-        return commandId;
-    }
-
-    private static void givenThrowingAggregate(
-            Throwable cause,
-            Command cmd,
-            AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repositorySpy) {
-        final ProjectAggregate throwingAggregate = mock(ProjectAggregate.class);
-        final Message msg = unpack(cmd.getMessage());
-        final RuntimeException exception = new RuntimeException(cause);
-        doThrow(exception).when(throwingAggregate).dispatchCommand(msg, cmd.getContext());
-        doReturn(throwingAggregate).when(repositorySpy).loadOrCreate(any(ProjectId.class));
     }
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
@@ -254,20 +174,6 @@ public class CommandEndpointShould {
     /*
      * Test environment classes
      ****************************/
-
-    private static class TestFailure extends FailureThrowable {
-        private static final long serialVersionUID = 0L;
-
-        private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
-        }
-    }
-
-    private static class TestThrowable extends Throwable {
-        private static final long serialVersionUID = 0L;
-    }
 
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 

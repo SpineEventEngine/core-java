@@ -29,7 +29,9 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
-import org.spine3.server.entity.Entity;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.base.Versions.newVersion;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
@@ -208,7 +211,7 @@ public class SubscriptionServiceShould {
                                             .build();
         final int version = 1;
 
-        final Entity entity = mockEntity(projectId, projectState, version);
+        final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
                       .post(entity);
 
@@ -216,11 +219,11 @@ public class SubscriptionServiceShould {
         activationObserver.verifyState(false);
     }
 
-    private static Entity mockEntity(ProjectId projectId, Message projectState, int version) {
-        final Entity entity = mock(Entity.class);
+    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState, int version) {
+        final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(version);
+        when(entity.getVersion()).thenReturn(newVersion(version, Timestamps2.getCurrentTime()));
         return entity;
     }
 
@@ -260,11 +263,13 @@ public class SubscriptionServiceShould {
         subscriptionService.subscribe(topic, subscribeObserver);
 
         // Activate subscription
-        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription = spy(new MemoizeStreamObserver<SubscriptionUpdate>());
+        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
+                spy(new MemoizeStreamObserver<SubscriptionUpdate>());
         subscriptionService.activate(subscribeObserver.streamFlowValue, activateSubscription);
 
         // Cancel subscription
-        subscriptionService.cancel(subscribeObserver.streamFlowValue, new MemoizeStreamObserver<Response>());
+        subscriptionService.cancel(subscribeObserver.streamFlowValue,
+                                   new MemoizeStreamObserver<Response>());
 
         // Post update to Stand
         final ProjectId projectId = ProjectId.newBuilder()
@@ -274,7 +279,7 @@ public class SubscriptionServiceShould {
                                             .setId(projectId)
                                             .build();
         final int version = 1;
-        final Entity entity = mockEntity(projectId, projectState, version);
+        final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
                       .post(entity);
 
@@ -294,7 +299,8 @@ public class SubscriptionServiceShould {
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
                                  .build();
-        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        final MemoizeStreamObserver<Subscription> subscriptionObserver =
+                new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
 
         final String failureMessage = "Execution breaking exception";

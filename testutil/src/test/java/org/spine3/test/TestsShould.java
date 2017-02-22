@@ -20,18 +20,13 @@
 
 package org.spine3.test;
 
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.users.UserId;
 
-import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -66,11 +61,6 @@ public class TestsShould {
     }
 
     @Test
-    public void return_current_time_in_seconds() {
-        assertNotEquals(0, Tests.currentTimeSeconds());
-    }
-
-    @Test
     public void return_null_reference() {
         assertNull(Tests.nullRef());
     }
@@ -94,15 +84,6 @@ public class TestsShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_UseId_value() {
         newUserId(Tests.<String>nullRef());
-    }
-
-    @Test
-    public void have_frozen_time_provider() {
-        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
-
-        final Tests.FrozenMadHatterParty provider = new Tests.FrozenMadHatterParty(fiveMinutesAgo);
-
-        assertEquals(fiveMinutesAgo, provider.getCurrentTime());
     }
 
     @Test

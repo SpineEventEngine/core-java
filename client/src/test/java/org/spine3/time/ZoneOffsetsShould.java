@@ -26,9 +26,8 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps.SECONDS_PER_MINUTE;
+import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
+import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
 import static org.spine3.time.ZoneOffsets.toZoneOffset;

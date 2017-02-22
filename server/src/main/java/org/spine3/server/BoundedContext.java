@@ -38,11 +38,10 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
@@ -133,7 +132,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * <li>Closes {@link CommandBus}.
      * <li>Closes {@link EventBus}.
      * <li>Closes {@link CommandStore}.
-     * <li>Closes {@link EventStore}.
+     * <li>Closes {@link org.spine3.server.event.EventStore EventStore}.
      * <li>Closes {@link Stand}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
@@ -200,7 +199,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
-    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends AbstractVersionableEntity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
         if (repository instanceof CommandDispatcher) {

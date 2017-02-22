@@ -22,13 +22,13 @@ package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.base.Identifiers;
 
 /**
  * Obtains an event producer ID based on an event {@link Message} and context.
  *
  * <p>An ID must be the first field in event messages (in Protobuf definition).
- * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ * Its name must end with the
+ * {@link org.spine3.base.Identifiers#ID_PROPERTY_SUFFIX Identifiers.ID_PROPERTY_SUFFIX}.
  *
  * @param <I> the type of target entity IDs
  * @param <M> the type of event messages to get IDs from
