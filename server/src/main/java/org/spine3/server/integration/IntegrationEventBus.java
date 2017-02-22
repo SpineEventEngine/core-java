@@ -131,6 +131,7 @@ public class IntegrationEventBus {
 
         @Override
         public void onCompleted() {
+            // Do nothing.
         }
     }
 
