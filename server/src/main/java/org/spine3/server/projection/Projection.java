@@ -30,6 +30,7 @@ import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static java.lang.String.format;
 import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
 
 /**
@@ -64,7 +65,8 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
     private void dispatch(Message event, EventContext ctx) {
         final Class<? extends Message> eventClass = event.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventSubscriberMethod method = registry.get(getClass(), eventClass, EventSubscriberMethod.factory());
+        final EventSubscriberMethod method = registry.get(getClass(), eventClass,
+                                                          EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
@@ -81,13 +83,16 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
      * @param clazz the class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Projection> clazz) {
+    public static ImmutableSet<Class<? extends Message>>
+    getEventClasses(Class<? extends Projection> clazz) {
         return Classes.getHandledMessageClasses(clazz, PREDICATE);
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = String.format("Missing event handler for event class %s in the stream projection class %s",
-                                         eventClass, this.getClass());
+        final String msg = format(
+                "Missing event handler for event class %s in the stream projection class %s",
+                eventClass, this.getClass()
+        );
         return new IllegalStateException(msg);
     }
 
