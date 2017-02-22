@@ -165,6 +165,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.markArchived(id);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_record_archived_multiple_times() {
         final I id = newId();
@@ -185,6 +186,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         markArchivedAndCheck(storage, id);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     private void markArchivedAndCheck(RecordStorage<I> storage, I id) {
         // Mark archived.
         storage.markArchived(id);
@@ -232,6 +234,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.markDeleted(id);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_record_deleted_multiple_times() {
         final I id = newId();
@@ -252,6 +255,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         markDeletedAndCheck(storage, id);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     private void markDeletedAndCheck(RecordStorage<I> storage, I id) {
         // Mark archived.
         storage.markArchived(id);
@@ -279,6 +283,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(storage.read(id).isPresent());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_deleted_after_archived() {
         final RecordStorage<I> storage = getStorage();
@@ -305,6 +310,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(archivedAndDeleted.getDeleted());
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_archived_after_deleted() {
         final RecordStorage<I> storage = getStorage();
