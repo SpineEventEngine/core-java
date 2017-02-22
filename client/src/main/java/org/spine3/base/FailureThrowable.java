@@ -58,11 +58,11 @@ public abstract class FailureThrowable extends Throwable {
     private final Timestamp timestamp;
 
     protected FailureThrowable(GeneratedMessageV3 commandMessage,
-                               CommandContext ctx,
+                               CommandContext commandContext,
                                GeneratedMessageV3 failureMessage) {
         super();
         this.commandMessage = commandMessage;
-        this.commandContext = ctx;
+        this.commandContext = commandContext;
         this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
     }
