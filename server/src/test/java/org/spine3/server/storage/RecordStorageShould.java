@@ -138,7 +138,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
 
         // The attempt to mark a record which is not yet stored returns `false`.
-        assertFalse(storage.markArchived(id));
+        storage.markArchived(id);
 
         // Write the record.
         storage.write(id, record);
@@ -157,9 +157,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                           .get()
                           .getEntityStatus()
                           .getArchived());
-
-        // Check that another attempt to mark archived returns `false`.
-        assertFalse(storage.markArchived(id));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
@@ -170,7 +167,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
 
         // The attempt to mark a record which is not yet stored returns `false`.
-        assertFalse(storage.markDeleted(id));
+        storage.markDeleted(id);
 
         // Write the record.
         storage.write(id, record);
@@ -191,7 +188,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                           .getDeleted());
 
         // Check that another attempt to mark deleted returns `false`.
-        assertFalse(storage.markDeleted(id));
     }
 
     @Test

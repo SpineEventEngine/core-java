@@ -196,6 +196,20 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     protected abstract void writeStatus(I id, EntityStatus status);
 
     /**
+     * Marks the aggregate with the passed ID as {@code archived}.
+     *
+     * @param id the aggregate ID
+     */
+    protected abstract void markArchived(I id);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code deleted}.
+     *
+     * @param id the aggregate ID
+     */
+    protected abstract void markDeleted(I id);
+
+    /**
      * Writes a count of events which were saved to the storage after the last snapshot was created,
      * or a count of all events if there were no snapshots yet.
      *
@@ -248,20 +262,4 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      *         the aggregate with passed ID
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
-
-    /**
-     * Marks the aggregate with the passed ID as {@code archived}.
-     *
-     * @param id the aggregate ID
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
-     */
-    protected abstract boolean markArchived(I id);
-
-    /**
-     * Marks the aggregate with the passed ID as {@code deleted}.
-     *
-     * @param id the aggregate ID
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
-     */
-    protected abstract boolean markDeleted(I id);
 }

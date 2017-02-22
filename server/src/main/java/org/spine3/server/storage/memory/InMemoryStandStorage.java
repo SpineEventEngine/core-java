@@ -82,13 +82,13 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public boolean markArchived(AggregateStateId id) {
-        return recordStorage.markArchived(id);
+    public void markArchived(AggregateStateId id) {
+        recordStorage.markArchived(id);
     }
 
     @Override
-    public boolean markDeleted(AggregateStateId id) {
-        return recordStorage.markDeleted(id);
+    public void markDeleted(AggregateStateId id) {
+        recordStorage.markDeleted(id);
     }
 
     @Override
