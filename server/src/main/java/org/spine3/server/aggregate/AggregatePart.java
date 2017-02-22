@@ -66,6 +66,9 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
      * @param partStateClass the class of the state of the part
      * @param <P>            the type of the part state
      * @return the state of the part or a default state if the state was not found
+     * @throws IllegalStateException if a repository was not found,
+     *                               or the repository does not match expectations
+     *                               of this {@code AggregateRoot}
      */
     protected <P extends Message, A extends AggregatePart<I, P, ?>> P getPartState(
             Class<P> partStateClass) {

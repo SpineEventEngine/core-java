@@ -42,7 +42,7 @@ public class Entities {
     }
 
     /**
-     * Obtains constructor for the passed entity class.
+     * Obtains the constructor for the passed entity class.
      *
      * <p>The entity class must have a constructor with the single parameter of type defined by
      * generic type {@code <I>}.
@@ -81,6 +81,19 @@ public class Entities {
      *
      * <p>The part class must have a constructor with ID and {@code AggregateRoot} parameters.
      *
+     * <p>Returns the constructor if:
+     *
+     * <li>the first argument is aggregate ID and the second is {@code AggregateRoot}. For example:
+     *
+     * <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre></li>
+     *
+     * <li>the second constructor parameter is subtype of the {@code AggregateRoot}. For example:
+     *
+     * <pre>{@code SubAggregateRoot extends AggregateRoot{...};
+     * AggregatePartCtor(AnAggregateId id, SubAggregateRoot root){...}}</pre></li>
+     *
+     * <p>Throws {@code IllegalStateException} in other cases.
+     *
      * @param entityClass the {@code AggregatePart} class
      * @param idClass     the class of entity identifiers
      * @param <E>         the entity type
@@ -117,24 +130,24 @@ public class Entities {
      * <p>Returns the constructor if the first argument is aggregate ID
      * and the second is {@code AggregateRoot}. For example:
      *
-     * <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root).}</pre>
+     * <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre>
      *
-     * <p>Does not return constructor if the second constructor parameter
-     * is subtype of the {@code AggregateRoot}. For example:
+     * <p>Returns {@code null} if the entity class does not have
+     * the constructor as described above. For example:
      *
-     * <pre> {@code SubAggregateRoot extends AggregateRoot{...};}
-     * {@code AggregatePartCtor(AnAggregateId id, SubAggregateRoot root)};</pre>
+     * <pre> {@code SubAggregateRoot extends AggregateRoot{...};
+     * AggregatePartCtor(AnAggregateId id, SubAggregateRoot root){...}}</pre>
      *
      * @param entityClass the {@code AggregatePart} class
      * @param idClass     the ID class of the {@code AggregatePart} class
      * @param <E>         the {@code Message} entity type
      * @param <I>         the {@code Message} ID type of the {@code idClass}
-     * @return the obtained constructor, if constructor was not found,
-     * the {@code null} will be returned
+     * @return the constructor for the Aggregate part class,
+     * or {@code null} if no appropriate constructor is found.
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    // It is OK because the constructor arguments are checked, before returning the constructor.
+    // It is OK because the constructor arguments are checked before returning the constructor.
     private static <E extends AggregatePart, I> Constructor<E> getAggregatePartSupertypeCtor
     (Class<E> entityClass, Class<I> idClass) {
         checkNotNull(entityClass);
@@ -164,7 +177,7 @@ public class Entities {
      * @param boundedContext the {@code BoundedContext} to use
      * @param rootClass      the class of the {@code AggregateRoot}
      * @param <I>            the type of entity IDs
-     * @return a {@code AggregateRoot} instance
+     * @return an {@code AggregateRoot} instance
      */
     public static <I, R extends AggregateRoot<I>> R
     createAggregateRootEntity(I id, BoundedContext boundedContext, Class<R> rootClass) {
@@ -176,7 +189,7 @@ public class Entities {
             final Constructor<R> rootConstructor =
                     rootClass.getDeclaredConstructor(boundedContext.getClass(), id.getClass());
             rootConstructor.setAccessible(true);
-            R root = rootConstructor.newInstance(boundedContext, id);
+            final R root = rootConstructor.newInstance(boundedContext, id);
             return root;
         } catch (NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {
@@ -215,7 +228,7 @@ public class Entities {
      * @param id   the ID of the entity
      * @param <I>  the type of entity IDs
      * @param <E>  the type of the entity
-     * @return new entity
+     * @return a new entity
      */
     public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
         checkNotNull(ctor);

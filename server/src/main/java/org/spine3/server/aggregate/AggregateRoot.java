@@ -81,6 +81,9 @@ public class AggregateRoot<I> {
      * @param partStateClass the class of the state of the part
      * @param <S>            the type of the part state
      * @return the state of the part or a default state if the state was not found
+     * @throws IllegalStateException if a repository was not found,
+     *                               or the repository does not match expectations
+     *                               of this {@code AggregateRoot}
      */
     protected <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>> S getPartState(
             Class<S> partStateClass) {
