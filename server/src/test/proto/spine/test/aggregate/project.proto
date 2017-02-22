@@ -50,7 +50,7 @@ message Project {
     Status status = 4;
 }
 
-message ProjectLifeCycle {
+message ProjectLifecycle {
 
     ProjectId id = 1;
 

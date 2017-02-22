@@ -33,7 +33,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.ProjectLifeCycle;
+import org.spine3.test.aggregate.ProjectLifecycle;
 import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -77,7 +77,7 @@ public class AggregateRootShould {
         final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 
-        final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifeCycle.class);
+        final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
     }
 
@@ -162,7 +162,7 @@ public class AggregateRootShould {
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod") // It is needed for testing.
     private static class ProjectLifeCyclePart
-            extends AggregatePart<ProjectId, ProjectLifeCycle, ProjectLifeCycle.Builder> {
+            extends AggregatePart<ProjectId, ProjectLifecycle, ProjectLifecycle.Builder> {
 
         private static boolean exceptionOccurred = false;
 
