@@ -137,7 +137,7 @@ public class AggregateRootShould {
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We need exact message classes, without OrBuilder.
+    @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
     private static class ProjectDefinitionPart
             extends AggregatePart<ProjectId, ProjectDefinition, ProjectDefinition.Builder> {
 
@@ -161,18 +161,13 @@ public class AggregateRootShould {
         }
     }
 
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod") // It is needed for testing.
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
+    // Static field in the instance method is used for the test simplification.
     private static class ProjectLifeCyclePart
             extends AggregatePart<ProjectId, ProjectLifecycle, ProjectLifecycle.Builder> {
 
         private static boolean exceptionOccurred = false;
 
-        /**
-         * {@inheritDoc}
-         *
-         * @param id
-         * @param root
-         */
         protected ProjectLifeCyclePart(ProjectId id, ProjectRoot root) {
             super(id, root);
         }

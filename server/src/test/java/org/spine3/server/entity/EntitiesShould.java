@@ -75,13 +75,15 @@ public class EntitiesShould {
         assertNotNull(aggregateRoot);
     }
 
-    @SuppressWarnings("unchecked") // It is needed for testing.
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
         getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class, id.getClass());
     }
 
-    @SuppressWarnings("unchecked") // It is needed for testing.
+    @SuppressWarnings("unchecked")
+    // Aupply a "wrong" value on purpose to cause the validation failure.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
         getConstructor(AggregatePart.class, id.getClass());
@@ -94,7 +96,8 @@ public class EntitiesShould {
     private static class WrongAggregatePart
             extends AggregatePart<String, StringValue, StringValue.Builder> {
 
-        @SuppressWarnings("ConstantConditions") // It is needed for testing.
+        @SuppressWarnings("ConstantConditions")
+        // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
             super(null, null);
         }
@@ -103,18 +106,13 @@ public class EntitiesShould {
     private static class AnAggregatePart
             extends AggregatePart<String, StringValue, StringValue.Builder> {
 
-        /**
-         * {@inheritDoc}
-         *
-         * @param id
-         * @param root
-         */
         protected AnAggregatePart(String id, AnAggregateRoot root) {
             super(id, root);
         }
     }
 
     private static class AnAggregateRoot extends AggregateRoot<String> {
+
         /**
          * Creates an new instance.
          *
