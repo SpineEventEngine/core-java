@@ -22,6 +22,7 @@ package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -340,8 +341,9 @@ public abstract class CommandStorageShould
     }
 
     private static Failure newFailure() {
+        final Any packedFailureMessage = AnyPacker.pack(Values.newStringValue("newFailure"));
         return Failure.newBuilder()
-                      .setInstance(AnyPacker.pack(Values.newStringValue("newFailure")))
+                      .setMessage(packedFailureMessage)
                       .setStacktrace("failure stacktrace")
                       .setTimestamp(getCurrentTime())
                       .build();

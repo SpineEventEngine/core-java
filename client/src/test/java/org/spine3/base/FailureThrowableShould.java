@@ -48,9 +48,9 @@ public class FailureThrowableShould {
     public void convert_to_failure_message() {
         final StringValue failure = newStringValue(newUuid());
 
-        final Failure failureWrapper = new TestFailure(failure).toMessage();
+        final Failure failureWrapper = new TestFailure(failure).toFailure();
 
-        assertEquals(failure, AnyPacker.unpack(failureWrapper.getInstance()));
+        assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
         assertFalse(failureWrapper.getStacktrace().isEmpty());
         assertTrue(Timestamps.isValid(failureWrapper.getTimestamp()));
     }

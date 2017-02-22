@@ -123,7 +123,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toFailure()));
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
