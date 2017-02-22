@@ -83,7 +83,7 @@ public class EntitiesShould {
     }
 
     @SuppressWarnings("unchecked")
-    // Aupply a "wrong" value on purpose to cause the validation failure.
+    // Supply a "wrong" value on purpose to cause the validation failure.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
         getConstructor(AggregatePart.class, id.getClass());
