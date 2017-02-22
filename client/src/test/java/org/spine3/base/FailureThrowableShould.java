@@ -48,11 +48,14 @@ public class FailureThrowableShould {
     public void convert_to_failure_message() {
         final StringValue failure = newStringValue(newUuid());
 
-        final Failure failureWrapper = new TestFailure(failure).toMessage();
+        final Failure failureWrapper = new TestFailure(failure).toFailure();
 
-        assertEquals(failure, AnyPacker.unpack(failureWrapper.getInstance()));
-        assertFalse(failureWrapper.getStacktrace().isEmpty());
-        assertTrue(Timestamps.isValid(failureWrapper.getTimestamp()));
+        assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
+        assertFalse(failureWrapper.getContext()
+                                  .getStacktrace()
+                                  .isEmpty());
+        assertTrue(Timestamps.isValid(failureWrapper.getContext()
+                                                    .getTimestamp()));
     }
 
     private static class TestFailure extends FailureThrowable {

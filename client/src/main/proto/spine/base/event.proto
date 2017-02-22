@@ -31,8 +31,10 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 import "spine/base/command.proto";
 import "spine/base/version.proto";
+import "spine/base/enrichment.proto";
 
 // Event identifier.
 message EventId {
@@ -61,59 +63,36 @@ message EventId {
 message Event {
 
     // The message of the event wrapped into `Any`.
-    google.protobuf.Any message = 1;
+    google.protobuf.Any message = 1 [(required) = true];
 
     // The context of the event.
-    EventContext context = 2;
+    EventContext context = 2 [(required) = true];
 }
 
 // Meta-information for an event.
 message EventContext {
 
     // The ID of the event.
-    EventId event_id = 1;
+    EventId event_id = 1 [(required) = true];
 
     // When the event occurred.
-    google.protobuf.Timestamp timestamp = 2;
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
     // The ID of the entity which generated the event.
     //
-    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`),
-    // bounded contexts (for integration events).
+    // Examples of event producers are: aggregates, process managers
+    // (which generate `CommandRouted`), bounded contexts (for integration events).
     //
-    google.protobuf.Any producer_id = 4;
+    google.protobuf.Any producer_id = 4 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 5;
+    Version version = 5 [(required) = true];
 
-    // An event can be enriched with one or more messages. Or, event enrichment can be disabled.
-    oneof enrichment_mode {
-
-        // One or more enrichments of the event.
-        Enrichments enrichments = 6;
-            // We are having the wrapper type because maps are not allowed in `oneof`s.
-
-        // The instruction not to enrich the event.
-        bool do_not_enrich = 7;
-    }
-
-    // Service attributes that the system wants to store in addition to
-    // the domain attributes defined in the event message.
-    Attributes attributes = 8;
-
-    message Attributes {
-        map<string, google.protobuf.Any> entries = 1;
-    }
-}
-
-// A container for event enrichments.
-message Enrichments {
-
-    // A map from a fully qualified Protobuf type name of an enrichment, to its wrapped instance.
-    map<string, google.protobuf.Any> map = 1;
+    // Optional enrichment of the event.
+    Enrichment enrichment = 6;
 }
 
 // Enumeration of possible event validation technical error reasons.

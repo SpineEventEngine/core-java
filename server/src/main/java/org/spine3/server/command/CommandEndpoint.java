@@ -20,6 +20,8 @@
 
 package org.spine3.server.command;
 
+import org.spine3.base.CommandEnvelope;
+
 /**
  * A command endpoint is responsible for delivering a command to
  * the place it is handled.

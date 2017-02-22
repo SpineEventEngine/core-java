@@ -25,7 +25,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
@@ -180,7 +179,7 @@ public class Tests {
      * Returns {@code StringObserver} that does nothing.
      *
      * <p>Use this method when you need to call
-     * {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)
+     * {@link org.spine3.server.command.CommandBus#post(org.spine3.base.Command, StreamObserver)
      *  CommandBus.post()} and observing results is not needed.
      */
     public static StreamObserver<Response> emptyObserver() {

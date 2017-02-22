@@ -22,7 +22,6 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -40,7 +39,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
 
 /**
  * The predicate for filtering events by {@link EventFilter}.
@@ -158,13 +157,10 @@ class MatchFilter implements Predicate<Event> {
         return true;
     }
 
-    private static boolean checkFields(
-            Message object,
-            @SuppressWarnings("TypeMayBeWeakened") /*BuilderOrType interface*/ FieldFilter filter) {
-        final String fieldPath = filter.getFieldPath();
-        final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
-        checkArgument(!Strings.isNullOrEmpty(fieldName), "Field filter " + filter.toString() + " is invalid");
+    private static boolean checkFields(Message object, FieldFilter filter) {
+        final String fieldName = getFieldName(filter);
 
+        //TODO:2017-02-22:alexander.yevsyukov: Packing `actualValue` into Any and then verifying would be faster.
         final Collection<Any> expectedAnys = filter.getValueList();
         final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
         Message actualValue;
@@ -182,5 +178,19 @@ class MatchFilter implements Predicate<Event> {
 
         final boolean result = expectedValues.contains(actualValue);
         return result;
+    }
+
+    private static String getFieldName(FieldFilter filter) {
+        final String fieldPath = filter.getFieldPath();
+        final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
+
+        if (fieldName.isEmpty()) {
+            final String errMsg = format(
+                "Unable to get a field name from the field filter: %s",
+                filter
+            );
+            throw new IllegalArgumentException(errMsg);
+        }
+        return fieldName;
     }
 }

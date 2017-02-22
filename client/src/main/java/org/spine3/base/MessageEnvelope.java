@@ -18,37 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.base;
 
-import org.spine3.base.CommandId;
-import org.spine3.base.FailureThrowable;
+import com.google.protobuf.Message;
 
 /**
- * The service for updating a status of a command.
+ * A common interface for obtaining messages from wrapping objects.
  *
+ * @param <T> the type of the object that wraps a message
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+public interface MessageEnvelope<T> {
 
-    private final CommandStore commandStore;
+    /**
+     * Obtains the object which contains the message of interest.
+     */
+    T getOuterObject();
 
-    CommandStatusService(CommandStore commandStore) {
-        this.commandStore = commandStore;
-    }
-
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
-    }
-
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
-    }
-
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toFailure());
-    }
-
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
-    }
+    /**
+     * Obtains the message.
+     */
+    Message getMessage();
 }
