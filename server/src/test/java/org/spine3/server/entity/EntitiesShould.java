@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +54,19 @@ public class EntitiesShould {
                                        .build();
         id = newUuid();
         root = new AnAggregateRoot(boundedContext, id);
+    }
+
+    @Test
+    public void pass_null_pointer_check() throws NoSuchMethodException {
+        final Constructor constructor = root.getClass()
+                                            .getDeclaredConstructor(BoundedContext.class,
+                                                                    String.class);
+        final NullPointerTester tester = new NullPointerTester();
+        tester.setDefault(Constructor.class, constructor);
+        tester.setDefault(BoundedContext.class, boundedContext);
+        tester.setDefault(AggregateRoot.class, root);
+
+        tester.testStaticMethods(Entities.class, NullPointerTester.Visibility.PUBLIC);
     }
 
     @Test

@@ -196,6 +196,7 @@ public class Entities {
     public static <I, E extends AbstractEntity<I, ?>> E
     createAggregatePartEntity(Constructor<E> ctor, I id, AggregateRoot<I> root) {
         checkNotNull(ctor);
+        checkNotNull(id);
         checkNotNull(root);
 
         try {
