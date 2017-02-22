@@ -51,7 +51,7 @@ public abstract class FailureThrowable extends Throwable {
         this.timestamp = getCurrentTime();
     }
 
-    //TODO:2017-02-22:alexander.yevsyukov: Rename to getFailureMessage().
+    //TODO:2017-02-22:alexander.yevsyukov: Rename to getMessage().
     // This involves modifying failure generation Gradle plug-in in the Tools project.
     public Message getFailure() {
         return failureMessage;
