@@ -25,11 +25,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
@@ -49,6 +49,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.spine3.protobuf.AnyPacker.pack;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -64,16 +66,19 @@ class Given {
 
     static Event validEvent() {
         return Event.newBuilder()
-                    .setMessage(AnyPacker.pack(ProjectCreated.newBuilder()
-                                                             .setProjectId(ProjectId.newBuilder()
-                                                                                    .setId("12345AD0"))
-                                                             .build())
-                                         .toBuilder()
-                                         .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' + ProjectCreated.getDescriptor()
-                                                                                                         .getFullName())
-                                         .build())
+                    .setMessage(
+                            pack(ProjectCreated.newBuilder()
+                                               .setProjectId(ProjectId.newBuilder()
+                                                                      .setId("12345AD0"))
+                                               .build())
+                                    .toBuilder()
+                                    .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' +
+                                                ProjectCreated.getDescriptor()
+                                                              .getFullName())
+                                    .build())
                     .setContext(EventContext.newBuilder()
-                                            .setDoNotEnrich(true)
+                                            .setEnrichment(Enrichment.newBuilder()
+                                                                     .setDoNotEnrich(true))
                                             .setCommandContext(CommandContext.getDefaultInstance())
                                             .setEventId(EventId.newBuilder()
                                                                .setUuid(Identifiers.newUuid())
@@ -83,7 +88,7 @@ class Given {
 
     static Command validCommand() {
         return Command.newBuilder()
-                      .setMessage(AnyPacker.pack(CreateProject.getDefaultInstance()))
+                      .setMessage(pack(CreateProject.getDefaultInstance()))
                       .setContext(CommandContext.getDefaultInstance())
                       .build();
     }
@@ -92,7 +97,8 @@ class Given {
         return new StandTestProjectionRepository(context);
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo(BoundedContext context) {
+    static AggregateRepository<ProjectId, StandTestAggregate>
+    aggregateRepo(BoundedContext context) {
         return new StandTestAggregateRepository(context);
     }
 
@@ -113,7 +119,8 @@ class Given {
                              .setStand(stand);
     }
 
-    static class StandTestProjectionRepository extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+    static class StandTestProjectionRepository
+            extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
             addIdSetFunction(ProjectCreated.class, new IdSetEventFunction<ProjectId, ProjectCreated>() {
@@ -127,7 +134,8 @@ class Given {
         }
     }
 
-    static class StandTestAggregateRepository extends AggregateRepository<ProjectId, StandTestAggregate> {
+    static class StandTestAggregateRepository
+            extends AggregateRepository<ProjectId, StandTestAggregate> {
 
         /**
          * Creates a new repository instance.
@@ -139,7 +147,8 @@ class Given {
         }
     }
 
-    static class StandTestAggregate extends Aggregate<ProjectId, StringValue, StringValue.Builder> {
+    static class StandTestAggregate
+            extends Aggregate<ProjectId, StringValue, StringValue.Builder> {
 
         /**
          * Creates a new aggregate instance.
@@ -153,7 +162,8 @@ class Given {
 
         @Assign
         List<? extends Message> handle(CreateProject createProject, CommandContext context) {
-            // In real life we would return a list with at least one element populated with real data.
+            // In real life we would return a list with at least one element
+            // populated with real data.
             return Collections.emptyList();
         }
 

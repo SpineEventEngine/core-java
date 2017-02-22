@@ -33,9 +33,9 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.base.FailureContext;
+import org.spine3.base.Failures;
 import org.spine3.protobuf.TypeName;
-import org.spine3.protobuf.Values;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
@@ -55,8 +55,10 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -341,11 +343,13 @@ public abstract class CommandStorageShould
     }
 
     private static Failure newFailure() {
-        final Any packedFailureMessage = AnyPacker.pack(Values.newStringValue("newFailure"));
+        final Any packedFailureMessage = pack(newStringValue("newFailure"));
         return Failure.newBuilder()
                       .setMessage(packedFailureMessage)
-                      .setStacktrace("failure stacktrace")
-                      .setTimestamp(getCurrentTime())
+                      .setContext(FailureContext.newBuilder()
+                                                .setFailureId(Failures.generateId())
+                                                .setStacktrace("failure stacktrace")
+                                                .setTimestamp(getCurrentTime()))
                       .build();
     }
 

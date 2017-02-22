@@ -69,12 +69,25 @@ public abstract class FailureThrowable extends Throwable {
      */
     public Failure toFailure() {
         final Any packedMessage = pack(failureMessage);
-        final String stacktrace = Throwables.getStackTraceAsString(this);
         final Failure.Builder builder =
                 Failure.newBuilder()
                        .setMessage(packedMessage)
-                       .setStacktrace(stacktrace)
-                       .setTimestamp(timestamp);
+                       .setContext(createContext());
         return builder.build();
+    }
+
+    private FailureContext createContext() {
+        final String stacktrace = Throwables.getStackTraceAsString(this);
+
+        //TODO:2017-02-22:alexander.yevsyukov: Pass Command to the context
+        // by adding commandMessage and commandContext parameters to
+        // FailureThrowable constructor. This, again, requires extending the Spine model
+        // compiler.
+
+        return FailureContext.newBuilder()
+                             .setFailureId(Failures.generateId())
+                             .setTimestamp(timestamp)
+                             .setStacktrace(stacktrace)
+                             .build();
     }
 }

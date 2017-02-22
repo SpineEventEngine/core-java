@@ -51,8 +51,11 @@ public class FailureThrowableShould {
         final Failure failureWrapper = new TestFailure(failure).toFailure();
 
         assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
-        assertFalse(failureWrapper.getStacktrace().isEmpty());
-        assertTrue(Timestamps.isValid(failureWrapper.getTimestamp()));
+        assertFalse(failureWrapper.getContext()
+                                  .getStacktrace()
+                                  .isEmpty());
+        assertTrue(Timestamps.isValid(failureWrapper.getContext()
+                                                    .getTimestamp()));
     }
 
     private static class TestFailure extends FailureThrowable {

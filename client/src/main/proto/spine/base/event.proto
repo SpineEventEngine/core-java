@@ -34,6 +34,7 @@ import "spine/annotations.proto";
 import "spine/validate.proto";
 import "spine/base/command.proto";
 import "spine/base/version.proto";
+import "spine/base/enrichment.proto";
 
 // Event identifier.
 message EventId {
@@ -90,23 +91,8 @@ message EventContext {
     // The version of the entity after the event was applied.
     Version version = 5 [(required) = true];
 
-    // An event can be enriched with one or more messages. Or, event enrichment can be disabled.
-    oneof enrichment_mode {
-
-        // One or more enrichments of the event.
-        Enrichments enrichments = 6;
-            // We are having the wrapper type because maps are not allowed in `oneof`s.
-
-        // The instruction not to enrich the event.
-        bool do_not_enrich = 7;
-    }
-}
-
-// A container for event enrichments.
-message Enrichments {
-
-    // A map from a fully qualified Protobuf type name of an enrichment, to its wrapped instance.
-    map<string, google.protobuf.Any> map = 1;
+    // Optional enrichment of the event.
+    Enrichment enrichment = 6;
 }
 
 // Enumeration of possible event validation technical error reasons.

@@ -30,7 +30,6 @@ import org.spine3.users.UserId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
@@ -61,7 +60,7 @@ public class Events {
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
-        final String value = UUID.randomUUID().toString();
+        final String value = Identifiers.newUuid();
         return EventId.newBuilder()
                       .setUuid(value)
                       .build();
@@ -198,8 +197,9 @@ public class Events {
     public static boolean isEnrichmentEnabled(Event event) {
         checkNotNull(event);
         final EventContext context = event.getContext();
-        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
-        final boolean isEnabled = mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+        final boolean isEnabled =
+                context.getEnrichment()
+                       .getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return isEnabled;
     }
 
@@ -209,11 +209,11 @@ public class Events {
      * @param context a context to get enrichments from
      * @return an optional of enrichments
      */
-    public static Optional<Enrichments> getEnrichments(EventContext context) {
+    public static Optional<Enrichment.Container> getEnrichments(EventContext context) {
         checkNotNull(context);
-        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
-        if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
-            return Optional.of(context.getEnrichments());
+        if (context.getEnrichment()
+                   .getModeCase() == Enrichment.ModeCase.CONTAINER) {
+            return Optional.of(context.getEnrichment().getContainer());
         }
         return Optional.absent();
     }
@@ -230,13 +230,13 @@ public class Events {
                                                                 EventContext context) {
         checkNotNull(enrichmentClass);
         checkNotNull(context);
-        final Optional<Enrichments> value = getEnrichments(context);
+        final Optional<Enrichment.Container> value = getEnrichments(context);
         if (!value.isPresent()) {
             return Optional.absent();
         }
-        final Enrichments enrichments = value.get();
+        final Enrichment.Container enrichments = value.get();
         final String typeName = TypeName.of(enrichmentClass);
-        final Any any = enrichments.getMapMap()
+        final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {
             return Optional.absent();

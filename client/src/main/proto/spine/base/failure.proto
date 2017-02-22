@@ -33,6 +33,9 @@ import "google/protobuf/struct.proto";
 
 import "spine/annotations.proto";
 import "spine/validate.proto";
+import "spine/base/command.proto";
+import "spine/base/enrichment.proto";
+import "spine/base/version.proto";
 
 // Failure identifier.
 message FailureId {
@@ -52,14 +55,31 @@ message Failure {
     // another part of the business logic code.
     google.protobuf.Any message = 1 [(required) = true];
 
+    // The context of the failure.
+    FailureContext context = 3;
+}
+
+// Meta-information for a failure.
+message FailureContext {
+
+    // The ID of the failure.
+    FailureId failure_id = 1 [(required) = true];
+
     // The moment when the failure message (not this message) was created.
     google.protobuf.Timestamp timestamp = 2 [(required) = true];
 
-    // A stacktrace of from the code, which generated the failure message (if available).
-    string stacktrace = 3;
+    // The command which generated the failure.
+    Command command = 3 [(required) = true];
 
-    //TODO:2017-02-21:alexander.yevsyukov: Add Command
-    // Have FailureContext type
-    // Add Enrichments
-    // Add FailureId
+    // The ID of the entity which generated the failure.
+    google.protobuf.Any producer_id = 4 [(required) = true];
+
+    // The version of the entity which generated the failure.
+    Version version = 5 [(required) = true];
+
+    // A stacktrace of from the code, which generated the failure message (if available).
+    string stacktrace = 6;
+
+    // Optional enrichment of the failure.
+    Enrichment enrichment = 7;
 }
