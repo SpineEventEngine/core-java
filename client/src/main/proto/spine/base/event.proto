@@ -31,6 +31,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 import "spine/base/command.proto";
 import "spine/base/version.proto";
 
@@ -61,20 +62,20 @@ message EventId {
 message Event {
 
     // The message of the event wrapped into `Any`.
-    google.protobuf.Any message = 1;
+    google.protobuf.Any message = 1 [(required) = true];
 
     // The context of the event.
-    EventContext context = 2;
+    EventContext context = 2 [(required) = true];
 }
 
 // Meta-information for an event.
 message EventContext {
 
     // The ID of the event.
-    EventId event_id = 1;
+    EventId event_id = 1 [(required) = true];
 
     // When the event occurred.
-    google.protobuf.Timestamp timestamp = 2;
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
@@ -84,10 +85,10 @@ message EventContext {
     // Examples of event producers are: aggregates, process managers
     // (which generate `CommandRouted`), bounded contexts (for integration events).
     //
-    google.protobuf.Any producer_id = 4;
+    google.protobuf.Any producer_id = 4 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 5;
+    Version version = 5 [(required) = true];
 
     // An event can be enriched with one or more messages. Or, event enrichment can be disabled.
     oneof enrichment_mode {
