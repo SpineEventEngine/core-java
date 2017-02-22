@@ -137,9 +137,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * Marks the entity with the passed ID as {@code archived}.
      *
      * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-    protected abstract boolean markArchived(I id);
+    protected abstract void markArchived(I id);
 
     /**
      * Marks the entity with the passed ID as {@code deleted}.
@@ -148,9 +147,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * can be later physically removed from a storage by custom clean-up operation.
      *
      * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-    protected abstract boolean markDeleted(I id);
+    protected abstract void markDeleted(I id);
 
     /**
      * Returns the storage assigned to this repository or {@code null} if

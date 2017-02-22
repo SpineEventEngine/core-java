@@ -217,9 +217,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        final boolean successful = repository.markArchived(id);
+        repository.markArchived(id);
 
-        assertTrue(successful);
         assertFalse(repository.load(id).isPresent());
     }
 
@@ -232,9 +231,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        final boolean successful = repository.markDeleted(id);
+        repository.markDeleted(id);
 
-        assertTrue(successful);
         assertFalse(repository.load(id).isPresent());
     }
 }
