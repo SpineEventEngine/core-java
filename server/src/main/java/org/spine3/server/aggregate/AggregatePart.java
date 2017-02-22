@@ -61,7 +61,7 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
     }
 
     /**
-     * Obtains a part state by its class.
+     * Obtains a state of another {@code AggregatePart} by its class.
      *
      * @param partStateClass the class of the state of the part
      * @param <P>            the type of the part state
