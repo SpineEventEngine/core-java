@@ -137,9 +137,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityStorageRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
 
-        // The attempt to mark a record which is not yet stored returns `false`.
-        storage.markArchived(id);
-
         // Write the record.
         storage.write(id, record);
 
@@ -159,15 +156,51 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                           .getArchived());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void fail_to_mark_non_existing_record_archived() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+
+        storage.markArchived(id);
+    }
+
+    @Test
+    public void mark_record_archived_multiple_times() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not archived.
+        assertFalse(storage.read(id)
+                           .get()
+                           .getEntityStatus()
+                           .getArchived());
+
+        markArchivedAndCheck(storage, id);
+        markArchivedAndCheck(storage, id);
+        markArchivedAndCheck(storage, id);
+    }
+
+    private void markArchivedAndCheck(RecordStorage<I> storage, I id) {
+        // Mark archived.
+        storage.markArchived(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id)
+                          .get()
+                          .getEntityStatus()
+                          .getArchived());
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
     @Test
     public void mark_record_as_deleted() {
         final I id = newId();
         final EntityStorageRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-
-        // The attempt to mark a record which is not yet stored returns `false`.
-        storage.markDeleted(id);
 
         // Write the record.
         storage.write(id, record);
@@ -188,6 +221,45 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                           .getDeleted());
 
         // Check that another attempt to mark deleted returns `false`.
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void fail_to_mark_non_existing_record_deleted() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+
+        storage.markDeleted(id);
+    }
+
+    @Test
+    public void mark_record_deleted_multiple_times() {
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+
+        // Write the record.
+        storage.write(id, record);
+
+        // See it is not archived.
+        assertFalse(storage.read(id)
+                           .get()
+                           .getEntityStatus()
+                           .getDeleted());
+
+        markDeletedAndCheck(storage, id);
+        markDeletedAndCheck(storage, id);
+        markDeletedAndCheck(storage, id);
+    }
+
+    private void markDeletedAndCheck(RecordStorage<I> storage, I id) {
+        // Mark archived.
+        storage.markArchived(id);
+
+        // See that the record is marked.
+        assertTrue(storage.read(id)
+                          .get()
+                          .getEntityStatus()
+                          .getArchived());
     }
 
     @Test
