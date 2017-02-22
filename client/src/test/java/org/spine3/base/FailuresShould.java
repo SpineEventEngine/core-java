@@ -18,37 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.base;
 
-import org.spine3.base.CommandId;
-import org.spine3.base.FailureThrowable;
+import com.google.common.testing.NullPointerTester;
+import org.junit.Test;
+import org.spine3.test.Tests;
+
+import static org.junit.Assert.assertFalse;
 
 /**
- * The service for updating a status of a command.
- *
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+public class FailuresShould {
 
-    private final CommandStore commandStore;
-
-    CommandStatusService(CommandStore commandStore) {
-        this.commandStore = commandStore;
+    @Test
+    public void have_utility_ctor() {
+        Tests.hasPrivateParameterlessCtor(Failures.class);
     }
 
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Failures.class);
     }
 
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
-    }
-
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toFailure());
-    }
-
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
+    @Test
+    public void generate_failure_id() {
+        assertFalse(Failures.generateId()
+                            .getUuid()
+                            .isEmpty());
     }
 }

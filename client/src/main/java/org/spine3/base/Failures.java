@@ -18,37 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
-
-import org.spine3.base.CommandId;
-import org.spine3.base.FailureThrowable;
+package org.spine3.base;
 
 /**
- * The service for updating a status of a command.
+ * Utility class for working with failures.
  *
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+public class Failures {
 
-    private final CommandStore commandStore;
-
-    CommandStatusService(CommandStore commandStore) {
-        this.commandStore = commandStore;
+    private Failures() {
+        // Prevent instantiation of this utility class.
     }
 
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
-    }
-
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
-    }
-
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toFailure());
-    }
-
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
+    /** Generates a new random UUID-based {@code FailureId}. */
+    public static FailureId generateId() {
+        final String value = Identifiers.newUuid();
+        return FailureId.newBuilder()
+                        .setUuid(value)
+                        .build();
     }
 }

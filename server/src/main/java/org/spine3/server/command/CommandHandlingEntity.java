@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -38,7 +39,6 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
-import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -69,7 +69,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * <p>The method may throw one or more throwables derived from
  * {@link org.spine3.base.FailureThrowable FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a {@linkplain org.spine3.base.FailureThrowable#getFailure() business failure}.
+ * because of a {@linkplain org.spine3.base.FailureThrowable#getFailureMessage() business failure}.
  *
  * @author Alexander Yevsyukov
  */

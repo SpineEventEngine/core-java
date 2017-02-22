@@ -29,7 +29,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
@@ -38,7 +40,6 @@ import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.Durations2;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -109,8 +110,8 @@ public class CommandBusShouldHandleCommandStatus {
         commandBus.post(command, responseObserver);
 
         verify(commandStore, atMost(1)).updateStatus(getId(command), dispatcher.exception);
-        final CommandEnvelope envelope = new CommandEnvelope(command);
-        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getMessage(), envelope.getCommandId());
     }
 
     @Test
@@ -122,7 +123,7 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toFailure()));
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 

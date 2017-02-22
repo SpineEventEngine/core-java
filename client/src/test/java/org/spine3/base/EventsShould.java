@@ -20,6 +20,7 @@
 package org.spine3.base;
 
 import com.google.common.base.Optional;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 import org.spine3.test.EventTests;
-import org.spine3.test.NullToleranceTest;
 
 import java.util.Comparator;
 import java.util.List;
@@ -188,9 +188,11 @@ public class EventsShould {
 
     @Test
     public void return_false_if_event_enrichment_is_disabled() {
-        final EventContext withDisabledEnrichment = context.toBuilder()
-                                                           .setDoNotEnrich(true)
-                                                           .build();
+        final EventContext withDisabledEnrichment =
+                context.toBuilder()
+                       .setEnrichment(Enrichment.newBuilder()
+                                                .setDoNotEnrich(true))
+                       .build();
         final Event event = createEvent(stringValue, withDisabledEnrichment);
 
         assertFalse(isEnrichmentEnabled(event));
@@ -201,10 +203,11 @@ public class EventsShould {
     public void return_all_event_enrichments() {
         final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
 
-        final Optional<Enrichments> enrichments = Events.getEnrichments(context);
+        final Optional<Enrichment.Container> enrichments = Events.getEnrichments(context);
 
         assertTrue(enrichments.isPresent());
-        assertEquals(context.getEnrichments(), enrichments.get());
+        assertEquals(context.getEnrichment()
+                            .getContainer(), enrichments.get());
     }
 
     @Test
@@ -239,19 +242,22 @@ public class EventsShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Events.class)
-                                                                     .addDefaultValue(stringValue.getClass())
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(StringValue.class, StringValue.getDefaultInstance())
+                .setDefault(EventContext.class, EventTests.newEventContext())
+                .testAllPublicStaticMethods(Events.class);
     }
 
-    private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {
-        final Enrichments.Builder enrichments = Enrichments.newBuilder()
-                                                           .putMap(enrichmentKey, AnyPacker.pack(enrichment));
-        final EventContext context = EventTests.newEventContext().toBuilder()
-                                               .setEnrichments(enrichments.build())
+    private static EventContext newEventContextWithEnrichment(String enrichmentKey,
+                                                              Message enrichment) {
+        final Enrichment.Builder enrichments =
+                Enrichment.newBuilder()
+                          .setContainer(Enrichment.Container.newBuilder()
+                                                            .putItems(enrichmentKey,
+                                                                      AnyPacker.pack(enrichment)));
+        final EventContext context = EventTests.newEventContext()
+                                               .toBuilder()
+                                               .setEnrichment(enrichments.build())
                                                .build();
         return context;
     }
