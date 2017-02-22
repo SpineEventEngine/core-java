@@ -54,8 +54,8 @@ public class Entities {
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends Entity<I, ?>, I> Constructor<E>
-    getConstructor(Class<E> entityClass, Class<I> idClass) {
+    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                            Class<I> idClass) {
         checkNotNull(entityClass);
         checkNotNull(idClass);
 
@@ -83,14 +83,32 @@ public class Entities {
      *
      * <p>Returns the constructor if:
      *
-     * <li>the first argument is aggregate ID and the second is {@code AggregateRoot}. For example:
+     * <ul>
+     *      <li>the first argument is aggregate ID and the second is {@code AggregateRoot}.
+     *      For example:
      *
-     * <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre></li>
+     *          <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre>
+     *      </li>
      *
-     * <li>the second constructor parameter is subtype of the {@code AggregateRoot}. For example:
+     *      <li>the second constructor parameter is subtype of the {@code AggregateRoot}.
+     *      For example:
      *
-     * <pre>{@code SubAggregateRoot extends AggregateRoot{...};
-     * AggregatePartCtor(AnAggregateId id, SubAggregateRoot root){...}}</pre></li>
+     *          <pre>{@code
+     *
+     *              // A user-defined AggregateRoot:
+     *              class CustomAggregateRoot extends AggregateRoot{...}
+     *
+     *              // An AggregatePart for the CustomAggregateRoot:
+     *              class CustomAggregatePart extends AggregatePart<...>{
+     *
+     *                  // The expected constructor:
+     *                  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root){...}
+     *              }
+     *
+     *          }
+     *          </pre>
+     *      </li>
+     * </ul>
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
@@ -149,7 +167,7 @@ public class Entities {
     @SuppressWarnings("unchecked")
     // It is OK because the constructor arguments are checked before returning the constructor.
     private static <E extends AggregatePart, I> Constructor<E> getAggregatePartSupertypeCtor
-    (Class<E> entityClass, Class<I> idClass) {
+                   (Class<E> entityClass, Class<I> idClass) {
         checkNotNull(entityClass);
         checkNotNull(idClass);
 
@@ -173,23 +191,24 @@ public class Entities {
     /**
      * Creates a new {@code AggregateRoot} entity and sets it to the default state.
      *
-     * @param id             the ID of the {@code AggregatePart} is managed by {@code AggregateRoot}
-     * @param boundedContext the {@code BoundedContext} to use
-     * @param rootClass      the class of the {@code AggregateRoot}
-     * @param <I>            the type of entity IDs
+     * @param id        the ID of the {@code AggregatePart} is managed by {@code AggregateRoot}
+     * @param ctx       the {@code BoundedContext} to use
+     * @param rootClass the class of the {@code AggregateRoot}
+     * @param <I>       the type of entity IDs
      * @return an {@code AggregateRoot} instance
      */
-    public static <I, R extends AggregateRoot<I>> R
-    createAggregateRootEntity(I id, BoundedContext boundedContext, Class<R> rootClass) {
+    public static <I, R extends AggregateRoot<I>> R createAggregateRootEntity(I id,
+                                                                              BoundedContext ctx,
+                                                                              Class<R> rootClass) {
         checkNotNull(id);
-        checkNotNull(boundedContext);
+        checkNotNull(ctx);
         checkNotNull(rootClass);
 
         try {
             final Constructor<R> rootConstructor =
-                    rootClass.getDeclaredConstructor(boundedContext.getClass(), id.getClass());
+                    rootClass.getDeclaredConstructor(ctx.getClass(), id.getClass());
             rootConstructor.setAccessible(true);
-            final R root = rootConstructor.newInstance(boundedContext, id);
+            final R root = rootConstructor.newInstance(ctx, id);
             return root;
         } catch (NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {
