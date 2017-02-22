@@ -21,10 +21,12 @@
 package org.spine3.base;
 
 import com.google.common.base.Throwables;
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.AnyPacker;
 
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -35,31 +37,57 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;
-    // We accept GeneratedMessage (instead of Message) because generated messages implement Serializable.
-    private final GeneratedMessageV3 failure;
+
+    // We accept GeneratedMessage (instead of Message) because
+    // generated messages implement Serializable.
+    private final GeneratedMessageV3 failureMessage;
+
+    /** The moment of creation of this object. */
     private final Timestamp timestamp;
 
-    protected FailureThrowable(GeneratedMessageV3 failure) {
+    protected FailureThrowable(GeneratedMessageV3 failureMessage) {
         super();
-        this.failure = failure;
+        this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
     }
 
-    public GeneratedMessageV3 getFailure() {
-        return failure;
+    //TODO:2017-02-22:alexander.yevsyukov: Rename to getFailureMessage().
+    // This involves modifying failure generation Gradle plug-in in the Tools project.
+    public Message getFailure() {
+        return failureMessage;
     }
 
-    /** Returns timestamp of the instance creation. */
+    /**
+     * Returns timestamp of the failure message creation.
+     */
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    /** Converts this instance into {@link Failure} message. */
-    public Failure toMessage() {
-        final Failure.Builder builder = Failure.newBuilder()
-                                               .setInstance(AnyPacker.pack(this.failure))
-                                               .setStacktrace(Throwables.getStackTraceAsString(this))
-                                               .setTimestamp(this.timestamp);
+    /**
+     * Converts this {@code FailureThrowable} into {@link Failure}.
+     */
+    public Failure toFailure() {
+        final Any packedMessage = pack(failureMessage);
+        final Failure.Builder builder =
+                Failure.newBuilder()
+                       .setMessage(packedMessage)
+                       .setContext(createContext());
         return builder.build();
+    }
+
+    private FailureContext createContext() {
+        final String stacktrace = Throwables.getStackTraceAsString(this);
+
+        //TODO:2017-02-22:alexander.yevsyukov: Pass Command to the context
+        // by adding commandMessage and commandContext parameters to
+        // FailureThrowable constructor. This, again, requires extending the Spine model
+        // compiler.
+
+        return FailureContext.newBuilder()
+                             .setFailureId(Failures.generateId())
+                             .setTimestamp(timestamp)
+                             .setStacktrace(stacktrace)
+                             .build();
     }
 }

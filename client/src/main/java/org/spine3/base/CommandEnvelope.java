@@ -18,29 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.base;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.server.type.CommandClass;
-
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
 
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
  *
  * @author Alexander Yevsyukov
  */
-final class CommandEnvelope {
-
-    /** The command that we wrap. */
-    private final Command command;
+public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
 
     // The below fields are calculated from the command.
 
@@ -53,47 +43,54 @@ final class CommandEnvelope {
     /** The command class. */
     private final CommandClass commandClass;
 
-    CommandEnvelope(Command command) {
-        this.command = checkNotNull(command);
+    private CommandEnvelope(Command command) {
+        super(command);
         this.commandId = getId(command);
-        this.commandMessage = getMessage(command);
+        this.commandMessage = Commands.getMessage(command);
         this.commandClass = CommandClass.of(commandMessage);
     }
 
-    Command getCommand() {
-        return command;
+    /**
+     * Creates an instance with the passed command.
+     */
+    public static CommandEnvelope of(Command command) {
+        checkNotNull(command);
+        return new CommandEnvelope(command);
     }
 
-    CommandId getCommandId() {
+    /**
+     * Obtains the enclosed command object.
+     */
+    public Command getCommand() {
+        return getOuterObject();
+    }
+
+    /**
+     * Obtains the ID of the command.
+     */
+    public CommandId getCommandId() {
         return commandId;
     }
 
-    Message getCommandMessage() {
+    /**
+     * Obtains the command message.
+     */
+    @Override
+    public Message getMessage() {
         return commandMessage;
     }
 
-    CommandContext getCommandContext() {
-        return command.getContext();
+    /**
+     * Obtains the command context.
+     */
+    public CommandContext getCommandContext() {
+        return getOuterObject().getContext();
     }
 
-    CommandClass getCommandClass() {
+    /**
+     * Obtains the command class.
+     */
+    public CommandClass getCommandClass() {
         return commandClass;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof CommandEnvelope)) {
-            return false;
-        }
-        CommandEnvelope that = (CommandEnvelope) o;
-        return Objects.equals(command, that.command);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(command);
     }
 }

@@ -20,6 +20,8 @@
 
 package org.spine3.server.command;
 
+import org.spine3.base.CommandEnvelope;
+
 /**
  * The endpoint for {@link CommandHandler}s.
  *
@@ -35,7 +37,7 @@ class HandlerEndpoint implements CommandEndpoint {
 
     @Override
     public void receive(CommandEnvelope commandEnvelope) {
-        handler.handle(commandEnvelope.getCommandMessage(),
+        handler.handle(commandEnvelope.getMessage(),
                        commandEnvelope.getCommandContext());
     }
 }

@@ -50,6 +50,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.server.storage.Given.AnEvent.projectCreated;
 
 /**
  * @author Alexander Litus
@@ -269,7 +270,7 @@ public abstract class AggregateStorageShould
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
-        final Event expectedEvent = org.spine3.server.storage.Given.Event.projectCreated();
+        final Event expectedEvent = projectCreated();
 
         storage.writeEvent(id, expectedEvent);
 

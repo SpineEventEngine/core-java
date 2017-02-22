@@ -18,12 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.type;
+package org.spine3.base;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
-import org.spine3.base.Commands;
 
 import java.util.Set;
 
@@ -53,8 +51,9 @@ public final class CommandClass extends MessageClass {
     /**
      * Creates a new instance for the class of the passed command.
      *
-     * <p>If an instance of {@link Command} (which implements {@code Message}) is passed to this method,
-     * enclosing command message will be un-wrapped to determine the class of the command.
+     * <p>If an instance of {@link Command} (which implements {@code Message}) is
+     * passed to this method, enclosing command message will be un-wrapped to
+     * determine the class of the command.
      *
      * @param command a command for which to get the class
      * @return new instance
@@ -71,7 +70,8 @@ public final class CommandClass extends MessageClass {
     }
 
     /**
-     * Obtains Java class of the command message or a {@link Command} instance containing the message of interest.
+     * Obtains Java class of the command message or a {@link Command} instance
+     * containing the message of interest.
      */
     public static Class<? extends Message> valueOf(Message command) {
         return of(command).value();

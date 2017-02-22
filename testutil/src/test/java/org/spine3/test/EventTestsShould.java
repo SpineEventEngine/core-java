@@ -21,7 +21,10 @@
 package org.spine3.test;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov
@@ -36,6 +39,7 @@ public class EventTestsShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(Timestamp.class, getCurrentTime())
                 .testAllPublicStaticMethods(EventTests.class);
     }
 }

@@ -44,12 +44,6 @@ public class Durations2 {
         // Prevent instantiation of this utility class.
     }
 
-    /*
-     * The following group of factory methods is for mimicking javax.time (or java.time) API
-     * of creating durations. The goal of these methods is to allow for quick transition to
-     * using com.google.protobuf.Duration just by adding 's' before the dot.
-     */
-
     /**
      * Obtains an instance of {@code Duration} representing the passed number of minutes.
      *
@@ -141,7 +135,7 @@ public class Durations2 {
         if (d2 == null) {
             return d1;
         }
-        final Duration result = com.google.protobuf.util.Durations.add(d1, d2);
+        final Duration result = Durations.add(d1, d2);
         return result;
     }
 
@@ -157,7 +151,7 @@ public class Durations2 {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
         checkNotNull(duration);
-        final long result = com.google.protobuf.util.Durations.toNanos(duration);
+        final long result = Durations.toNanos(duration);
         return result;
     }
 

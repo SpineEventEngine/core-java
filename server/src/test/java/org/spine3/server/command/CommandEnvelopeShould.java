@@ -20,12 +20,14 @@
 
 package org.spine3.server.command;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Commands;
-import org.spine3.server.type.CommandClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,7 +48,14 @@ public class CommandEnvelopeShould {
     @Before
     public void setUp() {
         command = createProject();
-        envelope = new CommandEnvelope(command);
+        envelope = CommandEnvelope.of(command);
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .testAllPublicStaticMethods(CommandEnvelope.class);
     }
 
     @Test
@@ -61,7 +70,7 @@ public class CommandEnvelopeShould {
 
     @Test
     public void extract_command_message() {
-        final Message commandMessage = envelope.getCommandMessage();
+        final Message commandMessage = envelope.getMessage();
         assertNotNull(commandMessage);
         assertFalse(isDefault(commandMessage));
     }
@@ -80,7 +89,7 @@ public class CommandEnvelopeShould {
     @Test
     public void have_equals() {
 
-        assertEquals(envelope, new CommandEnvelope(command));
+        assertEquals(envelope, CommandEnvelope.of(command));
         assertTrue(envelope.equals(envelope));
         assertFalse(envelope.equals(command));
     }

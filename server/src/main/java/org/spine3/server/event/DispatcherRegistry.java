@@ -22,7 +22,7 @@ package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import org.spine3.server.type.EventClass;
+import org.spine3.base.EventClass;
 
 import java.util.Set;
 
