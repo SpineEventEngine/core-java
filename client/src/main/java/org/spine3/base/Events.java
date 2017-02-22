@@ -160,12 +160,13 @@ public class Events {
      *
      * @param context the event context to to get the event producer ID
      * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
-     * @return producer ID
+     * @return the producer ID
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
-        @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
+        @SuppressWarnings("unchecked")
+            // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I) aggregateId;
         return id;
 
