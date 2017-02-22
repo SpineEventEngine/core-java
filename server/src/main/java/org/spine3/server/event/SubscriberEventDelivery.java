@@ -20,7 +20,6 @@
 package org.spine3.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
