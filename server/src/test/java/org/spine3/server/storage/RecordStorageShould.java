@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.status.EntityStatus;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -276,6 +277,58 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // There's no record with such ID.
         assertFalse(storage.read(id).isPresent());
+    }
+
+    @Test
+    public void mark_deleted_after_archived() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+
+        // Write the record.
+        storage.write(id, record);
+
+        storage.markArchived(id);
+
+        final EntityStatus archived = storage.read(id)
+                                             .get()
+                                             .getEntityStatus();
+        assertTrue(archived.getArchived());
+        assertFalse(archived.getDeleted());
+
+        storage.markDeleted(id);
+
+        final EntityStatus archivedAndDeleted = storage.read(id)
+                                                       .get()
+                                                       .getEntityStatus();
+        assertTrue(archivedAndDeleted.getArchived());
+        assertTrue(archivedAndDeleted.getDeleted());
+    }
+
+    @Test
+    public void mark_archived_after_deleted() {
+        final RecordStorage<I> storage = getStorage();
+        final I id = newId();
+        final EntityStorageRecord record = newStorageRecord(id);
+
+        // Write the record.
+        storage.write(id, record);
+
+        storage.markDeleted(id);
+
+        final EntityStatus deleted = storage.read(id)
+                                             .get()
+                                             .getEntityStatus();
+        assertTrue(deleted.getDeleted());
+        assertFalse(deleted.getArchived());
+
+        storage.markArchived(id);
+
+        final EntityStatus archivedAndDeleted = storage.read(id)
+                                                       .get()
+                                                       .getEntityStatus();
+        assertTrue(archivedAndDeleted.getArchived());
+        assertTrue(archivedAndDeleted.getDeleted());
     }
 
     @Test
