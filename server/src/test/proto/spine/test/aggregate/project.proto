@@ -32,7 +32,7 @@ message ProjectId {
 }
 
 enum Status {
-    UNDEFINED = 0;
+    PS_UNDEFINED = 0;
     CREATED = 1;
     STARTED = 2;
     DONE = 3;
