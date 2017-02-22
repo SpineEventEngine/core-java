@@ -30,12 +30,18 @@ import org.spine3.server.aggregate.AggregateRoot;
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.server.entity.Entities.createAggregatePartEntity;
+import static org.spine3.server.entity.Entities.createAggregateRootEntity;
+import static org.spine3.server.entity.Entities.getAggregatePartConstructor;
+import static org.spine3.server.entity.Entities.getConstructor;
+import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Illia Shepilov
  */
-public class AbstractEntityShould {
+public class EntitiesShould {
 
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
@@ -50,32 +56,35 @@ public class AbstractEntityShould {
     }
 
     @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateParameterlessCtor(Entities.class));
+    }
+
+    @Test
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
                 AnAggregatePart.class.getDeclaredConstructor(String.class, AnAggregateRoot.class);
-        final AggregatePart aggregatePart =
-                AbstractEntity.createAggregatePartEntity(constructor, id, root);
+        final AggregatePart aggregatePart = createAggregatePartEntity(constructor, id, root);
         assertNotNull(aggregatePart);
     }
 
     @Test
     public void create_aggregate_root_entity() {
         final AnAggregateRoot aggregateRoot =
-                AbstractEntity.createAggregateRootEntity(id, boundedContext, AnAggregateRoot.class);
+                createAggregateRootEntity(id, boundedContext, AnAggregateRoot.class);
         assertNotNull(aggregateRoot);
     }
 
     @SuppressWarnings("unchecked") // It is needed for testing.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        AbstractEntity.getAggregatePartConstructor(
-                WrongAggregatePart.class, AggregateRoot.class, id.getClass());
+        getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class, id.getClass());
     }
 
     @SuppressWarnings("unchecked") // It is needed for testing.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
-        AbstractEntity.getConstructor(AggregatePart.class, id.getClass());
+        getConstructor(AggregatePart.class, id.getClass());
     }
 
     /*

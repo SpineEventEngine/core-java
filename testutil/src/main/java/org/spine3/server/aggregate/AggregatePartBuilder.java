@@ -21,10 +21,13 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
-import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.Entities;
 import org.spine3.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
+
+import static org.spine3.server.entity.Entities.createAggregatePartEntity;
+import static org.spine3.server.entity.Entities.getAggregatePartConstructor;
 
 /**
  * Utility class for building {@code AggregatePart}s for tests.
@@ -60,13 +63,13 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     protected A createEntity(I id) {
         final Constructor<A> constructor = getConstructor();
         final AggregateRoot<I> root = aggregateRoot;
-        final A result = AbstractEntity.createAggregatePartEntity(constructor, id, root);
+        final A result = createAggregatePartEntity(constructor, id, root);
         return result;
     }
 
     @Override
     protected Constructor<A> getConstructor() {
-        final Constructor<A> constructor = AbstractEntity.getAggregatePartConstructor(
+        final Constructor<A> constructor = getAggregatePartConstructor(
                 getResultClass(), aggregateRoot.getClass(), getIdClass());
         return constructor;
     }

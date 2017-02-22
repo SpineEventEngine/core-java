@@ -30,7 +30,6 @@ import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -52,6 +51,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
+import static org.spine3.server.entity.Entities.createEntity;
+import static org.spine3.server.entity.Entities.getConstructor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
@@ -115,7 +116,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the entity constructor
      */
     protected Constructor<A> getEntityConstructor() {
-        final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
+        final Constructor<A> result = getConstructor(entityClass, idClass);
         return result;
     }
 
@@ -128,7 +129,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A create(I id) {
         initEntityConstructorIfNeeded();
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        return createEntity(this.entityConstructor, id);
     }
 
     /**

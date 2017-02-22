@@ -52,6 +52,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class AggregateRootShould {
 
     private static final StreamObserver<Response> RESPONSE_OBSERVER = new MockStreamObserver();
+
     private ProjectRoot aggregateRoot;
     private CommandBus commandBus;
     private ProjectId projectId;
@@ -105,7 +106,7 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void set_variable_to_true_when_it_is_trying_to_start_uncreated_project() {
+    public void set_variable_to_true_when_it_is_trying_to_start_inexistent_project() {
         final Command startProjectCmd = createStartProjectCmd();
         commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
         assertTrue(ProjectLifeCyclePart.exceptionOccurred);
@@ -140,7 +141,7 @@ public class AggregateRootShould {
     private static class ProjectDefinitionPart
             extends AggregatePart<ProjectId, ProjectDefinition, ProjectDefinition.Builder> {
 
-        private ProjectDefinitionPart(ProjectId id, AggregateRoot root) {
+        private ProjectDefinitionPart(ProjectId id, ProjectRoot root) {
             super(id, root);
         }
 

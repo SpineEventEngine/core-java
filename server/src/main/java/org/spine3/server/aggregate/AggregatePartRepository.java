@@ -24,8 +24,8 @@ import org.spine3.server.BoundedContext;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.entity.AbstractEntity.createAggregatePartEntity;
-import static org.spine3.server.entity.AbstractEntity.getAggregatePartConstructor;
+import static org.spine3.server.entity.Entities.createAggregatePartEntity;
+import static org.spine3.server.entity.Entities.getAggregatePartConstructor;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
