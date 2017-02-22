@@ -34,6 +34,7 @@ import org.spine3.server.storage.EntityStorageRecord;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -58,39 +59,30 @@ class TenantRecords<I> implements TenantStorage<I, EntityStorageRecord> {
         return Optional.fromNullable(record);
     }
 
-    boolean markArchived(I id) {
+    void markArchived(I id) {
         final EntityStorageRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-        final EntityStatus currentStatus = record.getEntityStatus();
-        if (currentStatus.getArchived()) {
-            return false;
-        }
+        checkNotNull(record, "Can't mark a non-existing record archived.");
+        final EntityStatus status = record.getEntityStatus()
+                                          .toBuilder()
+                                          .setArchived(true)
+                                          .build();
         final EntityStorageRecord archivedRecord = record.toBuilder()
-                                                         .setEntityStatus(currentStatus.toBuilder()
-                                                                                       .setArchived(true))
+                                                         .setEntityStatus(status)
                                                          .build();
         records.put(id, archivedRecord);
-        return true;
     }
 
-    boolean markDeleted(I id) {
+    void markDeleted(I id) {
         final EntityStorageRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-
-        final EntityStatus currentStatus = record.getEntityStatus();
-        if (currentStatus.getDeleted()) {
-            return false;
-        }
+        checkNotNull(record, "Can't mark a non-existing record deleted.");
+        final EntityStatus status = record.getEntityStatus()
+                                          .toBuilder()
+                                          .setDeleted(true)
+                                          .build();
         final EntityStorageRecord deletedRecord = record.toBuilder()
-                                                        .setEntityStatus(currentStatus.toBuilder()
-                                                                                      .setDeleted(true))
+                                                        .setEntityStatus(status)
                                                         .build();
         records.put(id, deletedRecord);
-        return true;
     }
 
     boolean delete(I id) {
