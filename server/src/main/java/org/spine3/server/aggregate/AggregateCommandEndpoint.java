@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Stringifiers;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
@@ -119,14 +119,14 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final EntityStatus statusBefore = aggregate.getStatus();
+            final Visibility statusBefore = aggregate.getVisibility();
 
             aggregate.dispatchCommand(commandMessage, context);
 
             // Update status only if the command was handled successfully.
-            final EntityStatus statusAfter = aggregate.getStatus();
+            final Visibility statusAfter = aggregate.getVisibility();
             if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                storage().writeStatus(aggregateId, statusAfter);
+                storage().writeVisibility(aggregateId, statusAfter);
             }
 
             return aggregate;

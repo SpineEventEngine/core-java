@@ -22,8 +22,8 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Map;
@@ -90,25 +90,25 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids) {
-        final Iterable<EntityStorageRecord> result = recordStorage.readMultiple(ids);
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        final Iterable<EntityRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords() {
-        final Map<I, EntityStorageRecord> result = recordStorage.readAll();
+    protected Map<I, EntityRecord> readAllRecords() {
+        final Map<I, EntityRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
-    protected Map<I, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
-        final Map<I, EntityStorageRecord> result = recordStorage.readAll(fieldMask);
+    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
+        final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 }

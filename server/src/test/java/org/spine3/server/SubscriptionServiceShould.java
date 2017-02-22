@@ -29,9 +29,8 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Version;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
@@ -50,6 +49,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.base.Versions.newVersion;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
@@ -223,7 +223,7 @@ public class SubscriptionServiceShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(Version.of(version, Timestamps.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(version, Timestamps2.getCurrentTime()));
         return entity;
     }
 

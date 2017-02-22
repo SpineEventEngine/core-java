@@ -23,7 +23,7 @@ package org.spine3.server.projection;
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
@@ -46,20 +46,20 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Optional<EntityStorageRecord> readRecord(I id) {
+    protected Optional<EntityRecord> readRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
-        final Optional<EntityStorageRecord> record = storage.read(id);
+        final Optional<EntityRecord> record = storage.read(id);
         return record;
     }
 
     @Override
-    protected void writeRecord(I id, EntityStorageRecord record) {
+    protected void writeRecord(I id, EntityRecord record) {
         final RecordStorage<I> storage = recordStorage();
         storage.write(id, record);
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityStorageRecord> records) {
+    protected void writeRecords(Map<I, EntityRecord> records) {
         final RecordStorage<I> storage = recordStorage();
         storage.write(records);
     }

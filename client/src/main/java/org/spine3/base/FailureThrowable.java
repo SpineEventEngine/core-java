@@ -25,7 +25,7 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
 
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Abstract base for throwable business failures.

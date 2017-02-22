@@ -21,8 +21,6 @@
 package org.spine3.server.entity;
 
 import org.junit.Test;
-import org.spine3.server.entity.status.EntityStatus;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
@@ -41,8 +39,8 @@ public class PredicatesShould {
 
     @Test
     public void consider_archived_entity_invisible() {
-        final EntityStatus status =
-                EntityStatus.newBuilder()
+        final Visibility status =
+                Visibility.newBuilder()
                             .setArchived(true)
                             .build();
         assertFalse(isEntityVisible().apply(status));
@@ -50,8 +48,8 @@ public class PredicatesShould {
 
     @Test
     public void consider_deleted_entity_invisible() {
-        final EntityStatus status =
-                EntityStatus.newBuilder()
+        final Visibility status =
+                Visibility.newBuilder()
                             .setDeleted(true)
                             .build();
         assertFalse(isEntityVisible().apply(status));
@@ -59,10 +57,10 @@ public class PredicatesShould {
 
     @Test
     public void consider_archived_record_invisible() {
-        final EntityStorageRecord record =
-                EntityStorageRecord
+        final EntityRecord record =
+                EntityRecord
                         .newBuilder()
-                        .setEntityStatus(EntityStatus.newBuilder()
+                        .setVisibility(Visibility.newBuilder()
                                                      .setArchived(true))
                         .build();
         assertFalse(isRecordVisible().apply(record));
@@ -70,10 +68,10 @@ public class PredicatesShould {
 
     @Test
     public void consider_deleted_record_invisible() {
-        final EntityStorageRecord record =
-                EntityStorageRecord
+        final EntityRecord record =
+                EntityRecord
                         .newBuilder()
-                        .setEntityStatus(EntityStatus.newBuilder()
+                        .setVisibility(Visibility.newBuilder()
                                                      .setDeleted(true))
                         .build();
         assertFalse(isRecordVisible().apply(record));

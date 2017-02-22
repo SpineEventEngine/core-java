@@ -40,13 +40,20 @@ import "spine/client/entities.proto";
 message QueryContext {
 
     ui.Language language = 1;
+
     //TODO:2015-12-16:alexander.yevsyukov: Finish
+    // extend with (see CommandContext for details):
+    //    users.UserId actor = 2 [(required) = true];
+    //    time.ZoneOffset zone_offset = 4 [(required) = true];
+    //              here should come language with index 5.
+    //    google.protobuf.Timestamp timestamp = 6 [(required) = true];
 }
 
 // The main abstraction over the read-side API.
 //
 // Allows clients to form the requests to the read-side through the `QueryService`.
 // `Query` execution typically results in a QueryResponse object.
+//
 message Query {
 
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
@@ -62,7 +69,8 @@ message Query {
 // The result of `Query` processing.
 //
 // Contains the actual processing results and other response attributes.
-// Used as a result of {@code QueryService#Read(Query)} gRPC method call.
+// Used as a result of `QueryService.Read(Query)` gRPC method call.
+//
 message QueryResponse {
 
     // Represents the base part of the response. I.e. whether the `Query` has been acked or not.
@@ -71,6 +79,7 @@ message QueryResponse {
     // Reserved for more query response attributes, e.g. to describe paginated response etc.
     reserved 2 to 4;
 
+    //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
     // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
 }

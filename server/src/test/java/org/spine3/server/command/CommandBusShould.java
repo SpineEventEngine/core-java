@@ -127,18 +127,22 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     public void verify_tenant_id_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutTenant();
 
         commandBus.post(cmd, responseObserver);
 
-        checkCommandError(responseObserver.getThrowable(), TENANT_UNKNOWN, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(),
+                          TENANT_UNKNOWN,
+                          InvalidCommandException.class,
+                          cmd);
+
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 
     @Test
     public void return_InvalidCommandException_if_command_is_invalid() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
@@ -297,7 +301,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     @Test
     public void store_invalid_command_with_error_status() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
@@ -349,12 +353,22 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
      * Test utility methods.
      ***********************/
 
-    private static Command createProjectCmdWithoutContext() {
+    private static Command commandWithoutContext() {
         final Command cmd = createProject();
         final Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
                                       .build();
         return invalidCmd;
+    }
+
+    private static Command commandWithoutTenant() {
+        final Command cmd = createProject();
+        final Command tenantless = cmd.toBuilder()
+                                      .setContext(cmd.getContext()
+                                                     .toBuilder()
+                                                     .clearTenantId())
+                                      .build();
+        return tenantless;
     }
 
     /**

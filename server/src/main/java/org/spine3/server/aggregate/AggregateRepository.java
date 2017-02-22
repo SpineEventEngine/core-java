@@ -28,17 +28,15 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
-import org.spine3.server.entity.status.EntityStatus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
@@ -51,9 +49,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -150,7 +149,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
         final Class<? extends Message> stateClass = getGenericParameterType(
                 aggregateClass,
-                Entity.GenericParamer.STATE.getIndex()
+                Entity.GenericParameter.STATE.getIndex()
         );
         return stateClass;
     }
@@ -256,16 +255,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @VisibleForTesting
     A loadOrCreate(I id) {
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // The storage always returns events.
-        final AggregateEvents aggregateEvents = aggregateStorage().read(id)
-                                                                  .get();
-        final Snapshot snapshot = aggregateEvents.getSnapshot();
-        final A result = create(id);
-        final List<Event> events = aggregateEvents.getEventList();
-        if (isNotDefault(snapshot)) {
-            result.restore(snapshot);
+        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
+        if (!eventsFromStorage.isPresent()) {
+            throw unableToLoadEvents(id);
         }
-        result.play(events);
+        final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
+        final A result = create(id);
+        result.play(aggregateStateRecord);
         return result;
     }
 
@@ -286,7 +282,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
                 final Snapshot snapshot = aggregate.toSnapshot();
-                storage.write(id, snapshot);
+                storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
             }
         }
@@ -307,11 +303,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured
      *                               prior to calling this method
-     * @see AggregateEvents
+     * @see AggregateStateRecord
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
-        final Optional<EntityStatus> status = aggregateStorage().readStatus(id);
+        final Optional<Visibility> status = aggregateStorage().readVisibility(id);
         if (status.isPresent() && !Predicates.isEntityVisible()
                                              .apply(status.get())) {
             // If there is a status that hides the aggregate, return nothing.
@@ -336,6 +332,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected boolean markDeleted(I id) {
         return aggregateStorage().markDeleted(id);
+    }
+
+    private static <I> IllegalStateException unableToLoadEvents(I id) {
+        final String errMsg = format(
+                "Unable to load events for the aggregate with ID: %s",
+                idToString(id)
+        );
+        throw new IllegalStateException(errMsg);
     }
 
     private enum LogSingleton {

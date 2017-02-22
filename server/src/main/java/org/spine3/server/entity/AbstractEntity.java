@@ -53,7 +53,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Creates new instance with the passed ID.
      */
     protected AbstractEntity(I id) {
-        this.id = id;
+        this.id = checkNotNull(id);
     }
 
     /**

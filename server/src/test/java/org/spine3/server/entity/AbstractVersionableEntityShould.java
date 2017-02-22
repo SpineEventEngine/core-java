@@ -34,9 +34,7 @@ public class AbstractVersionableEntityShould {
     public void have_equals() throws Exception {
         final AvEntity entity = new AvEntity(88L);
         final AvEntity another = new AvEntity(88L);
-        another.setState(entity.getState(), entity.getVersion()
-                                                  .getNumber(), entity.getVersion()
-                                                                      .getTimestamp());
+        another.setState(entity.getState(), entity.getVersion());
 
         new EqualsTester().addEqualityGroup(entity, another)
                           .addEqualityGroup(new AvEntity(42L))

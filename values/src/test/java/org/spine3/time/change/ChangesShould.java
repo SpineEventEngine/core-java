@@ -22,8 +22,9 @@ package org.spine3.time.change;
 
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
+import org.spine3.test.TimeTests;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 import org.spine3.time.LocalDate;
@@ -55,33 +56,33 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Interval_previousValue() {
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = Timestamps2.getCurrentTime();
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         Changes.of(null, fourMinutes);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Interval_newValue() {
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = Timestamps2.getCurrentTime();
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         Changes.of(fourMinutes, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_Interval_values() {
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = Timestamps2.getCurrentTime();
         final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
         Changes.of(fourMinutes, fourMinutes);
     }
 
     @Test
     public void create_IntervalChange_instance() {
-        final Timestamp fiveMinutesAgo = Timestamps.minutesAgo(5);
-        final Timestamp fourMinutesAgo = Timestamps.minutesAgo(4);
-        final Timestamp now = Timestamps.getCurrentTime();
+        final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
+        final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
+        final Timestamp now = Timestamps2.getCurrentTime();
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         final Interval fiveMinutes = Intervals.between(fiveMinutesAgo, now);
 
