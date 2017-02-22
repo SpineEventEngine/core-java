@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
-import org.spine3.server.entity.Entities;
 import org.spine3.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
