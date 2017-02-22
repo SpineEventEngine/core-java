@@ -26,15 +26,14 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TestCommandFactory;
-import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.newUuidValue;
 
 public class FailureThrowableShould {
 
@@ -43,10 +42,8 @@ public class FailureThrowableShould {
     @Before
     public void setUp() {
         final TestCommandFactory commandFactory =
-                TestCommandFactory.newInstance(newUuid(),
-                                               ZoneOffset.getDefaultInstance());
-        this.command = commandFactory.create(newStringValue(newUuid()),
-                                             Timestamps2.getCurrentTime());
+                TestCommandFactory.newInstance(FailureThrowable.class);
+        this.command = commandFactory.create(newUuidValue());
     }
 
     @Test
