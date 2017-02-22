@@ -283,16 +283,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
-     * @param originCommand the {@linkplain Command} which execution triggered this check
+     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
      * @see #getVisibility()
      * @see Visibility#getArchived()
      */
-    protected void checkNotArchived(Command originCommand) throws CannotModifyArchivedEntity {
+    protected void checkNotArchived(Command modification) throws CannotModifyArchivedEntity {
         if (getVisibility().getArchived()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyArchivedEntity(originCommand.getMessage(),
-                                                 originCommand.getContext(),
+            throw new CannotModifyArchivedEntity(modification.getMessage(),
+                                                 modification.getContext(),
                                                  idStr);
         }
     }
@@ -300,16 +300,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Ensures that the entity is not marked as {@code deleted}.
      *
-     * @param originCommand the {@linkplain Command} which execution triggered this check
+     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
      * @see #getVisibility()
      * @see Visibility#getDeleted()
      */
-    protected void checkNotDeleted(Command originCommand) throws CannotModifyDeletedEntity {
+    protected void checkNotDeleted(Command modification) throws CannotModifyDeletedEntity {
         if (getVisibility().getDeleted()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyDeletedEntity(originCommand.getMessage(),
-                                                originCommand.getContext(),
+            throw new CannotModifyDeletedEntity(modification.getMessage(),
+                                                modification.getContext(),
                                                 idStr);
         }
     }
