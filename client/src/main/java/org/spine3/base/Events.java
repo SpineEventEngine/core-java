@@ -49,7 +49,7 @@ public class Events {
     }
 
     /** Compares two events by their timestamps. */
-    private static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
+    private static final Comparator<Event> eventComparator = new Comparator<Event>() {
         @Override
         public int compare(Event o1, Event o2) {
             final Timestamp timestamp1 = getTimestamp(o1);
@@ -81,7 +81,7 @@ public class Events {
      * in chronological order.
      */
     public static Comparator<Event> eventComparator() {
-        return EVENT_TIMESTAMP_COMPARATOR;
+        return eventComparator;
     }
 
     /**
