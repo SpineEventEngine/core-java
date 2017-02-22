@@ -289,7 +289,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getVisibility().getArchived()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyArchivedEntity(idStr);
+            //TODO:2/22/17:alex.tymchenko: avoid nulls
+            throw new CannotModifyArchivedEntity(null, null, idStr);
         }
     }
 
@@ -303,7 +304,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getVisibility().getDeleted()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyDeletedEntity(idStr);
+            //TODO:2/22/17:alex.tymchenko: avoid nulls
+            throw new CannotModifyDeletedEntity(null, null, idStr);
         }
     }
 
