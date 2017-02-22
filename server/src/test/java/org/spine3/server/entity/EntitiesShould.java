@@ -103,6 +103,15 @@ public class EntitiesShould {
         getConstructor(AggregatePart.class, id.getClass());
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to check the getAggregatePartConstructor method.
+    public void return_appropriate_constructor() {
+        final Constructor constructor =
+                getAggregatePartConstructor(AggregatePartWithSuperTypeCtor.class,
+                                            AggregateRoot.class, id.getClass());
+        assertNotNull(constructor);
+    }
     /*
      Test environment classes
     ***************************/
@@ -121,6 +130,17 @@ public class EntitiesShould {
             extends AggregatePart<String, StringValue, StringValue.Builder> {
 
         protected AnAggregatePart(String id, AnAggregateRoot root) {
+            super(id, root);
+        }
+    }
+
+    private static class AggregatePartWithSuperTypeCtor
+            extends AggregatePart<String, StringValue, StringValue.Builder> {
+
+        @SuppressWarnings("unchecked")
+        // Supply a "wrong" value on purpose to check
+        // the implementation of the `getAggregatePartConstructor` method.
+        protected AggregatePartWithSuperTypeCtor(String id, AggregateRoot root) {
             super(id, root);
         }
     }
