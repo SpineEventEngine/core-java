@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * The utility class for working with entities.
+ * The utility class for working with aggregates.
  *
  * @author Illia Shepilov
  */
