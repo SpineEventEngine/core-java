@@ -126,9 +126,9 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     private static class ProjectPartRepository
-            extends AggregatePartRepository<ProjectId, ProjectPart> {
+            extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
         private ProjectPartRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super(boundedContext, ProjectRoot.class);
         }
     }
 

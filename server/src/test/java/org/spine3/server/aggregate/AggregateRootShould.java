@@ -193,18 +193,18 @@ public class AggregateRootShould {
     }
 
     private static class ProjectDefinitionRepository
-            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart> {
+            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
 
         private ProjectDefinitionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super(boundedContext, ProjectRoot.class);
         }
     }
 
     private static class ProjectLifeCycleRepository
-            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart> {
+            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
 
         private ProjectLifeCycleRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super(boundedContext, ProjectRoot.class);
         }
     }
 

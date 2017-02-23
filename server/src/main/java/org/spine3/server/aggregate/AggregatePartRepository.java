@@ -25,31 +25,29 @@ import org.spine3.server.BoundedContext;
 import java.lang.reflect.Constructor;
 
 import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
-import static org.spine3.server.aggregate.Aggregates.createAggregateRootEntity;
+import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>>
+public abstract class AggregatePartRepository
+        <I, A extends AggregatePart<I, ?, ?>, R extends AggregateRoot<I>>
         extends AggregateRepository<I, A> {
 
-    private final Class<AggregateRoot<I>> rootClass;
+    /**
+     * The class of the {@code AggregateRoot}, which instance will be injected
+     * into the {@code AggregatePart} instance during initialization.
+     */
+    private final Class<R> rootClass;
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartRepository(BoundedContext boundedContext) {
+    protected AggregatePartRepository(BoundedContext boundedContext, Class<R> rootClass) {
         super(boundedContext);
-        rootClass = getAggregateRootClass();
-    }
-
-    private <R extends AggregateRoot<I>> Class<R> getAggregateRootClass() {
-        @SuppressWarnings("unchecked")
-        // It is OK because value returned with `getAggregateRootClass` is fully controlled.
-        final Class<R> rootClass = (Class<R>) Aggregates.getAggregateRootClass(getEntityClass());
-        return rootClass;
+        this.rootClass = rootClass;
     }
 
     /**
@@ -64,7 +62,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
-        final AggregateRoot<I> root = createAggregateRootEntity(id, getBoundedContext(), rootClass);
+        final AggregateRoot<I> root = createAggregateRoot(id, getBoundedContext(), rootClass);
         final A result = createAggregatePartEntity(entityConstructor, id, root);
         return result;
     }
