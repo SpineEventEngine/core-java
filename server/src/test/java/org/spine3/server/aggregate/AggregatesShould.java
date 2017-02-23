@@ -18,31 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.aggregate.AggregateRoot;
 
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.server.entity.Entities.createAggregatePartEntity;
-import static org.spine3.server.entity.Entities.createAggregateRootEntity;
-import static org.spine3.server.entity.Entities.getAggregatePartConstructor;
-import static org.spine3.server.entity.Entities.getConstructor;
+import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
+import static org.spine3.server.aggregate.Aggregates.createAggregateRootEntity;
+import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
  * @author Illia Shepilov
  */
-public class EntitiesShould {
+public class AggregatesShould {
 
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
@@ -66,12 +63,12 @@ public class EntitiesShould {
         tester.setDefault(BoundedContext.class, boundedContext);
         tester.setDefault(AggregateRoot.class, root);
 
-        tester.testStaticMethods(Entities.class, NullPointerTester.Visibility.PUBLIC);
+        tester.testStaticMethods(Aggregates.class, NullPointerTester.Visibility.PUBLIC);
     }
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Entities.class));
+        assertTrue(hasPrivateParameterlessCtor(Aggregates.class));
     }
 
     @Test
@@ -94,13 +91,6 @@ public class EntitiesShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
         getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class, id.getClass());
-    }
-
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to cause the validation failure.
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
-        getConstructor(AggregatePart.class, id.getClass());
     }
 
     @Test
