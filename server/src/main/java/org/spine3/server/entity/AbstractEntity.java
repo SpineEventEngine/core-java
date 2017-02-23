@@ -54,63 +54,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains the constructor for the passed entity class.
-     *
-     * <p>The entity class must have a constructor with the single parameter of type defined by
-     * generic type {@code <I>}.
-     *
-     * @param entityClass the entity class
-     * @param idClass     the class of entity identifiers
-     * @param <E>         the entity type
-     * @param <I>         the ID type
-     * @return the constructor
-     * @throws IllegalStateException if the entity class does not have the required constructor
-     */
-    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
-                                                                            Class<I> idClass) {
-        checkNotNull(entityClass);
-        checkNotNull(idClass);
-
-        try {
-            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            result.setAccessible(true);
-            return result;
-        } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), idClass.getName());
-        }
-    }
-
-    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
-        final String errMsg = format(
-                "%s class must declare a constructor with a single %s ID parameter.",
-                entityClass, idClass
-        );
-        return new IllegalStateException(new NoSuchMethodException(errMsg));
-    }
-
-    /**
-     * Creates a new entity and sets it to the default state.
-     *
-     * @param ctor the constructor to use
-     * @param id   the ID of the entity
-     * @param <I>  the type of entity IDs
-     * @param <E>  the type of the entity
-     * @return a new entity
-     */
-    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
-        checkNotNull(ctor);
-        checkNotNull(id);
-
-        try {
-            final E result = ctor.newInstance(id);
-            result.init();
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
      * Obtains the ID of the entity.
      */
     @Override
@@ -179,6 +122,63 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected Class<S> getStateClass() {
         return TypeInfo.getStateClass(getClass());
+    }
+
+    /**
+     * Obtains the constructor for the passed entity class.
+     *
+     * <p>The entity class must have a constructor with the single parameter of type defined by
+     * generic type {@code <I>}.
+     *
+     * @param entityClass the entity class
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
+     * @return the constructor
+     * @throws IllegalStateException if the entity class does not have the required constructor
+     */
+    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                            Class<I> idClass) {
+        checkNotNull(entityClass);
+        checkNotNull(idClass);
+
+        try {
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            result.setAccessible(true);
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName(), idClass.getName());
+        }
+    }
+
+    private static IllegalStateException noSuchConstructor(String entityClass, String idClass) {
+        final String errMsg = format(
+                "%s class must declare a constructor with a single %s ID parameter.",
+                entityClass, idClass
+        );
+        return new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+    /**
+     * Creates a new entity and sets it to the default state.
+     *
+     * @param ctor the constructor to use
+     * @param id   the ID of the entity
+     * @param <I>  the type of entity IDs
+     * @param <E>  the type of the entity
+     * @return a new entity
+     */
+    public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+        checkNotNull(ctor);
+        checkNotNull(id);
+
+        try {
+            final E result = ctor.newInstance(id);
+            result.init();
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
