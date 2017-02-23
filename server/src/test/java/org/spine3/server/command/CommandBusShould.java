@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
@@ -372,7 +373,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * The dispatcher that remembers that {@link #dispatch(Command)} was called.
+     * The dispatcher that remembers that {@link CommandDispatcher#dispatch(CommandEnvelope)} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 
@@ -384,7 +385,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
         }
 

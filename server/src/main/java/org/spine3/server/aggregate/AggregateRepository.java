@@ -24,9 +24,9 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
@@ -183,7 +183,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param command the command to dispatch
      */
     @Override
-    public void dispatch(Command command) {
+    public void dispatch(CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
         final A aggregate = commandEndpoint.dispatch(command);
 

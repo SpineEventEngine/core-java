@@ -26,6 +26,7 @@ import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
@@ -237,15 +238,19 @@ public class StandFunnelShould {
                 repository.initStorage(InMemoryStorageFactory.getInstance());
 
                 try {
-                    // Mock aggregate and mock stand are not able to handle events returned after command handling.
+                    // Mock aggregate and mock stand are not able to handle events
+                    // returned after command handling.
                     // This causes IllegalStateException to be thrown.
-                    // Note that this is not the end of a test case, so we can't just "expect=IllegalStateException"
-                    repository.dispatch(Given.validCommand());
+                    // Note that this is not the end of a test case,
+                    // so we can't just "expect=IllegalStateException".
+                    final CommandEnvelope cmd = CommandEnvelope.of(Given.validCommand());
+                    repository.dispatch(cmd);
                 } catch (IllegalStateException e) {
                     // Handle null event dispatching after the command is handled.
 
-                    // Check if this error is caused by returning nuu or empty list after command processing.
-                    // Proceed crash if it's not
+                    // Check if this error is caused by returning nuu or empty list after
+                    // command processing.
+                    // Proceed crash if it's not.
                     if (!e.getMessage()
                           .contains("No record found for command ID: EMPTY")) {
                         throw e;
@@ -320,7 +325,8 @@ public class StandFunnelShould {
     }
 
     /**
-     * A custom {@code StandUpdateDelivery}, which is suitable for {@link org.mockito.Mockito#spy(Object)}.
+     * A custom {@code StandUpdateDelivery}, which is suitable for
+     * {@linkplain org.mockito.Mockito#spy(Object) spying}.
      */
     private static class SpyableStandUpdateDelivery extends StandUpdateDelivery {
 

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Commands;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
@@ -96,7 +97,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
             }
 
             @Override
-            public void dispatch(Command request) {
+            public void dispatch(CommandEnvelope envelope) {
                 // Do nothing.
             }
         });

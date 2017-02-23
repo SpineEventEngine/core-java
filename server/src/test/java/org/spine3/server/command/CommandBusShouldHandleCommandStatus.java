@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -243,7 +242,7 @@ public class CommandBusShouldHandleCommandStatus {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             throw exception;
         }
     }

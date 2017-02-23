@@ -23,9 +23,9 @@ package org.spine3.server.command;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -212,7 +212,7 @@ public class CommandEndpointRegistryShould {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
         }
     }
 
@@ -241,7 +241,7 @@ public class CommandEndpointRegistryShould {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
         }
     }
 
@@ -252,7 +252,7 @@ public class CommandEndpointRegistryShould {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
         }
     }
 
@@ -264,7 +264,7 @@ public class CommandEndpointRegistryShould {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             // Do nothing.
         }
     }

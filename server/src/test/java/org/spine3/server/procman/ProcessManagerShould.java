@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -326,7 +327,7 @@ public class ProcessManagerShould {
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             // Do nothing in this dummy dispatcher.
         }
     }

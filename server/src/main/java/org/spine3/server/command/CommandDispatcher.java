@@ -20,8 +20,8 @@
 
 package org.spine3.server.command;
 
-import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
+import org.spine3.base.CommandEnvelope;
 
 import java.util.Set;
 
@@ -48,5 +48,5 @@ public interface CommandDispatcher {
     /**
      * Dispatches the command to its handler.
      */
-    void dispatch(Command request);
+    void dispatch(CommandEnvelope envelope);
 }
