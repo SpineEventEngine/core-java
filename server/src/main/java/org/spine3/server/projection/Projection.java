@@ -70,6 +70,7 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
+
         try {
             method.invoke(this, event, ctx);
         } catch (InvocationTargetException e) {
@@ -95,5 +96,4 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
         );
         return new IllegalStateException(msg);
     }
-
 }
