@@ -61,8 +61,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     @Override
     protected A createEntity(I id) {
         final Constructor<A> constructor = getConstructor();
-        final AggregateRoot<I> root = aggregateRoot;
-        final A result = createAggregatePart(constructor, id, root);
+        final A result = createAggregatePart(constructor, id, aggregateRoot);
         return result;
     }
 
