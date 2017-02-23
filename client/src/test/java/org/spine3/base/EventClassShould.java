@@ -18,32 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.base;
 
-import org.spine3.SPI;
-import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.status.EntityStatus;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-/**
- * A container for the storage fields used to store the {@linkplain EntityStatus}.
- *
- * @author Dmytro Dashenkov
- * @see StorageField
- */
-@SPI
-public enum EntityStatusField implements StorageField {
+import static org.junit.Assert.assertEquals;
 
-    /**
-     * A {@linkplain boolean} field representing weather the relevant record is {@code archived} or not.
-     *
-     * @see Repository#markArchived
-     */
-    archived,
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventClassShould {
 
-    /**
-     * A {@linkplain boolean} field representing weather the relevant record is {@code deleted} or not.
-     *
-     * @see Repository#markDeleted
-     */
-    deleted
+    @Test
+    public void create_set_on_varargs() {
+        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+    }
 }

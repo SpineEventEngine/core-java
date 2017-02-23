@@ -21,14 +21,14 @@
 package org.spine3.testdata;
 
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
+import org.spine3.test.Tests;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * Creates {@link EntityStorageRecord}s for tests.
+ * Creates {@link EntityRecord}s for tests.
  *
  * @author Alexander Litus
  */
@@ -38,11 +38,12 @@ public class TestEntityStorageRecordFactory {
     }
 
     /** Creates a new record with all fields set. */
-    public static EntityStorageRecord newEntityStorageRecord() {
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(AnyPacker.pack(newStringValue(newUuid())))
-                .setWhenModified(getCurrentTime())
-                .setVersion(5); // set any non-default (non-zero) value
+    public static EntityRecord newEntityStorageRecord() {
+        final EntityRecord.Builder builder =
+                EntityRecord.newBuilder()
+                         .setState(AnyPacker.pack(newStringValue(newUuid())))
+                         .setVersion(Tests.newVersionWithNumber(5));
+                            // set any non-default (non-zero) value
         return builder.build();
     }
 }

@@ -18,11 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.test;
+
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
+import org.junit.Test;
+
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+
 /**
- * This package contains commonly used server-side data classes.
+ * @author Alexander Yevsyukov
  */
+public class EventTestsShould {
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.type;
+    @Test
+    public void have_utility_ctor() {
+        Tests.hasPrivateParameterlessCtor(EventTests.class);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Timestamp.class, getCurrentTime())
+                .testAllPublicStaticMethods(EventTests.class);
+    }
+}

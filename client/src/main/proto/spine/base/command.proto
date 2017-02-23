@@ -55,7 +55,7 @@ message CommandId {
 // A command can hold any valid Protobuf message, but in most cases, it would be a type
 // defined in `commands.proto` file of the corresponding aggregate or process manager.
 //
-// There should be <strong>one and only one</strong> command handler associated with the type of the command.
+// There should be one and only one command handler associated with the type of the command.
 //
 message Command {
 
@@ -90,7 +90,8 @@ message CommandContext {
     // A command may be scheduled. This type defines scheduling options.
     message Schedule {
 
-        // The delay between the moment of receiving a command at the server and its delivery to the target.
+        // The delay between the moment of receiving a command at the server
+        // and its delivery to the target.
         google.protobuf.Duration delay = 1;
 
         //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific OffsetDateTime.
@@ -109,7 +110,8 @@ message CommandContext {
 
     // The version of the entity for which this command is intended.
     //
-    // A client app may not fill in this attribute if the command applies to any version of the entity.
+    // A client app may not fill in this attribute if the command applies to
+    // any version of the entity.
     //
     int32 target_version = 7;
 }
@@ -126,7 +128,8 @@ enum CommandValidationError {
     // The command message is invalid according to custom Protobuf options set.
     INVALID_COMMAND = 2;
 
-    // The command context does not have `tenant_id` attribute defined in a multitenant application.
+    // The command context does not have `tenant_id` attribute defined
+    // in a multitenant application.
     TENANT_UNKNOWN = 3;
 }
 
@@ -139,7 +142,8 @@ enum CommandStatus {
     // The command has been received by backend and stored.
     RECEIVED = 1;
 
-    // The command has been received by backend and stored, but will be delivered to the target later.
+    // The command has been received by backend and stored,
+    // but will be delivered to the target later.
     SCHEDULED = 2;
 
     // The command has been successfully handled.

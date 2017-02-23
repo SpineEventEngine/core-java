@@ -20,7 +20,7 @@
 package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 
 import java.util.Calendar;
 
@@ -52,7 +52,7 @@ public class LocalTimes {
      * Obtains current local time.
      */
     public static LocalTime now() {
-        final Timestamp time = Timestamps.getCurrentTime();
+        final Timestamp time = Timestamps2.getCurrentTime();
         final Calendar cal = Calendars.now();
 
         final LocalTime result = LocalTime.newBuilder()

@@ -21,13 +21,16 @@
 package org.spine3.server.event;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
-import org.spine3.base.Events;
 
 import javax.annotation.Nullable;
 import java.util.List;
+
+import static com.google.common.base.Predicates.alwaysTrue;
+import static org.spine3.base.EventPredicates.isAfter;
+import static org.spine3.base.EventPredicates.isBefore;
+import static org.spine3.base.EventPredicates.isBetween;
 
 /**
  * The predicate for filtering {@code Event} instances by
@@ -48,15 +51,15 @@ public class MatchesStreamQuery implements Predicate<Event> {
         final Timestamp before = query.getBefore();
         final boolean afterSpecified = query.hasAfter();
         final boolean beforeSpecified = query.hasBefore();
-        //noinspection IfStatementWithTooManyBranches
+
         if (afterSpecified && !beforeSpecified) {
-            this.timePredicate = new Events.IsAfter(after);
+            this.timePredicate = isAfter(after);
         } else if (!afterSpecified && beforeSpecified) {
-            this.timePredicate = new Events.IsBefore(before);
-        } else if (afterSpecified /* && beforeSpecified is true here too */) {
-            this.timePredicate = new Events.IsBetween(after, before);
+            this.timePredicate = isBefore(before);
+        } else if (afterSpecified /* && beforeSpecified is `true` here too */) {
+            this.timePredicate = isBetween(after, before);
         } else { // No timestamps specified.
-            this.timePredicate = Predicates.alwaysTrue();
+            this.timePredicate = alwaysTrue();
         }
     }
 

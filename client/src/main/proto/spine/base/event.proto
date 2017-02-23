@@ -31,7 +31,10 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
 import "spine/base/command.proto";
+import "spine/base/version.proto";
+import "spine/base/enrichment.proto";
 
 // Event identifier.
 message EventId {
@@ -42,68 +45,54 @@ message EventId {
 //
 // An event consists of two parts: event message and its context.
 //
-// The `message` is the domain model part of the event. Event messages are formulated in the past tense.
+// The `message` is the domain model part of the event.
+// Event messages are named in the past tense.
+//
 // The type of the event is defined by the type of the enclosed message.
-// When we speak about a 'command' as a typed thing, we refer to the message of the event.
+// When we speak about an 'event' as a typed thing, we refer to the
+// message of the event.
 //
-// Event subscriber are associated with the type of the messages. There can be multiple subscribers
-// per event type.
+// An event subscriber uses the type of the event message to receive
+// events of this type.
 //
-// The event context contains attributes common for all events. It can also contain additional attributes
-// added by the code handling the event.
+// There can be multiple subscribers per event type.
+//
+// The event context contains attributes common for all events.
+// It can also contain additional attributes added by the code handling the event.
 //
 message Event {
-    // The message of the event message wrapped into `Any`.
-    google.protobuf.Any message = 1;
+
+    // The message of the event wrapped into `Any`.
+    google.protobuf.Any message = 1 [(required) = true];
 
     // The context of the event.
-    EventContext context = 2;
+    EventContext context = 2 [(required) = true];
 }
 
 // Meta-information for an event.
 message EventContext {
 
     // The ID of the event.
-    EventId event_id = 1;
+    EventId event_id = 1 [(required) = true];
 
     // When the event occurred.
-    google.protobuf.Timestamp timestamp = 2;
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
     // The ID of the entity which generated the event.
-    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`),
-    // bounded contexts (for integration events).
-    google.protobuf.Any producer_id = 4;
+    //
+    // Examples of event producers are: aggregates, process managers
+    // (which generate `CommandRouted`), bounded contexts (for integration events).
+    //
+    google.protobuf.Any producer_id = 4 [(required) = true];
 
     // The version of the entity after the event was applied.
-    int32 version = 5;
+    Version version = 5 [(required) = true];
 
-    // An event can be enriched with one or more messages. Or, event enrichment can be disabled.
-    oneof enrichment_mode {
-
-        // One or more enrichments of the event.
-        Enrichments enrichments = 6; // We are having the wrapper type because maps are not allowed in `oneof`s.
-
-        // The instruction not to enrich the event.
-        bool do_not_enrich = 7;
-    }
-
-    // Service attributes that the system wants to store in addition to
-    // the domain attributes defined in the event message.
-    Attributes attributes = 8;
-
-    message Attributes {
-        map<string, google.protobuf.Any> entries = 1;
-    }
-}
-
-// A container for event enrichments.
-message Enrichments {
-
-    // A map from a fully qualified Protobuf type name of an enrichment, to its wrapped instance.
-    map<string, google.protobuf.Any> map = 1;
+    // Optional enrichment of the event.
+    Enrichment enrichment = 6;
 }
 
 // Enumeration of possible event validation technical error reasons.

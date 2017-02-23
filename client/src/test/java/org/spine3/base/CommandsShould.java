@@ -23,6 +23,7 @@ package org.spine3.base;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DescriptorProtos;
@@ -33,11 +34,15 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Durations2;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
+import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
+import org.spine3.users.UserId;
 import org.spine3.users.TenantId;
 
 import java.util.List;
@@ -53,16 +58,15 @@ import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Durations2.seconds;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor().getFile();
@@ -118,18 +122,20 @@ public class CommandsShould {
                                                             .setTenantId(TenantId.getDefaultInstance())
                                                             .build();
 
-        assertTrue(sameActorAndTenant(commandContext, commandContext));
-    }
-
-    @Test
-    public void pass_null_tolerance_test() {
-        final boolean passed = NullToleranceTest.newBuilder()
-                                                .setClass(Commands.class)
-                                                .addDefaultValue(DEFAULT_FILE_DESCRIPTOR)
-                                                .addDefaultValue(Timestamps.getCurrentTime()) // to fulfil custom validation
-                                                .build()
-                                                .check();
-        assertTrue(passed);
+        assertTrue(sameActorAndTenant(commandContext, commandContext));}
+        @Test
+        public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
+                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Duration.class, Durations2.ZERO)
+                .setDefault(Command.class,
+                            commandFactory.create(StringValue.getDefaultInstance(),
+                                                  minutesAgo(1)))
+                .setDefault(CommandContext.class, commandFactory.createCommandContext())
+                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
+                .setDefault(UserId.class, Tests.newUserUuid())
+                .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
@@ -234,7 +240,7 @@ public class CommandsShould {
     public void update_schedule_options() {
         final Command cmd = commandFactory.createCommand(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
 
         final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
 

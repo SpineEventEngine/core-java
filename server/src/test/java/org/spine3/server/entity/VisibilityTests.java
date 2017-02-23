@@ -23,15 +23,19 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.entity.status.CannotModifyArchivedEntity;
-import org.spine3.server.entity.status.CannotModifyDeletedEntity;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.base.Command;
+import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
+import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.time.ZoneOffset;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * Tests of working with entity status.
@@ -41,9 +45,10 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class EntityStatusTests {
+public class VisibilityTests {
 
     private AbstractVersionableEntity<Long, StringValue> entity;
+    private Command modificationCommand;
 
     /**
      * A minimal entity class.
@@ -56,12 +61,16 @@ public class EntityStatusTests {
 
     @Before
     public void setUp() {
-        entity = new MiniEntity(ThreadLocalRandom.current().nextLong());
+        entity = new MiniEntity(ThreadLocalRandom.current()
+                                                 .nextLong());
+        final TestCommandFactory factory =
+                TestCommandFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
+        modificationCommand = factory.create(newStringValue("Entity modification command"));
     }
 
     @Test
     public void return_default_status_after_constructor() {
-        assertEquals(EntityStatus.getDefaultInstance(), new MiniEntity(1L).getStatus());
+        assertEquals(Visibility.getDefaultInstance(), new MiniEntity(1L).getVisibility());
     }
 
     @Test
@@ -115,12 +124,12 @@ public class EntityStatusTests {
 
     @Test
     public void assign_status() {
-        final EntityStatus status = EntityStatus.newBuilder()
-                                                .setArchived(true)
-                                                .setDeleted(false)
-                                                .build();
-        entity.setStatus(status);
-        assertEquals(status, entity.getStatus());
+        final Visibility status = Visibility.newBuilder()
+                                            .setArchived(true)
+                                            .setDeleted(false)
+                                            .build();
+        entity.setVisibility(status);
+        assertEquals(status, entity.getVisibility());
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)
@@ -128,10 +137,10 @@ public class EntityStatusTests {
         entity.setArchived(true);
 
         // This should pass.
-        entity.checkNotDeleted();
+        entity.checkNotDeleted(modificationCommand);
 
         // This should throw.
-        entity.checkNotArchived();
+        entity.checkNotArchived(modificationCommand);
     }
 
     @Test(expected = CannotModifyDeletedEntity.class)
@@ -139,9 +148,9 @@ public class EntityStatusTests {
         entity.setDeleted(true);
 
         // This should pass.
-        entity.checkNotArchived();
+        entity.checkNotArchived(modificationCommand);
 
         // This should throw.
-        entity.checkNotDeleted();
+        entity.checkNotDeleted(modificationCommand);
     }
 }

@@ -45,7 +45,7 @@ public class CommandStatusService {
     }
 
     public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toMessage());
+        commandStore.updateStatus(commandId, failure.toFailure());
     }
 
     public void setToError(CommandId commandId, org.spine3.base.Error error) {

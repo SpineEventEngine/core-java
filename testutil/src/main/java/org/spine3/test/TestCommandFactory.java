@@ -59,7 +59,8 @@ public class TestCommandFactory extends CommandFactory {
     /** Creates new command with the passed timestamp. */
     public Command create(Message message, Timestamp timestamp) {
         final Command command = createCommand(message);
-        return Tests.adjustTimestamp(command, timestamp);
+        return TimeTests.adjustTimestamp(command, timestamp);
+
     }
 
     /**

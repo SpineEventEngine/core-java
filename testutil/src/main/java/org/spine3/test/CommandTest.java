@@ -30,7 +30,7 @@ import org.spine3.client.CommandFactory;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.test.Tests.adjustTimestamp;
+import static org.spine3.test.TimeTests.adjustTimestamp;
 
 /**
  * An abstract base for testing entities handling commands.

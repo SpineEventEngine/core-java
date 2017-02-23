@@ -27,30 +27,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
- * A server-side object with an identity.
+ * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Class) identity}.
  *
- * <p>An entity identifier can be of one of the following types:
- *   <ul>
- *      <li>String
- *      <li>Long
- *      <li>Integer
- *      <li>A class implementing {@link Message}
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes
- *      <li>ISBN
- *      <li>Phone number
- *      <li>email address as a couple of local-part and domain
- *   </ul>
- *
- * <p>A state of an entity is defined as a protobuf message.
+ * <p>A state of an entity is defined as a Protobuf message.
  *
  * @param <I> the type of entity identifier
  * @param <S> the type of entity state
  * @author Alexander Yevsyukov
+ * @see VersionableEntity
  */
 public interface Entity<I, S extends Message> {
 
@@ -79,7 +63,7 @@ public interface Entity<I, S extends Message> {
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParamer implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
@@ -95,7 +79,7 @@ public interface Entity<I, S extends Message> {
 
         private final int index;
 
-        GenericParamer(int index) {
+        GenericParameter(int index) {
             this.index = index;
         }
 
@@ -124,7 +108,7 @@ public interface Entity<I, S extends Message> {
         static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
             checkNotNull(entityClass);
             final Class<I> idClass = getGenericParameterType(entityClass,
-                                                             GenericParamer.ID.getIndex());
+                                                             GenericParameter.ID.getIndex());
             return idClass;
         }
 
@@ -138,7 +122,7 @@ public interface Entity<I, S extends Message> {
         static <S extends Message> Class<S> getStateClass(
                 Class<? extends Entity> entityClass) {
             final Class<S> result = getGenericParameterType(entityClass,
-                                                            GenericParamer.STATE.getIndex());
+                                                            GenericParameter.STATE.getIndex());
             return result;
         }
     }

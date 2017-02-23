@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
 import org.spine3.SPI;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 
 /**
@@ -49,7 +49,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
      *          equals the argument value
      */
-    public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type);
+    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type);
 
     /**
      * Reads all the state records by the given type.
@@ -58,5 +58,5 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
      *          equals the argument value
      */
-    public abstract ImmutableCollection<EntityStorageRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
+    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
 }

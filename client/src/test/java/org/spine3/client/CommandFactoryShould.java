@@ -25,7 +25,8 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.test.TimeTests;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -106,11 +107,11 @@ public class CommandFactoryShould {
         // We are creating a range of +/- second between the call to make sure the timestamp would fit
         // into this range. The purpose of this test is to make sure it works with this precision
         // and to add coverage.
-        final Timestamp beforeCall = Timestamps.secondsAgo(1);
+        final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
         final Command command = commandFactory.createCommand(StringValue.getDefaultInstance());
-        final Timestamp afterCall = Timestamps.secondsFromNow(1);
+        final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
-        assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
+        assertTrue(Timestamps2.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
     }
 
     @Test

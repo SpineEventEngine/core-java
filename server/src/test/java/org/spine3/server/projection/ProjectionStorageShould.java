@@ -28,9 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
@@ -42,11 +40,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
@@ -83,8 +82,9 @@ public abstract class ProjectionStorageShould<I>
         close(storage);
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    protected EntityStorageRecord newStorageRecord() {
+    protected EntityRecord newStorageRecord() {
         return newEntityStorageRecord();
     }
 
@@ -100,9 +100,9 @@ public abstract class ProjectionStorageShould<I>
     public void read_all_messages() {
         final List<I> ids = fillStorage(5);
 
-        final Map<I, EntityStorageRecord> read = storage.readAll();
+        final Map<I, EntityRecord> read = storage.readAll();
         assertSize(ids.size(), read);
-        for (Map.Entry<I, EntityStorageRecord> record : read.entrySet()) {
+        for (Map.Entry<I, EntityRecord> record : read.entrySet()) {
             assertContains(record.getKey(), ids);
         }
     }
@@ -117,9 +117,9 @@ public abstract class ProjectionStorageShould<I>
         @SuppressWarnings("DuplicateStringLiteralInspection")       // clashes with non-related tests.
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".name");
 
-        final Map<I, EntityStorageRecord> read = storage.readAll(fieldMask);
+        final Map<I, EntityRecord> read = storage.readAll(fieldMask);
         assertSize(ids.size(), read);
-        for (Map.Entry<I, EntityStorageRecord> record : read.entrySet()) {
+        for (Map.Entry<I, EntityRecord> record : read.entrySet()) {
             assertContains(record.getKey(), ids);
 
             final Any packedState = record.getValue()
@@ -129,14 +129,16 @@ public abstract class ProjectionStorageShould<I>
         }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // because the behaviour to test is different
+    @Override
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final Map<I, EntityStorageRecord> noMaskEntiries = storage.readAll();
+        final Map<I, EntityRecord> noMaskEntiries = storage.readAll();
 
         final FieldMask nonEmptyMask = FieldMask.newBuilder()
                                                 .addPaths("invalid_path")
                                                 .build();
-        final Map<I, EntityStorageRecord> maskedEntries = storage.readAll(nonEmptyMask);
+        final Map<I, EntityRecord> maskedEntries = storage.readAll(nonEmptyMask);
 
         assertEmpty(noMaskEntiries);
         assertEmpty(maskedEntries);
@@ -151,11 +153,11 @@ public abstract class ProjectionStorageShould<I>
         // Get a subset of IDs
         final List<I> ids = fillStorage(10).subList(0, 5);
 
-        final Iterable<EntityStorageRecord> read = storage.readMultiple(ids);
+        final Iterable<EntityRecord> read = storage.readMultiple(ids);
         assertSize(ids.size(), read);
 
         // Check data consistency
-        for (EntityStorageRecord record : read) {
+        for (EntityRecord record : read) {
             checkProjectIdIsInList(record, ids);
         }
     }
@@ -170,11 +172,11 @@ public abstract class ProjectionStorageShould<I>
                                                 .getFullName();
         final FieldMask fieldMask = maskForPaths(projectDescriptor + ".id", projectDescriptor + ".status");
 
-        final Iterable<EntityStorageRecord> read = storage.readMultiple(ids, fieldMask);
+        final Iterable<EntityRecord> read = storage.readMultiple(ids, fieldMask);
         assertSize(ids.size(), read);
 
         // Check data consistency
-        for (EntityStorageRecord record : read) {
+        for (EntityRecord record : read) {
             final Project state = checkProjectIdIsInList(record, ids);
             assertMatchesMask(state, fieldMask);
         }
@@ -193,7 +195,7 @@ public abstract class ProjectionStorageShould<I>
     @Test
     public void write_and_read_last_event_time_several_times() {
         final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, Durations.ofSeconds(10));
+        final Timestamp time2 = add(time1, fromSeconds(10L));
         writeAndReadLastEventTimeTest(time1);
         writeAndReadLastEventTimeTest(time2);
     }
@@ -206,11 +208,10 @@ public abstract class ProjectionStorageShould<I>
             final Project state = Given.project(id.toString(), String.format("project-%d", i));
             final Any packedState = AnyPacker.pack(state);
 
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(packedState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(1)
-                                                                  .build();
+            final EntityRecord record = EntityRecord.newBuilder()
+                                                    .setState(packedState)
+                                                    .setVersion(Tests.newVersionWithNumber(1))
+                                                    .build();
             storage.write(id, record);
             ids.add(id);
         }
@@ -227,7 +228,7 @@ public abstract class ProjectionStorageShould<I>
     }
 
     @SuppressWarnings("BreakStatement")
-    private static <I> Project checkProjectIdIsInList(EntityStorageRecord project, List<I> ids) {
+    private static <I> Project checkProjectIdIsInList(EntityRecord project, List<I> ids) {
         final Any packedState = project.getState();
         final Project state = AnyPacker.unpack(packedState);
         final ProjectId id = state.getId();

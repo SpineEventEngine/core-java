@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
@@ -67,7 +67,7 @@ public class EntityBuilderShould {
         final long id = 1024L;
         final int version = 100500;
         final StringValue state = newStringValue(getClass().getName());
-        final Timestamp timestamp = Timestamps.getCurrentTime();
+        final Timestamp timestamp = Timestamps2.getCurrentTime();
 
         final VersionableEntity entity = givenEntity()
                 .withId(id)
