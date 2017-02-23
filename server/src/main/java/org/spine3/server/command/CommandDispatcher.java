@@ -22,31 +22,19 @@ package org.spine3.server.command;
 
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandEnvelope;
-
-import java.util.Set;
+import org.spine3.server.bus.MessageDispatcher;
 
 /**
  * {@code CommandDispatcher} delivers commands to their handlers.
  *
  * <p>A dispatcher can deliver more than one class of commands.
  *
- * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the business model, neither it
- * produces events.
+ * <p>Unlike {@link CommandHandler} the dispatcher not change the state of the
+ * business model,neither it produces events.
  *
  * @author Alexander Yevsyukov
  * @see CommandHandler
  */
-public interface CommandDispatcher {
-
-    /**
-     * Returns the set of command classes that can be processed by this dispatcher.
-     *
-     * @return non-empty set of command classes
-     */
-    Set<CommandClass> getCommandClasses();
-
-    /**
-     * Dispatches the command to its handler.
-     */
-    void dispatch(CommandEnvelope envelope);
+public interface CommandDispatcher
+        extends MessageDispatcher<CommandClass, CommandEnvelope> {
 }

@@ -138,7 +138,7 @@ public class ProcessManagerRepositoryShould
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
                           @Override
-                          public Set<CommandClass> getCommandClasses() {
+                          public Set<CommandClass> getMessageClasses() {
                               return CommandClass.setOf(AddTask.class);
                           }
 
@@ -231,7 +231,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_command_classes() {
-        final Set<CommandClass> commandClasses = repository.getCommandClasses();
+        final Set<CommandClass> commandClasses = repository.getMessageClasses();
         assertTrue(commandClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(commandClasses.contains(CommandClass.of(AddTask.class)));
         assertTrue(commandClasses.contains(CommandClass.of(StartProject.class)));

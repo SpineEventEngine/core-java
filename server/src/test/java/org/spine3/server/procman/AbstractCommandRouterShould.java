@@ -92,7 +92,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         // Otherwise we won't be able to post.
         commandBus.register(new CommandDispatcher() {
             @Override
-            public Set<CommandClass> getCommandClasses() {
+            public Set<CommandClass> getMessageClasses() {
                 return CommandClass.setOf(StringValue.class);
             }
 

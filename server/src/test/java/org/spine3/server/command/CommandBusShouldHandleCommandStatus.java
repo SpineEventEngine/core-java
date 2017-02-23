@@ -237,7 +237,7 @@ public class CommandBusShouldHandleCommandStatus {
         private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
         }
 

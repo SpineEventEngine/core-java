@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,12 +53,12 @@ import static org.spine3.base.Identifiers.newUuid;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEndpointRegistryShould {
+public class CommandDispatcherRegistryShould {
 
     /**
      * The object we test.
      */
-    private CommandEndpointRegistry registry;
+    private CommandDispatcherRegistry registry;
 
     /**
      * The instance of {@code EventBus} that we need for stub command handler classes.
@@ -68,12 +69,12 @@ public class CommandEndpointRegistryShould {
     public void setUp() {
         eventBus = TestEventBusFactory.create(InMemoryStorageFactory.getInstance());
 
-        registry = new CommandEndpointRegistry();
+        registry = new CommandDispatcherRegistry();
     }
 
     @SafeVarargs
     private final void assertSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getSupportedCommandClasses();
+        final Set<CommandClass> supportedClasses = registry.getMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
             final CommandClass cmdClass = CommandClass.of(clazz);
@@ -83,7 +84,7 @@ public class CommandEndpointRegistryShould {
 
     @SafeVarargs
     private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getSupportedCommandClasses();
+        final Set<CommandClass> supportedClasses = registry.getMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
             final CommandClass cmdClass = CommandClass.of(clazz);
@@ -102,7 +103,7 @@ public class CommandEndpointRegistryShould {
 
         registry.unregisterAll();
 
-        assertTrue(registry.getSupportedCommandClasses().isEmpty());
+        assertTrue(registry.getMessageClasses().isEmpty());
     }
 
     @Test
@@ -149,12 +150,15 @@ public class CommandEndpointRegistryShould {
         registry.register(new EmptyDispatcher());
     }
 
-    //TODO:2017-02-11:alexander.yevsyukov: Why do we allow this?
+    /**
+     * Verifies if it's possible to pass a {@link ProcessManagerRepository}
+     * which does not expose any command classes.
+     */
     @Test
     public void accept_empty_process_manager_repository_dispatcher() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        final ProcessManagerRepoDispatcher pmRepo = new ProcessManagerRepoDispatcher(boundedContext);
+        final ProcessManagerRepoDispatcher pmRepo =
+                new ProcessManagerRepoDispatcher(BoundedContext.newBuilder()
+                                                               .build());
         registry.register(pmRepo);
     }
 
@@ -207,7 +211,7 @@ public class CommandEndpointRegistryShould {
 
     private static class EmptyDispatcher implements CommandDispatcher {
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return Collections.emptySet();
         }
 
@@ -218,7 +222,8 @@ public class CommandEndpointRegistryShould {
 
     //TODO:2017-02-11:alexander.yevsyukov: Fix inter-test dependency.
     private static class ProcessManagerRepoDispatcher
-            extends ProcessManagerRepository<ProjectId, ProcessManagerRepositoryShould.TestProcessManager, Project> {
+            extends ProcessManagerRepository<ProjectId,
+            ProcessManagerRepositoryShould.TestProcessManager, Project> {
 
         protected ProcessManagerRepoDispatcher(BoundedContext boundedContext) {
             super(boundedContext);
@@ -229,14 +234,14 @@ public class CommandEndpointRegistryShould {
          */
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return newHashSet();
         }
     }
 
     private static class AllCommandDispatcher implements CommandDispatcher {
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
         }
 
@@ -247,7 +252,7 @@ public class CommandEndpointRegistryShould {
 
     private static class CreateProjectDispatcher implements CommandDispatcher {
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class);
         }
 
@@ -259,7 +264,7 @@ public class CommandEndpointRegistryShould {
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 
@@ -283,6 +288,11 @@ public class CommandEndpointRegistryShould {
         ProjectCreated handle(CreateProject command, CommandContext ctx) {
             return ProjectCreated.getDefaultInstance();
         }
+
+        @Override
+        public Set<CommandClass> getMessageClasses() {
+            return ImmutableSet.of(CommandClass.of(CreateProject.class));
+        }
     }
 
     private class AllCommandHandler extends CommandHandler {
@@ -305,11 +315,23 @@ public class CommandEndpointRegistryShould {
         ProjectStarted handle(StartProject command) {
             return ProjectStarted.getDefaultInstance();
         }
+
+        @Override
+        public Set<CommandClass> getMessageClasses() {
+            return ImmutableSet.of(CommandClass.of(CreateProject.class),
+                                   CommandClass.of(StartProject.class),
+                                   CommandClass.of(AddTask.class));
+        }
     }
 
     private class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler() {
             super(newUuid(), eventBus);
+        }
+
+        @Override
+        public Set<CommandClass> getMessageClasses() {
+            return ImmutableSet.of();
         }
     }
 }

@@ -217,22 +217,6 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         assertTrue(responseObserver.isCompleted());
     }
 
-    @Test
-    public void unregister_command_handler() {
-        final CommandHandler handler = newCommandHandler();
-
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-
-        commandBus.post(createProject(), responseObserver);
-
-        assertTrue(responseObserver.isError());
-    }
-
-    CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler(newUuid());
-    }
-
     /*
      * Test of illegal arguments for post()
      ***************************************/
@@ -373,14 +357,15 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * The dispatcher that remembers that {@link CommandDispatcher#dispatch(CommandEnvelope)} was called.
+     * The dispatcher that remembers that
+     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 

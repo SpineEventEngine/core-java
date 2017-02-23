@@ -20,14 +20,18 @@
 
 package org.spine3.server.command;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.After;
 import org.junit.Before;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
+
+import java.util.Set;
 
 import static org.mockito.Mockito.spy;
 import static org.spine3.base.Identifiers.newUuid;
@@ -90,6 +94,11 @@ public abstract class AbstractCommandBusTestSuite {
 
         boolean wasHandlerInvoked() {
             return handlerInvoked;
+        }
+
+        @Override
+        public Set<CommandClass> getMessageClasses() {
+            return ImmutableSet.of(CommandClass.of(CreateProject.class));
         }
     }
 }

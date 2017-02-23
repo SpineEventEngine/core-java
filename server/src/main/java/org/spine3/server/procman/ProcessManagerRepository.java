@@ -76,7 +76,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> getCommandClasses() {
+    public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
             commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
@@ -177,7 +177,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
-        final Set<CommandClass> classes = getCommandClasses();
+        final Set<CommandClass> classes = getMessageClasses();
         if (!classes.contains(commandClass)) {
             final String eventClassName = commandClass.value()
                                                       .getName();

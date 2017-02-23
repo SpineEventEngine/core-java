@@ -20,13 +20,18 @@
 
 package org.spine3.server.command;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.event.EventBus;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The abstract base for classes that expose command handling methods
@@ -46,13 +51,20 @@ import java.util.List;
  * some rare cases, using {@linkplain org.spine3.server.aggregate.Aggregate aggregates}
  * is a preferred way of handling commands.
  *
+ * <p>This class implements {@code CommandDispatcher} dispatching messages
+ * to itself.
+ *
  * @author Alexander Yevsyukov
  * @see org.spine3.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
-public abstract class CommandHandler extends CommandHandlingEntity<String, Empty> {
+public abstract class CommandHandler extends CommandHandlingEntity<String, Empty>
+        implements CommandDispatcher {
 
     private final EventBus eventBus;
+
+    @Nullable
+    private Set<CommandClass> commandClasses;
 
     /**
      * Creates a new instance of the command handler.
@@ -63,6 +75,28 @@ public abstract class CommandHandler extends CommandHandlingEntity<String, Empty
     protected CommandHandler(String id, EventBus eventBus) {
         super(id);
         this.eventBus = eventBus;
+    }
+
+    /**
+     * Dispatches the command to the handler method and
+     * posts resulting events to the {@link EventBus}.
+     *
+     * @param envelope the command to dispatch
+     * @throws IllegalStateException if an exception occurred during command dispatching
+     *                               with this exception as the cause
+     */
+    @Override
+    public void dispatch(CommandEnvelope envelope) {
+        handle(envelope.getMessage(), envelope.getCommandContext());
+    }
+
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
+    @Override
+    public Set<CommandClass> getMessageClasses() {
+        if (commandClasses == null) {
+            commandClasses = ImmutableSet.copyOf(getCommandClasses(getClass()));
+        }
+        return commandClasses;
     }
 
     /**

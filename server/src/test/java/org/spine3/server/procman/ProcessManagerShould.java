@@ -322,7 +322,7 @@ public class ProcessManagerShould {
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 

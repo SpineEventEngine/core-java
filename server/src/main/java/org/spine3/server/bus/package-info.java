@@ -18,25 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
-
-import org.spine3.base.CommandEnvelope;
-
 /**
- * The endpoint for {@link CommandDispatcher}s.
- *
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for abstract {@code Bus}.
  */
-class DispatcherEndpoint implements CommandEndpoint {
 
-    private final CommandDispatcher dispatcher;
+@ParametersAreNonnullByDefault
+package org.spine3.server.bus;
 
-    DispatcherEndpoint(CommandDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
-
-    @Override
-    public void receive(CommandEnvelope envelope) {
-        dispatcher.dispatch(envelope);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

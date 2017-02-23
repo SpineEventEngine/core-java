@@ -21,6 +21,7 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
@@ -94,6 +96,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
+
+    @Nullable
+    private Set<CommandClass> messageClasses;
 
     /**
      * Creates a new repository instance.
@@ -146,11 +151,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
-    public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result =
-                CommandHandlingEntity.getCommandClasses(getAggregateClass());
-        return result;
+    public Set<CommandClass> getMessageClasses() {
+        if (messageClasses == null) {
+            messageClasses = ImmutableSet.copyOf(
+                    CommandHandlingEntity.getCommandClasses(getAggregateClass()));
+        }
+        return messageClasses;
     }
 
     /**

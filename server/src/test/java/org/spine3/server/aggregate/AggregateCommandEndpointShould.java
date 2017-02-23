@@ -66,12 +66,12 @@ import static org.spine3.server.aggregate.Given.Command.createProject;
 import static org.spine3.server.aggregate.Given.Command.startProject;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
-public class CommandEndpointShould {
+public class AggregateCommandEndpointShould {
 
-    private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repository;
+    private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
-    private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repositorySpy;
+    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
     private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
@@ -164,8 +164,8 @@ public class CommandEndpointShould {
     }
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
-            CommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<CommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
+            AggregateCommandEndpointShould.ProjectAggregate> repository) {
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }
@@ -248,7 +248,7 @@ public class CommandEndpointShould {
     }
 
     private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> {
+            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(InMemoryStorageFactory.getInstance());
