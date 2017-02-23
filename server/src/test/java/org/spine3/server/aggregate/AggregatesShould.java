@@ -28,12 +28,14 @@ import org.spine3.server.BoundedContext;
 
 import java.lang.reflect.Constructor;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
 import static org.spine3.server.aggregate.Aggregates.createAggregateRootEntity;
 import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
+import static org.spine3.server.aggregate.Aggregates.getAggregateRootClass;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 
 /**
@@ -102,6 +104,20 @@ public class AggregatesShould {
                                             AggregateRoot.class, id.getClass());
         assertNotNull(constructor);
     }
+
+    @Test
+    public void obtain_aggregate_root_class() {
+        final Class<?> rootClass = getAggregateRootClass(AnAggregatePart.class);
+
+        assertNotNull(rootClass);
+        assertEquals(rootClass.getName(), AnAggregateRoot.class.getName());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_obtain_aggregate_root_class_when_part_does_not_have_appropriate_ctor() {
+        getAggregateRootClass(WrongAggregatePart.class);
+    }
+
     /*
      Test environment classes
     ***************************/

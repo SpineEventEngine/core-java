@@ -99,15 +99,33 @@ public class Aggregates {
                     entityClass.getDeclaredConstructor(idClass, rootClass);
             constructor.setAccessible(true);
             return constructor;
-        } catch (NoSuchMethodException e) {
-            final String errMsg = format("%s class must declare a constructor " +
-                                         "with ID and AggregateRoot parameters.", entityClass);
-            throw new IllegalStateException(errMsg, e);
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructor(entityClass.getName());
         }
     }
 
-    public static <E extends AggregatePart, I, R extends AggregateRoot<I>> Class<?> getAggregateRootClass(
-            Class<E> partClass) {
+    private static IllegalStateException noSuchConstructor(String entityClass) {
+        final String errMsg = format("%s class must declare a constructor " +
+                                     "with ID and AggregateRoot parameters.", entityClass);
+        throw new IllegalStateException(new NoSuchMethodException(errMsg));
+    }
+
+    /**
+     * Obtains the class of the {@code AggregateRoot} from
+     * the constructor of the passed {@code AggregatePart}.
+     *
+     * @param partClass the {@code AggregatePart} class
+     * @param <E>       the type of the {@code AggregatePart}
+     * @param <I>       the type of the {@code AggregatePart} ID
+     * @param <R>       the type of the {@code AggregateRoot}
+     * @return the {@code AggregateRoot} class
+     * @throws IllegalStateException if the {@code AggregatePart}
+     *                               does not have appropriate constructor
+     */
+    public static <E extends AggregatePart, I, R extends AggregateRoot<I>> Class<R>
+    getAggregateRootClass(Class<E> partClass) {
+        checkNotNull(partClass);
+
         final Constructor<?>[] constructors = partClass.getDeclaredConstructors();
         for (Constructor<?> constructor : constructors) {
             final Class<?>[] parameters = constructor.getParameterTypes();
@@ -117,10 +135,13 @@ public class Aggregates {
 
             final boolean isRoot = AggregateRoot.class.isAssignableFrom(parameters[1]);
             if (isRoot) {
-                return parameters[1];
+                @SuppressWarnings("unchecked")
+                // Actually it is OK because it is checked above.
+                final Class<R> rootClass = (Class<R>) parameters[1];
+                return rootClass;
             }
         }
-        throw new IllegalStateException();
+        throw noSuchConstructor(partClass.getName());
     }
 
     /**
