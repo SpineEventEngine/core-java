@@ -133,7 +133,7 @@ public class ProcessManagerShould {
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
         final List<Event> events = processManager.dispatchCommand(command,
-                                                                  commandFactory.createCommandContext());
+                                                                  commandFactory.createContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -192,7 +192,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, commandFactory.createCommandContext());
+        processManager.dispatchCommand(unknownCommand, commandFactory.createContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -213,7 +213,7 @@ public class ProcessManagerShould {
     @Test
     public void create_iterating_router() {
         final StringValue commandMessage = newStringValue("create_iterating_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -236,7 +236,7 @@ public class ProcessManagerShould {
     @Test
     public void create_router() {
         final StringValue commandMessage = newStringValue("create_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 

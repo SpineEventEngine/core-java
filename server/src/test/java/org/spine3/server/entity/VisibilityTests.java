@@ -65,7 +65,7 @@ public class VisibilityTests {
                                                  .nextLong());
         final TestCommandFactory factory =
                 TestCommandFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
-        modificationCommand = factory.create(newStringValue("Entity modification command"));
+        modificationCommand = factory.createCommand(newStringValue("Entity modification command"));
     }
 
     @Test

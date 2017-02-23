@@ -43,7 +43,7 @@ public class FailureThrowableShould {
     public void setUp() {
         final TestCommandFactory commandFactory =
                 TestCommandFactory.newInstance(FailureThrowable.class);
-        this.command = commandFactory.create(newUuidValue());
+        this.command = commandFactory.createCommand(newUuidValue());
     }
 
     @Test
