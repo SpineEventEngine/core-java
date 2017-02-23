@@ -43,11 +43,29 @@ public class Identifiers {
     }
 
     /**
-     * Verifies if the passed class of identifiers is supported.
+     * Ensures that the passed class of identifiers is supported.
      *
+     * <p>The following types of IDs are supported:
+     *   <ul>
+     *      <li>{@code String}
+     *      <li>{@code Long}
+     *      <li>{@code Integer}
+     *      <li>A class implementing {@link com.google.protobuf.Message Message}
+     *   </ul>
+     *
+     * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code,
+     * and/or if you need to have IDs with some structure inside.
+     *
+     * <p>Examples of such structural IDs are:
+     *   <ul>
+     *      <li>EAN value used in bar codes
+     *      <li>ISBN
+     *      <li>Phone number
+     *      <li>Email address as a couple of local-part and domain
+     *   </ul>
      * @param <I> the type of the ID
      * @param idClass the class of IDs
-     * @throws IllegalArgumentException if the class of IDs is not supported
+     * @throws IllegalArgumentException if the class of IDs is not of supported type
      */
     public static <I> void checkSupported(Class<I> idClass) {
         checkNotNull(idClass);
@@ -61,10 +79,11 @@ public class Identifiers {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     *      <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
-     *      <li>For {@code String} — {@link com.google.protobuf.StringValue}
-     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
-     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
+     *      <li>For classes implementing {@link com.google.protobuf.Message Message} — the value
+     *      of the message itself
+     *      <li>For {@code String} — {@link com.google.protobuf.StringValue StringValue}
+     *      <li>For {@code Long} — {@link com.google.protobuf.UInt64Value UInt64Value}
+     *      <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -80,17 +99,18 @@ public class Identifiers {
     }
 
     /**
-     * Extracts ID object from the passed {@link Any} instance.
+     * Extracts ID object from the passed {@code Any} instance.
      *
-     * <p>Returned type depends on the type of the message wrapped into {@code Any}.
-     *
-     * @param any the ID value wrapped into {@code Any}
-     * @return <ul>
-     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped
-     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped
-     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped
+     * <p>Returned type depends on the type of the message wrapped into {@code Any}:
+     * <ul>
+     * <li>{@code String} for unwrapped {@link com.google.protobuf.StringValue StringValue}
+     * <li>{@code Integer} for unwrapped {@link com.google.protobuf.UInt32Value UInt32Value}
+     * <li>{@code Long} for unwrapped {@link com.google.protobuf.UInt64Value UInt64Value}
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
+     *
+     * @param any the ID value wrapped into {@code Any}
+     * @return unwrapped ID
      */
     public static Object idFromAny(Any any) {
         checkNotNull(any);

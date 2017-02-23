@@ -25,6 +25,8 @@ import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
@@ -36,7 +38,6 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.util.Environment;
 
@@ -241,7 +242,7 @@ public class CommandBus implements AutoCloseable {
         checkNotNull(responseObserver);
         checkArgument(isNotDefault(command));
 
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         final CommandClass commandClass = commandEnvelope.getCommandClass();
 
         final Optional<CommandEndpoint> commandEndpoint = getEndpoint(commandClass);
@@ -276,7 +277,7 @@ public class CommandBus implements AutoCloseable {
      * Passes a previously scheduled command to the corresponding endpoint.
      */
     void postPreviouslyScheduled(Command command) {
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
+        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         final Optional<CommandEndpoint> endpoint = getEndpoint(commandEnvelope.getCommandClass());
         if (!endpoint.isPresent()) {
             throw noEndpointFound(commandEnvelope);
@@ -330,18 +331,18 @@ public class CommandBus implements AutoCloseable {
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
 
-            log.failureHandling(failure, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            log.failureHandling(failure, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
 
             commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
 
-            log.errorHandling(exception, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            log.errorHandling(exception, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
 
             commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
 
-            log.errorHandlingUnknown(cause, commandEnvelope.getCommandMessage(), commandEnvelope.getCommandId());
+            log.errorHandlingUnknown(cause, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
 
             final Error error = Errors.fromThrowable(cause);
             commandStatusService.setToError(commandEnvelope.getCommandId(), error);

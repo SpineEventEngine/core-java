@@ -18,32 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.entity;
 
-import org.spine3.SPI;
-import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.status.EntityStatus;
+import com.google.common.base.Function;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
+import org.spine3.client.EntityId;
+import org.spine3.protobuf.AnyPacker;
+
+import static org.spine3.protobuf.Values.newLongValue;
 
 /**
- * A container for the storage fields used to store the {@linkplain EntityStatus}.
- *
- * @author Dmytro Dashenkov
- * @see StorageField
+ * @author Alexander Yevsyukov
  */
-@SPI
-public enum EntityStatusField implements StorageField {
+public class EntityIdFunctionShould {
 
-    /**
-     * A {@linkplain boolean} field representing weather the relevant record is {@code archived} or not.
-     *
-     * @see Repository#markArchived
-     */
-    archived,
+    @Test(expected = IllegalStateException.class)
+    public void do_not_accept_wrong_id_type() {
+        final Function<EntityId, StringValue> func =
+                new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
-    /**
-     * A {@linkplain boolean} field representing weather the relevant record is {@code deleted} or not.
-     *
-     * @see Repository#markDeleted
-     */
-    deleted
+        final EntityId wrongType = EntityId.newBuilder()
+                                           .setId(AnyPacker.pack(newLongValue(100)))
+                                           .build();
+        func.apply(wrongType);
+    }
 }

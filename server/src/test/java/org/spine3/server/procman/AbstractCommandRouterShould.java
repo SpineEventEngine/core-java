@@ -28,13 +28,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.type.CommandClass;
 import org.spine3.test.TestCommandFactory;
 
 import javax.annotation.Nullable;
@@ -102,7 +102,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         });
 
         sourceMessage = newStringValue(getClass().getSimpleName());
-        sourceContext = commandFactory.createCommandContext();
+        sourceContext = commandFactory.createContext();
 
         router = createRouter(commandBus, sourceMessage, sourceContext);
         router.addAll(messages);

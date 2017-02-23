@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.entity.Project;
@@ -33,7 +32,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
 
 /**
- * This test suite tests {@link Entity#equals(Object)}.
+ * This test suite tests {@link AbstractVersionableEntity#equals(Object)}.
  *
  * <p>When migrating to JUnit 5, this class may become a
  * {@code @Nested} class of {@link EntityShould}.
@@ -85,7 +84,7 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_states_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setState(Sample.messageOfType(Project.class), another.getVersion(), another.whenModified());
+        another.setState(Sample.messageOfType(Project.class), another.getVersion());
 
         assertNotEquals(entity.getState(), another.getState());
         assertFalse(entity.equals(another));
@@ -94,17 +93,8 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_versions_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setVersion(entity.getVersion() + 5, another.whenModified());
+        another.incrementVersion();
 
-        assertFalse(entity.equals(another));
-    }
-
-    @Test
-    public void assure_entities_with_different_modification_times_are_not_equal() {
-        final TestEntity another = TestEntity.withStateOf(entity);
-        another.setVersion(another.getVersion(), Timestamp.newBuilder().setSeconds(5).build());
-
-        assertNotEquals(entity.whenModified(), another.whenModified());
         assertFalse(entity.equals(another));
     }
 }

@@ -25,7 +25,7 @@ import com.google.protobuf.Empty;
 import static org.spine3.base.Response.StatusCase.OK;
 
 /**
- * Utilities for working with {@link org.spine3.base.Response} objects.
+ * Utilities for working with {@link org.spine3.base.Response Response} objects.
  *
  * @author Alexander Yevsyukov
  */

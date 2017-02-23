@@ -22,16 +22,16 @@ package org.spine3.server.event;
 import com.google.common.base.Function;
 import org.spine3.Internal;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.server.delivery.Delivery;
-import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
- * Base functionality for the routines delivering the {@link org.spine3.base.Event}s to event consumers,
- * such as {@link EventDispatcher}s or {@link EventSubscriber}s.
+ * Base functionality for the routines delivering the {@linkplain org.spine3.base.Event Events}
+ * to event consumers, such as {@link EventDispatcher}s or {@link EventSubscriber}s.
  *
  * @param <C> the type of the consumer
  * @author Alex Tymchenko
@@ -51,7 +51,8 @@ abstract class EventDelivery<C> extends Delivery<Event, C> {
         super();
     }
 
-    /** Used by the instance of {@link EventBus} to inject the knowledge about up-to-date consumers for the event */
+    /** Used by the instance of {@link EventBus} to inject the knowledge about
+     * up-to-date consumers for the event */
     void setConsumerProvider(Function<EventClass, Set<C>> consumerProvider) {
         this.consumerProvider = consumerProvider;
     }

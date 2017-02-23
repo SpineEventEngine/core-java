@@ -22,9 +22,9 @@ package org.spine3.server.event.error;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Error;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventValidationError;
 import org.spine3.base.ValidationError;
-import org.spine3.server.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
 
 /**

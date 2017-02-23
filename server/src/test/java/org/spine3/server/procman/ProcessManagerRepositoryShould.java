@@ -31,9 +31,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
@@ -44,8 +46,7 @@ import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
-import org.spine3.server.type.EventClass;
+import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.Task;
@@ -58,7 +59,6 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
-import org.spine3.test.Given;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -76,9 +76,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerRepositoryShould
-        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
+                                            ProjectId,
+                                            Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
@@ -313,12 +314,6 @@ public class ProcessManagerRepositoryShould
 
         static void clearMessageDeliveryHistory() {
             messagesDelivered.clear();
-        }
-
-        @Override // is overridden to make it accessible from tests
-        @SuppressWarnings("MethodDoesntCallSuperMethod")
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
 
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber

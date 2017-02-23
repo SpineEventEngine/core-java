@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
-import org.spine3.server.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

@@ -21,11 +21,13 @@
 package org.spine3.base;
 
 import com.google.common.base.Throwables;
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.AnyPacker;
 
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Abstract base for throwable business failures.
@@ -35,31 +37,68 @@ import static org.spine3.protobuf.Timestamps.getCurrentTime;
 public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;
-    // We accept GeneratedMessage (instead of Message) because generated messages implement Serializable.
-    private final GeneratedMessageV3 failure;
+
+    /**
+     * For the {@code failureMessage} and {@code commandMessage} we accept GeneratedMessage
+     * (instead of Message) because generated messages implement Serializable.
+     */
+    private final GeneratedMessageV3 failureMessage;
+
+    /**
+     * The message of the {@code Command}, which led to this {@code Failure}.
+     */
+    private final GeneratedMessageV3 commandMessage;
+
+    /**
+     * The context of the {@code Command}, which led to this {@code Failure}.
+     */
+    private final CommandContext commandContext;
+
+    /** The moment of creation of this object. */
     private final Timestamp timestamp;
 
-    protected FailureThrowable(GeneratedMessageV3 failure) {
+    protected FailureThrowable(GeneratedMessageV3 commandMessage,
+                               CommandContext commandContext,
+                               GeneratedMessageV3 failureMessage) {
         super();
-        this.failure = failure;
+        this.commandMessage = commandMessage;
+        this.commandContext = commandContext;
+        this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
     }
 
-    public GeneratedMessageV3 getFailure() {
-        return failure;
+    public Message getFailureMessage() {
+        return failureMessage;
     }
 
-    /** Returns timestamp of the instance creation. */
+    /**
+     * Returns timestamp of the failure message creation.
+     */
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    /** Converts this instance into {@link Failure} message. */
-    public Failure toMessage() {
-        final Failure.Builder builder = Failure.newBuilder()
-                                               .setInstance(AnyPacker.pack(this.failure))
-                                               .setStacktrace(Throwables.getStackTraceAsString(this))
-                                               .setTimestamp(this.timestamp);
+    /**
+     * Converts this {@code FailureThrowable} into {@link Failure}.
+     */
+    public Failure toFailure() {
+        final Any packedMessage = pack(failureMessage);
+        final Failure.Builder builder =
+                Failure.newBuilder()
+                       .setMessage(packedMessage)
+                       .setContext(createContext());
         return builder.build();
+    }
+
+    private FailureContext createContext() {
+        final String stacktrace = Throwables.getStackTraceAsString(this);
+        final Command command = Commands.createCommand(commandMessage, commandContext);
+
+        return FailureContext.newBuilder()
+                             .setFailureId(Failures.generateId())
+                             .setTimestamp(timestamp)
+                             .setStacktrace(stacktrace)
+                             .setCommand(command)
+                             .build();
     }
 }

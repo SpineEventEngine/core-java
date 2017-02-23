@@ -24,7 +24,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.util.Timestamps.add;
+import static java.lang.String.format;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Represents a write operation for the projection storage, designed to modify
@@ -42,7 +44,8 @@ import static com.google.protobuf.util.Timestamps.add;
  *
  * <p>Acts as an intermediate buffer for the changes to apply.
  *
- * <p>Primary usage is letting the {@link ProjectionRepository} write loaded projections all at once.
+ * <p>Primary usage is letting the {@link ProjectionRepository} write
+ * loaded projections all at once.
  *
  * @param <I> type of the ID of the projection
  * @param <P> type of the projection
@@ -67,7 +70,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
 
     BulkWriteOperation(Duration maximumDuration, FlushCallback<P> flushCallback) {
         this.flushCallback = checkNotNull(flushCallback);
-        this.expirationTime = add(Timestamps.getCurrentTime(), maximumDuration);
+        this.expirationTime = add(getCurrentTime(), maximumDuration);
         this.active.set(true);
     }
 
@@ -81,7 +84,8 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     }
 
     /**
-     * Verifies if the operation lasts for too long. If so, completes the operation, otherwise performs no action.
+     * Verifies if the operation lasts for too long. If so, completes the operation,
+     * otherwise performs no action.
      *
      * <p>Performs no action if the operation is already finished.
      *
@@ -92,8 +96,8 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
             return;
         }
 
-        final Timestamp currentTime = Timestamps.getCurrentTime();
-        if (Timestamps.compare(currentTime, expirationTime) > 0) {
+        final Timestamp currentTime = getCurrentTime();
+        if (Timestamps2.compare(currentTime, expirationTime) > 0) {
             log().warn("Completing bulk write operation before all the events are processed.");
 
             complete();
@@ -101,7 +105,9 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     }
 
     /**
-     * Add new {@link Projection} to store. All the projections will be passed tothe {@link FlushCallback callback}
+     * Adds new {@link Projection} to store.
+     *
+     * <p>All the projections will be passed to the {@link FlushCallback callback}
      * on {@link #complete()}.
      *
      * @param projection new {@link Projection} to store
@@ -111,35 +117,45 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     }
 
     /**
-     * Update the {@code lastHandledEventTime} field. Only the last value is saved and passed to
+     * Updates the {@code lastHandledEventTime} field.
+     *
+     * <p>Only the last value is saved and passed to
      * the {@link FlushCallback callback} on {@link #complete()}.
      *
-     * @param lastHandledEventTime new value of the timestamp
+     * @param lastHandledEventTime the new value to set
      */
     synchronized void storeLastHandledEventTime(Timestamp lastHandledEventTime) {
         this.lastHandledEventTime = checkNotNull(lastHandledEventTime);
     }
 
+    private synchronized Timestamp getLastHandledEventTime() {
+        return lastHandledEventTime;
+    }
     /**
-     * Completes the operation and calls the {@link FlushCallback} passed as a parameter to the constructor.
+     * Completes the operation and calls the {@link FlushCallback} passed as
+     * a parameter to the constructor.
      *
-     * <p>While executing the callback the operation is still considered to be active. See {@link #isInProgress()}
-     * for details.
+     * <p>While executing the callback the operation is still considered to be active.
+     * See {@link #isInProgress()} for details.
      */
     void complete() {
-        final boolean closed = flushCallback == null || !active.get();
+        final boolean closed = flushCallback == null
+                               || !active.get();
         checkState(
-                !closed,
-                String.format("Can not complete the %s. Already closed.", BulkWriteOperation.class.getSimpleName()));
+            !closed,
+            format("Cannot complete the %s. Already closed.",
+                   BulkWriteOperation.class.getSimpleName())
+        );
 
-        flushCallback.onFlushResults(pendingProjections, lastHandledEventTime);
+        flushCallback.onFlushResults(pendingProjections, getLastHandledEventTime());
         close();
     }
 
     /**
      * Makes the operation not active and flushes the callback.
      *
-     * <p>Called automatically on {@link #complete() operation complete} after the callback is triggered.
+     * <p>Called automatically on {@link #complete() operation complete} after
+     * the callback is triggered.
      *
      * @see #isInProgress()
      */

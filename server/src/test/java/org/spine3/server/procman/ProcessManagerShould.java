@@ -28,6 +28,7 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -39,7 +40,7 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
+import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.command.AddTask;
@@ -49,7 +50,6 @@ import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
-import org.spine3.test.Given;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -133,7 +133,7 @@ public class ProcessManagerShould {
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
         final List<Event> events = processManager.dispatchCommand(command,
-                                                                  commandFactory.createCommandContext());
+                                                                  commandFactory.createContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -192,7 +192,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, commandFactory.createCommandContext());
+        processManager.dispatchCommand(unknownCommand, commandFactory.createContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -213,7 +213,7 @@ public class ProcessManagerShould {
     @Test
     public void create_iterating_router() {
         final StringValue commandMessage = newStringValue("create_iterating_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -236,7 +236,7 @@ public class ProcessManagerShould {
     @Test
     public void create_router() {
         final StringValue commandMessage = newStringValue("create_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -266,35 +266,11 @@ public class ProcessManagerShould {
                 .build();
     }
 
-    private static ProjectStarted projectStarted() {
-        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static ProjectCreated projectCreated() {
-        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static TaskAdded taskAdded() {
-        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
-                .setProjectId(ID)
-                .build();
-    }
-
     @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
         private TestProcessManager(ProjectId id) {
             super(id);
-        }
-
-        @SuppressWarnings("MethodDoesntCallSuperMethod") // OK for this test.
-        @Override
-        protected Any getDefaultState() {
-            return Any.getDefaultInstance();
         }
 
         @Subscribe

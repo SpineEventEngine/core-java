@@ -79,7 +79,7 @@ public class CommandStore implements AutoCloseable {
      * Stores the command with the error status.
      *
      * @param command the command to store
-     * @param exception an exception occurred to convert to {@link org.spine3.base.Error}
+     * @param exception an exception occurred to convert to {@link org.spine3.base.Error Error}
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, Exception exception) {
@@ -91,7 +91,8 @@ public class CommandStore implements AutoCloseable {
      * Stores the command with the error status.
      *
      * @param command the command to store
-     * @param exception the exception occurred, which encloses {@link org.spine3.base.Error} to store
+     * @param exception the exception occurred, which encloses {@link org.spine3.base.Error Error}
+     *                  to store
      * @throws IllegalStateException if the storage is closed
      */
     public void storeWithError(Command command, CommandException exception) {

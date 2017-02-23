@@ -18,20 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.type;
+package org.spine3.server.reflect;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
-import org.junit.Test;
+/**
+ * Base interface for enumerations on generic parameters of types.
+ *
+ * @author Alexander Yevsyukov
+ */
+public interface GenericTypeIndex {
 
-import static org.junit.Assert.assertEquals;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class EventClassShould {
-
-    @Test
-    public void create_set_on_varargs() {
-        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
-    }
+    /**
+     * Obtains a zero-based index of a generic parameter of a type.
+     */
+    int getIndex();
 }

@@ -20,6 +20,8 @@
 
 package org.spine3.server.command;
 
+import org.spine3.base.CommandEnvelope;
+
 /**
  * The endpoint for {@link CommandDispatcher}s.
  *

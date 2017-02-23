@@ -19,44 +19,29 @@
 //
 syntax = "proto3";
 
-package spine.event.storage;
+package spine.base;
 
 option (type_url_prefix) = "type.spine3.org";
-option (SPI_all) = true;
-option java_package = "org.spine3.server.event.storage";
+option java_package = "org.spine3.base";
+option java_outer_classname = "VersionProto";
 option java_multiple_files = true;
-option java_outer_classname = "EventStorageProto";
 option java_generate_equals_and_hash = true;
 
-import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
-import "spine/base/event.proto";
+import "spine/validate.proto";
 
-// This type defines the way events are stored in event storage.
-// Some of the fields are defined as string representation of corresponding message types
-// so that these fields are available for querying.
-message EventStorageRecord {
-    option (SPI_type) = true;
+// A version number with timestamp of the version creation.
+message Version {
 
-    // A moment of time when the event occurred.
-    google.protobuf.Timestamp timestamp = 1;
+    // A zero-based version number.
+    //
+    // When numbering versions of entities the zero value is reserved for
+    // the “pre-initialization” version of an entity.
+    //
+    int32 number = 1 [(required) = true];
 
-    // A short name of Protobuf type of the event.
-    string event_type = 2;
-
-    // String representation of ID of the aggregate or another entity, which generated the event.
-    string producer_id = 3;
-
-    // String representation of `EventId`.
-    string event_id = 4;
-
-    reserved 5 to 19;
-
-    // Event instance.
-    google.protobuf.Any message = 20;
-
-    // Event context.
-    base.EventContext context = 21;
+    // A moment in time when the new version was created.
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 }

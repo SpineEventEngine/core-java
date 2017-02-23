@@ -21,9 +21,9 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
+import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * In-memory storage for aggregate events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
- *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
@@ -52,25 +51,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         };
     }
 
-    private TenantAggregateRecords<I> getStorage() {
-        return multitenantStorage.getStorage();
-    }
-
     /** Creates a new single-tenant storage instance. */
     protected static <I> InMemoryAggregateStorage<I> newInstance() {
         return new InMemoryAggregateStorage<>(false);
     }
 
-    @Override
-    protected void writeRecord(I id, AggregateStorageRecord record) {
-        getStorage().put(id, record);
-    }
-
-    @Override
-    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-        checkNotNull(id);
-        final List<AggregateStorageRecord> records = getStorage().getHistoryBackward(id);
-        return records.iterator();
+    private TenantAggregateRecords<I> getStorage() {
+        return multitenantStorage.getStorage();
     }
 
     @Override
@@ -81,14 +68,14 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Optional<EntityStatus> readStatus(I id) {
+    protected Optional<Visibility> readVisibility(I id) {
         checkNotClosed();
-        Optional<EntityStatus> result = getStorage().getStatus(id);
+        Optional<Visibility> result = getStorage().getStatus(id);
         return result;
     }
 
     @Override
-    protected void writeStatus(I id, EntityStatus status) {
+    protected void writeVisibility(I id, Visibility status) {
         checkNotClosed();
         getStorage().putStatus(id, status);
     }
@@ -100,16 +87,28 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
+    protected void writeRecord(I id, AggregateEventRecord record) {
+        getStorage().put(id, record);
+    }
+
+    @Override
+    protected Iterator<AggregateEventRecord> historyBackward(I id) {
+        checkNotNull(id);
+        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(id);
+        return records.iterator();
+    }
+
+    @Override
     protected boolean markArchived(I id) {
-        final Optional<EntityStatus> found = getStorage().getStatus(id);
+        final Optional<Visibility> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
-            getStorage().putStatus(id, EntityStatus.newBuilder()
-                                                   .setArchived(true)
-                                                   .build());
+            getStorage().putStatus(id, Visibility.newBuilder()
+                                                 .setArchived(true)
+                                                 .build());
             return true;
         }
-        final EntityStatus currentStatus = found.get();
+        final Visibility currentStatus = found.get();
         if (currentStatus.getArchived()) {
             return false; // Already archived.
         }
@@ -122,16 +121,16 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected boolean markDeleted(I id) {
-        final Optional<EntityStatus> found = getStorage().getStatus(id);
+        final Optional<Visibility> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
-            getStorage().putStatus(id, EntityStatus.newBuilder()
-                                                   .setDeleted(true)
-                                                   .build());
+            getStorage().putStatus(id, Visibility.newBuilder()
+                                                 .setDeleted(true)
+                                                 .build());
             return true;
         }
 
-        final EntityStatus currentStatus = found.get();
+        final Visibility currentStatus = found.get();
 
         if (currentStatus.getDeleted()) {
             return false; // Already deleted.

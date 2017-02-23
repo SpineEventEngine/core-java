@@ -86,7 +86,8 @@ public class AnyPacker {
     /**
      * Unwraps {@code Any} value into an instance of the passed class.
      *
-     * <p>If there is no Java class for the type, {@link org.spine3.protobuf.error.UnexpectedTypeException}
+     * <p>If there is no Java class for the type,
+     * {@link org.spine3.protobuf.error.UnexpectedTypeException UnexpectedTypeException}
      * will be thrown.
      *
      * @param any   instance of {@link Any} that should be unwrapped
