@@ -49,9 +49,11 @@ public class AggregatePartRepositoryLookupShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        final ProjectId id = ProjectId.newBuilder().setId(newUuid()).build();
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId(newUuid())
+                                      .build();
         final ProjectRoot root = new ProjectRoot(boundedContext, id);
-        boundedContext.register(new ProjectPartRepository(boundedContext, root));
+        boundedContext.register(new ProjectPartRepository(boundedContext));
         boundedContext.register(new TaskAggregateRepository(boundedContext));
     }
 
@@ -123,9 +125,10 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class ProjectPartRepository extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
-        private ProjectPartRepository(BoundedContext boundedContext, ProjectRoot root) {
-            super(boundedContext, root);
+    private static class ProjectPartRepository
+            extends AggregatePartRepository<ProjectId, ProjectPart> {
+        private ProjectPartRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 

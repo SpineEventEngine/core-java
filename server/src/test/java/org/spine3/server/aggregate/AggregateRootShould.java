@@ -67,8 +67,8 @@ public class AggregateRootShould {
                              .setId(newUuid())
                              .build();
         aggregateRoot = new ProjectRoot(boundedContext, projectId);
-        boundedContext.register(new ProjectDefinitionRepository(boundedContext, aggregateRoot));
-        boundedContext.register(new ProjectLifeCycleRepository(boundedContext, aggregateRoot));
+        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
+        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
 
         commandBus = boundedContext.getCommandBus();
     }
@@ -193,18 +193,18 @@ public class AggregateRootShould {
     }
 
     private static class ProjectDefinitionRepository
-            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
+            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart> {
 
-        private ProjectDefinitionRepository(BoundedContext boundedContext, ProjectRoot root) {
-            super(boundedContext, root);
+        private ProjectDefinitionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 
     private static class ProjectLifeCycleRepository
-            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
+            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart> {
 
-        private ProjectLifeCycleRepository(BoundedContext boundedContext, ProjectRoot root) {
-            super(boundedContext, root);
+        private ProjectLifeCycleRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 
