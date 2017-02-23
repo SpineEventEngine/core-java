@@ -71,7 +71,7 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends Message, A extends AggregatePart<I, P, ?>> P getPartState(
+    protected <P extends Message> P getPartState(
             Class<P> partStateClass) {
         final P partState = root.getPartState(partStateClass);
         return partState;
