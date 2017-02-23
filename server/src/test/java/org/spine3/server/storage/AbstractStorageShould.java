@@ -203,9 +203,8 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_close_twice() {
-        closeAndFailIfException(storage);
-
-        storage.read(newId());
+    public void throw_exception_if_close_twice() throws Exception {
+        storage.close();
+        storage.close();
     }
 }
