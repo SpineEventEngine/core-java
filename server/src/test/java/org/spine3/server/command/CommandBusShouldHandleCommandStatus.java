@@ -62,6 +62,7 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
@@ -221,9 +222,9 @@ public class CommandBusShouldHandleCommandStatus {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+            super(newStringValue("some Command message"),
+                  CommandContext.getDefaultInstance(),
+                  newStringValue(TestFailure.class.getName()));
         }
     }
 

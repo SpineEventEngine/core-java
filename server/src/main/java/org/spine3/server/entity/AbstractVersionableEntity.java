@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Command;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
@@ -282,28 +283,34 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
+     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
      * @see #getVisibility()
      * @see Visibility#getArchived()
      */
-    protected void checkNotArchived() throws CannotModifyArchivedEntity {
+    protected void checkNotArchived(Command modification) throws CannotModifyArchivedEntity {
         if (getVisibility().getArchived()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyArchivedEntity(idStr);
+            throw new CannotModifyArchivedEntity(modification.getMessage(),
+                                                 modification.getContext(),
+                                                 idStr);
         }
     }
 
     /**
      * Ensures that the entity is not marked as {@code deleted}.
      *
+     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
      * @see #getVisibility()
      * @see Visibility#getDeleted()
      */
-    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
+    protected void checkNotDeleted(Command modification) throws CannotModifyDeletedEntity {
         if (getVisibility().getDeleted()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyDeletedEntity(idStr);
+            throw new CannotModifyDeletedEntity(modification.getMessage(),
+                                                modification.getContext(),
+                                                idStr);
         }
     }
 
