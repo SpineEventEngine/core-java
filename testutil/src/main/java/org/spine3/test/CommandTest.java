@@ -82,7 +82,7 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = commandFactory.create(commandMessage);
+        this.command = commandFactory.createCommand(commandMessage);
         return this.command;
     }
 
@@ -96,7 +96,7 @@ public abstract class CommandTest<C extends Message> {
      * @return new command instance
      */
     protected Command createDifferentCommand(Message commandMessage) {
-        return commandFactory.create(checkNotNull(commandMessage));
+        return commandFactory.createCommand(checkNotNull(commandMessage));
     }
 
     /**
@@ -126,13 +126,13 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage, Timestamp timestamp) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = adjustTimestamp(commandFactory.create(commandMessage), checkNotNull(timestamp));
+        this.command = adjustTimestamp(commandFactory.createCommand(commandMessage), checkNotNull(timestamp));
         return this.command;
     }
 
     /**
      * Obtains remembered command message or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<C> commandMessage() {
         return Optional.fromNullable(commandMessage);
@@ -140,7 +140,7 @@ public abstract class CommandTest<C extends Message> {
 
     /**
      * Obtains remembered command context or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<CommandContext> commandContext() {
         if (command().isPresent()) {
@@ -151,7 +151,7 @@ public abstract class CommandTest<C extends Message> {
 
     /**
      * Obtains remembered command or empty {@code Optional} if
-     * none of the {@code createCommand()} was called before.
+     * none of the {@code Command()} was called before.
      */
     protected Optional<Command> command() {
         return Optional.fromNullable(command);

@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * In-memory storage for aggregate events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
+ *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
@@ -99,46 +100,44 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected boolean markArchived(I id) {
+    protected void markArchived(I id) {
         final Optional<Visibility> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
             getStorage().putStatus(id, Visibility.newBuilder()
                                                  .setArchived(true)
                                                  .build());
-            return true;
+            return;
         }
         final Visibility currentStatus = found.get();
         if (currentStatus.getArchived()) {
-            return false; // Already archived.
+            return; // Already archived.
         }
 
         getStorage().putStatus(id, currentStatus.toBuilder()
                                                 .setArchived(true)
                                                 .build());
-        return true;
     }
 
     @Override
-    protected boolean markDeleted(I id) {
+    protected void markDeleted(I id) {
         final Optional<Visibility> found = getStorage().getStatus(id);
 
         if (!found.isPresent()) {
             getStorage().putStatus(id, Visibility.newBuilder()
                                                  .setDeleted(true)
                                                  .build());
-            return true;
+            return;
         }
 
         final Visibility currentStatus = found.get();
 
         if (currentStatus.getDeleted()) {
-            return false; // Already deleted.
+            return; // Already deleted.
         }
 
         getStorage().putStatus(id, currentStatus.toBuilder()
                                                 .setDeleted(true)
                                                 .build());
-        return true;
     }
 }

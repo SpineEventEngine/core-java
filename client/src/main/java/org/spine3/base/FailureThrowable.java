@@ -38,22 +38,36 @@ public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;
 
-    // We accept GeneratedMessage (instead of Message) because
-    // generated messages implement Serializable.
+    /**
+     * For the {@code failureMessage} and {@code commandMessage} we accept GeneratedMessage
+     * (instead of Message) because generated messages implement Serializable.
+     */
     private final GeneratedMessageV3 failureMessage;
+
+    /**
+     * The message of the {@code Command}, which led to this {@code Failure}.
+     */
+    private final GeneratedMessageV3 commandMessage;
+
+    /**
+     * The context of the {@code Command}, which led to this {@code Failure}.
+     */
+    private final CommandContext commandContext;
 
     /** The moment of creation of this object. */
     private final Timestamp timestamp;
 
-    protected FailureThrowable(GeneratedMessageV3 failureMessage) {
+    protected FailureThrowable(GeneratedMessageV3 commandMessage,
+                               CommandContext commandContext,
+                               GeneratedMessageV3 failureMessage) {
         super();
+        this.commandMessage = commandMessage;
+        this.commandContext = commandContext;
         this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
     }
 
-    //TODO:2017-02-22:alexander.yevsyukov: Rename to getFailureMessage().
-    // This involves modifying failure generation Gradle plug-in in the Tools project.
-    public Message getFailure() {
+    public Message getFailureMessage() {
         return failureMessage;
     }
 
@@ -78,16 +92,13 @@ public abstract class FailureThrowable extends Throwable {
 
     private FailureContext createContext() {
         final String stacktrace = Throwables.getStackTraceAsString(this);
-
-        //TODO:2017-02-22:alexander.yevsyukov: Pass Command to the context
-        // by adding commandMessage and commandContext parameters to
-        // FailureThrowable constructor. This, again, requires extending the Spine model
-        // compiler.
+        final Command command = Commands.createCommand(commandMessage, commandContext);
 
         return FailureContext.newBuilder()
                              .setFailureId(Failures.generateId())
                              .setTimestamp(timestamp)
                              .setStacktrace(stacktrace)
+                             .setCommand(command)
                              .build();
     }
 }

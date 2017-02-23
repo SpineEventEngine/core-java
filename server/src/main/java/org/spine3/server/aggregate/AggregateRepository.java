@@ -326,13 +326,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected boolean markArchived(I id) {
-        return aggregateStorage().markArchived(id);
+    protected void markArchived(I id) {
+        aggregateStorage().markArchived(id);
     }
 
     @Override
-    protected boolean markDeleted(I id) {
-        return aggregateStorage().markDeleted(id);
+    protected void markDeleted(I id) {
+        aggregateStorage().markDeleted(id);
     }
 
     private static <I> IllegalStateException unableToLoadEvents(I id) {
