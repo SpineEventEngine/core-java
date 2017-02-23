@@ -23,24 +23,38 @@ package org.spine3.base;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.TestCommandFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.newUuidValue;
 
 public class FailureThrowableShould {
+
+    private Command command;
+
+    @Before
+    public void setUp() {
+        final TestCommandFactory commandFactory =
+                TestCommandFactory.newInstance(FailureThrowable.class);
+        this.command = commandFactory.createCommand(newUuidValue());
+    }
 
     @Test
     public void create_instance() {
         final StringValue failure = newStringValue(newUuid());
 
-        final FailureThrowable failureThrowable = new TestFailure(failure);
+        final FailureThrowable failureThrowable = new TestFailure(command.getMessage(),
+                                                                  command.getContext(),
+                                                                  failure);
 
-        assertEquals(failure, failureThrowable.getFailure());
+        assertEquals(failure, failureThrowable.getFailureMessage());
         assertTrue(Timestamps.isValid(failureThrowable.getTimestamp()));
     }
 
@@ -48,7 +62,9 @@ public class FailureThrowableShould {
     public void convert_to_failure_message() {
         final StringValue failure = newStringValue(newUuid());
 
-        final Failure failureWrapper = new TestFailure(failure).toFailure();
+        final Failure failureWrapper = new TestFailure(command.getMessage(),
+                                                       command.getContext(),
+                                                       failure).toFailure();
 
         assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
         assertFalse(failureWrapper.getContext()
@@ -56,12 +72,17 @@ public class FailureThrowableShould {
                                   .isEmpty());
         assertTrue(Timestamps.isValid(failureWrapper.getContext()
                                                     .getTimestamp()));
+        final Command wrappedCommand = failureWrapper.getContext()
+                                                     .getCommand();
+        assertEquals(command, wrappedCommand);
     }
 
     private static class TestFailure extends FailureThrowable {
 
-        protected TestFailure(GeneratedMessageV3 failure) {
-            super(failure);
+        protected TestFailure(GeneratedMessageV3 commandMessage,
+                              CommandContext context,
+                              GeneratedMessageV3 failure) {
+            super(commandMessage, context, failure);
         }
 
         private static final long serialVersionUID = 0L;

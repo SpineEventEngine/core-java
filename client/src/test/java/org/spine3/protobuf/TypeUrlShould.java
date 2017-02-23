@@ -158,7 +158,7 @@ public class TypeUrlShould {
     public void obtain_type_of_command() {
         final CommandFactory factory = TestCommandFactory.newInstance(TypeUrlShould.class);
         final StringValue message = newStringValue(newUuid());
-        final Command command = factory.create(message);
+        final Command command = factory.createCommand(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
 

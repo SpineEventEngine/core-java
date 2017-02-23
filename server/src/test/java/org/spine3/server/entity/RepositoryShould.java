@@ -95,13 +95,11 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean markArchived(Exception id) {
-            return false;
+        protected void markArchived(Exception id) {
         }
 
         @Override
-        protected boolean markDeleted(Exception id) {
-            return false;
+        protected void markDeleted(Exception id) {
         }
 
         @Override
@@ -153,13 +151,11 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean markArchived(ProjectId id) {
-            return false;
+        protected void markArchived(ProjectId id) {
         }
 
         @Override
-        protected boolean markDeleted(ProjectId id) {
-            return false;
+        protected void markDeleted(ProjectId id) {
         }
     }
 
@@ -206,13 +202,11 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean markArchived(ProjectId id) {
-            return false;
+        protected void markArchived(ProjectId id) {
         }
 
         @Override
-        protected boolean markDeleted(ProjectId id) {
-            return false;
+        protected void markDeleted(ProjectId id) {
         }
     }
 
@@ -259,13 +253,11 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean markArchived(ProjectId id) {
-            return false;
+        protected void markArchived(ProjectId id) {
         }
 
         @Override
-        protected boolean markDeleted(ProjectId id) {
-            return false;
+        protected void markDeleted(ProjectId id) {
         }
     }
 
@@ -300,13 +292,11 @@ public class RepositoryShould {
         }
 
         @Override
-        protected boolean markArchived(ProjectId id) {
-            return false;
+        protected void markArchived(ProjectId id) {
         }
 
         @Override
-        protected boolean markDeleted(ProjectId id) {
-            return false;
+        protected void markDeleted(ProjectId id) {
         }
 
         @Override

@@ -62,6 +62,7 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
@@ -105,7 +106,7 @@ public class CommandBusShouldHandleCommandStatus {
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProjectMessage());
+        final Command command = commandFactory.createCommand(Given.CommandMessage.createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -209,7 +210,7 @@ public class CommandBusShouldHandleCommandStatus {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
-        final Command command = commandFactory.create(msg);
+        final Command command = commandFactory.createCommand(msg);
         return command;
     }
 
@@ -221,9 +222,9 @@ public class CommandBusShouldHandleCommandStatus {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+            super(newStringValue("some Command message"),
+                  CommandContext.getDefaultInstance(),
+                  newStringValue(TestFailure.class.getName()));
         }
     }
 
