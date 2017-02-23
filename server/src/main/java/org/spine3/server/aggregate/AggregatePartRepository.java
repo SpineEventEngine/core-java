@@ -47,8 +47,7 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
 
     private <R extends AggregateRoot<I>> Class<R> getAggregateRootClass() {
         @SuppressWarnings("unchecked")
-        // It is OK because `getAggregateRootClass` method returns the `R extends AggregateRoot<I>`.
-        // Where I is ID of the entity is passed with `getEntityClass()`.
+        // It is OK because value returned with `getAggregateRootClass` is fully controlled.
         final Class<R> rootClass = (Class<R>) Aggregates.getAggregateRootClass(getEntityClass());
         return rootClass;
     }
