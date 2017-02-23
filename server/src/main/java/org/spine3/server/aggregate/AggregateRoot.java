@@ -82,11 +82,11 @@ public class AggregateRoot<I> {
      * @param <S>            the type of the part state
      * @return the state of the part or a default state if the state was not found
      * @throws IllegalStateException if a repository was not found,
-     *                               or the repository does not match expectations
-     *                               of this {@code AggregateRoot}
+     *                               or the ID type of the part state does not match
+     *                               the ID type of this {@code AggregateRoot}
      */
-    protected <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>> S getPartState(
-            Class<S> partStateClass) {
+    protected <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>> S
+              getPartState(Class<S> partStateClass) {
         final AggregatePartRepository<I, A, R> repo = getRepository(partStateClass);
         final AggregatePart<I, S, ?> aggregatePart = repo.loadOrCreate(getId());
         final S partState = aggregatePart.getState();
@@ -97,7 +97,8 @@ public class AggregateRoot<I> {
      * Obtains a repository for the passed state class.
      *
      * @throws IllegalStateException if a repository was not found,
-     *                               or the repository does not match expectations of this {@code AggregateRoot}
+     *                               or the repository ID type does not match
+     *                               the ID type of this {@code AggregateRoot}
      */
     private <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>>
     AggregatePartRepository<I, A, R> getRepository(Class<S> stateClass) {
