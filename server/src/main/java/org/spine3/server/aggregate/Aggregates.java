@@ -193,8 +193,9 @@ class Aggregates {
      * @param <E>  the type of the entity
      * @return an {@code AggregatePart} instance
      */
-    static <I, E extends AbstractEntity<I, ?>> E
-    createAggregatePartEntity(Constructor<E> ctor, I id, AggregateRoot<I> root) {
+    static <I, E extends AbstractEntity<I, ?>> E createAggregatePart(Constructor<E> ctor,
+                                                                     I id,
+                                                                     AggregateRoot<I> root) {
         checkNotNull(ctor);
         checkNotNull(id);
         checkNotNull(root);

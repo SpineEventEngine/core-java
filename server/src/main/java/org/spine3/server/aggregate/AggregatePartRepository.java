@@ -24,7 +24,7 @@ import org.spine3.server.BoundedContext;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
+import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
 import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
 
 /**
@@ -63,7 +63,7 @@ public abstract class AggregatePartRepository
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
         final AggregateRoot<I> root = createAggregateRoot(id, getBoundedContext(), rootClass);
-        final A result = createAggregatePartEntity(entityConstructor, id, root);
+        final A result = createAggregatePart(entityConstructor, id, root);
         return result;
     }
 

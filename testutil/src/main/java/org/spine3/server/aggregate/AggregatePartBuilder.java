@@ -25,7 +25,7 @@ import org.spine3.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
+import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
 import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
 
 /**
@@ -62,7 +62,7 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
     protected A createEntity(I id) {
         final Constructor<A> constructor = getConstructor();
         final AggregateRoot<I> root = aggregateRoot;
-        final A result = createAggregatePartEntity(constructor, id, root);
+        final A result = createAggregatePart(constructor, id, root);
         return result;
     }
 

@@ -31,7 +31,7 @@ import java.lang.reflect.Constructor;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
+import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
 import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
 import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
@@ -75,7 +75,7 @@ public class AggregatesShould {
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
                 AnAggregatePart.class.getDeclaredConstructor(String.class, AnAggregateRoot.class);
-        final AggregatePart aggregatePart = createAggregatePartEntity(constructor, id, root);
+        final AggregatePart aggregatePart = createAggregatePart(constructor, id, root);
         assertNotNull(aggregatePart);
     }
 
