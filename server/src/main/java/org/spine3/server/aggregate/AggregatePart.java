@@ -48,7 +48,8 @@ import com.google.protobuf.Message;
  * @author Alexander Yevsyukov
  * @see Aggregate
  */
-public abstract class AggregatePart<I, S extends Message, B extends Message.Builder> extends Aggregate<I, S, B> {
+public abstract class AggregatePart<I, S extends Message, B extends Message.Builder>
+                      extends Aggregate<I, S, B> {
 
     private final AggregateRoot<I> root;
 
