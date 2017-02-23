@@ -21,8 +21,6 @@
 package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.AbstractEntity;
 
 import javax.annotation.Nullable;
@@ -118,8 +116,8 @@ public class Aggregates {
             }
 
             final boolean isRoot = AggregateRoot.class.isAssignableFrom(parameters[1]);
-            if(isRoot){
-              return parameters[1];
+            if (isRoot) {
+                return parameters[1];
             }
         }
         throw new IllegalStateException();
