@@ -121,7 +121,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
         // Sleep to ensure the commands have been rescheduled in parallel.
         try {
-            Thread.sleep(100);
+            Thread.sleep(150);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
