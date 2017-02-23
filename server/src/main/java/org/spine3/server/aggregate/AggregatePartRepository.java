@@ -37,7 +37,7 @@ public abstract class AggregatePartRepository
         extends AggregateRepository<I, A> {
 
     /**
-     * The class of the {@code AggregateRoot}, which instance will be injected
+     * The {@code AggregateRoot} class, which instance will be injected
      * into the {@code AggregatePart} instance during initialization.
      */
     private final Class<R> rootClass;
