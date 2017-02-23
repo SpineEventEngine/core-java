@@ -106,7 +106,7 @@ public class CommandBusShouldHandleCommandStatus {
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProjectMessage());
+        final Command command = commandFactory.createCommand(Given.CommandMessage.createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -210,7 +210,7 @@ public class CommandBusShouldHandleCommandStatus {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
-        final Command command = commandFactory.create(msg);
+        final Command command = commandFactory.createCommand(msg);
         return command;
     }
 

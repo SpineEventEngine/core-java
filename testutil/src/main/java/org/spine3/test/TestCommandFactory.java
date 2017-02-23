@@ -58,8 +58,9 @@ public class TestCommandFactory extends CommandFactory {
 
     /** Creates new command with the passed timestamp. */
     public Command create(Message message, Timestamp timestamp) {
-        final Command command = create(message);
+        final Command command = createCommand(message);
         return TimeTests.adjustTimestamp(command, timestamp);
+
     }
 
     /**
@@ -68,7 +69,7 @@ public class TestCommandFactory extends CommandFactory {
      * <p>Overrides to open access to creating command contexts in tests.
      */
     @Override
-    public CommandContext createCommandContext() {
-        return super.createCommandContext();
+    public CommandContext createContext() {
+        return super.createContext();
     }
 }

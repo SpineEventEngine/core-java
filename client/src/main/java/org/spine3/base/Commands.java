@@ -82,14 +82,14 @@ public class Commands {
      *
      * <p>This method is not supposed to be called from outside the framework.
      * Commands in client applications should be created by
-     * {@link org.spine3.client.CommandFactory#create(Message) CommandFactory.create(Message)},
+     * {@link org.spine3.client.CommandFactory#createCommand(Message) CommandFactory.create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId     the actor id
+     * @param userId     the actor ID
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
-     * @see org.spine3.client.CommandFactory#create(Message)
+     * @see org.spine3.client.CommandFactory#createCommand(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
@@ -98,6 +98,42 @@ public class Commands {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
 
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        return result.build();
+    }
+
+    /**
+     * Creates a new command context with the current time.
+     *
+     * <p>This method is not supposed to be called from outside the framework.
+     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#createCommand(Message)},
+     * which creates {@code CommandContext} automatically.
+     *
+     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId        the actor id
+     * @param zoneOffset    the offset of the timezone in which the user works
+     * @param targetVersion the the ID of the entity for applying commands
+     * @return new {@code CommandContext}
+     * @see org.spine3.client.CommandFactory#createCommand(Message)
+     */
+    @Internal
+    public static CommandContext createContext(@Nullable TenantId tenantId,
+                                               UserId userId,
+                                               ZoneOffset zoneOffset,
+                                               int targetVersion) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+        checkNotNull(targetVersion);
+
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        result.setTargetVersion(targetVersion);
+
+        return result.build();
+    }
+
+    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
+                                                            UserId userId,
+                                                            ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -107,7 +143,7 @@ public class Commands {
         if (tenantId != null) {
             result.setTenantId(tenantId);
         }
-        return result.build();
+        return result;
     }
 
     /**
