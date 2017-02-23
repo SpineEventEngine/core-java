@@ -23,7 +23,6 @@ package org.spine3.server.entity;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregatePart;
 
-import static org.junit.Assert.*;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
 
 /**
