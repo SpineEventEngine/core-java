@@ -51,8 +51,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
-import static org.spine3.server.entity.Entities.createEntity;
-import static org.spine3.server.entity.Entities.getConstructor;
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**

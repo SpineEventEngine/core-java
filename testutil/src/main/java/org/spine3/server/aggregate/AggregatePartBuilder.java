@@ -25,8 +25,8 @@ import org.spine3.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.entity.Entities.createAggregatePartEntity;
-import static org.spine3.server.entity.Entities.getAggregatePartConstructor;
+import static org.spine3.server.aggregate.Aggregates.createAggregatePartEntity;
+import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
 
 /**
  * Utility class for building {@code AggregatePart}s for tests.

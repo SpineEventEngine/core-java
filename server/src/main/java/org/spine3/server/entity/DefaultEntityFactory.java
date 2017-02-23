@@ -22,8 +22,8 @@ package org.spine3.server.entity;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.entity.Entities.createEntity;
-import static org.spine3.server.entity.Entities.getConstructor;
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
 
 /**
  * Default factory that creates entities by invoking constructor that
