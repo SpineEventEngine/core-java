@@ -86,9 +86,24 @@ public class AggregatesShould {
         assertNotNull(aggregateRoot);
     }
 
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
+        createAggregateRoot(id, boundedContext, AggregateRoot.class);
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
         getAggregatePartConstructor(WrongAggregatePart.class);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exc_during_aggregate_part_creation_when_it_does_not_have_appropriate_ctor()
+            throws NoSuchMethodException {
+        final Constructor<WrongAggregatePart> constructor =
+                WrongAggregatePart.class.getDeclaredConstructor();
+        createAggregatePart(constructor, root);
     }
 
     @Test

@@ -138,7 +138,8 @@ class Aggregates {
         try {
             final A result = ctor.newInstance(root);
             return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        } catch (InvocationTargetException | InstantiationException |
+                 IllegalAccessException | IllegalArgumentException e) {
             throw new IllegalStateException(e);
         }
     }
