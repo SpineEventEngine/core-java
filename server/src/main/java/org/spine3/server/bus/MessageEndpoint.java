@@ -18,26 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.bus;
 
-import org.spine3.base.CommandEnvelope;
+import org.spine3.base.MessageEnvelope;
 
 /**
- * The endpoint for {@link CommandHandler}s.
+ * A destination point of a {@link org.spine3.base.MessageEnvelope MessageEnvelope}.
  *
+ * @param <E> the type of the message envelope
+ * @param <R> the type of the processing result
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-class HandlerEndpoint implements CommandEndpoint {
+public interface MessageEndpoint<E extends MessageEnvelope, R> {
 
-    private final CommandHandler handler;
-
-    HandlerEndpoint(CommandHandler handler) {
-        this.handler = handler;
-    }
-
-    @Override
-    public void receive(CommandEnvelope commandEnvelope) {
-        handler.handle(commandEnvelope.getMessage(),
-                       commandEnvelope.getCommandContext());
-    }
+    /**
+     * Processes the message enclosed in the passed envelope.
+     */
+    R receive(E envelope);
 }

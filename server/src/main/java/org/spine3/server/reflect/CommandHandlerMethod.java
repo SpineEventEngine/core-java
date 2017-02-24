@@ -61,7 +61,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return the list of event messages (or an empty list if the handler returns nothing)
      */
     @Override
-    public <R> R invoke(Object target, Message message, CommandContext context) throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, CommandContext context)
+            throws InvocationTargetException {
         final R handlingResult = super.invoke(target, message, context);
 
         final List<? extends Message> events = toList(handlingResult);
@@ -74,8 +75,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * Casts a command handling result to a list of event messages.
      *
-     * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages,
-     *                       or {@code null}.
+     * @param handlingResult the command handler method return value.
+     *                       Could be a {@link Message}, a list of messages, or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     private static <R> List<? extends Message> toList(@Nullable R handlingResult) {
@@ -83,7 +84,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             return emptyList();
         }
         if (handlingResult instanceof List) {
-            // Cast to the list of messages as it is the one of the return types we expect by methods we call.
+            // Cast to the list of messages as it is the one of the return types
+            // we expect by methods we call.
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
@@ -102,7 +104,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     @CheckReturnValue
     public static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
-        final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(), factory());
+        final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(),
+                                                                          factory());
         return handlers;
     }
 
@@ -132,17 +135,20 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         public void checkAccessModifier(Method method) {
             final int modifiers = method.getModifiers();
             final boolean nonDefaultModifier =
-                    Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers);
+                    Modifier.isPublic(modifiers)
+                    || Modifier.isProtected(modifiers)
+                    || Modifier.isPrivate(modifiers);
             if (nonDefaultModifier) {
-                warnOnWrongModifier("Command handler method {} should be declared with the default access modifier.",
-                                    method);
+                warnOnWrongModifier(
+                   "Command handler method {} should be declared with the default access modifier.",
+                   method);
             }
         }
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
-            private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory(); // use the FQN
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory();
         }
 
         private static Factory instance() {

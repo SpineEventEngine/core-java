@@ -58,12 +58,15 @@ public class Classes {
      * @param paramNumber a zero-based index of the generic parameter in the class declaration
      * @param <T> the generic type
      * @return the class reference for the generic type
-     * @throws ClassCastException if the passed class does not have a generic parameter of the expected class
+     * @throws ClassCastException if the passed class does not have a generic
+     *                            parameter of the expected class
      */
     @CheckReturnValue
     public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
-        // We cast here as we assume that the superclasses of the classes we operate with are parametrized too.
-        final ParameterizedType genericSuperclass = (ParameterizedType) clazz.getGenericSuperclass();
+        // We cast here as we assume that the superclasses of the classes
+        // we operate with are parametrized too.
+        final ParameterizedType genericSuperclass =
+                (ParameterizedType) clazz.getGenericSuperclass();
 
         final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
         final Type typeArgument = typeArguments[paramNumber];
@@ -81,14 +84,16 @@ public class Classes {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<?> clazz,
-                                                                                  Predicate<Method> predicate) {
+    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
+            Class<?> cls,
+            Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
 
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : cls.getDeclaredMethods()) {
             final boolean methodMatches = predicate.apply(method);
             if (methodMatches) {
-                final Class<? extends Message> firstParamType = HandlerMethod.getFirstParamType(method);
+                final Class<? extends Message> firstParamType =
+                        HandlerMethod.getFirstParamType(method);
                 builder.add(firstParamType);
             }
         }
@@ -106,7 +111,8 @@ public class Classes {
      * @return {@link Method} instance reflecting the getter method
      * @throws RuntimeException upon reflective failure
      */
-    public static Method getGetterForField(Class<?> clazz, String fieldName) throws NoSuchMethodException {
+    public static Method getGetterForField(Class<?> clazz, String fieldName)
+            throws NoSuchMethodException {
         @SuppressWarnings("DuplicateStringLiteralInspection")
         final String fieldGetterName = "get" + fieldName.substring(0, 1)
                                                         .toUpperCase() + fieldName.substring(1);
