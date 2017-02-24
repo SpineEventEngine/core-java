@@ -55,8 +55,9 @@ public class MethodRegistry {
                                               HandlerMethod.Factory<H> factory) {
 
         final Key<?, H> key = new Key<>(targetClass, factory.getMethodClass());
-        @SuppressWarnings("unchecked") /* We can cast as the map type is the same as one of the passed factory,
-                                          which is used in creating the entry in the `if` block below. */
+        @SuppressWarnings("unchecked")
+            /* We can cast as the map type is the same as one of the passed factory,
+               which is used in creating the entry in the `if` block below. */
         MethodMap<H> methods = items.get(key);
         if (methods == null) {
             methods = MethodMap.create(targetClass, factory);
