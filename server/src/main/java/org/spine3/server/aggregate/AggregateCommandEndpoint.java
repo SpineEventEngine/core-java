@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Stringifiers;
-import org.spine3.server.bus.MessageEndpoint;
+import org.spine3.server.command.CommandEndpoint;
 import org.spine3.server.entity.Visibility;
 
 /**
@@ -34,8 +34,7 @@ import org.spine3.server.entity.Visibility;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        implements MessageEndpoint<CommandEnvelope, A> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> implements CommandEndpoint<A> {
 
     private final AggregateRepository<I, A> repository;
 
