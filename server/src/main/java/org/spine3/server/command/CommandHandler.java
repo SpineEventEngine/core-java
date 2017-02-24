@@ -28,6 +28,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.reflect.CommandHandlerMethod;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -94,7 +95,7 @@ public abstract class CommandHandler extends CommandHandlingEntity<String, Empty
     @Override
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
-            commandClasses = ImmutableSet.copyOf(getCommandClasses(getClass()));
+            commandClasses = ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(getClass()));
         }
         return commandClasses;
     }
