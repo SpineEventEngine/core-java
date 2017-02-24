@@ -36,6 +36,7 @@ import org.spine3.base.Responses;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
+import org.spine3.server.bus.Bus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.users.CurrentTenant;
@@ -57,11 +58,9 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Alex Tymchenko
  */
-public class CommandBus implements AutoCloseable {
+public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
 
     private final Filter filter;
-
-    private final CommandDispatcherRegistry registry = new CommandDispatcherRegistry();
 
     private final CommandStore commandStore;
 
@@ -162,6 +161,11 @@ public class CommandBus implements AutoCloseable {
         return scheduler;
     }
 
+    @Override
+    protected CommandDispatcherRegistry createRegistry() {
+        return new CommandDispatcherRegistry();
+    }
+
     /**
      * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
      *
@@ -169,8 +173,8 @@ public class CommandBus implements AutoCloseable {
      *
      * @return a set of classes of supported commands
      */
-    public Set<CommandClass> getSupportedCommandClasses() {
-        return registry.getMessageClasses();
+    public Set<CommandClass> getRegisteredCommandClasses() {
+        return registry().getRegisteredMessageClasses();
     }
 
     /**
@@ -180,28 +184,8 @@ public class CommandBus implements AutoCloseable {
         return commandStatusService;
     }
 
-    /**
-     * Registers the passed command dispatcher.
-     *
-     * @param dispatcher the dispatcher to register
-     * @throws IllegalArgumentException if the set of command classes
-     *  {@linkplain CommandDispatcher#getMessageClasses() exposed} by the dispatcher is empty
-     */
-    public void register(CommandDispatcher dispatcher) {
-        registry.register(checkNotNull(dispatcher));
-    }
-
-    /**
-     * Unregisters dispatching for command classes of the passed dispatcher.
-     *
-     * @param dispatcher the dispatcher to unregister
-     */
-    public void unregister(CommandDispatcher dispatcher) {
-        registry.unregister(checkNotNull(dispatcher));
-    }
-
     private Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
-        return registry.getDispatcher(commandClass);
+        return registry().getDispatcher(commandClass);
     }
 
     /**
@@ -217,6 +201,7 @@ public class CommandBus implements AutoCloseable {
      * @param command the command to be processed
      * @param responseObserver the observer to return the result of the call
      */
+    @Override
     public void post(Command command, StreamObserver<Response> responseObserver) {
         checkNotNull(command);
         checkNotNull(responseObserver);
@@ -310,18 +295,24 @@ public class CommandBus implements AutoCloseable {
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
 
-            log.failureHandling(failure, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
+            log.failureHandling(failure,
+                                commandEnvelope.getMessage(),
+                                commandEnvelope.getCommandId());
 
             commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
 
-            log.errorHandling(exception, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
+            log.errorHandling(exception,
+                              commandEnvelope.getMessage(),
+                              commandEnvelope.getCommandId());
 
             commandStatusService.setToError(commandEnvelope.getCommandId(), exception);
         } else {
 
-            log.errorHandlingUnknown(cause, commandEnvelope.getMessage(), commandEnvelope.getCommandId());
+            log.errorHandlingUnknown(cause,
+                                     commandEnvelope.getMessage(),
+                                     commandEnvelope.getCommandId());
 
             final Error error = Errors.fromThrowable(cause);
             commandStatusService.setToError(commandEnvelope.getCommandId(), error);
@@ -352,9 +343,19 @@ public class CommandBus implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        registry.unregisterAll();
+        registry().unregisterAll();
         commandStore.close();
         scheduler.shutdown();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
+     */
+    @Override
+    protected CommandDispatcherRegistry registry() {
+        return (CommandDispatcherRegistry) super.registry();
     }
 
     /**

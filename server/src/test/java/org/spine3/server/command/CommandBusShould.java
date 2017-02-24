@@ -328,7 +328,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+        final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));

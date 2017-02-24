@@ -65,6 +65,11 @@ public class DispatcherRegistry<C extends MessageClass,
         }
     }
 
+    /**
+     * Removes registration for the passed dispatcher.
+     *
+     * @see #register(D)
+     */
     protected void unregister(D dispatcher) {
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
@@ -75,6 +80,9 @@ public class DispatcherRegistry<C extends MessageClass,
         }
     }
 
+    /**
+     * Unregisters all dispatchers.
+     */
     protected void unregisterAll() {
         dispatchers.clear();
     }
@@ -82,7 +90,7 @@ public class DispatcherRegistry<C extends MessageClass,
     /**
      * Obtains message classes from all registered dispatchers.
      */
-    protected Set<C> getMessageClasses() {
+    protected Set<C> getRegisteredMessageClasses() {
         return dispatchers.keySet();
     }
 

@@ -138,11 +138,11 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * {@inheritDoc}
      *
      * <p>Overrides to expose the method to
-     * {@link CommandBus#getSupportedCommandClasses() CommandBus}.
+     * {@link CommandBus#getRegisteredCommandClasses() CommandBus}.
      */
     @Override
-    protected Set<CommandClass> getMessageClasses() {
-        return super.getMessageClasses();
+    protected Set<CommandClass> getRegisteredMessageClasses() {
+        return super.getRegisteredMessageClasses();
     }
 
     /**
