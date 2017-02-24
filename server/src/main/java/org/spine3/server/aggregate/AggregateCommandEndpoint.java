@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Stringifiers;
+import org.spine3.server.bus.MessageEndpoint;
 import org.spine3.server.entity.Visibility;
 
 /**
@@ -33,7 +34,8 @@ import org.spine3.server.entity.Visibility;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+        implements MessageEndpoint<CommandEnvelope, A> {
 
     private final AggregateRepository<I, A> repository;
 
@@ -51,7 +53,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
      *
      * @return the aggregate to which the command was dispatched
      */
-    A dispatch(CommandEnvelope envelope) {
+    @Override
+    public A receive(CommandEnvelope envelope) {
         final Action<I, A> action = new Action<>(this, envelope);
         final A result = action.loadAndDispatch();
         return result;

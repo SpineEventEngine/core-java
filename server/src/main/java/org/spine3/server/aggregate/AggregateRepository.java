@@ -193,7 +193,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void dispatch(CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
-        final A aggregate = commandEndpoint.dispatch(command);
+        final A aggregate = commandEndpoint.receive(command);
 
         final List<Event> events = aggregate.getUncommittedEvents();
         storeAndPostToStand(aggregate);
