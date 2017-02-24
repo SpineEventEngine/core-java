@@ -59,7 +59,7 @@ public class AggregateRoot<I> {
         checkNotNull(boundedContext);
         checkNotNull(id);
         this.boundedContext = boundedContext;
-        this.id = checkNotNull(id);
+        this.id = id;
     }
 
     /**
