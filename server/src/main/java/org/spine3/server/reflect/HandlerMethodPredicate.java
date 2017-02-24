@@ -22,19 +22,42 @@ package org.spine3.server.reflect;
 
 import com.google.protobuf.Message;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
  * The predicate for filtering message handling methods.
  *
+ * @param <C> the type of message context
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethodPredicate extends MethodPredicate {
+public abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
+
+    private final Class<? extends Annotation> annotationClass;
+    private final Class<C> contextClass;
+
+    protected HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
+                                     Class<C> contextClass) {
+        this.annotationClass = annotationClass;
+        this.contextClass = contextClass;
+    }
 
     /**
      * Returns the context parameter class.
      */
-    protected abstract Class<? extends Message> getContextClass();
+    protected Class<C> getContextClass() {
+        return contextClass;
+    }
+
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return annotationClass;
+    }
+
+    @Override
+    protected boolean isAnnotatedCorrectly(Method method) {
+        final boolean isAnnotated = method.isAnnotationPresent(getAnnotationClass());
+        return isAnnotated;
+    }
 
     /**
      * {@inheritDoc}

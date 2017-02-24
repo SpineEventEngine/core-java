@@ -21,7 +21,6 @@
 package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
@@ -92,8 +91,8 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
-            private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory(); // use the FQN
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory();
         }
 
         private static Factory instance() {
@@ -106,23 +105,16 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate<EventContext> {
 
-        @Override
-        protected boolean isAnnotatedCorrectly(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
-            return isAnnotated;
+        private FilterPredicate() {
+            super(Subscribe.class, EventContext.class);
         }
 
         @Override
         protected boolean isReturnTypeCorrect(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
-        }
-
-        @Override
-        protected Class<? extends Message> getContextClass() {
-            return EventContext.class;
         }
     }
 }

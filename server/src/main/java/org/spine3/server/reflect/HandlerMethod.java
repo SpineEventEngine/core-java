@@ -186,7 +186,8 @@ public abstract class HandlerMethod<C extends Message> {
      */
     static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
-        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        final Class<? extends Message> result =
+                (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 

@@ -177,12 +177,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      *
      * <p>See {@link Assign} annotation for more info about such methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate<CommandContext> {
 
-        @Override
-        protected boolean isAnnotatedCorrectly(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-            return isAnnotated;
+        private FilterPredicate() {
+            super(Assign.class, CommandContext.class);
         }
 
         @Override
@@ -194,11 +192,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             }
             final boolean isList = List.class.isAssignableFrom(returnType);
             return isList;
-        }
-
-        @Override
-        protected Class<? extends Message> getContextClass() {
-            return CommandContext.class;
         }
     }
 }
