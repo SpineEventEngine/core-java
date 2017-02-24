@@ -247,14 +247,14 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
                 commandEnvelope.getCommandClass()
         );
         if (!dispatcher.isPresent()) {
-            throw noEndpointFound(commandEnvelope);
+            throw noDispatcherFound(commandEnvelope);
         }
         doPost(commandEnvelope, dispatcher.get());
     }
 
-    private static IllegalStateException noEndpointFound(CommandEnvelope commandEnvelope) {
+    private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
         final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
-        final String msg = String.format("No endpoint found for the command (class: %s id: %s).",
+        final String msg = String.format("No dispatcher found for the command (class: %s id: %s).",
                                          commandEnvelope.getCommandClass(), idStr);
         throw new IllegalStateException(msg);
     }
@@ -375,12 +375,15 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         private CommandScheduler commandScheduler;
 
         /**
-         * If set to {@code true}, the {@code CommandBus} will be creating instances of {@link Thread} for operation.
+         * If set to {@code true}, the {@code CommandBus} will be creating instances of
+         * {@link Thread} for operation.
          *
-         * <p>However, some runtime environments, such as Google AppEngine Standard, do not allow manual thread
+         * <p>However, some runtime environments, such as Google AppEngine Standard,
+         * do not allow manual thread
          * spawning. In this case, this flag should be set to {@code false}.
          *
-         * <p>The default value of this flag is set upon the best guess, based on current {@link Environment}.
+         * <p>The default value of this flag is set upon the best guess,
+         * based on current {@link Environment}.
          */
         private boolean threadSpawnAllowed = detectThreadsAllowed();
 
@@ -392,7 +395,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         private boolean autoReschedule;
 
         /**
-         * Checks whether the manual {@link Thread} spawning is allowed withing the current runtime environment.
+         * Checks whether the manual {@link Thread} spawning is allowed within
+         * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
             final boolean appEngine = Environment.getInstance()
