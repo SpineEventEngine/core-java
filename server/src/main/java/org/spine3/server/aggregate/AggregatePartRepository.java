@@ -33,7 +33,7 @@ import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregatePartRepository<I,
-                                              A extends AggregatePart<I, ?, ?>,
+                                              A extends AggregatePart<I, ?, ?, R>,
                                               R extends AggregateRoot<I>>
                       extends AggregateRepository<I, A> {
 
@@ -64,7 +64,7 @@ public abstract class AggregatePartRepository<I,
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
         final AggregateRoot<I> root = createAggregateRoot(id, getBoundedContext(), rootClass);
-        final A result = createAggregatePart(entityConstructor, id, root);
+        final A result = createAggregatePart(entityConstructor, root);
         return result;
     }
 
@@ -72,7 +72,7 @@ public abstract class AggregatePartRepository<I,
     @Override
     protected Constructor<A> getEntityConstructor() {
         final Constructor<A> result =
-                Aggregates.getAggregatePartConstructor(getEntityClass(), rootClass, getIdClass());
+                Aggregates.getAggregatePartConstructor(getEntityClass(), rootClass);
         return result;
     }
 }

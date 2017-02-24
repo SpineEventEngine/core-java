@@ -109,9 +109,12 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class ProjectPart extends AggregatePart<ProjectId, Project, Project.Builder> {
-        private ProjectPart(ProjectId id, ProjectRoot root) {
-            super(id, root);
+    private static class ProjectPart extends AggregatePart<ProjectId,
+                                                           Project,
+                                                           Project.Builder,
+                                                           ProjectRoot> {
+        private ProjectPart(ProjectRoot root) {
+            super(root);
         }
 
         @Assign
@@ -149,9 +152,12 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class TaskAggregatePart extends AggregatePart<TaskId, Task, Task.Builder> {
-        private TaskAggregatePart(TaskId id, TaskRoot root) {
-            super(id, root);
+    private static class TaskAggregatePart extends AggregatePart<TaskId,
+                                                                 Task,
+                                                                 Task.Builder,
+                                                                 TaskRoot> {
+        private TaskAggregatePart(TaskRoot root) {
+            super(root);
         }
 
         @Assign

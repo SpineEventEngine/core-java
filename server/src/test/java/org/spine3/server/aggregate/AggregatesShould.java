@@ -75,7 +75,7 @@ public class AggregatesShould {
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
                 AnAggregatePart.class.getDeclaredConstructor(String.class, AnAggregateRoot.class);
-        final AggregatePart aggregatePart = createAggregatePart(constructor, id, root);
+        final AggregatePart aggregatePart = createAggregatePart(constructor, root);
         assertNotNull(aggregatePart);
     }
 
@@ -86,21 +86,9 @@ public class AggregatesShould {
         assertNotNull(aggregateRoot);
     }
 
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to cause the validation failure.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class, id.getClass());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to check the getAggregatePartConstructor method.
-    public void return_appropriate_constructor() {
-        final Constructor constructor =
-                getAggregatePartConstructor(AggregatePartWithSuperTypeCtor.class,
-                                            AggregateRoot.class, id.getClass());
-        assertNotNull(constructor);
+        getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class);
     }
 
     /*
@@ -108,31 +96,20 @@ public class AggregatesShould {
     ***************************/
 
     private static class WrongAggregatePart
-            extends AggregatePart<String, StringValue, StringValue.Builder> {
+            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
 
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
-            super(null, null);
+            super(null);
         }
     }
 
     private static class AnAggregatePart
-            extends AggregatePart<String, StringValue, StringValue.Builder> {
+            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
 
-        protected AnAggregatePart(String id, AnAggregateRoot root) {
-            super(id, root);
-        }
-    }
-
-    private static class AggregatePartWithSuperTypeCtor
-            extends AggregatePart<String, StringValue, StringValue.Builder> {
-
-        @SuppressWarnings("unchecked")
-        // Supply a "wrong" value on purpose to check
-        // the implementation of the `getAggregatePartConstructor` method.
-        protected AggregatePartWithSuperTypeCtor(String id, AggregateRoot root) {
-            super(id, root);
+        protected AnAggregatePart(AnAggregateRoot root) {
+            super(root);
         }
     }
 

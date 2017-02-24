@@ -40,7 +40,8 @@ public class AggregateRoot<I> {
 
     /** The map from a part class to a repository which manages corresponding aggregate part */
     private static final Map<Class<? extends Message>,
-            AggregatePartRepository<?, ?, ?>> partsAccess = Maps.newConcurrentMap();
+                             AggregatePartRepository<?, ?, ?>> partsAccess =
+                                                               Maps.newConcurrentMap();
 
     /** The bounded context to which the aggregate belongs. */
     private final BoundedContext boundedContext;
@@ -85,10 +86,10 @@ public class AggregateRoot<I> {
      *                               or the ID type of the part state does not match
      *                               the ID type of this {@code AggregateRoot}
      */
-    protected <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>> S
+    protected <S extends Message, A extends AggregatePart<I, S, ?, ?>> S
     getPartState(Class<S> partStateClass) {
-        final AggregatePartRepository<I, A, R> repo = getRepository(partStateClass);
-        final AggregatePart<I, S, ?> aggregatePart = repo.loadOrCreate(getId());
+        final AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
+        final AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
         final S partState = aggregatePart.getState();
         return partState;
     }
@@ -100,18 +101,18 @@ public class AggregateRoot<I> {
      *                               or the repository ID type does not match
      *                               the ID type of this {@code AggregateRoot}
      */
-    private <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>>
-    AggregatePartRepository<I, A, R> getRepository(Class<S> stateClass) {
+    private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-        final AggregatePartRepository<I, A, R> cached =
-                (AggregatePartRepository<I, A, R>) partsAccess.get(stateClass);
+        final AggregatePartRepository<I, A, ?> cached =
+                (AggregatePartRepository<I, A, ?>) partsAccess.get(stateClass);
 
         if (cached != null) {
             return cached;
         }
 
         // We don't have a cached instance. Obtain from the `BoundedContext` and cache.
-        final AggregatePartRepository<I, A, R> repo = lookup(stateClass);
+        final AggregatePartRepository<I, A, ?> repo = lookup(stateClass);
 
         partsAccess.put(stateClass, repo);
 
@@ -119,14 +120,14 @@ public class AggregateRoot<I> {
     }
 
     @VisibleForTesting
-    <S extends Message, A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>>
-    AggregatePartRepository<I, A, R> lookup(Class<S> stateClass) {
+    <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         final Class<I> idClass = (Class<I>) getId().getClass();
         final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
                                                                         idClass,
                                                                         stateClass);
-        final AggregatePartRepository<I, A, R> result = lookup.find();
+        final AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
     }
 }

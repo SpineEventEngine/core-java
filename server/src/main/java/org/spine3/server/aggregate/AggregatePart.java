@@ -48,16 +48,19 @@ import com.google.protobuf.Message;
  * @author Alexander Yevsyukov
  * @see Aggregate
  */
-public abstract class AggregatePart<I, S extends Message, B extends Message.Builder>
+public abstract class AggregatePart<I,
+                                    S extends Message,
+                                    B extends Message.Builder,
+                                    R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
 
-    private final AggregateRoot<I> root;
+    private final R root;
 
     /**
      * {@inheritDoc}
      */
-    protected AggregatePart(I id, AggregateRoot<I> root) {
-        super(id);
+    protected AggregatePart(R root) {
+        super(root.getId());
         this.root = root;
     }
 
@@ -71,8 +74,7 @@ public abstract class AggregatePart<I, S extends Message, B extends Message.Buil
      *                               or the ID type of the part state does not match
      *                               the ID type of the {@code root}
      */
-    protected <P extends Message> P getPartState(
-            Class<P> partStateClass) {
+    protected <P extends Message> P getPartState(Class<P> partStateClass) {
         final P partState = root.getPartState(partStateClass);
         return partState;
     }

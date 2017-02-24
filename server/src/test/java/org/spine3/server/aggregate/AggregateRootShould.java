@@ -138,11 +138,13 @@ public class AggregateRootShould {
     }
 
     @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
-    private static class ProjectDefinitionPart
-            extends AggregatePart<ProjectId, ProjectDefinition, ProjectDefinition.Builder> {
+    private static class ProjectDefinitionPart extends AggregatePart<ProjectId,
+                                                                     ProjectDefinition,
+                                                                     ProjectDefinition.Builder,
+                                                                     ProjectRoot> {
 
-        private ProjectDefinitionPart(ProjectId id, ProjectRoot root) {
-            super(id, root);
+        private ProjectDefinitionPart(ProjectRoot root) {
+            super(root);
         }
 
         @Assign
@@ -163,13 +165,14 @@ public class AggregateRootShould {
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
     // Static field in the instance method is used for the test simplification.
-    private static class ProjectLifeCyclePart
-            extends AggregatePart<ProjectId, ProjectLifecycle, ProjectLifecycle.Builder> {
-
+    private static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
+                                                                    ProjectLifecycle,
+                                                                    ProjectLifecycle.Builder,
+                                                                    ProjectRoot> {
         private static boolean exceptionOccurred = false;
 
-        protected ProjectLifeCyclePart(ProjectId id, ProjectRoot root) {
-            super(id, root);
+        protected ProjectLifeCyclePart(ProjectRoot root) {
+            super(root);
         }
 
         @Assign

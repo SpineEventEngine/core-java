@@ -34,10 +34,13 @@ import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
-public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
-        extends AggregateBuilder<A, I, S> {
+public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
+                                  I,
+                                  S extends Message,
+                                  R extends AggregateRoot<I>>
+             extends AggregateBuilder<A, I, S> {
 
-    private AggregateRoot<I> aggregateRoot;
+    private R aggregateRoot;
 
     /**
      * {@inheritDoc}
@@ -47,28 +50,27 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
         // Have the constructor for easier location of usages.
     }
 
-    public EntityBuilder<A, I, S> withRoot(AggregateRoot<I> aggregateRoot) {
+    public EntityBuilder<A, I, S> withRoot(R aggregateRoot) {
         this.aggregateRoot = aggregateRoot;
         return this;
     }
 
     @Override
-    public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
+    public AggregatePartBuilder<A, I, S, R> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
         return this;
     }
 
     @Override
     protected A createEntity(I id) {
-        final A result = createAggregatePart(getConstructor(), id, aggregateRoot);
+        final A result = createAggregatePart(getConstructor(), aggregateRoot);
         return result;
     }
 
     @Override
     protected Constructor<A> getConstructor() {
         final Constructor<A> constructor = getAggregatePartConstructor(getResultClass(),
-                                                                       aggregateRoot.getClass(),
-                                                                       getIdClass());
+                                                                       aggregateRoot.getClass());
         return constructor;
     }
 }
