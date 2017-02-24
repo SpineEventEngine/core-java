@@ -54,7 +54,7 @@ public class AggregatesShould {
     }
 
     @Test
-    public void pass_null_pointer_check() throws NoSuchMethodException {
+    public void not_accept_nulls_as_parameter_values() throws NoSuchMethodException {
         final Constructor constructor = root.getClass()
                                             .getDeclaredConstructor(BoundedContext.class,
                                                                     String.class);
