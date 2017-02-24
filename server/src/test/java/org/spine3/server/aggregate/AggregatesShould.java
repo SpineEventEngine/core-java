@@ -95,9 +95,10 @@ public class AggregatesShould {
      Test environment classes
     ***************************/
 
-    private static class WrongAggregatePart
-            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
-
+    private static class WrongAggregatePart extends AggregatePart<String,
+                                                                  StringValue,
+                                                                  StringValue.Builder,
+                                                                  AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
@@ -105,8 +106,10 @@ public class AggregatesShould {
         }
     }
 
-    private static class AnAggregatePart
-            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
+    private static class AnAggregatePart extends AggregatePart<String,
+                                                               StringValue,
+                                                               StringValue.Builder,
+                                                               AnAggregateRoot> {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
