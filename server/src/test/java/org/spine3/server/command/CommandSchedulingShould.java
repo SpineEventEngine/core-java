@@ -170,7 +170,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
         spy.postPreviouslyScheduled(command);
 
-        verify(spy).doPost(eq(CommandEnvelope.of(command)), any(CommandEndpoint.class));
+        verify(spy).doPost(eq(CommandEnvelope.of(command)), any(CommandDispatcher.class));
     }
 
     @Test(expected = IllegalStateException.class)

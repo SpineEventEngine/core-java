@@ -30,10 +30,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
@@ -70,6 +69,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.spine3.base.Commands.createCommand;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
@@ -138,12 +138,12 @@ public class ProcessManagerRepositoryShould
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
                           @Override
-                          public Set<CommandClass> getCommandClasses() {
+                          public Set<CommandClass> getMessageClasses() {
                               return CommandClass.setOf(AddTask.class);
                           }
 
                           @Override
-                          public void dispatch(Command request) {
+                          public void dispatch(CommandEnvelope envelope) {
                               // Simply swallow the command. We need this dispatcher for allowing Process Manager
                               // under test to route the AddTask command.
                           }
@@ -193,7 +193,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final Command cmd = Commands.createCommand(cmdMsg, CMD_CONTEXT);
+        final CommandEnvelope cmd = CommandEnvelope.of(createCommand(cmdMsg, CMD_CONTEXT));
         repository.dispatch(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
@@ -216,7 +216,9 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final Command request = Commands.createCommand(unknownCommand, CommandContext.getDefaultInstance());
+        final CommandEnvelope request =
+                CommandEnvelope.of(createCommand(unknownCommand,
+                                                 CommandContext.getDefaultInstance()));
         repository.dispatch(request);
     }
 
@@ -229,7 +231,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_command_classes() {
-        final Set<CommandClass> commandClasses = repository.getCommandClasses();
+        final Set<CommandClass> commandClasses = repository.getMessageClasses();
         assertTrue(commandClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(commandClasses.contains(CommandClass.of(AddTask.class)));
         assertTrue(commandClasses.contains(CommandClass.of(StartProject.class)));
