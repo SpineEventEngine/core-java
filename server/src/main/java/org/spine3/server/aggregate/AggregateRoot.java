@@ -72,7 +72,7 @@ public class AggregateRoot<I> {
     /**
      * Obtains the {@code BoundedContext} to which the aggregate belongs.
      */
-    protected BoundedContext getBoundedContext() {
+    private BoundedContext getBoundedContext() {
         return boundedContext;
     }
 
