@@ -39,6 +39,7 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
 
     protected HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
                                      Class<C> contextClass) {
+        super();
         this.annotationClass = annotationClass;
         this.contextClass = contextClass;
     }
