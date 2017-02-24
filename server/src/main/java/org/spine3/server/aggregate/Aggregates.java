@@ -64,30 +64,32 @@ class Aggregates {
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
-     * @param entityClass the {@code AggregatePart} class
-     * @param <A>         the entity type
-     * @param <I>         the ID type
+     * @param aggregatePartClass the {@code AggregatePart} class
+     * @param <A>                the {@code AggregatePart} type
+     * @param <I>                the ID type
      * @return the {@code AggregatePart} constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
     static <A extends AggregatePart<I, ?, ?, ?>, I> Constructor<A>
-    getAggregatePartConstructor(Class<A> entityClass, Class<?> rootClass) {
-        checkNotNull(entityClass);
-        checkNotNull(rootClass);
+    getAggregatePartConstructor(Class<A> aggregatePartClass, Class<?> aggregateRootClass) {
+        checkNotNull(aggregatePartClass);
+        checkNotNull(aggregateRootClass);
 
         try {
             final Constructor<A> constructor =
-                    entityClass.getDeclaredConstructor(rootClass);
+                    aggregatePartClass.getDeclaredConstructor(aggregateRootClass);
             constructor.setAccessible(true);
             return constructor;
         } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName(), rootClass.getName());
+            throw noSuchConstructor(aggregatePartClass.getName(), aggregateRootClass.getName());
         }
     }
 
-    private static IllegalStateException noSuchConstructor(String entityClass, String rootClass) {
-        final String errMsg = format("%s class must declare a constructor " +
-                                     "with %s AggregateRoot parameter.", entityClass, rootClass);
+    private static IllegalStateException noSuchConstructor(String aggregatePartClass,
+                                                           String aggregateRootClass) {
+        final String errMsg =
+                format("%s class must declare a constructor " +
+                       "with %s AggregateRoot parameter.", aggregatePartClass, aggregateRootClass);
         throw new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
