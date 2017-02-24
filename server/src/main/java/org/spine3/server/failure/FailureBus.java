@@ -17,43 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.failure;
 
-package org.spine3.base;
-
-import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.grpc.stub.StreamObserver;
+import org.spine3.base.Failure;
+import org.spine3.base.Response;
+import org.spine3.server.bus.Bus;
+import org.spine3.server.bus.DispatcherRegistry;
 
 /**
- * Utility class for working with failures.
+ * Dispatches the business failures that occur during the command processing
+ * to the corresponding subscriber.
  *
- * @author Alexander Yevsyukov
+ * @author Alexander Yevsyuov
+ * @author Alex Tymchenko
+ * @see org.spine3.base.FailureThrowable
+ * @see org.spine3.server.event.Subscribe Subscribe @Subscribe
  */
-public class Failures {
+public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
+    @Override
+    public void post(Failure message, StreamObserver<Response> responseObserver) {
 
-    private Failures() {
-        // Prevent instantiation of this utility class.
     }
 
-    /** Generates a new random UUID-based {@code FailureId}. */
-    public static FailureId generateId() {
-        final String value = Identifiers.newUuid();
-        return FailureId.newBuilder()
-                        .setUuid(value)
-                        .build();
+    @Override
+    protected DispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
+        return null;
     }
 
-    /**
-     * Extracts the message from the passed {@code Failure} instance.
-     *
-     * @param failure a failure to extract a message from
-     * @param <M>     a type of the failure message
-     * @return an unpacked message
-     */
-    public static <M extends Message> M getMessage(Failure failure) {
-        checkNotNull(failure);
-        final M result = AnyPacker.unpack(failure.getMessage());
-        return result;
+    @Override
+    public void close() throws Exception {
+
     }
 }

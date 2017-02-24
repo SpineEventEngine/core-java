@@ -17,43 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.base;
+package org.spine3.server.failure;
 
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.base.AbstractMessageEnvelope;
+import org.spine3.base.Failure;
+import org.spine3.base.Failures;
 
 /**
- * Utility class for working with failures.
+ * Wraps the business failure into a transferable parcel for
+ * transportation along the {@linkplain FailureBus}.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class Failures {
+public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
 
-    private Failures() {
-        // Prevent instantiation of this utility class.
-    }
+    private final Message failureMessage;
 
-    /** Generates a new random UUID-based {@code FailureId}. */
-    public static FailureId generateId() {
-        final String value = Identifiers.newUuid();
-        return FailureId.newBuilder()
-                        .setUuid(value)
-                        .build();
+    protected FailureEnvelope(Failure failure) {
+        super(failure);
+        this.failureMessage = Failures.getMessage(failure);
     }
 
     /**
-     * Extracts the message from the passed {@code Failure} instance.
-     *
-     * @param failure a failure to extract a message from
-     * @param <M>     a type of the failure message
-     * @return an unpacked message
+     * Creates instance for the passed failure.
      */
-    public static <M extends Message> M getMessage(Failure failure) {
-        checkNotNull(failure);
-        final M result = AnyPacker.unpack(failure.getMessage());
-        return result;
+    public static FailureEnvelope of(Failure failure) {
+        return new FailureEnvelope(failure);
+    }
+
+    @Override
+    public Message getMessage() {
+        return failureMessage;
     }
 }
