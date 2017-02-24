@@ -75,9 +75,12 @@ public class AggregatePartCommandTestShould {
     /**
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
-    private static final class TimerCounter extends AggregatePart<String, UInt32Value, UInt32Value.Builder> {
-        private TimerCounter(String id, TimerCounterRoot root) {
-            super(id, root);
+    private static final class TimerCounter extends AggregatePart<String,
+                                                                  UInt32Value,
+                                                                  UInt32Value.Builder,
+                                                                  TimerCounterRoot> {
+        private TimerCounter(TimerCounterRoot root) {
+            super(root);
         }
 
         @Assign
