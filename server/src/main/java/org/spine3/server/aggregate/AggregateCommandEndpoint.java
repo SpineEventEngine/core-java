@@ -34,7 +34,7 @@ import org.spine3.server.entity.Visibility;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> implements CommandEndpoint<A> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandEndpoint<A, A> {
 
     private final AggregateRepository<I, A> repository;
 

@@ -20,17 +20,17 @@
 
 package org.spine3.server.command;
 
-import org.spine3.base.CommandEnvelope;
-import org.spine3.server.bus.MessageEndpoint;
+import com.google.protobuf.Any;
 
 /**
- * An endpoint for command handling.
+ * A base interface for objects that produce events in response to commands.
  *
- * @param <R> the type of the processing result
- * @param <H> the type of command handlers that this endpoint processes
  * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
-public abstract class CommandEndpoint<H, R> implements MessageEndpoint<CommandEnvelope, R> {
+interface ICommandHandler {
 
+    /**
+     * Obtains identifier of the event producer wrapped into {@link Any}.
+     */
+    Any getProducerId();
 }

@@ -71,7 +71,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * @author Alexander Yevsyukov
  */
 public abstract class CommandHandlingEntity<I, S extends Message>
-        extends AbstractVersionableEntity<I, S> {
+        extends AbstractVersionableEntity<I, S> implements ICommandHandler {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
@@ -84,7 +84,8 @@ public abstract class CommandHandlingEntity<I, S extends Message>
         this.idAsAny = idToAny(id);
     }
 
-    protected Any getIdAsAny() {
+    @Override
+    public Any getProducerId() {
         return idAsAny;
     }
 
@@ -107,7 +108,7 @@ public abstract class CommandHandlingEntity<I, S extends Message>
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
                                                          .setCommandContext(commandContext)
-                                                         .setProducerId(getIdAsAny())
+                                                         .setProducerId(getProducerId())
                                                          .setVersion(getVersion());
         extendEventContext(builder, event, commandContext);
         return builder.build();
