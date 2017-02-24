@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.HandlerMethod;
+import org.spine3.server.reflect.HandlerMethodPredicate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,10 +50,18 @@ class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     /**
-     * Invokes {@link HandlerMethod#invoke(Object, Message, Message)} passing the default message as the context parameter
-     * as event appliers do not have this parameter.
+     * Invokes the applier method.
+     *
+     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
+     * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
+     * as the context parameter because event appliers do not have a context parameter.
+     * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
+     * is set to one during instance construction.
+     *
+     * @throws InvocationTargetException if the method call results in an exception
      */
-    protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
+    protected <R> R invoke(Object aggregate, Message message)
+            throws InvocationTargetException {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
@@ -88,8 +97,8 @@ class EventApplierMethod extends HandlerMethod<Empty> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
-            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory(); // use the FQN
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory();
         }
 
         private static Factory instance() {
@@ -98,14 +107,18 @@ class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     /** The predicate for filtering event applier methods. */
-    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate<Empty> {
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;
 
+        private FilterPredicate() {
+            super(Apply.class, Empty.class);
+        }
+
         @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
         @Override
-        protected boolean acceptsCorrectParams(Method method) {
+        protected boolean verifyParams(Method method) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
             final boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
             if (!paramCountIsValid) {
@@ -117,20 +130,9 @@ class EventApplierMethod extends HandlerMethod<Empty> {
         }
 
         @Override
-        protected boolean isAnnotatedCorrectly(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-            return isAnnotated;
-        }
-
-        @Override
-        protected boolean isReturnTypeCorrect(Method method) {
+        protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
-        }
-
-        @Override
-        protected Class<? extends Message> getContextClass() {
-            return Empty.class;
         }
     }
 }

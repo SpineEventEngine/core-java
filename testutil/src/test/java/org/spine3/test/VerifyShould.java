@@ -44,14 +44,46 @@ import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.test.Verify.*;
+import static org.spine3.test.Verify.assertBefore;
+import static org.spine3.test.Verify.assertClassNonInstantiable;
+import static org.spine3.test.Verify.assertContains;
+import static org.spine3.test.Verify.assertContainsAll;
+import static org.spine3.test.Verify.assertContainsEntry;
+import static org.spine3.test.Verify.assertContainsKey;
+import static org.spine3.test.Verify.assertContainsKeyValue;
+import static org.spine3.test.Verify.assertEmpty;
+import static org.spine3.test.Verify.assertEndsWith;
+import static org.spine3.test.Verify.assertEqualsAndHashCode;
+import static org.spine3.test.Verify.assertError;
+import static org.spine3.test.Verify.assertInstanceOf;
+import static org.spine3.test.Verify.assertItemAtIndex;
+import static org.spine3.test.Verify.assertIterableEmpty;
+import static org.spine3.test.Verify.assertIterableNotEmpty;
+import static org.spine3.test.Verify.assertMapsEqual;
+import static org.spine3.test.Verify.assertNegative;
+import static org.spine3.test.Verify.assertNotContains;
+import static org.spine3.test.Verify.assertNotContainsKey;
+import static org.spine3.test.Verify.assertNotEmpty;
+import static org.spine3.test.Verify.assertNotEquals;
+import static org.spine3.test.Verify.assertNotInstanceOf;
+import static org.spine3.test.Verify.assertPositive;
+import static org.spine3.test.Verify.assertSetsEqual;
+import static org.spine3.test.Verify.assertShallowClone;
+import static org.spine3.test.Verify.assertSize;
+import static org.spine3.test.Verify.assertStartsWith;
+import static org.spine3.test.Verify.assertThrows;
+import static org.spine3.test.Verify.assertThrowsWithCause;
+import static org.spine3.test.Verify.assertZero;
+import static org.spine3.test.Verify.denyContainsKey;
+import static org.spine3.test.Verify.mangledException;
 
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyComplexClass"})
 public class VerifyShould {
 
     private static final String EMPTY_STRING = "";
     private static final String NON_EMPTY_STRING = "Non-empty string";
-    private static final String MAP_NAME = "map";
+
+    private static final String MAP_NAME = Verify.PARAM_MAP;
 
     @Test
     public void extend_Assert_class() {

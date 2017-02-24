@@ -33,10 +33,10 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.reflect.CommandHandlerMethod;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -79,7 +79,7 @@ public abstract class ProcessManagerRepository<I,
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
+            commandClasses = CommandHandlerMethod.getCommandClasses(pmClass);
         }
         return commandClasses;
     }

@@ -62,7 +62,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
-import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
+import static org.spine3.server.reflect.CommandHandlerMethod.getCommandClasses;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;

@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -44,13 +43,11 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
@@ -134,18 +131,6 @@ public abstract class CommandHandlingEntity<I, S extends Message>
                                       Message event,
                                       CommandContext commandContext) {
         // Do nothing.
-    }
-
-    /**
-     * Returns the set of the command classes handled by the passed class.
-     *
-     * @param clazz the class of objects that handle commands
-     * @return immutable set of command classes
-     */
-    public static Set<CommandClass> getCommandClasses(Class<? extends CommandHandlingEntity> clazz) {
-        final Set<CommandClass> result = CommandClass.setOf(
-                getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE));
-        return result;
     }
 
     /**
