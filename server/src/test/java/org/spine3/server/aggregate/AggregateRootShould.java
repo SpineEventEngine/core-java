@@ -211,17 +211,14 @@ public class AggregateRootShould {
     private static class MockStreamObserver implements StreamObserver<Response> {
         @Override
         public void onNext(Response value) {
-
         }
 
         @Override
         public void onError(Throwable t) {
-
         }
 
         @Override
         public void onCompleted() {
-
         }
     }
 }
