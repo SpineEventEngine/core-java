@@ -34,7 +34,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.atMost;
@@ -51,7 +51,7 @@ public class AggregateRootShould {
                                                             .build();
         boundedContext.register(new ProjectHeaderRepository(boundedContext));
 
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final ProjectId id = Exemplum.messageOfType(ProjectId.class);
         aggregateRoot = new ProjectRoot(boundedContext, id);
     }
 

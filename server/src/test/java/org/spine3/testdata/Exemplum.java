@@ -57,9 +57,9 @@ import static java.lang.String.format;
  *
  * @author Dmytro Dashenkov
  */
-public class Sample {
+public class Exemplum {
 
-    private Sample() {
+    private Exemplum() {
     }
 
     public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
