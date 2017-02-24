@@ -184,7 +184,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
 
         @Override
-        protected boolean isReturnTypeCorrect(Method method) {
+        protected boolean verifyReturnType(Method method) {
             final Class<?> returnType = method.getReturnType();
             final boolean isMessage = Message.class.isAssignableFrom(returnType);
             if (isMessage) {

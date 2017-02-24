@@ -112,7 +112,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         }
 
         @Override
-        protected boolean isReturnTypeCorrect(Method method) {
+        protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }

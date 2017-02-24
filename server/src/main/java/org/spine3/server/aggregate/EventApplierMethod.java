@@ -118,7 +118,7 @@ class EventApplierMethod extends HandlerMethod<Empty> {
 
         @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
         @Override
-        protected boolean acceptsCorrectParams(Method method) {
+        protected boolean verifyParams(Method method) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
             final boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
             if (!paramCountIsValid) {
@@ -130,7 +130,7 @@ class EventApplierMethod extends HandlerMethod<Empty> {
         }
 
         @Override
-        protected boolean isReturnTypeCorrect(Method method) {
+        protected boolean verifyReturnType(Method method) {
             final boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }

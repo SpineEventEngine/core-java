@@ -37,24 +37,24 @@ public abstract class MethodPredicate implements Predicate<Method> {
         if (method == null) {
             return false;
         }
-        final boolean result = isAnnotatedCorrectly(method)
-                               && acceptsCorrectParams(method)
-                               && isReturnTypeCorrect(method);
+        final boolean result = verifyAnnotation(method)
+                               && verifyParams(method)
+                               && verifyReturnType(method);
         return result;
     }
 
     /**
      * Returns {@code true} if the method is annotated correctly, {@code false} otherwise.
      */
-    protected abstract boolean isAnnotatedCorrectly(Method method);
+    protected abstract boolean verifyAnnotation(Method method);
 
     /**
      * Returns {@code true} if the method return type is correct, {@code false} otherwise.
      */
-    protected abstract boolean isReturnTypeCorrect(Method method);
+    protected abstract boolean verifyReturnType(Method method);
 
     /**
      * Returns {@code true} if the method parameters are correct, {@code false} otherwise.
      */
-    protected abstract boolean acceptsCorrectParams(Method method);
+    protected abstract boolean verifyParams(Method method);
 }

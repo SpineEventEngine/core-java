@@ -55,7 +55,7 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
     }
 
     @Override
-    protected boolean isAnnotatedCorrectly(Method method) {
+    protected boolean verifyAnnotation(Method method) {
         final boolean isAnnotated = method.isAnnotationPresent(getAnnotationClass());
         return isAnnotated;
     }
@@ -64,7 +64,7 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
      * {@inheritDoc}
      */
     @Override
-    protected boolean acceptsCorrectParams(Method method) {
+    protected boolean verifyParams(Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         final int paramCount = paramTypes.length;
         final boolean isParamCountCorrect = (paramCount == 1) || (paramCount == 2);
