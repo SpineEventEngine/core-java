@@ -91,6 +91,13 @@ public class AggregatesShould {
         getAggregatePartConstructor(WrongAggregatePart.class);
     }
 
+    @Test
+    public void obtain_aggregate_part_constructor() {
+        final Constructor<AnAggregatePart> constructor =
+                getAggregatePartConstructor(AnAggregatePart.class);
+        assertNotNull(constructor);
+    }
+
     /*
      Test environment classes
     ***************************/
