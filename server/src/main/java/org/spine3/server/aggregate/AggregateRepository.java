@@ -116,20 +116,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return the entity constructor
      */
     protected Constructor<A> getEntityConstructor() {
-        final Constructor<A> result = getConstructor(entityClass, idClass);
-        return result;
-    }
-
-    private void initEntityConstructorIfNeeded() {
         if (this.entityConstructor == null) {
-            this.entityConstructor = getEntityConstructor();
+            final Constructor<A> result = getConstructor(entityClass, idClass);
+            return result;
         }
+        return this.entityConstructor;
     }
 
     @Override
     public A create(I id) {
-        initEntityConstructorIfNeeded();
-        return createEntity(this.entityConstructor, id);
+        return createEntity(getEntityConstructor(), id);
     }
 
     /**
