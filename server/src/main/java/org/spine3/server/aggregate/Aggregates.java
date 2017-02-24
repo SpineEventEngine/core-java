@@ -207,5 +207,4 @@ class Aggregates {
             throw new IllegalStateException(e);
         }
     }
-
 }
