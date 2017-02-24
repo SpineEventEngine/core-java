@@ -75,8 +75,8 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // as this is the purpose of the method
-    private AggregateRepository<?, ?> checkFound(
-            Optional<? extends AggregateRepository<?, ?>> rawRepo) {
+    private AggregateRepository<?, ?>
+    checkFound(Optional<? extends AggregateRepository<?, ?>> rawRepo) {
         if (!rawRepo.isPresent()) {
             final String errMsg = String.format("Unable to find repository for the state class: %s",
                                                 stateClass);
