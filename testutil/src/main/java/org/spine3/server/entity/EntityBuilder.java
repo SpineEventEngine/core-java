@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @VisibleForTesting
 public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
-        extends ReflectiveBuilder<E> {
+             extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
