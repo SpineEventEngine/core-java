@@ -26,6 +26,7 @@ import java.lang.reflect.Constructor;
 
 import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
 import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
@@ -38,17 +39,10 @@ public abstract class AggregatePartRepository<I,
                       extends AggregateRepository<I, A> {
 
     /**
-     * The {@code AggregateRoot} class, which instance will be injected
-     * into the {@code AggregatePart} instance during initialization.
-     */
-    private final Class<R> rootClass;
-
-    /**
      * {@inheritDoc}
      */
-    protected AggregatePartRepository(BoundedContext boundedContext, Class<R> rootClass) {
+    protected AggregatePartRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.rootClass = rootClass;
     }
 
     /**
@@ -63,6 +57,7 @@ public abstract class AggregatePartRepository<I,
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
+        final Class<R> rootClass = getGenericParameterType(this.getClass(), 2);
         final AggregateRoot<I> root = createAggregateRoot(id, getBoundedContext(), rootClass);
         final A result = createAggregatePart(entityConstructor, root);
         return result;
@@ -71,8 +66,7 @@ public abstract class AggregatePartRepository<I,
     @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
     @Override
     protected Constructor<A> getEntityConstructor() {
-        final Constructor<A> result =
-                Aggregates.getAggregatePartConstructor(getEntityClass(), rootClass);
+        final Constructor<A> result = Aggregates.getAggregatePartConstructor(getEntityClass());
         return result;
     }
 }
