@@ -22,11 +22,14 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -43,6 +46,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.generateId;
@@ -68,13 +72,19 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
  * because of a {@linkplain org.spine3.base.FailureThrowable#getFailureMessage() business failure}.
  *
+ * {@inheritDoc}
+ *
  * @author Alexander Yevsyukov
  */
 public abstract class CommandHandlingEntity<I, S extends Message>
-        extends AbstractVersionableEntity<I, S> implements ICommandHandler {
+        extends AbstractVersionableEntity<I, S>
+        implements ICommandHandler<List<? extends Message>> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
+
+    @Nullable
+    private List<? extends Message> result;
 
     /**
      * {@inheritDoc}
@@ -87,6 +97,22 @@ public abstract class CommandHandlingEntity<I, S extends Message>
     @Override
     public Any getProducerId() {
         return idAsAny;
+    }
+
+    @Override
+    public Set<CommandClass> getMessageClasses() {
+        //TODO:2017-02-24:alexander.yevsyukov: Why don't we do it via MethodRegistry?
+        return CommandHandlerMethod.getCommandClasses(getClass());
+    }
+
+    @Override
+    public void dispatch(CommandEnvelope envelope) {
+        result = dispatchCommand(envelope.getMessage(), envelope.getCommandContext());
+    }
+
+    @Override
+    public Optional<List<? extends Message>> getResult() {
+        return Optional.<List<? extends Message>>fromNullable(result);
     }
 
     /**
@@ -176,18 +202,18 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      * Ensures that the passed instance of {@code Message} is not an {@code Any},
      * and unwraps the command message if {@code Any} is passed.
      */
-    private static Message ensureCommandMessage(Message command) {
+    private static Message ensureCommandMessage(Message msgOrAny) {
         Message commandMessage;
-        if (command instanceof Any) {
+        if (msgOrAny instanceof Any) {
             /* It looks that we're getting the result of `command.getMessage()`
                because the calling code did not bother to unwrap it.
                Extract the wrapped message (instead of treating this as an error).
                There may be many occasions of such a call especially from the
                testing code. */
-            final Any any = (Any) command;
+            final Any any = (Any) msgOrAny;
             commandMessage = AnyPacker.unpack(any);
         } else {
-            commandMessage = command;
+            commandMessage = msgOrAny;
         }
         return commandMessage;
     }
