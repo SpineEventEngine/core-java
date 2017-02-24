@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
@@ -148,9 +149,9 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to expose the method to
-     * {@link CommandBus#unregister(CommandDispatcher) CommandBus}.
+     * <p>Overrides to expose the method to the tests.
      */
+    @VisibleForTesting
     @Override
     protected void unregister(CommandDispatcher dispatcher) {
         super.unregister(dispatcher);
