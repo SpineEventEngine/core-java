@@ -23,7 +23,6 @@ package org.spine3.server.aggregate;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntity;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -46,14 +45,8 @@ class Aggregates {
      *
      * <p>The part class must have a constructor with ID and {@code AggregateRoot} parameters.
      *
-     * <p>Returns the constructor if:
-     *
-     * <ul>
-     *      <li>the first argument is aggregate ID and the second is {@code AggregateRoot}.
-     *      For example:
-     *          <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre>
-     *      </li>
-     *      <li>the second constructor parameter is subtype of the {@code AggregateRoot}.
+     * <p>Returns the constructor if the first parameter is aggregate ID
+     * and the second constructor parameter is subtype of the {@code AggregateRoot}
      *      For example:
      *          <pre>{@code
      *
@@ -68,89 +61,34 @@ class Aggregates {
      *              }
      *          }
      *          </pre>
-     *      </li>
-     * </ul>
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
      * @param entityClass the {@code AggregatePart} class
-     * @param idClass     the class of entity identifiers
      * @param <E>         the entity type
      * @param <I>         the ID type
      * @return the {@code AggregatePart} constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends AggregatePart, I, R extends AggregateRoot<I>> Constructor<E>
-    getAggregatePartConstructor(Class<E> entityClass, Class<R> rootClass, Class<I> idClass) {
+    static <E extends AggregatePart<I, ?, ?, ?>, I> Constructor<E>
+    getAggregatePartConstructor(Class<E> entityClass, Class<?> rootClass) {
         checkNotNull(entityClass);
         checkNotNull(rootClass);
-        checkNotNull(idClass);
-
-        final Constructor<E> result = getAggregatePartSupertypeCtor(entityClass, idClass);
-        if (result != null) {
-            return result;
-        }
 
         try {
             final Constructor<E> constructor =
-                    entityClass.getDeclaredConstructor(idClass, rootClass);
+                    entityClass.getDeclaredConstructor(rootClass);
             constructor.setAccessible(true);
             return constructor;
         } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructor(entityClass.getName());
+            throw noSuchConstructor(entityClass.getName(), rootClass.getName());
         }
     }
 
-    private static IllegalStateException noSuchConstructor(String entityClass) {
+    private static IllegalStateException noSuchConstructor(String entityClass, String rootClass) {
         final String errMsg = format("%s class must declare a constructor " +
-                                     "with ID and AggregateRoot parameters.", entityClass);
+                                     "with %s AggregateRoot parameter.", entityClass, rootClass);
         throw new IllegalStateException(new NoSuchMethodException(errMsg));
-    }
-
-    /**
-     * Obtains the constructor for the passed aggregate part class.
-     *
-     * <p>Returns the constructor if the first argument is aggregate ID
-     * and the second is {@code AggregateRoot}. For example:
-     *
-     * <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre>
-     *
-     * <p>Returns {@code null} if the entity class does not have
-     * the constructor as described above. For example:
-     *
-     * <pre> {@code SubAggregateRoot extends AggregateRoot{...};
-     * AggregatePartCtor(AnAggregateId id, SubAggregateRoot root){...}}</pre>
-     *
-     * @param entityClass the {@code AggregatePart} class
-     * @param idClass     the ID class of the {@code AggregatePart} class
-     * @param <E>         the {@code Message} entity type
-     * @param <I>         the {@code Message} ID type of the {@code idClass}
-     * @return the constructor for the Aggregate part class,
-     * or {@code null} if no appropriate constructor is found.
-     */
-    @Nullable
-    @SuppressWarnings("unchecked")
-    // It is OK because the constructor arguments are checked before returning the constructor.
-    private static <E extends AggregatePart, I> Constructor<E>
-    getAggregatePartSupertypeCtor(Class<E> entityClass, Class<I> idClass) {
-        checkNotNull(entityClass);
-        checkNotNull(idClass);
-
-        final Constructor<?>[] constructors = entityClass.getDeclaredConstructors();
-        for (Constructor constructor : constructors) {
-            final Class[] parameters = constructor.getParameterTypes();
-            final int length = parameters.length;
-            if (length != 2) {
-                continue;
-            }
-            final boolean isSuperType = parameters[0].equals(idClass) &&
-                                        parameters[1].equals(AggregateRoot.class);
-            if (isSuperType) {
-                constructor.setAccessible(true);
-                return constructor;
-            }
-        }
-        return null;
     }
 
     /**
@@ -185,20 +123,17 @@ class Aggregates {
      * Creates a new {@code AggregatePart} entity and sets it to the default state.
      *
      * @param ctor the constructor to use
-     * @param id   the ID of the entity
      * @param <I>  the type of entity IDs
      * @param <E>  the type of the entity
      * @return an {@code AggregatePart} instance
      */
     static <I, E extends AbstractEntity<I, ?>> E createAggregatePart(Constructor<E> ctor,
-                                                                     I id,
                                                                      AggregateRoot<I> root) {
         checkNotNull(ctor);
-        checkNotNull(id);
         checkNotNull(root);
 
         try {
-            final E result = ctor.newInstance(id, root);
+            final E result = ctor.newInstance(root);
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
