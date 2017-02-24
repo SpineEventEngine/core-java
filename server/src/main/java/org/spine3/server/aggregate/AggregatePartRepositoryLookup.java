@@ -43,10 +43,8 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      * Creates the lookup object for finding the repository that
      * manages aggregate parts with the passed state class.
      */
-    static <I, S extends Message> AggregatePartRepositoryLookup<I, S> createLookup(
-            BoundedContext boundedContext,
-            Class<I> idClass,
-            Class<S> stateClass) {
+    static <I, S extends Message> AggregatePartRepositoryLookup<I, S>
+    createLookup(BoundedContext boundedContext, Class<I> idClass, Class<S> stateClass) {
         return new AggregatePartRepositoryLookup<>(boundedContext, idClass, stateClass);
     }
 
@@ -65,8 +63,8 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      *                               if not of the expected type, or
      *                               IDs are not of the expected type
      */
-    <A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>>
-               AggregatePartRepository<I, A, R> find() {
+    <A extends AggregatePart<I, S, ?>, R extends AggregateRoot<I>> AggregatePartRepository<I, A, R>
+        find() {
         final AggregateRepository<?, ?> repo =
                 checkFound(boundedContext.getAggregateRepository(stateClass));
 
@@ -106,9 +104,9 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     /**
      * Ensures the type of the IDs of the passed repository.
      */
-    private <A extends AggregatePart<I, S, ?>, R
-               extends AggregateRoot<I>> AggregatePartRepository<I, A, R> checkIdClass(
-            AggregatePartRepository<?, ?, ?> repo) {
+    private <A extends AggregatePart<I, S, ?>,
+             R extends AggregateRoot<I>>
+    AggregatePartRepository<I, A, R> checkIdClass(AggregatePartRepository<?, ?, ?> repo) {
         final Class<?> repoIdClass = repo.getIdClass();
         if (!idClass.equals(repoIdClass)) {
             final String errMsg = String.format(

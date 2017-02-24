@@ -38,6 +38,7 @@ import static java.lang.String.format;
 class Aggregates {
 
     private Aggregates() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -50,13 +51,10 @@ class Aggregates {
      * <ul>
      *      <li>the first argument is aggregate ID and the second is {@code AggregateRoot}.
      *      For example:
-     *
      *          <pre>{@code AggregatePartCtor(AnAggregateId id, AggregateRoot root){...}}</pre>
      *      </li>
-     *
      *      <li>the second constructor parameter is subtype of the {@code AggregateRoot}.
      *      For example:
-     *
      *          <pre>{@code
      *
      *              // A user-defined AggregateRoot:
@@ -68,7 +66,6 @@ class Aggregates {
      *                  // The expected constructor:
      *                  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root){...}
      *              }
-     *
      *          }
      *          </pre>
      *      </li>
@@ -134,8 +131,8 @@ class Aggregates {
     @Nullable
     @SuppressWarnings("unchecked")
     // It is OK because the constructor arguments are checked before returning the constructor.
-    private static <E extends AggregatePart, I> Constructor<E> getAggregatePartSupertypeCtor
-    (Class<E> entityClass, Class<I> idClass) {
+    private static <E extends AggregatePart, I> Constructor<E>
+    getAggregatePartSupertypeCtor(Class<E> entityClass, Class<I> idClass) {
         checkNotNull(entityClass);
         checkNotNull(idClass);
 

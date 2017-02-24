@@ -32,9 +32,10 @@ import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository
-        <I, A extends AggregatePart<I, ?, ?>, R extends AggregateRoot<I>>
-        extends AggregateRepository<I, A> {
+public abstract class AggregatePartRepository<I,
+                                              A extends AggregatePart<I, ?, ?>,
+                                              R extends AggregateRoot<I>>
+                      extends AggregateRepository<I, A> {
 
     /**
      * The {@code AggregateRoot} class, which instance will be injected

@@ -59,7 +59,8 @@ public class AggregatePartRepositoryLookupShould {
 
     @Test
     public void find_a_repository() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, ProjectId.class,
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            ProjectId.class,
                                                             Project.class);
 
         final AggregatePartRepository repository = lookup.find();
@@ -69,21 +70,24 @@ public class AggregatePartRepositoryLookupShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_repository_is_not_AggregatePartRepository() {
-        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext, TaskId.class,
+        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                                  TaskId.class,
                                                                   Task.class);
         lookup.find();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_repository_not_found() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, Timestamp.class,
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            Timestamp.class,
                                                             StringValue.class);
         lookup.find();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_id_class_does_not_match() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, TaskId.class,
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            TaskId.class,
                                                             Project.class);
         lookup.find();
     }
@@ -166,7 +170,8 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class TaskAggregateRepository extends AggregateRepository<TaskId, TaskAggregatePart> {
+    private static class TaskAggregateRepository extends AggregateRepository<TaskId,
+                                                                             TaskAggregatePart> {
         private TaskAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
