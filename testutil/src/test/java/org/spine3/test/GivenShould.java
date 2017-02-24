@@ -73,9 +73,12 @@ public class GivenShould {
                                                  .getResultClass());
     }
 
-    private static class AnAggregatePart extends AggregatePart<Long, Timestamp, Timestamp.Builder> {
-        protected AnAggregatePart(Long id, AnAggregateRoot root) {
-            super(id, root);
+    private static class AnAggregatePart extends AggregatePart<Long,
+                                                               Timestamp,
+                                                               Timestamp.Builder,
+                                                               AnAggregateRoot> {
+        protected AnAggregatePart(AnAggregateRoot root) {
+            super(root);
         }
     }
 
