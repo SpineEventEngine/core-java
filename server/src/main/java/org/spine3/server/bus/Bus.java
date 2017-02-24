@@ -34,8 +34,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for buses.
  *
- * @param <T> the type of messages that are posted the bus.
- *
+ * @param <T> the type of outer objects (containing messages of interest) that are posted the bus
+ * @param <E> the type of envelopes for outer objects used by this bus
+ * @param <C> the type of message class
+ * @param <D> the type of dispatches used by this bus
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */

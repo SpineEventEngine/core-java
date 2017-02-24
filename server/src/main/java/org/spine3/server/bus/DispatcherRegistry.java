@@ -48,6 +48,8 @@ public class DispatcherRegistry<C extends MessageClass,
      */
     private final HashMultimap<C, D> dispatchers = HashMultimap.create();
 
+    //TODO:2017-02-24:alexander.yevsyukov: Make dispatchers concurrency-friendly.
+    
     /**
      * Registers the passed dispatcher.
      *
