@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
@@ -216,22 +217,6 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         assertTrue(responseObserver.isCompleted());
     }
 
-    @Test
-    public void unregister_command_handler() {
-        final CommandHandler handler = newCommandHandler();
-
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-
-        commandBus.post(createProject(), responseObserver);
-
-        assertTrue(responseObserver.isError());
-    }
-
-    CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler(newUuid());
-    }
-
     /*
      * Test of illegal arguments for post()
      ***************************************/
@@ -343,7 +328,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+        final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
@@ -372,19 +357,20 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * The dispatcher that remembers that {@link #dispatch(Command)} was called.
+     * The dispatcher that remembers that
+     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
         }
 

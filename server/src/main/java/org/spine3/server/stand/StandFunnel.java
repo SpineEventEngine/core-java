@@ -20,6 +20,7 @@
 package org.spine3.server.stand;
 
 import org.spine3.Internal;
+import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.VersionableEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,7 +41,7 @@ import static com.google.common.base.Preconditions.checkState;
  * there can be the only instance of {@code StandFunnel}.
  *
  * @author Alex Tymchenko
- * @see org.spine3.server.aggregate.AggregateRepository#dispatch(org.spine3.base.Command)
+ * @see CommandDispatcher#dispatch(org.spine3.base.CommandEnvelope)
  *      AggregateRepository.dispatch(Command)
  * @see org.spine3.server.projection.ProjectionRepository#dispatch(org.spine3.base.Event)
  *      ProjectionRepository.dispatch(Event)

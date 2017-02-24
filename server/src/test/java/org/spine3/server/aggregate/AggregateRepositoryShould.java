@@ -183,7 +183,7 @@ public class AggregateRepositoryShould {
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
         final Set<CommandClass> aggregateCommands = getCommandClasses(ProjectAggregate.class);
-        final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
+        final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }

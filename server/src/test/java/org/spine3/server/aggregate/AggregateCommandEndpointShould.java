@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
@@ -60,14 +61,17 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Events.getMessage;
+import static org.spine3.server.aggregate.Given.Command.addTask;
+import static org.spine3.server.aggregate.Given.Command.createProject;
+import static org.spine3.server.aggregate.Given.Command.startProject;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
-public class CommandEndpointShould {
+public class AggregateCommandEndpointShould {
 
-    private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repository;
+    private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
-    private AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> repositorySpy;
+    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
     private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
@@ -94,7 +98,7 @@ public class CommandEndpointShould {
 
     @Test
     public void post_events_on_command_dispatching() {
-        final Command cmd = Given.Command.createProject(projectId);
+        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         repository.dispatch(cmd);
 
@@ -105,8 +109,8 @@ public class CommandEndpointShould {
 
     @Test
     public void store_aggregate_on_command_dispatching() {
-        final Command cmd = Given.Command.createProject(projectId);
-        final CreateProject msg = Commands.getMessage(cmd);
+        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        final CreateProject msg = (CreateProject) cmd.getMessage();
 
         repositorySpy.dispatch(cmd);
 
@@ -120,7 +124,7 @@ public class CommandEndpointShould {
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
         @SuppressWarnings("unchecked")
         final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-        final Command cmd = Given.Command.createProject(projectId);
+        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
@@ -139,14 +143,14 @@ public class CommandEndpointShould {
 
     @Test
     public void dispatch_command() {
-        assertDispatches(Given.Command.createProject());
+        assertDispatches(createProject());
     }
 
     @Test
     public void dispatch_several_commands() {
-        assertDispatches(Given.Command.createProject(projectId));
-        assertDispatches(Given.Command.addTask(projectId));
-        assertDispatches(Given.Command.startProject(projectId));
+        assertDispatches(createProject(projectId));
+        assertDispatches(addTask(projectId));
+        assertDispatches(startProject(projectId));
     }
 
     /*
@@ -160,14 +164,15 @@ public class CommandEndpointShould {
     }
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
-            CommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<CommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
+            AggregateCommandEndpointShould.ProjectAggregate> repository) {
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }
 
     private void assertDispatches(Command cmd) {
-        repository.dispatch(cmd);
+        final CommandEnvelope envelope = CommandEnvelope.of(cmd);
+        repository.dispatch(envelope);
         ProjectAggregate.assertHandled(cmd);
     }
 
@@ -243,7 +248,7 @@ public class CommandEndpointShould {
     }
 
     private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, CommandEndpointShould.ProjectAggregate> {
+            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(InMemoryStorageFactory.getInstance());

@@ -21,12 +21,13 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
@@ -43,6 +44,7 @@ import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Set;
@@ -96,6 +98,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
+
+    @Nullable
+    private Set<CommandClass> messageClasses;
 
     /**
      * Creates a new repository instance.
@@ -154,11 +159,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     @Override
-    public Set<CommandClass> getCommandClasses() {
-        final Set<CommandClass> result =
-                CommandHandlingEntity.getCommandClasses(getAggregateClass());
-        return result;
+    public Set<CommandClass> getMessageClasses() {
+        if (messageClasses == null) {
+            messageClasses = ImmutableSet.copyOf(
+                    CommandHandlingEntity.getCommandClasses(getAggregateClass()));
+        }
+        return messageClasses;
     }
 
     /**
@@ -191,9 +199,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param command the command to dispatch
      */
     @Override
-    public void dispatch(Command command) {
+    public void dispatch(CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
-        final A aggregate = commandEndpoint.dispatch(command);
+        final A aggregate = commandEndpoint.receive(command);
 
         final List<Event> events = aggregate.getUncommittedEvents();
         storeAndPostToStand(aggregate);

@@ -19,13 +19,10 @@
  */
 
 /**
- * This package contains generated classes and interfaces for storing commands.
+ * This package contains classes and interfaces for abstract {@code Bus}.
  */
 
-@SPI
 @ParametersAreNonnullByDefault
-package org.spine3.server.command.storage;
-
-import org.spine3.SPI;
+package org.spine3.server.bus;
 
 import javax.annotation.ParametersAreNonnullByDefault;

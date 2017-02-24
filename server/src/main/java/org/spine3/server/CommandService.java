@@ -141,7 +141,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder) {
             final CommandBus commandBus = boundedContext.getCommandBus();
-            final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+            final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 mapBuilder.put(commandClass, boundedContext);
             }
