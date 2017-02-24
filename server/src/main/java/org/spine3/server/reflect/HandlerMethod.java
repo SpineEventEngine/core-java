@@ -39,10 +39,10 @@ import static com.google.common.base.Throwables.throwIfUnchecked;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
+ * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
+ *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *           a context parameter is never used
  */
 public abstract class HandlerMethod<C extends Message> {
 
@@ -68,15 +68,19 @@ public abstract class HandlerMethod<C extends Message> {
         return method;
     }
 
+    private int getModifiers() {
+        return method.getModifiers();
+    }
+
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
-        final boolean result = Modifier.isPublic(getMethod().getModifiers());
+        final boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
     /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
     protected boolean isPrivate() {
-        final boolean result = Modifier.isPrivate(getMethod().getModifiers());
+        final boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 

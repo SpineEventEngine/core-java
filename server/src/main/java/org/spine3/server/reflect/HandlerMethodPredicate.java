@@ -28,7 +28,8 @@ import java.lang.reflect.Method;
 /**
  * The predicate for filtering message handling methods.
  *
- * @param <C> the type of message context
+ * @param <C> the type of message context or {@link com.google.protobuf.Empty Empty} if
+ *            a context parameter is never used
  * @author Alexander Yevsyukov
  */
 public abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
