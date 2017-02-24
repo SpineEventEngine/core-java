@@ -22,6 +22,7 @@ package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.reflect.Classes;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -71,10 +72,10 @@ class Aggregates {
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
     static <A extends AggregatePart<I, ?, ?, ?>, I> Constructor<A>
-    getAggregatePartConstructor(Class<A> aggregatePartClass, Class<?> aggregateRootClass) {
+    getAggregatePartConstructor(Class<A> aggregatePartClass) {
         checkNotNull(aggregatePartClass);
-        checkNotNull(aggregateRootClass);
 
+        final Class<?> aggregateRootClass = Classes.getGenericParameterType(aggregatePartClass, 3);
         try {
             final Constructor<A> constructor =
                     aggregatePartClass.getDeclaredConstructor(aggregateRootClass);

@@ -88,7 +88,7 @@ public class AggregatesShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        getAggregatePartConstructor(WrongAggregatePart.class, AggregateRoot.class);
+        getAggregatePartConstructor(WrongAggregatePart.class);
     }
 
     /*
