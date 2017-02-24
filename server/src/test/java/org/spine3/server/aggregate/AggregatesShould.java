@@ -74,7 +74,7 @@ public class AggregatesShould {
     @Test
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
-                AnAggregatePart.class.getDeclaredConstructor(String.class, AnAggregateRoot.class);
+                AnAggregatePart.class.getDeclaredConstructor(AnAggregateRoot.class);
         final AggregatePart aggregatePart = createAggregatePart(constructor, root);
         assertNotNull(aggregatePart);
     }
