@@ -65,18 +65,18 @@ class Aggregates {
      * <p>Throws {@code IllegalStateException} in other cases.
      *
      * @param entityClass the {@code AggregatePart} class
-     * @param <E>         the entity type
+     * @param <A>         the entity type
      * @param <I>         the ID type
      * @return the {@code AggregatePart} constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <E extends AggregatePart<I, ?, ?, ?>, I> Constructor<E>
-    getAggregatePartConstructor(Class<E> entityClass, Class<?> rootClass) {
+    static <A extends AggregatePart<I, ?, ?, ?>, I> Constructor<A>
+    getAggregatePartConstructor(Class<A> entityClass, Class<?> rootClass) {
         checkNotNull(entityClass);
         checkNotNull(rootClass);
 
         try {
-            final Constructor<E> constructor =
+            final Constructor<A> constructor =
                     entityClass.getDeclaredConstructor(rootClass);
             constructor.setAccessible(true);
             return constructor;
@@ -124,16 +124,16 @@ class Aggregates {
      *
      * @param ctor the constructor to use
      * @param <I>  the type of entity IDs
-     * @param <E>  the type of the entity
+     * @param <A>  the type of the entity
      * @return an {@code AggregatePart} instance
      */
-    static <I, E extends AbstractEntity<I, ?>> E createAggregatePart(Constructor<E> ctor,
+    static <I, A extends AbstractEntity<I, ?>> A createAggregatePart(Constructor<A> ctor,
                                                                      AggregateRoot<I> root) {
         checkNotNull(ctor);
         checkNotNull(root);
 
         try {
-            final E result = ctor.newInstance(root);
+            final A result = ctor.newInstance(root);
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
