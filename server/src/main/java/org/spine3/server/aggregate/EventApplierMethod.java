@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.HandlerMethod;
+import org.spine3.server.reflect.HandlerMethodPredicate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -98,7 +99,7 @@ class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     /** The predicate for filtering event applier methods. */
-    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate {
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;

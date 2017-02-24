@@ -106,7 +106,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate {
 
         @Override
         protected boolean isAnnotatedCorrectly(Method method) {

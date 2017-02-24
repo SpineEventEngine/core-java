@@ -177,7 +177,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      *
      * <p>See {@link Assign} annotation for more info about such methods.
      */
-    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate {
 
         @Override
         protected boolean isAnnotatedCorrectly(Method method) {
