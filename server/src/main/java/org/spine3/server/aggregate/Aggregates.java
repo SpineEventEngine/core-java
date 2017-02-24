@@ -89,7 +89,7 @@ class Aggregates {
                                                            String aggregateRootClass) {
         final String errMsg =
                 format("%s class must declare a constructor " +
-                       "with %s AggregateRoot parameter.", aggregatePartClass, aggregateRootClass);
+                       "with %s parameter type.", aggregatePartClass, aggregateRootClass);
         throw new IllegalStateException(new NoSuchMethodException(errMsg));
     }
 
