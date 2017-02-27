@@ -22,12 +22,21 @@ package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+
+import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
+import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
+
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
+public abstract class AggregatePartRepository<I,
+                                              A extends AggregatePart<I, ?, ?, R>,
+                                              R extends AggregateRoot<I>>
+                      extends AggregateRepository<I, A> {
 
     /**
      * {@inheritDoc}
@@ -42,5 +51,22 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @Override // to expose this method in the same package.
     protected Class<I> getIdClass() {
         return super.getIdClass();
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+    @Override
+    public A create(I id) {
+        final Constructor<A> entityConstructor = getEntityConstructor();
+        final Class<R> rootClass = getGenericParameterType(this.getClass(), 2);
+        final AggregateRoot<I> root = createAggregateRoot(id, getBoundedContext(), rootClass);
+        final A result = createAggregatePart(entityConstructor, root);
+        return result;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+    @Override
+    protected Constructor<A> getEntityConstructor() {
+        final Constructor<A> result = Aggregates.getAggregatePartConstructor(getEntityClass());
+        return result;
     }
 }

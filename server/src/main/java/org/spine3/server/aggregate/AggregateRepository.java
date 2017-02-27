@@ -54,6 +54,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
@@ -89,8 +91,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             GetTargetIdFromCommand.newInstance();
 
     /** The constructor for creating entity instances. */
-    private final Constructor<A> entityConstructor;
-
+    private Constructor<A> entityConstructor;
+    private final Class<A> entityClass;
+    private final Class<I> idClass;
     private final EventBus eventBus;
     private final StandFunnel standFunnel;
 
@@ -109,20 +112,33 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
+        this.entityClass = getEntityClass();
+        this.idClass = getIdClass();
     }
 
-    private Constructor<A> getEntityConstructor() {
-        final Class<A> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
+    /**
+     * Obtains constructor for the passed entity class.
+     *
+     * @return the entity constructor
+     */
+    protected Constructor<A> getEntityConstructor() {
+        if (this.entityConstructor == null) {
+            final Constructor<A> result = getAggregateConstructor();
+            return result;
+        }
+        return this.entityConstructor;
+    }
+
+    @VisibleForTesting
+    Constructor<A> getAggregateConstructor() {
+        final Constructor<A> result = getConstructor(entityClass, idClass);
+        this.entityConstructor = result;
         return result;
     }
 
     @Override
     public A create(I id) {
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        return createEntity(getEntityConstructor(), id);
     }
 
     /**

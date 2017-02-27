@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.commandservice.customer.Customer;
@@ -202,7 +203,7 @@ public class FieldMasksShould {
                                            .setName(String.format("Test project : %s", id))
                                            .addTask(first)
                                            .addTask(second)
-                                           .setStatus(Project.Status.CREATED)
+                                           .setStatus(Status.CREATED)
                                            .build();
             return project;
         }
