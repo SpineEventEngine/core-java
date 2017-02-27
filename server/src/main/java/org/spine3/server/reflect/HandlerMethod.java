@@ -39,10 +39,10 @@ import static com.google.common.base.Throwables.throwIfUnchecked;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
+ * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
+ *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *           a context parameter is never used
  */
 public abstract class HandlerMethod<C extends Message> {
 
@@ -68,15 +68,19 @@ public abstract class HandlerMethod<C extends Message> {
         return method;
     }
 
+    private int getModifiers() {
+        return method.getModifiers();
+    }
+
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
-        final boolean result = Modifier.isPublic(getMethod().getModifiers());
+        final boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
     /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
     protected boolean isPrivate() {
-        final boolean result = Modifier.isPrivate(getMethod().getModifiers());
+        final boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 
@@ -92,10 +96,12 @@ public abstract class HandlerMethod<C extends Message> {
      * @param target  the target object on which call the method
      * @param message the message to handle   @return the result of message handling
      * @param context the context of the message
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
+     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
+     *                                   is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    public <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, C context)
+            throws InvocationTargetException {
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -184,7 +190,8 @@ public abstract class HandlerMethod<C extends Message> {
      */
     static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
-        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        final Class<? extends Message> result =
+                (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -213,51 +220,6 @@ public abstract class HandlerMethod<C extends Message> {
          * @see HandlerMethod#warnOnWrongModifier(String, Method)
          */
         void checkAccessModifier(Method method);
-    }
-
-    /** The predicate class allowing to filter message handler methods. */
-    protected abstract static class FilterPredicate implements Predicate<Method> {
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isHandler(method);
-        }
-
-        /** Checks if the passed method is a handler. */
-        protected boolean isHandler(Method method) {
-            final boolean isHandler = isAnnotatedCorrectly(method)
-                    && acceptsCorrectParams(method)
-                    && isReturnTypeCorrect(method);
-            return isHandler;
-        }
-
-        /** Returns {@code true} if the method is annotated correctly, {@code false} otherwise. */
-        protected abstract boolean isAnnotatedCorrectly(Method method);
-
-        /** Returns {@code true} if the method return type is correct, {@code false} otherwise. */
-        protected abstract boolean isReturnTypeCorrect(Method method);
-
-        /** Returns the context parameter type. */
-        protected abstract Class<? extends Message> getContextClass();
-
-        /** Returns {@code true} if the method parameters are correct, {@code false} otherwise. */
-        protected boolean acceptsCorrectParams(Method method) {
-            final Class<?>[] paramTypes = method.getParameterTypes();
-            final int paramCount = paramTypes.length;
-            final boolean isParamCountCorrect = (paramCount == 1) || (paramCount == 2);
-            if (!isParamCountCorrect) {
-                return false;
-            }
-            final boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
-            if (paramCount == 1) {
-                return isFirstParamMsg;
-            } else {
-                final Class<? extends Message> contextClass = getContextClass();
-                final boolean paramsCorrect = isFirstParamMsg && contextClass.equals(paramTypes[1]);
-                return paramsCorrect;
-            }
-        }
     }
 
     private enum LogSingleton {
