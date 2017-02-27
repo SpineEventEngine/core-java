@@ -101,7 +101,6 @@ public abstract class CommandHandlingEntity<I, S extends Message>
 
     @Override
     public Set<CommandClass> getMessageClasses() {
-        //TODO:2017-02-24:alexander.yevsyukov: Why don't we do it via MethodRegistry?
         return CommandHandlerMethod.getCommandClasses(getClass());
     }
 

@@ -288,11 +288,6 @@ public class CommandDispatcherRegistryShould {
         ProjectCreated handle(CreateProject command, CommandContext ctx) {
             return ProjectCreated.getDefaultInstance();
         }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return ImmutableSet.of(CommandClass.of(CreateProject.class));
-        }
     }
 
     private class AllCommandHandler extends CommandHandler {
@@ -314,13 +309,6 @@ public class CommandDispatcherRegistryShould {
         @Assign
         ProjectStarted handle(StartProject command) {
             return ProjectStarted.getDefaultInstance();
-        }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return ImmutableSet.of(CommandClass.of(CreateProject.class),
-                                   CommandClass.of(StartProject.class),
-                                   CommandClass.of(AddTask.class));
         }
     }
 

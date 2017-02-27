@@ -44,11 +44,11 @@ import static org.spine3.base.Identifiers.newUuid;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
 public class CommandHandlerMethodShould {
 
     private final EventBus eventBus = TestEventBusFactory.create();
 
+    @SuppressWarnings("ConstantConditions") // OK as we get the method right after scanning
     @Test
     public void scan_target_for_handlers() {
         final TestCommandHandler handlerObject = new ValidHandlerOneParam();
@@ -56,10 +56,10 @@ public class CommandHandlerMethodShould {
         final MethodMap<CommandHandlerMethod> handlerMap = CommandHandlerMethod.scan(handlerObject);
 
         assertEquals(1, handlerMap.values().size());
-        //noinspection ConstantConditions
         assertEquals(handlerObject.getHandler(), handlerMap.get(CreateProject.class).getMethod());
     }
 
+    @SuppressWarnings("ConstantConditions") // OK as we get the method right after scanning
     @Test
     public void log_warning_if_not_default_handler_found() {
         final TestCommandHandler handlerObject = new ValidHandlerButPrivate();
@@ -68,7 +68,6 @@ public class CommandHandlerMethodShould {
         final MethodMap<CommandHandlerMethod> handlerMap = CommandHandlerMethod.scan(handlerObject);
 
         assertEquals(1, handlerMap.values().size());
-        //noinspection ConstantConditions
         assertEquals(handlerMethod, handlerMap.get(CreateProject.class).getMethod());
         // TODO:2016-04-25:alexander.litus: check that a warning is logged (may require some refactoring)
     }
@@ -79,9 +78,11 @@ public class CommandHandlerMethodShould {
         final CommandHandlerMethod handler = CommandHandlerMethod.from(handlerObject.getHandler());
         final CreateProject cmd = Given.CommandMessage.createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
+        final List<? extends Message> events = handler.invoke(handlerObject, cmd,
+                                                              CommandContext.getDefaultInstance());
 
-        verify(handlerObject, times(1)).handleTest(cmd, CommandContext.getDefaultInstance());
+        verify(handlerObject, times(1))
+                .handleTest(cmd, CommandContext.getDefaultInstance());
         assertEquals(1, events.size());
         final ProjectCreated event = (ProjectCreated) events.get(0);
         assertEquals(cmd.getProjectId(), event.getProjectId());
@@ -89,11 +90,13 @@ public class CommandHandlerMethodShould {
 
     @Test
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
-        final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
+        final ValidHandlerOneParamReturnsList handlerObject =
+                spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = CommandHandlerMethod.from(handlerObject.getHandler());
         final CreateProject cmd = Given.CommandMessage.createProject();
 
-        final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
+        final List<? extends Message> events = handler.invoke(handlerObject, cmd,
+                                                              CommandContext.getDefaultInstance());
 
         verify(handlerObject, times(1)).handleTest(cmd);
         assertEquals(1, events.size());

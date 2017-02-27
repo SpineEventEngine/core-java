@@ -95,7 +95,8 @@ public abstract class CommandHandler extends CommandHandlingEntity<String, Empty
     @Override
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
-            commandClasses = ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(getClass()));
+            commandClasses = ImmutableSet.copyOf(
+                    CommandHandlerMethod.getCommandClasses(getClass()));
         }
         return commandClasses;
     }
