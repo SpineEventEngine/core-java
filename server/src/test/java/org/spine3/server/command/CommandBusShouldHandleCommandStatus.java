@@ -60,7 +60,6 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -193,7 +192,7 @@ public class CommandBusShouldHandleCommandStatus {
         private final Throwable throwable;
 
         protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
-            super(newUuid(), eventBus);
+            super(eventBus);
             this.throwable = throwable;
         }
 

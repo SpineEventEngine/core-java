@@ -39,7 +39,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Litus
@@ -302,7 +301,7 @@ public class CommandHandlerMethodShould {
         private static final String HANDLER_METHOD_NAME = "handleTest";
 
         protected TestCommandHandler() {
-            super(newUuid(), eventBus);
+            super(eventBus);
         }
 
         public Method getHandler() {

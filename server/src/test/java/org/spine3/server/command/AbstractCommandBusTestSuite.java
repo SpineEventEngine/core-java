@@ -79,7 +79,7 @@ public abstract class AbstractCommandBusTestSuite {
         private boolean handlerInvoked = false;
 
         CreateProjectHandler(String id) {
-            super(id, eventBus);
+            super(eventBus);
         }
 
         @Assign

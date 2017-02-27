@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 
 /**
@@ -30,18 +29,10 @@ import com.google.protobuf.Any;
  *
  * @author Alexander Yevsyukov
  */
-interface ICommandHandler<R> extends CommandDispatcher {
+interface ICommandHandler extends CommandDispatcher {
 
     /**
      * Obtains identifier of the event producer wrapped into {@link Any}.
      */
     Any getProducerId();
-
-    /**
-     * Obtains the result of command handling.
-     *
-     * <p>This method must be called after command is
-     * {@linkplain #dispatch(org.spine3.base.MessageEnvelope) dispatched}.
-     */
-    Optional<R> getResult();
 }

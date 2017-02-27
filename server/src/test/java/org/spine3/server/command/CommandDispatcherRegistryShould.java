@@ -281,7 +281,7 @@ public class CommandDispatcherRegistryShould {
     private class CreateProjectHandler extends CommandHandler {
 
         protected CreateProjectHandler(String id) {
-            super(id, eventBus);
+            super(eventBus);
         }
 
         @Assign
@@ -293,7 +293,7 @@ public class CommandDispatcherRegistryShould {
     private class AllCommandHandler extends CommandHandler {
 
         protected AllCommandHandler() {
-            super(newUuid(), eventBus);
+            super(eventBus);
         }
 
         @Assign
@@ -314,7 +314,7 @@ public class CommandDispatcherRegistryShould {
 
     private class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler() {
-            super(newUuid(), eventBus);
+            super(eventBus);
         }
 
         @Override

@@ -49,7 +49,6 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -108,8 +107,6 @@ public class CommandHandlerShould {
 
     @Test
     public void generate_non_zero_hash_code_if_handler_has_non_empty_id() {
-        assertFalse(handler.getId().trim().isEmpty());
-
         final int hashCode = handler.hashCode();
 
         assertTrue(hashCode != 0);
@@ -121,13 +118,8 @@ public class CommandHandlerShould {
     }
 
     @Test
-    public void generate_different_hash_codes_for_different_instances() {
-        assertNotEquals(new TestCommandHandler().hashCode(), new TestCommandHandler().hashCode());
-    }
-
-    @Test
     public void assure_same_handlers_are_equal() {
-        final TestCommandHandler same = new TestCommandHandler(handler.getId());
+        final TestCommandHandler same = new TestCommandHandler();
 
         assertTrue(handler.equals(same));
     }
@@ -147,14 +139,6 @@ public class CommandHandlerShould {
     public void assure_handler_is_not_equal_to_object_of_another_class() {
         //noinspection EqualsBetweenInconvertibleTypes
         assertFalse(handler.equals(newUuid()));
-    }
-
-    @Test
-    public void assure_handlers_with_different_ids_are_not_equal() {
-        final TestCommandHandler another = new TestCommandHandler();
-
-        assertNotEquals(handler.getId(), another.getId());
-        assertFalse(handler.equals(another));
     }
 
     private List<Event> verifyPostedEvents(int expectedEventCount) {
@@ -177,12 +161,8 @@ public class CommandHandlerShould {
 
         private final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        protected TestCommandHandler(String id) {
-            super(id, eventBus);
-        }
-
         protected TestCommandHandler() {
-            this(newUuid());
+            super(eventBus);
         }
 
         void assertHandled(Command expected) {

@@ -20,10 +20,20 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.Version;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 
@@ -35,10 +45,14 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.spine3.base.Events.generateId;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * The wrapper for a command handler method.
@@ -103,8 +117,96 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<?> cls) {
         final Set<CommandClass> result = CommandClass.setOf(
-                getHandledMessageClasses(cls, PREDICATE));
+                getHandledMessageClasses(cls, predicate()));
         return result;
+    }
+
+    /**
+     * Ensures that the passed instance of {@code Message} is not an {@code Any},
+     * and unwraps the command message if {@code Any} is passed.
+     */
+    private static Message ensureCommandMessage(Message msgOrAny) {
+        Message commandMessage;
+        if (msgOrAny instanceof Any) {
+            /* It looks that we're getting the result of `command.getMessage()`
+               because the calling code did not bother to unwrap it.
+               Extract the wrapped message (instead of treating this as an error).
+               There may be many occasions of such a call especially from the
+               testing code. */
+            final Any any = (Any) msgOrAny;
+            commandMessage = AnyPacker.unpack(any);
+        } else {
+            commandMessage = msgOrAny;
+        }
+        return commandMessage;
+    }
+
+    /**
+     * Invokes the handler method in the passed object.
+     *
+     * @return the list of events produced by the handler method
+     */
+    public static List<? extends Message> invokeHandler(Object object,
+                                                        Message command,
+                                                        CommandContext context) {
+        checkNotNull(command);
+        checkNotNull(context);
+        final Message commandMessage = ensureCommandMessage(command);
+
+        try {
+            final CommandHandlerMethod method = forMessage(object.getClass(),
+                                                           commandMessage);
+            final List<? extends Message> eventMessages = method.invoke(object,
+                                                                        commandMessage,
+                                                                        context);
+            return eventMessages;
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
+    }
+
+    /**
+     * Creates new {@code CommandContext} with passed parameters.
+     *
+     * @param producerId the ID of an object which produced the event
+     * @param version optional version of the object
+     * @param commandContext the context of the command handling of which produced the event
+     * @return new {@code CommandContext}
+     */
+    public static EventContext createEventContext(Any producerId,
+                                                  @Nullable Version version,
+                                                  CommandContext commandContext) {
+        final EventId eventId = generateId();
+        final Timestamp timestamp = getCurrentTime();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(eventId)
+                                                         .setTimestamp(timestamp)
+                                                         .setCommandContext(commandContext)
+                                                         .setProducerId(producerId);
+        if (version != null) {
+            builder.setVersion(version);
+        }
+        return builder.build();
+    }
+
+    public static List<Event> toEvents(final Any producerId,
+                                       @Nullable final Version version,
+                                       final List<? extends Message> eventMessages,
+                                       final CommandContext commandContext) {
+
+        return Lists.transform(eventMessages, new Function<Message, Event>() {
+            @Override
+            public Event apply(@Nullable Message eventMessage) {
+                if (eventMessage == null) {
+                    return Event.getDefaultInstance();
+                }
+                final EventContext eventContext = createEventContext(producerId,
+                                                                     version,
+                                                                     commandContext);
+                final Event result = Events.createEvent(eventMessage, eventContext);
+                return result;
+            }
+        });
     }
 
     /**

@@ -207,27 +207,18 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * {@inheritDoc}
      *
-     * <p>As the result of this method call, the aggregate generates
-     * event messages and applies them to compute new state.
-     */
-    @Override
-    protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
-            throws InvocationTargetException {
-        final List<? extends Message> eventMessages = super.invokeHandler(commandMessage, context);
-
-        apply(eventMessages, context);
-
-        return eventMessages;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
+     * <p>Overrides to apply generated events to the state.
      */
     @Override
     protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
-        return super.dispatchCommand(command, context);
+        final List<? extends Message> eventMessages = super.dispatchCommand(command, context);
+
+        try {
+            apply(eventMessages, context);
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
+        return eventMessages;
     }
 
     /**
@@ -337,7 +328,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                                   .setVersion(getVersion())
                                   .build();
         } else {
-            eventContext = createEventContext(eventMessage, commandContext);
+            eventContext = createEventContext(commandContext);
         }
 
         final Event event = createEvent(eventMessage, eventContext);

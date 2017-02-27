@@ -28,6 +28,7 @@ import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 
 import java.lang.reflect.InvocationTargetException;
@@ -88,40 +89,31 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     }
 
     /**
-     * Directs the passed command to the handler method and
-     * transforms its output to a list of events.
-     *
-     * @param commandMessage the command to be processed
-     * @param context the context of the command
-     * @return the events resulted from the call
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    @Override
-    protected List<Event> invokeHandler(Message commandMessage, CommandContext context)
-            throws InvocationTargetException {
-        final List<? extends Message> messages = super.invokeHandler(commandMessage, context);
-
-        final List<Event> events = toEvents(messages, context);
-        return events;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * This method overrides the parent for:
-     * <ol>
-     *     <li>Opening the method to the package.
-     *     <li>Casting the result to {@code List<Event>}, which is produced by
-     *     {@link #invokeHandler(Message, CommandContext) invokeHander()}.
-     * </ol>
+     * Dispatches the command to the handler method and transforms the output
+     * into a list of events.
      *
      * @return the list of events generated as the result of handling the command.
      */
-    @SuppressWarnings("unchecked") // See Javadoc above
     @Override
-    protected List<Event> dispatchCommand(Message command, CommandContext context) {
-        final List<? extends Message> messages = super.dispatchCommand(command, context);
-        return (List<Event>)messages;
+    protected List<Event> dispatchCommand(Message commandMessage, CommandContext context) {
+        final List<? extends Message> messages = super.dispatchCommand(commandMessage, context);
+        final List<Event> result = toEvents(messages, context);
+        return result;
+    }
+
+    /**
+     * Transforms the passed list of event messages into the list of events.
+     *
+     * @param eventMessages event messages for which generate events
+     * @param commandContext the context of the command which generated the event messages
+     * @return list of events
+     */
+    private List<Event> toEvents(List<? extends Message> eventMessages,
+                                 final CommandContext commandContext) {
+        return CommandHandlerMethod.toEvents(getProducerId(),
+                                             getVersion(),
+                                             eventMessages,
+                                             commandContext);
     }
 
     /**
