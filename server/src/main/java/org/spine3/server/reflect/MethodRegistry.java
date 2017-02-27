@@ -22,7 +22,6 @@ package org.spine3.server.reflect;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
@@ -33,8 +32,7 @@ import java.util.Objects;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-public class MethodRegistry {
+class MethodRegistry {
 
     private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
 
