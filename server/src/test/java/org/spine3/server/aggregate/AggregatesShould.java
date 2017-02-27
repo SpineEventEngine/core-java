@@ -62,7 +62,7 @@ public class AggregatesShould {
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
               .setDefault(AggregateRoot.class, root)
-              .testAllPublicStaticMethods(Aggregates.class);
+              .testStaticMethods(Aggregates.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
