@@ -59,11 +59,10 @@ public class AggregatesShould {
                                             .getDeclaredConstructor(BoundedContext.class,
                                                                     String.class);
         final NullPointerTester tester = new NullPointerTester();
-        tester.setDefault(Constructor.class, constructor);
-        tester.setDefault(BoundedContext.class, boundedContext);
-        tester.setDefault(AggregateRoot.class, root);
-
-        tester.testStaticMethods(Aggregates.class, NullPointerTester.Visibility.PUBLIC);
+        tester.setDefault(Constructor.class, constructor)
+              .setDefault(BoundedContext.class, boundedContext)
+              .setDefault(AggregateRoot.class, root)
+              .testAllPublicStaticMethods(Aggregates.class);
     }
 
     @Test
