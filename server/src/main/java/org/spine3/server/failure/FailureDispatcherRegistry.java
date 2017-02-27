@@ -19,44 +19,25 @@
  */
 package org.spine3.server.failure;
 
-import io.grpc.stub.StreamObserver;
-import org.spine3.base.Failure;
-import org.spine3.base.Response;
-import org.spine3.server.bus.Bus;
 import org.spine3.server.bus.DispatcherRegistry;
 
 /**
- * Dispatches the business failures that occur during the command processing
- * to the corresponding subscriber.
+ * The registry of objects dispatching the business failures to their subscribers.
  *
- * @author Alexander Yevsyuov
+ * <p>There can be multiple dispatchers per failure class.
+ *
  * @author Alex Tymchenko
- * @see org.spine3.base.FailureThrowable
- * @see org.spine3.server.event.Subscribe Subscribe @Subscribe
  */
-public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
-    @Override
-    public void post(Failure message, StreamObserver<Response> responseObserver) {
-
-    }
-
-    @Override
-    protected DispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
-        return new FailureDispatcherRegistry();
-    }
-
-    @Override
-    public void close() throws Exception {
-        registry().unregisterAll();
-    }
+public class FailureDispatcherRegistry extends DispatcherRegistry<FailureClass, FailureDispatcher> {
 
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides for return type covariance.
+     * <p>Overrides to expose the method to
+     * {@link FailureBus#close() FailureBus}.
      */
     @Override
-    protected FailureDispatcherRegistry registry() {
-        return (FailureDispatcherRegistry) super.registry();
+    protected void unregisterAll() {
+        super.unregisterAll();
     }
 }
