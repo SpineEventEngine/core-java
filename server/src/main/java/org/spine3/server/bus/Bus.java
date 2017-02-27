@@ -25,7 +25,6 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.MessageClass;
 import org.spine3.base.MessageEnvelope;
 import org.spine3.base.Response;
-import org.spine3.server.command.CommandDispatcher;
 
 import javax.annotation.Nullable;
 
@@ -50,18 +49,18 @@ public abstract class Bus<T extends Message,
     private DispatcherRegistry<C, D> registry;
 
     /**
-     * Registers the passed command dispatcher.
+     * Registers the passed dispatcher.
      *
      * @param dispatcher the dispatcher to register
-     * @throws IllegalArgumentException if the set of command classes
-     *  {@linkplain CommandDispatcher#getMessageClasses() exposed} by the dispatcher is empty
+     * @throws IllegalArgumentException if the set of message classes
+     *  {@linkplain MessageDispatcher#getMessageClasses() exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
     }
 
     /**
-     * Unregisters dispatching for command classes of the passed dispatcher.
+     * Unregisters dispatching for message classes of the passed dispatcher.
      *
      * @param dispatcher the dispatcher to unregister
      */
@@ -76,6 +75,14 @@ public abstract class Bus<T extends Message,
      * @param responseObserver the observer to receive outcome of the operation
      */
     public abstract void post(T message, StreamObserver<Response> responseObserver);
+
+    /**
+     * Handles the message, for which there is dispatchers registered in the registry.
+     *
+     * @param message          the message that has no target dispatchers, packed into an envelope
+     * @param responseObserver the observer to be potentially notified about the dead message
+     */
+    public abstract void handleDeadMessage(E message, StreamObserver<Response> responseObserver);
 
     /**
      * Obtains the dispatcher registry.

@@ -214,7 +214,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
         // If the command is not supported, return as error.
         if (!dispatcher.isPresent()) {
-            handleUnsupported(command, responseObserver);
+            handleDeadMessage(commandEnvelope, responseObserver);
             return;
         }
 
@@ -238,6 +238,15 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void handleDeadMessage(CommandEnvelope message,
+                                  StreamObserver<Response> responseObserver) {
+        Command command = message.getCommand();
+        final CommandException unsupported = new UnsupportedCommandException(command);
+        commandStore.storeWithError(command, unsupported);
+        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+    }
+
     /**
      * Passes a previously scheduled command to the corresponding dispatcher.
      */
@@ -257,12 +266,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         final String msg = String.format("No dispatcher found for the command (class: %s id: %s).",
                                          commandEnvelope.getCommandClass(), idStr);
         throw new IllegalStateException(msg);
-    }
-
-    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final CommandException unsupported = new UnsupportedCommandException(command);
-        commandStore.storeWithError(command, unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
     private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {

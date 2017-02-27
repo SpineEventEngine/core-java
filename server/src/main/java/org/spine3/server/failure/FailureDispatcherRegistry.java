@@ -19,7 +19,11 @@
  */
 package org.spine3.server.failure;
 
+import io.grpc.stub.StreamObserver;
+import org.spine3.base.Failure;
 import org.spine3.server.bus.DispatcherRegistry;
+
+import java.util.Set;
 
 /**
  * The registry of objects dispatching the business failures to their subscribers.
@@ -39,5 +43,16 @@ public class FailureDispatcherRegistry extends DispatcherRegistry<FailureClass, 
     @Override
     protected void unregisterAll() {
         super.unregisterAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to
+     * {@link FailureBus#post(Failure, StreamObserver)} FailureBus}.
+     */
+    @Override
+    protected Set<FailureDispatcher> getDispatchers(FailureClass messageClass) {
+        return super.getDispatchers(messageClass);
     }
 }

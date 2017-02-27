@@ -20,10 +20,18 @@
 package org.spine3.server.failure;
 
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.bus.DispatcherRegistry;
+
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -36,8 +44,23 @@ import org.spine3.server.bus.DispatcherRegistry;
  */
 public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
     @Override
-    public void post(Failure message, StreamObserver<Response> responseObserver) {
+    public void post(Failure failure, StreamObserver<Response> responseObserver) {
+        checkNotNull(failure);
+        checkNotNull(responseObserver);
+        checkArgument(isNotDefault(failure));
 
+        final FailureEnvelope failureEnvelope = FailureEnvelope.of(failure);
+        final FailureClass failureClass = failureEnvelope.getFailureClass();
+
+        final Set<FailureDispatcher> dispatchers = registry().getDispatchers(failureClass);
+
+        for (FailureDispatcher dispatcher : dispatchers) {
+            dispatcher.dispatch(failureEnvelope);
+        }
+        final int dispatchersCalled = dispatchers.size();
+        if (dispatchersCalled == 0) {
+            handleDeadMessage(failureEnvelope, responseObserver);
+        }
     }
 
     @Override
@@ -50,6 +73,12 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
         registry().unregisterAll();
     }
 
+    @Override
+    public void handleDeadMessage(FailureEnvelope message,
+                                  StreamObserver<Response> responseObserver) {
+        log().warn("No dispatcher defined for the failure class {}", message.getFailureClass());
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -58,5 +87,15 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
     @Override
     protected FailureDispatcherRegistry registry() {
         return (FailureDispatcherRegistry) super.registry();
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(FailureBus.class);
+    }
+
+    static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

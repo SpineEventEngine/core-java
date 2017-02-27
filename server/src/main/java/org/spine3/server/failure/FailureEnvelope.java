@@ -32,11 +32,20 @@ import org.spine3.base.Failures;
  */
 public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
 
+    /**
+     * The failure message.
+     */
     private final Message failureMessage;
+
+    /**
+     * The failure class.
+     */
+    private final FailureClass failureClass;
 
     protected FailureEnvelope(Failure failure) {
         super(failure);
         this.failureMessage = Failures.getMessage(failure);
+        this.failureClass = FailureClass.of(failureMessage);
     }
 
     /**
@@ -49,5 +58,9 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
     @Override
     public Message getMessage() {
         return failureMessage;
+    }
+
+    public FailureClass getFailureClass() {
+        return failureClass;
     }
 }
