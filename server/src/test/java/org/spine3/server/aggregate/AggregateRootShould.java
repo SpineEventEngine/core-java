@@ -47,11 +47,12 @@ import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.Tests.emptyObserver;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class AggregateRootShould {
 
-    private static final StreamObserver<Response> RESPONSE_OBSERVER = new MockStreamObserver();
+    private static final StreamObserver<Response> responseObserver = emptyObserver();
 
     private ProjectRoot aggregateRoot;
     private CommandBus commandBus;
@@ -97,10 +98,10 @@ public class AggregateRootShould {
     @Test
     public void start_the_project() {
         final Command createProjectSmd = createProjectCmdInstance();
-        commandBus.post(createProjectSmd, RESPONSE_OBSERVER);
+        commandBus.post(createProjectSmd, responseObserver);
 
         final Command startProjectCmd = createStartProjectCmd();
-        commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
+        commandBus.post(startProjectCmd, responseObserver);
 
         assertFalse(ProjectLifeCyclePart.exceptionOccurred);
     }
@@ -108,7 +109,7 @@ public class AggregateRootShould {
     @Test
     public void set_variable_to_true_when_it_is_trying_to_start_inexistent_project() {
         final Command startProjectCmd = createStartProjectCmd();
-        commandBus.post(startProjectCmd, RESPONSE_OBSERVER);
+        commandBus.post(startProjectCmd, responseObserver);
         assertTrue(ProjectLifeCyclePart.exceptionOccurred);
     }
 
@@ -139,9 +140,9 @@ public class AggregateRootShould {
 
     @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
     private static class ProjectDefinitionPart extends AggregatePart<ProjectId,
-                                                                     ProjectDefinition,
-                                                                     ProjectDefinition.Builder,
-                                                                     ProjectRoot> {
+            ProjectDefinition,
+            ProjectDefinition.Builder,
+            ProjectRoot> {
 
         private ProjectDefinitionPart(ProjectRoot root) {
             super(root);
@@ -166,9 +167,9 @@ public class AggregateRootShould {
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
     // Static field in the instance method is used for the test simplification.
     private static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
-                                                                    ProjectLifecycle,
-                                                                    ProjectLifecycle.Builder,
-                                                                    ProjectRoot> {
+            ProjectLifecycle,
+            ProjectLifecycle.Builder,
+            ProjectRoot> {
         private static boolean exceptionOccurred = false;
 
         protected ProjectLifeCyclePart(ProjectRoot root) {
@@ -208,20 +209,6 @@ public class AggregateRootShould {
 
         private ProjectLifeCycleRepository(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-    }
-
-    private static class MockStreamObserver implements StreamObserver<Response> {
-        @Override
-        public void onNext(Response value) {
-        }
-
-        @Override
-        public void onError(Throwable t) {
-        }
-
-        @Override
-        public void onCompleted() {
         }
     }
 }
