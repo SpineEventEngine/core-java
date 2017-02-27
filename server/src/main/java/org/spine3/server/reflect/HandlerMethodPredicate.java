@@ -37,8 +37,8 @@ abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate
     private final Class<? extends Annotation> annotationClass;
     private final Class<C> contextClass;
 
-    protected HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
-                                     Class<C> contextClass) {
+    HandlerMethodPredicate(Class<? extends Annotation> annotationClass,
+                           Class<C> contextClass) {
         super();
         this.annotationClass = annotationClass;
         this.contextClass = contextClass;
