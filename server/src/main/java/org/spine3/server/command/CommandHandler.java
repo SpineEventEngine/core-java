@@ -44,10 +44,11 @@ import org.spine3.server.event.EventBus;
  *
  * @author Alexander Yevsyukov
  */
-interface ICommandHandler extends CommandDispatcher {
+interface CommandHandler extends CommandDispatcher {
 
     /**
-     * Obtains identifier of the event producer wrapped into {@link Any}.
+     * Obtains identifier for being placed in to {@link org.spine3.base.EventContext EventContext}
+     * of the produced events.
      */
     Any getProducerId();
 

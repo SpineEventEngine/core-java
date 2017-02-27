@@ -48,7 +48,7 @@ import static org.spine3.protobuf.Values.newStringValue;
  * @see org.spine3.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
-public abstract class AbstractCommandHandler implements ICommandHandler {
+public abstract class AbstractCommandHandler implements CommandHandler {
 
     /**
      * The {@code EventBut} to which the handler posts events it produces.
@@ -58,7 +58,7 @@ public abstract class AbstractCommandHandler implements ICommandHandler {
     /**
      * Fully qualified name of the class wrapped into {@code Any}.
      *
-     * @see ICommandHandler#getProducerId()
+     * @see CommandHandler#getProducerId()
      */
     private final Any producerId;
 

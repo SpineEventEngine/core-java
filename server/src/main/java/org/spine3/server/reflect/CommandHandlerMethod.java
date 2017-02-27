@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -34,7 +35,6 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.command.AbstractCommandHandler;
 import org.spine3.server.command.Assign;
 
 import javax.annotation.CheckReturnValue;
@@ -59,6 +59,7 @@ import static org.spine3.util.Exceptions.wrappedCause;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
@@ -248,19 +249,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             final List<Message> result = singletonList((Message) handlingResult);
             return result;
         }
-    }
-
-    /**
-     * Returns a map of the command handler methods from the passed instance.
-     *
-     * @param object the object that keeps command handler methods
-     * @return immutable map
-     */
-    @CheckReturnValue
-    static MethodMap<CommandHandlerMethod> scan(AbstractCommandHandler object) {
-        final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(),
-                                                                          factory());
-        return handlers;
     }
 
     private static HandlerMethod.Factory<CommandHandlerMethod> factory() {

@@ -47,30 +47,6 @@ public class CommandHandlerMethodShould {
 
     private final EventBus eventBus = TestEventBusFactory.create();
 
-    @SuppressWarnings("ConstantConditions") // OK as we get the method right after scanning
-    @Test
-    public void scan_target_for_handlers() {
-        final TestCommandHandler handlerObject = new ValidHandlerOneParam();
-
-        final MethodMap<CommandHandlerMethod> handlerMap = CommandHandlerMethod.scan(handlerObject);
-
-        assertEquals(1, handlerMap.values().size());
-        assertEquals(handlerObject.getHandler(), handlerMap.get(CreateProject.class).getMethod());
-    }
-
-    @SuppressWarnings("ConstantConditions") // OK as we get the method right after scanning
-    @Test
-    public void log_warning_if_not_default_handler_found() {
-        final TestCommandHandler handlerObject = new ValidHandlerButPrivate();
-        final Method handlerMethod = handlerObject.getHandler();
-
-        final MethodMap<CommandHandlerMethod> handlerMap = CommandHandlerMethod.scan(handlerObject);
-
-        assertEquals(1, handlerMap.values().size());
-        assertEquals(handlerMethod, handlerMap.get(CreateProject.class).getMethod());
-        // TODO:2016-04-25:alexander.litus: check that a warning is logged (may require some refactoring)
-    }
-
     @Test
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());

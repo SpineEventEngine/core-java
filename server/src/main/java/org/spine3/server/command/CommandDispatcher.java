@@ -29,11 +29,11 @@ import org.spine3.server.bus.MessageDispatcher;
  *
  * <p>A dispatcher can deliver more than one class of commands.
  *
- * <p>Unlike {@link AbstractCommandHandler} the dispatcher does not change the state of the
+ * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the
  * business model, neither it produces events.
  *
  * @author Alexander Yevsyukov
- * @see AbstractCommandHandler
+ * @see CommandHandler
  */
 public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
 }
