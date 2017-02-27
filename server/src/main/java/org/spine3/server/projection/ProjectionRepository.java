@@ -22,6 +22,7 @@ package org.spine3.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -46,11 +47,11 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -104,12 +105,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     private BulkWriteOperation<I, P> ongoingOperation;
 
     /**
-     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and enables catching up
-     * after the storage initialization.
+     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and
+     * enables catching up after the storage initialization.
      *
-     * <p>NOTE: The {@link #catchUp()} will be called automatically after the {@link #initStorage(StorageFactory)} call
-     * is performed. To override this behavior, please use
-     * {@link ProjectionRepository#ProjectionRepository(BoundedContext, boolean, Duration)} constructor.
+     * <p>NOTE: The {@link #catchUp()} will be called automatically after
+     * the storage is {@linkplain #initStorage(StorageFactory) initialized}.
+     * To override this behavior, please use
+     * {@link #ProjectionRepository(BoundedContext, boolean, Duration)} constructor.
      *
      * @param boundedContext the target {@code BoundedContext}
      */
@@ -120,11 +122,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /**
      * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
      *
-     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
-     * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     * <p>If {@code catchUpAfterStorageInit} is set to {@code true},
+     * the {@link #catchUp()} will be called automatically after the
+     * {@link #initStorage(StorageFactory)} call is performed.
      *
      * @param boundedContext          the target {@code BoundedContext}
-     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
+     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after
+     *                                storage initialization
      */
     @SuppressWarnings("MethodParameterNamingConvention")
     protected ProjectionRepository(BoundedContext boundedContext,
@@ -135,18 +139,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /**
      * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
      *
-     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()} will be called
-     * automatically after the {@link #initStorage(StorageFactory)} call is performed.
+     * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()}
+     * will be called automatically after the storage is {@linkplain #initStorage(StorageFactory)
+     * initialized}.
      *
-     * <p>If the passed {@code catchUpMaxDuration} is not default, the repository uses a {@link BulkWriteOperation}
-     * to accumulate the read projections and then save them as a single bulk of records.
+     * <p>If the passed {@code catchUpMaxDuration} is not default, the repository uses a
+     * {@link BulkWriteOperation} to accumulate the read projections and then save them as
+     * a single bulk of records.
      *
-     * <p>The {@code catchUpMaxDuration} represents the maximum time span for the catch-up to read the events and apply
-     * them to corresponding projections. If the reading process takes longer then this time, the the read will be
-     * automatically finished and all the result projections will be flushed to the storage as a bulk.
+     * <p>The {@code catchUpMaxDuration} represents the maximum time span for the catch-up to read
+     * the events and apply them to corresponding projections. If the reading process takes longer
+     * then this time, the the read will be automatically finished and all the result projections
+     * will be flushed to the storage as a bulk.
      *
      * @param boundedContext          the target {@code BoundedContext}
-     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after storage initialization
+     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after
+     *                                storage initialization
      * @param catchUpMaxDuration      the maximum duration of the catch-up
      */
     @SuppressWarnings("MethodParameterNamingConvention")
@@ -176,7 +184,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                        we create a specific type of a storage, not a regular entity storage created in the parent. */)
     protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
-        final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
+        final ProjectionStorage<I> projectionStorage =
+                factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
     }
@@ -293,6 +302,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     private void storePostponed(P projection, Timestamp eventTime) {
+        checkState(ongoingOperation != null,
+                   "Unable to store postponed projection: ongoingOperation is null.");
         ongoingOperation.storeProjection(projection);
         ongoingOperation.storeLastHandledEventTime(eventTime);
     }
@@ -305,7 +316,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @VisibleForTesting
     void store(Collection<P> projections) {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityRecord> records = new HashMap<>(projections.size());
+        final Map<I, EntityRecord> records = Maps.newHashMapWithExpectedSize(projections.size());
         for (P projection : projections) {
             final I id = projection.getId();
             final EntityRecord record = toRecord(projection);
@@ -390,14 +401,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         @Override
         public void onNext(Event event) {
             if (projectionRepository.status != Status.CATCHING_UP) {
-                // The repository is catching up. Skip all the events and perform {@code #onCompleted}.
-                log().info("The catch-up is completing due to an overtime. Skipping event {}.", event);
+                // The repository is catching up.
+                // Skip all the events and perform {@code #onCompleted}.
+                log().info("The catch-up is completing due to an overtime. Skipping event {}.",
+                           event);
                 return;
             }
 
             if (projectionRepository.isBulkWriteRequired()) {
                 if (!projectionRepository.isBulkWriteInProgress()) {
-                    operation = projectionRepository.startBulkWrite(projectionRepository.catchUpMaxDuration);
+                    operation = projectionRepository.startBulkWrite(
+                            projectionRepository.catchUpMaxDuration);
                 }
                 // `flush` the data if the operation expires.
                 operation.checkExpiration();
@@ -421,8 +435,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 operation.complete();
             }
             projectionRepository.completeCatchUp();
+            logCatchUpComplete();
+        }
+
+        private void logCatchUpComplete() {
             if (log().isInfoEnabled()) {
-                final Class<? extends ProjectionRepository> repositoryClass = projectionRepository.getClass();
+                final Class<? extends ProjectionRepository> repositoryClass =
+                        projectionRepository.getClass();
                 log().info("{} catch-up complete", repositoryClass.getName());
             }
         }
@@ -437,8 +456,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing the projections and
-     * the last handled event time into the {@link ProjectionRepository}.
+     * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
+     * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
     private static class PendingDataFlushTask<P extends Projection<?, ?>>
             implements BulkWriteOperation.FlushCallback<P> {
