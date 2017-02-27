@@ -155,7 +155,7 @@ public class CommandHandlerShould {
     }
 
     @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters", "ReturnOfCollectionOrArrayField"})
-    private class TestCommandHandler extends CommandHandler {
+    private class TestCommandHandler extends AbstractCommandHandler {
 
         private final ImmutableList<Message> eventsOnStartProjectCmd = createEventsOnStartProjectCmd();
 

@@ -186,7 +186,7 @@ public class CommandBusShouldHandleCommandStatus {
      * @see #set_command_status_to_failure_when_handler_throws_exception
      * @see #set_command_status_to_failure_when_handler_throws_unknown_Throwable
      */
-    private class ThrowingCreateProjectHandler extends CommandHandler {
+    private class ThrowingCreateProjectHandler extends AbstractCommandHandler {
 
         @Nonnull
         private final Throwable throwable;
@@ -205,7 +205,7 @@ public class CommandBusShouldHandleCommandStatus {
     }
 
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
+        final AbstractCommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
         final Command command = commandFactory.createCommand(msg);

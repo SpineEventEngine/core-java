@@ -191,7 +191,7 @@ public class CommandDispatcherRegistryShould {
 
     @Test
     public void unregister_handler() {
-        final CommandHandler handler = new CreateProjectHandler(newUuid());
+        final AbstractCommandHandler handler = new CreateProjectHandler(newUuid());
         registry.register(handler);
         registry.unregister(handler);
         assertNotSupported(CreateProject.class);
@@ -278,7 +278,7 @@ public class CommandDispatcherRegistryShould {
      * Test command handlers.
      ************************/
     
-    private class CreateProjectHandler extends CommandHandler {
+    private class CreateProjectHandler extends AbstractCommandHandler {
 
         protected CreateProjectHandler(String id) {
             super(eventBus);
@@ -290,7 +290,7 @@ public class CommandDispatcherRegistryShould {
         }
     }
 
-    private class AllCommandHandler extends CommandHandler {
+    private class AllCommandHandler extends AbstractCommandHandler {
 
         protected AllCommandHandler() {
             super(eventBus);
@@ -312,7 +312,7 @@ public class CommandDispatcherRegistryShould {
         }
     }
 
-    private class EmptyCommandHandler extends CommandHandler {
+    private class EmptyCommandHandler extends AbstractCommandHandler {
         protected EmptyCommandHandler() {
             super(eventBus);
         }

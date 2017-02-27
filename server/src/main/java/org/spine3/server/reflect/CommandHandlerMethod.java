@@ -34,8 +34,8 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.command.AbstractCommandHandler;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -257,7 +257,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return immutable map
      */
     @CheckReturnValue
-    static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
+    static MethodMap<CommandHandlerMethod> scan(AbstractCommandHandler object) {
         final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(),
                                                                           factory());
         return handlers;
