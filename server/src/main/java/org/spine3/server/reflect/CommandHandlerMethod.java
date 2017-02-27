@@ -47,15 +47,19 @@ import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
-    static final Predicate<Method> PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    public CommandHandlerMethod(Method method) {
+    private CommandHandlerMethod(Method method) {
         super(method);
+    }
+
+    static MethodPredicate predicate() {
+        return PREDICATE;
     }
 
     /**
@@ -69,6 +73,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         final Set<CommandClass> result = CommandClass.setOf(
                 getHandledMessageClasses(cls, PREDICATE));
         return result;
+    }
+
+    static CommandHandlerMethod from(Method method) {
+        return new CommandHandlerMethod(method);
     }
 
     /**
@@ -139,12 +147,12 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         public CommandHandlerMethod create(Method method) {
-            return new CommandHandlerMethod(method);
+            return from(method);
         }
 
         @Override
         public Predicate<Method> getPredicate() {
-            return PREDICATE;
+            return predicate();
         }
 
         @Override

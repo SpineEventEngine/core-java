@@ -60,7 +60,7 @@ import java.util.Set;
  * @see CommandDispatcher
  */
 public abstract class CommandHandler extends CommandHandlingEntity<String, Empty>
-        implements CommandDispatcher {
+        implements ICommandHandler<List<? extends Message>> {
 
     private final EventBus eventBus;
 

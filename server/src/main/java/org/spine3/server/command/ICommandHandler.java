@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
-import org.spine3.base.MessageEnvelope;
 
 /**
  * A base interface for objects that produce events in response to commands.
@@ -42,7 +41,7 @@ interface ICommandHandler<R> extends CommandDispatcher {
      * Obtains the result of command handling.
      *
      * <p>This method must be called after command is
-     * {@linkplain #dispatch(MessageEnvelope) dispatched}.
+     * {@linkplain #dispatch(org.spine3.base.MessageEnvelope) dispatched}.
      */
     Optional<R> getResult();
 }

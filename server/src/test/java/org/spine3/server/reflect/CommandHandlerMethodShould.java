@@ -76,7 +76,7 @@ public class CommandHandlerMethodShould {
     @Test
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
-        final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
+        final CommandHandlerMethod handler = CommandHandlerMethod.from(handlerObject.getHandler());
         final CreateProject cmd = Given.CommandMessage.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
@@ -90,7 +90,7 @@ public class CommandHandlerMethodShould {
     @Test
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
         final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
-        final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
+        final CommandHandlerMethod handler = CommandHandlerMethod.from(handlerObject.getHandler());
         final CreateProject cmd = Given.CommandMessage.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
@@ -186,7 +186,7 @@ public class CommandHandlerMethodShould {
     }
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler, CommandHandlerMethod.PREDICATE.apply(handler));
+        assertEquals(isHandler, CommandHandlerMethod.predicate().apply(handler));
     }
 
     /*
