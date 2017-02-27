@@ -161,11 +161,11 @@ public class CommandHandlerShould {
 
         private final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        protected TestCommandHandler() {
+        private TestCommandHandler() {
             super(eventBus);
         }
 
-        void assertHandled(Command expected) {
+        private void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
             final String cmdName = getMessage(expected).getClass().getName();
@@ -173,11 +173,11 @@ public class CommandHandlerShould {
             assertEquals(expected, actual);
         }
 
-        void handle(Command cmd) {
+        private void handle(Command cmd) {
             handle(getMessage(cmd), cmd.getContext());
         }
 
-        ImmutableList<Message> getEventsOnStartProjectCmd() {
+        private ImmutableList<Message> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 
