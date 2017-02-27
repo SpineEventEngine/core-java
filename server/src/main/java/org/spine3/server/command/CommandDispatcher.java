@@ -25,12 +25,12 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.server.bus.MessageDispatcher;
 
 /**
- * {@code CommandDispatcher} delivers commands to their handlers.
+ * Delivers commands to their handlers.
  *
  * <p>A dispatcher can deliver more than one class of commands.
  *
- * <p>Unlike {@link CommandHandler} the dispatcher not change the state of the
- * business model,neither it produces events.
+ * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the
+ * business model, neither it produces events.
  *
  * @author Alexander Yevsyukov
  * @see CommandHandler

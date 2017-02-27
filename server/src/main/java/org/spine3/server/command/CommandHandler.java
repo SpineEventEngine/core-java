@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The abstract base for classes that expose command handling methods
+ * The abstract base for non-aggregate classes that expose command handling methods
  * and post their results to {@link EventBus}.
  *
  * <p>A command handler is responsible for:
@@ -53,7 +53,7 @@ import java.util.Set;
  * is a preferred way of handling commands.
  *
  * <p>This class implements {@code CommandDispatcher} dispatching messages
- * to itself.
+ * to methods declared in the derived classes.
  *
  * @author Alexander Yevsyukov
  * @see org.spine3.server.aggregate.Aggregate Aggregate
