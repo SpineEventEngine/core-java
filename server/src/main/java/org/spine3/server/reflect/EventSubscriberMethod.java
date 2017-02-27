@@ -41,7 +41,7 @@ import static java.lang.String.format;
 public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
-    public static final Predicate<Method> PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -92,7 +92,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
         final ImmutableSet<EventClass> result =
-                EventClass.setOf(Classes.getHandledMessageClasses(cls, PREDICATE));
+                EventClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 
@@ -100,6 +100,11 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
     private static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.instance();
     }
+
+    static MethodPredicate predicate() {
+        return PREDICATE;
+    }
+
 
     /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
@@ -116,7 +121,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return PREDICATE;
+            return predicate();
         }
 
         @Override

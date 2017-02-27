@@ -89,9 +89,7 @@ public abstract class ProcessManagerRepository<I,
     public Set<EventClass> getEventClasses() {
         if (eventClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<Class<? extends Message>> classes =
-                    ProcessManager.getHandledEventClasses(pmClass);
-            eventClasses = EventClass.setOf(classes);
+            eventClasses = ProcessManager.getHandledEventClasses(pmClass);
         }
         return eventClasses;
     }

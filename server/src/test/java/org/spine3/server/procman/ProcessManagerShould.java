@@ -32,6 +32,7 @@ import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
@@ -185,9 +186,11 @@ public class ProcessManagerShould {
 
     @SuppressWarnings("unchecked")
     private void verifyPostedCmd(Command cmd) {
-        // The produced command was posted to CommandBus once, and the same command is in the generated event.
+        // The produced command was posted to CommandBus once, and the same
+        // command is in the generated event.
         // We are not interested in observer instance here.
-        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
+        verify(commandBus, times(1))
+                .post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -204,11 +207,12 @@ public class ProcessManagerShould {
 
     @Test
     public void return_handled_event_classes() {
-        final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(TestProcessManager.class);
+        final Set<EventClass> classes =
+                ProcessManager.getHandledEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
-        assertTrue(classes.contains(ProjectCreated.class));
-        assertTrue(classes.contains(TaskAdded.class));
-        assertTrue(classes.contains(ProjectStarted.class));
+        assertTrue(classes.contains(EventClass.of(ProjectCreated.class)));
+        assertTrue(classes.contains(EventClass.of(TaskAdded.class)));
+        assertTrue(classes.contains(EventClass.of(ProjectStarted.class)));
     }
 
     @Test

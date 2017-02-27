@@ -141,7 +141,7 @@ public class EventSubscriberMethodShould {
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, EventSubscriberMethod.PREDICATE.apply(subscriber));
+        assertEquals(isSubscriber, EventSubscriberMethod.predicate().apply(subscriber));
     }
 
     /*
@@ -234,12 +234,19 @@ public class EventSubscriberMethodShould {
         }
     }
 
+    /**
+     * The abstract base for test subscriber classes.
+     *
+     * <p>The purpose of this class is to obtain a reference to a
+     * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
+     * This reference will be later used for assertions.
+     */
     private abstract static class TestEventSubscriber {
 
         @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String HANDLER_METHOD_NAME = "handle";
 
-        public Method getMethod() {
+        Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName().equals(HANDLER_METHOD_NAME)) {

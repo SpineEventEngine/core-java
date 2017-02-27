@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.EventSubscriberMethod;
 
 import java.lang.reflect.InvocationTargetException;
@@ -88,7 +88,8 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     }
 
     /**
-     * Directs the passed command to the handler method and transforms its output to a list of events.
+     * Directs the passed command to the handler method and
+     * transforms its output to a list of events.
      *
      * @param commandMessage the command to be processed
      * @param context the context of the command
@@ -144,9 +145,9 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @param pmClass the process manager class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(
+    public static ImmutableSet<EventClass> getHandledEventClasses(
             Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
+        return EventSubscriberMethod.getEventClasses(pmClass);
     }
 
     /**
