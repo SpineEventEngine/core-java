@@ -31,7 +31,7 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -39,6 +39,7 @@ import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -164,7 +165,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public Set<CommandClass> getMessageClasses() {
         if (messageClasses == null) {
             messageClasses = ImmutableSet.copyOf(
-                    CommandHandlingEntity.getCommandClasses(getAggregateClass()));
+                    CommandHandlerMethod.getCommandClasses(getAggregateClass()));
         }
         return messageClasses;
     }

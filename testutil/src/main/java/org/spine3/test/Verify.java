@@ -10,6 +10,7 @@
 
 package org.spine3.test;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Multimap;
@@ -56,7 +57,9 @@ public final class Verify extends Assert {
     @SuppressWarnings("AccessOfSystemProperties")
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-    private static final String PARAM_MAP = "map";
+    @VisibleForTesting
+    static final String PARAM_MAP = "map";
+
     private static final String PARAM_MULTIMAP = "multimap";
     private static final String PARAM_COLLECTION = "collection";
     private static final String PARAM_ARRAY = "array";

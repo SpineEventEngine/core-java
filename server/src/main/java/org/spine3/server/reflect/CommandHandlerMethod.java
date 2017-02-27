@@ -22,6 +22,7 @@ package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
@@ -32,9 +33,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
 /**
  * The wrapper for a command handler method.
@@ -44,7 +47,7 @@ import static java.util.Collections.singletonList;
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
-    public static final Predicate<Method> PREDICATE = new FilterPredicate();
+    static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -53,6 +56,19 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     public CommandHandlerMethod(Method method) {
         super(method);
+    }
+
+    /**
+     * Returns the set of the command classes handled by the passed class.
+     *
+     * @param cls the class of objects that handle commands
+     * @return immutable set of command classes
+     */
+    @CheckReturnValue
+    public static Set<CommandClass> getCommandClasses(Class<?> cls) {
+        final Set<CommandClass> result = CommandClass.setOf(
+                getHandledMessageClasses(cls, PREDICATE));
+        return result;
     }
 
     /**
@@ -103,7 +119,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return immutable map
      */
     @CheckReturnValue
-    public static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
+    static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
         final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(),
                                                                           factory());
         return handlers;
@@ -148,7 +164,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory();
+            private final Factory value = new Factory();
         }
 
         private static Factory instance() {
@@ -161,16 +177,14 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      *
      * <p>See {@link Assign} annotation for more info about such methods.
      */
-    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
+    private static class FilterPredicate extends HandlerMethodPredicate<CommandContext> {
 
-        @Override
-        protected boolean isAnnotatedCorrectly(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-            return isAnnotated;
+        private FilterPredicate() {
+            super(Assign.class, CommandContext.class);
         }
 
         @Override
-        protected boolean isReturnTypeCorrect(Method method) {
+        protected boolean verifyReturnType(Method method) {
             final Class<?> returnType = method.getReturnType();
             final boolean isMessage = Message.class.isAssignableFrom(returnType);
             if (isMessage) {
@@ -178,11 +192,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             }
             final boolean isList = List.class.isAssignableFrom(returnType);
             return isList;
-        }
-
-        @Override
-        protected Class<? extends Message> getContextClass() {
-            return CommandContext.class;
         }
     }
 }
