@@ -30,7 +30,6 @@ import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
 
 import static org.mockito.Mockito.spy;
-import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -59,7 +58,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        createProjectHandler = new CreateProjectHandler(newUuid());
+        createProjectHandler = new CreateProjectHandler();
         responseObserver = new TestResponseObserver();
     }
 
@@ -78,7 +77,7 @@ public abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
 
-        CreateProjectHandler(String id) {
+        CreateProjectHandler() {
             super(eventBus);
         }
 

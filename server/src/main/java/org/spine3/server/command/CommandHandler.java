@@ -41,20 +41,6 @@ import static org.spine3.protobuf.Values.newStringValue;
  * The abstract base for non-aggregate classes that expose command handling methods
  * and post their results to {@link EventBus}.
  *
- * <p>A command handler is responsible for:
- * <ol>
- *     <li>Changing the state of the business model in response to a command.
- *     <li>Producing corresponding events.
- *     <li>Posting events to {@code EventBus}.
- * </ol>
- *
- * <p>Event messages are returned as values of command handling methods.
- *
- * <p>A command handler does not have own state. So the state of the business
- * model it changes is external to it. Even though such a behaviour may be needed in
- * some rare cases, using {@linkplain org.spine3.server.aggregate.Aggregate aggregates}
- * is a preferred way of handling commands.
- *
  * <p>This class implements {@code CommandDispatcher} dispatching messages
  * to methods declared in the derived classes.
  *
@@ -95,6 +81,11 @@ public abstract class CommandHandler implements ICommandHandler {
     @Override
     public Any getProducerId() {
         return producerId;
+    }
+
+    @Override
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     /**
