@@ -84,7 +84,7 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandContext commandContext) {
-        return CommandHandlerMethod.createEventContext(idAsAny, getVersion(), commandContext);
+        return CommandHandlerMethod.createEventContext(getProducerId(), getVersion(), commandContext);
     }
 
     /**
