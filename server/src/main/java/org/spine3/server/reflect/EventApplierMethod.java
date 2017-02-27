@@ -20,6 +20,7 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -72,6 +73,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
                               eventClass.getName(), cls.getName()));
     }
 
+    @VisibleForTesting
     static MethodPredicate predicate() {
         return PREDICATE;
     }

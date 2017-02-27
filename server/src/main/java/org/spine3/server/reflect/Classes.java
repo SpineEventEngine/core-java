@@ -82,7 +82,7 @@ public class Classes {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
+    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
             Class<?> cls,
             Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();

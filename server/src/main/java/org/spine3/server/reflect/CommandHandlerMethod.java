@@ -80,7 +80,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      * @return handler method
      * @throws IllegalStateException if the passed class does not handle messages of this class
      */
-    public static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage)  {
+    private static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage)  {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                                                           .get(cls, commandClass, factory());

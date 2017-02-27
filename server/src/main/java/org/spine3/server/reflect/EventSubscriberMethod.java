@@ -52,6 +52,12 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         super(method);
     }
 
+    /**
+     * Obtains the method for handling the event in the passed class.
+     *
+     * @throws IllegalStateException if the passed class does not have an event handling method
+     *                               for the class of the passed message
+     */
     public static EventSubscriberMethod forMessage(Class<?> cls, Message eventMessage) {
         final Class<? extends Message> eventClass = eventMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
