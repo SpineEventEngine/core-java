@@ -112,8 +112,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        entityClass = getEntityClass();
-        idClass = getIdClass();
+        this.entityClass = getEntityClass();
+        this.idClass = getIdClass();
     }
 
     /**
@@ -123,10 +123,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected Constructor<A> getEntityConstructor() {
         if (this.entityConstructor == null) {
-            final Constructor<A> result = getConstructor(entityClass, idClass);
+            final Constructor<A> result = getAggregateConstructor();
             return result;
         }
         return this.entityConstructor;
+    }
+
+    @VisibleForTesting
+    Constructor<A> getAggregateConstructor() {
+        final Constructor<A> result = getConstructor(entityClass, idClass);
+        this.entityConstructor = result;
+        return result;
     }
 
     @Override
