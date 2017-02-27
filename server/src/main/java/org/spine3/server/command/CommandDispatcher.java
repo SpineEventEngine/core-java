@@ -35,6 +35,5 @@ import org.spine3.server.bus.MessageDispatcher;
  * @author Alexander Yevsyukov
  * @see CommandHandler
  */
-public interface CommandDispatcher
-        extends MessageDispatcher<CommandClass, CommandEnvelope> {
+public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
 }

@@ -26,11 +26,10 @@ import org.spine3.server.bus.MessageEndpoint;
 /**
  * An endpoint for command handling.
  *
- * @param <R> the type of the processing result
  * @param <H> the type of command handlers that this endpoint processes
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class CommandEndpoint<H, R> implements MessageEndpoint<CommandEnvelope> {
+public abstract class CommandEndpoint<H> implements MessageEndpoint<CommandEnvelope> {
 
 }

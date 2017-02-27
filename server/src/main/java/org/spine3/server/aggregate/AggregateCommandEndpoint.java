@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandEndpoint<A, A> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandEndpoint<A> {
 
     private final AggregateRepository<I, A> repository;
 

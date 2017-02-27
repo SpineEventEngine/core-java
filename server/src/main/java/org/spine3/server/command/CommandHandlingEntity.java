@@ -40,7 +40,6 @@ import org.spine3.change.ValueMismatch;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
-import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -227,27 +226,10 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      */
     protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
-        final CommandHandlerMethod method = getCommandHandlerMethod(commandMessage);
+        final CommandHandlerMethod method = CommandHandlerMethod.forMessage(getClass(),
+                                                                            commandMessage);
         final List<? extends Message> result = method.invoke(this, commandMessage, context);
         return result;
-    }
-
-    private CommandHandlerMethod getCommandHandlerMethod(Message commandMessage) {
-        final Class<? extends Message> commandClass = commandMessage.getClass();
-        final CommandHandlerMethod method = MethodRegistry.getInstance()
-                                                          .get(getClass(),
-                                                               commandClass,
-                                                               CommandHandlerMethod.factory());
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
-        return method;
-    }
-
-    private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
-        return new IllegalStateException(
-                String.format("Missing handler for command class %s in the class %s.",
-                        commandClass.getName(), getClass().getName()));
     }
 
     /**

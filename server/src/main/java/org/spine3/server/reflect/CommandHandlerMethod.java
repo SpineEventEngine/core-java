@@ -35,6 +35,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
@@ -56,6 +57,33 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     private CommandHandlerMethod(Method method) {
         super(method);
+    }
+
+    /**
+     * Obtains handler method for the command message.
+     *
+     * @param cls the class that handles the message
+     * @param commandMessage the message
+     * @return handler method
+     * @throws IllegalStateException if the passed class does not handle messages of this class
+     */
+    public static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage)  {
+        final Class<? extends Message> commandClass = commandMessage.getClass();
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                                                          .get(cls, commandClass, factory());
+        if (method == null) {
+            throw missingCommandHandler(cls, commandClass);
+        }
+        return method;
+    }
+
+    private static IllegalStateException missingCommandHandler(Class<?> cls,
+                        Class<? extends Message> commandClass) {
+        final String errMsg = format(
+                "No handler for the command class %s found in the class %s.",
+                 commandClass.getName(), cls.getName()
+        );
+        throw new IllegalStateException(errMsg);
     }
 
     static MethodPredicate predicate() {
@@ -133,11 +161,13 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return handlers;
     }
 
-    public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+    private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.instance();
     }
 
-    /** The factory for filtering methods that match {@code CommandHandlerMethod} specification. */
+    /**
+     * The factory for filtering methods that match {@code CommandHandlerMethod} specification.
+     */
     private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
 
         @Override
