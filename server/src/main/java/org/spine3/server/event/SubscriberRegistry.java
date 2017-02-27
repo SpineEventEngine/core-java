@@ -42,14 +42,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class SubscriberRegistry {
 
-    private final HashMultimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
+    private final HashMultimap<EventClass, EventSubscriber> subscribersByEventClass =
+            HashMultimap.create();
 
     void subscribe(EventSubscriber object) {
         checkNotNull(object);
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
         checkSubscribersNotEmpty(object, subscribersEmpty);
-        for (Map.Entry<Class<? extends Message>, EventSubscriberMethod> entry : subscribers.entrySet()) {
+        for (Map.Entry<Class<? extends Message>,
+                       EventSubscriberMethod> entry : subscribers.entrySet()) {
             subscribersByEventClass.put(EventClass.of(entry.getKey()), object);
         }
     }
@@ -80,6 +82,7 @@ class SubscriberRegistry {
     }
 
     private static void checkSubscribersNotEmpty(Object object, boolean subscribersEmpty) {
-        checkArgument(!subscribersEmpty, "No event subscriber methods found in %s", object);
+        checkArgument(!subscribersEmpty,
+                      "No event subscriber methods found in %s", object);
     }
 }

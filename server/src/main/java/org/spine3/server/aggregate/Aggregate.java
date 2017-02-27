@@ -32,7 +32,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.Visibility;
-import org.spine3.server.reflect.MethodRegistry;
+import org.spine3.server.reflect.EventApplierMethod;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -42,6 +42,7 @@ import java.util.List;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -236,13 +237,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final EventApplierMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(),
-                                                             eventMessage.getClass(),
-                                                             EventApplierMethod.factory());
-        if (method == null) {
-            throw missingEventApplier(eventMessage.getClass());
-        }
+        final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
 
@@ -449,12 +444,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         return builder.build();
-    }
-
-    private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
-        return new IllegalStateException(
-                String.format("Missing event applier for event class %s in aggregate class %s.",
-                        eventClass.getName(), getClass().getName()));
     }
 
     /**
