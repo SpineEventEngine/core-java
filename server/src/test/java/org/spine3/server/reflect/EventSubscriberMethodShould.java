@@ -36,42 +36,38 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings("unused") // OK as we have some
 public class EventSubscriberMethodShould {
 
     @Test
     public void scan_target_for_subscribers() {
         final TestEventSubscriber subscriberObject = new ValidSubscriberOneParam();
 
-        final MethodMap<EventSubscriberMethod> subscriberMap = EventSubscriberMethod.scan(subscriberObject);
+        final MethodMap<EventSubscriberMethod> subscriberMap =
+                EventSubscriberMethod.scan(subscriberObject);
 
-        assertEquals(1, subscriberMap.values().size());
-        //noinspection ConstantConditions
-        assertEquals(subscriberObject.getMethod(), subscriberMap.get(ProjectCreated.class).getMethod());
-    }
+        assertEquals(1, subscriberMap.values()
+                                     .size());
 
-    @Test
-    public void log_warning_if_not_public_subscriber_found() {
-        final TestEventSubscriber subscriberObject = new ValidSubscriberButPrivate();
-        final Method subscriberMethod = subscriberObject.getMethod();
-
-        final MethodMap<EventSubscriberMethod> subscriberMap = EventSubscriberMethod.scan(subscriberObject);
-
-        assertEquals(1, subscriberMap.values().size());
-        //noinspection ConstantConditions
-        assertEquals(subscriberMethod, subscriberMap.get(ProjectCreated.class).getMethod());
-        // TODO:2016-04-25:alexander.litus: check that a warning is logged (may require some refactoring)
+        @SuppressWarnings("ConstantConditions")
+            // We won't have null because we pass class with method that handles this command.
+        final Method method = subscriberMap.get(ProjectCreated.class)
+                                           .getMethod();
+        assertEquals(subscriberObject.getMethod(),
+                     method);
     }
 
     @Test
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
-        final EventSubscriberMethod subscriber = new EventSubscriberMethod(subscriberObject.getMethod());
+        final EventSubscriberMethod subscriber =
+                EventSubscriberMethod.from(subscriberObject.getMethod());
         final ProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 
-        verify(subscriberObject, times(1)).handle(msg, EventContext.getDefaultInstance());
+        verify(subscriberObject, times(1))
+                .handle(msg, EventContext.getDefaultInstance());
     }
 
     @Test
@@ -174,45 +170,66 @@ public class EventSubscriberMethodShould {
      * Invalid subscribers
      */
 
+    /**
+     * The subscriber with a method which is not annotated.
+     */
     private static class InvalidSubscriberNoAnnotation extends TestEventSubscriber {
         @SuppressWarnings("unused")
         public void handle(ProjectCreated event, EventContext context) {
         }
     }
 
+    /**
+     * The subscriber with a method which does not have parameters.
+     */
     private static class InvalidSubscriberNoParams extends TestEventSubscriber {
         @Subscribe
         public void handle() {
         }
     }
 
+    /**
+     * The subscriber which has too many parameters.
+     */
     private static class InvalidSubscriberTooManyParams extends TestEventSubscriber {
         @Subscribe
         public void handle(ProjectCreated event, EventContext context, Object redundant) {
         }
     }
 
+    /**
+     * The subscriber which has invalid single argument.
+     */
     private static class InvalidSubscriberOneNotMsgParam extends TestEventSubscriber {
         @Subscribe
         public void handle(Exception invalid) {
         }
     }
 
+    /**
+     * The subscriber with a method with first invalid parameter.
+     */
     private static class InvalidSubscriberTwoParamsFirstInvalid extends TestEventSubscriber {
         @Subscribe
         public void handle(Exception invalid, EventContext context) {
         }
     }
 
+    /**
+     * The subscriber which has invalid second parameter.
+     */
     private static class InvalidSubscriberTwoParamsSecondInvalid extends TestEventSubscriber {
         @Subscribe
         public void handle(ProjectCreated event, Exception invalid) {
         }
     }
 
+    /**
+     * The class with event subscriber that returns {@code Object} instead of {@code void}.
+     */
     private static class InvalidSubscriberNotVoid extends TestEventSubscriber {
         @Subscribe
-        public Object handle(ProjectCreated event, EventContext context) {
+        public Object handle(ProjectCreated event) {
             return event;
         }
     }

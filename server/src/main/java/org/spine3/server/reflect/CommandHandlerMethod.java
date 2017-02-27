@@ -77,6 +77,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return method;
     }
 
+    static CommandHandlerMethod from(Method method) {
+        return new CommandHandlerMethod(method);
+    }
+
     private static IllegalStateException missingCommandHandler(Class<?> cls,
                         Class<? extends Message> commandClass) {
         final String errMsg = format(
@@ -101,10 +105,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         final Set<CommandClass> result = CommandClass.setOf(
                 getHandledMessageClasses(cls, PREDICATE));
         return result;
-    }
-
-    static CommandHandlerMethod from(Method method) {
-        return new CommandHandlerMethod(method);
     }
 
     /**

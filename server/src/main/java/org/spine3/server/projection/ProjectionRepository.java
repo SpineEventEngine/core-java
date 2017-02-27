@@ -230,8 +230,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @Override
     public Set<EventClass> getEventClasses() {
         final Class<? extends Projection> projectionClass = getEntityClass();
-        final Set<Class<? extends Message>> eventClasses = Projection.getEventClasses(projectionClass);
-        final Set<EventClass> result = EventClass.setOf(eventClasses);
+        final Set<EventClass> result = Projection.getEventClasses(projectionClass);
         return result;
     }
 
@@ -256,7 +255,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @Override
     public void dispatch(Event event) {
         if (!isOnline()) {
-            log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
+            log().trace("Ignoring event {} while repository is not in {} status",
+                        event,
+                        Status.ONLINE);
             return;
         }
 

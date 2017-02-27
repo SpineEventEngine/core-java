@@ -29,14 +29,13 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.EventSubscriberMethod;
-import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
+import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -127,22 +126,16 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     /**
      * Dispatches an event to the event subscriber method of the process manager.
      *
-     * @param event the event to be handled by the process manager
+     * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
-    protected void dispatchEvent(Message event, EventContext context)
+    protected void dispatchEvent(Message eventMessage, EventContext context)
             throws InvocationTargetException {
         checkNotNull(context);
-        checkNotNull(event);
-        final Class<? extends Message> eventClass = event.getClass();
-        final EventSubscriberMethod method =
-                MethodRegistry.getInstance()
-                              .get(getClass(), eventClass, EventSubscriberMethod.factory());
-        if (method == null) {
-            throw missingEventHandler(eventClass);
-        }
-        method.invoke(this, event, context);
+        checkNotNull(eventMessage);
+        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
+        method.invoke(this, eventMessage, context);
     }
 
     /**
@@ -240,12 +233,4 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         return commandBus;
     }
 
-    private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = format(
-                "Missing event handler for event class %s in the process manager class %s",
-                eventClass,
-                this.getClass()
-        );
-        return new IllegalStateException(msg);
-    }
 }
