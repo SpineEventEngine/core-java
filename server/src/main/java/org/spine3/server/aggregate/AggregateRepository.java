@@ -193,10 +193,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void dispatch(CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
-        final A aggregate = commandEndpoint.receive(command);
+        commandEndpoint.receive(command);
+        final Optional<A> aggregate = commandEndpoint.getLastAggregate();
+        if (!aggregate.isPresent()) {
+            final String errMsg = format("Unable to dispatch command (%s)", command.getCommand());
+            throw new IllegalStateException(errMsg);
+        }
 
-        final List<Event> events = aggregate.getUncommittedEvents();
-        storeAndPostToStand(aggregate);
+        final A agg = aggregate.get();
+        final List<Event> events = agg.getUncommittedEvents();
+        storeAndPostToStand(agg);
         postEvents(events);
     }
 

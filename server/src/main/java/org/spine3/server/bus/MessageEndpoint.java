@@ -26,14 +26,13 @@ import org.spine3.base.MessageEnvelope;
  * A destination point of a {@link org.spine3.base.MessageEnvelope MessageEnvelope}.
  *
  * @param <E> the type of the message envelope
- * @param <R> the type of the processing result
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public interface MessageEndpoint<E extends MessageEnvelope, R> {
+public interface MessageEndpoint<E extends MessageEnvelope> {
 
     /**
      * Processes the message enclosed in the passed envelope.
      */
-    R receive(E envelope);
+    void receive(E envelope);
 }

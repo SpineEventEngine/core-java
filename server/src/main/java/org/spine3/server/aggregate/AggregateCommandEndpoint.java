@@ -20,12 +20,16 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.command.CommandEndpoint;
 import org.spine3.server.entity.Visibility;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -37,6 +41,9 @@ import org.spine3.server.entity.Visibility;
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandEndpoint<A, A> {
 
     private final AggregateRepository<I, A> repository;
+
+    @Nullable
+    private A lastAggregate;
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
         this.repository = repository;
@@ -50,13 +57,18 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> extends CommandE
     /**
      * Dispatches the command.
      *
-     * @return the aggregate to which the command was dispatched
+     * <p>Remembers the aggregate for which the command was dispatched.
+     * Later this aggregate can be obtained via {@link #getLastAggregate()}.
      */
     @Override
-    public A receive(CommandEnvelope envelope) {
+    public void receive(CommandEnvelope envelope) {
         final Action<I, A> action = new Action<>(this, envelope);
-        final A result = action.loadAndDispatch();
-        return result;
+        lastAggregate = action.loadAndDispatch();
+    }
+
+    @CheckReturnValue
+    Optional<A> getLastAggregate() {
+        return Optional.fromNullable(lastAggregate);
     }
 
     /**

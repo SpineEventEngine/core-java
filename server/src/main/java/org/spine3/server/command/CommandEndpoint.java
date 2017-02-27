@@ -31,6 +31,6 @@ import org.spine3.server.bus.MessageEndpoint;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class CommandEndpoint<H, R> implements MessageEndpoint<CommandEnvelope, R> {
+public abstract class CommandEndpoint<H, R> implements MessageEndpoint<CommandEnvelope> {
 
 }
