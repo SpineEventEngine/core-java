@@ -57,6 +57,7 @@ import static org.mockito.Mockito.intThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.server.reflect.CommandHandlerMethod.getCommandClasses;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -83,6 +84,15 @@ public class AggregateRepositoryShould {
     public void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
         repository.close();
+    }
+
+    @Test
+    public void call_get_aggregate_constructor_method_only_once(){
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.create(id);
+        repositorySpy.create(id);
+
+        verify(repositorySpy, times(1)).getAggregateConstructor();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.

@@ -29,6 +29,7 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Math.abs;
@@ -107,7 +108,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
         storeSingleCommandForRescheduling();
 
         // Create CommandBus specific for this test.
@@ -119,9 +121,9 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
                                                 .build();
         assertNotNull(commandBus);
 
-        // Sleep to ensure the commands have been rescheduled in parallel.
+        // Await to ensure the commands have been rescheduled in parallel.
         try {
-            Thread.sleep(100);
+            latch.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -140,7 +142,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
         storeSingleCommandForRescheduling();
 
         // Create CommandBus specific for this test.
@@ -203,15 +206,19 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
      * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class instance.
      *
      * @param targetThreadName the builder of the thread name that will be created upon command scheduling
+     * @param latch the instance of the {@code CountDownLatch} to await the execution finishing
      * @return newly created instance
      */
     @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
-    private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName) {
+    private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName,
+                                                  final CountDownLatch latch) {
         return spy(new ExecutorCommandScheduler() {
             @Override
             public void schedule(Command command) {
                 super.schedule(command);
-                targetThreadName.append(Thread.currentThread().getName());
+                targetThreadName.append(Thread.currentThread()
+                                              .getName());
+                latch.countDown();
             }
         });
     }

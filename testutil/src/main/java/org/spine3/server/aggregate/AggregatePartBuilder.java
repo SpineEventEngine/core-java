@@ -21,14 +21,26 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.server.entity.EntityBuilder;
+
+import java.lang.reflect.Constructor;
+
+import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
+import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
 
 /**
  * Utility class for building {@code AggregatePart}s for tests.
  *
  * @author Alexander Yevsyukov
  */
-public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends Message>
-       extends AggregateBuilder<A, I, S> {
+@SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
+                                  I,
+                                  S extends Message,
+                                  R extends AggregateRoot<I>>
+             extends AggregateBuilder<A, I, S> {
+
+    private R aggregateRoot;
 
     /**
      * {@inheritDoc}
@@ -38,9 +50,26 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?>, I, S extends
         // Have the constructor for easier location of usages.
     }
 
+    public EntityBuilder<A, I, S> withRoot(R aggregateRoot) {
+        this.aggregateRoot = aggregateRoot;
+        return this;
+    }
+
     @Override
-    public AggregatePartBuilder<A, I, S> setResultClass(Class<A> entityClass) {
+    public AggregatePartBuilder<A, I, S, R> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
         return this;
+    }
+
+    @Override
+    protected A createEntity(I id) {
+        final A result = createAggregatePart(getConstructor(), aggregateRoot);
+        return result;
+    }
+
+    @Override
+    protected Constructor<A> getConstructor() {
+        final Constructor<A> constructor = getAggregatePartConstructor(getResultClass());
+        return constructor;
     }
 }

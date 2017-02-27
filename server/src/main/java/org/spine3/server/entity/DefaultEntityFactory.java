@@ -22,6 +22,9 @@ package org.spine3.server.entity;
 
 import java.lang.reflect.Constructor;
 
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
+
 /**
  * Default factory that creates entities by invoking constructor that
  * accepts a single ID parameter.
@@ -46,13 +49,12 @@ public class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements 
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = repository.getEntityClass();
         final Class<I> idClass = repository.getIdClass();
-        final Constructor<E> result = AbstractEntity.getConstructor(entityClass, idClass);
+        final Constructor<E> result = getConstructor(entityClass, idClass);
         return result;
     }
 
-
     @Override
     public E create(I id) {
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        return createEntity(this.entityConstructor, id);
     }
 }
