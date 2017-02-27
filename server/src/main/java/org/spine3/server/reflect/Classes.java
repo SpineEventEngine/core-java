@@ -23,7 +23,6 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -36,7 +35,6 @@ import java.lang.reflect.Type;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@Internal
 public class Classes {
 
     private Classes() {

@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  *            a context parameter is never used
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
+abstract class HandlerMethodPredicate<C extends Message> extends MethodPredicate {
 
     private final Class<? extends Annotation> annotationClass;
     private final Class<C> contextClass;

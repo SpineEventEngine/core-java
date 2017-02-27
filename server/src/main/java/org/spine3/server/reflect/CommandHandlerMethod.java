@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -59,7 +58,6 @@ import static org.spine3.util.Exceptions.wrappedCause;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
