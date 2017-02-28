@@ -19,11 +19,11 @@
 //
 
 configurations {
-    jaxDoclet
+    excludeInternalDoclet
 }
 
 dependencies {
-    jaxDoclet group: 'org.spine3.tools', name: 'javadoc', version: spineToolsVersion
+    excludeInternalDoclet group: 'org.spine3.tools', name: 'javadoc', version: spineToolsVersion
     // We need this in order to generate javadoc correctly. Remove it after update guava to 22.0.
     // Details: https://github.com/google/guava/issues/2721
     compile group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.0.15'
@@ -35,5 +35,5 @@ task noInternalJavadoc(type: Javadoc) {
     }
     classpath = javadoc.getClasspath()
     options.doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
-    options.docletpath = configurations.jaxDoclet.files.asType(List)
+    options.docletpath = configurations.excludeInternalDoclet.files.asType(List)
 }
