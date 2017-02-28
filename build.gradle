@@ -37,7 +37,7 @@ buildscript {
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineToolsVersion = '0.8.1-SNAPSHOT'
+        spineToolsVersion = '0.8.2-SNAPSHOT'
     }
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
