@@ -21,7 +21,6 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,6 @@ import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -170,8 +168,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<CommandClass> getMessageClasses() {
         if (messageClasses == null) {
-            messageClasses = ImmutableSet.copyOf(
-                    CommandHandlerMethod.getCommandClasses(getAggregateClass()));
+            messageClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
         }
         return messageClasses;
     }

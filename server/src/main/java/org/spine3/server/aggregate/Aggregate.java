@@ -21,9 +21,11 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -32,12 +34,14 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.Visibility;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
@@ -446,5 +450,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * Provides type information on an aggregate class.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction of this utility class.
+        }
+
+        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
+            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(aggregateClass));
+        }
     }
 }
