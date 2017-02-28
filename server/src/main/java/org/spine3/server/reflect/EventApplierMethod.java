@@ -31,6 +31,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A wrapper for event applier method.
  *
@@ -39,7 +41,7 @@ import java.lang.reflect.Modifier;
 public class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -55,7 +57,10 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     public static EventApplierMethod forEventMessage(Class<? extends Aggregate> cls,
-                                              Message eventMessage) {
+                                                     Message eventMessage) {
+        checkNotNull(cls);
+        checkNotNull(eventMessage);
+
         final EventApplierMethod method = MethodRegistry.getInstance()
                                                         .get(cls,
                                                              eventMessage.getClass(),

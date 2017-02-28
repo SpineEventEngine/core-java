@@ -20,6 +20,7 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.Aggregate;
@@ -38,6 +39,12 @@ import static org.junit.Assert.assertTrue;
 public class EventApplierMethodShould {
 
     private final HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EventApplierMethod.class);
+    }
 
     @Test
     public void invoke_applier_method() throws InvocationTargetException {
