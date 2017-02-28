@@ -39,6 +39,8 @@ import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
+import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.testdata.Exemplum;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -64,14 +66,14 @@ public class AggregateRootShould {
         commandContext = createCommandContext();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        projectId = ProjectId.newBuilder()
-                             .setId(newUuid())
-                             .build();
+
+        final ProjectId projectId = Exemplum.messageOfType(ProjectId.class);
         aggregateRoot = new ProjectRoot(boundedContext, projectId);
         boundedContext.register(new ProjectDefinitionRepository(boundedContext));
         boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
 
         commandBus = boundedContext.getCommandBus();
+
     }
 
     @Test

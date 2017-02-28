@@ -55,7 +55,7 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
@@ -81,7 +81,7 @@ public class ProcessManagerRepositoryShould
                                             ProjectId,
                                             Project> {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+    private static final ProjectId ID = Exemplum.messageOfType(ProjectId.class);
 
     private static final CommandContext CMD_CONTEXT = createCommandContext();
 
@@ -246,37 +246,37 @@ public class ProcessManagerRepositoryShould
     }
 
     private static CreateProject createProject() {
-        return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+        return ((CreateProject.Builder) Exemplum.builderForType(CreateProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static StartProject startProject() {
-        return ((StartProject.Builder) Sample.builderForType(StartProject.class))
+        return ((StartProject.Builder) Exemplum.builderForType(StartProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static AddTask addTask() {
-        return ((AddTask.Builder) Sample.builderForType(AddTask.class))
+        return ((AddTask.Builder) Exemplum.builderForType(AddTask.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static ProjectStarted projectStarted() {
-        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
+        return ((ProjectStarted.Builder) Exemplum.builderForType(ProjectStarted.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static ProjectCreated projectCreated() {
-        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+        return ((ProjectCreated.Builder) Exemplum.builderForType(ProjectCreated.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static TaskAdded taskAdded() {
-        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+        return ((TaskAdded.Builder) Exemplum.builderForType(TaskAdded.class))
                 .setProjectId(ID)
                 .build();
     }
@@ -372,7 +372,7 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+            final ProjectCreated event = ((ProjectCreated.Builder) Exemplum.builderForType(ProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
@@ -385,7 +385,7 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleTaskAdded(command.getTask());
-            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+            final TaskAdded event = ((TaskAdded.Builder) Exemplum.builderForType(TaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return event;
@@ -396,7 +396,7 @@ public class ProcessManagerRepositoryShould
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final Message addTask = ((AddTask.Builder) Exemplum.builderForType(AddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
             return newRouterFor(command, context)

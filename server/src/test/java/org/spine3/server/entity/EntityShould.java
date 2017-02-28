@@ -35,7 +35,7 @@ import org.spine3.test.Tests;
 import org.spine3.test.TimeTests;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
 
@@ -63,13 +63,13 @@ import static org.spine3.test.TimeTests.currentTimeSeconds;
  */
 public class EntityShould {
 
-    private Project state = Sample.messageOfType(Project.class);
+    private Project state = Exemplum.messageOfType(Project.class);
     private TestEntity entityNew;
     private TestEntity entityWithState;
 
     @Before
     public void setUp() {
-        state = Sample.messageOfType(Project.class);
+        state = Exemplum.messageOfType(Project.class);
         entityNew = TestEntity.newInstance(newUuid());
         entityWithState = TestEntity.withState();
     }
@@ -263,7 +263,7 @@ public class EntityShould {
             extends AbstractVersionableEntity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
-            super(Sample.messageOfType(ProjectId.class));
+            super(Exemplum.messageOfType(ProjectId.class));
         }
     }
 

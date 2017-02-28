@@ -41,7 +41,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +98,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
     public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Sample.messageOfType(ProjectId.class))
+        final ProjectAggregate aggregate = repository.load(Exemplum.messageOfType(ProjectId.class))
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -107,7 +107,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final ProjectId id = Exemplum.messageOfType(ProjectId.class);
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.store(expected);
@@ -122,7 +122,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void restore_aggregate_using_snapshot() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final ProjectId id = Exemplum.messageOfType(ProjectId.class);
         final ProjectAggregate expected = givenAggregateWithUncommittedEvents(id);
 
         repository.setSnapshotTrigger(expected.getUncommittedEvents()
@@ -223,7 +223,7 @@ public class AggregateRepositoryShould {
      ****************************/
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents() {
-        return givenAggregateWithUncommittedEvents(Sample.messageOfType(ProjectId.class));
+        return givenAggregateWithUncommittedEvents(Exemplum.messageOfType(ProjectId.class));
     }
 
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
@@ -233,15 +233,15 @@ public class AggregateRepositoryShould {
 
         final CommandContext context = createCommandContext();
         final CreateProject createProject =
-                ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+                ((CreateProject.Builder) Exemplum.builderForType(CreateProject.class))
                         .setProjectId(id)
                         .build();
         final AddTask addTask =
-                ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                ((AddTask.Builder) Exemplum.builderForType(AddTask.class))
                         .setProjectId(id)
                         .build();
         final StartProject startProject =
-                ((StartProject.Builder) Sample.builderForType(StartProject.class))
+                ((StartProject.Builder) Exemplum.builderForType(StartProject.class))
                         .setProjectId(id)
                         .build();
 
@@ -252,7 +252,7 @@ public class AggregateRepositoryShould {
     }
 
     private ProjectId createAndStoreAggregate() {
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final ProjectId id = Exemplum.messageOfType(ProjectId.class);
         final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
 
         repository.store(aggregate);

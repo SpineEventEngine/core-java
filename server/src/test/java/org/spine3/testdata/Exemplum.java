@@ -52,14 +52,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and {@link Command}),
- * storage objects and else.
+ * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
+ * {@link Command}), storage objects and else.
  *
  * @author Dmytro Dashenkov
  */
-public class Sample {
+public class Exemplum {
 
-    private Sample() {
+    private Exemplum() {
     }
 
     public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
@@ -82,9 +82,11 @@ public class Sample {
     }
 
     /**
-     * Generates a new stub {@link Message.Builder builder} with all the fields set to {@link Random random} values.
+     * Generates a new stub {@link Message.Builder builder} with all the fields set to
+     * {@link Random random} values.
      *
-     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
+     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and
+     * {@code boolean} fields
      * may or may not have their default values ({@code 0} and {@code false}).
      *
      * @param clazz Java class of the stub message
@@ -114,10 +116,12 @@ public class Sample {
     /**
      * Generates a new stub {@link Message} with all the fields set to {@link Random random} values.
      *
-     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
+     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and
+     * {@code boolean} fields
      * may or may not have their default values ({@code 0} and {@code false}).
      *
-     * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into another {@link Any}
+     * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into
+     * another {@link Any}
      * is returned. See {@link AnyPacker}.
      *
      * @param clazz Java class of the required stub message
@@ -152,7 +156,8 @@ public class Sample {
     /**
      * Generates a non-default value for the given message field.
      *
-     * <p>All the protobuf types are supported including nested {@link Message}s and the {@code enum}s.
+     * <p>All the protobuf types are supported including nested {@link Message}s and
+     * the {@code enum}s.
      *
      * @param field {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field

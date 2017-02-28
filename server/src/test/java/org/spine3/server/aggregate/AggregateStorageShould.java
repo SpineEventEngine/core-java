@@ -34,7 +34,7 @@ import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -59,7 +59,7 @@ import static org.spine3.server.storage.Given.AnEvent.projectCreated;
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId, AggregateStateRecord, AggregateStorage<ProjectId>> {
 
-    private final ProjectId id = Sample.messageOfType(ProjectId.class);
+    private final ProjectId id = Exemplum.messageOfType(ProjectId.class);
 
     private AggregateStorage<ProjectId> storage;
 
@@ -96,7 +96,7 @@ public abstract class AggregateStorageShould
 
     @Override
     protected ProjectId newId() {
-        return Sample.messageOfType(ProjectId.class);
+        return Exemplum.messageOfType(ProjectId.class);
     }
 
     /**

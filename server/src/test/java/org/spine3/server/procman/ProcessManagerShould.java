@@ -50,7 +50,7 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Exemplum;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -72,7 +72,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+    private static final ProjectId ID = Exemplum.messageOfType(ProjectId.class);
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
@@ -102,14 +102,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
+        testDispatchEvent(Exemplum.messageOfType(ProjectStarted.class));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(Sample.messageOfType(ProjectCreated.class));
-        testDispatchEvent(Sample.messageOfType(TaskAdded.class));
-        testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
+        testDispatchEvent(Exemplum.messageOfType(ProjectCreated.class));
+        testDispatchEvent(Exemplum.messageOfType(TaskAdded.class));
+        testDispatchEvent(Exemplum.messageOfType(ProjectStarted.class));
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
@@ -250,19 +250,19 @@ public class ProcessManagerShould {
     }
 
     private static CreateProject createProject() {
-        return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
+        return ((CreateProject.Builder) Exemplum.builderForType(CreateProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static StartProject startProject() {
-        return ((StartProject.Builder) Sample.builderForType(StartProject.class))
+        return ((StartProject.Builder) Exemplum.builderForType(StartProject.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static AddTask addTask() {
-        return ((AddTask.Builder) Sample.builderForType(AddTask.class))
+        return ((AddTask.Builder) Exemplum.builderForType(AddTask.class))
                 .setProjectId(ID)
                 .build();
     }
@@ -292,7 +292,7 @@ public class ProcessManagerShould {
         @Assign
         ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
-            return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+            return ((ProjectCreated.Builder) Exemplum.builderForType(ProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
         }
@@ -300,7 +300,7 @@ public class ProcessManagerShould {
         @Assign
         TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(AnyPacker.pack(command));
-            return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+            return ((TaskAdded.Builder) Exemplum.builderForType(TaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
         }
@@ -309,7 +309,7 @@ public class ProcessManagerShould {
         CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(AnyPacker.pack(command));
 
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
+            final Message addTask = ((AddTask.Builder) Exemplum.builderForType(AddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
             final CommandRouted route = newRouterFor(command, context)
