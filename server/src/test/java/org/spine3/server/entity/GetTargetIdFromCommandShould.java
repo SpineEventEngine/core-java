@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.test.entity.command.CreateProject;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Typical;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,7 +46,7 @@ public class GetTargetIdFromCommandShould {
 
     @Test
     public void get_ID_from_command_message() {
-        final CreateProject msg = Sample.messageOfType(CreateProject.class);
+        final CreateProject msg = Typical.messageOfType(CreateProject.class);
 
         final Optional id = GetTargetIdFromCommand.asOptional(msg);
 

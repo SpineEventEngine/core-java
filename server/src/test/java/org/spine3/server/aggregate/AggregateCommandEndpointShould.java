@@ -46,7 +46,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Typical;
 
 import java.util.Map;
 
@@ -74,7 +74,7 @@ public class AggregateCommandEndpointShould {
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
-    private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
+    private final ProjectId projectId = Typical.messageOfType(ProjectId.class);
 
     @Before
     public void setUp() {
