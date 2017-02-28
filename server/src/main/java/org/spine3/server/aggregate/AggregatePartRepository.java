@@ -24,8 +24,6 @@ import org.spine3.server.BoundedContext;
 
 import java.lang.reflect.Constructor;
 
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
-
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
@@ -38,8 +36,6 @@ public abstract class AggregatePartRepository<I,
                                               A extends AggregatePart<I, ?, ?, R>,
                                               R extends AggregateRoot<I>>
                       extends AggregateRepository<I, A> {
-
-    private static final int ROOT_GENERIC_INDEX = 2;
 
     /**
      * {@inheritDoc}
@@ -60,7 +56,7 @@ public abstract class AggregatePartRepository<I,
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
-        final Class<R> rootClass = getGenericParameterType(this.getClass(), ROOT_GENERIC_INDEX);
+        final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
         final AggregateRoot<I> root = AggregateRoot.create(id, getBoundedContext(), rootClass);
         final A result = AggregatePart.create(entityConstructor, root);
         return result;

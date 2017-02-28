@@ -30,6 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * A part of a larger aggregate.
@@ -167,6 +168,9 @@ public abstract class AggregatePart<I,
         throw new IllegalStateException(cause);
     }
 
+    /**
+     * Enumeration of generic type parameters of this class.
+     */
     enum GenericParameter implements GenericTypeIndex {
 
         /** The index of the generic type {@code <I>}. */
@@ -190,6 +194,25 @@ public abstract class AggregatePart<I,
         @Override
         public int getIndex() {
             return this.index;
+        }
+    }
+
+    /**
+     * Provides type information on classes extending {@code AggregatePart}.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        static <I, R extends AggregateRoot<I>> Class<R>
+        getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
+            checkNotNull(aggregatePartClass);
+            final Class<R> rootClass = getGenericParameterType(
+                    aggregatePartClass,
+                    GenericParameter.AGGREGATE_ROOT.getIndex());
+            return rootClass;
         }
     }
 }
