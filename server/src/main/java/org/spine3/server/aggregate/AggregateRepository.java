@@ -91,16 +91,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
-    private final Class<A> entityClass;
-    private final Class<I> idClass;
+
+    /** The EventBus to which we post events produced by aggregates. */
     private final EventBus eventBus;
+
+    /** The funnel for sending updated aggregate states to Stand. */
     private final StandFunnel standFunnel;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
+    /** The set of command classes dispatched to aggregates by this repository. */
     @Nullable
     private Set<CommandClass> messageClasses;
+
+    private Class<I> idClass;
+//    private Class<A> entityClass;
 
     /**
      * Creates a new repository instance.
@@ -111,7 +117,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        this.entityClass = getEntityClass();
+//        this.entityClass = getEntityClass();
         this.idClass = getIdClass();
     }
 
@@ -130,7 +136,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @VisibleForTesting
     Constructor<A> getAggregateConstructor() {
-        final Constructor<A> result = getConstructor(entityClass, idClass);
+//        final Constructor<A> result = getConstructor(entityClass, idClass);
+        final Constructor<A> result = getConstructor(getEntityClass(), idClass);
         this.entityConstructor = result;
         return result;
     }
@@ -147,7 +154,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return the class of the aggregates
      */
-    public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
+    Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
     }
 

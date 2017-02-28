@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 
 /**
  * Abstract base class for repositories.
@@ -71,7 +72,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      *
      * <p>Used to optimize heavy {@link #getEntityClass()} calls.
      **/
+    @Nullable
     private volatile Class<E> entityClass;
+
+    /**
+     * Cached value for the entity ID class.
+     *
+     * <p>Used to optimize heavy {@link #getIdClass()} calls.
+     */
+    @Nullable
+    private volatile Class<I> idClass;
 
     /**
      * Creates the repository in the passed {@link BoundedContext}.
@@ -90,10 +100,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        final Class<I> idClass = Classes.getGenericParameterType(getClass(),
-                                                                 ID_CLASS_GENERIC_INDEX);
-        checkIdClass(idClass);
-
+        if (idClass == null) {
+            final Class<? extends Repository> repositoryClass = getClass();
+            final Class<I> candidateClass =
+                    Classes.getGenericParameterType(repositoryClass, ID_CLASS_GENERIC_INDEX);
+            checkIdClass(candidateClass);
+            idClass = candidateClass;
+        }
         return idClass;
     }
 
@@ -216,8 +229,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw new IllegalStateException(String.format(
-                    "The repository %s already has storage %s.", this, this.storage));
+            final String errMsg = format(
+                    "The repository %s already has storage %s.",
+                    this, this.storage
+            );
+            throw new IllegalStateException(errMsg);
         }
 
         this.storage = createStorage(factory);

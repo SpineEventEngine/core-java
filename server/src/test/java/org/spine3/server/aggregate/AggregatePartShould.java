@@ -29,72 +29,49 @@ import org.spine3.server.BoundedContext;
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.server.aggregate.Aggregates.createAggregatePart;
-import static org.spine3.server.aggregate.Aggregates.createAggregateRoot;
-import static org.spine3.server.aggregate.Aggregates.getAggregatePartConstructor;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.server.aggregate.AggregatePart.create;
+import static org.spine3.server.aggregate.AggregatePart.getConstructor;
 
 /**
  * @author Illia Shepilov
  */
-public class AggregatesShould {
+public class AggregatePartShould {
 
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
-    private String id;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        id = newUuid();
-        root = new AnAggregateRoot(boundedContext, id);
+        root = new AnAggregateRoot(boundedContext, newUuid());
     }
 
     @Test
     public void not_accept_nulls_as_parameter_values() throws NoSuchMethodException {
-        final Constructor constructor = root.getClass()
+        final Constructor constructor = AnAggregateRoot.class
                                             .getDeclaredConstructor(BoundedContext.class,
                                                                     String.class);
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
               .setDefault(AggregateRoot.class, root)
-              .testStaticMethods(Aggregates.class, NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Aggregates.class));
+              .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
                 AnAggregatePart.class.getDeclaredConstructor(AnAggregateRoot.class);
-        final AggregatePart aggregatePart = createAggregatePart(constructor, root);
+        final AggregatePart aggregatePart = create(constructor, root);
         assertNotNull(aggregatePart);
     }
 
-    @Test
-    public void create_aggregate_root_entity() {
-        final AnAggregateRoot aggregateRoot =
-                createAggregateRoot(id, boundedContext, AnAggregateRoot.class);
-        assertNotNull(aggregateRoot);
-    }
-
-    @SuppressWarnings("unchecked")
-    // Supply a "wrong" value on purpose to cause the validation failure.
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
-        createAggregateRoot(id, boundedContext, AggregateRoot.class);
-    }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        getAggregatePartConstructor(WrongAggregatePart.class);
+        getConstructor(WrongAggregatePart.class);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -102,19 +79,25 @@ public class AggregatesShould {
             throws NoSuchMethodException {
         final Constructor<WrongAggregatePart> constructor =
                 WrongAggregatePart.class.getDeclaredConstructor();
-        createAggregatePart(constructor, root);
+        create(constructor, root);
     }
 
     @Test
     public void obtain_aggregate_part_constructor() {
         final Constructor<AnAggregatePart> constructor =
-                getAggregatePartConstructor(AnAggregatePart.class);
+                getConstructor(AnAggregatePart.class);
         assertNotNull(constructor);
     }
 
     /*
      Test environment classes
     ***************************/
+
+    private static class AnAggregateRoot extends AggregateRoot<String> {
+        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
+        }
+    }
 
     private static class WrongAggregatePart extends AggregatePart<String,
                                                                   StringValue,
@@ -134,19 +117,6 @@ public class AggregatesShould {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
-        }
-    }
-
-    private static class AnAggregateRoot extends AggregateRoot<String> {
-
-        /**
-         * Creates an new instance.
-         *
-         * @param boundedContext the bounded context to which the aggregate belongs
-         * @param id             the ID of the aggregate
-         */
-        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
-            super(boundedContext, id);
         }
     }
 }

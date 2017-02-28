@@ -25,6 +25,8 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,6 +62,34 @@ public class AggregateRoot<I> {
         checkNotNull(id);
         this.boundedContext = boundedContext;
         this.id = id;
+    }
+
+    /**
+     * Creates a new {@code AggregateRoot} entity and sets it to the default state.
+     *
+     * @param id        the ID of the {@code AggregatePart} is managed by {@code AggregateRoot}
+     * @param ctx       the {@code BoundedContext} to use
+     * @param rootClass the class of the {@code AggregateRoot}
+     * @param <I>       the type of entity IDs
+     * @return an {@code AggregateRoot} instance
+     */
+    static <I, R extends AggregateRoot<I>> R create(I id,
+                                                    BoundedContext ctx,
+                                                    Class<R> rootClass) {
+        checkNotNull(id);
+        checkNotNull(ctx);
+        checkNotNull(rootClass);
+
+        try {
+            final Constructor<R> rootConstructor =
+                    rootClass.getDeclaredConstructor(ctx.getClass(), id.getClass());
+            rootConstructor.setAccessible(true);
+            final R root = rootConstructor.newInstance(ctx, id);
+            return root;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
