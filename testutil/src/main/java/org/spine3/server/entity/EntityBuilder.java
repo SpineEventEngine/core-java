@@ -39,12 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
-       extends ReflectiveBuilder<E> {
+             extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;

@@ -25,6 +25,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateBuilder;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregatePartBuilder;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityBuilder;
 import org.spine3.server.procman.ProcessManager;
@@ -70,10 +71,13 @@ public class Given {
     /**
      * Creates a builder for an {@code AggregatePart}.
      */
-    public static <A extends AggregatePart<I, S, ?>, I, S extends Message>
-           AggregatePartBuilder<A, I, S> aggregatePartOfClass(Class<A> partClass) {
+    public static <A extends AggregatePart<I, S, ?, R>,
+                   I,
+                   S extends Message,
+                   R extends AggregateRoot<I>>
+    AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
         checkNotNull(partClass);
-        final AggregatePartBuilder<A, I, S> result = new AggregatePartBuilder<>();
+        final AggregatePartBuilder<A, I, S, R> result = new AggregatePartBuilder<>();
         result.setResultClass(partClass);
         return result;
     }
