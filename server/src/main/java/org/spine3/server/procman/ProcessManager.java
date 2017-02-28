@@ -22,6 +22,7 @@ package org.spine3.server.procman;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
@@ -33,6 +34,7 @@ import org.spine3.server.reflect.EventSubscriberMethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -132,17 +134,6 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     }
 
     /**
-     * Returns the set of event classes handled by the process manager.
-     *
-     * @param pmClass the process manager class to inspect
-     * @return immutable set of event classes or an empty set if no events are handled
-     */
-    public static ImmutableSet<EventClass> getHandledEventClasses(
-            Class<? extends ProcessManager> pmClass) {
-        return EventSubscriberMethod.getEventClasses(pmClass);
-    }
-
-    /**
      * Creates a new {@link CommandRouter}.
      *
      * <p>A {@code CommandRouter} allows to create and post one or more commands
@@ -226,4 +217,33 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         return commandBus;
     }
 
+    /**
+     * Provides type information for process manager classes.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction of this utility class.
+        }
+
+        /**
+         * Obtains the set of command classes handled by passed process manager class.
+         *
+         * @param pmClass the process manager class to inspect
+         * @return immutable set of command classes or an empty set if no commands are handled
+         */
+        static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
+            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(pmClass));
+        }
+
+        /**
+         * Returns the set of event classes handled by the process manager.
+         *
+         * @param pmClass the process manager class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
+            return EventSubscriberMethod.getEventClasses(pmClass);
+        }
+    }
 }

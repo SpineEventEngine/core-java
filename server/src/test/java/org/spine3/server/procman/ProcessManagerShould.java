@@ -208,7 +208,7 @@ public class ProcessManagerShould {
     @Test
     public void return_handled_event_classes() {
         final Set<EventClass> classes =
-                ProcessManager.getHandledEventClasses(TestProcessManager.class);
+                ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
         assertTrue(classes.contains(EventClass.of(ProjectCreated.class)));
         assertTrue(classes.contains(EventClass.of(TaskAdded.class)));
