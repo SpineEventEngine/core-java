@@ -148,8 +148,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     public static List<? extends Message> invokeHandler(Object object,
                                                         Message command,
                                                         CommandContext context) {
+        checkNotNull(object);
         checkNotNull(command);
         checkNotNull(context);
+
         final Message commandMessage = ensureCommandMessage(command);
 
         try {
@@ -175,6 +177,9 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     public static EventContext createEventContext(Any producerId,
                                                   @Nullable Version version,
                                                   CommandContext commandContext) {
+        checkNotNull(producerId);
+        checkNotNull(commandContext);
+
         final EventId eventId = generateId();
         final Timestamp timestamp = getCurrentTime();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -231,23 +236,23 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * Casts a command handling result to a list of event messages.
      *
-     * @param handlingResult the command handler method return value.
-     *                       Could be a {@link Message}, a list of messages, or {@code null}.
+     * @param output the command handler method return value.
+     *               Could be a {@link Message}, a list of messages, or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
-    private static <R> List<? extends Message> toList(@Nullable R handlingResult) {
-        if (handlingResult == null) {
+    private static <R> List<? extends Message> toList(@Nullable R output) {
+        if (output == null) {
             return emptyList();
         }
-        if (handlingResult instanceof List) {
+        if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
             @SuppressWarnings("unchecked")
-            final List<? extends Message> result = (List<? extends Message>) handlingResult;
+            final List<? extends Message> result = (List<? extends Message>) output;
             return result;
         } else {
             // Another type of result is single event message (as Message).
-            final List<Message> result = singletonList((Message) handlingResult);
+            final List<Message> result = singletonList((Message) output);
             return result;
         }
     }
