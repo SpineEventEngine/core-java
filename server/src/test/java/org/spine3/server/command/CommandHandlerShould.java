@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
@@ -155,7 +156,7 @@ public class CommandHandlerShould {
     }
 
     @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters", "ReturnOfCollectionOrArrayField"})
-    private class TestCommandHandler extends AbstractCommandHandler {
+    private class TestCommandHandler extends CommandHandler {
 
         private final ImmutableList<Message> eventsOnStartProjectCmd = createEventsOnStartProjectCmd();
 
@@ -174,7 +175,8 @@ public class CommandHandlerShould {
         }
 
         private void handle(Command cmd) {
-            handle(getMessage(cmd), cmd.getContext());
+            final CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
+            dispatch(commandEnvelope);
         }
 
         private ImmutableList<Message> getEventsOnStartProjectCmd() {

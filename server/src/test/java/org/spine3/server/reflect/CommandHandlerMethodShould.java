@@ -23,8 +23,8 @@ package org.spine3.server.reflect;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.server.command.AbstractCommandHandler;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;
@@ -272,7 +272,7 @@ public class CommandHandlerMethodShould {
         }
     }
 
-    private abstract class TestCommandHandler extends AbstractCommandHandler {
+    private abstract class TestCommandHandler extends CommandHandler {
 
         private static final String HANDLER_METHOD_NAME = "handleTest";
 
