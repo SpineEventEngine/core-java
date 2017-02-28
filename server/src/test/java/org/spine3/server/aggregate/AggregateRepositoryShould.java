@@ -92,7 +92,7 @@ public class AggregateRepositoryShould {
         repositorySpy.create(id);
         repositorySpy.create(id);
 
-        verify(repositorySpy, times(1)).getAggregateConstructor();
+        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.

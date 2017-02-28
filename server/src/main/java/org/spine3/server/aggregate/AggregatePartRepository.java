@@ -56,7 +56,7 @@ public abstract class AggregatePartRepository<I,
         return super.getIdClass();
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
         final Constructor<A> entityConstructor = getEntityConstructor();
@@ -66,9 +66,9 @@ public abstract class AggregatePartRepository<I,
         return result;
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // The call of the super method is not needed.
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We find constructor for another class.
     @Override
-    protected Constructor<A> getEntityConstructor() {
+    protected Constructor<A> findEntityConstructor() {
         final Constructor<A> result = AggregatePart.getConstructor(getEntityClass());
         return result;
     }

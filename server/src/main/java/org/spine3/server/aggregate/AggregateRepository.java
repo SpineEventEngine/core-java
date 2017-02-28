@@ -105,9 +105,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Nullable
     private Set<CommandClass> messageClasses;
 
-    private Class<I> idClass;
-//    private Class<A> entityClass;
-
     /**
      * Creates a new repository instance.
      *
@@ -117,27 +114,27 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-//        this.entityClass = getEntityClass();
-        this.idClass = getIdClass();
     }
 
     /**
-     * Obtains constructor for the passed entity class.
+     * Obtains the constructor.
      *
-     * @return the entity constructor
+     * <p>The method returns cached value if called more than once.
+     * During the first call, it {@linkplain #findEntityConstructor() finds}  the constructor.
      */
     protected Constructor<A> getEntityConstructor() {
         if (this.entityConstructor == null) {
-            final Constructor<A> result = getAggregateConstructor();
-            return result;
+            this.entityConstructor = findEntityConstructor();
         }
         return this.entityConstructor;
     }
 
+    /**
+     * Obtains the constructor for creating entities.
+     */
     @VisibleForTesting
-    Constructor<A> getAggregateConstructor() {
-//        final Constructor<A> result = getConstructor(entityClass, idClass);
-        final Constructor<A> result = getConstructor(getEntityClass(), idClass);
+    protected Constructor<A> findEntityConstructor() {
+        final Constructor<A> result = getConstructor(getEntityClass(), getIdClass());
         this.entityConstructor = result;
         return result;
     }
