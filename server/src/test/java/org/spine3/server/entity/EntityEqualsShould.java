@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.entity.Project;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Typical;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -84,7 +84,7 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_states_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setState(Sample.messageOfType(Project.class), another.getVersion());
+        another.setState(Typical.messageOfType(Project.class), another.getVersion());
 
         assertNotEquals(entity.getState(), another.getState());
         assertFalse(entity.equals(another));

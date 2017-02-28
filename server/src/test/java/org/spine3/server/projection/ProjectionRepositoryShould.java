@@ -52,7 +52,7 @@ import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Typical;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
@@ -87,7 +87,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+    private static final ProjectId ID = Typical.messageOfType(ProjectId.class);
 
     private BoundedContext boundedContext;
 
@@ -289,13 +289,13 @@ public class ProjectionRepositoryShould
                                                     .getEventStore();
 
         // Put events into the EventStore.
-        final Event projectCreatedEvent = Sample.eventBy(ID, ProjectCreated.class);
+        final Event projectCreatedEvent = Typical.eventBy(ID, ProjectCreated.class);
         eventStore.append(projectCreatedEvent);
 
-        final Event taskAddedEvent = Sample.eventBy(ID, TaskAdded.class);
+        final Event taskAddedEvent = Typical.eventBy(ID, TaskAdded.class);
         eventStore.append(taskAddedEvent);
 
-        final Event projectStartedEvent = Sample.eventBy(ID, ProjectStarted.class);
+        final Event projectStartedEvent = Typical.eventBy(ID, ProjectStarted.class);
         eventStore.append(projectStartedEvent);
 
         repo.catchUp();
@@ -318,7 +318,7 @@ public class ProjectionRepositoryShould
         final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
 
-        final Event event = Sample.eventBy(ID, projectCreated());
+        final Event event = Typical.eventBy(ID, projectCreated());
         repository().dispatch(event);
 
         final ProjectCreated expectedEventMessage = Events.getMessage(event);
@@ -478,19 +478,19 @@ public class ProjectionRepositoryShould
     }
 
     private static ProjectStarted projectStarted() {
-        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
+        return ((ProjectStarted.Builder) Typical.builderForType(ProjectStarted.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static ProjectCreated projectCreated() {
-        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
+        return ((ProjectCreated.Builder) Typical.builderForType(ProjectCreated.class))
                 .setProjectId(ID)
                 .build();
     }
 
     private static TaskAdded taskAdded() {
-        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
+        return ((TaskAdded.Builder) Typical.builderForType(TaskAdded.class))
                 .setProjectId(ID)
                 .build();
     }

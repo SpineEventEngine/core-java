@@ -22,7 +22,7 @@ package org.spine3.server.entity;
 
 import org.spine3.test.Given;
 import org.spine3.test.entity.Project;
-import org.spine3.testdata.Sample;
+import org.spine3.testdata.Typical;
 
 import static org.spine3.base.Identifiers.newUuid;
 
@@ -43,7 +43,7 @@ class TestEntity extends AbstractVersionableEntity<String, Project> {
     static TestEntity withState() {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
                                        .withId(newUuid())
-                                       .withState(Sample.messageOfType(Project.class))
+                                       .withState(Typical.messageOfType(Project.class))
                                        .withVersion(3)
                                        .build();
         return result;
