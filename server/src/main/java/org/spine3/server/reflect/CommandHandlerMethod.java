@@ -192,7 +192,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
                                        @Nullable final Version version,
                                        final List<? extends Message> eventMessages,
                                        final CommandContext commandContext) {
-
+        checkNotNull(producerId);
+        checkNotNull(eventMessages);
+        checkNotNull(commandContext);
+        
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
             public Event apply(@Nullable Message eventMessage) {
