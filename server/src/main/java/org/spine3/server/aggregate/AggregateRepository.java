@@ -55,7 +55,6 @@ import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -160,10 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Class<? extends Message> getAggregateStateClass() {
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = getGenericParameterType(
-                aggregateClass,
-                Entity.GenericParameter.STATE.getIndex()
-        );
+        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(aggregateClass);
         return stateClass;
     }
 

@@ -22,7 +22,6 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.GenericTypeIndex;
 
 import java.lang.reflect.Constructor;
@@ -142,17 +141,15 @@ public abstract class AggregatePart<I,
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    static <A extends AggregatePart<I, ?, ?, ?>, I> Constructor<A> getConstructor(Class<A> cls) {
+    static <A extends AggregatePart<I, ?, ?, R>, I, R extends AggregateRoot<I>>
+    Constructor<A> getConstructor(Class<A> cls) {
         checkNotNull(cls);
 
-        final Class<?> aggregateRootClass = Classes.getGenericParameterType(
-                cls,
-                GenericParameter.AGGREGATE_ROOT.getIndex());
+        final Class<R> aggregateRootClass = TypeInfo.getRootClass(cls);
         try {
-            final Constructor<A> constructor =
-                    cls.getDeclaredConstructor(aggregateRootClass);
-            constructor.setAccessible(true);
-            return constructor;
+            final Constructor<A> ctor = cls.getDeclaredConstructor(aggregateRootClass);
+            ctor.setAccessible(true);
+            return ctor;
         } catch (NoSuchMethodException ignored) {
             throw noSuchConstructor(cls, aggregateRootClass);
         }

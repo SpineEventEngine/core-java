@@ -100,7 +100,7 @@ public class Classes {
     }
 
     /**
-     * Finds a getter method in given class or it's superclasses.
+     * Finds a getter method in given class or its superclasses.
      *
      * <p>The method must match {@code getFieldName} notation, have no argument to be found.
      *

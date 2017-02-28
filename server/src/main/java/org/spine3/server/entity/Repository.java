@@ -26,7 +26,6 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -38,6 +37,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Abstract base class for repositories.
@@ -132,8 +132,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @CheckReturnValue
     protected Class<E> getEntityClass() {
         if (entityClass == null) {
-            entityClass = Classes.getGenericParameterType(getClass(),
-                                                          GenericParameter.ENTITY.getIndex());
+            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
+            final Class<? extends Repository<I, E>> repoClass =
+                    (Class<? extends Repository<I, E>>) getClass();
+            entityClass = TypeInfo.getEntityClass(repoClass);
         }
         checkNotNull(entityClass);
         return entityClass;
@@ -280,6 +282,20 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         @Override
         public int getIndex() {
             return this.index;
+        }
+    }
+
+    private static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        private static <E extends Entity<I, ?>, I>
+        Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
+            final Class<E> result = getGenericParameterType(repositoryClass,
+                                                            GenericParameter.ENTITY.getIndex());
+            return result;
         }
     }
 }
