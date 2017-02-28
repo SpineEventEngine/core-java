@@ -20,6 +20,7 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
@@ -38,6 +39,12 @@ import static org.mockito.Mockito.verify;
  */
 @SuppressWarnings("unused") // OK as we have some
 public class EventSubscriberMethodShould {
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EventSubscriberMethod.class);
+    }
 
     @Test
     public void scan_target_for_subscribers() {

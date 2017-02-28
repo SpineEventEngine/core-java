@@ -31,6 +31,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -59,6 +60,9 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      *                               for the class of the passed message
      */
     public static EventSubscriberMethod forMessage(Class<?> cls, Message eventMessage) {
+        checkNotNull(cls);
+        checkNotNull(eventMessage);
+
         final Class<? extends Message> eventClass = eventMessage.getClass();
         final MethodRegistry registry = MethodRegistry.getInstance();
         final EventSubscriberMethod method = registry.get(cls,
@@ -91,12 +95,17 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      */
     @CheckReturnValue
     public static MethodMap<EventSubscriberMethod> scan(Object target) {
+        checkNotNull(target);
+
         final MethodMap<EventSubscriberMethod> result = MethodMap.create(target.getClass(),
                                                                          factory());
         return result;
     }
 
+    @CheckReturnValue
     public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
+        checkNotNull(cls);
+
         final ImmutableSet<EventClass> result =
                 EventClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
         return result;
