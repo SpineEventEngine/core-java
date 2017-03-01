@@ -42,6 +42,7 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
@@ -86,6 +87,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
     private final CommandBus commandBus;
     private final EventBus eventBus;
+    private final FailureBus failureBus;
     private final Stand stand;
     private final StandFunnel standFunnel;
 
@@ -110,6 +112,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
+        this.failureBus = builder.failureBus;
         this.stand = builder.stand;
         this.standFunnel = builder.standFunnel;
     }
@@ -149,6 +152,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         storageFactory.get().close();
         commandBus.close();
         eventBus.close();
+        failureBus.close();
         stand.close();
 
         shutDownRepositories();
@@ -267,6 +271,10 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         return this.eventBus;
     }
 
+    /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public FailureBus getFailureBus() {return this.failureBus;}
+
     /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */
     @CheckReturnValue
     public StandFunnel getStandFunnel() {
@@ -304,6 +312,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         private CommandStore commandStore;
         private CommandBus commandBus;
         private EventBus eventBus;
+        private FailureBus failureBus;
         private boolean multitenant;
         private Stand stand;
         private StandUpdateDelivery standUpdateDelivery;
@@ -385,6 +394,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return Optional.fromNullable(eventBus);
         }
 
+        public Builder setFailureBus(FailureBus failureBus) {
+            this.failureBus = checkNotNull(failureBus);
+            return this;
+        }
+
+        public Optional<FailureBus> failureBus() {
+            return Optional.fromNullable(failureBus);
+        }
+
         public Builder setStand(Stand stand) {
             this.stand = checkNotNull(stand);
             return this;
@@ -424,6 +442,9 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             }
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
+            }
+            if(failureBus == null) {
+                failureBus = createFailureBus();
             }
 
             if (stand == null) {
@@ -468,6 +489,12 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             final EventBus result = EventBus.newBuilder()
                                             .setStorageFactory(storageFactory)
                                             .build();
+            return result;
+        }
+
+        private static FailureBus createFailureBus() {
+            final FailureBus result = FailureBus.newBuilder()
+                                                .build();
             return result;
         }
 
