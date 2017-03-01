@@ -32,6 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Illia Shepilov
@@ -87,6 +88,11 @@ public class AggregatePartShould {
         final Constructor<AnAggregatePart> constructor =
                 getConstructor(AnAggregatePart.class);
         assertNotNull(constructor);
+    }
+
+    @Test
+    public void have_TypeInfo() {
+        assertHasPrivateParameterlessCtor(AggregatePart.TypeInfo.class);
     }
 
     /*

@@ -63,6 +63,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -71,7 +72,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods"})
+@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
@@ -586,6 +587,10 @@ public class AggregateShould {
         new TestAggregateWithIdInteger(100).getBuilder();
     }
 
+    @Test
+    public void have_TypeInfo() {
+        assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
+    }
 
     /*
      * Utility methods.

@@ -56,6 +56,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.currentTimeSeconds;
 
 /**
@@ -297,6 +298,11 @@ public class EntityShould {
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
+    }
+
+    @Test
+    public void have_TypeInfo() {
+        assertHasPrivateParameterlessCtor(Entity.TypeInfo.class);
     }
 
     private static Matcher<Long> isBetween(final Long lower, final Long higher) {
