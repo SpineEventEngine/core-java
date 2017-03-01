@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <H> the type of the handler method instances stored in the map
  * @author Alexander Yevsyukov
  */
-public class MethodMap<H extends HandlerMethod> {
+class MethodMap<H extends HandlerMethod> {
 
     private final ImmutableMap<Class<? extends Message>, H> map;
 
