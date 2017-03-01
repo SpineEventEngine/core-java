@@ -18,35 +18,69 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.reflect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import org.spine3.server.reflect.HandlerMethod;
-import org.spine3.server.reflect.HandlerMethodPredicate;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.Apply;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
  *
  * @author Alexander Yevsyukov
  */
-class EventApplierMethod extends HandlerMethod<Empty> {
+public class EventApplierMethod extends HandlerMethod<Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    static final Predicate<Method> PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    EventApplierMethod(Method method) {
+    private EventApplierMethod(Method method) {
         super(method);
+    }
+
+    static EventApplierMethod from(Method method) {
+        return new EventApplierMethod(method);
+    }
+
+    public static EventApplierMethod forEventMessage(Class<? extends Aggregate> cls,
+                                                     Message eventMessage) {
+        checkNotNull(cls);
+        checkNotNull(eventMessage);
+
+        final EventApplierMethod method = MethodRegistry.getInstance()
+                                                        .get(cls,
+                                                             eventMessage.getClass(),
+                                                             factory());
+        if (method == null) {
+            throw missingEventApplier(cls, eventMessage.getClass());
+        }
+        return method;
+    }
+
+    private static IllegalStateException missingEventApplier(Class<? extends Aggregate> cls,
+                                                      Class<? extends Message> eventClass) {
+        return new IllegalStateException(
+                String.format("Missing event applier for event class %s in aggregate class %s.",
+                              eventClass.getName(), cls.getName()));
+    }
+
+    @VisibleForTesting
+    static MethodPredicate predicate() {
+        return PREDICATE;
     }
 
     /**
@@ -60,7 +94,7 @@ class EventApplierMethod extends HandlerMethod<Empty> {
      *
      * @throws InvocationTargetException if the method call results in an exception
      */
-    protected <R> R invoke(Object aggregate, Message message)
+    public <R> R invoke(Aggregate aggregate, Message message)
             throws InvocationTargetException {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
@@ -80,12 +114,12 @@ class EventApplierMethod extends HandlerMethod<Empty> {
 
         @Override
         public EventApplierMethod create(Method method) {
-            return new EventApplierMethod(method);
+            return from(method);
         }
 
         @Override
         public Predicate<Method> getPredicate() {
-            return PREDICATE;
+            return predicate();
         }
 
         @Override

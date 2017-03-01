@@ -23,7 +23,6 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -36,7 +35,6 @@ import java.lang.reflect.Type;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@Internal
 public class Classes {
 
     private Classes() {
@@ -84,7 +82,7 @@ public class Classes {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
+    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
             Class<?> cls,
             Predicate<Method> predicate) {
         final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
@@ -102,7 +100,7 @@ public class Classes {
     }
 
     /**
-     * Finds a getter method in given class or it's superclasses.
+     * Finds a getter method in given class or its superclasses.
      *
      * <p>The method must match {@code getFieldName} notation, have no argument to be found.
      *

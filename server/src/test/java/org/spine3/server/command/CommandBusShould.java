@@ -53,7 +53,6 @@ import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.base.CommandValidationError.TENANT_UNKNOWN;
 import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 
@@ -210,7 +209,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void register_command_handler() {
-        commandBus.register(new CreateProjectHandler(newUuid()));
+        commandBus.register(new CreateProjectHandler());
 
         commandBus.post(createProject(), responseObserver);
 

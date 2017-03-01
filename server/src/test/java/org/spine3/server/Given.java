@@ -34,6 +34,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -212,7 +213,7 @@ public class Given {
         private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED)
+                    .setStatus(Status.CREATED)
                     .build();
         }
 
@@ -224,7 +225,7 @@ public class Given {
         private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED)
+                    .setStatus(Status.STARTED)
                     .build();
         }
     }

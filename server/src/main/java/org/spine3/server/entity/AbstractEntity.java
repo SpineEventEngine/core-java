@@ -106,7 +106,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             registry.put(entityClass, state);
         }
         @SuppressWarnings("unchecked")
-            // cast is safe because this type of messages is saved to the map
+        // cast is safe because this type of messages is saved to the map
         final S defaultState = (S) registry.get(entityClass);
         return defaultState;
     }
@@ -125,20 +125,23 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains constructor for the passed entity class.
+     * Obtains the constructor for the passed entity class.
      *
      * <p>The entity class must have a constructor with the single parameter of type defined by
      * generic type {@code <I>}.
      *
      * @param entityClass the entity class
-     * @param idClass the class of entity identifiers
-     * @param <E> the entity type
-     * @param <I> the ID type
+     * @param idClass     the class of entity identifiers
+     * @param <E>         the entity type
+     * @param <I>         the ID type
      * @return the constructor
      * @throws IllegalStateException if the entity class does not have the required constructor
      */
-    public static <E extends Entity<I, ?>, I>
-           Constructor<E> getConstructor(Class<E> entityClass, Class<I> idClass) {
+    public static <E extends Entity<I, ?>, I> Constructor<E> getConstructor(Class<E> entityClass,
+                                                                            Class<I> idClass) {
+        checkNotNull(entityClass);
+        checkNotNull(idClass);
+
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);
@@ -157,15 +160,18 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Creates new entity and sets it to the default state.
+     * Creates a new entity and sets it to the default state.
      *
      * @param ctor the constructor to use
-     * @param id the ID of the entity
-     * @param <I> the type of entity IDs
-     * @param <E> the type of the entity
-     * @return new entity
+     * @param id   the ID of the entity
+     * @param <I>  the type of entity IDs
+     * @param <E>  the type of the entity
+     * @return a new entity
      */
     public static <I, E extends AbstractEntity<I, ?>> E createEntity(Constructor<E> ctor, I id) {
+        checkNotNull(ctor);
+        checkNotNull(id);
+
         try {
             final E result = ctor.newInstance(id);
             result.init();

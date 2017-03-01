@@ -20,12 +20,21 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.Version;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -35,9 +44,14 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.spine3.base.Events.generateId;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * The wrapper for a command handler method.
@@ -47,15 +61,50 @@ import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter command handler methods of a class. */
-    static final Predicate<Method> PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    public CommandHandlerMethod(Method method) {
+    private CommandHandlerMethod(Method method) {
         super(method);
+    }
+
+    /**
+     * Obtains handler method for the command message.
+     *
+     * @param cls the class that handles the message
+     * @param commandMessage the message
+     * @return handler method
+     * @throws IllegalStateException if the passed class does not handle messages of this class
+     */
+    private static CommandHandlerMethod forMessage(Class<?> cls, Message commandMessage)  {
+        final Class<? extends Message> commandClass = commandMessage.getClass();
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                                                          .get(cls, commandClass, factory());
+        if (method == null) {
+            throw missingCommandHandler(cls, commandClass);
+        }
+        return method;
+    }
+
+    static CommandHandlerMethod from(Method method) {
+        return new CommandHandlerMethod(method);
+    }
+
+    private static IllegalStateException missingCommandHandler(Class<?> cls,
+                        Class<? extends Message> commandClass) {
+        final String errMsg = format(
+                "No handler for the command class %s found in the class %s.",
+                 commandClass.getName(), cls.getName()
+        );
+        throw new IllegalStateException(errMsg);
+    }
+
+    static MethodPredicate predicate() {
+        return PREDICATE;
     }
 
     /**
@@ -67,8 +116,104 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<?> cls) {
         final Set<CommandClass> result = CommandClass.setOf(
-                getHandledMessageClasses(cls, PREDICATE));
+                getHandledMessageClasses(cls, predicate()));
         return result;
+    }
+
+    /**
+     * Ensures that the passed instance of {@code Message} is not an {@code Any},
+     * and unwraps the command message if {@code Any} is passed.
+     */
+    private static Message ensureCommandMessage(Message msgOrAny) {
+        Message commandMessage;
+        if (msgOrAny instanceof Any) {
+            /* It looks that we're getting the result of `command.getMessage()`
+               because the calling code did not bother to unwrap it.
+               Extract the wrapped message (instead of treating this as an error).
+               There may be many occasions of such a call especially from the
+               testing code. */
+            final Any any = (Any) msgOrAny;
+            commandMessage = AnyPacker.unpack(any);
+        } else {
+            commandMessage = msgOrAny;
+        }
+        return commandMessage;
+    }
+
+    /**
+     * Invokes the handler method in the passed object.
+     *
+     * @return the list of events produced by the handler method
+     */
+    public static List<? extends Message> invokeHandler(Object object,
+                                                        Message command,
+                                                        CommandContext context) {
+        checkNotNull(object);
+        checkNotNull(command);
+        checkNotNull(context);
+
+        final Message commandMessage = ensureCommandMessage(command);
+
+        try {
+            final CommandHandlerMethod method = forMessage(object.getClass(),
+                                                           commandMessage);
+            final List<? extends Message> eventMessages = method.invoke(object,
+                                                                        commandMessage,
+                                                                        context);
+            return eventMessages;
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
+    }
+
+    /**
+     * Creates new {@code CommandContext} with passed parameters.
+     *
+     * @param producerId the ID of an object which produced the event
+     * @param version optional version of the object
+     * @param commandContext the context of the command handling of which produced the event
+     * @return new {@code CommandContext}
+     */
+    public static EventContext createEventContext(Any producerId,
+                                                  @Nullable Version version,
+                                                  CommandContext commandContext) {
+        checkNotNull(producerId);
+        checkNotNull(commandContext);
+
+        final EventId eventId = generateId();
+        final Timestamp timestamp = getCurrentTime();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(eventId)
+                                                         .setTimestamp(timestamp)
+                                                         .setCommandContext(commandContext)
+                                                         .setProducerId(producerId);
+        if (version != null) {
+            builder.setVersion(version);
+        }
+        return builder.build();
+    }
+
+    public static List<Event> toEvents(final Any producerId,
+                                       @Nullable final Version version,
+                                       final List<? extends Message> eventMessages,
+                                       final CommandContext commandContext) {
+        checkNotNull(producerId);
+        checkNotNull(eventMessages);
+        checkNotNull(commandContext);
+        
+        return Lists.transform(eventMessages, new Function<Message, Event>() {
+            @Override
+            public Event apply(@Nullable Message eventMessage) {
+                if (eventMessage == null) {
+                    return Event.getDefaultInstance();
+                }
+                final EventContext eventContext = createEventContext(producerId,
+                                                                     version,
+                                                                     commandContext);
+                final Event result = Events.createEvent(eventMessage, eventContext);
+                return result;
+            }
+        });
     }
 
     /**
@@ -91,45 +236,34 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * Casts a command handling result to a list of event messages.
      *
-     * @param handlingResult the command handler method return value.
-     *                       Could be a {@link Message}, a list of messages, or {@code null}.
+     * @param output the command handler method return value.
+     *               Could be a {@link Message}, a list of messages, or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
-    private static <R> List<? extends Message> toList(@Nullable R handlingResult) {
-        if (handlingResult == null) {
+    private static <R> List<? extends Message> toList(@Nullable R output) {
+        if (output == null) {
             return emptyList();
         }
-        if (handlingResult instanceof List) {
+        if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
             @SuppressWarnings("unchecked")
-            final List<? extends Message> result = (List<? extends Message>) handlingResult;
+            final List<? extends Message> result = (List<? extends Message>) output;
             return result;
         } else {
             // Another type of result is single event message (as Message).
-            final List<Message> result = singletonList((Message) handlingResult);
+            final List<Message> result = singletonList((Message) output);
             return result;
         }
     }
 
-    /**
-     * Returns a map of the command handler methods from the passed instance.
-     *
-     * @param object the object that keeps command handler methods
-     * @return immutable map
-     */
-    @CheckReturnValue
-    static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
-        final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(),
-                                                                          factory());
-        return handlers;
-    }
-
-    public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+    private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.instance();
     }
 
-    /** The factory for filtering methods that match {@code CommandHandlerMethod} specification. */
+    /**
+     * The factory for filtering methods that match {@code CommandHandlerMethod} specification.
+     */
     private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
 
         @Override
@@ -139,12 +273,12 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         @Override
         public CommandHandlerMethod create(Method method) {
-            return new CommandHandlerMethod(method);
+            return from(method);
         }
 
         @Override
         public Predicate<Method> getPredicate() {
-            return PREDICATE;
+            return predicate();
         }
 
         @Override
