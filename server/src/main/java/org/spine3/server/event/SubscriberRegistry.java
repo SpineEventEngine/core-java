@@ -24,12 +24,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.protobuf.Message;
 import org.spine3.base.EventClass;
 import org.spine3.server.reflect.EventSubscriberMethod;
-import org.spine3.server.reflect.MethodMap;
 
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -44,38 +41,42 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class SubscriberRegistry {
 
-    private final Multimap<EventClass, EventSubscriber> subscribersByEventClass =
+    private final Multimap<EventClass, EventSubscriber> subscribers =
             Multimaps.synchronizedMultimap(HashMultimap.<EventClass, EventSubscriber>create());
 
     void subscribe(EventSubscriber object) {
         checkNotNull(object);
-        final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
-        final boolean subscribersEmpty = subscribers.isEmpty();
-        checkSubscribersNotEmpty(object, subscribersEmpty);
-        for (Map.Entry<Class<? extends Message>,
-                       EventSubscriberMethod> entry : subscribers.entrySet()) {
-            subscribersByEventClass.put(EventClass.of(entry.getKey()), object);
+        final ImmutableSet<EventClass> eventClasses = getEventClasses(object);
+        for (EventClass eventClass : eventClasses) {
+            subscribers.put(eventClass, object);
         }
     }
 
     void unsubscribe(EventSubscriber object) {
-        final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
-        final boolean subscribersEmpty = subscribers.isEmpty();
-        checkSubscribersNotEmpty(object, subscribersEmpty);
-        if (!subscribersEmpty) {
-            for (Class<? extends Message> eventClass : subscribers.keySet()) {
-                subscribersByEventClass.remove(EventClass.of(eventClass), object);
-            }
+        final ImmutableSet<EventClass> eventClasses = getEventClasses(object);
+        for (EventClass eventClass : eventClasses) {
+            subscribers.remove(eventClass, object);
         }
     }
 
+    /**
+     * Ensures that the passed object subscribes to one or more events
+     * and returns their classes.
+     */
+    private static ImmutableSet<EventClass> getEventClasses(EventSubscriber object) {
+        final ImmutableSet<EventClass> eventClasses =
+                EventSubscriberMethod.getEventClasses(object.getClass());
+        checkSubscribersNotEmpty(object, eventClasses.isEmpty());
+        return eventClasses;
+    }
+
     void unsubscribeAll() {
-        subscribersByEventClass.clear();
+        subscribers.clear();
         EventBus.log().info("All subscribers cleared.");
     }
 
     Set<EventSubscriber> getSubscribers(EventClass c) {
-        return ImmutableSet.copyOf(subscribersByEventClass.get(c));
+        return ImmutableSet.copyOf(subscribers.get(c));
     }
 
     boolean hasSubscribers(EventClass eventClass) {

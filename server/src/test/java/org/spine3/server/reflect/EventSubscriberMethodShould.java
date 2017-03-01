@@ -45,25 +45,7 @@ public class EventSubscriberMethodShould {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }
-
-    @Test
-    public void scan_target_for_subscribers() {
-        final TestEventSubscriber subscriberObject = new ValidSubscriberOneParam();
-
-        final MethodMap<EventSubscriberMethod> subscriberMap =
-                EventSubscriberMethod.scan(subscriberObject);
-
-        assertEquals(1, subscriberMap.values()
-                                     .size());
-
-        @SuppressWarnings("ConstantConditions")
-            // We won't have null because we pass class with method that handles this command.
-        final Method method = subscriberMap.get(ProjectCreated.class)
-                                           .getMethod();
-        assertEquals(subscriberObject.getMethod(),
-                     method);
-    }
-
+    
     @Test
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
