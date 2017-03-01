@@ -86,7 +86,10 @@ public class ProcessManagerShould {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        final CommandStore commandStore = spy(
+                new CommandStore(storageFactory.createCommandStorage())
+        );
+        
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
