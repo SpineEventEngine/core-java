@@ -87,21 +87,6 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return new IllegalStateException(msg);
     }
 
-    /**
-     * Scans for event subscribers the passed target.
-     *
-     * @param target the target to scan
-     * @return immutable map of event subscriber methods
-     */
-    @CheckReturnValue
-    public static MethodMap<EventSubscriberMethod> scan(Object target) {
-        checkNotNull(target);
-
-        final MethodMap<EventSubscriberMethod> result = MethodMap.create(target.getClass(),
-                                                                         factory());
-        return result;
-    }
-
     @CheckReturnValue
     public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
         checkNotNull(cls);
