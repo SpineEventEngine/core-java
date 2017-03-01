@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
@@ -40,6 +41,8 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 
+import java.lang.reflect.Constructor;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -58,12 +61,13 @@ public class AggregateRootShould {
     private CommandBus commandBus;
     private ProjectId projectId;
     private CommandContext commandContext;
+    private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
         commandContext = createCommandContext();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+        boundedContext = BoundedContext.newBuilder()
+                                       .build();
         projectId = ProjectId.newBuilder()
                              .setId(newUuid())
                              .build();
@@ -72,6 +76,30 @@ public class AggregateRootShould {
         boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
 
         commandBus = boundedContext.getCommandBus();
+    }
+
+    @Test
+    public void pass_null_tolerance_test() throws NoSuchMethodException {
+        final Constructor<AnAggregateRoot> ctor =
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
+        new NullPointerTester()
+                .setDefault(Constructor.class, ctor)
+                .setDefault(BoundedContext.class, boundedContext)
+                .testStaticMethods(AggregateRoot.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
+        AggregateRoot.create(newUuid(), boundedContext, AggregateRoot.class);
+    }
+
+    @Test
+    public void create_aggregate_root_entity() {
+        final AnAggregateRoot aggregateRoot =
+                AggregateRoot.create(newUuid(), boundedContext, AnAggregateRoot.class);
+        assertNotNull(aggregateRoot);
     }
 
     @Test
@@ -130,6 +158,12 @@ public class AggregateRootShould {
     /*
        Test environment classes
      ***************************/
+
+    private static class AnAggregateRoot extends AggregateRoot<String> {
+        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
+        }
+    }
 
     private static class ProjectRoot extends AggregateRoot<ProjectId> {
 

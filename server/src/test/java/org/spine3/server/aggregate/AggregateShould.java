@@ -63,7 +63,6 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
-import static org.spine3.server.reflect.CommandHandlerMethod.getCommandClasses;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -177,7 +176,8 @@ public class AggregateShould {
 
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
-        final Set<CommandClass> classes = getCommandClasses(TestAggregate.class);
+        final Set<CommandClass> classes =
+                Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
 
         assertTrue(classes.size() == 4);
         assertTrue(classes.contains(CommandClass.of(CreateProject.class)));

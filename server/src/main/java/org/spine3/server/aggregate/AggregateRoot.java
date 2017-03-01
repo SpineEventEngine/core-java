@@ -25,6 +25,8 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,6 +65,35 @@ public class AggregateRoot<I> {
     }
 
     /**
+     * Creates a new {@code AggregateRoot}.
+     *
+     * @param aggregateId    the ID of the aggregate
+     * @param boundedContext the {@code BoundedContext} to use
+     * @param rootClass      the class of the {@code AggregateRoot}
+     * @param <I>            the type of entity IDs
+     * @return new instance
+     */
+    static <I, R extends AggregateRoot<I>> R create(I aggregateId,
+                                                    BoundedContext boundedContext,
+                                                    Class<R> rootClass) {
+        checkNotNull(aggregateId);
+        checkNotNull(boundedContext);
+        checkNotNull(rootClass);
+
+        try {
+            final Constructor<R> rootConstructor =
+                    rootClass.getDeclaredConstructor(boundedContext.getClass(),
+                                                     aggregateId.getClass());
+            rootConstructor.setAccessible(true);
+            final R root = rootConstructor.newInstance(boundedContext, aggregateId);
+            return root;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Obtains the aggregate ID.
      */
     public I getId() {
@@ -86,8 +117,8 @@ public class AggregateRoot<I> {
      *                               or the ID type of the part state does not match
      *                               the ID type of this {@code AggregateRoot}
      */
-    protected <S extends Message, A extends AggregatePart<I, S, ?, ?>> S
-    getPartState(Class<S> partStateClass) {
+    protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    S getPartState(Class<S> partStateClass) {
         final AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
         final AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
         final S partState = aggregatePart.getState();

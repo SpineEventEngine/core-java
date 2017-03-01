@@ -281,24 +281,19 @@ public class CommandDispatcherRegistryShould {
     private class CreateProjectHandler extends CommandHandler {
 
         protected CreateProjectHandler(String id) {
-            super(id, eventBus);
+            super(eventBus);
         }
 
         @Assign
         ProjectCreated handle(CreateProject command, CommandContext ctx) {
             return ProjectCreated.getDefaultInstance();
         }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return ImmutableSet.of(CommandClass.of(CreateProject.class));
-        }
     }
 
     private class AllCommandHandler extends CommandHandler {
 
         protected AllCommandHandler() {
-            super(newUuid(), eventBus);
+            super(eventBus);
         }
 
         @Assign
@@ -315,18 +310,11 @@ public class CommandDispatcherRegistryShould {
         ProjectStarted handle(StartProject command) {
             return ProjectStarted.getDefaultInstance();
         }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return ImmutableSet.of(CommandClass.of(CreateProject.class),
-                                   CommandClass.of(StartProject.class),
-                                   CommandClass.of(AddTask.class));
-        }
     }
 
     private class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler() {
-            super(newUuid(), eventBus);
+            super(eventBus);
         }
 
         @Override

@@ -45,7 +45,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.setSchedule;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
@@ -77,7 +76,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void not_schedule_command_if_no_scheduling_options_are_set() {
-        commandBus.register(new CreateProjectHandler(newUuid()));
+        commandBus.register(new CreateProjectHandler());
 
         commandBus.post(createProject(), responseObserver);
 

@@ -59,7 +59,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.server.reflect.CommandHandlerMethod.getCommandClasses;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -92,7 +91,7 @@ public class AggregateRepositoryShould {
         repositorySpy.create(id);
         repositorySpy.create(id);
 
-        verify(repositorySpy, times(1)).getAggregateConstructor();
+        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
@@ -192,7 +191,8 @@ public class AggregateRepositoryShould {
 
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
-        final Set<CommandClass> aggregateCommands = getCommandClasses(ProjectAggregate.class);
+        final Set<CommandClass> aggregateCommands =
+                Aggregate.TypeInfo.getCommandClasses(ProjectAggregate.class);
         final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));

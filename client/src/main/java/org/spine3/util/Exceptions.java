@@ -20,6 +20,8 @@
 
 package org.spine3.util;
 
+import com.google.common.base.Throwables;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -90,6 +92,7 @@ public class Exceptions {
      */
     public static IllegalStateException wrappedCause(Throwable throwable) {
         checkNotNull(throwable);
-        throw new IllegalStateException(throwable.getCause());
+        final Throwable cause = Throwables.getRootCause(throwable);
+        throw new IllegalStateException(cause);
     }
 }
