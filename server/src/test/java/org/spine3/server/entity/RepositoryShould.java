@@ -60,14 +60,16 @@ public class RepositoryShould {
         new RepoForEntityWithUnsupportedId(boundedContext).getIdClass();
     }
 
-    private static class EntityWithUnsupportedId extends AbstractVersionableEntity<Exception, Project> {
+    private static class EntityWithUnsupportedId
+            extends AbstractVersionableEntity<Exception, Project> {
         protected EntityWithUnsupportedId(Exception id) {
             super(id);
         }
     }
 
     @SuppressWarnings("ReturnOfNull")
-    private static class RepoForEntityWithUnsupportedId extends Repository<Exception, EntityWithUnsupportedId> {
+    private static class RepoForEntityWithUnsupportedId
+            extends Repository<Exception, EntityWithUnsupportedId> {
 
         /**
          * Creates the repository in the passed {@link BoundedContext}.
@@ -117,7 +119,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithPrivateConstructor extends AbstractVersionableEntity<ProjectId, Project> {
+    private static class EntityWithPrivateConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
@@ -168,7 +171,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithProtectedConstructor extends AbstractVersionableEntity<ProjectId, Project> {
+    private static class EntityWithProtectedConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
@@ -219,7 +223,8 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithoutRequiredConstructor extends AbstractVersionableEntity<ProjectId, Project> {
+    private static class EntityWithoutRequiredConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
@@ -265,7 +270,7 @@ public class RepositoryShould {
     //-----------------------
 
     private static class ProjectEntity extends AbstractVersionableEntity<ProjectId, Project> {
-        public ProjectEntity(ProjectId id) {
+        private ProjectEntity(ProjectId id) {
             super(id);
         }
     }
