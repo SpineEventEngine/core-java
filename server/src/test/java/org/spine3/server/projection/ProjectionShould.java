@@ -73,7 +73,8 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final ImmutableSet<EventClass> classes = Projection.TypeInfo.getEventClasses(TestProjection.class);
+        final ImmutableSet<EventClass> classes =
+                Projection.TypeInfo.getEventClasses(TestProjection.class);
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));
