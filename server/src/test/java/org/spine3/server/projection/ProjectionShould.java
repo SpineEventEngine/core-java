@@ -36,6 +36,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
@@ -73,11 +74,16 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final ImmutableSet<EventClass> classes = Projection.getEventClasses(TestProjection.class);
+        final ImmutableSet<EventClass> classes = Projection.TypeInfo.getEventClasses(TestProjection.class);
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));
         assertTrue(classes.contains(EventClass.of(Int32Value.class)));
+    }
+
+    @Test
+    public void have_type_info_utility_class() {
+        assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
     private static class TestProjection extends Projection<String, StringValue> {
@@ -90,14 +96,15 @@ public class ProjectionShould {
         }
 
         @Subscribe
-        public void on(StringValue event, EventContext ignored) {
+        public void on(StringValue event) {
             final StringValue newSate = createNewState("stringState", event.getValue());
             incrementState(newSate);
         }
 
         @Subscribe
         public void on(Int32Value event) {
-            final StringValue newSate = createNewState("integerState", String.valueOf(event.getValue()));
+            final StringValue newSate = createNewState("integerState",
+                                                       String.valueOf(event.getValue()));
             incrementState(newSate);
         }
 

@@ -39,6 +39,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Utilities for testing.
@@ -95,6 +96,13 @@ public class Tests {
             return true;
         }
         return true;
+    }
+
+    /**
+     * Asserts that the passed class has private parameter-less constructor.
+     */
+    public static void assertHasPrivateParameterlessCtor(Class<?> targetClass) {
+        assertTrue(hasPrivateParameterlessCtor(targetClass));
     }
 
     /**
