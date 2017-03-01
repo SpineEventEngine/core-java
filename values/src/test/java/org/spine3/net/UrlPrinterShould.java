@@ -25,8 +25,7 @@ import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
@@ -135,6 +134,6 @@ public class UrlPrinterShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(UrlPrinter.class));
+        assertHasPrivateParameterlessCtor(UrlPrinter.class);
     }
 }

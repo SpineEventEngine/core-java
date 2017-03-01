@@ -23,15 +23,14 @@ package org.spine3.change;
 import com.google.protobuf.ByteString;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
 import static org.spine3.change.Preconditions.checkNewValueNotEmpty;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class PreconditionsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Preconditions.class));
+        assertHasPrivateParameterlessCtor(Preconditions.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

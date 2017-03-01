@@ -48,7 +48,6 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandServiceShould {
 
     private CommandService service;

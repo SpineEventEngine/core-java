@@ -38,7 +38,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class RepositoryShould {
 
     private BoundedContext boundedContext;

@@ -35,7 +35,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandValidatorShould {
 
     private final CommandValidator validator = CommandValidator.getInstance();

@@ -26,19 +26,18 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.getZoneOffset;
 import static org.spine3.time.Calendars.nowAt;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class CalendarsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Calendars.class));
+        assertHasPrivateParameterlessCtor(Calendars.class);
     }
 
     @Test

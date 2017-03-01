@@ -24,9 +24,8 @@ import org.junit.Test;
 import org.spine3.net.Url.Record.QueryParameter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
@@ -74,6 +73,6 @@ public class QueryParametersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(QueryParameters.class));
+        assertHasPrivateParameterlessCtor(QueryParameters.class);
     }
 }

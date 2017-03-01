@@ -38,7 +38,6 @@ import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
 
     private TestProjection projection;

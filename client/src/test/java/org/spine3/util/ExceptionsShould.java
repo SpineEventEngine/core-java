@@ -20,22 +20,21 @@
 
 package org.spine3.util;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
-import org.spine3.test.Tests;
 
-import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ThrowableResultOfMethodCallIgnored"})
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class ExceptionsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(Exceptions.class));
+        assertHasPrivateParameterlessCtor(Exceptions.class);
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -50,11 +49,8 @@ public class ExceptionsShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Exceptions.class)
-                                                                     .addDefaultValue(new RuntimeException("message"))
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(Exception.class, new RuntimeException(""))
+                .testAllPublicStaticMethods(Exceptions.class);
     }
 }

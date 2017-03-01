@@ -39,7 +39,6 @@ import static org.spine3.server.validate.FieldValidatorFactory.create;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class FieldValidatorFactoryShould {
 
     private static final FieldPath FIELD_PATH = FieldPath.getDefaultInstance();
