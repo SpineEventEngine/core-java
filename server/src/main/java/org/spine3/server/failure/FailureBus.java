@@ -43,6 +43,21 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @see org.spine3.server.event.Subscribe Subscribe @Subscribe
  */
 public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
+
+    /**
+     * Creates a new instance according to the pre-configured {@code Builder}.
+     */
+    private FailureBus(Builder builder) {
+        //TODO:3/1/17:alex.tymchenko: initialize FailureStore via the Builder.
+    }
+
+    /**
+     * Creates a new builder for the {@code FailureBus}.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     @Override
     public void post(Failure failure, StreamObserver<Response> responseObserver) {
         checkNotNull(failure);
@@ -87,6 +102,14 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
     @Override
     protected FailureDispatcherRegistry registry() {
         return (FailureDispatcherRegistry) super.registry();
+    }
+
+    /** The {@code Builder} for {@code FailureBus}. */
+    public static class Builder {
+
+        public FailureBus build() {
+            return new FailureBus(this);
+        }
     }
 
     private enum LogSingleton {
