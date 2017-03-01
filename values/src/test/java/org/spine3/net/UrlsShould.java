@@ -32,7 +32,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
+@SuppressWarnings({"DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
 public class UrlsShould {
 
     @Test

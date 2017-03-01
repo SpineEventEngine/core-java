@@ -34,7 +34,6 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
     @Test

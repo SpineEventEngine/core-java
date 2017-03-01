@@ -62,7 +62,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"}) // Over-coupling is OK for test classes
+@SuppressWarnings("ClassWithTooManyMethods")
 public class EventEnrichmentsMapShould {
 
     @Test

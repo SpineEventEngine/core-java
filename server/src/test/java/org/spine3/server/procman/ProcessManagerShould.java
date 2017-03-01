@@ -70,7 +70,7 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
+@SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);

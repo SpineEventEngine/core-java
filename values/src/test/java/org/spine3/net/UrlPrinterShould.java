@@ -30,7 +30,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public class UrlPrinterShould {
 
     private static final Authorization AUTH =
