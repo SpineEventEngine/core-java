@@ -22,6 +22,8 @@ package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.protobuf.Message;
 import org.spine3.base.EventClass;
 import org.spine3.server.reflect.EventSubscriberMethod;
@@ -42,8 +44,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class SubscriberRegistry {
 
-    private final HashMultimap<EventClass, EventSubscriber> subscribersByEventClass =
-            HashMultimap.create();
+    private final Multimap<EventClass, EventSubscriber> subscribersByEventClass =
+            Multimaps.synchronizedMultimap(HashMultimap.<EventClass, EventSubscriber>create());
 
     void subscribe(EventSubscriber object) {
         checkNotNull(object);
