@@ -58,8 +58,7 @@ import static org.spine3.base.Identifiers.idToAny;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message>
-        extends AbstractVersionableEntity<I, S> {
+public abstract class CommandHandlingEntity<I, S extends Message> extends AbstractVersionableEntity<I, S> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

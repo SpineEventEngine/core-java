@@ -89,7 +89,7 @@ public class ProcessManagerShould {
         final CommandStore commandStore = spy(
                 new CommandStore(storageFactory.createCommandStorage())
         );
-        
+
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
