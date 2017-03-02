@@ -18,6 +18,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+repositories {
+    // Spine releases repository.
+    maven { url = 'http://maven.teamdev.com/repository/spine' }
+
+    // Spine snapshots repository.
+    maven { url = 'http://maven.teamdev.com/repository/spine-snapshots' }
+}
+
 configurations {
     excludeInternalDoclet
 }
