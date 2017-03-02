@@ -25,8 +25,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import org.spine3.validate.ConversionError;
 
 import javax.annotation.Nullable;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -65,8 +67,10 @@ public class Stringifiers {
     public static String toIdString(Timestamp timestamp) {
         checkNotNull(timestamp);
         String result = Timestamps.toString(timestamp);
-        result = PATTERN_COLON.matcher(result).replaceAll("-");
-        result = PATTERN_T.matcher(result).replaceAll("_T");
+        result = PATTERN_COLON.matcher(result)
+                              .replaceAll("-");
+        result = PATTERN_T.matcher(result)
+                          .replaceAll("_T");
 
         return result;
     }
@@ -111,8 +115,9 @@ public class Stringifiers {
         final Class<? extends Message> msgClass = message.getClass();
         if (registry.hasStringiferFor(msgClass)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgClass).get();
-            result = (String) converter.apply(message);
+            final Stringifier converter = registry.get(msgClass)
+                                                  .get();
+            result = (String) converter.convert(message);
         } else {
             result = convert(message);
         }
@@ -120,12 +125,14 @@ public class Stringifiers {
     }
 
     private static String convert(Message message) {
-        final Collection<Object> values = message.getAllFields().values();
+        final Collection<Object> values = message.getAllFields()
+                                                 .values();
         final String result;
         if (values.isEmpty()) {
             result = EMPTY_ID;
         } else if (values.size() == 1) {
-            final Object object = values.iterator().next();
+            final Object object = values.iterator()
+                                        .next();
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);
             } else {
@@ -139,38 +146,63 @@ public class Stringifiers {
 
     private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
         String result = shortDebugString(message);
-        result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
+        result = PATTERN_COLON_SPACE.matcher(result)
+                                    .replaceAll(EQUAL_SIGN);
         return result;
     }
 
-    static class TimestampIdStringifer implements Stringifier<Timestamp> {
+    protected static class TimestampIdStringifer extends Stringifier<Timestamp, String> {
+
         @Override
-        public String apply(@Nullable Timestamp timestamp) {
-            if (timestamp == null) {
-                return NULL_ID;
-            }
+        protected String doForward(Timestamp timestamp) {
             final String result = toIdString(timestamp);
+            return result;
+        }
+
+        @Override
+        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+        // It is OK, because all necessary information about exception
+        // is passed to the {@code ConversionError} instance.
+        protected Timestamp doBackward(String s) {
+            try {
+                return Timestamps.parse(s);
+            } catch (ParseException e) {
+                final ConversionError conversionError = new ConversionError(e.getMessage(),
+                                                                            e.getErrorOffset());
+                throw new IllegalArgumentException(conversionError);
+            }
+        }
+    }
+
+    static class EventIdStringifier extends Stringifier<EventId, String> {
+        @Override
+        protected String doForward(EventId eventId) {
+            final String result = eventId.getUuid();
+            return result;
+        }
+
+        @Override
+        protected EventId doBackward(String s) {
+            final EventId result = EventId.newBuilder()
+                                          .setUuid(s)
+                                          .build();
             return result;
         }
     }
 
-    static class EventIdStringifier implements Stringifier<EventId> {
+    static class CommandIdStringifier extends Stringifier<CommandId, String> {
         @Override
-        public String apply(@Nullable EventId eventId) {
-            if (eventId == null) {
-                return NULL_ID;
-            }
-            return eventId.getUuid();
+        protected String doForward(CommandId commandId) {
+            final String result = commandId.getUuid();
+            return result;
         }
-    }
 
-    static class CommandIdStringifier implements Stringifier<CommandId> {
         @Override
-        public String apply(@Nullable CommandId commandId) {
-            if (commandId == null) {
-                return NULL_ID;
-            }
-            return commandId.getUuid();
+        protected CommandId doBackward(String s) {
+            final CommandId result = CommandId.newBuilder()
+                                              .setUuid(s)
+                                              .build();
+            return result;
         }
     }
 }
