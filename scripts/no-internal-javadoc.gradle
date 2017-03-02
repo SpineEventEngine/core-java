@@ -35,6 +35,10 @@ task noInternalJavadoc(type: Javadoc) {
         !it.absolutePath.contains('generated')
     }
     classpath = javadoc.getClasspath()
-    options.doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
-    options.docletpath = configurations.excludeInternalDoclet.files.asType(List)
+
+    options {
+        doclet = 'org.spine3.javadoc.ExcludeInternalDoclet'
+        docletpath = configurations.excludeInternalDoclet.files.asType(List)
+        encoding = 'UTF8'
+    }
 }
