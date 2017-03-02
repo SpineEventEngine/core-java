@@ -43,7 +43,6 @@ import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeUrlShould {
 
     private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor().getFullName();
@@ -158,7 +157,7 @@ public class TypeUrlShould {
     public void obtain_type_of_command() {
         final CommandFactory factory = TestCommandFactory.newInstance(TypeUrlShould.class);
         final StringValue message = newStringValue(newUuid());
-        final Command command = factory.create(message);
+        final Command command = factory.createCommand(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
 

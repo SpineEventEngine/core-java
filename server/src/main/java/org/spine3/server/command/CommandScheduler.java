@@ -20,18 +20,22 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.setSchedulingTime;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -75,7 +79,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Schedules a command and delivers it to the target according to the scheduling options set to a context.
+     * Schedules a command and delivers it to the target according to
+     * the scheduling options set to a context.
      *
      * @param command a command to deliver later
      * @see #post(Command)
@@ -115,5 +120,52 @@ public abstract class CommandScheduler {
     /** Sets a command bus used to post scheduled commands. */
     void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
+    }
+
+    /**
+     * Sets a new scheduling time to {@link CommandContext.Schedule}.
+     *
+     * @param command        a command to update
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @return an updated command
+     */
+    static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
+        checkNotNull(command);
+        checkNotNull(schedulingTime);
+
+        final Duration delay = command.getContext()
+                                      .getSchedule()
+                                      .getDelay();
+        final Command result = setSchedule(command, delay, schedulingTime);
+        return result;
+    }
+
+    /**
+     * Updates {@link CommandContext.Schedule}.
+     *
+     * @param command        a command to update
+     * @param delay          a {@linkplain CommandContext.Schedule#getDelay() delay} to set
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @return an updated command
+     */
+    static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
+        checkNotNull(command);
+        checkNotNull(delay);
+        checkNotNull(schedulingTime);
+        checkValid(schedulingTime);
+
+        final CommandContext context = command.getContext();
+        final CommandContext.Schedule scheduleUpdated = context.getSchedule()
+                                                               .toBuilder()
+                                                               .setDelay(delay)
+                                                               .setSchedulingTime(schedulingTime)
+                                                               .build();
+        final CommandContext contextUpdated = context.toBuilder()
+                                                     .setSchedule(scheduleUpdated)
+                                                     .build();
+        final Command result = command.toBuilder()
+                                      .setContext(contextUpdated)
+                                      .build();
+        return result;
     }
 }

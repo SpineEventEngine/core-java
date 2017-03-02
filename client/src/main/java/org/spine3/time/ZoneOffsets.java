@@ -21,14 +21,14 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 
 import java.util.TimeZone;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static org.spine3.protobuf.Durations.hours;
-import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Durations2.hours;
+import static org.spine3.protobuf.Durations2.minutes;
+import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -77,7 +77,8 @@ public class ZoneOffsets {
     }
 
     /**
-     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java virtual machine.
+     * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java
+     * virtual machine.
      *
      * @see TimeZone#getDefault()
      */
@@ -92,7 +93,7 @@ public class ZoneOffsets {
     public static ZoneOffset ofHours(int hours) {
         checkHourOffset(hours, false);
 
-        final Duration hourDuration = Durations.ofHours(hours);
+        final Duration hourDuration = Durations2.fromHours(hours);
         final int seconds = toSeconds(hourDuration);
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(seconds)
@@ -114,15 +115,17 @@ public class ZoneOffsets {
                          .build();
     }
 
-    @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the arguments.
+    @SuppressWarnings("NumericCastThatLosesPrecision")
+    // It is safe, as we check bounds of the arguments.
     private static int toSeconds(Duration duration) {
-        return (int) Durations.toSeconds(duration);
+        return (int) Durations2.toSeconds(duration);
     }
 
     private static void checkHourOffset(int hours, boolean assumingMinutes) {
         // If the offset contains minutes too, we make the range smaller by one hour from each end.
         final int shift = (assumingMinutes ? 1 : 0);
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift, MAX_HOURS_OFFSET - shift);
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift,
+                    MAX_HOURS_OFFSET - shift);
     }
 
     private static void checkMinuteOffset(int minutes) {

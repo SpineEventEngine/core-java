@@ -22,21 +22,23 @@ package org.spine3.server.procman;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
-import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
+import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -89,71 +91,46 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
     }
 
     /**
-     * Directs the passed command to the handler method and transforms its output to a list of events.
-     *
-     * @param commandMessage the command to be processed
-     * @param context the context of the command
-     * @return the events resulted from the call
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    @Override
-    protected List<Event> invokeHandler(Message commandMessage, CommandContext context)
-            throws InvocationTargetException {
-        final List<? extends Message> messages = super.invokeHandler(commandMessage, context);
-
-        final List<Event> events = toEvents(messages, context);
-        return events;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * This method overrides the parent for:
-     * <ol>
-     *     <li>Opening the method to the package.
-     *     <li>Casting the result to {@code List<Event>}, which is produced by
-     *     {@link #invokeHandler(Message, CommandContext) invokeHander()}.
-     * </ol>
+     * Dispatches the command to the handler method and transforms the output
+     * into a list of events.
      *
      * @return the list of events generated as the result of handling the command.
      */
-    @SuppressWarnings("unchecked") // See Javadoc above
     @Override
-    protected List<Event> dispatchCommand(Message command, CommandContext context) {
-        final List<? extends Message> messages = super.dispatchCommand(command, context);
-        return (List<Event>)messages;
+    protected List<Event> dispatchCommand(Message commandMessage, CommandContext context) {
+        final List<? extends Message> messages = super.dispatchCommand(commandMessage, context);
+        final List<Event> result = toEvents(messages, context);
+        return result;
+    }
+
+    /**
+     * Transforms the passed list of event messages into the list of events.
+     *
+     * @param eventMessages event messages for which generate events
+     * @param commandContext the context of the command which generated the event messages
+     * @return list of events
+     */
+    private List<Event> toEvents(List<? extends Message> eventMessages,
+                                 final CommandContext commandContext) {
+        return CommandHandlerMethod.toEvents(getProducerId(),
+                                             getVersion(),
+                                             eventMessages,
+                                             commandContext);
     }
 
     /**
      * Dispatches an event to the event subscriber method of the process manager.
      *
-     * @param event the event to be handled by the process manager
+     * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
-    protected void dispatchEvent(Message event, EventContext context)
+    protected void dispatchEvent(Message eventMessage, EventContext context)
             throws InvocationTargetException {
         checkNotNull(context);
-        checkNotNull(event);
-        final Class<? extends Message> eventClass = event.getClass();
-        final EventSubscriberMethod method =
-                MethodRegistry.getInstance()
-                              .get(getClass(), eventClass, EventSubscriberMethod.factory());
-        if (method == null) {
-            throw missingEventHandler(eventClass);
-        }
-        method.invoke(this, event, context);
-    }
-
-    /**
-     * Returns the set of event classes handled by the process manager.
-     *
-     * @param pmClass the process manager class to inspect
-     * @return immutable set of event classes or an empty set if no events are handled
-     */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(
-            Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
+        checkNotNull(eventMessage);
+        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
+        method.invoke(this, eventMessage, context);
     }
 
     /**
@@ -240,12 +217,33 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         return commandBus;
     }
 
-    private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = format(
-                "Missing event handler for event class %s in the process manager class %s",
-                eventClass,
-                this.getClass()
-        );
-        return new IllegalStateException(msg);
+    /**
+     * Provides type information for process manager classes.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction of this utility class.
+        }
+
+        /**
+         * Obtains the set of command classes handled by passed process manager class.
+         *
+         * @param pmClass the process manager class to inspect
+         * @return immutable set of command classes or an empty set if no commands are handled
+         */
+        static Set<CommandClass> getCommandClasses(Class<? extends ProcessManager> pmClass) {
+            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(pmClass));
+        }
+
+        /**
+         * Returns the set of event classes handled by the process manager.
+         *
+         * @param pmClass the process manager class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static Set<EventClass> getEventClasses(Class<? extends ProcessManager> pmClass) {
+            return EventSubscriberMethod.getEventClasses(pmClass);
+        }
     }
 }

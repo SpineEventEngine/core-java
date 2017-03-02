@@ -38,7 +38,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
@@ -132,7 +133,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * <li>Closes {@link CommandBus}.
      * <li>Closes {@link EventBus}.
      * <li>Closes {@link CommandStore}.
-     * <li>Closes {@link org.spine3.server.event.EventStore}.
+     * <li>Closes {@link org.spine3.server.event.EventStore EventStore}.
      * <li>Closes {@link Stand}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
@@ -199,7 +200,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
-    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends AbstractVersionableEntity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
         if (repository instanceof CommandDispatcher) {
@@ -411,17 +412,29 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
-                throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
-                                                        ") returned null instance");
+                final String errMsg = String.format(
+                        "Supplier of StorageFactory (%s) returned null instance",
+                        storageFactorySupplier
+                );
+                throw new IllegalStateException(errMsg);
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
                 commandStore = createCommandStore(storageFactory);
             }
+
             if (commandBus == null) {
                 commandBus = createCommandBus(storageFactory);
+            } else {
+                // Check that both either multi-tenant or single-tenant.
+                checkState(multitenant == commandBus.isMultitenant(),
+                           "CommandBus must match multitenancy of BoundedContext. " +
+                           "Status in BoundedContext.Builder: %s CommandBus: %s",
+                           String.valueOf(multitenant), String.valueOf(commandBus.isMultitenant())
+                );
             }
+
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
             }
@@ -431,8 +444,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             }
 
             standFunnel = createStandFunnel(standUpdateDelivery);
-
-            commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 
@@ -459,6 +470,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                 this.commandStore = createCommandStore(storageFactory);
             }
             final CommandBus commandBus = CommandBus.newBuilder()
+                                                    .setMultitenant(this.multitenant)
                                                     .setCommandStore(commandStore)
                                                     .build();
             return commandBus;

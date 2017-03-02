@@ -34,9 +34,10 @@ public class MoneyUtil {
     /**
      * Creates a new {@code Money} instance.
      *
-     * @param amount   the amount of minor currency units (for currencies whose minor units are used, e.g. "cents")
-     *                 or the amount of major currency units (for currencies whose minor currency units are unused
-     *                 due to negligible value or do not exist at all)
+     * @param amount   the amount of minor currency units (for currencies whose minor units
+     *                 are used, e.g. "cents") or the amount of major currency units (for currencies
+     *                 whose minor currency units are unused due to negligible value or
+     *                 do not exist at all)
      * @param currency the currency of the amount of money
      */
     public static Money newMoney(long amount, Currency currency) {

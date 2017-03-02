@@ -42,6 +42,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends 
         // Have the constructor for easier location of usages.
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
     @Override
     public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);

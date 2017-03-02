@@ -55,7 +55,7 @@ message CommandId {
 // A command can hold any valid Protobuf message, but in most cases, it would be a type
 // defined in `commands.proto` file of the corresponding aggregate or process manager.
 //
-// There should be <strong>one and only one</strong> command handler associated with the type of the command.
+// There should be one and only one command handler associated with the type of the command.
 //
 message Command {
 
@@ -81,7 +81,7 @@ message CommandContext {
     // The zone offset from which the command is made.
     time.ZoneOffset zone_offset = 4 [(required) = true];
 
-    // The ID of a tenant in a multitenant application.
+    // The ID of a tenant in a multi-tenant application.
     //
     // This field is not populated in single-tenant applications.
     //
@@ -90,18 +90,19 @@ message CommandContext {
     // A command may be scheduled. This type defines scheduling options.
     message Schedule {
 
-        // The delay between the moment of receiving a command at the server and its delivery to the target.
+        // The delay between the moment of receiving a command at the server
+        // and its delivery to the target.
         google.protobuf.Duration delay = 1;
+
+        // The time when the command was scheduled.
+        // Is set automatically and used only by Spine when re-scheduling a command.
+        google.protobuf.Timestamp scheduling_time = 2 [(internal) = true];
 
         //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific OffsetDateTime.
         // Name the field `at`;
 
         //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence. Name the attribute `every`.
         // The recurrence pattern should be a separate type somewhere under `time` package.
-
-        // The time when the command was scheduled.
-        // Is set automatically and used only by Spine when re-scheduling a command.
-        google.protobuf.Timestamp scheduling_time = 2 [(internal) = true];
     }
 
     // The schedule to execute the command.
@@ -109,7 +110,8 @@ message CommandContext {
 
     // The version of the entity for which this command is intended.
     //
-    // A client app may not fill in this attribute if the command applies to any version of the entity.
+    // A client app may not fill in this attribute if the command applies to
+    // any version of the entity.
     //
     int32 target_version = 7;
 }
@@ -126,8 +128,12 @@ enum CommandValidationError {
     // The command message is invalid according to custom Protobuf options set.
     INVALID_COMMAND = 2;
 
-    // The command context does not have `tenant_id` attribute defined in a multitenant application.
+    // The command context does not have `tenant_id` attribute defined
+    // in a multi-tenant application.
     TENANT_UNKNOWN = 3;
+
+    // The command context has non-default value of `tenant_id` in the command sent to a single-tenant application.
+    TENANT_INAPPLICABLE = 4;
 }
 
 // This enumeration defines possible statuses of command processing.
@@ -139,7 +145,8 @@ enum CommandStatus {
     // The command has been received by backend and stored.
     RECEIVED = 1;
 
-    // The command has been received by backend and stored, but will be delivered to the target later.
+    // The command has been received by backend and stored,
+    // but will be delivered to the target later.
     SCHEDULED = 2;
 
     // The command has been successfully handled.

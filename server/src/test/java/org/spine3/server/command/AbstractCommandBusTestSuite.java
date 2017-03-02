@@ -22,15 +22,25 @@ package org.spine3.server.command;
 
 import org.junit.After;
 import org.junit.Before;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandValidationError;
+import org.spine3.base.Error;
+import org.spine3.client.CommandFactory;
+import org.spine3.server.command.error.CommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.users.TenantId;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.spy;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
+import static org.spine3.server.command.Given.Command.createProject;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -40,26 +50,84 @@ import static org.spine3.base.Identifiers.newUuid;
 @SuppressWarnings("ProtectedField") // OK for brevity of derived tests.
 public abstract class AbstractCommandBusTestSuite {
 
+    private final boolean multitenant;
+
+    protected CommandFactory commandFactory;
+
     protected CommandBus commandBus;
     protected CommandStore commandStore;
+    protected Log log;
     protected EventBus eventBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected TestResponseObserver responseObserver;
+
+    /**
+     * A public constructor for derived test cases.
+     *
+     * @param multitenant the multi-tenancy status of the {@code CommandBus} under tests
+     */
+    public AbstractCommandBusTestSuite(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    protected static Command newCommandWithoutContext() {
+        final Command cmd = createProject();
+        final Command invalidCmd = cmd.toBuilder()
+                                      .setContext(CommandContext.getDefaultInstance())
+                                      .build();
+        return invalidCmd;
+    }
+
+    protected static <E extends CommandException> void checkCommandError(Throwable throwable,
+                                                                         CommandValidationError validationError,
+                                                                         Class<E> exceptionClass,
+                                                                         Command cmd) {
+        final Throwable cause = throwable.getCause();
+        assertEquals(exceptionClass, cause.getClass());
+        @SuppressWarnings("unchecked")
+        final E exception = (E) cause;
+        assertEquals(cmd, exception.getCommand());
+        final Error error = exception.getError();
+        assertEquals(CommandValidationError.getDescriptor()
+                                           .getFullName(), error.getType());
+        assertEquals(validationError.getNumber(), error.getCode());
+        assertFalse(error.getMessage()
+                         .isEmpty());
+        if (validationError == INVALID_COMMAND) {
+            assertFalse(error.getValidationError()
+                             .getConstraintViolationList()
+                             .isEmpty());
+        }
+    }
+
+    protected static Command newCommandWithoutTenantId() {
+        final Command cmd = createProject();
+        final Command invalidCmd = cmd.toBuilder()
+                                      .setContext(cmd.getContext()
+                                                     .toBuilder()
+                                                     .setTenantId(TenantId.getDefaultInstance()))
+                                      .build();
+        return invalidCmd;
+    }
 
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
+        log = spy(new Log());
         commandBus = CommandBus.newBuilder()
+                               .setMultitenant(multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setThreadSpawnAllowed(true)
+                               .setLog(log)
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        createProjectHandler = new CreateProjectHandler(newUuid());
+        commandFactory = TestCommandFactory.newInstance(getClass());
+        createProjectHandler = new CreateProjectHandler();
         responseObserver = new TestResponseObserver();
     }
 
@@ -78,8 +146,8 @@ public abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
 
-        CreateProjectHandler(String id) {
-            super(id, eventBus);
+        CreateProjectHandler() {
+            super(eventBus);
         }
 
         @Assign

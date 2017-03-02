@@ -22,97 +22,74 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
-import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
-import org.spine3.base.Response;
-import org.spine3.client.CommandFactory;
-import org.spine3.protobuf.Durations;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.protobuf.Durations2;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
-import org.spine3.testdata.TestEventBusFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.base.Commands.setSchedule;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.command.CommandScheduler.setSchedule;
+import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
-public class CommandBusShouldHandleCommandStatus {
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestSuite {
 
-    private CommandBus commandBus;
-    private CommandStore commandStore;
-    private CommandFactory commandFactory;
-    private Log log;
-    private EventBus eventBus;
-    private TestResponseObserver responseObserver;
-
-    @Before
-    public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
-        final ExecutorCommandScheduler scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new Log());
-        commandBus = CommandBus.newBuilder()
-                               .setCommandStore(commandStore)
-                               .setCommandScheduler(scheduler)
-                               .setThreadSpawnAllowed(true)
-                               .setLog(log)
-                               .setAutoReschedule(false)
-                               .build();
-        eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
-        responseObserver = new TestResponseObserver();
+    public CommandBusShouldHandleCommandStatus() {
+        super(true);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if (commandStore.isOpen()) { // then command bus is opened, too
-            commandBus.close();
-        }
-        eventBus.close();
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
+    @Test
+    public void set_command_status_to_OK_when_handler_returns() {
+        commandBus.register(createProjectHandler);
+
+        final Command command = createProject();
+        commandBus.post(command, responseObserver);
+
+        // See that we called CommandStore only once with the right command ID.
+//        verify(commandStore).setCommandStatusOk(command);
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
     @Test
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProjectMessage());
+        final Command command = commandFactory.createCommand(Given.CommandMessage.createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(getId(command), dispatcher.exception);
-        final CommandEnvelope envelope = new CommandEnvelope(command);
-        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
+//        verify(commandStore, atMost(1)).updateStatus(command, dispatcher.exception);
+
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getMessage(), envelope.getCommandId());
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
     @Test
     public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
         final TestFailure failure = new TestFailure();
@@ -122,10 +99,12 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+//        verify(commandStore, atMost(1)).updateStatus(eq(command), eq(failure.toMessage()));
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
     @Test
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
         final RuntimeException exception = new IllegalStateException("handler throws");
@@ -135,12 +114,15 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(exception));
+//        verify(commandStore, atMost(1)).updateStatus(eq(command), eq(exception));
         verify(log).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
     @Test
-    public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
+    public void set_command_status_to_failure_when_handler_throws_unknown_Throwable()
+            throws TestFailure, TestThrowable {
         final Throwable throwable = new TestThrowable();
         final Command command = givenThrowingHandler(throwable);
         final CommandId commandId = getId(command);
@@ -148,16 +130,20 @@ public class CommandBusShouldHandleCommandStatus {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
+//        verify(commandStore, atMost(1))
+//                .updateStatus(eq(command), eq(Errors.fromThrowable(throwable)));
+
         verify(log).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
 
+    //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
+    @Ignore
     @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
         final List<Command> commands = newArrayList(Given.Command.createProject(),
                                                     Given.Command.addTask(),
                                                     Given.Command.startProject());
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
@@ -167,7 +153,7 @@ public class CommandBusShouldHandleCommandStatus {
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);
             final CommandId id = getId(cmd);
-            verify(commandStore, atMost(1)).updateStatus(id, commandExpiredError(msg));
+//            verify(commandStore, atMost(1)).updateStatus(cmd, commandExpiredError(msg));
             verify(log).errorExpiredCommand(msg, id);
         }
     }
@@ -192,7 +178,7 @@ public class CommandBusShouldHandleCommandStatus {
         private final Throwable throwable;
 
         protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
-            super(newUuid(), eventBus);
+            super(eventBus);
             this.throwable = throwable;
         }
 
@@ -208,7 +194,7 @@ public class CommandBusShouldHandleCommandStatus {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
-        final Command command = commandFactory.create(msg);
+        final Command command = commandFactory.createCommand(msg);
         return command;
     }
 
@@ -220,9 +206,9 @@ public class CommandBusShouldHandleCommandStatus {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+            super(newStringValue("some Command message"),
+                  CommandContext.getDefaultInstance(),
+                  newStringValue(TestFailure.class.getName()));
         }
     }
 
@@ -233,50 +219,16 @@ public class CommandBusShouldHandleCommandStatus {
     private static class ThrowingDispatcher implements CommandDispatcher {
 
         @SuppressWarnings("ThrowableInstanceNeverThrown")
-        private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
+        private final RuntimeException exception = new RuntimeException("Dispatching exception.");
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             throw exception;
-        }
-    }
-
-    /*
-     * Response observers.
-     *********************/
-
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private final List<Response> responses = newLinkedList();
-        private Throwable throwable;
-        private boolean completed;
-
-        @Override
-        public void onNext(Response response) {
-            responses.add(response);
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.completed = true;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return this.completed;
         }
     }
 }

@@ -22,11 +22,10 @@ package org.spine3.server.storage.memory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.users.TenantId;
+import org.spine3.server.storage.TenantDataOperation;
 
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.Tests.newTenantUuid;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,21 +41,18 @@ public class MultitenantStorageShould {
 
     @Test(expected = IllegalStateException.class)
     public void report_missing_tenant_under_multitenant_context() {
-        // Make sure we don't have current tenant.
-        CurrentTenant.clear();
-
-        // Obtaining storage for the current tenant should cause exception.
         storage.getStorage();
     }
 
     @Test
     public void obtain_storage_for_current_tenant() {
-        CurrentTenant.set(TenantId.newBuilder()
-                                  .setValue(newUuid())
-                                  .build());
-
-        final TenantStorage tenantStorage = storage.getStorage();
-        assertNotNull(tenantStorage);
+        new TenantDataOperation(newTenantUuid()) {
+            @Override
+            public void run() {
+                final TenantStorage tenantStorage = storage.getStorage();
+                assertNotNull(tenantStorage);
+            }
+        };
     }
 
     private static class MultiStorage extends MultitenantStorage<TenantCommands> {

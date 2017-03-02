@@ -20,52 +20,83 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.ProjectLifecycle;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
-import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
+
+import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.base.Identifiers.newUuid;
 
 public class AggregateRootShould {
 
-    private AggregateRoot aggregateRoot;
+    private ProjectRoot aggregateRoot;
+    private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        boundedContext.register(new ProjectHeaderRepository(boundedContext));
+        boundedContext = BoundedContext.newBuilder()
+                                       .build();
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(newUuid())
+                                       .build();
+        aggregateRoot = new ProjectRoot(boundedContext, projectId);
+        boundedContext.register(new ProjectDefinitionRepository(boundedContext));
+        boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
+    }
 
-        final ProjectId id = Sample.messageOfType(ProjectId.class);
-        aggregateRoot = new ProjectRoot(boundedContext, id);
+    @Test
+    public void pass_null_tolerance_test() throws NoSuchMethodException {
+        final Constructor<AnAggregateRoot> ctor =
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
+        new NullPointerTester()
+                .setDefault(Constructor.class, ctor)
+                .setDefault(BoundedContext.class, boundedContext)
+                .testStaticMethods(AggregateRoot.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
+        AggregateRoot.create(newUuid(), boundedContext, AggregateRoot.class);
+    }
+
+    @Test
+    public void create_aggregate_root_entity() {
+        final AnAggregateRoot aggregateRoot =
+                AggregateRoot.create(newUuid(), boundedContext, AnAggregateRoot.class);
+        assertNotNull(aggregateRoot);
     }
 
     @Test
     public void return_part_state_by_class() {
-        final Message part = aggregateRoot.getPartState(Project.class);
+        final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
+        assertNotNull(definitionPart);
 
-        assertNotNull(part);
+        final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
+        assertNotNull(lifeCyclePart);
     }
 
     @Test
     public void cache_repositories() {
         final AggregateRoot rootSpy = spy(aggregateRoot);
-        final Class<Project> partClass = Project.class;
+        final Class<ProjectDefinition> partClass = ProjectDefinition.class;
 
         rootSpy.getPartState(partClass);
         rootSpy.getPartState(partClass);
@@ -78,6 +109,12 @@ public class AggregateRootShould {
        Test environment classes
      ***************************/
 
+    private static class AnAggregateRoot extends AggregateRoot<String> {
+        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
+        }
+    }
+
     private static class ProjectRoot extends AggregateRoot<ProjectId> {
 
         private ProjectRoot(BoundedContext boundedContext, ProjectId id) {
@@ -85,19 +122,23 @@ public class AggregateRootShould {
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We need exact message classes, without OrBuilder.
-    private static class ProjectHeader extends AggregatePart<ProjectId, Project, Project.Builder> {
+    @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
+    private static class ProjectDefinitionPart extends AggregatePart<ProjectId,
+            ProjectDefinition,
+            ProjectDefinition.Builder,
+            ProjectRoot> {
 
-        private ProjectHeader(ProjectId id) {
-            super(id);
+        private ProjectDefinitionPart(ProjectRoot root) {
+            super(root);
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject msg, CommandContext context) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+        ProjectCreated handle(CreateProject msg) {
+            final ProjectCreated result = ProjectCreated.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .setName(msg.getName())
+                                                        .build();
+            return result;
         }
 
         @Apply
@@ -105,34 +146,45 @@ public class AggregateRootShould {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
+    }
 
-        @Assign
-        public TaskAdded handle(AddTask msg, CommandContext context) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .build();
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
+    // Static field in the instance method is used for the test simplification.
+    private static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
+            ProjectLifecycle,
+            ProjectLifecycle.Builder,
+            ProjectRoot> {
+
+        protected ProjectLifeCyclePart(ProjectRoot root) {
+            super(root);
         }
 
-        @Apply
-        private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId());
-        }
-
         @Assign
-        public ProjectStarted handle(StartProject msg, CommandContext context) {
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+        ProjectStarted handle(StartProject msg) {
+            final ProjectStarted result = ProjectStarted.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .build();
+            return result;
         }
 
         @Apply
         private void apply(ProjectStarted event) {
+            getBuilder().setStatus(Status.STARTED);
         }
     }
 
-    private static class ProjectHeaderRepository extends AggregatePartRepository<ProjectId, ProjectHeader> {
+    private static class ProjectDefinitionRepository
+            extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
 
-        private ProjectHeaderRepository(BoundedContext boundedContext) {
+        private ProjectDefinitionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private static class ProjectLifeCycleRepository
+            extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
+
+        private ProjectLifeCycleRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }

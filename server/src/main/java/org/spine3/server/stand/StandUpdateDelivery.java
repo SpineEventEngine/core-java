@@ -27,21 +27,27 @@ import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.delivery.Delivery;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Entity} state updates to the {@code Stand} from the
- * sources such as {@link org.spine3.server.aggregate.AggregateRepository} and {@link ProjectionRepository} via {@link StandFunnel}.
+ * A base class for the strategies on delivering the {@code Entity} state updates
+ * to the {@code Stand}.
+ *
+ * <p>Common delivery sources are
+ * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
+ * and {@link ProjectionRepository}.
+ *
+ * <p>Delivery is performed via {@link StandFunnel}.
  *
  * @author Alex Tymchenko
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
+public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, Stand> {
 
     private Stand stand;
 
@@ -58,7 +64,8 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     }
 
     @Override
-    protected Runnable getDeliveryAction(final Stand consumer, final Entity deliverable) {
+    protected Runnable getDeliveryAction(final Stand consumer,
+                                         final VersionableEntity deliverable) {
         return new Runnable() {
             @Override
             public void run() {
@@ -70,13 +77,13 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     }
 
     @Override
-    protected Collection<Stand> consumersFor(Entity deliverable) {
+    protected Collection<Stand> consumersFor(VersionableEntity deliverable) {
         return Lists.newArrayList(stand);
     }
 
     /**
-     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state update propagation
-     * and uses the specified {@code executor} for the operation.
+     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state
+     * update propagation and uses the specified {@code executor} for the operation.
      *
      * @param executor an instance of {@code Executor} to use for the delivery
      * @return the instance of {@code StandUpdateDelivery} with the given executor
@@ -84,7 +91,7 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     public static StandUpdateDelivery immediateDeliveryWithExecutor(Executor executor) {
         final StandUpdateDelivery immediateDelivery = new StandUpdateDelivery(executor) {
             @Override
-            protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
                 return false;
             }
         };
@@ -99,13 +106,13 @@ public abstract class StandUpdateDelivery extends Delivery<Entity, Stand> {
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any update delivery
-         * and uses a default executor for the operation.
+         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any
+         * update delivery and uses a default executor for the operation.
          */
         private static final StandUpdateDelivery DIRECT_DELIVERY = new StandUpdateDelivery() {
 
             @Override
-            protected boolean shouldPostponeDelivery(Entity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
                 return false;
             }
         };

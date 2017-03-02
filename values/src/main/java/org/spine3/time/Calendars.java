@@ -45,13 +45,14 @@ import static java.util.Calendar.getInstance;
  * Spine v2 will be based on Java 8 and this class will be deprecated.
  *
  * @author Alexander Aleksandrov
- * @since 0.6.12
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public class Calendars {
 
     private static final String TIME_ZONE_GMT = "GMT";
 
     private Calendars() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -74,7 +75,8 @@ public class Calendars {
      * Obtains month using {@code Calendar}.
      */
     public static int getMonth(Calendar cal) {
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the reasonable value of month
+        // The Calendar class assumes JANUARY is zero.
+        // Therefore add 1 to get the reasonable value of month
         final int month = cal.get(MONTH) + 1;
         return month;
     }
@@ -227,7 +229,8 @@ public class Calendars {
      * Obtains month of year using calendar.
      */
     public static MonthOfYear getMonthOfYear(Calendar calendar) {
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
+        // The Calendar class assumes JANUARY is zero.
+        // Therefore add 1 to get the value of MonthOfYear.
         final int monthByCalendar = calendar.get(MONTH);
         final MonthOfYear month = MonthOfYear.forNumber(monthByCalendar + 1);
         return month;

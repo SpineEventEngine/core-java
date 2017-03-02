@@ -25,15 +25,13 @@ import org.junit.Test;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.getZoneOffset;
 import static org.spine3.time.Calendars.nowAt;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetDatesShould {
 
     private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(5, 30);
@@ -44,7 +42,7 @@ public class OffsetDatesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(OffsetDates.class));
+        assertHasPrivateParameterlessCtor(OffsetDates.class);
     }
 
     @Test
@@ -78,7 +76,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_years() {
         final int yearsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate, yearsToSubstract);
+        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate,
+                                                                       yearsToSubstract);
 
         final LocalDate date = offsetDateMinusYears.getDate();
         assertEquals(year - yearsToSubstract, date.getYear());
@@ -93,7 +92,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_months() {
         final int monthsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate, monthsToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate,
+                                                                         monthsToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -109,7 +109,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_days() {
         final int daysToSubstract = 5;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate, daysToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate,
+                                                                       daysToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());

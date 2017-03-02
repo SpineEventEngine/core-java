@@ -22,19 +22,46 @@ package org.spine3.users;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.users.UserAccounts.GOOGLE_AUTH_PROVIDER_ID;
+import static org.spine3.users.UserAccounts.getGoogleUid;
 
 public class UserAccountsShould {
+
+    @Test
+    public void have_private_utility_ctor() {
+        assertHasPrivateParameterlessCtor(UserAccounts.class);
+    }
 
     @Test
     public void return_absent_for_google_uid_if_no_linked_account_added() {
         assertFalse(UserAccounts.getGoogleUid(UserAccount.getDefaultInstance()).isPresent());
     }
 
+    @SuppressWarnings({"ConstantConditions", "MagicNumber"})
+    // Checking the bounds of the constant {@code DUNBARS_NUMBER} value.
     @Test
     public void declare_Dubars_number() {
-        //noinspection MagicNumber
-        assertTrue(UserAccounts.DUNBARS_NUMBER > 100 && UserAccounts.DUNBARS_NUMBER < 250);
+        assertTrue(UserAccounts.getDunbarsNumber() > 100
+                   && UserAccounts.getDunbarsNumber() < 250);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // No need to check in this test.
+    @Test
+    public void obtain_user_google_uid() {
+        final String uid = newUuid(); // In reality Google's user ID has different formant.
+
+        final UserAccount userAccount =
+                UserAccount.newBuilder()
+                           .addLinkedIdentity(UserInfo.newBuilder()
+                                                      .setProviderId(GOOGLE_AUTH_PROVIDER_ID)
+                                                      .setUid(uid))
+                           .build();
+
+        assertEquals(uid, getGoogleUid(userAccount).get());
     }
 }

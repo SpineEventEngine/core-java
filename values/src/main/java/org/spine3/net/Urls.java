@@ -39,7 +39,7 @@ public class Urls {
      * Converts {@link Url} with raw data into the instance with structurized record.
      *
      * @param rawUrl {@link Url} with raw String
-     * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
+     * @return {@link Url} with {@link org.spine3.net.Url.Record Url.Record} instance
      * @throws IllegalArgumentException if the argument already has a structurized record
      */
     @SuppressWarnings("TypeMayBeWeakened")
@@ -61,10 +61,11 @@ public class Urls {
     /**
      * Converts String URL representation into {@link Url} instance.
      *
-     * <p>Does not perform any additional validation of the value, except calling {@link Urls#validate(Url)}.
+     * <p>Does not perform any additional validation of the value, except
+     * calling {@link Urls#validate(Url)}.
      *
      * @param rawUrlString raw URL String
-     * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
+     * @return {@link Url} with {@link org.spine3.net.Url.Record Url.Record} instance
      */
     public static Url of(String rawUrlString) {
         checkNotNull(rawUrlString);
@@ -95,7 +96,8 @@ public class Urls {
      *     <li>{@link Url} with raw String is always valid.
      *     <li>{@link Url} with not set value is always invalid.
      *     <li>{@link Url} can not have empty host.
-     *     <li>{@link org.spine3.net.Url.Record.Authorization} can't have password without having login.
+     *     <li>{@link org.spine3.net.Url.Record.Authorization Record.Authorization} can't have
+     *          password without having login.
      * </ul>
      *
      * @param url {@link Url} instance

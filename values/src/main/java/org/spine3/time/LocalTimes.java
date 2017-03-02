@@ -20,7 +20,7 @@
 package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 
 import java.util.Calendar;
 
@@ -52,7 +52,7 @@ public class LocalTimes {
      * Obtains current local time.
      */
     public static LocalTime now() {
-        final Timestamp time = Timestamps.getCurrentTime();
+        final Timestamp time = Timestamps2.getCurrentTime();
         final Calendar cal = Calendars.now();
 
         final LocalTime result = LocalTime.newBuilder()
@@ -216,7 +216,8 @@ public class LocalTimes {
      * Obtains local time changed on specified amount of hours.
      *
      * @param localTime  local time that will be changed
-     * @param hoursDelta a number of hours that needs to be added or subtracted that can be either positive or negative
+     * @param hoursDelta a number of hours that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this local time with new hours value
      */
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
@@ -227,7 +228,8 @@ public class LocalTimes {
      * Obtains local time changed on specified amount of minutes.
      *
      * @param localTime    local time that will be changed
-     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be either positive or negative
+     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be
+     *                     either positive or negative
      * @return copy of this local time with new minutes value
      */
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
@@ -238,7 +240,8 @@ public class LocalTimes {
      * Obtains local time changed on specified amount of seconds.
      *
      * @param localTime    local time that will be changed
-     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be either positive or negative
+     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be
+     *                     either positive or negative
      * @return copy of this local time with new seconds value
      */
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
@@ -249,7 +252,8 @@ public class LocalTimes {
      * Obtains local time changed on specified amount of milliseconds.
      *
      * @param localTime   local time that will be changed
-     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be either positive or negative
+     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be
+     *                    either positive or negative
      * @return copy of this local time with new milliseconds value
      */
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {

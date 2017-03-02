@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.commandservice.customer.Customer;
@@ -39,8 +40,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.assertMatchesMask;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -50,7 +51,7 @@ public class FieldMasksShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(FieldMasks.class));
+        assertHasPrivateParameterlessCtor(FieldMasks.class);
     }
 
     @Test
@@ -91,7 +92,8 @@ public class FieldMasksShould {
     @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
     @Test
     public void apply_mask_to_message_collections() {
-        final FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER, Project.TASK_FIELD_NUMBER);
+        final FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
+                                                    Project.TASK_FIELD_NUMBER);
         final int count = 5;
 
         final Collection<Project> original = new LinkedList<>();
@@ -202,13 +204,13 @@ public class FieldMasksShould {
                                            .setName(String.format("Test project : %s", id))
                                            .addTask(first)
                                            .addTask(second)
-                                           .setStatus(Project.Status.CREATED)
+                                           .setStatus(Status.CREATED)
                                            .build();
             return project;
         }
 
-        private static FieldMask fieldMask(int... fieldIndeces) {
-            return FieldMasks.maskOf(TYPE_DESCRIPTOR, fieldIndeces);
+        private static FieldMask fieldMask(int... fieldIndices) {
+            return FieldMasks.maskOf(TYPE_DESCRIPTOR, fieldIndices);
         }
     }
 }

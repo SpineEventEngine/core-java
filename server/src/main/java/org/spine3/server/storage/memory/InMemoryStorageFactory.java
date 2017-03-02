@@ -75,7 +75,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      *
-     * NOTE: the parameter is unused.
+     * @param unused the parameter is not used in this implementation
      */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {

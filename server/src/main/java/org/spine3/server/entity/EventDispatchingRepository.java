@@ -40,10 +40,14 @@ import java.util.Set;
  * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S extends Message>
+public abstract class EventDispatchingRepository<I,
+                                                 E extends AbstractVersionableEntity<I, S>,
+                                                 S extends Message>
         extends RecordBasedRepository<I, E, S>
-                implements EntityEventDispatcher<I> {
+        implements EntityEventDispatcher<I> {
 
+    private final EntityFactory<I, E> entityFactory;
+    private final EntityStorageConverter<I, E, S> storageConverter;
     private final IdSetFunctions<I> idSetFunctions;
 
     /**
@@ -52,10 +56,23 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
      * @param boundedContext the {@code BoundedContext} in which the repository works
      * @param defaultFunction the default function for getting an target entity IDs
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
     protected EventDispatchingRepository(BoundedContext boundedContext,
                                          IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
+        this.entityFactory = new DefaultEntityFactory<>(this);
+        this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
+    }
+
+    @Override
+    protected EntityFactory<I, E> entityFactory() {
+        return this.entityFactory;
+    }
+
+    @Override
+    protected EntityStorageConverter<I, E, S> entityConverter() {
+        return this.storageConverter;
     }
 
     /**
@@ -66,17 +83,20 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
      *
      * <p>Such a mapping may be required when...
      * <ul>
-     *     <li>An event should be matched to more than one projection.</li>
-     *     <li>The type of an event producer ID (stored in {@code EventContext}) differs from {@code <I>}.</li>
+     *     <li>An event should be matched to more than one projection.
+     *     <li>The type of an event producer ID (stored in {@code EventContext})
+     *     differs from {@code <I>}.
      * </ul>
      *
      * <p>If there is no function for the class of the passed event message,
-     * the repository will use the event producer ID from an {@code EventContext} passed with the event message.
+     * the repository will use the event producer ID from an {@code EventContext} passed
+     * with the event message.
      *
      * @param func the function instance
      * @param <M> the type of the event message handled by the function
      */
-    public <M extends Message> void addIdSetFunction(Class<M> eventClass, IdSetEventFunction<I, M> func) {
+    public <M extends Message> void addIdSetFunction(Class<M> eventClass,
+                                                     IdSetEventFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -91,7 +111,8 @@ public abstract class EventDispatchingRepository<I, E extends Entity<I, S>, S ex
     }
 
     @Override
-    public <M extends Message> Optional<IdSetEventFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
+    public <M extends Message>
+           Optional<IdSetEventFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 

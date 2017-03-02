@@ -45,13 +45,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class MessagesShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(Messages.class));
+        assertHasPrivateParameterlessCtor(Messages.class);
     }
 
     @Test(expected = NullPointerException.class)

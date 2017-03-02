@@ -89,9 +89,7 @@ message EnrichmentByContextFields {
 
     string by_version = 5 [(by) = "context.version"];
 
-    string by_attributes = 6 [(by) = "context.attributes"];
-
-    string by_event_field = 7 [(by) = "project_id"];
+    string by_event_field = 6 [(by) = "project_id"];
 }
 
 message ProjectCompleted {

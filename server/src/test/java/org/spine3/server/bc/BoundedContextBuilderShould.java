@@ -41,8 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"InstanceMethodNamingConvention",
-                   "OptionalGetWithoutIsPresent" /* OK as we set right before get(). */})
+@SuppressWarnings("OptionalGetWithoutIsPresent" /* OK as we set right before get(). */)
 public class BoundedContextBuilderShould {
 
     private StorageFactory storageFactory;
@@ -57,6 +56,14 @@ public class BoundedContextBuilderShould {
     @After
     public void tearDown() throws Exception {
         storageFactory.close();
+    }
+
+    @Test
+    public void return_name_if_it_was_set() {
+        final String name = getClass().getName();
+        assertEquals(name, BoundedContext.newBuilder()
+                                         .setName(name)
+                                         .getName());
     }
 
     @Test
@@ -125,6 +132,7 @@ public class BoundedContextBuilderShould {
     public void create_EventBus_if_it_was_not_set() {
         // Pass CommandBus to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
+                .setMultitenant(true)
                 .setCommandBus(TestCommandBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getEventBus());
@@ -132,8 +140,7 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void create_both_CommandBus_and_EventBus_if_not_set() {
-        final BoundedContext boundedContext = builder
-                .build();
+        final BoundedContext boundedContext = builder.build();
         assertNotNull(boundedContext.getCommandBus());
         assertNotNull(boundedContext.getEventBus());
     }
@@ -155,5 +162,17 @@ public class BoundedContextBuilderShould {
         final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
         assertEquals(mock, builder.setStandUpdateDelivery(mock)
                                   .standUpdateDelivery().get());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setMultitenant(true)
+                                                .setCommandStore(mock(CommandStore.class))
+                                                .build();
+        BoundedContext.newBuilder()
+                       .setMultitenant(false)
+                       .setCommandBus(commandBus)
+                       .build();
     }
 }

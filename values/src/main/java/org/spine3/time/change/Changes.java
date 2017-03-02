@@ -40,7 +40,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link IntervalChange} object for the passed previous and new field values of time interval.
+     * Creates {@link IntervalChange} object for the passed previous and new field values of
+     * time interval.
      *
      * <p>Passed values cannot be equal.
      */
@@ -57,7 +58,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link LocalDateChange} object for the passed previous and new field values of local date.
+     * Creates {@link LocalDateChange} object for the passed previous and new field values of
+     * local date.
      *
      * <p>Passed values cannot be equal.
      */
@@ -74,7 +76,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link LocalTimeChange} object for the passed previous and new field values of local time.
+     * Creates {@link LocalTimeChange} object for the passed previous and new field values of
+     * local time.
      *
      * <p>Passed values cannot be equal.
      */
@@ -91,7 +94,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link OffsetTimeChange} object for the passed previous and new field values of offset time.
+     * Creates {@link OffsetTimeChange} object for the passed previous and new field values of
+     * offset time.
      *
      * <p>Passed values cannot be equal.
      */
@@ -108,7 +112,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link OffsetDateChange} object for the passed previous and new field values of offset time.
+     * Creates {@link OffsetDateChange} object for the passed previous and new field values of
+     * offset time.
      *
      * <p>Passed values cannot be equal.
      */
@@ -125,7 +130,8 @@ public class Changes {
     }
 
     /**
-     * Creates {@link OffsetDateTimeChange} object for the passed previous and new field values of offset time.
+     * Creates {@link OffsetDateTimeChange} object for the passed previous and new field values of
+     * offset time.
      *
      * <p>Passed values cannot be equal.
      */

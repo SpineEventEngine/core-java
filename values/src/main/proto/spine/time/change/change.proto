@@ -34,10 +34,11 @@ import "spine/validate.proto";
 //
 // This file provides messages that define changes of date/time fields in other messages.
 //
-// Types in this file are modeled after those from changes defined in "spine/change/change.proto" file.
+// Types in this file are modeled after those from changes defined in
+// `spine/change/change.proto` file.
 //
-// The `TimeChange` messages can be use as a request to change a value (e.g. as a field of a command),
-// or as information on the change made (e.g. as a part of an event).
+// The `TimeChange` messages can be use as a request to change a value (e.g. as a field of
+// a command), or as information on the change made (e.g. as a part of an event).
 //
 // For all types the following rule apply: `new_value` field must not be equal to `previous_value`.
 //

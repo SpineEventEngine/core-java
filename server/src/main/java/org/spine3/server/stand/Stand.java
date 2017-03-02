@@ -28,17 +28,18 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Queries;
 import org.spine3.base.Responses;
+import org.spine3.base.Version;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -50,25 +51,30 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A container for storing the lastest {@link org.spine3.server.aggregate.Aggregate} states.
+ * A container for storing the latest {@link org.spine3.server.aggregate.Aggregate Aggregate}
+ * states.
  *
- * <p>Provides an optimal way to access the latest state of published aggregates for read-side services.
- * The aggregate states are delivered to the instance of {@code Stand} through {@link StandFunnel}
- * from {@link AggregateRepository} instances.
+ * <p>Provides an optimal way to access the latest state of published aggregates
+ * for read-side services. The aggregate states are delivered to the instance of {@code Stand}
+ * through {@link StandFunnel} from {@link AggregateRepository} instances.
  *
- * <p>In order to provide a flexibility in defining data access policies, {@code Stand} contains only the states
- * of published aggregates. Please refer to {@link org.spine3.server.aggregate.Aggregate} for publication description.
+ * <p>In order to provide a flexibility in defining data access policies,
+ * {@code Stand} contains only the states of published aggregates.
+ * Please refer to {@link org.spine3.server.aggregate.Aggregate Aggregate} for details on
+ * publishing aggregates.
  *
- * <p>Each {@link org.spine3.server.BoundedContext} contains the only instance of {@code Stand}.
+ * <p>Each {@link org.spine3.server.BoundedContext BoundedContext} contains only one
+ * instance of {@code Stand}.
  *
  * @author Alex Tymchenko
  */
 public class Stand implements AutoCloseable {
 
     /**
-     * Persistent storage for the latest {@link org.spine3.server.aggregate.Aggregate} states.
+     * Persistent storage for the latest {@code Aggregate} states.
      *
-     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is persisted to this storage.
+     * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is
+     * persisted to this storage.
      */
     private final StandStorage storage;
 
@@ -83,17 +89,20 @@ public class Stand implements AutoCloseable {
     private final Executor callbackExecutor;
 
     /**
-     * The mapping between {@code TypeUrl} instances and repositories providing the entities of this type
+     * The mapping between {@code TypeUrl} instances and repositories providing
+     * the entities of this type.
      */
     private final ConcurrentMap<TypeUrl,
-            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap = new ConcurrentHashMap<>();
+            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap =
+            new ConcurrentHashMap<>();
 
     /**
-     * Stores  known {@link org.spine3.server.aggregate.Aggregate} types in order to distinguish them among all
-     * instances of {@code TypeUrl}.
+     * Stores  known {@code Aggregate} types in order to distinguish
+     * them among all instances of {@code TypeUrl}.
      *
-     * <p>Once this instance of {@code Stand} receives an update as {@link Any}, the {@code Aggregate} states
-     * are persisted for further usage. The entities that are not {@code Aggregate} are not persisted,
+     * <p>Once this instance of {@code Stand} receives an update as {@link Any},
+     * the {@code Aggregate} states are persisted for further usage.
+     * The entities that are not {@code Aggregate} are not persisted,
      * and only propagated to the registered callbacks.
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
@@ -115,26 +124,30 @@ public class Stand implements AutoCloseable {
     /**
      * Update the state of an entity inside of the current instance of {@code Stand}.
      *
-     * <p>In case the entity update represents the new {@link org.spine3.server.aggregate.Aggregate} state,
-     * store the new value for the {@code Aggregate} to each of the configured instances of {@link StandStorage}.
+     * <p>In case the entity update represents the new
+     * {@link org.spine3.server.aggregate.Aggregate} Aggregate state,
+     * store the new value for the {@code Aggregate} to each of the configured instances of
+     * {@link StandStorage}.
      *
-     * <p>Each {@code Aggregate } state value is stored as one-to-one to its {@link org.spine3.protobuf.TypeUrl}
-     * obtained via {@link Any#getTypeUrl()}.
+     * <p>Each {@code Aggregate} state value is stored as one-to-one to its
+     * {@link org.spine3.protobuf.TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
      *
-     * <p>In case {@code Stand} already contains the state for this {@code Aggregate}, the value will be replaced.
+     * <p>In case {@code Stand} already contains the state for this {@code Aggregate},
+     * the value will be replaced.
      *
-     * <p>The state updates which are not originated from the {@code Aggregate} are not stored in the {@code Stand}.
+     * <p>The state updates which are not originated from the {@code Aggregate} are not
+     * stored in the {@code Stand}.
      *
-     * <p>In any case, the state update is then propagated to the callbacks. The set of matched callbacks
-     * is determined by filtering all the registered callbacks by the entity {@code TypeUrl}.
+     * <p>In any case, the state update is then propagated to the callbacks.
+     * The set of matched callbacks is determined by filtering all the registered callbacks
+     * by the entity {@code TypeUrl}.
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
-     *
-     * @param id            the entity identifier
+     *  @param id            the entity identifier
      * @param entityState   the entity state
      * @param entityVersion the version of the entity
      */
-    void update(Object id, Any entityState, int entityVersion) {
+    void update(Object id, Any entityState, Version entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
 
@@ -143,11 +156,11 @@ public class Stand implements AutoCloseable {
         if (isAggregateUpdate) {
             final AggregateStateId aggregateStateId = AggregateStateId.of(id, typeUrl);
 
-            final EntityStorageRecord record = EntityStorageRecord.newBuilder()
-                                                                  .setState(entityState)
-                                                                  .setWhenModified(Timestamps.getCurrentTime())
-                                                                  .setVersion(entityVersion)
-                                                                  .build();
+            final EntityRecord record =
+                    EntityRecord.newBuilder()
+                                .setState(entityState)
+                                .setVersion(entityVersion)
+                                .build();
             storage.write(aggregateStateId, record);
         }
 
@@ -157,8 +170,8 @@ public class Stand implements AutoCloseable {
     /**
      * Subscribe for all further changes of an entity state, which satisfies the {@link Target}.
      *
-     * <p>Once this instance of {@code Stand} receives an update of an entity with the given {@code TypeUrl},
-     * all such callbacks are executed.
+     * <p>Once this instance of {@code Stand} receives an update of an entity
+     * with the given {@code TypeUrl}, all such callbacks are executed.
      *
      * @param target an instance {@link Target}, defining the entity and criteria,
      *               which changes should be propagated to the {@code callback}
@@ -172,8 +185,9 @@ public class Stand implements AutoCloseable {
     /**
      * Activate the subscription created via {@link #subscribe(Target)}.
      *
-     * <p>After the activation, the clients will start receiving the updates via {@code EntityUpdateCallback}
-     * upon the changes in the entities, defined by the {@code Target} attribute used for this subscription.
+     * <p>After the activation, the clients will start receiving the updates via
+     * {@code EntityUpdateCallback} upon the changes in the entities, defined by
+     * the {@code Target} attribute used for this subscription.
      *
      * @param subscription the subscription to activate.
      * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
@@ -186,7 +200,9 @@ public class Stand implements AutoCloseable {
     /**
      * Cancel the {@link Subscription}.
      *
-     * <p>Typically invoked to cancel the previous {@link #activate(Subscription, EntityUpdateCallback)} call.
+     * <p>Typically invoked to cancel the previous
+     * {@link #activate(Subscription, EntityUpdateCallback) activate()} call.
+     *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
@@ -216,8 +232,8 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link org.spine3.server.aggregate.Aggregate} entity types exposed for reading
-     * by this instance of {@code Stand}.
+     * Read all {@link org.spine3.server.aggregate.Aggregate Aggregate} entity types
+     * exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose an {@code Aggregate} type.
      *
@@ -230,7 +246,8 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read a particular set of items from the read-side of the application and feed the result into an instance
+     * Read a particular set of items from the read-side of the application and
+     * feed the result into an instance.
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
      *
@@ -277,23 +294,25 @@ public class Stand implements AutoCloseable {
 
     /**
      * Register a supplier for the objects of a certain {@link TypeUrl} to be able
-     * to read them in response to a {@link org.spine3.client.Query}.
+     * to read them in response to a {@link org.spine3.client.Query Query}.
      *
-     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository} is not registered
-     * as type supplier, since the {@code Aggregate} reads are performed by accessing
-     * the latest state in the supplied {@code StandStorage}.
+     * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
+     * is not registered as type supplier, since the {@code Aggregate} reads are performed
+     * by accessing the latest state in the supplied {@code StandStorage}.
      *
-     * <p>However, the type of the {@code AggregateRepository} instance is recorded for the postponed processing
-     * of updates.
+     * <p>However, the type of the {@code AggregateRepository} instance is recorded for
+     * the postponed processing of updates.
      *
-     * @see #update(Object, Any, int)
+     * @see #update(Object, Any, Version)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    public <I, E extends Entity<I, ?>> void registerTypeSupplier(Repository<I, E> repository) {
+    public <I, E extends AbstractVersionableEntity<I, ?>>
+           void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof RecordBasedRepository) {
-            typeToRepositoryMap.put(entityType, (RecordBasedRepository<I, E, ? extends Message>) repository);
+            typeToRepositoryMap.put(entityType,
+                                    (RecordBasedRepository<I, E, ? extends Message>) repository);
         }
         if (repository instanceof AggregateRepository) {
             knownAggregateTypes.add(entityType);
@@ -326,12 +345,13 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Factory method which determines a proper {@link QueryProcessor} implementation depending on {@link TypeUrl}
-     * of the incoming {@link Query#getTarget()}.
+     * Factory method which determines a proper {@link QueryProcessor} implementation
+     * depending on {@link TypeUrl} of the incoming {@link Query#getTarget()}.
      *
-     * <p>As {@code Stand} accumulates the read-side updates from various repositories, the {@code Query} processing
-     * varies a lot. The target type of the incoming {@code Query} tells the {@code Stand} about the essence of the
-     * object queried. Thus making it possible to pick a proper strategy for data fetch.
+     * <p>As {@code Stand} accumulates the read-side updates from various repositories,
+     * the {@code Query} processing varies a lot. The target type of the incoming {@code Query}
+     * tells the {@code Stand} about the essence of the object queried. Thus making it possible
+     * to pick a proper strategy for data fetch.
      *
      * @param type the target type of the {@code Query}
      * @return suitable implementation of {@code QueryProcessor}
@@ -339,7 +359,9 @@ public class Stand implements AutoCloseable {
     private QueryProcessor processorFor(TypeUrl type) {
         final QueryProcessor result;
 
-        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository = typeToRepositoryMap.get(type);
+        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository =
+                typeToRepositoryMap.get(type);
+
         if (repository != null) {
 
             // The query target is an {@code Entity}.
@@ -350,7 +372,8 @@ public class Stand implements AutoCloseable {
             result = new AggregateQueryProcessor(storage, type);
         } else {
 
-            // This type points to an objects, that are not exposed via the current instance of {@code Stand}.
+            // This type points to an objects, that are not exposed via the current
+            // instance of {@code Stand}.
             result = NOOP_PROCESSOR;
         }
         return result;
@@ -361,10 +384,12 @@ public class Stand implements AutoCloseable {
         private Executor callbackExecutor;
 
         /**
-         * Set an instance of {@link StandStorage} to be used to persist the latest an Aggregate states.
+         * Set an instance of {@link StandStorage} to be used to persist
+         * the latest aggregate states.
          *
-         * <p>If no {@code storage} is assigned, the result of {@link InMemoryStorageFactory#createStandStorage()}
-         * will be set by default.
+         * <p>If no {@code storage} is assigned,
+         * {@linkplain InMemoryStorageFactory#createStandStorage() in-memory storage}
+         * will be used.
          *
          * @param storage an instance of {@code StandStorage}
          * @return this instance of {@code Builder}
@@ -381,7 +406,8 @@ public class Stand implements AutoCloseable {
         /**
          * Set an {@code Executor} to be used for executing callback methods.
          *
-         * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
+         * <p>If the {@code Executor} is not set,
+         * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
          *
          * @param callbackExecutor the instance of {@code Executor}
          * @return this instance of {@code Builder}
@@ -413,5 +439,4 @@ public class Stand implements AutoCloseable {
             return result;
         }
     }
-
 }

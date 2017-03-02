@@ -22,13 +22,12 @@ package org.spine3.server.command.error;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
 import org.spine3.protobuf.TypeName;
-import org.spine3.server.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.lang.String.format;
@@ -60,9 +59,10 @@ public class InvalidCommandException extends CommandException {
      */
     public static InvalidCommandException onConstraintViolations(Command command,
                                                                  Iterable<ConstraintViolation> violations) {
-        final Error error = invalidCommandMessageError(Commands.getMessage(command), violations, MSG_VALIDATION_ERROR);
+        final CommandInfo cmd = CommandInfo.of(command);
+        final Error error = invalidCommandMessageError(cmd.getCommandMessage(), violations, MSG_VALIDATION_ERROR);
         final String text = format("%s Message class: %s. See Error.getValidationError() for details.",
-                                   MSG_VALIDATION_ERROR, CommandClass.of(command));
+                                   MSG_VALIDATION_ERROR, cmd.getCommandClass());
         //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.
         return new InvalidCommandException(text, command, error);
     }
@@ -88,24 +88,23 @@ public class InvalidCommandException extends CommandException {
 
     /**
      * Creates an exception for a command with missing {@code tenant_id} attribute in the {@code CommandContext},
-     * which is required in a multitenant application.
+     * which is required in a multi-tenant application.
      */
     public static InvalidCommandException onMissingTenantId(Command command) {
-        final Message commandMessage = Commands.getMessage(command);
-        final CommandContext context = command.getContext();
+        final CommandInfo cmd = CommandInfo.of(command);
         final String errMsg = format(
-                "The command (class: `%s`, type: `%s`, id: `%s`) is posted to multitenant Command Bus, " +
-                "but has no `tenant_id` attribute in the context.",
-                TypeName.of(commandMessage),
-                CommandClass.valueOf(commandMessage),
-                idToString(context.getCommandId()));
-        final Error error = unknownTenantError(commandMessage, errMsg);
+                "The command (class: %s, type: %s, id: %s) was posted to multi-tenant CommandBus, " +
+                "but has no tenant_id attribute set in the command context.",
+                cmd.getCommandClass(),
+                cmd.getTypeName(),
+                cmd.getCommandId());
+        final Error error = unknownTenantError(cmd.getCommandMessage(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
     /**
-     * Creates an error for a command with missing {@code tenant_id} attribute  attribute in the {@code CommandContext},
-     * which is required in a multitenant application.
+     * Creates an error for a command with missing {@code CommandContext.tenant_id} attribute
+     * which is required in a multi-tenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
@@ -114,5 +113,64 @@ public class InvalidCommandException extends CommandException {
                 .setMessage(errorText)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
+    }
+
+    public static InvalidCommandException onInapplicableTenantId(Command command) {
+        final CommandInfo cmd = CommandInfo.of(command);
+        final String errMsg = format(
+                "The command (class: %s, type: %s, id: %s) was posted to single-tenant CommandBus," +
+                " but has tenant_id: %s attribute set in the command context.",
+                cmd.getCommandClass(),
+                cmd.getTypeName(),
+                cmd.getCommandId(),
+                command.getContext().getTenantId());
+        final Error error = inapplicableTenantError(cmd.getCommandMessage(), errMsg);
+        return new InvalidCommandException(errMsg, command, error);
+    }
+
+    private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
+        final Error.Builder error = Error.newBuilder()
+                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
+                .setMessage(errMsg)
+                .putAllAttributes(commandTypeAttribute(commandMessage));
+        return error.build();
+    }
+
+    /**
+     * Utility class for obtaining properties of a command.
+     */
+    private static class CommandInfo {
+        private final Message commandMessage;
+        private final CommandClass commandClass;
+        private final String commandId;
+        private final String typeName;
+
+        private static CommandInfo of(Command command) {
+            return new CommandInfo(command);
+        }
+
+        private CommandInfo(Command command) {
+            this.commandMessage = Commands.getMessage(command);
+            this.commandClass = CommandClass.of(commandMessage);
+            this.commandId = idToString(command.getContext().getCommandId());
+            this.typeName = TypeName.of(commandMessage);
+        }
+
+        private Message getCommandMessage() {
+            return commandMessage;
+        }
+
+        private CommandClass getCommandClass() {
+            return commandClass;
+        }
+
+        private String getCommandId() {
+            return commandId;
+        }
+
+        private String getTypeName() {
+            return typeName;
+        }
     }
 }

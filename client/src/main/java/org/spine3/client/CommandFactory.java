@@ -23,6 +23,7 @@ package org.spine3.client;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -31,8 +32,6 @@ import org.spine3.users.UserId;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.createCommand;
-import static org.spine3.base.Commands.createContext;
 
 /**
  * The factory to generate new {@link Command} instances.
@@ -100,18 +99,44 @@ public class CommandFactory {
      * @param message the command message
      * @return new command instance
      */
-    public Command create(Message message) {
+    public Command createCommand(Message message) {
         checkNotNull(message);
-        final CommandContext context = createCommandContext();
-        final Command result = createCommand(message, context);
+        final CommandContext context = createContext();
+        final Command result = Commands.createCommand(message, context);
         return result;
+    }
+
+    /**
+     * Creates new {@code Command} with the passed message and target entity version.
+     *
+     * <p>The command contains a {@code CommandContext} instance with the current time.
+     *
+     * @param message       the command message
+     * @param targetVersion the ID of the entity for applying commands if {@code null}
+     *                      the commands can be applied to any entity
+     * @return new command instance
+     */
+    public Command createCommand(Message message, int targetVersion) {
+        checkNotNull(message);
+        checkNotNull(targetVersion);
+
+        final CommandContext context = createContext(targetVersion);
+        final Command result = Commands.createCommand(message, context);
+        return result;
+    }
+
+    /**
+     * Creates command context for a new command with entity ID.
+     */
+    protected CommandContext createContext(int targetVersion) {
+        return Commands.createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
     }
 
     /**
      * Creates command context for a new command.
      */
-    protected CommandContext createCommandContext() {
-        return createContext(getTenantId(), getActor(), getZoneOffset());
+    protected CommandContext createContext() {
+        return Commands.createContext(getTenantId(), getActor(), getZoneOffset());
     }
 
     public static class Builder {
@@ -119,7 +144,6 @@ public class CommandFactory {
         private ZoneOffset zoneOffset;
         @Nullable
         private TenantId tenantId;
-
         private Builder() {
             // Prevent instantiations from outside.
         }
@@ -158,7 +182,7 @@ public class CommandFactory {
         }
 
         /**
-         * Sets the ID of a tenant in a multitenant application to which this user belongs.
+         * Sets the ID of a tenant in a multi-tenant application to which this user belongs.
          *
          * @param tenantId the ID of the tenant or null for single-tenant applications
          */
