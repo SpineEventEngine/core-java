@@ -36,7 +36,7 @@ import static java.util.Collections.synchronizedMap;
  *
  * @author Alexander Yevsyukov
  */
-class StringifierRegistry {
+public class StringifierRegistry {
 
     private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
