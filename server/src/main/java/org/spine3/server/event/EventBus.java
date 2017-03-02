@@ -102,8 +102,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * spy on final or anonymous classes).
      */
 
-    /** The registry of event dispatchers. */
-
     /** The registry of event subscriber methods. */
     private final SubscriberRegistry subscriberRegistry = new SubscriberRegistry();
 
