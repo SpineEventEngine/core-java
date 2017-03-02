@@ -77,7 +77,8 @@ public class CurrentTenant {
     public static TenantId ensure() throws IllegalStateException {
         final Optional<TenantId> currentTenant = get();
         if (!currentTenant.isPresent()) {
-            throw new IllegalStateException("No current TenantId set in multi-tenant execution context.");
+            throw new IllegalStateException(
+                    "No current TenantId set in multi-tenant execution context.");
         }
         return currentTenant.get();
     }

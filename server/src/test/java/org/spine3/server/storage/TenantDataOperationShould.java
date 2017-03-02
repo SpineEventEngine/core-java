@@ -86,8 +86,38 @@ public class TenantDataOperationShould {
         assertFalse(CurrentTenant.get().isPresent());
     }
 
+    @Test
+    public void create_instance_for_non_command_execution_context() {
+        final TenantId tenant = newTenantUuid();
+        CurrentTenant.set(tenant);
+
+        final TenantDataOperation op = createOperation();
+
+        assertEquals(tenant, op.tenantId());
+
+        op.execute();
+
+        assertEquals(tenant, getTenantFromRun(op));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void do_not_allow_creating_instance_in_non_command_execution_without_current_tenant() {
+        CurrentTenant.clear();
+
+        // This should fail.
+        createOperation();
+    }
+
+    /*
+     * Test environment utilities.
+     *********************************/
+
     private static TestOp createOperation(TenantId newTenant) {
         return new TestOp(newTenant);
+    }
+
+    private static TestOp createOperation() {
+        return new TestOp();
     }
 
     private static TenantId getTenantFromRun(TenantDataOperation op) {
@@ -103,6 +133,10 @@ public class TenantDataOperationShould {
 
         private TestOp(TenantId tenantId) {
             super(tenantId);
+        }
+
+        private TestOp() {
+            super();
         }
 
         @Override

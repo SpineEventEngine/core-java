@@ -113,9 +113,10 @@ public abstract class TenantDataOperation implements Runnable {
      *
      * @throws IllegalStateException of the method is called from non-command handling context
      */
-    public CommandId commandId() {
+    protected CommandId commandId() {
         if (commandId == null) {
-            throw new IllegalStateException("Unable to get CommandId from non-command handling excution context.");
+            throw new IllegalStateException(
+                    "Unable to get CommandId from non-command handling execution context.");
         }
         return commandId;
     }
