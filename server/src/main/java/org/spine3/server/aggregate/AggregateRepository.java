@@ -263,7 +263,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>If the aggregate is not available in the repository this method returns
      * a newly created aggregate.
      *
-     * <p>If the aggregate is "invisible" to regular queries, {@code Optional.absent()}
+     * <p>If the aggregate is “invisible” to regular queries, {@code Optional.absent()}
      * is returned
      *
      * @param id the ID of the aggregate to load

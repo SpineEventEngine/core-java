@@ -58,10 +58,10 @@ public class Predicates {
     /**
      * Obtains the predicate for checking if an aggregate is visible to regular queries.
      *
-     * <p>An aggregate may be marked as archived or deleted. If so, it becomes "invisible"
+     * <p>An aggregate may be marked as archived or deleted. If so, it becomes “invisible”
      * to regular queries.
      *
-     * @return the predicate that filters "invisible" {@code AggregateStatus}es
+     * @return the predicate that filters “invisible” {@code AggregateStatus}es
      * @see EntityStatus#getArchived()
      * @see EntityStatus#getDeleted()
      */
@@ -72,10 +72,10 @@ public class Predicates {
     /**
      * Obtains the predicate for checking if an entity is visible to regular queries.
      *
-     * <p>An entity may be marked as archived or deleted. If so, it becomes "invisible"
+     * <p>An entity may be marked as archived or deleted. If so, it becomes “invisible”
      * to regular queries.
      *
-     * @return the predicate that filters "invisible" {@code EntityStorageRecord}s
+     * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
      * @see EntityStorageRecord#getEntityStatus()
      */
     public static Predicate<EntityStorageRecord> isRecordVisible() {

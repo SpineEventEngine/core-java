@@ -29,10 +29,10 @@ import javax.annotation.CheckReturnValue;
  *
  * <p>A {@link Repository} may have a view that provides a different set of entities.
  * For example, there can be views that represent archived or deleted entities (that are
- * not "visible" by default).
+ * not “visible” by default).
  *
  * <p>{@code Repository} itself is also a {@code RepositoryView}, which loads only
- * "visible" entities.
+ * “visible” entities.
  *
  * @param <I> the type of IDs of entities returned by the view
  * @param <E> the entity type

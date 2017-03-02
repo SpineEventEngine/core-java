@@ -32,7 +32,7 @@ import "spine/annotations.proto";
 
 // The storage status of an entity.
 //
-// If one of the flags is set to `true` the entity becomes "invisible" to regular queries.
+// If one of the flags is set to `true` the entity becomes “invisible” to regular queries.
 //
 message EntityStatus {
 
