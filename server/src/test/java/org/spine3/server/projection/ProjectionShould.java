@@ -23,10 +23,10 @@ package org.spine3.server.projection;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.Given;
@@ -73,11 +73,11 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final ImmutableSet<Class<? extends Message>> classes = Projection.getEventClasses(TestProjection.class);
+        final ImmutableSet<EventClass> classes = Projection.getEventClasses(TestProjection.class);
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
-        assertTrue(classes.contains(StringValue.class));
-        assertTrue(classes.contains(Int32Value.class));
+        assertTrue(classes.contains(EventClass.of(StringValue.class)));
+        assertTrue(classes.contains(EventClass.of(Int32Value.class)));
     }
 
     private static class TestProjection extends Projection<String, StringValue> {

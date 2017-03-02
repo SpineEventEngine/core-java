@@ -18,37 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.server.entity;
 
 import org.junit.Test;
-import org.spine3.base.CommandContext;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.command.Assign;
-import org.spine3.test.reflect.Project;
-import org.spine3.test.reflect.command.CreateProject;
-import org.spine3.test.reflect.event.ProjectCreated;
+import org.spine3.server.aggregate.AggregatePart;
 
-import static org.junit.Assert.assertFalse;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class MethodMapShould {
+/**
+ * @author Illia Shepilov
+ */
+public class AbstractEntityShould {
 
-    /** Test aggregate in which methods are scanned. */
-    private static final class TestAggregate extends Aggregate<Long, Project, Project.Builder> {
-
-        public TestAggregate(Long id) {
-            super(id);
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject command, CommandContext context) {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-
-    @Test
-    public void expose_key_set() {
-        final MethodMap methodMap = MethodMap.create(TestAggregate.class, CommandHandlerMethod.factory());
-        assertFalse(methodMap.keySet().isEmpty());
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
+        getConstructor(AggregatePart.class, String.class);
     }
 }

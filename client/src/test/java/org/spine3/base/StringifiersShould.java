@@ -25,20 +25,24 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
+import java.text.ParseException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.NULL_ID;
 import static org.spine3.base.Stringifiers.idToString;
@@ -191,8 +195,8 @@ public class StringifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static final Stringifier<IdWithPrimitiveFields, String> ID_TO_STRING_CONVERTER =
-            new Stringifier<IdWithPrimitiveFields, String>() {
+    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
+            new Stringifier<IdWithPrimitiveFields>() {
                 @Override
                 protected String doForward(IdWithPrimitiveFields id) {
                     return id.getName();
@@ -225,7 +229,7 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(EventId.class)
+        assertNull(registry.get(Timestamp.class)
                            .get()
                            .convert(null));
         assertNull(registry.get(EventId.class)
@@ -248,7 +252,35 @@ public class StringifiersShould {
         final String actual = new Stringifiers.CommandIdStringifier().convert(id);
 
         assertEquals(idToString(id), actual);
-        assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void convert_string_to_command_id() {
+        final String id = newUuid();
+        final CommandId expected = CommandId.newBuilder()
+                                            .setUuid(id)
+                                            .build();
+        final CommandId actual = new Stringifiers.CommandIdStringifier().reverse()
+                                                                        .convert(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
+        final String time = Timestamps2.getCurrentTime()
+                                       .toString();
+        new Stringifiers.TimestampIdStringifer().reverse()
+                                                .convert(time);
+    }
+
+    @Test
+    public void convert_string_to_timestamp() throws ParseException {
+        final String date = "1972-01-01T10:00:20.021-05:00";
+        final Timestamp expected = Timestamps.parse(date);
+        final Timestamp actual = new Stringifiers.TimestampIdStringifer().reverse()
+                                                                         .convert(date);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -257,6 +289,18 @@ public class StringifiersShould {
         final String actual = new Stringifiers.EventIdStringifier().convert(id);
 
         assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void convert_string_to_event_id() {
+        final String id = newUuid();
+        final EventId expected = EventId.newBuilder()
+                                        .setUuid(id)
+                                        .build();
+        final EventId actual = new Stringifiers.EventIdStringifier().reverse()
+                                                                    .convert(id);
+
+        assertEquals(expected, actual);
     }
 
     @Test

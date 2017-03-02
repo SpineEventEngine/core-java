@@ -44,7 +44,7 @@ import static com.google.common.base.Throwables.throwIfUnchecked;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class HandlerMethod<C extends Message> {
+abstract class HandlerMethod<C extends Message> {
 
     /** The method to be called. */
     private final Method method;

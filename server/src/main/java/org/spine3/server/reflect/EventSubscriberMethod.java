@@ -21,12 +21,18 @@
 package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A wrapper for an event subscriber method.
@@ -36,33 +42,69 @@ import java.lang.reflect.Modifier;
 public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
-    public static final Predicate<Method> PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    public EventSubscriberMethod(Method method) {
+    private EventSubscriberMethod(Method method) {
         super(method);
     }
 
     /**
-     * Scans for event subscribers the passed target.
+     * Obtains the method for handling the event in the passed class.
      *
-     * @param target the target to scan
-     * @return immutable map of event subscriber methods
+     * @throws IllegalStateException if the passed class does not have an event handling method
+     *                               for the class of the passed message
      */
+    public static EventSubscriberMethod forMessage(Class<?> cls, Message eventMessage) {
+        checkNotNull(cls);
+        checkNotNull(eventMessage);
+
+        final Class<? extends Message> eventClass = eventMessage.getClass();
+        final MethodRegistry registry = MethodRegistry.getInstance();
+        final EventSubscriberMethod method = registry.get(cls,
+                                                          eventClass,
+                                                          factory());
+        if (method == null) {
+            throw missingEventHandler(cls, eventClass);
+        }
+        return method;
+    }
+
+    static EventSubscriberMethod from(Method method) {
+        return new EventSubscriberMethod(method);
+    }
+
+    private static IllegalStateException missingEventHandler(Class<?> cls,
+                                                             Class<? extends Message> eventClass) {
+        final String msg = format(
+                "Missing event handler for event class %s in the stream projection class %s",
+                eventClass, cls
+        );
+        return new IllegalStateException(msg);
+    }
+
     @CheckReturnValue
-    public static MethodMap<EventSubscriberMethod> scan(Object target) {
-        final MethodMap<EventSubscriberMethod> result = MethodMap.create(target.getClass(), factory());
+    public static ImmutableSet<EventClass> getEventClasses(Class<?> cls) {
+        checkNotNull(cls);
+
+        final ImmutableSet<EventClass> result =
+                EventClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
-    public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
+    private static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.instance();
     }
+
+    static MethodPredicate predicate() {
+        return PREDICATE;
+    }
+
 
     /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
@@ -74,12 +116,12 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         @Override
         public EventSubscriberMethod create(Method method) {
-            return new EventSubscriberMethod(method);
+            return from(method);
         }
 
         @Override
         public Predicate<Method> getPredicate() {
-            return PREDICATE;
+            return predicate();
         }
 
         @Override

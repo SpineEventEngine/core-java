@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author Alexander Yevsyukov
  */
-public class MethodRegistry {
+class MethodRegistry {
 
     private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
 

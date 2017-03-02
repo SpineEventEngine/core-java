@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class MethodPredicate implements Predicate<Method> {
+abstract class MethodPredicate implements Predicate<Method> {
 
     @Override
     public boolean apply(@Nullable Method method) {

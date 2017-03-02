@@ -73,5 +73,4 @@ public abstract class MessageClass {
         final MessageClass other = (MessageClass) obj;
         return Objects.equals(this.value, other.value);
     }
-
 }

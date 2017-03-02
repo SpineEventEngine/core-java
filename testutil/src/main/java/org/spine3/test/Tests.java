@@ -192,5 +192,4 @@ public class Tests {
     public static Version newVersionWithNumber(int number) {
         return Versions.newVersion(number, Timestamps2.getCurrentTime());
     }
-
 }
