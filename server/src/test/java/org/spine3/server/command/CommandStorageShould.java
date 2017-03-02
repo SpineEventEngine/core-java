@@ -38,7 +38,6 @@ import org.spine3.base.Failures;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
-import org.spine3.test.command.CreateProject;
 
 import java.util.Iterator;
 import java.util.List;
@@ -56,12 +55,9 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.Given.Command.createProject;
-import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * @author Alexander Litus
@@ -123,7 +119,7 @@ public abstract class CommandStorageShould
         storage.store(command);
         final CommandRecord record = storage.read(commandId).get();
 
-        checkRecord(record, command, RECEIVED);
+        CommandTestUtil.checkRecord(record, command, RECEIVED);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
@@ -136,7 +132,7 @@ public abstract class CommandStorageShould
         storage.store(command, error);
         final CommandRecord record = storage.read(commandId).get();
 
-        checkRecord(record, command, ERROR);
+        CommandTestUtil.checkRecord(record, command, ERROR);
         assertEquals(error, record.getStatus()
                                   .getError());
     }
@@ -166,7 +162,7 @@ public abstract class CommandStorageShould
         storage.store(command, status);
         final CommandRecord record = storage.read(commandId).get();
 
-        checkRecord(record, command, status);
+        CommandTestUtil.checkRecord(record, command, status);
     }
 
     @Test
@@ -232,19 +228,6 @@ public abstract class CommandStorageShould
                                     .getFailure());
     }
 
-    /*
-     * Conversion tests.
-     *******************/
-
-    @Test
-    public void convert_cmd_to_record() {
-        final Command command = createProject();
-        final CommandStatus status = RECEIVED;
-
-        final CommandRecord record = CommandStorage.newRecordBuilder(command, status, null).build();
-
-        checkRecord(record, command, status);
-    }
 
     /*
      * Check that exception is thrown if try to pass null to methods.
@@ -350,45 +333,5 @@ public abstract class CommandStorageShould
                                                 .setStacktrace("failure stacktrace")
                                                 .setTimestamp(getCurrentTime()))
                       .build();
-    }
-
-    private static void checkRecord(CommandRecord record,
-                                    Command cmd,
-                                    CommandStatus statusExpected) {
-        final CommandContext context = cmd.getContext();
-        final CommandId commandId = context.getCommandId();
-        final CreateProject message = unpack(cmd.getMessage());
-        assertEquals(cmd.getMessage(), record.getCommand()
-                                             .getMessage());
-        assertTrue(record.getTimestamp()
-                         .getSeconds() > 0);
-        assertEquals(message.getClass()
-                            .getSimpleName(), record.getCommandType());
-        assertEquals(commandId, record.getCommandId());
-        assertEquals(statusExpected, record.getStatus()
-                                           .getCode());
-        assertEquals(context, record.getCommand()
-                                    .getContext());
-        switch (statusExpected) {
-            case RECEIVED:
-            case OK:
-            case SCHEDULED:
-                assertTrue(isDefault(record.getStatus()
-                                           .getError()));
-                assertTrue(isDefault(record.getStatus()
-                                           .getFailure()));
-                break;
-            case ERROR:
-                assertTrue(isNotDefault(record.getStatus()
-                                              .getError()));
-                break;
-            case FAILURE:
-                assertTrue(isNotDefault(record.getStatus()
-                                              .getFailure()));
-                break;
-            case UNDEFINED:
-            case UNRECOGNIZED:
-                break;
-        }
     }
 }

@@ -20,27 +20,39 @@
 
 package org.spine3.server.command;
 
-import org.spine3.SPI;
-import org.spine3.base.CommandId;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.DefaultRecordBasedRepository;
+import org.junit.Test;
+import org.spine3.base.Command;
+import org.spine3.base.CommandStatus;
 
-//TODO:2017-02-15:alexander.yevsyukov: Update Javadoc after migration to this class.
+import static org.spine3.base.CommandStatus.RECEIVED;
+import static org.spine3.server.command.CommandRecords.newRecordBuilder;
+import static org.spine3.server.command.CommandTestUtil.checkRecord;
+import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+
 /**
- * This is Repository-based implementation of Command Store, which is going to
- * {@link CommandStore} .
- *
- * @author Alexander Yevsyukov
+ * @author Alexander Yevsykov
  */
-@SPI
-public class CommandRepository
-        extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
+public class CommandRecordsShould {
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
-    protected CommandRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+    @Test
+    public void have_utility_ctor() {
+        assertHasPrivateParameterlessCtor(CommandRecords.class);
+    }
+
+    /*
+     * Conversion tests.
+     *******************/
+
+    @Test
+    public void convert_cmd_to_record() {
+        final Command command = createProject();
+        final CommandStatus status = RECEIVED;
+
+        final CommandRecord record = newRecordBuilder(command,
+                                                      status,
+                                                      null).build();
+
+        checkRecord(record, command, status);
     }
 }

@@ -20,8 +20,19 @@
 
 package org.spine3.server.command;
 
+import org.spine3.base.Command;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.server.entity.AbstractEntity;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.CommandStatus.ERROR;
+import static org.spine3.base.CommandStatus.FAILURE;
+import static org.spine3.base.CommandStatus.OK;
+import static org.spine3.server.command.CommandRecords.getOrGenerateCommandId;
+import static org.spine3.server.command.CommandRecords.newRecordBuilder;
 
 /**
  * An entity for storing command and its processing status.
@@ -35,5 +46,72 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
      */
     protected CommandEntity(CommandId id) {
         super(id);
+    }
+
+    private static CommandEntity create(CommandId commandId) {
+        return new CommandEntity(commandId);
+    }
+
+    static CommandEntity createForStatus(Command command, CommandStatus status) {
+        checkNotNull(command);
+        checkNotNull(status);
+
+        final CommandId commandId = command.getContext()
+                                           .getCommandId();
+        final CommandEntity commandEntity = create(commandId);
+        commandEntity.setCommandAndStatus(command, status);
+        return commandEntity;
+    }
+
+    static CommandEntity createForError(Command command, Error error) {
+        checkNotNull(command);
+        checkNotNull(error);
+
+        final CommandId id = getOrGenerateCommandId(command);
+
+        final CommandEntity result = create(id);
+        result.setError(id, command, error);
+        return result;
+    }
+
+    private void setCommandAndStatus(Command command, CommandStatus status) {
+        final CommandRecord record = newRecordBuilder(command,
+                                                      status,
+                                                      null).build();
+        injectState(record);
+    }
+
+    private void setError(CommandId id, Command command, Error error) {
+        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
+        builder.getStatusBuilder()
+               .setError(error);
+        final CommandRecord record = builder.build();
+        injectState(record);
+    }
+
+    void setOkStatus() {
+        final CommandRecord.Builder builder = getState().toBuilder();
+        builder.getStatusBuilder()
+               .setCode(OK);
+        final CommandRecord record = builder.build();
+        injectState(record);
+    }
+
+    void setToError(Error error) {
+        final CommandRecord.Builder builder = getState().toBuilder();
+        builder.getStatusBuilder()
+               .setCode(ERROR)
+               .setError(error);
+        final CommandRecord record = builder.build();
+        injectState(record);
+    }
+
+    void setToFailure(Failure failure) {
+        final CommandRecord.Builder builder = getState().toBuilder();
+        builder.getStatusBuilder()
+               .setCode(FAILURE)
+               .setFailure(failure);
+        final CommandRecord record = builder.build();
+        injectState(record);
     }
 }

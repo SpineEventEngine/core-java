@@ -89,7 +89,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /**
      * Sets the entity state to the passed value.
      */
-    void injectState(S newState) {
+    protected void injectState(S newState) {
         this.state = checkNotNull(newState);
     }
 

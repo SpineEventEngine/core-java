@@ -262,6 +262,19 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
     }
 
+    private boolean isOpen() {
+        return storage != null;
+    }
+
+    /**
+     * Ensures that the repository {@linkplain #isOpen() is open}.
+     *
+     * <p>If not throws {@code IllegalStateException}
+     */
+    protected void checkNotClosed() {
+        checkState(isOpen(), "The repository is closed.");
+    }
+
     /**
      * Enumeration of generic type parameters of this class.
      */

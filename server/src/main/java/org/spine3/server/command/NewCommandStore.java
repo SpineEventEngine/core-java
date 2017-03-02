@@ -20,7 +20,10 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
@@ -29,70 +32,70 @@ import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
+import org.spine3.base.Stringifiers;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
+import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.storage.TenantDataOperation;
 
 import java.util.Iterator;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.base.CommandStatus.RECEIVED;
 
+//TODO:2017-02-15:alexander.yevsyukov: Update Javadoc after migration to this class.
 /**
- * Manages commands received by the system.
+ * This is Repository-based implementation of Command Store, which is going to
+ * {@link CommandStore} .
  *
- * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public class CommandStore implements AutoCloseable {
-
-    private final CommandStorage storage;
+@SPI
+public class NewCommandStore
+        extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
 
     /**
-     * Creates a new instance.
-     *
-     * @param storage an underlying storage
+     * {@inheritDoc}
      */
-    public CommandStore(CommandStorage storage) {
-        this.storage = storage;
+    protected NewCommandStore(BoundedContext boundedContext) {
+        super(boundedContext);
     }
 
     /**
-     * Stores the command.
+     * Stores a command with the {@link CommandStatus#RECEIVED} status by
+     * a command ID from a command context.
      *
-     * <p>The underlying storage must be opened.
+     * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
-     * @param command the command to store
-     * @throws IllegalStateException if the storage is closed
+     * @param command a complete command to store
      */
-    public void store(final Command command) {
+    public void store(Command command) {
         checkNotClosed();
-
-        final TenantDataOperation op = new TenantDataOperation(command) {
-            @Override
-            public void run() {
-                storage.store(command);
-            }
-        };
-
-        op.execute();
+        store(command, RECEIVED);
     }
 
-    /**
-     * Stores a command with the error status.
+     /**
+     * Stores a command with the given status.
      *
      * @param command a command to store
-     * @param error an error occurred
+     * @param status a command status
      */
-    public void store(final Command command, final Error error) {
+    public void store(Command command, CommandStatus status) {
         checkNotClosed();
+        final CommandEntity commandEntity = CommandEntity.createForStatus(command, status);
+        store(commandEntity);
+    }
 
-        final TenantDataOperation op = new TenantDataOperation(command) {
-            @Override
-            public void run() {
-                storage.store(command, error);
-            }
-        };
-
-        op.execute();
+    /**
+     * Stores a command with the {@link CommandStatus#ERROR} status by
+     * a command ID from a command context.
+     *
+     * @param command a command to store
+     * @param error   an error occurred
+     */
+    public void store(Command command, Error error) {
+        checkNotClosed();
+        final CommandEntity commandEntity = CommandEntity.createForError(command, error);
+        store(commandEntity);
     }
 
     /**
@@ -103,7 +106,7 @@ public class CommandStore implements AutoCloseable {
      */
     public void store(Command command, Exception exception) {
         checkNotClosed();
-        storage.store(command, Errors.fromException(exception));
+        store(command, Errors.fromException(exception));
     }
 
     /**
@@ -112,28 +115,10 @@ public class CommandStore implements AutoCloseable {
      * @param command the command to store
      * @param exception the exception occurred, which encloses {@link org.spine3.base.Error Error}
      *                  to store
+     * @throws IllegalStateException if the storage is closed
      */
     public void storeWithError(Command command, CommandException exception) {
         store(command, exception.getError());
-    }
-
-    /**
-     * Stores a command with the given status.
-     *
-     * @param command a command to store
-     * @param status a command status
-     */
-    public void store(final Command command, final CommandStatus status) {
-        checkNotClosed();
-
-        final TenantDataOperation op = new TenantDataOperation(command) {
-            @Override
-            public void run() {
-                storage.store(command, status);
-            }
-        };
-
-        op.execute();
     }
 
     //TODO:2017-02-14:alexander.yevsyukov: Have reads as tenant-data ops.
@@ -143,11 +128,15 @@ public class CommandStore implements AutoCloseable {
      *
      * @param status a command status to search by
      * @return commands with the given status
+     * @throws IllegalStateException if the storage is closed
      */
     public Iterator<Command> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<Command> commands = storage.iterator(status);
-        return commands;
+
+        //TODO:2017-03-02:alexander.yevsyukov: Implement
+        // final Iterator<Command> commands = storage.iterator(status);
+
+        return ImmutableList.<Command>of().iterator();
     }
 
     /**
@@ -155,7 +144,9 @@ public class CommandStore implements AutoCloseable {
      */
     private void setCommandStatusOk(CommandId commandId) {
         checkNotClosed();
-        storage.setOkStatus(commandId);
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setOkStatus();
+        store(entity);
     }
 
     /**
@@ -173,7 +164,9 @@ public class CommandStore implements AutoCloseable {
      */
     private void updateStatus(CommandId commandId, Error error) {
         checkNotClosed();
-        storage.updateStatus(commandId, error);
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setToError(error);
+        store(entity);
     }
 
     /**
@@ -184,33 +177,32 @@ public class CommandStore implements AutoCloseable {
      */
     private void updateStatus(CommandId commandId, Failure failure) {
         checkNotClosed();
-        storage.updateStatus(commandId, failure);
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setToFailure(failure);
+        store(entity);
     }
 
-    @Override
-    public void close() throws Exception {
-        storage.close();
-    }
 
-    /** Returns {@code true} if the store is open, {@code false} otherwise */
-    boolean isOpen() {
-        final boolean isOpened = storage.isOpen();
-        return isOpened;
-    }
+    private CommandEntity loadEntity(CommandId commandId) {
+        final Optional<CommandEntity> loaded = load(commandId);
+        if (!loaded.isPresent()) {
+            final String idStr = Stringifiers.idToString(commandId);
+            throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
+        }
 
-    private void checkNotClosed() {
-        checkState(isOpen(), "The CommandStore is closed.");
+        return loaded.get();
     }
 
     /**
      * The service for updating a status of a command.
      */
+    @SuppressWarnings("unused")
     static class StatusService {
 
-        private final CommandStore commandStore;
-        private final Log log;
+        private final NewCommandStore commandStore;
 
-        StatusService(CommandStore commandStore, Log log) {
+        private final Log log;
+        StatusService(NewCommandStore commandStore, Log log) {
             this.commandStore = commandStore;
             this.log = log;
         }
@@ -261,5 +253,6 @@ public class CommandStore implements AutoCloseable {
             };
             op.execute();
         }
+
     }
 }
