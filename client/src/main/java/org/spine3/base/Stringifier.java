@@ -27,6 +27,5 @@ import com.google.common.base.Converter;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractMethodOverridesAbstractMethod")
 public abstract class Stringifier<A, B> extends Converter<A, B> {
 }
