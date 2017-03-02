@@ -195,8 +195,8 @@ public class StringifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static final Stringifier<IdWithPrimitiveFields, String> ID_TO_STRING_CONVERTER =
-            new Stringifier<IdWithPrimitiveFields, String>() {
+    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
+            new Stringifier<IdWithPrimitiveFields>() {
                 @Override
                 protected String doForward(IdWithPrimitiveFields id) {
                     return id.getName();

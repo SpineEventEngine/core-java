@@ -151,7 +151,7 @@ public class Stringifiers {
         return result;
     }
 
-    protected static class TimestampIdStringifer extends Stringifier<Timestamp, String> {
+    protected static class TimestampIdStringifer extends Stringifier<Timestamp> {
 
         @Override
         protected String doForward(Timestamp timestamp) {
@@ -174,7 +174,7 @@ public class Stringifiers {
         }
     }
 
-    static class EventIdStringifier extends Stringifier<EventId, String> {
+    static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String doForward(EventId eventId) {
             final String result = eventId.getUuid();
@@ -190,7 +190,7 @@ public class Stringifiers {
         }
     }
 
-    static class CommandIdStringifier extends Stringifier<CommandId, String> {
+    static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String doForward(CommandId commandId) {
             final String result = commandId.getUuid();
