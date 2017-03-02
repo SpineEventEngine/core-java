@@ -240,7 +240,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @Override
     public Set<EventClass> getMessageClasses() {
         final Class<? extends Projection> projectionClass = getEntityClass();
-        final Set<EventClass> result = Projection.getEventClasses(projectionClass);
+        final Set<EventClass> result = Projection.TypeInfo.getEventClasses(projectionClass);
         return result;
     }
 

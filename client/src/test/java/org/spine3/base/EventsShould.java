@@ -51,12 +51,11 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
 
     private final EventContext context = EventTests.newEventContext();
@@ -68,7 +67,7 @@ public class EventsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Events.class));
+        assertHasPrivateParameterlessCtor(Events.class);
     }
 
     @Test

@@ -287,10 +287,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private static class TypeInfo {
 
-        private TypeInfo() {
-            // Prevent construction from outside.
-        }
-
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
             final Class<E> result = getGenericParameterType(repositoryClass,

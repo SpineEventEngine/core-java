@@ -26,8 +26,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.DescriptorProtos;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
@@ -36,7 +34,6 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
@@ -61,7 +58,7 @@ import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
@@ -78,7 +75,7 @@ public class CommandsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Commands.class));
+        assertHasPrivateParameterlessCtor(Commands.class);
     }
 
     @Test

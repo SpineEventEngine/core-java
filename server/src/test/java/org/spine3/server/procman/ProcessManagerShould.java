@@ -69,8 +69,9 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
+@SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
@@ -85,7 +86,10 @@ public class ProcessManagerShould {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        final CommandStore commandStore = spy(
+                new CommandStore(storageFactory.createCommandStorage())
+        );
+
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());
@@ -321,6 +325,11 @@ public class ProcessManagerShould {
                     .routeAll();
             return route;
         }
+    }
+
+    @Test
+    public void have_TypeInfo_utility_class() {
+        assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
