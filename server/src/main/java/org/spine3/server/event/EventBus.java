@@ -269,6 +269,21 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /**
      * Validates and posts the event for handling.
      *
+     * <p>Does performs the same as the {@link #post(Event, StreamObserver) overloaded method}, but
+     * does not require any response observer.
+     *
+     * <p>This method should be used if the callee does not care about the event acknowledgement.
+     *
+     * @param event the event to be handled
+     * @see #post(Event, StreamObserver)
+     */
+    public void post(Event event) {
+        post(event, emptyObserver());
+    }
+
+    /**
+     * Validates and posts the event for handling.
+     *
      * <p>If the event is invalid, the {@code responseObserver} is notified of an error.
      *
      * <p>If the event is valid, it is stored in the associated {@link EventStore} before
@@ -433,6 +448,32 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     protected EventDispatcherRegistry registry() {
         return (EventDispatcherRegistry) super.registry();
     }
+
+    private static StreamObserver<Response> emptyObserver() {
+        return emptyObserver;
+    }
+
+    /**
+     * The {@code StreamObserver} which does nothing.
+     *
+     * @see #emptyObserver()
+     */
+    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
+        @Override
+        public void onNext(Response value) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
+    };
 
     /** The {@code Builder} for {@code EventBus}. */
     public static class Builder {
