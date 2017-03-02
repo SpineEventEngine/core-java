@@ -20,34 +20,32 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.test.NullToleranceTest;
 
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
+/**
+ * Provides only class-level tests.
+ *
+ * <p>Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by
+ * its own set of tests.
+ */
 public class TypeNameShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(TypeName.class));
+        assertHasPrivateParameterlessCtor(TypeName.class);
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final Descriptors.Descriptor descriptor = Command.getDefaultInstance()
-                                                         .getDescriptorForType();
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(TypeName.class)
-                                                                     .addDefaultValue(descriptor)
-                                                                     .addDefaultValue(Command.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(Descriptors.Descriptor.class, Command.getDefaultInstance()
+                                                                 .getDescriptorForType())
+                .testAllPublicStaticMethods(TypeName.class);
     }
-    /**
-     * Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by its own set of tests.
-     **/
 }

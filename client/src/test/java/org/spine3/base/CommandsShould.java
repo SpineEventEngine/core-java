@@ -58,7 +58,7 @@ import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
@@ -75,7 +75,7 @@ public class CommandsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Commands.class));
+        assertHasPrivateParameterlessCtor(Commands.class);
     }
 
     @Test

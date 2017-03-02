@@ -66,7 +66,6 @@ import static org.spine3.validate.Validate.isNotDefault;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class CommandStorageShould
         extends AbstractStorageShould<CommandId, CommandRecord, CommandStorage> {
 

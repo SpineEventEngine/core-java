@@ -69,13 +69,20 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
         }
     }
 
-    /**
-     * Returns the set of event classes handled by the passed {@link Projection} class.
-     *
-     * @param cls the class to inspect
-     * @return immutable set of event classes or an empty set if no events are handled
-     */
-    static ImmutableSet<EventClass> getEventClasses(Class<? extends Projection> cls) {
-        return EventSubscriberMethod.getEventClasses(cls);
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent instantiation of this utility class.
+        }
+
+        /**
+         * Returns the set of event classes handled by the passed {@link Projection} class.
+         *
+         * @param cls the class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static ImmutableSet<EventClass> getEventClasses(Class<? extends Projection> cls) {
+            return EventSubscriberMethod.getEventClasses(cls);
+        }
     }
 }

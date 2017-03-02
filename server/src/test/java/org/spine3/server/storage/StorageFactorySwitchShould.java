@@ -39,7 +39,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.server.storage.StorageFactorySwitch.init;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -91,7 +91,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void have_private_parameterless_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(StorageFactorySwitch.class));
+        assertHasPrivateParameterlessCtor(StorageFactorySwitch.class);
     }
 
     @Test

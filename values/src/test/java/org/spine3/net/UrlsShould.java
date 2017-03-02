@@ -20,20 +20,19 @@
 
 package org.spine3.net;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
+@SuppressWarnings({"DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
 public class UrlsShould {
 
     @Test
@@ -116,15 +115,12 @@ public class UrlsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Urls.class));
+        assertHasPrivateParameterlessCtor(Urls.class);
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Urls.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Urls.class);
     }
 }

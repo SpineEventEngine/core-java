@@ -35,16 +35,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ValidateShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Validate.class));
+        assertHasPrivateParameterlessCtor(Validate.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
