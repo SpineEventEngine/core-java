@@ -328,7 +328,7 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void have_TypeInfo() {
+    public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(ProcessManager.TypeInfo.class);
     }
 

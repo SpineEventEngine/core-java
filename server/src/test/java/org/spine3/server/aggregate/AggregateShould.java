@@ -591,7 +591,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void have_TypeInfo() {
+    public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
     }
 

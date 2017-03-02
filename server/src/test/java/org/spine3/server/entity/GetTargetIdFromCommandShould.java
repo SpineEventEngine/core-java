@@ -43,7 +43,7 @@ public class GetTargetIdFromCommandShould {
         assertFalse(id.isPresent());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     public void get_ID_from_command_message() {
         final CreateProject msg = Sample.messageOfType(CreateProject.class);

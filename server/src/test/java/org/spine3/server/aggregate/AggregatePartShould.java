@@ -91,7 +91,7 @@ public class AggregatePartShould {
     }
 
     @Test
-    public void have_TypeInfo() {
+    public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(AggregatePart.TypeInfo.class);
     }
 

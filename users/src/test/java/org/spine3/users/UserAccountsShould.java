@@ -50,17 +50,17 @@ public class UserAccountsShould {
                    && UserAccounts.getDunbarsNumber() < 250);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // No need to check in this test.
     @Test
     public void obtain_user_google_uid() {
         final String uid = newUuid(); // In reality Google's user ID has different formant.
 
-        final UserAccount userAccount = UserAccount.newBuilder()
-                                             .addLinkedIdentity(
-                                                     UserInfo.newBuilder()
-                                                             .setProviderId(GOOGLE_AUTH_PROVIDER_ID)
-                                                             .setUid(uid))
-                                             .build();
+        final UserAccount userAccount =
+                UserAccount.newBuilder()
+                           .addLinkedIdentity(UserInfo.newBuilder()
+                                                      .setProviderId(GOOGLE_AUTH_PROVIDER_ID)
+                                                      .setUid(uid))
+                           .build();
 
         assertEquals(uid, getGoogleUid(userAccount).get());
     }

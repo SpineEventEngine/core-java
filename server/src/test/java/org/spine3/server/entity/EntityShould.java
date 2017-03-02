@@ -301,7 +301,7 @@ public class EntityShould {
     }
 
     @Test
-    public void have_TypeInfo() {
+    public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(Entity.TypeInfo.class);
     }
 

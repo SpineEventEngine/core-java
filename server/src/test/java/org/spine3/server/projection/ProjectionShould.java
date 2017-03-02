@@ -82,7 +82,7 @@ public class ProjectionShould {
     }
 
     @Test
-    public void have_type_info_utility_class() {
+    public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
