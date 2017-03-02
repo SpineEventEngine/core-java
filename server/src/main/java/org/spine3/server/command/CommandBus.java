@@ -173,7 +173,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return this.failureBus;
     }
 
-
     @Override
     protected CommandDispatcherRegistry createRegistry() {
         return new CommandDispatcherRegistry();
