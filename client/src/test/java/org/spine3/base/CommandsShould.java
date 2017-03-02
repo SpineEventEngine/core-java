@@ -56,7 +56,6 @@ import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations2.seconds;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserUuid;
@@ -80,9 +79,9 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final Command cmd1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
-        final Command cmd2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
-        final Command cmd3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final Command cmd1 = commandFactory.createCommand(StringValue.getDefaultInstance(), minutesAgo(1));
+        final Command cmd2 = commandFactory.createCommand(Int64Value.getDefaultInstance(), secondsAgo(30));
+        final Command cmd3 = commandFactory.createCommand(BoolValue.getDefaultInstance(), secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertFalse(sortedCommands.equals(commandsToSort));
@@ -118,8 +117,8 @@ public class CommandsShould {
                 .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
-                            commandFactory.create(StringValue.getDefaultInstance(),
-                                                  minutesAgo(1)))
+                            commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                         minutesAgo(1)))
                 .setDefault(CommandContext.class, commandFactory.createContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, Tests.newUserUuid())
@@ -177,23 +176,23 @@ public class CommandsShould {
 
     @Test
     public void create_wereBetween_predicate() {
-        final Command command1 = commandFactory.create(StringValue.getDefaultInstance(),
-                                                       minutesAgo(5));
-        final Command command2 = commandFactory.create(Int64Value.getDefaultInstance(),
-                                                       minutesAgo(2));
-        final Command command3 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(30));
-        final Command command4 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(20));
-        final Command command5 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(5));
+        final Command command1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                              minutesAgo(5));
+        final Command command2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                              minutesAgo(2));
+        final Command command3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(30));
+        final Command command4 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(20));
+        final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(5));
 
-        final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3,
-                                                                 command4, command5);
-        final Iterable<Command> filter = Iterables.filter(commands,
-                                                          Commands.wereWithinPeriod(minutesAgo(3),
-                                                                                    secondsAgo(
-                                                                                            10)));
+        final ImmutableList<Command> commands =
+                ImmutableList.of(command1, command2, command3, command4, command5);
+        final Iterable<Command> filter = Iterables.filter(
+                commands,
+                Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+        );
 
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
@@ -237,31 +236,5 @@ public class CommandsShould {
         final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
-    }
-
-    @Test
-    public void update_schedule_options() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations2.fromMinutes(5);
-
-        final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
-
-        final CommandContext.Schedule schedule = cmdUpdated.getContext()
-                                                           .getSchedule();
-        assertEquals(delay, schedule.getDelay());
-        assertEquals(schedulingTime, schedule.getSchedulingTime());
-    }
-
-    @Test
-    public void update_scheduling_time() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-
-        final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);
-
-        assertEquals(schedulingTime, cmdUpdated.getContext()
-                                               .getSchedule()
-                                               .getSchedulingTime());
     }
 }

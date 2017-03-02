@@ -40,7 +40,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.spy;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.command.Given.Command.createProject;
 
 /**

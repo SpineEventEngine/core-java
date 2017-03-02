@@ -26,8 +26,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Identifiers;
-import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;

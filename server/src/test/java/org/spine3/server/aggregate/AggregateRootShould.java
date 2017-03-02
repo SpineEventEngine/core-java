@@ -22,16 +22,10 @@ package org.spine3.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
-import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
 import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.ProjectLifecycle;
@@ -43,39 +37,27 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 
 import java.lang.reflect.Constructor;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.test.Tests.emptyObserver;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class AggregateRootShould {
 
-    private static final StreamObserver<Response> responseObserver = emptyObserver();
-
     private ProjectRoot aggregateRoot;
-    private CommandBus commandBus;
-    private ProjectId projectId;
-    private CommandContext commandContext;
     private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
-        commandContext = createCommandContext();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
-        projectId = ProjectId.newBuilder()
-                             .setId(newUuid())
-                             .build();
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(newUuid())
+                                       .build();
         aggregateRoot = new ProjectRoot(boundedContext, projectId);
         boundedContext.register(new ProjectDefinitionRepository(boundedContext));
         boundedContext.register(new ProjectLifeCycleRepository(boundedContext));
-
-        commandBus = boundedContext.getCommandBus();
     }
 
     @Test
@@ -121,38 +103,6 @@ public class AggregateRootShould {
 
         // It may be called once in another test. So here we check for atMost().
         verify(rootSpy, atMost(1)).lookup(partClass);
-    }
-
-    @Test
-    public void start_the_project() {
-        final Command createProjectSmd = createProjectCmdInstance();
-        commandBus.post(createProjectSmd, responseObserver);
-
-        final Command startProjectCmd = createStartProjectCmd();
-        commandBus.post(startProjectCmd, responseObserver);
-
-        assertFalse(ProjectLifeCyclePart.exceptionOccurred);
-    }
-
-    @Test
-    public void set_variable_to_true_when_it_is_trying_to_start_inexistent_project() {
-        final Command startProjectCmd = createStartProjectCmd();
-        commandBus.post(startProjectCmd, responseObserver);
-        assertTrue(ProjectLifeCyclePart.exceptionOccurred);
-    }
-
-    private Command createProjectCmdInstance() {
-        final CreateProject createProject = CreateProject.newBuilder()
-                                                         .setProjectId(projectId)
-                                                         .build();
-        return Commands.createCommand(createProject, commandContext);
-    }
-
-    private Command createStartProjectCmd() {
-        final StartProject startProject = StartProject.newBuilder()
-                                                      .setProjectId(projectId)
-                                                      .build();
-        return Commands.createCommand(startProject, commandContext);
     }
 
     /*
@@ -204,7 +154,6 @@ public class AggregateRootShould {
             ProjectLifecycle,
             ProjectLifecycle.Builder,
             ProjectRoot> {
-        private static boolean exceptionOccurred = false;
 
         protected ProjectLifeCyclePart(ProjectRoot root) {
             super(root);
@@ -212,12 +161,6 @@ public class AggregateRootShould {
 
         @Assign
         ProjectStarted handle(StartProject msg) {
-            final ProjectDefinition projectDefinition = getPartState(ProjectDefinition.class);
-            final boolean defaultId = projectDefinition.getId()
-                                                       .equals(ProjectId.getDefaultInstance());
-            if (defaultId) {
-                exceptionOccurred = true;
-            }
             final ProjectStarted result = ProjectStarted.newBuilder()
                                                         .setProjectId(msg.getProjectId())
                                                         .build();

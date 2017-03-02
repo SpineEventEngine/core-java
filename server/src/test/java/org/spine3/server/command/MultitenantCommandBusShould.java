@@ -24,15 +24,11 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
-import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.users.CurrentTenant;
-import org.spine3.server.type.CommandClass;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -46,8 +42,6 @@ import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandValidationError.TENANT_UNKNOWN;
 import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 
@@ -157,7 +151,7 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler(newUuid());
+        return new CreateProjectHandler();
     }
 
     /*
@@ -229,17 +223,6 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.post(addTask(), responseObserver);
 
         assertTrue(dispatcher.wasDispatcherInvoked());
-    }
-
-    @Test
-    public void set_command_status_to_OK_when_handler_returns() {
-        commandBus.register(createProjectHandler);
-
-        final Command command = createProject();
-        commandBus.post(command, responseObserver);
-
-        // See that we called CommandStore only once with the right command ID.
-        verify(commandStore).setCommandStatusOk(getId(command));
     }
 
     @Test

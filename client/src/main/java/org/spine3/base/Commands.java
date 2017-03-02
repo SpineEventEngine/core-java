@@ -42,7 +42,6 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -62,6 +61,7 @@ public class Commands {
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private Commands() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -296,54 +296,6 @@ public class Commands {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Sets a new scheduling time to {@link Schedule}.
-     *
-     * @param command        a command to update
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
-     * @return an updated command
-     */
-    @Internal
-    public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
-        checkNotNull(command);
-        checkNotNull(schedulingTime);
-
-        final Duration delay = command.getContext()
-                                      .getSchedule()
-                                      .getDelay();
-        final Command result = setSchedule(command, delay, schedulingTime);
-        return result;
-    }
-
-    /**
-     * Updates {@link Schedule}.
-     *
-     * @param command        a command to update
-     * @param delay          a delay to set (see {@link Schedule#getDelay()} for details)
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
-     * @return an updated command
-     */
-    @Internal
-    public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
-        checkNotNull(command);
-        checkNotNull(delay);
-        checkValid(schedulingTime);
-
-        final CommandContext context = command.getContext();
-        final Schedule scheduleUpdated = context.getSchedule()
-                                                .toBuilder()
-                                                .setDelay(delay)
-                                                .setSchedulingTime(schedulingTime)
-                                                .build();
-        final CommandContext contextUpdated = context.toBuilder()
-                                                     .setSchedule(scheduleUpdated)
-                                                     .build();
-        final Command result = command.toBuilder()
-                                      .setContext(contextUpdated)
-                                      .build();
-        return result;
     }
 
     /**

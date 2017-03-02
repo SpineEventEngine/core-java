@@ -31,14 +31,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
-import org.spine3.base.Response;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.Durations2;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.TestCommandFactory;
-import org.spine3.protobuf.Durations;
-import org.spine3.server.type.CommandClass;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
@@ -54,14 +47,10 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
-import static org.spine3.test.TimeTests.Past.minutesAgo;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestSuite {
@@ -95,8 +84,8 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
 
 //        verify(commandStore, atMost(1)).updateStatus(command, dispatcher.exception);
 
-        final CommandEnvelope envelope = new CommandEnvelope(command);
-        verify(log).errorHandling(dispatcher.exception, envelope.getCommandMessage(), envelope.getCommandId());
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        verify(log).errorHandling(dispatcher.exception, envelope.getMessage(), envelope.getCommandId());
     }
 
     //TODO:2017-02-14:alexander.yevsyukov: Enable back when obtaining command status is available
@@ -230,7 +219,7 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
     private static class ThrowingDispatcher implements CommandDispatcher {
 
         @SuppressWarnings("ThrowableInstanceNeverThrown")
-        private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
+        private final RuntimeException exception = new RuntimeException("Dispatching exception.");
 
         @Override
         public Set<CommandClass> getMessageClasses() {

@@ -23,9 +23,9 @@ package org.spine3.server.command;
 import com.google.common.base.Optional;
 import org.spine3.base.CommandId;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.Repository;
-import org.spine3.server.storage.Storage;
-import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.entity.EntityFactory;
+import org.spine3.server.entity.EntityStorageConverter;
+import org.spine3.server.entity.RecordBasedRepository;
 
 //TODO:2017-02-15:alexander.yevsyukov: Update Javadoc after migration to this class.
 /**
@@ -34,7 +34,8 @@ import org.spine3.server.storage.StorageFactory;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandRepository extends Repository<CommandId, CommandEntity, CommandStatusMeta> {
+public class CommandRepository
+        extends RecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
 
     /**
      * {@inheritDoc}
@@ -49,17 +50,14 @@ public class CommandRepository extends Repository<CommandId, CommandEntity, Comm
     }
 
     @Override
-    protected void store(CommandEntity obj) {
-
+    protected EntityFactory<CommandId, CommandEntity> entityFactory() {
+        //TODO:2017-03-02:alexander.yevsyukov: Implement
+        return null;
     }
 
     @Override
-    protected void updateMetadata(CommandId id, CommandStatusMeta metadata) {
-
-    }
-
-    @Override
-    protected Storage createStorage(StorageFactory factory) {
+    protected EntityStorageConverter<CommandId, CommandEntity, CommandRecord> entityConverter() {
+        //TODO:2017-03-02:alexander.yevsyukov: Implement
         return null;
     }
 }

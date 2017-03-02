@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
 import org.spine3.test.TestCommandFactory;
@@ -45,19 +46,21 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.setSchedule;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.minutes;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.server.command.Given.Command.startProject;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Values.newStringValue;
 
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
-    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandSchedulingShould.class);
+    private final TestCommandFactory commandFactory =
+            TestCommandFactory.newInstance(CommandSchedulingShould.class);
 
     public CommandSchedulingShould() {
         super(true);
@@ -193,11 +196,11 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Command cmd = commandFactory.createCommand(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.minutes(5);
 
-        final Command cmdUpdated = CommandScheduler.setSchedule(cmd, delay, schedulingTime);
+        final Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
 
         final CommandContext.Schedule schedule = cmdUpdated.getContext().getSchedule();
         assertEquals(delay, schedule.getDelay());
@@ -206,7 +209,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Command cmd = commandFactory.createCommand(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
@@ -256,7 +259,9 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         });
     }
 
-    private void storeAsScheduled(Iterable<Command> commands, Duration delay, Timestamp schedulingTime) {
+    private void storeAsScheduled(Iterable<Command> commands,
+                                  Duration delay,
+                                  Timestamp schedulingTime) {
         for (Command cmd : commands) {
             final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
             commandStore.store(cmdWithSchedule, SCHEDULED);

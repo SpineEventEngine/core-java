@@ -22,6 +22,7 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -247,13 +248,13 @@ public class CommandStore implements AutoCloseable {
                 @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
                 @Override
                 public void run() {
-                    final Message commandMessage = commandEnvelope.getCommandMessage();
+                    final Message commandMessage = commandEnvelope.getMessage();
                     final CommandId commandId = commandEnvelope.getCommandId();
 
                     if (cause instanceof FailureThrowable) {
                         final FailureThrowable failure = (FailureThrowable) cause;
                         log.failureHandling(failure, commandMessage, commandId);
-                        commandStore.updateStatus(commandId, failure.toMessage());
+                        commandStore.updateStatus(commandId, failure.toFailure());
                     } else if (cause instanceof Exception) {
                         final Exception exception = (Exception) cause;
                         log.errorHandling(exception, commandMessage, commandId);

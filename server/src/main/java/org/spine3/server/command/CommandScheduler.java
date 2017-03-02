@@ -33,8 +33,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.setSchedulingTime;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -79,7 +79,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Schedules a command and delivers it to the target according to the scheduling options set to a context.
+     * Schedules a command and delivers it to the target according to
+     * the scheduling options set to a context.
      *
      * @param command a command to deliver later
      * @see #post(Command)
@@ -143,7 +144,7 @@ public abstract class CommandScheduler {
      * Updates {@link CommandContext.Schedule}.
      *
      * @param command        a command to update
-     * @param delay          a delay to set (see {@link CommandContext.Schedule#getDelay()} for details)
+     * @param delay          a {@linkplain CommandContext.Schedule#getDelay() delay} to set
      * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
@@ -151,7 +152,7 @@ public abstract class CommandScheduler {
         checkNotNull(command);
         checkNotNull(delay);
         checkNotNull(schedulingTime);
-        checkPositive(schedulingTime, "command scheduling time");
+        checkValid(schedulingTime);
 
         final CommandContext context = command.getContext();
         final CommandContext.Schedule scheduleUpdated = context.getSchedule()

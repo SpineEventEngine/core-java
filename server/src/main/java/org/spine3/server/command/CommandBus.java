@@ -26,10 +26,6 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandEnvelope;
-import org.spine3.base.CommandId;
-import org.spine3.base.Error;
-import org.spine3.base.Errors;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.base.Stringifiers;
@@ -37,7 +33,6 @@ import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.storage.CurrentTenant;
 import org.spine3.util.Environment;
 
 import java.util.Set;

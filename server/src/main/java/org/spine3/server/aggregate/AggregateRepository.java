@@ -81,7 +81,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
-    public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+    static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     private final IdCommandFunction<I, Message> defaultIdFunction =
             GetTargetIdFromCommand.newInstance();
@@ -204,8 +204,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void dispatch(CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
-        final A aggregate = commandEndpoint.receive(command);
+        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this, command);
+        commandEndpoint.execute();
+
+        final Optional<A> processedAggregate = commandEndpoint.getAggregate();
+        if (!processedAggregate.isPresent()) {
+            throw new IllegalStateException("No aggregate loaded for command: " + command);
+        }
+
+        final A aggregate = processedAggregate.get();
         final List<Event> events = aggregate.getUncommittedEvents();
         storeAndPostToStand(aggregate);
         postEvents(events);

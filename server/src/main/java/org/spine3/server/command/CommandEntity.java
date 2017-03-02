@@ -21,15 +21,14 @@
 package org.spine3.server.command;
 
 import org.spine3.base.CommandId;
-import org.spine3.server.command.storage.CommandStorageRecord;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractEntity;
 
 /**
  * An entity for storing command and its processing status.
  *
  * @author Alexander Yevyukov
  */
-class CommandEntity extends Entity<CommandId, CommandStorageRecord, CommandStatusMeta> {
+class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
 
     /**
      * {@inheritDoc}

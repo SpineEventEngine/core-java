@@ -20,13 +20,15 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.entity.Visibility;
 import org.spine3.server.storage.TenantDataOperation;
+
+import javax.annotation.Nullable;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -44,6 +46,9 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     private final AggregateRepository<I, A> repository;
     private final CommandEnvelope command;
 
+    @Nullable
+    private A aggregate;
+
     static <I, A extends Aggregate<I, ?, ?>>
             AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository,
                                                      CommandEnvelope command) {
@@ -59,14 +64,17 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public void run() {
-        final A aggregate = receive(command);
-        repository.afterDispatch(aggregate);
+        aggregate = receive(command);
+    }
+
+    Optional<A> getAggregate() {
+        return Optional.fromNullable(aggregate);
     }
 
     /**
      * Dispatches the command.
      */
-    A receive(CommandEnvelope envelope) {
+    private A receive(CommandEnvelope envelope) {
         final Action<I, A> action = new Action<>(this, envelope);
         final A result = action.loadAndDispatch();
         return result;

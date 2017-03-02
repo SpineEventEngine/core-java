@@ -50,7 +50,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                 implements RepositoryView<I, E>,
                            AutoCloseable {
 
-    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+    private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
