@@ -243,7 +243,7 @@ public class StringifiersShould {
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringiferFor(Random.class));
+                                       .hasStringifierFor(Random.class));
     }
 
     @Test
