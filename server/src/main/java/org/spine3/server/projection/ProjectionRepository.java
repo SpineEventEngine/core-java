@@ -400,7 +400,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         private final ProjectionRepository projectionRepository;
         private BulkWriteOperation operation;
 
-        EventStreamObserver(ProjectionRepository projectionRepository) {
+        private EventStreamObserver(ProjectionRepository projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 
@@ -465,12 +465,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
-    private static class PendingDataFlushTask<P extends Projection<?, ?>>
+    private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>
             implements BulkWriteOperation.FlushCallback<P> {
 
-        private final ProjectionRepository<?, P, ?> projectionRepository;
+        private final ProjectionRepository<I, P, S> projectionRepository;
 
-        private PendingDataFlushTask(ProjectionRepository<?, P, ?> projectionRepository) {
+        private PendingDataFlushTask(ProjectionRepository<I, P, S> projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 
