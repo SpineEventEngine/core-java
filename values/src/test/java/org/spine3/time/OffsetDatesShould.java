@@ -25,15 +25,13 @@ import org.junit.Test;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.getZoneOffset;
 import static org.spine3.time.Calendars.nowAt;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class OffsetDatesShould {
 
     private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(5, 30);
@@ -44,7 +42,7 @@ public class OffsetDatesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(OffsetDates.class));
+        assertHasPrivateParameterlessCtor(OffsetDates.class);
     }
 
     @Test

@@ -57,17 +57,17 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"}) // Over-coupling is OK for test classes
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EventEnrichmentsMapShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(EventEnrichmentsMap.class));
+        assertHasPrivateParameterlessCtor(EventEnrichmentsMap.class);
     }
 
     @Test
@@ -79,43 +79,53 @@ public class EventEnrichmentsMapShould {
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichment_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectCreated.Enrichment.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(ProjectCreated.Enrichment.class,
+                                            ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedSeparateEnrichment_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectCreatedSeparateEnrichment.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(ProjectCreatedSeparateEnrichment.class,
+                                            ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackage_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackage.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackage.class,
+                                            ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqn_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackageFqn.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackageFqn.class,
+                                            ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(
+                ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class,
+                ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectStarted_by_ProjectStartedEnrichment_type() {
-        assertOnlyEventTypeByEnrichmentType(ProjectStarted.Enrichment.class, ProjectStarted.class);
+        assertOnlyEventTypeByEnrichmentType(ProjectStarted.Enrichment.class,
+                                            ProjectStarted.class);
     }
 
     @Test
     public void contain_events_by_EnrichmentForSeveralEvents_type() {
         assertOnlyEventTypeByEnrichmentType(EnrichmentForSeveralEvents.class,
-                                            ProjectStarted.class, ProjectCreated.class, TaskAdded.class);
+                                            ProjectStarted.class,
+                                            ProjectCreated.class,
+                                            TaskAdded.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_EnrichmentByContextFields_type() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentByContextFields.class, ProjectCreated.class);
+        assertOnlyEventTypeByEnrichmentType(EnrichmentByContextFields.class,
+                                            ProjectCreated.class);
     }
 
     @Test
@@ -162,47 +172,54 @@ public class EventEnrichmentsMapShould {
 
     @Test
     public void contain_enrichments_defined_with_by_with_two_arguments() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNames.class,
-                                            SharingRequestApproved.class,
-                                            PermissionGrantedEvent.class);
+        assertOnlyEventTypeByEnrichmentType(
+                EnrichmentBoundWithFieldsWithDifferentNames.class,
+                SharingRequestApproved.class,
+                PermissionGrantedEvent.class);
     }
 
     @Test
     public void contain_enrichments_defined_with_by_with_two_fqn_arguments() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
-                                            SharingRequestApproved.class,
-                                            PermissionGrantedEvent.class);
+        assertOnlyEventTypeByEnrichmentType(
+                EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
+                SharingRequestApproved.class,
+                PermissionGrantedEvent.class);
     }
 
     @Test
     public void contain_enrichments_defined_with_by_with_multiple_arguments() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
-                                            SharingRequestApproved.class,
-                                            PermissionGrantedEvent.class,
-                                            UserDeletedEvent.class);
+        assertOnlyEventTypeByEnrichmentType(
+                EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
+                SharingRequestApproved.class,
+                PermissionGrantedEvent.class,
+                UserDeletedEvent.class);
     }
 
     @Test
     public void contain_enrichments_defined_with_by_with_multiple_arguments_using_wildcard() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
-                                            SharingRequestApproved.class,
-                                            PermissionGrantedEvent.class,
-                                            PermissionRevokedEvent.class);
+        assertOnlyEventTypeByEnrichmentType(
+                EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
+                SharingRequestApproved.class,
+                PermissionGrantedEvent.class,
+                PermissionRevokedEvent.class);
     }
 
     @Test
     public void contain_enrichments_defined_with_by_containing_separating_spaces() {
-        assertOnlyEventTypeByEnrichmentType(EnrichmentBoundWithFieldsSeparatedWithSpaces.class,
-                                            TaskAdded.class,
-                                            PermissionGrantedEvent.class);
+        assertOnlyEventTypeByEnrichmentType(
+                EnrichmentBoundWithFieldsSeparatedWithSpaces.class,
+                TaskAdded.class,
+                PermissionGrantedEvent.class);
     }
 
     @SafeVarargs
     private static void assertEventTypeByEnrichmentType(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
-        final Collection<String> eventTypesActual = EventEnrichmentsMap.getInstance()
-                                                                       .get(TypeName.of(enrichmentClass));
+        final Collection<String> eventTypesActual =
+                EventEnrichmentsMap.getInstance()
+                                   .get(TypeName.of(enrichmentClass));
+
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
             final String expectedTypeName = TypeName.of(expectedClass);
             assertTrue(eventTypesActual.contains(expectedTypeName));
@@ -213,8 +230,9 @@ public class EventEnrichmentsMapShould {
     private static void assertOnlyEventTypeByEnrichmentType(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
-        final Collection<String> eventTypesActual = EventEnrichmentsMap.getInstance()
-                                                                       .get(TypeName.of(enrichmentClass));
+        final Collection<String> eventTypesActual =
+                EventEnrichmentsMap.getInstance()
+                                   .get(TypeName.of(enrichmentClass));
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         assertEventTypeByEnrichmentType(enrichmentClass, eventClassesExpected);
     }

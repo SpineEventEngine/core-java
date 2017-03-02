@@ -64,7 +64,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShouldHandleCommandStatus {
 
     private CommandBus commandBus;
