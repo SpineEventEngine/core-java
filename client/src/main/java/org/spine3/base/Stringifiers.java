@@ -167,8 +167,7 @@ public class Stringifiers {
             try {
                 return Timestamps.parse(s);
             } catch (ParseException e) {
-                final ConversionError conversionError = new ConversionError(e.getMessage(),
-                                                                            e.getErrorOffset());
+                final ConversionError conversionError = new ConversionError(e.getMessage());
                 throw new IllegalArgumentException(conversionError);
             }
         }
