@@ -45,8 +45,7 @@ import static org.spine3.base.Commands.isCommandsFile;
  * @param <V> a type of field values
  * @author Alexander Litus
  */
-@Internal
-public abstract class FieldValidator<V> {
+abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
 

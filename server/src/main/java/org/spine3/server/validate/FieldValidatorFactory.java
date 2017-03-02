@@ -38,8 +38,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-@Internal
-public class FieldValidatorFactory {
+class FieldValidatorFactory {
 
     private FieldValidatorFactory() {
     }
