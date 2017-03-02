@@ -33,11 +33,11 @@ import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
-import javax.annotation.Nullable;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.NULL_ID;
@@ -137,7 +137,9 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_message_id_with_timestamp_field() {
         final Timestamp currentTime = getCurrentTime();
-        final TimestampFieldId id = TimestampFieldId.newBuilder().setId(currentTime).build();
+        final TimestampFieldId id = TimestampFieldId.newBuilder()
+                                                    .setId(currentTime)
+                                                    .build();
         final String expected = toIdString(currentTime);
 
         final String actual = idToString(id);
@@ -148,7 +150,9 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_message_id_with_message_field() {
         final StringValue value = newStringValue(TEST_ID);
-        final NestedMessageId idToConvert = NestedMessageId.newBuilder().setId(value).build();
+        final NestedMessageId idToConvert = NestedMessageId.newBuilder()
+                                                           .setId(value)
+                                                           .build();
 
         final String result = idToString(idToConvert);
 
@@ -169,8 +173,8 @@ public class StringifiersShould {
 
         final String expected =
                 "string=\"" + outerString + '\"' +
-                        " int=" + number +
-                        " message { value=\"" + nestedString + "\" }";
+                " int=" + number +
+                " message { value=\"" + nestedString + "\" }";
 
         final String actual = idToString(idToConvert);
 
@@ -187,54 +191,70 @@ public class StringifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
-            new Stringifier<IdWithPrimitiveFields>() {
-        @Override
-        public String apply(@Nullable IdWithPrimitiveFields id) {
-            if (id == null) {
-                return NULL_ID;
-            }
-            return id.getName();
-        }
-    };
+    private static final Stringifier<IdWithPrimitiveFields, String> ID_TO_STRING_CONVERTER =
+            new Stringifier<IdWithPrimitiveFields, String>() {
+                @Override
+                protected String doForward(IdWithPrimitiveFields id) {
+                    return id.getName();
+                }
+
+                @Override
+                protected IdWithPrimitiveFields doBackward(String s) {
+                    return IdWithPrimitiveFields.newBuilder()
+                                                .setName(s)
+                                                .build();
+                }
+            };
 
     @Test
     public void convert_to_string_registered_id_message_type() {
-        StringifierRegistry.getInstance().register(IdWithPrimitiveFields.class, ID_TO_STRING_CONVERTER);
+        StringifierRegistry.getInstance()
+                           .register(IdWithPrimitiveFields.class, ID_TO_STRING_CONVERTER);
 
-        final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder().setName(TEST_ID).build();
+        final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
+                                                              .setName(TEST_ID)
+                                                              .build();
         final String result = idToString(id);
 
         assertEquals(TEST_ID, result);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as these are standard Stringifiers we add ourselves.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    // OK as these are standard Stringifiers we add ourselves.
     @Test
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertEquals(NULL_ID, registry.get(Timestamp.class).get().apply(null));
-        assertEquals(NULL_ID, registry.get(EventId.class).get().apply(null));
-        assertEquals(NULL_ID, registry.get(CommandId.class).get().apply(null));
+        assertNull(registry.get(EventId.class)
+                           .get()
+                           .convert(null));
+        assertNull(registry.get(EventId.class)
+                           .get()
+                           .convert(null));
+        assertNull(registry.get(CommandId.class)
+                           .get()
+                           .convert(null));
     }
 
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
-        assertFalse(StringifierRegistry.getInstance().hasStringiferFor(Random.class));
+        assertFalse(StringifierRegistry.getInstance()
+                                       .hasStringiferFor(Random.class));
     }
 
     @Test
     public void convert_command_id_to_string() {
         final CommandId id = Commands.generateId();
-        final String actual = new Stringifiers.CommandIdStringifier().apply(id);
+        final String actual = new Stringifiers.CommandIdStringifier().convert(id);
 
+        assertEquals(idToString(id), actual);
         assertEquals(idToString(id), actual);
     }
 
     @Test
     public void convert_event_id_to_string() {
         final EventId id = Events.generateId();
-        final String actual = new Stringifiers.EventIdStringifier().apply(id);
+        final String actual = new Stringifiers.EventIdStringifier().convert(id);
 
         assertEquals(idToString(id), actual);
     }

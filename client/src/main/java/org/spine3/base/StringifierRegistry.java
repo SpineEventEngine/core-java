@@ -38,9 +38,9 @@ import static java.util.Collections.synchronizedMap;
  */
 class StringifierRegistry {
 
-    private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<Class<?>, Stringifier<?, ?>> entries = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<Class<?>, Stringifier<?>>builder()
+                    ImmutableMap.<Class<?>, Stringifier<?, ?>>builder()
                             .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
                             .put(EventId.class, new Stringifiers.EventIdStringifier())
                             .put(CommandId.class, new Stringifiers.CommandIdStringifier())
@@ -52,7 +52,7 @@ class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> valueClass, Stringifier<I> converter) {
+    public <I extends Message, B> void register(Class<I> valueClass, Stringifier<I, B> converter) {
         checkNotNull(valueClass);
         checkNotNull(converter);
         entries.put(valueClass, converter);
@@ -61,17 +61,18 @@ class StringifierRegistry {
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
-     * @param <I> the type of the values to convert
+     * @param <A> the type of the values to convert
+     * @param <B> the type of the values from convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
-        checkNotNull(valueClass);
+    public <A, B> Optional<Stringifier<A, B>> get(Class<A> toValueClass) {
+        checkNotNull(toValueClass);
 
-        final Stringifier<?> func = entries.get(valueClass);
+        final Stringifier<?, ?> func = entries.get(toValueClass);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
             @see #register(Class, Stringifier) */
-        final Stringifier<I> result = (Stringifier<I>) func;
+        final Stringifier<A, B> result = (Stringifier<A, B>) func;
         return Optional.fromNullable(result);
     }
 

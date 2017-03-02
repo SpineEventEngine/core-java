@@ -20,12 +20,12 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
+import com.google.common.base.Converter;
 
 /**
- * An object converting to {@code String}.
+ * An object converting from A to B and reverse.
  *
  * @author Alexander Yevsyukov
  */
-public interface Stringifier<T> extends Function<T, String> {
+public abstract class Stringifier<A, B> extends Converter<A, B> {
 }
