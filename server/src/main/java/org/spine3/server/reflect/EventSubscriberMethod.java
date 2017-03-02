@@ -28,11 +28,13 @@ import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * A wrapper for an event subscriber method.
@@ -51,6 +53,23 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
      */
     private EventSubscriberMethod(Method method) {
         super(method);
+    }
+
+    /**
+     * Invokes the subscriber method in the passed object.
+     */
+    public static void invokeSubscriber(Object target, Message eventMessage, EventContext context) {
+        checkNotNull(target);
+        checkNotNull(eventMessage);
+        checkNotNull(context);
+
+        try {
+            final EventSubscriberMethod method = forMessage(target.getClass(),
+                                                            eventMessage);
+            method.invoke(target, eventMessage, context);
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
     }
 
     /**

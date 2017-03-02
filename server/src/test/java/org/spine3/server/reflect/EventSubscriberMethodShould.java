@@ -43,6 +43,7 @@ public class EventSubscriberMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }
     

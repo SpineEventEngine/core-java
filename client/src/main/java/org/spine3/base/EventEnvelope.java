@@ -32,11 +32,13 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
 
     private final Message eventMessage;
     private final EventClass eventClass;
+    private final EventContext eventContext;
 
-    private EventEnvelope(Event object) {
-        super(object);
-        this.eventMessage = Events.getMessage(object);
+    private EventEnvelope(Event event) {
+        super(event);
+        this.eventMessage = Events.getMessage(event);
         this.eventClass = EventClass.of(this.eventMessage);
+        this.eventContext = event.getContext();
     }
 
     /**
@@ -59,5 +61,12 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
      */
     public EventClass getEventClass() {
         return this.eventClass;
+    }
+
+    /**
+     * Obtains the context of the event.
+     */
+    public EventContext getEventContext() {
+        return this.eventContext;
     }
 }

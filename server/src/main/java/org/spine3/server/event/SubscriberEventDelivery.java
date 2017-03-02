@@ -27,7 +27,6 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
 
 import static org.spine3.base.Events.getMessage;
@@ -71,14 +70,14 @@ public abstract class SubscriberEventDelivery extends EventDelivery<EventSubscri
                 final EventContext context = event.getContext();
                 try {
                     consumer.handle(message, context);
-                } catch (InvocationTargetException e) {
+                } catch (RuntimeException e) {
                     handleSubscriberException(e, event, context);
                 }
             }
         };
     }
 
-    private static void handleSubscriberException(InvocationTargetException e,
+    private static void handleSubscriberException(RuntimeException e,
                                                   Message eventMessage,
                                                   EventContext eventContext) {
         log().error("Exception handling event. Event message: {}, context: {}, cause: {}",

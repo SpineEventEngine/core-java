@@ -20,13 +20,16 @@
 
 package org.spine3.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventEnvelope;
+import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.reflect.EventSubscriberMethod;
 
-import java.lang.reflect.InvocationTargetException;
-
-import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
+import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
@@ -35,14 +38,33 @@ import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
  * registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  * @see EventBus#subscribe(EventSubscriber)
- * @see EventBus#register(EventDispatcher)
+ * @see EventBus#register(MessageDispatcher)
  */
-public abstract class EventSubscriber {
+public abstract class EventSubscriber implements EventDispatcher {
 
-    public void handle(Message eventMessage, EventContext context)
-            throws InvocationTargetException {
-        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        method.invoke(this, eventMessage, context);
+    /**
+     * Cached set of the event classes this subscriber is subscribed to.
+     */
+    @Nullable
+    private Set<EventClass> eventClasses;
+
+    @Override
+    public void dispatch(EventEnvelope envelope) {
+        handle(envelope.getMessage(), envelope.getEventContext());
+    }
+
+    @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
+    public Set<EventClass> getMessageClasses() {
+        if (eventClasses == null) {
+            eventClasses = ImmutableSet.copyOf(EventSubscriberMethod.getEventClasses(getClass()));
+        }
+        return eventClasses;
+    }
+
+    public void handle(Message eventMessage, EventContext context) {
+        EventSubscriberMethod.invokeSubscriber(this, eventMessage, context);
     }
 }
