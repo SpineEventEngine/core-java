@@ -24,21 +24,23 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import org.junit.Test;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class GivenShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Given.class));
+        assertHasPrivateParameterlessCtor(Given.class);
     }
 
     @Test
@@ -47,7 +49,7 @@ public class GivenShould {
                                           .getResultClass());
     }
 
-    private static class AnEntity extends Entity<String, Timestamp> {
+    private static class AnEntity extends AbstractVersionableEntity<String, Timestamp> {
         protected AnEntity(String id) {
             super(id);
         }
@@ -71,9 +73,12 @@ public class GivenShould {
                                                  .getResultClass());
     }
 
-    private static class AnAggregatePart extends AggregatePart<Long, Timestamp, Timestamp.Builder> {
-        protected AnAggregatePart(Long id) {
-            super(id);
+    private static class AnAggregatePart extends AggregatePart<Long,
+                                                               Timestamp,
+                                                               Timestamp.Builder,
+                                                               AnAggregateRoot> {
+        protected AnAggregatePart(AnAggregateRoot root) {
+            super(root);
         }
     }
 
@@ -99,7 +104,8 @@ public class GivenShould {
     public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Given.class)
-                                                                     .addDefaultValue(AProjection.class)
+                                                                     .addDefaultValue(
+                                                                             AProjection.class)
                                                                      .build();
         final boolean passed = nullToleranceTest.check();
         assertTrue(passed);
@@ -108,6 +114,18 @@ public class GivenShould {
     private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {
         protected AProcessManager(Timestamp id) {
             super(id);
+        }
+    }
+
+    private static class AnAggregateRoot extends AggregateRoot<Long> {
+        /**
+         * Creates an new instance.
+         *
+         * @param boundedContext the bounded context to which the aggregate belongs
+         * @param id             the ID of the aggregate
+         */
+        protected AnAggregateRoot(BoundedContext boundedContext, Long id) {
+            super(boundedContext, id);
         }
     }
 }

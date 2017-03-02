@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.storage.Snapshot;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.type.CommandClass;
+import org.spine3.test.Given;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -42,7 +42,6 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
-import org.spine3.test.Given;
 
 import java.util.Map;
 import java.util.Set;
@@ -58,8 +57,8 @@ import static org.mockito.Mockito.intThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -84,6 +83,15 @@ public class AggregateRepositoryShould {
     public void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
         repository.close();
+    }
+
+    @Test
+    public void call_get_aggregate_constructor_method_only_once(){
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.create(id);
+        repositorySpy.create(id);
+
+        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
@@ -137,7 +145,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), eq(0));
     }
 
@@ -148,7 +156,7 @@ public class AggregateRepositoryShould {
 
         repositorySpy.store(aggregate);
 
-        verify(storage, never()).write(any(ProjectId.class), any(Snapshot.class));
+        verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
         verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
     }
 
@@ -183,8 +191,9 @@ public class AggregateRepositoryShould {
 
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
-        final Set<CommandClass> aggregateCommands = getCommandClasses(ProjectAggregate.class);
-        final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
+        final Set<CommandClass> aggregateCommands =
+                Aggregate.TypeInfo.getCommandClasses(ProjectAggregate.class);
+        final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }

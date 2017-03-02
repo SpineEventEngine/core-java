@@ -34,6 +34,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -52,7 +53,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
@@ -212,7 +213,7 @@ public class Given {
         private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED)
+                    .setStatus(Status.CREATED)
                     .build();
         }
 
@@ -224,7 +225,7 @@ public class Given {
         private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED)
+                    .setStatus(Status.STARTED)
                     .build();
         }
     }

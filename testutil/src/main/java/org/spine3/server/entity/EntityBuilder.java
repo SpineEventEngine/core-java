@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Versions;
 import org.spine3.test.ReflectiveBuilder;
 
 import javax.annotation.CheckReturnValue;
@@ -38,12 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
-       extends ReflectiveBuilder<E> {
+public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+             extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -102,7 +102,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
     @CheckReturnValue
     protected Class<I> getIdClass() {
         final Class<E> resultClass = getResultClass();
-        final Class<I> idClass = Entity.getIdClass(resultClass);
+        final Class<I> idClass = Entity.TypeInfo.getIdClass(resultClass);
         return idClass;
     }
 
@@ -117,7 +117,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
         final S state = state(result);
         final Timestamp timestamp = timestamp();
 
-        result.setState(state, version, timestamp);
+        result.setState(state, Versions.newVersion(version, timestamp));
         return result;
     }
 
@@ -150,7 +150,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = Entity.getConstructor(getResultClass(), idClass);
+        final Constructor<E> constructor = AbstractEntity.getConstructor(getResultClass(), idClass);
         constructor.setAccessible(true);
         return constructor;
     }
@@ -160,7 +160,7 @@ public class EntityBuilder<E extends Entity<I, S>, I, S extends Message>
      */
     protected E createEntity(I id) {
         final Constructor<E> constructor = getConstructor();
-        final E result = Entity.createEntity(constructor, id);
+        final E result = AbstractEntity.createEntity(constructor, id);
         return result;
     }
 }

@@ -22,12 +22,12 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Durations2;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Timestamps.compare;
-import static org.spine3.protobuf.Timestamps.isLaterThan;
+import static org.spine3.protobuf.Timestamps2.compare;
+import static org.spine3.protobuf.Timestamps2.isLaterThan;
 
 /**
  * A utility class for working with {@link Interval}s.
@@ -48,7 +48,8 @@ public class Intervals {
      * @throws IllegalArgumentException if the {@code end} is before the {@code start}
      */
     public static Interval between(Timestamp start, Timestamp end) {
-        checkArgument(isLaterThan(end, /*than*/ start), "The end must be after the start of the interval.");
+        checkArgument(isLaterThan(end, /*than*/ start),
+                      "The end must be after the start of the interval.");
         final Interval.Builder interval = Interval.newBuilder()
                                                   .setStart(start)
                                                   .setEnd(end);
@@ -79,7 +80,7 @@ public class Intervals {
         final Timestamp start = interval.getStart();
         final Timestamp end = interval.getEnd();
         if (start.equals(end)) {
-            return Durations.ZERO;
+            return Durations2.ZERO;
         }
         final long secondsBetween = end.getSeconds() - start.getSeconds();
         final int nanosBetween = end.getNanos() - start.getNanos();

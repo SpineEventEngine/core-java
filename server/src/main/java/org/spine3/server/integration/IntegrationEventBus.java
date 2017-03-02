@@ -28,10 +28,10 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.EventClass;
 import org.spine3.base.Response;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 
@@ -44,14 +44,16 @@ import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.
  * Allows to register {@link IntegrationEvent} subscribers and deliver events to them.
  *
  * <p>An integration event is sent between loosely coupled parts of a system.
- * Typically such parts would be implemented as {@link org.spine3.server.BoundedContext}s.
+ * Typically such parts would be implemented as
+ * {@link org.spine3.server.BoundedContext BoundedContext}s.
  *
  * @see Subscribe
  * @see EventBus
  */
 public class IntegrationEventBus {
 
-    private final Multimap<EventClass, IntegrationEventSubscriberImplBase> subscribersMap = HashMultimap.create();
+    private final Multimap<EventClass, IntegrationEventSubscriberImplBase> subscribersMap =
+            HashMultimap.create();
 
     private StreamObserver<Response> responseObserver = new DefaultResponseObserver();
 
@@ -60,7 +62,8 @@ public class IntegrationEventBus {
         return instance();
     }
 
-    /** Sets a response observer used in {@link IntegrationEventSubscriberImplBase#notify(IntegrationEvent, StreamObserver)}. */
+    /** Sets a response observer used in
+     * {@link IntegrationEventSubscriberImplBase#notify(IntegrationEvent, StreamObserver)}. */
     public void setResponseObserver(StreamObserver<Response> responseObserver) {
         this.responseObserver = responseObserver;
     }
@@ -78,8 +81,11 @@ public class IntegrationEventBus {
     public void post(IntegrationEvent event) {
         final Message msg = unpack(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
-        final Collection<IntegrationEventSubscriberImplBase> subscribers = subscribersMap.get(eventClass);
-        checkArgument(!subscribers.isEmpty(), "No integration event subscribers found for event " + msg.getClass().getName());
+        final Collection<IntegrationEventSubscriberImplBase> subscribers =
+                subscribersMap.get(eventClass);
+        checkArgument(!subscribers.isEmpty(),
+                      "No integration event subscribers found for event " +
+                                msg.getClass().getName());
         for (IntegrationEventSubscriberImplBase subscriber : subscribers) {
             subscriber.notify(event, responseObserver);
         }
@@ -88,10 +94,12 @@ public class IntegrationEventBus {
     /**
      * Subscribes the passed object to receive {@link IntegrationEvent}s of the specified classes.
      *
-     * @param subscriber a subscriber to register (typically it is a {@link org.spine3.server.BoundedContext})
+     * @param subscriber a subscriber to register (typically it is a
+     *                  {@link org.spine3.server.BoundedContext BoundedContext})
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
-    public void subscribe(IntegrationEventSubscriberImplBase subscriber, Iterable<Class<? extends Message>> eventClasses) {
+    public void subscribe(IntegrationEventSubscriberImplBase subscriber,
+                          Iterable<Class<? extends Message>> eventClasses) {
         checkNotNull(subscriber);
         for (Class<? extends Message> eventClass : eventClasses) {
             subscribersMap.put(EventClass.of(eventClass), subscriber);
@@ -105,7 +113,8 @@ public class IntegrationEventBus {
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
     @SafeVarargs
-    public final void subscribe(IntegrationEventSubscriberImplBase subscriber, Class<? extends Message>... eventClasses) {
+    public final void subscribe(IntegrationEventSubscriberImplBase subscriber,
+                                Class<? extends Message>... eventClasses) {
         subscribe(subscriber, FluentIterable.from(eventClasses));
     }
 
@@ -122,6 +131,7 @@ public class IntegrationEventBus {
 
         @Override
         public void onCompleted() {
+            // Do nothing.
         }
     }
 

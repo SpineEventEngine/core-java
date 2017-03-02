@@ -28,6 +28,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
@@ -35,7 +36,6 @@ import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
 
@@ -55,7 +55,8 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>To receive event messages a subscriber object should:
  * <ol>
  *    <li>Expose a {@code public} method that accepts an event message as the first parameter
- *        and an {@link org.spine3.base.EventContext} as the second (optional) parameter.
+ *        and an {@link org.spine3.base.EventContext EventContext} as the second
+ *        (optional) parameter.
  *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
  *    <li>{@linkplain #subscribe(EventSubscriber) Register} with an instance of
  *    {@code EventBus} directly, or rely on message delivery from an {@link EventDispatcher}.
@@ -152,7 +153,8 @@ public class EventBus implements AutoCloseable {
             @Override
             public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
                 checkNotNull(eventClass);
-                final Set<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
+                final Set<EventDispatcher> dispatchers =
+                        dispatcherRegistry.getDispatchers(eventClass);
                 return dispatchers;
             }
         });
@@ -164,7 +166,8 @@ public class EventBus implements AutoCloseable {
             @Override
             public Set<EventSubscriber> apply(@Nullable EventClass eventClass) {
                 checkNotNull(eventClass);
-                final Set<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
+                final Set<EventSubscriber> subscribers =
+                        subscriberRegistry.getSubscribers(eventClass);
                 return subscribers;
             }
         });
@@ -291,7 +294,8 @@ public class EventBus implements AutoCloseable {
      */
     private int callDispatchers(Event event) {
         final EventClass eventClass = EventClass.of(event);
-        final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
+        final Collection<EventDispatcher> dispatchers =
+                dispatcherRegistry.getDispatchers(eventClass);
         dispatcherEventDelivery.deliver(event);
         return dispatchers.size();
     }
@@ -364,7 +368,9 @@ public class EventBus implements AutoCloseable {
 
         if (enricher == null) {
             enricher = EventEnricher.newBuilder()
-                                    .addFieldEnrichment(eventFieldClass, enrichmentFieldClass, function)
+                                    .addFieldEnrichment(eventFieldClass,
+                                                        enrichmentFieldClass,
+                                                        function)
                                     .build();
         } else {
             enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);

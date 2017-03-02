@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
@@ -38,6 +39,7 @@ import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
@@ -48,6 +50,7 @@ import javax.annotation.Nullable;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.EventTests.newEvent;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
@@ -57,21 +60,16 @@ public class Given {
 
     private Given() {}
 
-    public static class AggregateId {
-
-        private AggregateId() {}
-
-        public static ProjectId newProjectId() {
-            final String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
+    static ProjectId newProjectId() {
+        final String uuid = newUuid();
+        return ProjectId.newBuilder()
+                        .setId(uuid)
+                        .build();
     }
 
     public static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
         private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
         private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(DUMMY_PROJECT_ID);
@@ -85,6 +83,12 @@ public class Given {
 
         public static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
+        }
+
+        public static TaskAdded taskAdded(ProjectId id) {
+            return TaskAdded.newBuilder()
+                            .setProjectId(id)
+                            .build();
         }
 
         public static ProjectCompleted projectCompleted() {
@@ -141,54 +145,54 @@ public class Given {
         }
     }
 
-    public static class Event {
+    public static class AnEvent {
 
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = newProjectId();
 
-        private Event() {}
+        private AnEvent() {}
 
-        public static org.spine3.base.Event projectCreated() {
+        public static Event projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        public static org.spine3.base.Event projectStarted() {
+        public static Event projectStarted() {
             final ProjectStarted msg = EventMessage.projectStarted();
-            final org.spine3.base.Event event = createEvent(msg, createEventContext(msg.getProjectId()));
+            final Event event = createEvent(msg, createEventContext(msg.getProjectId()));
             return event;
         }
 
-        public static org.spine3.base.Event projectCreated(ProjectId projectId) {
+        public static Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
+        public static Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final org.spine3.base.Event event = createEvent(msg, eventContext);
+            final Event event = createEvent(msg, eventContext);
             return event;
         }
 
-        public static org.spine3.base.Event permissionGranted() {
+        public static Event permissionGranted() {
             final PermissionGrantedEvent message = EventMessage.permissionGranted();
-            final org.spine3.base.Event permissionGranted = createGenericEvent(message);
+            final Event permissionGranted = createGenericEvent(message);
             return permissionGranted;
         }
 
-        public static org.spine3.base.Event permissionRevoked() {
+        public static Event permissionRevoked() {
             final PermissionRevokedEvent message = EventMessage.permissionRevoked();
-            final org.spine3.base.Event permissionRevoked = createGenericEvent(message);
+            final Event permissionRevoked = createGenericEvent(message);
             return permissionRevoked;
         }
 
-        public static org.spine3.base.Event sharingRequestApproved() {
+        public static Event sharingRequestApproved() {
             final SharingRequestApproved message = EventMessage.sharingRequestApproved();
-            final org.spine3.base.Event sharingReqquestApproved = createGenericEvent(message);
+            final Event sharingReqquestApproved = createGenericEvent(message);
             return sharingReqquestApproved;
         }
 
-        private static org.spine3.base.Event createGenericEvent(Message eventMessage) {
+        private static Event createGenericEvent(Message eventMessage) {
             final Any wrappedMessage = AnyPacker.pack(eventMessage);
             final EventContext eventContext = createEventContext();
-            final org.spine3.base.Event permissionRevoked = Events.createEvent(wrappedMessage, eventContext);
+            final Event permissionRevoked = Events.createEvent(wrappedMessage, eventContext);
             return permissionRevoked;
         }
     }
@@ -207,7 +211,6 @@ public class Given {
                     .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
                     .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
                     .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
-                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING)
                     .addFieldEnrichment(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
                     .addFieldEnrichment(String.class, PersonName.class, STRING_TO_PERSON_NAME)
                     .addFieldEnrichment(String.class, Integer.class, STRING_TO_INT);
@@ -293,15 +296,6 @@ public class Given {
                     }
                 };
 
-        private static final Function<EventContext.Attributes, String> ATTRIBUTES_TO_STRING =
-                new Function<EventContext.Attributes, String>() {
-                    @Nullable
-                    @Override
-                    public String apply(@Nullable EventContext.Attributes input) {
-                        return input == null ? "" : input.toString();
-                    }
-                };
-
         private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
                 new Function<String, ZoneOffset>() {
                     @Nullable
@@ -332,5 +326,33 @@ public class Given {
                         return 0;
                     }
                 };
+    }
+
+    public static class AnEventRecord {
+
+        private AnEventRecord() {
+        }
+
+        public static Event projectCreated() {
+            final Event event = newEvent(EventMessage.projectCreated());
+            return event;
+        }
+
+        public static Event projectCreated(Timestamp when) {
+            final Event event = newEvent(EventMessage.projectCreated(), when);
+            return event;
+        }
+
+        public static Event taskAdded(Timestamp when) {
+            final ProjectId projectId = newProjectId();
+            final Event event = newEvent(EventMessage.taskAdded(projectId), when);
+            return event;
+        }
+
+        public static Event projectStarted(Timestamp when) {
+            final ProjectId projectId = newProjectId();
+            final Event event = newEvent(EventMessage.projectStarted(projectId), when);
+            return event;
+        }
     }
 }

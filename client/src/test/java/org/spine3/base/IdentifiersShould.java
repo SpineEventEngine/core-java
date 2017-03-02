@@ -20,8 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -29,17 +29,16 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Identifiers.class));
+        assertHasPrivateParameterlessCtor(Identifiers.class);
     }
 
 
@@ -73,11 +72,7 @@ public class IdentifiersShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Identifiers.class)
-                                                                     .addDefaultValue(Identifiers.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testStaticMethods(Identifiers.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

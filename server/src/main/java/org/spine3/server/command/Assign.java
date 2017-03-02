@@ -32,15 +32,16 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>is annotated with {@link Assign};
  *     <li>has a default access modifier;
- *     <li>returns an event derived from {@link com.google.protobuf.Message} or a {@link java.util.List} of messages;
- *     <li>accepts a command derived from {@link com.google.protobuf.Message} as a first parameter;
- *     <li>(optional) accepts a {@link org.spine3.base.CommandContext} as the second parameter.
+ *     <li>returns an event derived from {@link com.google.protobuf.Message Message} or
+ *          a {@link java.util.List List} of messages;
+ *     <li>accepts a command derived from {@link com.google.protobuf.Message Message}
+ *          as a first parameter;
+ *     <li>(optional) accepts a {@link org.spine3.base.CommandContext CommandContext}
+ *          as the second parameter.
  * </ul>
  *
- * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
- * considered as a command handler and is not registered for command dispatching.
- *
- * <p>Objects handing commands are registered using {@link CommandBus#register(CommandHandler)}.
+ * If the annotation is applied to a method which doesn't satisfy any of these requirements,
+ * this method is not considered as a command handler and is not registered for command dispatching.
  *
  * <p><b>IMPORTANT:</b> an application must have one and only one handler per command class.
  * Declaring two methods that handle the same command class will result in run-time error.

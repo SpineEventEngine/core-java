@@ -82,7 +82,9 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
     protected abstract V getAbs(V number);
 
     /**
-     * Wraps a value to a corresponding message wrapper ({@link com.google.protobuf.DoubleValue}, {@link com.google.protobuf.Int32Value}, etc) and {@link Any}.
+     * Wraps a value to a corresponding message wrapper
+     * ({@link com.google.protobuf.DoubleValue DoubleValue},
+     * {@link com.google.protobuf.Int32Value Int32Value}, etc) and {@link Any}.
      */
     protected abstract Any wrap(V value);
 
@@ -115,10 +117,12 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
                                         maxDecimalOpt.getInclusive(), maxDecimalOpt.getValue()));
         }
         if (notFitToMin(value)) {
-            addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsgFormat(), minOption.getValue()));
+            addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsgFormat(),
+                                              minOption.getValue()));
         }
         if (notFitToMax(value)) {
-            addViolation(newMinOrMaxViolation(value, maxOption, maxOption.getMsgFormat(), maxOption.getValue()));
+            addViolation(newMinOrMaxViolation(value, maxOption, maxOption.getMsgFormat(),
+                                              maxOption.getValue()));
         }
     }
 
@@ -181,7 +185,8 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         final String[] parts = PATTERN_DOT.split(String.valueOf(abs));
         final int intDigitsCount = parts[0].length();
         final int fractionDigitsCount = parts[1].length();
-        final boolean isInvalid = (intDigitsCount > intDigitsMax) || (fractionDigitsCount > fractionDigitsMax);
+        final boolean isInvalid = (intDigitsCount > intDigitsMax) ||
+                                  (fractionDigitsCount > fractionDigitsMax);
         if (isInvalid) {
             addViolation(newDigitsViolation(value));
         }
@@ -202,7 +207,8 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         return violation.build();
     }
 
-    private ConstraintViolation newMinOrMaxViolation(V value, Message option, String customMsg, String minOrMax) {
+    private ConstraintViolation newMinOrMaxViolation(V value, Message option,
+                                                     String customMsg, String minOrMax) {
         final String msg = getErrorMsgFormat(option, customMsg);
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)

@@ -53,7 +53,8 @@ public class UnknownTypeException extends RuntimeException {
     /**
      * Creates a new instance when only the cause is known.
      *
-     * <p>Use this constructor when propagating {@link com.google.protobuf.InvalidProtocolBufferException}
+     * <p>Use this constructor when propagating
+     * {@link com.google.protobuf.InvalidProtocolBufferException InvalidProtocolBufferException}
      * without knowing which type caused the exception (e.g. when calling {@code JsonFormat.print()}.
      */
     public UnknownTypeException(Throwable cause) {

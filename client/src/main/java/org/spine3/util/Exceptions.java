@@ -20,11 +20,13 @@
 
 package org.spine3.util;
 
+import com.google.common.base.Throwables;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class for working with exceptions for cases that are not
- * supported by {@link com.google.common.base.Throwables}.
+ * supported by {@link com.google.common.base.Throwables Throwables}.
  *
  * @author Alexander Yevsyukov
  */
@@ -35,8 +37,10 @@ public class Exceptions {
     /**
      * Always throws {@code UnsupportedOperationException} initialized with the passed string.
      *
-     * <p>Use this method in combination with static import for brevity of code for unsupported operations.
-     * The return type is given to keep Java type system happy when called in methods with return type as shown below:
+     * <p>Use this method in combination with static import for brevity of code for
+     * unsupported operations.
+     * The return type is given to keep Java type system happy when called in methods with
+     * return type as shown below:
      *
      * <pre>
      *   import static com.teamdev.commons.Exceptions.unsupported;
@@ -50,7 +54,8 @@ public class Exceptions {
      * @return nothing ever
      * @throws UnsupportedOperationException always
      */
-    public static UnsupportedOperationException unsupported(String message) throws UnsupportedOperationException {
+    public static UnsupportedOperationException unsupported(String message)
+            throws UnsupportedOperationException {
         checkNotNull(message);
         throw new UnsupportedOperationException(message);
     }
@@ -58,8 +63,10 @@ public class Exceptions {
     /**
      * Always throws {@code UnsupportedOperationException}.
      *
-     * <p>Use this method in combination with static import for brevity of code for unsupported operations.
-     * The return type is given to keep Java type system happy when called in methods with return type as shown below:
+     * <p>Use this method in combination with static import for brevity of code for
+     * unsupported operations.
+     * The return type is given to keep Java type system happy when called in methods with
+     * return type as shown below:
      *
      * <pre>
      *   import static com.teamdev.commons.Exceptions.unsupported;
@@ -85,6 +92,7 @@ public class Exceptions {
      */
     public static IllegalStateException wrappedCause(Throwable throwable) {
         checkNotNull(throwable);
-        throw new IllegalStateException(throwable.getCause());
+        final Throwable cause = Throwables.getRootCause(throwable);
+        throw new IllegalStateException(cause);
     }
 }

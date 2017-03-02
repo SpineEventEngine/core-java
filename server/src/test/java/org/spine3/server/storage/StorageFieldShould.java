@@ -67,8 +67,8 @@ public class StorageFieldShould {
 
     @Test
     public void enclose_all_entity_status_fields() {
-        assertField(EntityStatusField.archived);
-        assertField(EntityStatusField.deleted);
+        assertField(VisibilityField.archived);
+        assertField(VisibilityField.deleted);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class StorageFieldShould {
         assertField(EntityField.timestamp);
         assertField(EntityField.timestamp_nanos);
         assertField(EntityField.type_url);
-        assertField(EntityField.value);
+        assertField(EntityField.bytes);
     }
 
     private static void assertField(Enum field) {

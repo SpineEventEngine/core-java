@@ -27,9 +27,6 @@ import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
-import static org.spine3.time.Calendars.getDay;
-import static org.spine3.time.Calendars.getMonthOfYear;
-import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.validate.Validate.checkPositive;
@@ -133,7 +130,8 @@ public class LocalDates {
      * Obtains local date changed on specified amount of years.
      *
      * @param localDate  local date that will be changed
-     * @param yearsDelta a number of years that needs to be added or subtracted that can be either positive or negative
+     * @param yearsDelta a number of years that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this local date with new years value
      */
     private static LocalDate changeYear(LocalDate localDate, int yearsDelta) {
@@ -144,7 +142,8 @@ public class LocalDates {
      * Obtains local date changed on specified amount of months.
      *
      * @param localDate  local date that will be changed
-     * @param monthDelta a number of months that needs to be added or subtracted that can be either positive or negative
+     * @param monthDelta a number of months that needs to be added or subtracted that can be
+     *                   either positive or negative
      * @return copy of this local date with new months value
      */
     private static LocalDate changeMonth(LocalDate localDate, int monthDelta) {
@@ -155,7 +154,8 @@ public class LocalDates {
      * Obtains local date changed on specified amount of days.
      *
      * @param localDate local date that will be changed
-     * @param daysDelta a number of days that needs to be added or subtracted that can be either positive or negative
+     * @param daysDelta a number of days that needs to be added or subtracted that can be
+     *                  either positive or negative
      * @return copy of this local date with new days value
      */
     private static LocalDate changeDays(LocalDate localDate, int daysDelta) {

@@ -33,7 +33,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.8.7-SNAPSHOT'
+        spineVersion = '0.8.16-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
@@ -70,7 +70,7 @@ ext {
     // is updated with new Message types introduced in the new version of Protobuf.
     protobufVersion = '3.2.0'
     protobufDependency = "com.google.protobuf:protoc:${protobufVersion}"
-    gRpcVersion = '1.0.2'
+    gRpcVersion = '1.1.2'
     slf4JVersion = '1.7.21'
     jUnitVersion = '4.12'
 
@@ -136,6 +136,7 @@ subprojects {
         }
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
+        testCompile group: 'com.google.guava', name: 'guava-testlib', version: guavaVersion
     }
 
     sourceSets {
