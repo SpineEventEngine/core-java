@@ -29,7 +29,7 @@ package org.spine3.validate;
 // It is OK, because it is not {@code Exception} in usual meaning.
 // It is occurred when input value cannot be converted to desirable type
 // and repeated input is required.
-public class ConversionError extends Throwable {
+public class ConversionError extends Exception {
 
     private static final long serialVersionUID = 1L;
 
