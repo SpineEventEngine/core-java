@@ -89,7 +89,7 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
     protected abstract Any wrap(V value);
 
     @Override
-    protected List<ConstraintViolation> validate() {
+    public List<ConstraintViolation> validate() {
         for (V value : getValues()) {
             validateRangeOptions(value);
             validateDigitsOption(value);

@@ -26,6 +26,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.FieldPath;
 
 import java.util.List;
@@ -37,7 +38,8 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-class FieldValidatorFactory {
+@Internal
+public class FieldValidatorFactory {
 
     private FieldValidatorFactory() {
     }
@@ -88,13 +90,13 @@ class FieldValidatorFactory {
         }
     }
 
-    static FieldValidator<?> create(FieldDescriptor descriptor,
+    public static FieldValidator<?> create(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, false);
     }
 
-    static FieldValidator<?> createStrict(FieldDescriptor descriptor,
+    public static FieldValidator<?> createStrict(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, true);

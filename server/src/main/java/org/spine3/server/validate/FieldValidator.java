@@ -28,6 +28,7 @@ import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.IfMissingOption;
@@ -44,7 +45,8 @@ import static org.spine3.base.Commands.isCommandsFile;
  * @param <V> a type of field values
  * @author Alexander Litus
  */
-abstract class FieldValidator<V> {
+@Internal
+public abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
 
@@ -107,7 +109,7 @@ abstract class FieldValidator<V> {
      *
      * <p>Use {@link #addViolation(ConstraintViolation)} method in custom implementations.
      */
-    protected List<ConstraintViolation> validate() {
+    public List<ConstraintViolation> validate() {
         if (!isRequiredField() && hasCustomMissingMessage()) {
             log().warn("'if_missing' option is set without '(required) = true'");
         }

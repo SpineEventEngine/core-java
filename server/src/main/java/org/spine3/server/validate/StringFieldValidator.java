@@ -61,7 +61,7 @@ class StringFieldValidator extends FieldValidator<String> {
     }
 
     @Override
-    protected List<ConstraintViolation> validate() {
+    public List<ConstraintViolation> validate() {
         checkIfRequiredAndNotSet();
         checkIfMatchesToRegexp();
         final List<ConstraintViolation> violations = super.validate();
