@@ -23,7 +23,7 @@ package org.spine3.validate;
 import java.text.ParseException;
 
 /**
- * Signals that an error has been reached unexpectedly while conversion from one type to another.
+ * Signals that an error has been reached unexpectedly while converting from one type to another.
  *
  * @author Illia Shepilov
  */
