@@ -619,22 +619,17 @@ public class AggregateShould {
     }
 
     private static List<Event> getProjectEvents() {
-
-        //TODO:2017-02-19:alexander.yevsyukov: Use TestCommandFactory instead of
-        // ”re-using” EVENT_CONTEXT.
-        // We need to have increasing version numbers in event contexts.
-
         final List<Event> events = ImmutableList.<Event>builder()
-                .add(projectCreated(ID, EVENT_CONTEXT.toBuilder()
-                                                     .setVersion(newVersionWithNumber(2))
-                                                     .build()))
-                .add(taskAdded(ID, EVENT_CONTEXT.toBuilder()
-                                                .setVersion(newVersionWithNumber(3))
-                                                .build()))
-                .add(projectStarted(ID, EVENT_CONTEXT.toBuilder()
-                                                     .setVersion(newVersionWithNumber(4))
-                                                     .build()))
+                .add(projectCreated(ID, withVersion(EVENT_CONTEXT, 1)))
+                .add(taskAdded(ID, withVersion(EVENT_CONTEXT, 3)))
+                .add(projectStarted(ID, withVersion(EVENT_CONTEXT, 4)))
                 .build();
         return events;
+    }
+
+    private static EventContext withVersion(EventContext eventContext, int versionNumber) {
+        return eventContext.toBuilder()
+                           .setVersion(newVersionWithNumber(versionNumber))
+                           .build();
     }
 }
