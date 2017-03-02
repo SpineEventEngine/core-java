@@ -88,6 +88,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
+        super();
         this.multitenant = builder.multitenant;
         this.commandStore = builder.commandStore;
         this.commandStatusService = new CommandStore.StatusService(commandStore, builder.log);
