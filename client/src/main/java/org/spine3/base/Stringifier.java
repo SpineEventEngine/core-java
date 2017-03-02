@@ -23,9 +23,11 @@ package org.spine3.base;
 import com.google.common.base.Converter;
 
 /**
- * An object converting from A to {@code String} and reverse.
+ * Converts an object of the I class to the {@code String} and reverse.
  *
  * @author Alexander Yevsyukov
+ * @see #convert(Object)
+ * @see #reverse()
  */
 public abstract class Stringifier<I> extends Converter<I, String> {
 }
