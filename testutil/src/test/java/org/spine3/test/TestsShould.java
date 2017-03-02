@@ -97,6 +97,32 @@ public class TestsShould {
         emptyObserver.onCompleted();
     }
 
+    @Test(expected = AssertionError.class)
+    public void have_own_assertion_for_boolean() {
+        // This should pass.
+        assertEquals(true, true);
+
+        // This should pass too.
+        assertEquals(false, false);
+
+        // This should fail.
+        Tests.assertEquals(true, false);
+    }
+
+    @SuppressWarnings("ConstantConditions") // The call with `false` should always fail.
+    @Test(expected = AssertionError.class)
+    public void have_own_assertTrue() {
+        // This should pass.
+        Tests.assertTrue(true);
+
+        // This should fail.
+        Tests.assertTrue(false);
+    }
+
+    /*
+     * Test environment classes
+     ***************************/
+
     private static class ClassWithPrivateCtor {
         @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.
         private ClassWithPrivateCtor() {}

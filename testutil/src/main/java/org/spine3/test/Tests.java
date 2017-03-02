@@ -58,7 +58,8 @@ public class Tests {
      * <p>This method is needed to avoid dependency on JUnit 4.x in projects that use
      * Spine and JUnit5.
      */
-    private static void assertEquals(boolean expected, boolean actual) {
+    @VisibleForTesting
+    static void assertEquals(boolean expected, boolean actual) {
         if (expected != actual) {
             throw new AssertionError();
         }
@@ -71,7 +72,8 @@ public class Tests {
      * <p>This method is needed to avoid dependency on JUnit 4.x in projects that use
      * Spine and JUnit5.
      */
-    private static void assertTrue(boolean condition) {
+    @VisibleForTesting
+    static void assertTrue(boolean condition) {
         if (!condition) {
             throw new AssertionError();
         }
