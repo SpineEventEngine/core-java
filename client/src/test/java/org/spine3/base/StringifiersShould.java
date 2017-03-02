@@ -33,13 +33,13 @@ import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
-import javax.annotation.Nullable;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.base.Stringifiers.NULL_ID;
 import static org.spine3.base.Stringifiers.idToString;
@@ -249,7 +249,18 @@ public class StringifiersShould {
         final String actual = new Stringifiers.CommandIdStringifier().convert(id);
 
         assertEquals(idToString(id), actual);
-        assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void convert_string_to_command_id() {
+        final String id = newUuid();
+        final CommandId expected = CommandId.newBuilder()
+                                            .setUuid(id)
+                                            .build();
+        final CommandId actual = new Stringifiers.CommandIdStringifier().reverse()
+                                                                        .convert(id);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -258,6 +269,15 @@ public class StringifiersShould {
         final String actual = new Stringifiers.EventIdStringifier().convert(id);
 
         assertEquals(idToString(id), actual);
+    }
+
+    @Test
+    public void convert_string_to_event_id(){
+        final String id = newUuid();
+        final EventId expected = EventId.newBuilder().setUuid(id).build();
+        final EventId actual = new Stringifiers.EventIdStringifier().reverse().convert(id);
+
+        assertEquals(expected, actual);
     }
 
     @Test
