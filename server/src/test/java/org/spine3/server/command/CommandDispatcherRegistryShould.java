@@ -159,7 +159,7 @@ public class CommandDispatcherRegistryShould {
         final ProcessManagerRepoDispatcher pmRepo =
                 new ProcessManagerRepoDispatcher(BoundedContext.newBuilder()
                                                                .build());
-        registry.register(pmRepo);
+        registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -234,7 +234,7 @@ public class CommandDispatcherRegistryShould {
          */
         @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
-        public Set<CommandClass> getMessageClasses() {
+        public Set<CommandClass> getCommandClasses() {
             return newHashSet();
         }
     }

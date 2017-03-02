@@ -26,7 +26,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import org.spine3.base.CommandClass;
 import org.spine3.server.bus.DispatcherRegistry;
-import org.spine3.server.procman.ProcessManagerRepository;
 
 import java.util.Map;
 import java.util.Set;
@@ -45,17 +44,19 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     /**
      * {@inheritDoc}
      *
-     * <p>If an instance of {@link ProcessManagerRepository} is passed to registration
-     * and it does not {@linkplain ProcessManagerRepository#getMessageClasses() expose}
-     * command classes (because the corresponding {@link org.spine3.server.procman.ProcessManager
-     * ProcessManager} does not handle commands), the repository is not registered.
-     * No exceptions or log messages will be produces in this case.
+     * <p>If an instance of {@link DelegatingCommandDispatcher} is passed to registration
+     * and it does not {@linkplain DelegatingCommandDispatcher#getMessageClasses() expose}
+     * command classes (because the underlying
+     * {@link org.spine3.server.command.CommandDispatcherDelegate delegate} does not handle
+     * commands), the repository is not registered.
+     *
+     * <p>No exceptions or log messages will be produces in this case.
      *
      * @param dispatcher the dispatcher to register
      */
     @Override
     protected void register(CommandDispatcher dispatcher) {
-        if (dispatcher instanceof ProcessManagerRepository
+        if (dispatcher instanceof DelegatingCommandDispatcher
             && dispatcher.getMessageClasses().isEmpty()) {
             return;
         }

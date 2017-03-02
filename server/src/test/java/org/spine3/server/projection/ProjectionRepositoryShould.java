@@ -221,7 +221,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository().getEventClasses();
+        final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
                           EventClass.of(ProjectCreated.class),
                           EventClass.of(TaskAdded.class),

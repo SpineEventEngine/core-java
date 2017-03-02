@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventEnvelope;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
@@ -122,12 +123,13 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Dispatches the passed event to entities.
+     * Dispatches the passed event envelope to entities.
      *
-     * @param event the event to dispatch
+     * @param envelope the event envelope to dispatch
      */
     @Override
-    public void dispatch(Event event) {
+    public void dispatch(EventEnvelope envelope) {
+        final Event event = envelope.getOuterObject();
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final Set<I> ids = findIds(eventMessage, context);

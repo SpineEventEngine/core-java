@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,10 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
+import org.spine3.base.EventEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandDispatcherDelegate;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
@@ -57,7 +58,7 @@ public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
-                implements CommandDispatcher {
+                implements CommandDispatcherDelegate {
 
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
             GetTargetIdFromCommand.newInstance();
@@ -75,7 +76,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> getMessageClasses() {
+    public Set<CommandClass> getCommandClasses() {
         if (commandClasses == null) {
             commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
         }
@@ -84,7 +85,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> getMessageClasses() {
         if (eventClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
             eventClasses = ProcessManager.TypeInfo.getEventClasses(pmClass);
@@ -102,7 +103,7 @@ public abstract class ProcessManagerRepository<I,
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
      */
     @Override
-    public void dispatch(CommandEnvelope envelope) {
+    public void dispatchCommand(CommandEnvelope envelope) {
         final Message commandMessage = envelope.getMessage();
         final CommandContext context = envelope.getCommandContext();
         final CommandClass commandClass = envelope.getCommandClass();
@@ -135,10 +136,15 @@ public abstract class ProcessManagerRepository<I,
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override
-    public void dispatch(Event event) throws IllegalArgumentException {
+    public void dispatch(EventEnvelope event) throws IllegalArgumentException {
         checkEventClass(event);
 
         super.dispatch(event);
+    }
+
+    @VisibleForTesting
+    void dispatch(Event event) throws IllegalArgumentException {
+        dispatch(EventEnvelope.of(event));
     }
 
     @Override
@@ -173,7 +179,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
-        final Set<CommandClass> classes = getMessageClasses();
+        final Set<CommandClass> classes = getCommandClasses();
         if (!classes.contains(commandClass)) {
             final String eventClassName = commandClass.value()
                                                       .getName();
@@ -181,11 +187,10 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-    private void checkEventClass(Event event) throws IllegalArgumentException {
-        final Message eventMessage = Events.getMessage(event);
-        final EventClass eventClass = EventClass.of(eventMessage);
+    private void checkEventClass(EventEnvelope eventEnvelope) throws IllegalArgumentException {
+        final EventClass eventClass = eventEnvelope.getEventClass();
 
-        final Set<EventClass> classes = getEventClasses();
+        final Set<EventClass> classes = getMessageClasses();
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()
                                                     .getName();

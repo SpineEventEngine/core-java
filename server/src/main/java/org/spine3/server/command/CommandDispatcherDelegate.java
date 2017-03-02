@@ -17,47 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.command;
 
-package org.spine3.base;
+import org.spine3.Internal;
+import org.spine3.base.CommandClass;
+import org.spine3.base.CommandEnvelope;
 
-import com.google.protobuf.Message;
+import java.util.Set;
 
 /**
- * The holder of an {@code Event} which provides convenient access to its properties.
+ * A common interface for the objects which need to dispatch the
+ * {@linkplain org.spine3.base.Command commands}, but are unable to implement
+ * the {@link org.spine3.server.command.CommandDispatcher} directly.
  *
- * @author Alexander Yevsyukov
  * @author Alex Tymchenko
+ * @see DelegatingCommandDispatcher
  */
-public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
+@Internal
+public interface CommandDispatcherDelegate {
 
-    private final Message eventMessage;
-    private final EventClass eventClass;
+    Set<CommandClass> getCommandClasses();
 
-    private EventEnvelope(Event object) {
-        super(object);
-        this.eventMessage = Events.getMessage(object);
-        this.eventClass = EventClass.of(this.eventMessage);
-    }
-
-    /**
-     * Creates instance for the passed event.
-     */
-    public static EventEnvelope of(Event event) {
-        return new EventEnvelope(event);
-    }
-
-    /**
-     * Obtains the event message.
-     */
-    @Override
-    public Message getMessage() {
-        return this.eventMessage;
-    }
-
-    /**
-     * Obtains the class of the event.
-     */
-    public EventClass getEventClass() {
-        return this.eventClass;
-    }
+    void dispatchCommand(CommandEnvelope envelope);
 }

@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventEnvelope;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
@@ -534,12 +535,12 @@ public class EventBusShould {
         private boolean dispatchCalled = false;
 
         @Override
-        public Set<EventClass> getEventClasses() {
+        public Set<EventClass> getMessageClasses() {
             return ImmutableSet.of(EventClass.of(ProjectCreated.class));
         }
 
         @Override
-        public void dispatch(Event event) {
+        public void dispatch(EventEnvelope event) {
             dispatchCalled = true;
         }
 

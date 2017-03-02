@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventEnvelope;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
@@ -256,28 +257,33 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * <p>If there is no stored projection with the ID from the event, a new projection is created
      * and stored after it handles the passed event.
      *
-     * @param event the event to dispatch
+     * @param eventEnvelope the event to dispatch packed into an envelope
      * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
     @Override
-    public void dispatch(Event event) {
+    public void dispatch(EventEnvelope eventEnvelope) {
         if (!isOnline()) {
             log().trace("Ignoring event {} while repository is not in {} status",
-                        event,
+                        eventEnvelope.getOuterObject(),
                         Status.ONLINE);
             return;
         }
 
-        internalDispatch(event);
+        internalDispatch(eventEnvelope);
+    }
+
+    @VisibleForTesting
+    void dispatch(Event event) {
+        dispatch(EventEnvelope.of(event));
     }
 
     /**
      * Dispatches the passed event to projections without checking the status.
      */
-    private void internalDispatch(Event event) {
-        super.dispatch(event);
+    private void internalDispatch(EventEnvelope envelope) {
+        super.dispatch(envelope);
     }
 
     @Override
@@ -421,7 +427,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 }
             }
 
-            projectionRepository.internalDispatch(event);
+            projectionRepository.internalDispatch(EventEnvelope.of(event));
         }
 
         @Override

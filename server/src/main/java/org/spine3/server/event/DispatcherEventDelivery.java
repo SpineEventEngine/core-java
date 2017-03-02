@@ -21,6 +21,7 @@ package org.spine3.server.event;
 
 import org.spine3.SPI;
 import org.spine3.base.Event;
+import org.spine3.base.EventEnvelope;
 
 import java.util.concurrent.Executor;
 
@@ -60,7 +61,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
         return new Runnable() {
             @Override
             public void run() {
-                consumer.dispatch(event);
+                consumer.dispatch(EventEnvelope.of(event));
             }
         };
     }

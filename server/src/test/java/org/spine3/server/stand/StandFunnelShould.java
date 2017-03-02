@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.CommandEnvelope;
+import org.spine3.base.EventEnvelope;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
@@ -269,7 +270,7 @@ public class StandFunnelShould {
                 repository.initStorage(InMemoryStorageFactory.getInstance());
 
                 // Dispatch an update from projection repo
-                repository.dispatch(Given.validEvent());
+                repository.dispatch(EventEnvelope.of(Given.validEvent()));
             }
         };
     }
