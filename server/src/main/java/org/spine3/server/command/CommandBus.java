@@ -39,6 +39,7 @@ import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.util.Environment;
 
@@ -70,6 +71,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
     private final Rescheduler rescheduler;
 
+    private final FailureBus failureBus;
+
     private final Log log;
 
     /**
@@ -95,6 +98,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     private CommandBus(Builder builder) {
         this(builder.getCommandStore(),
              builder.getCommandScheduler(),
+             builder.getFailureBus(),
              builder.log,
              builder.isThreadSpawnAllowed());
     }
@@ -118,17 +122,20 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      *
      * @param commandStore       a store to save commands
      * @param scheduler          a command scheduler
+     * @param failureBus                a failure bus
      * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only store the reference.
     private CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
+                             FailureBus failureBus,
                              Log log,
                              boolean threadSpawnAllowed) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = checkNotNull(scheduler);
+        this.failureBus = checkNotNull(failureBus);
         this.log = checkNotNull(log);
         this.isThreadSpawnAllowed = threadSpawnAllowed;
         this.filter = new Filter(this);
@@ -160,6 +167,12 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     CommandScheduler scheduler() {
         return scheduler;
     }
+
+    @VisibleForTesting
+    FailureBus failureBus() {
+        return this.failureBus;
+    }
+
 
     @Override
     protected CommandDispatcherRegistry createRegistry() {
@@ -349,6 +362,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         registry().unregisterAll();
         commandStore.close();
         scheduler.shutdown();
+        failureBus.close();
     }
 
     /**
@@ -396,6 +410,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
          * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
          */
         private boolean autoReschedule;
+        private FailureBus failureBus;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -415,6 +430,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return commandScheduler;
         }
 
+        public FailureBus getFailureBus() {
+            return failureBus;
+        }
+
         public Builder setCommandStore(CommandStore commandStore) {
             checkNotNull(commandStore);
             this.commandStore = commandStore;
@@ -424,6 +443,12 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
+            return this;
+        }
+
+        public Builder setFailureBus(FailureBus failureBus) {
+            checkNotNull(failureBus);
+            this.failureBus = failureBus;
             return this;
         }
 
@@ -458,12 +483,17 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         public CommandBus build() {
             checkNotNull(commandStore, "CommandStore must be set");
 
-            if(commandScheduler == null) {
+            if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
 
             if (log == null) {
                 log = new Log();
+            }
+
+            if (failureBus == null) {
+                failureBus = FailureBus.newBuilder()
+                                       .build();
             }
 
             final CommandBus commandBus = new CommandBus(this);
