@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate;
+package org.spine3.server.validate;
 
 import com.google.protobuf.Message;
 
