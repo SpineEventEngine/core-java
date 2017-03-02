@@ -49,18 +49,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class KnownTypesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(KnownTypes.class));
+        assertHasPrivateParameterlessCtor(KnownTypes.class);
     }
 
     @Test

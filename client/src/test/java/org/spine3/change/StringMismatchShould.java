@@ -32,7 +32,7 @@ import static org.spine3.change.StringMismatch.unexpectedValue;
 import static org.spine3.change.StringMismatch.unpackActual;
 import static org.spine3.change.StringMismatch.unpackExpected;
 import static org.spine3.change.StringMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StringMismatchShould {
 
@@ -44,7 +44,7 @@ public class StringMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(StringMismatch.class));
+        assertHasPrivateParameterlessCtor(StringMismatch.class);
     }
 
     @Test

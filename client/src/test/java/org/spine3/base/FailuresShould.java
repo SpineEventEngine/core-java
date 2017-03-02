@@ -22,9 +22,9 @@ package org.spine3.base;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -33,7 +33,7 @@ public class FailuresShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(Failures.class);
+        assertHasPrivateParameterlessCtor(Failures.class);
     }
 
     @Test

@@ -33,6 +33,8 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A utility class working with I/O: streams, resources, etc.
  *
@@ -53,6 +55,8 @@ public class IoUtil {
      * @param propsFilePath the path of the {@code .properties} file to load
      */
     public static ImmutableSet<Properties> loadAllProperties(String propsFilePath) {
+        checkNotNull(propsFilePath);
+
         final ImmutableSet.Builder<Properties> result = ImmutableSet.builder();
         final Enumeration<URL> resources = getResources(propsFilePath);
         if (resources == null) {
@@ -105,6 +109,8 @@ public class IoUtil {
      * <p>Logs each {@link IOException} if it occurs.
      */
     public static void close(Closeable... closeables) {
+        checkNotNull(closeables);
+
         close(FluentIterable.from(closeables));
     }
 
@@ -115,6 +121,8 @@ public class IoUtil {
      */
     @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static <T extends Closeable> void close(Iterable<T> closeables) {
+        checkNotNull(closeables);
+
         try {
             for (T c : closeables) {
                 if (c != null) {

@@ -25,14 +25,13 @@ import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ErrorsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Errors.class));
+        assertHasPrivateParameterlessCtor(Errors.class);
     }
 
     @Test

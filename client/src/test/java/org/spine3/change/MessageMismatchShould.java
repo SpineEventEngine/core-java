@@ -33,7 +33,7 @@ import static org.spine3.change.MessageMismatch.unpackActual;
 import static org.spine3.change.MessageMismatch.unpackExpected;
 import static org.spine3.change.MessageMismatch.unpackNewValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessageMismatchShould {
 
@@ -45,7 +45,7 @@ public class MessageMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(MessageMismatch.class));
+        assertHasPrivateParameterlessCtor(MessageMismatch.class);
     }
 
     @Test

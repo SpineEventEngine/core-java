@@ -31,7 +31,7 @@ import static org.spine3.change.BooleanMismatch.unpackActual;
 import static org.spine3.change.BooleanMismatch.unpackExpected;
 import static org.spine3.change.BooleanMismatch.unpackNewValue;
 import static org.spine3.change.IntMismatch.of;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class BooleanMismatchShould {
 
@@ -39,7 +39,7 @@ public class BooleanMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(BooleanMismatch.class));
+        assertHasPrivateParameterlessCtor(BooleanMismatch.class);
     }
 
     @Test

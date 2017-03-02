@@ -32,7 +32,7 @@ import static org.spine3.change.FloatMismatch.unexpectedValue;
 import static org.spine3.change.FloatMismatch.unpackActual;
 import static org.spine3.change.FloatMismatch.unpackExpected;
 import static org.spine3.change.FloatMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class FloatMismatchShould {
 
@@ -44,7 +44,7 @@ public class FloatMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(FloatMismatch.class));
+        assertHasPrivateParameterlessCtor(FloatMismatch.class);
     }
 
     @Test

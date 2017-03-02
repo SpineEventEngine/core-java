@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public class UrlParserShould {
 
     private static final String HOST = "ulr-parser-should.com";
