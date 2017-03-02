@@ -58,7 +58,6 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @param <I> the type of IDs of storage records
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class ProjectionStorageShould<I>
         extends RecordStorageShould<I, ProjectionStorage<I>> {
 

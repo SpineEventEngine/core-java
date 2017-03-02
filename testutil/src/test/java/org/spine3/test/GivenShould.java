@@ -34,13 +34,13 @@ import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class GivenShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Given.class));
+        assertHasPrivateParameterlessCtor(Given.class);
     }
 
     @Test

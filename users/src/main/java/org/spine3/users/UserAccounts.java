@@ -20,6 +20,7 @@
 
 package org.spine3.users;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 /**
@@ -27,21 +28,34 @@ import com.google.common.base.Optional;
  */
 public class UserAccounts {
 
-    private static final String GOOGLE_AUTH_PROVIDER_ID = "google.com";
+    @VisibleForTesting
+    static final String GOOGLE_AUTH_PROVIDER_ID = "google.com";
+
+    private static final int DUNBARS_NUMBER = 150;
+
+    private UserAccounts() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
-     * A suggested congnitive limit to the number of people with whom one can maintain stable
-     * social relationships.
+     * Obtains a suggested congnitive limit to the number of people with whom one can
+     * maintain stable social relationships.
      *
      * <p>This value should be used for calculating the cache size for storing
      * {@code UserAccount} instances.
      *
      * @see <a href="https://en.wikipedia.org/wiki/Dunbar%27s_number">Dunbar's number</a>
      */
-    public static final int DUNBARS_NUMBER = 150;
+    public static int getDunbarsNumber() {
+        return DUNBARS_NUMBER;
+    }
 
-    private UserAccounts() {}
-
+    /**
+     * Obtains Google account ID from the passed {@code UserAccount} instance.
+     *
+     * @return account ID or empty optional if {@code google.com} is not listed
+     * as an identity provider of the passed account
+     */
     public static Optional<String> getGoogleUid(UserAccount account) {
         for (UserInfo userInfo : account.getLinkedIdentityList()) {
             if (userInfo.getProviderId().equals(GOOGLE_AUTH_PROVIDER_ID)) {

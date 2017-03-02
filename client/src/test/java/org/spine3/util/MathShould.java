@@ -23,15 +23,13 @@ package org.spine3.util;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class MathShould {
 
     @Test
     public void have_private_constructor() throws Exception {
-        assertTrue(hasPrivateParameterlessCtor(Math.class));
+        assertHasPrivateParameterlessCtor(Math.class);
     }
 
     @Test(expected = ArithmeticException.class)

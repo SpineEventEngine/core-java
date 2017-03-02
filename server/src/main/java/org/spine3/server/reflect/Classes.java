@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utilities for working with classes.
  *
@@ -52,7 +54,7 @@ public class Classes {
      *     <li>The generic parameter must not be a type variable.
      * </ol>
      *
-     * @param clazz the class to check
+     * @param cls the class to check
      * @param paramNumber a zero-based index of the generic parameter in the class declaration
      * @param <T> the generic type
      * @return the class reference for the generic type
@@ -60,11 +62,13 @@ public class Classes {
      *                            parameter of the expected class
      */
     @CheckReturnValue
-    public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
+    public static <T> Class<T> getGenericParameterType(Class<?> cls, int paramNumber) {
+        checkNotNull(cls);
+
         // We cast here as we assume that the superclasses of the classes
         // we operate with are parametrized too.
         final ParameterizedType genericSuperclass =
-                (ParameterizedType) clazz.getGenericSuperclass();
+                (ParameterizedType) cls.getGenericSuperclass();
 
         final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
         final Type typeArgument = typeArguments[paramNumber];
@@ -104,17 +108,20 @@ public class Classes {
      *
      * <p>The method must match {@code getFieldName} notation, have no argument to be found.
      *
-     * @param clazz     class containing the getter method
+     * @param cls       class containing the getter method
      * @param fieldName field to find a getter for
      * @return {@link Method} instance reflecting the getter method
      * @throws RuntimeException upon reflective failure
      */
-    public static Method getGetterForField(Class<?> clazz, String fieldName)
+    public static Method getGetterForField(Class<?> cls, String fieldName)
             throws NoSuchMethodException {
+        checkNotNull(cls);
+        checkNotNull(fieldName);
+
         @SuppressWarnings("DuplicateStringLiteralInspection")
         final String fieldGetterName = "get" + fieldName.substring(0, 1)
                                                         .toUpperCase() + fieldName.substring(1);
-        final Method fieldGetter = clazz.getMethod(fieldGetterName);
+        final Method fieldGetter = cls.getMethod(fieldGetterName);
         return fieldGetter;
     }
 }

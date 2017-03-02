@@ -43,7 +43,6 @@ import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeUrlShould {
 
     private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor().getFullName();

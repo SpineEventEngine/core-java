@@ -20,24 +20,24 @@
 
 package org.spine3.io;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class IoUtilShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(IoUtil.class));
+        assertHasPrivateParameterlessCtor(IoUtil.class);
     }
 
     @Test
-    public void close_streams() {
-
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(IoUtil.class);
     }
 }
