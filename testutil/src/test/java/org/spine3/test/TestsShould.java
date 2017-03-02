@@ -97,25 +97,26 @@ public class TestsShould {
         emptyObserver.onCompleted();
     }
 
-    @Test(expected = AssertionError.class)
-    public void have_own_assertion_for_boolean() {
-        // This should pass.
+    @Test
+    public void assert_equality_of_booleans() {
         assertEquals(true, true);
-
-        // This should pass too.
         assertEquals(false, false);
+    }
 
+    @Test(expected = AssertionError.class)
+    public void fail_boolean_inequality_assertion() {
         // This should fail.
         Tests.assertEquals(true, false);
+    }
+
+    @Test
+    public void have_own_boolean_assertion() {
+        Tests.assertTrue(true);
     }
 
     @SuppressWarnings("ConstantConditions") // The call with `false` should always fail.
     @Test(expected = AssertionError.class)
     public void have_own_assertTrue() {
-        // This should pass.
-        Tests.assertTrue(true);
-
-        // This should fail.
         Tests.assertTrue(false);
     }
 

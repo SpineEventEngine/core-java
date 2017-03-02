@@ -66,7 +66,7 @@ public class Tests {
     }
 
     /**
-     * Asserts that a condition is true. If it isn't it throws an
+     * Asserts that a condition is true. If it isn't, it throws an
      * {@link AssertionError} without a message.
      *
      * <p>This method is needed to avoid dependency on JUnit 4.x in projects that use
