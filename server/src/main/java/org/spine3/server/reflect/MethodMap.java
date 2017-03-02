@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.server.error.DuplicateHandlerMethodException;
+import org.spine3.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <H> the type of the handler method instances stored in the map
  * @author Alexander Yevsyukov
  */
-public class MethodMap<H extends HandlerMethod> {
+class MethodMap<H extends HandlerMethod> {
 
     private final ImmutableMap<Class<? extends Message>, H> map;
 
@@ -76,8 +76,8 @@ public class MethodMap<H extends HandlerMethod> {
      * @param declaringClass the class that declares methods to scan
      * @param filter         the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
-     * @throws DuplicateHandlerMethodException if there are more than one handler for the same
-     *                                         message class are encountered
+     * @throws DuplicateHandlerMethodException if there are more than one handler for
+     *                                         the same message class are encountered
      */
     private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass,
                                                               Predicate<Method> filter) {

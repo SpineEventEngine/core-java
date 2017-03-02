@@ -18,14 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.server.entity;
+
+import org.junit.Test;
+import org.spine3.server.aggregate.AggregatePart;
+
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
+
 /**
- * This package contains generated classes and interfaces for storing commands.
+ * @author Illia Shepilov
  */
+public class AbstractEntityShould {
 
-@SPI
-@ParametersAreNonnullByDefault
-package org.spine3.server.command.storage;
-
-import org.spine3.SPI;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    @SuppressWarnings("unchecked")
+    // Supply a "wrong" value on purpose to cause the validation failure.
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
+        getConstructor(AggregatePart.class, String.class);
+    }
+}

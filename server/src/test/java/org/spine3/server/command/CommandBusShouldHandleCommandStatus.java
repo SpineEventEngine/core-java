@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -61,7 +60,7 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
@@ -105,7 +104,7 @@ public class CommandBusShouldHandleCommandStatus {
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProjectMessage());
+        final Command command = commandFactory.createCommand(Given.CommandMessage.createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -193,7 +192,7 @@ public class CommandBusShouldHandleCommandStatus {
         private final Throwable throwable;
 
         protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
-            super(newUuid(), eventBus);
+            super(eventBus);
             this.throwable = throwable;
         }
 
@@ -209,7 +208,7 @@ public class CommandBusShouldHandleCommandStatus {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
-        final Command command = commandFactory.create(msg);
+        final Command command = commandFactory.createCommand(msg);
         return command;
     }
 
@@ -221,9 +220,9 @@ public class CommandBusShouldHandleCommandStatus {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+            super(newStringValue("some Command message"),
+                  CommandContext.getDefaultInstance(),
+                  newStringValue(TestFailure.class.getName()));
         }
     }
 
@@ -237,12 +236,12 @@ public class CommandBusShouldHandleCommandStatus {
         private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             throw exception;
         }
     }

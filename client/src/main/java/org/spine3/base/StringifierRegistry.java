@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
@@ -71,7 +70,7 @@ class StringifierRegistry {
         final Stringifier<?> func = entries.get(valueClass);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-            @see #register(Class, Function) */
+            @see #register(Class, Stringifier) */
         final Stringifier<I> result = (Stringifier<I>) func;
         return Optional.fromNullable(result);
     }

@@ -18,26 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.bus;
 
-import org.spine3.base.CommandEnvelope;
+import org.spine3.base.MessageClass;
+import org.spine3.base.MessageEnvelope;
+
+import java.util.Set;
 
 /**
- * The endpoint for {@link CommandHandler}s.
+ * A dispatcher of a message.
  *
+ * @param <C> the type of dispatched messages
+ * @param <E> the type of envelopes for dispatched objects that contain messages
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-class HandlerEndpoint implements CommandEndpoint {
+public interface MessageDispatcher<C extends MessageClass,
+                                   E extends MessageEnvelope> {
+    /**
+     * Obtains a set of message classes that can be processed by this dispatcher.
+     *
+     * @return non-empty set of command classes
+     */
+    Set<C> getMessageClasses();
 
-    private final CommandHandler handler;
-
-    HandlerEndpoint(CommandHandler handler) {
-        this.handler = handler;
-    }
-
-    @Override
-    public void receive(CommandEnvelope commandEnvelope) {
-        handler.handle(commandEnvelope.getMessage(),
-                       commandEnvelope.getCommandContext());
-    }
+    /**
+     * Dispatches the message contained in the passed envelope.
+     *
+     * @param envelope the envelope with the message
+     */
+    void dispatch(E envelope);
 }

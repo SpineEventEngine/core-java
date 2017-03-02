@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
@@ -52,7 +53,6 @@ import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.base.CommandValidationError.TENANT_UNKNOWN;
 import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 
@@ -209,27 +209,11 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void register_command_handler() {
-        commandBus.register(new CreateProjectHandler(newUuid()));
+        commandBus.register(new CreateProjectHandler());
 
         commandBus.post(createProject(), responseObserver);
 
         assertTrue(responseObserver.isCompleted());
-    }
-
-    @Test
-    public void unregister_command_handler() {
-        final CommandHandler handler = newCommandHandler();
-
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-
-        commandBus.post(createProject(), responseObserver);
-
-        assertTrue(responseObserver.isError());
-    }
-
-    CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler(newUuid());
     }
 
     /*
@@ -343,7 +327,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+        final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
@@ -372,19 +356,20 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * The dispatcher that remembers that {@link #dispatch(Command)} was called.
+     * The dispatcher that remembers that
+     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
         }
 

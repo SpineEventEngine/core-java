@@ -119,9 +119,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * Marks the record with the passed ID as {@code archived}.
      *
      * @param id the ID of the record to mark
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public abstract boolean markArchived(I id);
+    public abstract void markArchived(I id);
 
     /**
      * Marks the record with the passed ID as {@code deleted}.
@@ -130,9 +129,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * To delete the record please call {@link #delete(Object)}
      *
      * @param id the ID of the record to mark
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public abstract boolean markDeleted(I id);
+    public abstract void markDeleted(I id);
 
     /**
      * Deletes the record with the passed ID.

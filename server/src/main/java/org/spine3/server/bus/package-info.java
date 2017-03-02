@@ -18,20 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
-
-import org.spine3.base.CommandEnvelope;
-
 /**
- * A command endpoint is responsible for delivering a command to
- * the place it is handled.
- *
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for abstract {@code Bus}.
  */
-interface CommandEndpoint {
 
-    /**
-     * Receives a command packed into an envelope and passes it for the further processing.
-     */
-    void receive(CommandEnvelope commandEnvelope);
-}
+@ParametersAreNonnullByDefault
+package org.spine3.server.bus;
+
+import javax.annotation.ParametersAreNonnullByDefault;

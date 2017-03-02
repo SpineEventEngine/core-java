@@ -23,7 +23,7 @@ package org.spine3.base;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 
-import java.util.Set;
+import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -78,7 +78,7 @@ public final class CommandClass extends MessageClass {
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
-    public static ImmutableSet<CommandClass> setOf(Set<Class<? extends Message>> classes) {
+    public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
@@ -89,10 +89,6 @@ public final class CommandClass extends MessageClass {
     /** Creates immutable set of {@code CommandClass} from the passed classes. */
     @SafeVarargs
     public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
-        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
-        }
-        return builder.build();
+        return setOf(Arrays.asList(classes));
     }
 }

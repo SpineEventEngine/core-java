@@ -58,7 +58,7 @@ public class EventTests {
     public static EventContext newEventContext(Timestamp time) {
         final EventId eventId = generateId();
         final Any producerId = AnyPacker.pack(newUuidValue());
-        final CommandContext cmdContext = factory.createCommandContext();
+        final CommandContext cmdContext = factory.createContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(producerId)

@@ -30,7 +30,9 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
@@ -133,8 +135,8 @@ public class ProcessManagerShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<Event> events =
-                processManager.dispatchCommand(command, commandFactory.createCommandContext());
+        final List<Event> events = processManager.dispatchCommand(command,
+                                                                  commandFactory.createContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -185,8 +187,8 @@ public class ProcessManagerShould {
 
     @SuppressWarnings("unchecked")
     private void verifyPostedCmd(Command cmd) {
-        // The produced command was posted to CommandBus once, and the same command is
-        // in the generated event.
+        // The produced command was posted to CommandBus once, and the same
+        // command is in the generated event.
         // We are not interested in observer instance here.
         verify(commandBus, times(1))
                 .post(eq(cmd), any(StreamObserver.class));
@@ -195,7 +197,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, commandFactory.createCommandContext());
+        processManager.dispatchCommand(unknownCommand, commandFactory.createContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -206,18 +208,18 @@ public class ProcessManagerShould {
 
     @Test
     public void return_handled_event_classes() {
-        final Set<Class<? extends Message>> classes =
-                ProcessManager.getEventClasses(TestProcessManager.class);
+        final Set<EventClass> classes =
+                ProcessManager.TypeInfo.getEventClasses(TestProcessManager.class);
         assertEquals(3, classes.size());
-        assertTrue(classes.contains(ProjectCreated.class));
-        assertTrue(classes.contains(TaskAdded.class));
-        assertTrue(classes.contains(ProjectStarted.class));
+        assertTrue(classes.contains(EventClass.of(ProjectCreated.class)));
+        assertTrue(classes.contains(EventClass.of(TaskAdded.class)));
+        assertTrue(classes.contains(EventClass.of(ProjectStarted.class)));
     }
 
     @Test
     public void create_iterating_router() {
         final StringValue commandMessage = newStringValue("create_iterating_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -240,7 +242,7 @@ public class ProcessManagerShould {
     @Test
     public void create_router() {
         final StringValue commandMessage = newStringValue("create_router");
-        final CommandContext commandContext = commandFactory.createCommandContext();
+        final CommandContext commandContext = commandFactory.createContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -325,12 +327,12 @@ public class ProcessManagerShould {
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             // Do nothing in this dummy dispatcher.
         }
     }

@@ -31,6 +31,7 @@ import org.spine3.server.entity.Visibility;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.protobuf.AnyPacker.pack;
@@ -60,39 +61,30 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         return Optional.fromNullable(record);
     }
 
-    boolean markArchived(I id) {
+    void markArchived(I id) {
         final EntityRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-        final Visibility currentStatus = record.getVisibility();
-        if (currentStatus.getArchived()) {
-            return false;
-        }
+        checkNotNull(record, "Can't mark a non-existing record archived.");
+        final Visibility status = record.getVisibility()
+                                          .toBuilder()
+                                          .setArchived(true)
+                                          .build();
         final EntityRecord archivedRecord = record.toBuilder()
-                                                  .setVisibility(currentStatus.toBuilder()
-                                                                              .setArchived(true))
-                                                  .build();
+                                                         .setVisibility(status)
+                                                         .build();
         records.put(id, archivedRecord);
-        return true;
     }
 
-    boolean markDeleted(I id) {
+    void markDeleted(I id) {
         final EntityRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-
-        final Visibility currentStatus = record.getVisibility();
-        if (currentStatus.getDeleted()) {
-            return false;
-        }
-        final EntityRecord deletedRecord = record.toBuilder()
-                                                 .setVisibility(currentStatus.toBuilder()
-                                                                             .setDeleted(true))
-                                                 .build();
-        records.put(id, deletedRecord);
-        return true;
+        checkNotNull(record, "Can't mark a non-existing record deleted.");
+        final Visibility status = record.getVisibility()
+                                        .toBuilder()
+                                        .setDeleted(true)
+                                        .build();
+        final EntityRecord archivedRecord = record.toBuilder()
+                                                  .setVisibility(status)
+                                                  .build();
+        records.put(id, archivedRecord);
     }
 
     boolean delete(I id) {

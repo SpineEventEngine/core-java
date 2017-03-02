@@ -81,43 +81,36 @@ public abstract class AggregateStorageVisibilityHandlingShould {
 
     @Test
     public void mark_aggregate_archived() {
-        final boolean success = storage.markArchived(id);
-        assertTrue(success);
+        storage.markArchived(id);
         final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
         assertArchived(aggregateStatus);
     }
 
     @Test
     public void mark_aggregate_deleted() {
-        final boolean success = storage.markDeleted(id);
-        assertTrue(success);
+        storage.markDeleted(id);
         final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
         assertDeleted(aggregateStatus);
     }
 
     @Test
     public void do_not_mark_aggregate_archived_twice() {
-        final boolean firstSuccessful = storage.markArchived(id);
-        assertTrue(firstSuccessful);
+        storage.markArchived(id);
         final Optional<Visibility> firstRead = storage.readVisibility(id);
         assertArchived(firstRead);
 
-        final boolean secondSuccessful = storage.markArchived(id);
-        assertFalse(secondSuccessful);
-
+        storage.markArchived(id);
         final Optional<Visibility> secondRead = storage.readVisibility(id);
         assertArchived(secondRead);
     }
 
     @Test
     public void do_not_mark_aggregate_deleted_twice() {
-        final boolean firstSuccessful = storage.markDeleted(id);
-        assertTrue(firstSuccessful);
+        storage.markDeleted(id);
         final Optional<Visibility> firstRead = storage.readVisibility(id);
         assertDeleted(firstRead);
 
-        final boolean secondSuccessful = storage.markDeleted(id);
-        assertFalse(secondSuccessful);
+        storage.markDeleted(id);
 
         final Optional<Visibility> secondRead = storage.readVisibility(id);
         assertDeleted(secondRead);
@@ -125,21 +118,17 @@ public abstract class AggregateStorageVisibilityHandlingShould {
 
     @Test
     public void mark_archived_if_deleted() {
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
+        storage.markDeleted(id);
         assertDeleted(storage.readVisibility(id));
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
+        storage.markArchived(id);
         assertStatus(storage.readVisibility(id), true, true);
     }
 
     @Test
     public void mark_deleted_if_archived() {
-        final boolean archivingSuccess = storage.markArchived(id);
-        assertTrue(archivingSuccess);
+        storage.markArchived(id);
         assertArchived(storage.readVisibility(id));
-        final boolean deletingSuccess = storage.markDeleted(id);
-        assertTrue(deletingSuccess);
+        storage.markDeleted(id);
         assertStatus(storage.readVisibility(id), true, true);
     }
 

@@ -18,59 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.server.reflect;
 
-import com.google.protobuf.Message;
-import org.spine3.type.ClassName;
+import com.google.common.base.Predicate;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
+import java.lang.reflect.Method;
 
 /**
- * A base class for value objects storing references to message classes.
+ * A filter for methods by annotation, method parameters, and return type.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class MessageClass {
-
-    private final Class<? extends Message> value;
-
-    protected MessageClass(Class<? extends Message> value) {
-        this.value = value;
-    }
-
-    /** Returns value of the object. */
-    public Class<? extends Message> value() {
-        return this.value;
-    }
+abstract class MethodPredicate implements Predicate<Method> {
 
     @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    /** Obtains the {@code ClassName} for this message class. */
-    public ClassName getClassName() {
-        return ClassName.of(value());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null || getClass() != obj.getClass()) {
+    public boolean apply(@Nullable Method method) {
+        if (method == null) {
             return false;
         }
-        final MessageClass other = (MessageClass) obj;
-        return Objects.equals(this.value, other.value);
+        final boolean result = verifyAnnotation(method)
+                               && verifyParams(method)
+                               && verifyReturnType(method);
+        return result;
     }
+
+    /**
+     * Returns {@code true} if the method is annotated correctly, {@code false} otherwise.
+     */
+    protected abstract boolean verifyAnnotation(Method method);
+
+    /**
+     * Returns {@code true} if the method return type is correct, {@code false} otherwise.
+     */
+    protected abstract boolean verifyReturnType(Method method);
+
+    /**
+     * Returns {@code true} if the method parameters are correct, {@code false} otherwise.
+     */
+    protected abstract boolean verifyParams(Method method);
 }

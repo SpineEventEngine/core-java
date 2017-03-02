@@ -21,11 +21,12 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Throwables;
+import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
@@ -35,6 +36,8 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
 
 /**
  * Abstract base class for repositories.
@@ -43,13 +46,9 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
-
-    /** The index of the declaration of the generic type {@code I} in this class. */
-    private static final int ID_CLASS_GENERIC_INDEX = 0;
-
-    /** The index of the declaration of the generic type {@code E} in this class. */
-    private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
+public abstract class Repository<I, E extends Entity<I, ?>>
+                implements RepositoryView<I, E>,
+                           AutoCloseable {
 
     protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -71,7 +70,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      *
      * <p>Used to optimize heavy {@link #getEntityClass()} calls.
      **/
+    @Nullable
     private volatile Class<E> entityClass;
+
+    /**
+     * Cached value for the entity ID class.
+     *
+     * <p>Used to optimize heavy {@link #getIdClass()} calls.
+     */
+    @Nullable
+    private volatile Class<I> idClass;
 
     /**
      * Creates the repository in the passed {@link BoundedContext}.
@@ -90,10 +98,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        final Class<I> idClass = Classes.getGenericParameterType(getClass(),
-                                                                 ID_CLASS_GENERIC_INDEX);
-        checkIdClass(idClass);
-
+        if (idClass == null) {
+            final Class<I> candidateClass = Entity.TypeInfo.getIdClass(getEntityClass());
+            checkIdClass(candidateClass);
+            idClass = candidateClass;
+        }
         return idClass;
     }
 
@@ -123,7 +132,10 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     @CheckReturnValue
     protected Class<E> getEntityClass() {
         if (entityClass == null) {
-            entityClass = Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
+            final Class<? extends Repository<I, E>> repoClass =
+                    (Class<? extends Repository<I, E>>) getClass();
+            entityClass = TypeInfo.getEntityClass(repoClass);
         }
         checkNotNull(entityClass);
         return entityClass;
@@ -137,9 +149,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass =
-                    Classes.getGenericParameterType(entityClass,
-                                                    Entity.GenericParameter.STATE.getIndex());
+            final Class<Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -169,9 +179,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * Marks the entity with the passed ID as {@code archived}.
      *
      * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-    protected abstract boolean markArchived(I id);
+    protected abstract void markArchived(I id);
 
     /**
      * Marks the entity with the passed ID as {@code deleted}.
@@ -180,9 +189,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * can be later physically removed from a storage by custom clean-up operation.
      *
      * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
      */
-    protected abstract boolean markDeleted(I id);
+    protected abstract void markDeleted(I id);
 
     /**
      * Returns the storage assigned to this repository or {@code null} if
@@ -218,8 +226,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw new IllegalStateException(String.format(
-                    "The repository %s already has storage %s.", this, this.storage));
+            final String errMsg = format(
+                    "The repository %s already has storage %s.",
+                    this, this.storage
+            );
+            throw new IllegalStateException(errMsg);
         }
 
         this.storage = createStorage(factory);
@@ -248,6 +259,43 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         if (this.storage != null) {
             this.storage.close();
             this.storage = null;
+        }
+    }
+
+    /**
+     * Enumeration of generic type parameters of this class.
+     */
+    enum GenericParameter implements GenericTypeIndex {
+
+        /** The index of the generic type {@code <I>}. */
+        ID(0),
+
+        /** The index of the generic type {@code <E>}. */
+        ENTITY(1);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return this.index;
+        }
+    }
+
+    private static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        private static <E extends Entity<I, ?>, I>
+        Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
+            final Class<E> result = getGenericParameterType(repositoryClass,
+                                                            GenericParameter.ENTITY.getIndex());
+            return result;
         }
     }
 }

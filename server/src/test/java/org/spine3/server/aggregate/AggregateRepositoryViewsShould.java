@@ -66,12 +66,12 @@ public class AggregateRepositoryViewsShould {
         boundedContext.register(repository);
 
         // Create the aggregate instance.
-        postCommand("create");
+        postCommand("createCommand");
     }
 
     /** Creates a command and posts it to {@code CommandBus} for being processed by the repository. */
     private void postCommand(String cmd) {
-        final Command command = commandFactory.create(SHRepository.createCommandMessage(id, cmd));
+        final Command command = commandFactory.createCommand(SHRepository.createCommandMessage(id, cmd));
         boundedContext.getCommandBus().post(command, emptyObserver());
     }
 
