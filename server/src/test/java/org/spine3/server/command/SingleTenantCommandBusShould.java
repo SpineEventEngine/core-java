@@ -23,20 +23,20 @@ package org.spine3.server.command;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.server.command.error.InvalidCommandException;
-import org.spine3.server.storage.CurrentTenant;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.base.CommandValidationError.TENANT_INAPPLICABLE;
 import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.server.storage.TenantDataOperation.isTenantSet;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class SingletenantCommandBusShould extends AbstractCommandBusTestSuite {
+public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
-    public SingletenantCommandBusShould() {
+    public SingleTenantCommandBusShould() {
         super(false);
     }
 
@@ -51,7 +51,7 @@ public class SingletenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void post_command_and_do_not_set_current_tenant() {
         commandBus.post(newCommandWithoutTenantId(), responseObserver);
 
-        assertFalse(CurrentTenant.get().isPresent());
+        assertFalse(isTenantSet());
     }
 
     @Test
@@ -60,7 +60,10 @@ public class SingletenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, responseObserver);
 
-        checkCommandError(responseObserver.getThrowable(), INVALID_COMMAND, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(),
+                          INVALID_COMMAND,
+                          InvalidCommandException.class,
+                          cmd);
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 
@@ -71,7 +74,10 @@ public class SingletenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, responseObserver);
 
-        checkCommandError(responseObserver.getThrowable(), TENANT_INAPPLICABLE, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(),
+                          TENANT_INAPPLICABLE,
+                          InvalidCommandException.class,
+                          cmd);
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 }

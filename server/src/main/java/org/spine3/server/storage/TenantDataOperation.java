@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.users.TenantId;
@@ -144,5 +145,34 @@ public abstract class TenantDataOperation implements Runnable {
                 CurrentTenant.clear();
             }
         }
+    }
+
+    /**
+     * Verifies whether a current tenant is set in the execution context.
+     */
+    @Internal
+    @VisibleForTesting
+    public static boolean isTenantSet() {
+        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        return currentTenant.isPresent();
+    }
+
+    /**
+     * Obtains current tenant ID.
+     *
+     * <p>In the multi-tenant context obtains the currently set tenant ID.
+     *
+     * <p>In single-tenant context, returns {@link CurrentTenant#singleTenant() singleTenant()}
+     *
+     * @param multitenantContext {@code true} if execution context is multi-tenant
+     * @return current tenant ID or {@link CurrentTenant#singleTenant() singleTenant()}
+     * @throws IllegalStateException if there is no current tenant set in a multi-tenant context
+     */
+    @Internal
+    public static TenantId getCurrentTenant(boolean multitenantContext) {
+        if (!multitenantContext) {
+            return CurrentTenant.singleTenant();
+        }
+        return CurrentTenant.ensure();
     }
 }

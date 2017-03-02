@@ -36,7 +36,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
  */
 @SPI
-public class CurrentTenant {
+class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
