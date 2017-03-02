@@ -237,7 +237,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     /** {@inheritDoc} */
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> getMessageClasses() {
         final Class<? extends Projection> projectionClass = getEntityClass();
         final Set<EventClass> result = Projection.getEventClasses(projectionClass);
         return result;
@@ -354,7 +354,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      */
     private Set<EventFilter> getEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        final Set<EventClass> eventClasses = getEventClasses();
+        final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
             final String typeName = TypeName.of(eventClass.value());
             builder.add(EventFilter.newBuilder()
