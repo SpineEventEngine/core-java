@@ -20,27 +20,14 @@
 
 package org.spine3.server.event;
 
-import org.spine3.base.Event;
 import org.spine3.base.EventClass;
-
-import java.util.Set;
+import org.spine3.base.EventEnvelope;
+import org.spine3.server.bus.MessageDispatcher;
 
 /**
  * {@code EventDispatcher} delivers events to subscribers.
  *
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher {
-
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher.
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
-
-    /**
-     * Dispatches the event.
-     */
-    void dispatch(Event event);
+public interface EventDispatcher extends MessageDispatcher<EventClass, EventEnvelope>{
 }

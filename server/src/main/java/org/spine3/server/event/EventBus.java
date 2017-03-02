@@ -29,12 +29,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventClass;
+import org.spine3.base.EventEnvelope;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
+import org.spine3.server.bus.DispatcherRegistry;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
+import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
@@ -69,10 +72,10 @@ import static com.google.common.base.Preconditions.checkState;
  * that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events are posted to an EventBus using {@link #post(Event)} method. Normally this
- * is done by an {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
- * in the process of handling a command, or by a
- * {@link org.spine3.server.procman.ProcessManager ProcessManager}.
+ * <p>Events are posted to an EventBus using {@link #post(Event, StreamObserver)} method.
+ * Normally this is done by an
+ * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository} in the process
+ * of handling a command, or by a {@link org.spine3.server.procman.ProcessManager ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
@@ -86,10 +89,11 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
+ * @author Alex Tymchenko
  * @see org.spine3.server.projection.Projection Projection
  * @see Subscribe @Subscribe
  */
-public class EventBus implements AutoCloseable {
+public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -99,7 +103,6 @@ public class EventBus implements AutoCloseable {
      */
 
     /** The registry of event dispatchers. */
-    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
 
     /** The registry of event subscriber methods. */
     private final SubscriberRegistry subscriberRegistry = new SubscriberRegistry();
@@ -154,7 +157,7 @@ public class EventBus implements AutoCloseable {
             public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
                 checkNotNull(eventClass);
                 final Set<EventDispatcher> dispatchers =
-                        dispatcherRegistry.getDispatchers(eventClass);
+                        registry().getDispatchers(eventClass);
                 return dispatchers;
             }
         });
@@ -215,11 +218,6 @@ public class EventBus implements AutoCloseable {
         subscriberRegistry.subscribe(object);
     }
 
-    /** Registers the passed dispatcher with the bus. */
-    public void register(EventDispatcher dispatcher) {
-        dispatcherRegistry.register(dispatcher);
-    }
-
     @VisibleForTesting
     boolean hasSubscribers(EventClass eventClass) {
         final boolean result = subscriberRegistry.hasSubscribers(eventClass);
@@ -234,7 +232,7 @@ public class EventBus implements AutoCloseable {
 
     @VisibleForTesting
     Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return dispatcherRegistry.getDispatchers(eventClass);
+        return registry().getDispatchers(eventClass);
     }
 
     /**
@@ -248,9 +246,19 @@ public class EventBus implements AutoCloseable {
         subscriberRegistry.unsubscribe(object);
     }
 
-    /** Removes dispatcher from the bus. */
-    public void unregister(EventDispatcher dispatcher) {
-        dispatcherRegistry.unregister(dispatcher);
+    @Override
+    public void handleDeadMessage(EventEnvelope message,
+                                  StreamObserver<Response> responseObserver) {
+        final Event event = message.getOuterObject();
+        log().warn("No subscriber or dispatcher defined for the event class: {}",
+                   event.getClass()
+                        .getName());
+        //TODO:3/2/17:alex.tymchenko: should we notify the observer?
+    }
+
+    @Override
+    protected DispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
+        return new EventDispatcherRegistry();
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -259,21 +267,37 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Posts the event for handling.
+     * Validates and posts the event for handling.
      *
-     * <p>The event is stored in the associated {@link EventStore} before
+     * <p>If the event is invalid, the {@code responseObserver} is notified of an error.
+     *
+     * <p>If the event is valid, it is stored in the associated {@link EventStore} before
      * passing it to dispatchers and subscribers.
      *
-     * @param event the event to be handled
+     * <p>The {@code responseObserver} is then notified of a successful acknowledgement of the
+     * passed event.
+     *
+     * @param event            the event to be handled
+     * @param responseObserver the observer to be notified
+     * @see #validate(Message, StreamObserver)
      */
-    public void post(Event event) {
-        store(event);
-        final Event enriched = enrich(event);
-        final int dispatchersCalled = callDispatchers(enriched);
-        final int subscribersInvoked = invokeSubscribers(enriched);
+    @Override
+    public void post(Event event, StreamObserver<Response> responseObserver) {
+        checkNotNull(responseObserver);
 
-        if (dispatchersCalled == 0 && subscribersInvoked == 0) {
-            handleDeadEvent(event);
+        final boolean validationPassed = doValidate(event, responseObserver);
+
+        if (validationPassed) {
+            responseObserver.onNext(Responses.ok());
+            store(event);
+            final Event enriched = enrich(event);
+            final int dispatchersCalled = callDispatchers(enriched);
+            final int subscribersInvoked = invokeSubscribers(enriched);
+
+            if (dispatchersCalled == 0 && subscribersInvoked == 0) {
+                handleDeadMessage(EventEnvelope.of(event), responseObserver);
+            }
+            responseObserver.onCompleted();
         }
     }
 
@@ -294,8 +318,7 @@ public class EventBus implements AutoCloseable {
      */
     private int callDispatchers(Event event) {
         final EventClass eventClass = EventClass.of(event);
-        final Collection<EventDispatcher> dispatchers =
-                dispatcherRegistry.getDispatchers(eventClass);
+        final Collection<EventDispatcher> dispatchers = registry().getDispatchers(eventClass);
         dispatcherEventDelivery.deliver(event);
         return dispatchers.size();
     }
@@ -333,6 +356,18 @@ public class EventBus implements AutoCloseable {
      *         {@code false} otherwise
      */
     public boolean validate(Message event, StreamObserver<Response> responseObserver) {
+        if (!doValidate(event, responseObserver)) {
+            return false;
+        }
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+        return true;
+    }
+
+    /**
+     * Validates the event message and notifies the observer of those (if any).
+     */
+    private boolean doValidate(Message event, StreamObserver<Response> responseObserver) {
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
@@ -346,8 +381,6 @@ public class EventBus implements AutoCloseable {
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
             return false;
         }
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
         return true;
     }
 
@@ -378,29 +411,33 @@ public class EventBus implements AutoCloseable {
     }
 
     private boolean isUnsupportedEvent(EventClass eventClass) {
-        final boolean noDispatchers = !dispatcherRegistry.hasDispatchersFor(eventClass);
+        final boolean noDispatchers = !registry().hasDispatchersFor(eventClass);
         final boolean noSubscribers = !hasSubscribers(eventClass);
         final boolean isUnsupported = noDispatchers && noSubscribers;
         return isUnsupported;
     }
 
-    private static void handleDeadEvent(Message event) {
-        log().warn("No subscriber or dispatcher defined for the event class: {}",
-                   event.getClass()
-                        .getName());
-    }
-
     @Override
     public void close() throws Exception {
-        dispatcherRegistry.unregisterAll();
+        registry().unregisterAll();
         subscriberRegistry.unsubscribeAll();
         eventStore.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
+     */
+    @Override
+    protected EventDispatcherRegistry registry() {
+        return (EventDispatcherRegistry) super.registry();
     }
 
     /** The {@code Builder} for {@code EventBus}. */
     public static class Builder {
 
-        private static final String EVENT_STORE_CONFIGURED_MESSAGE = "EventStore is already configured.";
+        private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
         /**
          * A {@code StorageFactory} for configuring the {@code EventStore} instance
@@ -486,7 +523,7 @@ public class EventBus implements AutoCloseable {
          * @see #setEventStore(EventStore)
          */
         public Builder setStorageFactory(StorageFactory storageFactory) {
-            checkState(eventStore == null, EVENT_STORE_CONFIGURED_MESSAGE);
+            checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
             this.storageFactory = checkNotNull(storageFactory);
             return this;
         }
@@ -532,7 +569,7 @@ public class EventBus implements AutoCloseable {
          */
         @SuppressWarnings("MethodParameterNamingConvention")
         public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
-            checkState(eventStore == null, EVENT_STORE_CONFIGURED_MESSAGE);
+            checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
             this.eventStoreStreamExecutor = eventStoreStreamExecutor;
             return this;
         }

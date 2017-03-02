@@ -20,9 +20,8 @@
 
 package org.spine3.server.event;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
 import org.spine3.base.EventClass;
+import org.spine3.server.bus.DispatcherRegistry;
 
 import java.util.Set;
 
@@ -35,36 +34,48 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>There can be multiple dispatchers per event class.
  *
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-class DispatcherRegistry {
+class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispatcher> {
 
-    private final HashMultimap<EventClass, EventDispatcher> dispatchers = HashMultimap.create();
-
-    void register(EventDispatcher dispatcher) {
+    @Override
+    protected void register(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        final Set<EventClass> eventClasses = dispatcher.getEventClasses();
+        final Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
 
-        for (EventClass eventClass : eventClasses) {
-            dispatchers.put(eventClass, dispatcher);
-        }
+        super.register(dispatcher);
     }
 
-    Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        final Set<EventDispatcher> result = this.dispatchers.get(eventClass);
-        return ImmutableSet.copyOf(result);
-    }
-
-    void unregister(EventDispatcher dispatcher) {
-        final Set<EventClass> eventClasses = dispatcher.getEventClasses();
+    @Override
+    protected void unregister(EventDispatcher dispatcher) {
+        checkNotNull(dispatcher);
+        final Set<EventClass> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
-        for (EventClass eventClass : eventClasses) {
-            dispatchers.remove(eventClass, dispatcher);
-        }
+
+        super.unregister(dispatcher);
     }
 
-    void unregisterAll() {
-        dispatchers.clear();
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to
+     * {@link EventBus#close() EventBus}.
+     */
+    @Override
+    protected Set<EventDispatcher> getDispatchers(EventClass messageClass) {
+        return super.getDispatchers(messageClass);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to
+     * {@link EventBus#isUnsupportedEvent(EventClass)} EventBus}.
+     */
+    @Override
+    protected void unregisterAll() {
+        super.unregisterAll();
     }
 
     boolean hasDispatchersFor(EventClass eventClass) {
@@ -77,10 +88,11 @@ class DispatcherRegistry {
      * Ensures that the dispatcher forwards at least one event.
      *
      * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
-     * @throws NullPointerException if the dispatcher returns null set
+     * @throws NullPointerException     if the dispatcher returns null set
      */
     private static void checkNotEmpty(EventDispatcher dispatcher, Set<EventClass> eventClasses) {
         checkArgument(!eventClasses.isEmpty(),
-                "No event classes are forwarded by this dispatcher: %s", dispatcher);
+                      "No event classes are forwarded by this dispatcher: %s",
+                      dispatcher);
     }
 }
