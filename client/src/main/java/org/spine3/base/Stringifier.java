@@ -28,12 +28,5 @@ import com.google.common.base.Converter;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractMethodOverridesAbstractMethod")
-// To allow calling the methods through the {@code Stringifier} link outside of the package.
 public abstract class Stringifier<A, B> extends Converter<A, B> {
-
-    @Override
-    protected abstract B doForward(A a);
-
-    @Override
-    protected abstract A doBackward(B b);
 }
