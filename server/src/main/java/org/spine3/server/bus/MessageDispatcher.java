@@ -38,7 +38,7 @@ public interface MessageDispatcher<C extends MessageClass,
     /**
      * Obtains a set of message classes that can be processed by this dispatcher.
      *
-     * @return non-empty set of command classes
+     * @return non-empty set of message classes
      */
     Set<C> getMessageClasses();
 
