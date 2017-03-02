@@ -36,8 +36,7 @@ public class ConversionError extends ParseException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Constructs a ParseException with the specified detail message and
-     * offset.
+     * Constructs a ParseException with the specified detail message and offset.
      * A detail message is a String that describes this particular exception.
      *
      * @param s           the detail message
