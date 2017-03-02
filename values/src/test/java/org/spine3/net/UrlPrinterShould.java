@@ -25,13 +25,12 @@ import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public class UrlPrinterShould {
 
     private static final Authorization AUTH =
@@ -113,7 +112,8 @@ public class UrlPrinterShould {
                            .setRecord(record)
                            .build();
 
-        // As UrlPrinter assumes that we have already validated url, it just ignores password if user is not set
+        // As UrlPrinter assumes that we have already validated url, it just ignores password
+        // if user is not set
         assertEquals("http://spine3.org:80/index?key=value&key2=value2#frag1",
                      UrlPrinter.printToString(url));
     }
@@ -134,6 +134,6 @@ public class UrlPrinterShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(UrlPrinter.class));
+        assertHasPrivateParameterlessCtor(UrlPrinter.class);
     }
 }

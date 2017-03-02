@@ -128,7 +128,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = TestCommandFactory.newInstance(getClass());
-        createProjectHandler = new CreateProjectHandler(newUuid());
+        createProjectHandler = new CreateProjectHandler();
         responseObserver = new TestResponseObserver();
     }
 
@@ -147,8 +147,8 @@ public abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
 
-        CreateProjectHandler(String id) {
-            super(id, eventBus);
+        CreateProjectHandler() {
+            super(eventBus);
         }
 
         @Assign

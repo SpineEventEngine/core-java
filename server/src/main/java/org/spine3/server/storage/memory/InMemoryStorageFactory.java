@@ -75,16 +75,15 @@ public class InMemoryStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      *
-     * NOTE: the parameter is unused.
-     * @param unused
+     * @param unused the parameter is not used in this implementation
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?, ?>> unused) {
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
         return InMemoryRecordStorage.newInstance(isMultitenant());
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?, ?>> unused) {
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage = InMemoryRecordStorage.newInstance(multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);

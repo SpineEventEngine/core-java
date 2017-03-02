@@ -359,9 +359,16 @@
       <option name="ignoreIterators" value="false" />
     </inspection_tool>
     <inspection_tool class="LoopWithImplicitTerminationCondition" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MagicNumber" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="MagicNumber" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="MapReplaceableByEnumMap" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MethodCount" enabled="true" level="INFO" enabled_by_default="true">
+    <inspection_tool class="MethodCount" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="TYPO" enabled="true">
+        <option name="m_limit" value="20" />
+        <option name="ignoreGettersAndSetters" value="false" />
+        <option name="ignoreOverridingMethods" value="false" />
+      </scope>
       <option name="m_limit" value="20" />
       <option name="ignoreGettersAndSetters" value="true" />
       <option name="ignoreOverridingMethods" value="true" />
@@ -560,6 +567,7 @@
     <inspection_tool class="ResultOfObjectAllocationIgnored" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Tests" level="WARNING" enabled="false" />
     </inspection_tool>
+    <inspection_tool class="ResultOfObjectAllocationIgnored" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ResultSetIndexZero" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ReturnNull" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_reportObjectMethods" value="true" />

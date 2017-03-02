@@ -28,14 +28,14 @@ import org.spine3.users.TenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantId;
 
 public class CurrentTenantShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(CurrentTenant.class));
+        assertHasPrivateParameterlessCtor(CurrentTenant.class);
     }
 
     @Test(expected = NullPointerException.class)

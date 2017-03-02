@@ -25,11 +25,12 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.protobuf.Durations;
+import org.spine3.base.CommandEnvelope;
+import org.spine3.protobuf.Durations2;
 import org.spine3.test.TestCommandFactory;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Math.abs;
@@ -44,15 +45,15 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.server.command.CommandScheduler.setSchedule;
+import static org.spine3.base.Commands.setSchedule;
+import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.server.command.Given.Command.startProject;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Values.newStringValue;
+
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
@@ -85,7 +86,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void not_schedule_command_if_no_scheduling_options_are_set() {
-        commandBus.register(new CreateProjectHandler(newUuid()));
+        commandBus.register(new CreateProjectHandler());
 
         commandBus.post(createProject(), responseObserver);
 
@@ -96,8 +97,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @Test
     public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations.ofMinutes(5);
-        final Duration newDelayExpected = Durations.ofMinutes(2); // = 5 - 3
+        final Duration delayPrimary = Durations2.fromMinutes(5);
+        final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
         final List<Command> commandsPrimary = newArrayList(createProject(), addTask(), startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
@@ -116,7 +117,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
         storeSingleCommandForRescheduling();
 
         // Create CommandBus specific for this test.
@@ -128,9 +130,9 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
                                                 .build();
         assertNotNull(commandBus);
 
-        // Sleep to ensure the commands have been rescheduled in parallel.
+        // Await to ensure the commands have been rescheduled in parallel.
         try {
-            Thread.sleep(100);
+            latch.await();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -149,7 +151,8 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
         final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
         storeSingleCommandForRescheduling();
 
         // Create CommandBus specific for this test.
@@ -179,7 +182,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
         spy.postPreviouslyScheduled(command);
 
-        verify(spy).doPost(eq(new CommandEnvelope(command)), any(CommandEndpoint.class));
+        verify(spy).doPost(eq(CommandEnvelope.of(command)), any(CommandDispatcher.class));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -217,7 +220,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     private static Command createScheduledCommand() {
         final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations.ofMinutes(5);
+        final Duration delayPrimary = Durations2.fromMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 
@@ -236,15 +239,19 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
      * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class instance.
      *
      * @param targetThreadName the builder of the thread name that will be created upon command scheduling
+     * @param latch the instance of the {@code CountDownLatch} to await the execution finishing
      * @return newly created instance
      */
     @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
-    private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName) {
+    private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName,
+                                                  final CountDownLatch latch) {
         return spy(new ExecutorCommandScheduler() {
             @Override
             public void schedule(Command command) {
                 super.schedule(command);
-                targetThreadName.append(Thread.currentThread().getName());
+                targetThreadName.append(Thread.currentThread()
+                                              .getName());
+                latch.countDown();
             }
         });
     }

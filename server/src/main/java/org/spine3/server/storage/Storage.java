@@ -33,7 +33,8 @@ public interface Storage extends AutoCloseable {
     /**
      * Verifies whether the storage is multitenant.
      *
-     * @return {@code true} if the storage was created with multitenancy support, {@code false} otherwise
+     * @return {@code true} if the storage was created with multitenancy support,
+     *         {@code false} otherwise
      */
     boolean isMultitenant();
 }

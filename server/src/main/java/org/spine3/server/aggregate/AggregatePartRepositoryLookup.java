@@ -45,13 +45,14 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      * Creates the lookup object for finding the repository that
      * manages aggregate parts with the passed state class.
      */
-    static <I, S extends Message> AggregatePartRepositoryLookup<I, S> createLookup(BoundedContext boundedContext,
-                                                                                   Class<I> idClass,
-                                                                                   Class<S> stateClass) {
+    static <I, S extends Message> AggregatePartRepositoryLookup<I, S>
+    createLookup(BoundedContext boundedContext, Class<I> idClass, Class<S> stateClass) {
         return new AggregatePartRepositoryLookup<>(boundedContext, idClass, stateClass);
     }
 
-    private AggregatePartRepositoryLookup(BoundedContext boundedContext, Class<I> idClass, Class<S> stateClass) {
+    private AggregatePartRepositoryLookup(BoundedContext boundedContext,
+                                          Class<I> idClass,
+                                          Class<S> stateClass) {
         this.boundedContext = boundedContext;
         this.idClass = idClass;
         this.stateClass = stateClass;
@@ -64,19 +65,23 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      *                               if not of the expected type, or
      *                               IDs are not of the expected type
      */
-    <A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> find() {
-        final AggregateRepository<?, ?> repo = checkFound(boundedContext.getAggregateRepository(stateClass));
+    <A extends AggregatePart<I, S, ?, ?>> AggregatePartRepository<I, A, ?> find() {
+        final AggregateRepository<?, ?> repo =
+                checkFound(boundedContext.getAggregateRepository(stateClass));
 
         checkIsAggregatePartRepository(repo);
 
-        final AggregatePartRepository<I, A> result = checkIdClass((AggregatePartRepository<?, ?>)repo);
+        final AggregatePartRepository<I, A, ?> result =
+                checkIdClass((AggregatePartRepository<?, ?, ?>) repo);
         return result;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // as this is the purpose of the method
-    private AggregateRepository<?, ?> checkFound(Optional<? extends AggregateRepository<?, ?>> rawRepo) {
+    private AggregateRepository<?, ?>
+    checkFound(Optional<? extends AggregateRepository<?, ?>> rawRepo) {
         if (!rawRepo.isPresent()) {
-            final String errMsg = format("Unable to find repository for the state class: %s", stateClass);
+            final String errMsg = format("Unable to find repository for the state class: %s",
+                                         stateClass);
             throw new IllegalStateException(errMsg);
         } else {
             return rawRepo.get();
@@ -92,7 +97,8 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     private static void checkIsAggregatePartRepository(AggregateRepository<?, ?> repo) {
         if (!(repo instanceof AggregatePartRepository)) {
             final String errMsg = format("The repository `%s` is not an instance of `%s`",
-                                                repo, AggregatePartRepository.class);
+                                         repo,
+                                         AggregatePartRepository.class);
             throw new IllegalStateException(errMsg);
         }
     }
@@ -100,19 +106,19 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     /**
      * Ensures the type of the IDs of the passed repository.
      */
-    private <A extends AggregatePart<I, S, ?>> AggregatePartRepository<I, A> checkIdClass(
-            AggregatePartRepository<?, ?> repo) {
+    private <A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, ?> checkIdClass(AggregatePartRepository<?, ?, ?> repo) {
         final Class<?> repoIdClass = repo.getIdClass();
         if (!idClass.equals(repoIdClass)) {
-            final String errMsg = format(
-                    "The ID class of the aggregate part repository (%s) " +
-                            "does not match the ID class of the AggregateRoot (%s)",
-                    repoIdClass, idClass);
+            final String errMsg = format("The ID class of the aggregate part repository (%s) " +
+                                         "does not match the ID class of the AggregateRoot (%s)",
+                                         repoIdClass,
+                                         idClass);
             throw new IllegalStateException(errMsg);
         }
 
         @SuppressWarnings("unchecked") // we checked by previous check methods and the code above.
-        final AggregatePartRepository<I, A> result = (AggregatePartRepository<I, A>) repo;
+        final AggregatePartRepository<I, A, ?> result = (AggregatePartRepository<I, A, ?>) repo;
         return result;
     }
 }

@@ -22,13 +22,13 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.aggregate.AggregateStorageStatusHandlingShould;
+import org.spine3.server.aggregate.AggregateStorageVisibilityHandlingShould;
 import org.spine3.test.aggregate.ProjectId;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class InMemoryAggregateStorageStatusHandlingShould extends AggregateStorageStatusHandlingShould {
+public class InMemoryAggregateStorageStatusHandlingShould extends AggregateStorageVisibilityHandlingShould {
 
     @Override
     protected AggregateStorage<ProjectId> getAggregateStorage(

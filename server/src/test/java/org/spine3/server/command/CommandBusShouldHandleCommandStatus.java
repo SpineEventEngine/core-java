@@ -22,14 +22,21 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
+import org.spine3.base.Response;
+import org.spine3.client.CommandFactory;
+import org.spine3.protobuf.Durations2;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.protobuf.Durations;
 import org.spine3.server.type.CommandClass;
 import org.spine3.test.command.AddTask;
@@ -47,11 +54,16 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
+import static org.spine3.base.Commands.setSchedule;
+import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.server.command.Given.Command.createProject;
 
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestSuite {
 
     public CommandBusShouldHandleCommandStatus() {
@@ -77,7 +89,7 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.CommandMessage.createProjectMessage());
+        final Command command = commandFactory.createCommand(Given.CommandMessage.createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -142,7 +154,7 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
         final List<Command> commands = newArrayList(Given.Command.createProject(),
                                                     Given.Command.addTask(),
                                                     Given.Command.startProject());
-        final Duration delay = Durations.ofMinutes(5);
+        final Duration delay = Durations2.fromMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
@@ -177,7 +189,7 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
         private final Throwable throwable;
 
         protected ThrowingCreateProjectHandler(@Nonnull Throwable throwable) {
-            super(newUuid(), eventBus);
+            super(eventBus);
             this.throwable = throwable;
         }
 
@@ -193,7 +205,7 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = Given.CommandMessage.createProjectMessage();
-        final Command command = commandFactory.create(msg);
+        final Command command = commandFactory.createCommand(msg);
         return command;
     }
 
@@ -205,9 +217,9 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(StringValue.newBuilder()
-                             .setValue(TestFailure.class.getName())
-                             .build());
+            super(newStringValue("some Command message"),
+                  CommandContext.getDefaultInstance(),
+                  newStringValue(TestFailure.class.getName()));
         }
     }
 
@@ -221,12 +233,12 @@ public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestS
         private final RuntimeException exception = new RuntimeException("Some dispatching exception.");
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             throw exception;
         }
     }

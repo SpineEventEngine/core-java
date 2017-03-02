@@ -20,17 +20,15 @@
 
 package org.spine3.net;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class SchemasShould {
 
     @Test
@@ -46,16 +44,13 @@ public class SchemasShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Schemas.class));
+        assertHasPrivateParameterlessCtor(Schemas.class);
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Schemas.class)
-                                                                     .addDefaultValue(Url.Record.Schema.UNDEFINED)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(Url.Record.Schema.class, Url.Record.Schema.UNDEFINED)
+                .testAllPublicStaticMethods(Schemas.class);
     }
 }

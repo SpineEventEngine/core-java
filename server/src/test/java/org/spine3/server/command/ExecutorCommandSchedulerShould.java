@@ -38,13 +38,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations.milliseconds;
+import static org.spine3.protobuf.Durations2.milliseconds;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ExecutorCommandSchedulerShould {
 
     private static final long DELAY_MS = 1100;

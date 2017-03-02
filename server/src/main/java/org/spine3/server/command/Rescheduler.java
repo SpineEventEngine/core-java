@@ -33,9 +33,11 @@ import java.util.Iterator;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.isLaterThan;
-import static org.spine3.server.command.CommandScheduler.setSchedule;
+import static org.spine3.base.Commands.getId;
+import static org.spine3.base.Commands.getMessage;
+import static org.spine3.base.Commands.setSchedule;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.isLaterThan;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.time.Intervals.between;
 import static org.spine3.time.Intervals.toDuration;
@@ -99,12 +101,11 @@ class Rescheduler {
     }
 
     private void onScheduledCommandExpired(Command command) {
-        final CommandEnvelope commandEnvelope = new CommandEnvelope(command);
         // We cannot post this command because there is no handler/dispatcher registered yet.
         // Also, posting it can be undesirable.
-        final Message msg = commandEnvelope.getCommandMessage();
-        final CommandId id = commandEnvelope.getCommandId();
+        final Message msg = getMessage(command);
+        final CommandId id = getId(command);
         commandBus.problemLog().errorExpiredCommand(msg, id);
-        commandBus.getCommandStatusService().setToError(commandEnvelope, commandExpiredError(msg));
+        commandBus.getCommandStatusService().setToError(id, commandExpiredError(msg));
     }
 }

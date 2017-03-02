@@ -41,7 +41,8 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Verifies if the storage factory is configured to serve a multi-tenant application.
      *
-     * @return {@code true} if the factory would produce multi-tenant storages, {@code false} otherwise
+     * @return {@code true} if the factory would produce multi-tenant storages,
+     *         {@code false} otherwise
      */
     boolean isMultitenant();
 
@@ -64,10 +65,11 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link RecordStorage} instance.
+     *
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?, ?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
@@ -75,5 +77,5 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>             the type of stream projection IDs
      * @param projectionClass the class of projections to store
      */
-    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?, ?>> projectionClass);
+    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> projectionClass);
 }

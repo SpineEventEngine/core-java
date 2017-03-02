@@ -31,8 +31,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 
-import javax.annotation.Nullable;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,11 +38,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class RepositoryShould {
 
     private BoundedContext boundedContext;
-    private Repository<ProjectId, ProjectEntity, Visibility<ProjectId>> repository;
+    private Repository<ProjectId, ProjectEntity> repository;
     private StorageFactory storageFactory;
 
     @Before
@@ -58,6 +55,60 @@ public class RepositoryShould {
     // Tests of initialization checks
     //-------------------------
 
+    @Test(expected = IllegalStateException.class)
+    public void check_for_entity_id_class() {
+        new RepoForEntityWithUnsupportedId(boundedContext).getIdClass();
+    }
+
+    private static class EntityWithUnsupportedId
+            extends AbstractVersionableEntity<Exception, Project> {
+        protected EntityWithUnsupportedId(Exception id) {
+            super(id);
+        }
+    }
+
+    @SuppressWarnings("ReturnOfNull")
+    private static class RepoForEntityWithUnsupportedId
+            extends Repository<Exception, EntityWithUnsupportedId> {
+
+        /**
+         * Creates the repository in the passed {@link BoundedContext}.
+         *
+         * @param boundedContext the {@link BoundedContext} in which this repository works
+         */
+        protected RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
+        @Override
+        public Optional<EntityWithUnsupportedId> load(Exception id) {
+            return null;
+        }
+
+        @Override
+        public EntityWithUnsupportedId create(Exception id) {
+            return null;
+        }
+
+        @Override
+        protected void store(EntityWithUnsupportedId obj) {
+
+        }
+
+        @Override
+        protected void markArchived(Exception id) {
+        }
+
+        @Override
+        protected void markDeleted(Exception id) {
+        }
+
+        @Override
+        protected Storage createStorage(StorageFactory factory) {
+            return null;
+        }
+    }
+
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
     public void throw_exception_if_entity_constructor_is_private() {
@@ -68,19 +119,25 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithPrivateConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
+    private static class EntityWithPrivateConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithPrivateConstructor
-            extends Repository<ProjectId, EntityWithPrivateConstructor, Visibility<ProjectId>> {
+            extends Repository<ProjectId, EntityWithPrivateConstructor> {
         private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithPrivateConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -91,14 +148,17 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
-        }
-
-        @Override
         public Optional<EntityWithPrivateConstructor> load(ProjectId id) {
             return Optional.absent();
         }
 
+        @Override
+        protected void markArchived(ProjectId id) {
+        }
+
+        @Override
+        protected void markDeleted(ProjectId id) {
+        }
     }
 
     @Test
@@ -111,19 +171,25 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithProtectedConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
+    private static class EntityWithProtectedConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithProtectedConstructor
-            extends Repository<ProjectId, EntityWithProtectedConstructor, Visibility<ProjectId>> {
+            extends Repository<ProjectId, EntityWithProtectedConstructor> {
         public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithProtectedConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -134,14 +200,17 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
-        }
-
-        @Override
         public Optional<EntityWithProtectedConstructor> load(ProjectId id) {
             return Optional.absent();
         }
 
+        @Override
+        protected void markArchived(ProjectId id) {
+        }
+
+        @Override
+        protected void markDeleted(ProjectId id) {
+        }
     }
 
     @Test
@@ -154,19 +223,25 @@ public class RepositoryShould {
         }
     }
 
-    private static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project, Visibility<ProjectId>> {
+    private static class EntityWithoutRequiredConstructor
+            extends AbstractVersionableEntity<ProjectId, Project> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
     }
 
+    @SuppressWarnings("ReturnOfNull")
     private static class RepositoryForEntitiesWithoutRequiredConstructor
-            extends Repository<ProjectId, EntityWithoutRequiredConstructor, Visibility<ProjectId>> {
+            extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
         private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public EntityWithoutRequiredConstructor create(ProjectId id) {
+            return null;
+        }
+
         @Override
         protected Storage createStorage(StorageFactory factory) {
             return null;
@@ -177,42 +252,55 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
-        }
-
-        @Override
         public Optional<EntityWithoutRequiredConstructor> load(ProjectId id) {
             return Optional.absent();
         }
 
+        @Override
+        protected void markArchived(ProjectId id) {
+        }
+
+        @Override
+        protected void markDeleted(ProjectId id) {
+        }
     }
 
     //
     // Tests of regular work
     //-----------------------
 
-    private static class ProjectEntity extends Entity<ProjectId, Project, Visibility<ProjectId>> {
-        public ProjectEntity(ProjectId id) {
+    private static class ProjectEntity extends AbstractVersionableEntity<ProjectId, Project> {
+        private ProjectEntity(ProjectId id) {
             super(id);
         }
     }
 
-    private static class TestRepo extends Repository<ProjectId, ProjectEntity, Visibility<ProjectId>> {
+    private static class TestRepo extends Repository<ProjectId, ProjectEntity> {
 
         private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @SuppressWarnings("ReturnOfNull")
+        @Override
+        public ProjectEntity create(ProjectId id) {
+            return null;
         }
 
         @Override
         protected void store(ProjectEntity obj) {}
 
         @Override
-        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
+        public Optional<ProjectEntity> load(ProjectId id) {
+            return Optional.absent();
         }
 
         @Override
-        public Optional<ProjectEntity> load(ProjectId id) {
-            return Optional.absent();
+        protected void markArchived(ProjectId id) {
+        }
+
+        @Override
+        protected void markDeleted(ProjectId id) {
         }
 
         @Override
@@ -264,54 +352,5 @@ public class RepositoryShould {
         repository.close();
         assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
-    }
-
-    @Test
-    public void create_entities() {
-        final ProjectId id = ProjectId.newBuilder().setId("create_entities()").build();
-        final ProjectEntity projectEntity = repository.create(id);
-        assertNotNull(projectEntity);
-        assertEquals(id, projectEntity.getId());
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void propagate_exception_if_entity_construction_fails() {
-        final Repository<ProjectId, FailingEntity, Visibility<ProjectId>> repo = new RepoForFailingEntities(boundedContext);
-        repo.create(ProjectId.newBuilder().setId("works?").build());
-    }
-
-    private static class FailingEntity extends Entity<ProjectId, Project, Visibility<ProjectId>> {
-        private FailingEntity(ProjectId id) {
-            super(id);
-            throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
-        }
-    }
-
-    private static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity, Visibility<ProjectId>> {
-
-        private RepoForFailingEntities(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-
-        @Override
-        protected void store(FailingEntity obj) {
-        }
-
-        @Override
-        protected void updateMetadata(ProjectId id, Visibility<ProjectId> metadata) {
-        }
-
-        @SuppressWarnings("ReturnOfNull") // It's the purpose of the test.
-        @Nullable
-        @Override
-        public Optional<FailingEntity> load(ProjectId id) {
-            return null;
-        }
-
-        @SuppressWarnings("ReturnOfNull")
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return null;
-        }
     }
 }

@@ -31,7 +31,7 @@ import static org.spine3.base.Identifiers.newUuid;
  *
  * @author Mikhail Mikhaylov
  */
-class TestEntity extends Entity<String, Project, Visibility<String>> {
+class TestEntity extends AbstractVersionableEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
@@ -42,19 +42,20 @@ class TestEntity extends Entity<String, Project, Visibility<String>> {
 
     static TestEntity withState() {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
-                                                       .withId(newUuid())
-                                                       .withState(Sample.messageOfType(Project.class))
-                                                       .withVersion(3)
-                                                       .build();
+                                       .withId(newUuid())
+                                       .withState(Sample.messageOfType(Project.class))
+                                       .withVersion(3)
+                                       .build();
         return result;
     }
 
     static TestEntity withStateOf(TestEntity entity) {
         final TestEntity result = Given.entityOfClass(TestEntity.class)
-                                                       .withId(entity.getId())
-                                                       .withState(entity.getState())
-                                                       .withVersion(entity.getVersion())
-                                                       .build();
+                                       .withId(entity.getId())
+                                       .withState(entity.getState())
+                                       .withVersion(entity.getVersion()
+                                                          .getNumber())
+                                       .build();
         return result;
     }
 

@@ -20,27 +20,24 @@
 package org.spine3.base;
 
 import com.google.common.base.Optional;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
-import org.spine3.test.NullToleranceTest;
-import org.spine3.testdata.TestCommandContextFactory;
+import org.spine3.test.EventTests;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Events.IsAfter;
-import static org.spine3.base.Events.IsBefore;
-import static org.spine3.base.Events.IsBetween;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Events.getActor;
@@ -51,19 +48,17 @@ import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.minutesAgo;
-import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
 
-    private final EventContext context = newEventContext();
+    private final EventContext context = EventTests.newEventContext();
 
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
@@ -72,7 +67,7 @@ public class EventsShould {
 
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Events.class));
+        assertHasPrivateParameterlessCtor(Events.class);
     }
 
     @Test
@@ -84,21 +79,6 @@ public class EventsShould {
     }
 
     @Test
-    public void return_null_from_null_input_in_IsAfter_predicate() {
-        assertFalse(new IsAfter(secondsAgo(5)).apply(null));
-    }
-
-    @Test
-    public void return_null_from_null_input_in_IsBefore_predicate() {
-        assertFalse(new IsBefore(secondsAgo(5)).apply(null));
-    }
-
-    @Test
-    public void return_null_from_null_input_in_IsBetween_predicate() {
-        assertFalse(new IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
-    }
-
-    @Test
     public void return_actor_from_EventContext() {
         assertEquals(context.getCommandContext()
                             .getActor(), getActor(context));
@@ -106,15 +86,26 @@ public class EventsShould {
 
     @Test
     public void sort_events_by_time() {
-        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(30)));
-        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(20)));
-        final Event event3 = createEvent(doubleValue, newEventContext(secondsAgo(10)));
+        final Event event1 = createEvent(stringValue, EventTests.newEventContext(minutesAgo(30)));
+        final Event event2 = createEvent(boolValue, EventTests.newEventContext(minutesAgo(20)));
+        final Event event3 = createEvent(doubleValue, EventTests.newEventContext(secondsAgo(10)));
         final List<Event> sortedEvents = newArrayList(event1, event2, event3);
         final List<Event> eventsToSort = newArrayList(event2, event1, event3);
 
         sort(eventsToSort);
 
         assertEquals(sortedEvents, eventsToSort);
+    }
+
+    @Test
+    public void have_event_comparator() {
+        final Event event1 = createEvent(stringValue, EventTests.newEventContext(minutesAgo(120)));
+        final Event event2 = createEvent(boolValue, EventTests.newEventContext(minutesAgo(2)));
+
+        final Comparator<Event> comparator = Events.eventComparator();
+        assertTrue(comparator.compare(event1, event2) < 0);
+        assertTrue(comparator.compare(event2, event1) > 0);
+        assertTrue(comparator.compare(event1, event1) == 0);
     }
 
     @Test
@@ -196,9 +187,11 @@ public class EventsShould {
 
     @Test
     public void return_false_if_event_enrichment_is_disabled() {
-        final EventContext withDisabledEnrichment = context.toBuilder()
-                                                           .setDoNotEnrich(true)
-                                                           .build();
+        final EventContext withDisabledEnrichment =
+                context.toBuilder()
+                       .setEnrichment(Enrichment.newBuilder()
+                                                .setDoNotEnrich(true))
+                       .build();
         final Event event = createEvent(stringValue, withDisabledEnrichment);
 
         assertFalse(isEnrichmentEnabled(event));
@@ -209,10 +202,11 @@ public class EventsShould {
     public void return_all_event_enrichments() {
         final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
 
-        final Optional<Enrichments> enrichments = Events.getEnrichments(context);
+        final Optional<Enrichment.Container> enrichments = Events.getEnrichments(context);
 
         assertTrue(enrichments.isPresent());
-        assertEquals(context.getEnrichments(), enrichments.get());
+        assertEquals(context.getEnrichment()
+                            .getContainer(), enrichments.get());
     }
 
     @Test
@@ -247,36 +241,24 @@ public class EventsShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Events.class)
-                                                                     .addDefaultValue(stringValue.getClass())
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(StringValue.class, StringValue.getDefaultInstance())
+                .setDefault(EventContext.class, EventTests.newEventContext())
+                .testAllPublicStaticMethods(Events.class);
     }
 
-    private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {
-        final Enrichments.Builder enrichments = Enrichments.newBuilder()
-                                                           .putMap(enrichmentKey, AnyPacker.pack(enrichment));
-        final EventContext context = newEventContext().toBuilder()
-                                                      .setEnrichments(enrichments.build())
-                                                      .build();
+    private static EventContext newEventContextWithEnrichment(String enrichmentKey,
+                                                              Message enrichment) {
+        final Enrichment.Builder enrichments =
+                Enrichment.newBuilder()
+                          .setContainer(Enrichment.Container.newBuilder()
+                                                            .putItems(enrichmentKey,
+                                                                      AnyPacker.pack(enrichment)));
+        final EventContext context = EventTests.newEventContext()
+                                               .toBuilder()
+                                               .setEnrichment(enrichments.build())
+                                               .build();
         return context;
     }
 
-    private static EventContext newEventContext() {
-        return newEventContext(getCurrentTime());
-    }
-
-    private static EventContext newEventContext(Timestamp time) {
-        final EventId eventId = generateId();
-        final StringValue producerId = newStringValue(newUuid());
-        final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setProducerId(AnyPacker.pack(producerId))
-                                                         .setTimestamp(time)
-                                                         .setCommandContext(cmdContext);
-        return builder.build();
-    }
 }

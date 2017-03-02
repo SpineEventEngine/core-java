@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
@@ -49,7 +50,6 @@ import java.util.Map;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -108,8 +108,6 @@ public class CommandHandlerShould {
 
     @Test
     public void generate_non_zero_hash_code_if_handler_has_non_empty_id() {
-        assertFalse(handler.getId().trim().isEmpty());
-
         final int hashCode = handler.hashCode();
 
         assertTrue(hashCode != 0);
@@ -121,13 +119,8 @@ public class CommandHandlerShould {
     }
 
     @Test
-    public void generate_different_hash_codes_for_different_instances() {
-        assertNotEquals(new TestCommandHandler().hashCode(), new TestCommandHandler().hashCode());
-    }
-
-    @Test
     public void assure_same_handlers_are_equal() {
-        final TestCommandHandler same = new TestCommandHandler(handler.getId());
+        final TestCommandHandler same = new TestCommandHandler();
 
         assertTrue(handler.equals(same));
     }
@@ -147,14 +140,6 @@ public class CommandHandlerShould {
     public void assure_handler_is_not_equal_to_object_of_another_class() {
         //noinspection EqualsBetweenInconvertibleTypes
         assertFalse(handler.equals(newUuid()));
-    }
-
-    @Test
-    public void assure_handlers_with_different_ids_are_not_equal() {
-        final TestCommandHandler another = new TestCommandHandler();
-
-        assertNotEquals(handler.getId(), another.getId());
-        assertFalse(handler.equals(another));
     }
 
     private List<Event> verifyPostedEvents(int expectedEventCount) {
@@ -177,15 +162,11 @@ public class CommandHandlerShould {
 
         private final Map<CommandId, Command> commandsHandled = newHashMap();
 
-        protected TestCommandHandler(String id) {
-            super(id, eventBus);
+        private TestCommandHandler() {
+            super(eventBus);
         }
 
-        protected TestCommandHandler() {
-            this(newUuid());
-        }
-
-        void assertHandled(Command expected) {
+        private void assertHandled(Command expected) {
             final CommandId id = Commands.getId(expected);
             final Command actual = commandsHandled.get(id);
             final String cmdName = getMessage(expected).getClass().getName();
@@ -193,11 +174,12 @@ public class CommandHandlerShould {
             assertEquals(expected, actual);
         }
 
-        void handle(Command cmd) {
-            handle(getMessage(cmd), cmd.getContext());
+        private void handle(Command cmd) {
+            final CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
+            dispatch(commandEnvelope);
         }
 
-        ImmutableList<Message> getEventsOnStartProjectCmd() {
+        private ImmutableList<Message> getEventsOnStartProjectCmd() {
             return eventsOnStartProjectCmd;
         }
 

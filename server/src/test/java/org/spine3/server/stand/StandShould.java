@@ -36,6 +36,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Queries;
 import org.spine3.base.Responses;
+import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.Query;
@@ -48,10 +49,11 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.Tests;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
@@ -177,8 +179,8 @@ public class StandShould {
 
         final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
         final Object someId = new Object();
-        final int someVersion = 1;
-        stand.update(someId, someUpdate, someVersion);
+        final Version stateVersion = Tests.newVersionWithNumber(1);
+        stand.update(someId, someUpdate, stateVersion);
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -201,16 +203,16 @@ public class StandShould {
         final Customer customerState = customerAggregate.getState();
         final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityStorageRecord.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
 
         stand.update(customerId, packedState, stateVersion);
 
         final AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
-        final EntityStorageRecord expectedRecord = EntityStorageRecord.newBuilder()
-                                                                      .setState(packedState)
-                                                                      .build();
+        final EntityRecord expectedRecord = EntityRecord.newBuilder()
+                                                        .setState(packedState)
+                                                        .build();
         verify(standStorageMock, times(1)).write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
 
@@ -307,7 +309,7 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(customerId, packedState, stateVersion);
 
         assertEquals(packedState, memoizeCallback.newEntityState);
@@ -330,7 +332,7 @@ public class StandShould {
         final ProjectId projectId = sampleData.getKey();
         final Project project = sampleData.getValue();
         final Any packedState = AnyPacker.pack(project);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(projectId, packedState, stateVersion);
 
         assertEquals(packedState, memoizeCallback.newEntityState);
@@ -354,7 +356,7 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(customerId, packedState, stateVersion);
 
         assertNull(memoizeCallback.newEntityState);
@@ -391,7 +393,7 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(customerId, packedState, stateVersion);
 
         for (MemoizeEntityUpdateCallback callback : callbacks) {
@@ -412,7 +414,7 @@ public class StandShould {
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(customerId, packedState, stateVersion);
 
         verify(callback, never()).onStateChanged(any(Any.class));
@@ -441,7 +443,7 @@ public class StandShould {
             final CustomerId customerId = sampleEntry.getKey();
             final Customer customer = sampleEntry.getValue();
             final Any packedState = AnyPacker.pack(customer);
-            final int stateVersion = 1;
+            final Version stateVersion = Tests.newVersionWithNumber(1);
             stand.update(customerId, packedState, stateVersion);
         }
 
@@ -473,7 +475,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         final Query customerQuery = Queries.readAll(Customer.class);
@@ -587,7 +589,7 @@ public class StandShould {
             // Has new ID each time
             final Customer customer = getSampleCustomer();
             customers.add(customer);
-            final int stateVersion = 1;
+            final Version stateVersion = Tests.newVersionWithNumber(1);
             stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
         }
 
@@ -614,7 +616,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         // FieldMask with invalid type URLs.
@@ -697,7 +699,7 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final int stateVersion = 1;
+        final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
         final String[] paths = new String[fieldIndexes.length];
@@ -719,7 +721,7 @@ public class StandShould {
     private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
-        final ImmutableList<EntityStorageRecord> emptyResultList = ImmutableList.<EntityStorageRecord>builder().build();
+        final ImmutableList<EntityRecord> emptyResultList = ImmutableList.<EntityRecord>builder().build();
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
@@ -769,7 +771,7 @@ public class StandShould {
                                                          .setId(CustomerId.newBuilder()
                                                                           .setNumber(i))
                                                          .build();
-            final int stateVersion = 1;
+            final Version stateVersion = Tests.newVersionWithNumber(1);
             stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
 
             ids.add(customer.getId());
@@ -833,12 +835,12 @@ public class StandShould {
         final StandStorage standStorageMock = mock(StandStorage.class);
 
         // Return non-empty results on any storage read call.
-        final EntityStorageRecord someRecord = EntityStorageRecord.getDefaultInstance();
-        final ImmutableList<EntityStorageRecord> nonEmptyList = ImmutableList.<EntityStorageRecord>builder().add(someRecord)
-                                                                                                            .build();
+        final EntityRecord someRecord = EntityRecord.getDefaultInstance();
+        final ImmutableList<EntityRecord> nonEmptyList = ImmutableList.<EntityRecord>builder().add(someRecord)
+                                                                                              .build();
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(nonEmptyList);
         when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(Optional.of(someRecord));
-        when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityStorageRecord>newHashMap());
+        when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
@@ -861,22 +863,22 @@ public class StandShould {
     private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType,
                                                        StandStorage standStorageMock) {
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
-        final ImmutableList.Builder<EntityStorageRecord> recordsBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<EntityRecord> recordsBuilder = ImmutableList.builder();
         for (CustomerId customerId : sampleCustomers.keySet()) {
             final AggregateStateId stateId = AggregateStateId.of(customerId, customerType);
             final Customer customer = sampleCustomers.get(customerId);
             final Any customerState = AnyPacker.pack(customer);
-            final EntityStorageRecord entityStorageRecord = EntityStorageRecord.newBuilder()
-                                                                               .setState(customerState)
-                                                                               .build();
+            final EntityRecord entityRecord = EntityRecord.newBuilder()
+                                                          .setState(customerState)
+                                                          .build();
             stateIdsBuilder.add(stateId);
-            recordsBuilder.add(entityStorageRecord);
+            recordsBuilder.add(entityRecord);
 
-            when(standStorageMock.read(eq(stateId))).thenReturn(Optional.of(entityStorageRecord));
+            when(standStorageMock.read(eq(stateId))).thenReturn(Optional.of(entityRecord));
         }
 
         final ImmutableList<AggregateStateId> stateIds = stateIdsBuilder.build();
-        final ImmutableList<EntityStorageRecord> records = recordsBuilder.build();
+        final ImmutableList<EntityRecord> records = recordsBuilder.build();
 
         final Iterable<AggregateStateId> matchingIds = argThat(idsMatcher(stateIds));
         when(standStorageMock.readMultiple(matchingIds)).thenReturn(records);
@@ -974,7 +976,7 @@ public class StandShould {
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
             final Any customerState = AnyPacker.pack(sampleCustomer);
-            final int stateVersion = 1;
+            final Version stateVersion = Tests.newVersionWithNumber(1);
             stand.update(id, customerState, stateVersion);
         }
     }
@@ -1061,10 +1063,10 @@ public class StandShould {
         return stand;
     }
 
-    private static EntityStorageRecord recordStateMatcher(final EntityStorageRecord expectedRecord) {
-        return argThat(new ArgumentMatcher<EntityStorageRecord>() {
+    private static EntityRecord recordStateMatcher(final EntityRecord expectedRecord) {
+        return argThat(new ArgumentMatcher<EntityRecord>() {
             @Override
-            public boolean matches(EntityStorageRecord argument) {
+            public boolean matches(EntityRecord argument) {
                 final boolean matchResult = Objects.equals(expectedRecord.getState(), argument.getState());
                 return matchResult;
             }

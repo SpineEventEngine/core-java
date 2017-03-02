@@ -32,7 +32,7 @@ import static org.spine3.change.LongMismatch.unexpectedValue;
 import static org.spine3.change.LongMismatch.unpackActual;
 import static org.spine3.change.LongMismatch.unpackExpected;
 import static org.spine3.change.LongMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class LongMismatchShould {
 
@@ -43,7 +43,7 @@ public class LongMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(LongMismatch.class));
+        assertHasPrivateParameterlessCtor(LongMismatch.class);
     }
 
     @Test

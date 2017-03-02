@@ -21,15 +21,11 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.aggregate.storage.AggregateEvents;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
-import org.spine3.server.aggregate.storage.Snapshot;
-import org.spine3.server.entity.status.EntityStatus;
+import org.spine3.server.entity.Visibility;
 import org.spine3.server.storage.AbstractStorage;
 
 import java.util.Deque;
@@ -40,10 +36,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * An event-sourced storage of aggregate part events and snapshots.
@@ -52,29 +47,26 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
-
-    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor()
-                                                             .getName();
+public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateStateRecord> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
     }
 
     @Override
-    public Optional<AggregateEvents> read(I aggregateId) {
+    public Optional<AggregateStateRecord> read(I aggregateId) {
         checkNotClosed();
         checkNotNull(aggregateId);
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
-        final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
+        final Iterator<AggregateEventRecord> historyBackward = historyBackward(aggregateId);
 
         while (historyBackward.hasNext()
                 && snapshot == null) {
 
-            final AggregateStorageRecord record = historyBackward.next();
+            final AggregateEventRecord record = historyBackward.next();
 
             switch (record.getKindCase()) {
                 case EVENT:
@@ -90,7 +82,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
             }
         }
 
-        final AggregateEvents.Builder builder = AggregateEvents.newBuilder();
+        final AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
@@ -110,7 +102,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
-    public void write(I id, AggregateEvents events) throws IllegalStateException, IllegalArgumentException {
+    public void write(I id, AggregateStateRecord events)
+            throws IllegalStateException, IllegalArgumentException {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(events);
@@ -118,7 +111,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (final Event event : eventList) {
-            final AggregateStorageRecord record = toStorageRecord(event);
+            final AggregateEventRecord record = toStorageRecord(event);
             writeRecord(id, record);
         }
     }
@@ -128,14 +121,13 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      *
      * @param id    the aggregate ID
      * @param event the event to write
-     * @throws IllegalStateException if the storage is closed
      */
-    protected void writeEvent(I id, Event event) {
+    void writeEvent(I id, Event event) {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(event);
 
-        final AggregateStorageRecord record = toStorageRecord(event);
+        final AggregateEventRecord record = toStorageRecord(event);
         writeRecord(id, record);
     }
 
@@ -146,21 +138,38 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param snapshot    the snapshot of the aggregate
      * @throws IllegalStateException if the storage is closed
      */
-    protected void write(I aggregateId, Snapshot snapshot) {
+    void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        final Timestamp timestamp = checkPositive(snapshot.getTimestamp(), "Snapshot timestamp");
 
-        final AggregateStorageRecord record =
-                AggregateStorageRecord.newBuilder()
-                                      .setTimestamp(timestamp)
-                                      .setEventType(SNAPSHOT_TYPE_NAME)
-                                      .setEventId("") // No event ID for snapshots because it's not a domain event.
-                                      .setVersion(snapshot.getVersion())
-                                      .setSnapshot(snapshot)
-                                      .build();
+        final AggregateEventRecord record = toStorageRecord(snapshot);
         writeRecord(aggregateId, record);
+    }
+
+    protected static AggregateEventRecord toStorageRecord(Event event) {
+        checkArgument(event.hasContext(), "Event context must be set.");
+        final EventContext context = event.getContext();
+
+        final String eventIdStr = idToString(context.getEventId());
+        checkNotEmptyOrBlank(eventIdStr, "Event ID");
+
+        checkArgument(event.hasMessage(), "Event message must be set.");
+
+        final Timestamp timestamp = checkValid(context.getTimestamp());
+
+        return AggregateEventRecord.newBuilder()
+                                   .setTimestamp(timestamp)
+                                   .setEvent(event)
+                                   .build();
+    }
+
+    protected static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
+        final Timestamp value = checkValid(snapshot.getTimestamp());
+        return AggregateEventRecord.newBuilder()
+                                   .setTimestamp(value)
+                                   .setSnapshot(snapshot)
+                                   .build();
     }
 
     /**
@@ -184,15 +193,29 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param id the ID of the aggregate
      * @return the aggregate status record or {@code Optional.absent()}
      */
-    protected abstract Optional<EntityStatus> readStatus(I id);
+    protected abstract Optional<Visibility> readVisibility(I id);
 
     /**
      * Writes the {@code EntityStatus} for the aggregate with the passed ID.
      *
      * @param id the ID of the aggregate for which we update the status
-     * @param status the status to write
+     * @param visibility the status to write
      */
-    protected abstract void writeStatus(I id, EntityStatus status);
+    protected abstract void writeVisibility(I id, Visibility visibility);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code archived}.
+     *
+     * @param id the aggregate ID
+     */
+    protected abstract void markArchived(I id);
+
+    /**
+     * Marks the aggregate with the passed ID as {@code deleted}.
+     *
+     * @param id the aggregate ID
+     */
+    protected abstract void markDeleted(I id);
 
     /**
      * Writes a count of events which were saved to the storage after the last snapshot was created,
@@ -204,30 +227,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      */
     protected abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
-    private static AggregateStorageRecord toStorageRecord(Event event) {
-        checkArgument(event.hasContext(), "Event context must be set.");
-        final EventContext context = event.getContext();
-
-        final String eventIdStr = idToString(context.getEventId());
-        checkNotEmptyOrBlank(eventIdStr, "Event ID");
-
-        checkArgument(event.hasMessage(), "Event message must be set.");
-        final Any eventMsg = event.getMessage();
-
-        final String eventType = ofEnclosed(eventMsg).getTypeName();
-        checkNotEmptyOrBlank(eventType, "Event type");
-
-        final Timestamp timestamp = checkPositive(context.getTimestamp(), "Event time");
-
-        return AggregateStorageRecord.newBuilder()
-                                     .setEvent(event)
-                                     .setTimestamp(timestamp)
-                                     .setEventId(eventIdStr)
-                                     .setEventType(eventType)
-                                     .setVersion(context.getVersion())
-                                     .build();
-    }
-
     // Storage implementation API.
 
     /**
@@ -236,22 +235,15 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param id     the aggregate ID
      * @param record the record to write
      */
-    protected abstract void writeRecord(I id, AggregateStorageRecord record);
+    protected abstract void writeRecord(I id, AggregateEventRecord record);
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
      * Records are sorted by timestamp descending (from newer to older).
      *
-     * @param id the aggregate ID
-     * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
+     * @param id aggregate ID
+     * @return new iterator instance, the iterator is empty if there's no history for
+     *         the aggregate with passed ID
      */
-    protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
-
-    /**
-     * Updates the status for the aggregate with the passed ID.
-     *
-     * @param id the aggregate ID
-     * @param status new entity status for the aggreagate
-     */
-    protected abstract void updateStatus(I id, EntityStatus status);
+    protected abstract Iterator<AggregateEventRecord> historyBackward(I id);
 }

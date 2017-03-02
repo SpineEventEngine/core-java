@@ -23,6 +23,7 @@ package org.spine3.protobuf;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
+import org.spine3.base.Event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -61,6 +62,16 @@ public class TypeName {
     public static String ofCommand(Command command) {
         checkNotNull(command);
         final String result = TypeUrl.ofCommand(command)
+                                     .getTypeName();
+        return result;
+    }
+
+    /**
+     * Obtains type name from the message of the passed event.
+     */
+    public static String ofEvent(Event event) {
+        checkNotNull(event);
+        final String result = TypeUrl.ofEvent(event)
                                      .getTypeName();
         return result;
     }

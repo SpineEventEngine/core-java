@@ -34,8 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.validate.Validate.checkPositive;
+import static org.spine3.base.Commands.setSchedulingTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.

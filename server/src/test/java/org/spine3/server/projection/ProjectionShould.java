@@ -23,10 +23,10 @@ package org.spine3.server.projection;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.Given;
@@ -36,8 +36,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
 
     private TestProjection projection;
@@ -73,11 +73,17 @@ public class ProjectionShould {
 
     @Test
     public void return_event_classes_which_it_handles() {
-        final ImmutableSet<Class<? extends Message>> classes = Projection.getEventClasses(TestProjection.class);
+        final ImmutableSet<EventClass> classes =
+                Projection.TypeInfo.getEventClasses(TestProjection.class);
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
-        assertTrue(classes.contains(StringValue.class));
-        assertTrue(classes.contains(Int32Value.class));
+        assertTrue(classes.contains(EventClass.of(StringValue.class)));
+        assertTrue(classes.contains(EventClass.of(Int32Value.class)));
+    }
+
+    @Test
+    public void have_TypeInfo_utility_class() {
+        assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
     private static class TestProjection extends Projection<String, StringValue> {
@@ -90,14 +96,15 @@ public class ProjectionShould {
         }
 
         @Subscribe
-        public void on(StringValue event, EventContext ignored) {
+        public void on(StringValue event) {
             final StringValue newSate = createNewState("stringState", event.getValue());
             incrementState(newSate);
         }
 
         @Subscribe
         public void on(Int32Value event) {
-            final StringValue newSate = createNewState("integerState", String.valueOf(event.getValue()));
+            final StringValue newSate = createNewState("integerState",
+                                                       String.valueOf(event.getValue()));
             incrementState(newSate);
         }
 

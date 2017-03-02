@@ -23,6 +23,10 @@ package org.spine3.server.command;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Command;
+import org.spine3.client.CommandFactory;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.util.Environment;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.newUuidValue;
@@ -32,6 +36,9 @@ import static org.spine3.test.Tests.newUuidValue;
  */
 public class CommandHandlingEntityShould {
 
+    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+
+    /** The object we test. */
     private HandlingEntity entity;
 
     @Before
@@ -41,7 +48,7 @@ public class CommandHandlingEntityShould {
 
     @Test
     public void set_version_when_creating_mismatches() {
-        final int version = entity.getVersion();
+        final int version = entity.getVersion().getNumber();
 
         assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());
         assertEquals(version, entity.expectedNotDefault(msg()).getVersion());
@@ -51,6 +58,21 @@ public class CommandHandlingEntityShould {
         assertEquals(version, entity.expectedEmpty(str(), str()).getVersion());
         assertEquals(version, entity.expectedNotEmpty(str()).getVersion());
         assertEquals(version, entity.unexpectedValue(str(), str(), str()).getVersion());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void do_not_allow_calling_dispatchForTest_from_production() {
+        final Environment environment = Environment.getInstance();
+        try {
+            // Simulate the production mode.
+            environment.setToProduction();
+
+            final Command cmd = commandFactory.createCommand(msg());
+            entity.dispatchForTest(cmd.getMessage(), cmd.getContext());
+            
+        } finally {
+            environment.setToTests();
+        }
     }
 
     /**

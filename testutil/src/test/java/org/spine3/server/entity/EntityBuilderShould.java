@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
@@ -67,9 +67,9 @@ public class EntityBuilderShould {
         final long id = 1024L;
         final int version = 100500;
         final StringValue state = newStringValue(getClass().getName());
-        final Timestamp timestamp = Timestamps.getCurrentTime();
+        final Timestamp timestamp = Timestamps2.getCurrentTime();
 
-        final Entity entity = givenEntity()
+        final VersionableEntity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -79,19 +79,18 @@ public class EntityBuilderShould {
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(id, entity.getId());
         assertEquals(state, entity.getState());
-        assertEquals(version, entity.getVersion());
-        assertEquals(timestamp, entity.whenModified());
+        assertEquals(version, entity.getVersion().getNumber());
+        assertEquals(timestamp, entity.getVersion().getTimestamp());
     }
 
     @Test
     public void create_entity_with_default_values() {
-        final Entity entity = givenEntity().build();
+        final VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
         assertEquals(newStringValue(""), entity.getState());
-        assertEquals(0, entity.getVersion());
-        assertEquals(Timestamp.getDefaultInstance(), entity.whenModified());
+        assertEquals(0, entity.getVersion().getNumber());
     }
 
     @Test
@@ -103,7 +102,7 @@ public class EntityBuilderShould {
         assertTrue(passed);
     }
 
-    private static class TestEntity extends Entity<Long, StringValue, Visibility<Long>> {
+    private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
         protected TestEntity(Long id) {
             super(id);
         }

@@ -48,7 +48,8 @@ class UrlPrinter {
             return url.getRaw();
         }
 
-        //noinspection StringBufferWithoutInitialCapacity // We don't know the capacity at this point
+        // We don't know the capacity at this point
+        @SuppressWarnings("StringBufferWithoutInitialCapacity")
         final StringBuilder sb = new StringBuilder();
 
         final Url.Record record = url.getRecord();
