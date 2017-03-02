@@ -51,7 +51,7 @@ class CurrentTenant {
     /**
      * Returns a constant for single-tenant applications.
      */
-    public static TenantId singleTenant() {
+    static TenantId singleTenant() {
         return singleTenant;
     }
 
@@ -61,7 +61,7 @@ class CurrentTenant {
      * @return ID of the tenant or {@linkplain Optional#absent() empty Optional} if
      *         the current thread works not in a multi-tenant context
      */
-    public static Optional<TenantId> get() {
+    static Optional<TenantId> get() {
         final TenantId result = threadLocal.get();
         return Optional.fromNullable(result);
     }
@@ -74,7 +74,7 @@ class CurrentTenant {
      * @return the ID of the current tenant
      * @throws IllegalStateException if the is no current tenant ID set
      */
-    public static TenantId ensure() throws IllegalStateException {
+    static TenantId ensure() throws IllegalStateException {
         final Optional<TenantId> currentTenant = get();
         if (!currentTenant.isPresent()) {
             throw new IllegalStateException(
