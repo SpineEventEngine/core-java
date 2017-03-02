@@ -26,6 +26,7 @@ import org.spine3.base.EventClass;
 import org.spine3.base.EventValidationError;
 import org.spine3.base.ValidationError;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolations;
 
 /**
  * The exception for reporting invalid events.
@@ -39,24 +40,26 @@ public class InvalidEventException extends EventException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MSG_VALIDATION_ERROR = "Event message does match validation constrains.";
+    private static final String MSG_VALIDATION_ERROR = "Event message does match " +
+                                                       "the validation constraints. ";
 
     private InvalidEventException(String messageText, Message eventMsg, Error error) {
         super(messageText, eventMsg, error);
     }
 
     /**
-     * Creates an exception instance for a event message, which has fields that violate validation constraint(s).
+     * Creates an exception instance for a event message, which has fields that
+     * violate validation constraint(s).
      *
-     * @param eventMsg an invalid event message
+     * @param eventMsg   an invalid event message
      * @param violations constraint violations for the event message
      */
-    public static InvalidEventException onConstraintViolations(Message eventMsg,
-                                                                 Iterable<ConstraintViolation> violations) {
-        final Error error = invalidEventMessageError(eventMsg, violations, MSG_VALIDATION_ERROR);
+    public static InvalidEventException onConstraintViolations(
+            Message eventMsg, Iterable<ConstraintViolation> violations) {
+        final String errorDetails = MSG_VALIDATION_ERROR + ConstraintViolations.toText(violations);
+        final Error error = invalidEventMessageError(eventMsg, violations, errorDetails);
         final String text = MSG_VALIDATION_ERROR + " Message class: " + EventClass.of(eventMsg) +
-                " See Error.getValidationError() for details.";
-        //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.
+                            " See Error.getValidationError() for details.";
         return new InvalidEventException(text, eventMsg, error);
     }
 
@@ -65,17 +68,19 @@ public class InvalidEventException extends EventException {
      * validation constraint(s).
      */
     private static Error invalidEventMessageError(Message eventMessage,
-            Iterable<ConstraintViolation> violations,
-            String errorText) {
-        final ValidationError validationError = ValidationError.newBuilder()
-                .addAllConstraintViolation(violations)
-                .build();
+                                                  Iterable<ConstraintViolation> violations,
+                                                  String errorText) {
+        final ValidationError validationError =
+                ValidationError.newBuilder()
+                               .addAllConstraintViolation(violations)
+                               .build();
         final Error.Builder error = Error.newBuilder()
-                .setType(EventValidationError.getDescriptor().getFullName())
-                .setCode(EventValidationError.INVALID_EVENT.getNumber())
-                .setValidationError(validationError)
-                .setMessage(errorText)
-                .putAllAttributes(eventTypeAttribute(eventMessage));
+                                         .setType(EventValidationError.getDescriptor()
+                                                                      .getFullName())
+                                         .setCode(EventValidationError.INVALID_EVENT.getNumber())
+                                         .setValidationError(validationError)
+                                         .setMessage(errorText)
+                                         .putAllAttributes(eventTypeAttribute(eventMessage));
         return error.build();
     }
 }
