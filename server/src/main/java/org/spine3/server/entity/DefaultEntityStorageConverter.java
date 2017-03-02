@@ -23,7 +23,6 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Version;
 import org.spine3.protobuf.TypeUrl;
 
 import static org.spine3.protobuf.AnyPacker.pack;
@@ -35,13 +34,13 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * @author Alexander Yevsyukov
  * @see Tuple
  */
-class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>, S extends Message>
+class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private final Repository<I, E> repository;
     private final FieldMask fieldMask;
 
-    static <I, E extends AbstractVersionableEntity<I, S>, S extends Message>
+    static <I, E extends AbstractEntity<I, S>, S extends Message>
     EntityStorageConverter<I, E, S> forAllFields(Repository<I, E> repository) {
         return new DefaultEntityStorageConverter<>(repository, FieldMask.getDefaultInstance());
     }
@@ -60,12 +59,15 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
     @Override
     protected Tuple<I> doForward(E entity) {
         final Any stateAny = pack(entity.getState());
-        final Version version = entity.getVersion();
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
-                            .setState(stateAny)
-                            .setVersion(version)
-                            .setVisibility(entity.getVisibility());
+                            .setState(stateAny);
+
+        if (entity instanceof AbstractVersionableEntity) {
+            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            builder.setVersion(versionable.getVersion())
+                   .setVisibility(versionable.getVisibility());
+        }
 
         final Tuple<I> result = tuple(entity.getId(), builder.build());
         return result;
@@ -83,8 +85,13 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
 
         final EntityRecord record = tuple.getState();
         if (entity != null) {
-            entity.setState(state, record.getVersion());
-            entity.setVisibility(record.getVisibility());
+            if (entity instanceof AbstractVersionableEntity) {
+                AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+                versionable.setState(state, record.getVersion());
+                versionable.setVisibility(record.getVisibility());
+            } else {
+                entity.injectState(state);
+            }
         }
         return entity;
     }

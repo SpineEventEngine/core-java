@@ -18,29 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.entity;
 
-import org.spine3.SPI;
-import org.spine3.base.CommandId;
+import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.DefaultRecordBasedRepository;
 
-//TODO:2017-02-15:alexander.yevsyukov: Update Javadoc after migration to this class.
 /**
- * This is Repository-based implementation of Command Store, which is going to
- * {@link CommandStore} .
+ * Implementation of {@link RecordBasedRepository} that manges entities
+ * derived from {@link AbstractEntity}.
  *
+ * @param <I> the type of IDs of entities
+ * @param <E> the type of entities
+ * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-@SPI
-public class CommandRepository
-        extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
+public abstract class DefaultRecordBasedRepository<I,
+                                                   E extends AbstractEntity<I, S>,
+                                                   S extends Message>
+                extends RecordBasedRepository<I, E, S> {
+
+    private final EntityFactory<I, E> entityFactory;
+    private final EntityStorageConverter<I, E, S> storageConverter;
 
     /**
      * {@inheritDoc}
+     *
+     * @param boundedContext
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
-    protected CommandRepository(BoundedContext boundedContext) {
+    protected DefaultRecordBasedRepository(BoundedContext boundedContext) {
         super(boundedContext);
+        this.entityFactory = new DefaultEntityFactory<>(this);
+        this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
+    }
+
+    @Override
+    protected EntityFactory<I, E> entityFactory() {
+        return this.entityFactory;
+    }
+
+    @Override
+    protected EntityStorageConverter<I, E, S> entityConverter() {
+        return this.storageConverter;
     }
 }
