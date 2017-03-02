@@ -23,7 +23,11 @@ package org.spine3.base;
 import com.google.common.base.Converter;
 
 /**
- * Converts an object of the I class to the {@code String} and reverse.
+ * Serves as converter from {@code I} to {@code String} with an associated
+ * reverse function from {@code String} to {@code I}.
+ *
+ * <p>It is used for converting back and forth between the different
+ * representations of the same information.
  *
  * @author Alexander Yevsyukov
  * @see #convert(Object)
