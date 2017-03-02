@@ -25,14 +25,17 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
+import java.text.ParseException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -263,6 +266,23 @@ public class StringifiersShould {
         assertEquals(expected, actual);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
+        final String time = Timestamps2.getCurrentTime()
+                                       .toString();
+        new Stringifiers.TimestampIdStringifer().reverse()
+                                                .convert(time);
+    }
+
+    @Test
+    public void convert_string_to_timestamp() throws ParseException {
+        final String date = "1972-01-01T10:00:20.021-05:00";
+        final Timestamp expected = Timestamps.parse(date);
+        final Timestamp actual = new Stringifiers.TimestampIdStringifer().reverse()
+                                                                         .convert(date);
+        assertEquals(expected, actual);
+    }
+
     @Test
     public void convert_event_id_to_string() {
         final EventId id = Events.generateId();
@@ -272,10 +292,13 @@ public class StringifiersShould {
     }
 
     @Test
-    public void convert_string_to_event_id(){
+    public void convert_string_to_event_id() {
         final String id = newUuid();
-        final EventId expected = EventId.newBuilder().setUuid(id).build();
-        final EventId actual = new Stringifiers.EventIdStringifier().reverse().convert(id);
+        final EventId expected = EventId.newBuilder()
+                                        .setUuid(id)
+                                        .build();
+        final EventId actual = new Stringifiers.EventIdStringifier().reverse()
+                                                                    .convert(id);
 
         assertEquals(expected, actual);
     }
