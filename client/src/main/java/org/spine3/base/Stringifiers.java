@@ -26,6 +26,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
@@ -168,7 +169,7 @@ public class Stringifiers {
                 return Timestamps.parse(s);
             } catch (ParseException e) {
                 final ConversionError conversionError = new ConversionError(e.getMessage());
-                throw new IllegalArgumentException(conversionError);
+                throw new IllegalConversionArgumentException(conversionError);
             }
         }
     }
