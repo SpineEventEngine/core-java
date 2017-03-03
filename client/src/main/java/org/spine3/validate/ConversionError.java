@@ -18,21 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
-
-import com.google.common.base.Converter;
+package org.spine3.validate;
 
 /**
- * Serves as converter from {@code I} to {@code String} with an associated
- * reverse function from {@code String} to {@code I}.
+ * Signals that an error has been reached unexpectedly while converting from one type to another.
  *
- * <p>It is used for converting back and forth between the different
- * representations of the same information.
- *
- * @author Alexander Yevsyukov
  * @author Illia Shepilov
- * @see #convert(Object)
- * @see #reverse()
  */
-public abstract class Stringifier<I> extends Converter<I, String> {
+@SuppressWarnings("ExceptionClassNameDoesntEndWithException")
+// It is OK, because it is not {@code Exception} in usual meaning.
+// It is occurred when input value cannot be converted to desirable type
+// and repeated input is required.
+public class ConversionError extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public ConversionError(String message) {
+        super(message);
+    }
 }

@@ -18,21 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
-
-import com.google.common.base.Converter;
+package org.spine3.validate;
 
 /**
- * Serves as converter from {@code I} to {@code String} with an associated
- * reverse function from {@code String} to {@code I}.
+ * Thrown to indicate that a method has been passed an illegal or
+ * inappropriate argument during the conversion from one type to another.
  *
- * <p>It is used for converting back and forth between the different
- * representations of the same information.
- *
- * @author Alexander Yevsyukov
  * @author Illia Shepilov
- * @see #convert(Object)
- * @see #reverse()
+ * @see ConversionError
  */
-public abstract class Stringifier<I> extends Converter<I, String> {
+public class IllegalConversionArgumentException extends IllegalArgumentException {
+
+    private static final long serialVersionUID = 1L;
+
+    private final ConversionError conversionError;
+
+    public IllegalConversionArgumentException(ConversionError conversionError) {
+        super();
+        this.conversionError = conversionError;
+    }
+
+    public ConversionError getConversionError() {
+        return conversionError;
+    }
 }
