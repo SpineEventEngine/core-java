@@ -41,6 +41,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Utility class for working with {@code Stringifier}s.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  */
 public class Stringifiers {
 
@@ -174,7 +175,7 @@ public class Stringifiers {
         }
     }
 
-    static class EventIdStringifier extends Stringifier<EventId> {
+    protected static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String doForward(EventId eventId) {
             final String result = eventId.getUuid();
@@ -190,7 +191,7 @@ public class Stringifiers {
         }
     }
 
-    static class CommandIdStringifier extends Stringifier<CommandId> {
+    protected static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String doForward(CommandId commandId) {
             final String result = commandId.getUuid();
