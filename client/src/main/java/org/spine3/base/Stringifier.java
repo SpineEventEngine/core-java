@@ -30,6 +30,7 @@ import com.google.common.base.Converter;
  * representations of the same information.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  * @see #convert(Object)
  * @see #reverse()
  */
