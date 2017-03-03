@@ -17,12 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.error;
 
 import com.google.protobuf.Message;
 
 /**
- * Indicates that more than one handling method for the same message class are present in the declaring class.
+ * Indicates that more than one handling method for the same message class are present
+ * in the declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
