@@ -68,7 +68,9 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
                                                             eventMessage);
             method.invoke(target, eventMessage, context);
         } catch (InvocationTargetException e) {
-            throw wrappedCause(e);
+            log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
+                        eventMessage, context, e.getCause());
+            //TODO:3/3/17:alex.tymchenko: why just catch?
         }
     }
 
@@ -123,7 +125,6 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
     static MethodPredicate predicate() {
         return PREDICATE;
     }
-
 
     /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
