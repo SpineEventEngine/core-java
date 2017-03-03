@@ -299,7 +299,6 @@ public class StringifiersShould {
                                         .build();
         final EventId actual = new Stringifiers.EventIdStringifier().reverse()
                                                                     .convert(id);
-
         assertEquals(expected, actual);
     }
 
