@@ -22,7 +22,7 @@ package org.spine3.validate;
 
 /**
  * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during conversion from one type to another.
+ * inappropriate argument during the conversion from one type to another.
  *
  * @author Illia Shepilov
  * @see ConversionError
