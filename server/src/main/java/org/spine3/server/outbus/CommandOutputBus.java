@@ -20,10 +20,13 @@
 package org.spine3.server.outbus;
 
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.MessageClass;
 import org.spine3.base.MessageEnvelope;
+import org.spine3.base.Response;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.bus.MessageDispatcher;
+import org.spine3.server.delivery.Delivery;
 
 /**
  * A base bus responsible for delivering the {@link org.spine3.base.Command command} output.
@@ -46,4 +49,26 @@ public abstract class CommandOutputBus< M extends Message,
                                         C extends MessageClass,
                                         D extends MessageDispatcher<C,E>> extends Bus<M, E, C, D> {
 
+    /**
+     * The strategy to deliver the messages to the dispatchers.
+     */
+    private final Delivery<E, D> delivery;
+
+    protected CommandOutputBus(Delivery<E, D> delivery) {
+        this.delivery = delivery;
+    }
+
+    protected abstract void store(M message);
+
+    protected abstract boolean validateMessage(Message message,
+                                               StreamObserver<Response> responseObserver);
+
+    /**
+     * Obtain the {@linkplain Delivery delivery strategy} configured for this bus.
+     *
+     * @return the delivery strategy
+     */
+    protected Delivery<E, D> delivery() {
+        return this.delivery;
+    }
 }

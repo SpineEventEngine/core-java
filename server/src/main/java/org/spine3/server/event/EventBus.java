@@ -35,6 +35,7 @@ import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.DispatcherRegistry;
 import org.spine3.server.bus.MessageDispatcher;
+import org.spine3.server.delivery.Delivery;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
@@ -106,9 +107,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /** The strategy to deliver events to the dispatchers. */
-    private final DispatcherEventDelivery dispatcherEventDelivery;
-
     /** The validator for events posted to the bus. */
     private final MessageValidator eventValidator;
 
@@ -120,10 +118,10 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * Creates new instance by the passed builder.
      */
     private EventBus(Builder builder) {
+        super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
-        this.dispatcherEventDelivery = builder.dispatcherEventDelivery;
 
         injectDispatcherProvider();
     }
@@ -136,7 +134,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * {@code dispatcherRegistry} keeping it private to the {@code EventBus}.
      */
     private void injectDispatcherProvider() {
-        dispatcherEventDelivery.setConsumerProvider(
+        delivery().setConsumerProvider(
                 new Function<EventClass, Set<EventDispatcher>>() {
                     @Nullable
                     @Override
@@ -163,12 +161,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     @Nullable
     EventEnricher getEnricher() {
         return enricher;
-    }
-
-    @VisibleForTesting
-    @Nullable
-    DispatcherEventDelivery getDispatcherEventDelivery() {
-        return dispatcherEventDelivery;
     }
 
     @VisibleForTesting
@@ -235,7 +227,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     public void post(Event event, StreamObserver<Response> responseObserver) {
         checkNotNull(responseObserver);
 
-        final boolean validationPassed = doValidate(event, responseObserver);
+        final boolean validationPassed = validateMessage(event, responseObserver);
 
         if (validationPassed) {
             responseObserver.onNext(Responses.ok());
@@ -268,11 +260,12 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     private int callDispatchers(EventEnvelope eventEnvelope) {
         final EventClass eventClass = eventEnvelope.getEventClass();
         final Collection<EventDispatcher> dispatchers = registry().getDispatchers(eventClass);
-        dispatcherEventDelivery.deliver(eventEnvelope);
+        delivery().deliver(eventEnvelope);
         return dispatchers.size();
     }
 
-    private void store(Event event) {
+    @Override
+    protected void store(Event event) {
         eventStore.append(event);
     }
 
@@ -291,7 +284,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      *         {@code false} otherwise
      */
     public boolean validate(Message event, StreamObserver<Response> responseObserver) {
-        if (!doValidate(event, responseObserver)) {
+        if (!validateMessage(event, responseObserver)) {
             return false;
         }
         responseObserver.onNext(Responses.ok());
@@ -302,7 +295,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /**
      * Validates the event message and notifies the observer of those (if any).
      */
-    private boolean doValidate(Message event, StreamObserver<Response> responseObserver) {
+    @Override
+    protected boolean validateMessage(Message event, StreamObserver<Response> responseObserver) {
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
@@ -364,6 +358,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     @Override
     protected EventDispatcherRegistry registry() {
         return (EventDispatcherRegistry) super.registry();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
+     */
+    @Override
+    protected DispatcherEventDelivery delivery() {
+        return (DispatcherEventDelivery) super.delivery();
     }
 
     private static StreamObserver<Response> emptyObserver() {

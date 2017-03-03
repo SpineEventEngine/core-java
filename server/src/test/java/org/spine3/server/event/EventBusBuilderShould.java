@@ -128,7 +128,7 @@ public class EventBusBuilderShould {
         final DispatcherEventDelivery actualValue = EventBus.newBuilder()
                                                             .setStorageFactory(storageFactory)
                                                             .build()
-                                                            .getDispatcherEventDelivery();
+                                                            .delivery();
         assertEquals(DispatcherEventDelivery.directDelivery(), actualValue);
     }
 
