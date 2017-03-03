@@ -21,8 +21,8 @@
 package org.spine3.validate;
 
 /**
- * Thrown to indicate that a method has been passed
- * an illegal or inappropriate argument during conversion.
+ * Thrown to indicate that a method has been passed an illegal or
+ * inappropriate argument during conversion from one type to another.
  *
  * @author Illia Shepilov
  * @see ConversionError
@@ -34,6 +34,7 @@ public class IllegalConversionArgumentException extends IllegalArgumentException
     private final ConversionError conversionError;
 
     public IllegalConversionArgumentException(ConversionError conversionError) {
+        super();
         this.conversionError = conversionError;
     }
 
