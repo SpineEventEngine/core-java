@@ -20,7 +20,6 @@
 package org.spine3.server.event;
 
 import org.spine3.SPI;
-import org.spine3.base.Event;
 import org.spine3.base.EventEnvelope;
 
 import java.util.concurrent.Executor;
@@ -47,7 +46,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
 
     /**
      * Creates an instance of event executor with a
-     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * used for event dispatching.
      *
      * @see EventDelivery#EventDelivery()
@@ -57,11 +56,12 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     }
 
     @Override
-    protected Runnable getDeliveryAction(final EventDispatcher consumer, final Event event) {
+    protected Runnable getDeliveryAction(final EventDispatcher consumer,
+                                         final EventEnvelope envelope) {
         return new Runnable() {
             @Override
             public void run() {
-                consumer.dispatch(EventEnvelope.of(event));
+                consumer.dispatch(envelope);
             }
         };
     }
@@ -69,7 +69,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     /**
      * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT
      * postpone any event dispatching and uses
-     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
      * @return the pre-configured default executor.
@@ -84,14 +84,16 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
         /**
          * A pre-defined instance of the {@code DispatcherEventDelivery},
          * which does not postpone any event dispatching and uses
-         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
          * for operation.
          */
-        private static final DispatcherEventDelivery DIRECT_DELIVERY = new DispatcherEventDelivery() {
-            @Override
-            public boolean shouldPostponeDelivery(Event event, EventDispatcher dispatcher) {
-                return false;
-            }
-        };
+        private static final DispatcherEventDelivery DIRECT_DELIVERY =
+                new DispatcherEventDelivery() {
+                    @Override
+                    public boolean shouldPostponeDelivery(EventEnvelope envelope,
+                                                          EventDispatcher dispatcher) {
+                        return false;
+                    }
+                };
     }
 }

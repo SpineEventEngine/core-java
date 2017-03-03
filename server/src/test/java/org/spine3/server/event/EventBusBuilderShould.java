@@ -22,7 +22,7 @@ package org.spine3.server.event;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Event;
+import org.spine3.base.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -82,26 +82,6 @@ public class EventBusBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_SubscriberEventDelivery() {
-        EventBus.newBuilder()
-                .setSubscriberEventDelivery(Tests.<SubscriberEventDelivery>nullRef());
-    }
-
-    @Test
-    public void return_set_SubscriberEventDelivery() {
-        final SubscriberEventDelivery delivery = new SubscriberEventDelivery() {
-            @Override
-            protected boolean shouldPostponeDelivery(Event event, EventSubscriber subscriber) {
-                return false;
-            }
-        };
-        assertEquals(delivery, EventBus.newBuilder()
-                                       .setSubscriberEventDelivery(delivery)
-                                       .getSubscriberEventDelivery()
-                                       .get());
-    }
-
-    @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventValidator() {
         EventBus.newBuilder()
                 .setEventValidator(Tests.<MessageValidator>nullRef());
@@ -133,7 +113,7 @@ public class EventBusBuilderShould {
         // Create a custom event executor to differ from the default one.
         final DispatcherEventDelivery delivery = new DispatcherEventDelivery() {
             @Override
-            public boolean shouldPostponeDelivery(Event event, EventDispatcher dispatcher) {
+            public boolean shouldPostponeDelivery(EventEnvelope event, EventDispatcher dispatcher) {
                 return true;
             }
         };
@@ -141,14 +121,6 @@ public class EventBusBuilderShould {
                                        .setDispatcherEventDelivery(delivery)
                                        .getDispatcherEventDelivery()
                                        .get());
-    }
-
-    @Test
-    public void set_direct_SubscriberEventDelivery_if_not_set_explicitly() {
-        assertEquals(SubscriberEventDelivery.directDelivery(), EventBus.newBuilder()
-                                                                       .setStorageFactory(storageFactory)
-                                                                       .build()
-                                                                       .getSubscriberEventDelivery());
     }
 
     @Test

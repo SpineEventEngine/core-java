@@ -34,6 +34,7 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.DispatcherRegistry;
+import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
@@ -61,7 +62,7 @@ import static com.google.common.base.Preconditions.checkState;
  *        and an {@link org.spine3.base.EventContext EventContext} as the second
  *        (optional) parameter.
  *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
- *    <li>{@linkplain #subscribe(EventSubscriber) Register} with an instance of
+ *    <li>{@linkplain #register(MessageDispatcher)} Register} with an instance of
  *    {@code EventBus} directly, or rely on message delivery from an {@link EventDispatcher}.
  *    An example of such a dispatcher is
  *    {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
@@ -81,8 +82,8 @@ import static com.google.common.base.Preconditions.checkState;
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
  *
  * <p>The delivery of the events to the subscribers and dispatchers is performed by
- * an {@link SubscriberEventDelivery} and {@link DispatcherEventDelivery} strategies
- * associated with the instance of the {@code EventBus}, respectively.
+ * the {@link DispatcherEventDelivery} strategy associated with
+ * this instance of the {@code EventBus}.
  *
  * <p>If there is no subscribers or dispatchers for the posted event, the fact is
  * logged as warning, with no further processing.
@@ -102,14 +103,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * spy on final or anonymous classes).
      */
 
-    /** The registry of event subscriber methods. */
-    private final SubscriberRegistry subscriberRegistry = new SubscriberRegistry();
-
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
-
-    /** The strategy to deliver events to the subscribers. */
-    private final SubscriberEventDelivery subscriberEventDelivery;
 
     /** The strategy to deliver events to the dispatchers. */
     private final DispatcherEventDelivery dispatcherEventDelivery;
@@ -128,50 +123,30 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         this.eventStore = builder.eventStore;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
-        this.subscriberEventDelivery = builder.subscriberEventDelivery;
         this.dispatcherEventDelivery = builder.dispatcherEventDelivery;
 
-        injectProviders();
+        injectDispatcherProvider();
     }
 
     /**
-     * Sets up the {@code DispatcherEventDelivery} and {@code SubscriberEventDelivery}
-     * with an ability to obtain {@link EventDispatcher}s and {@link EventSubscriber}s
-     * by a given {@link EventClass} instance.
+     * Sets up the {@code DispatcherEventDelivery} with an ability to obtain
+     * {@link EventDispatcher}s by a given {@link EventClass} instance.
      *
      * <p>Such an approach allows to query for an actual state of the
-     * {@code dispatcherRegistry} and {@code subscriberRegistry}, keeping both of
-     * the registries private to the {@code EventBus}.
+     * {@code dispatcherRegistry} keeping it private to the {@code EventBus}.
      */
-    private void injectProviders() {
-        injectDispatcherProvider();
-        injectSubscriberProvider();
-    }
-
     private void injectDispatcherProvider() {
-        dispatcherEventDelivery.setConsumerProvider(new Function<EventClass, Set<EventDispatcher>>() {
-            @Nullable
-            @Override
-            public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
-                checkNotNull(eventClass);
-                final Set<EventDispatcher> dispatchers =
-                        registry().getDispatchers(eventClass);
-                return dispatchers;
-            }
-        });
-    }
-
-    private void injectSubscriberProvider() {
-        subscriberEventDelivery.setConsumerProvider(new Function<EventClass, Set<EventSubscriber>>() {
-            @Nullable
-            @Override
-            public Set<EventSubscriber> apply(@Nullable EventClass eventClass) {
-                checkNotNull(eventClass);
-                final Set<EventSubscriber> subscribers =
-                        subscriberRegistry.getSubscribers(eventClass);
-                return subscribers;
-            }
-        });
+        dispatcherEventDelivery.setConsumerProvider(
+                new Function<EventClass, Set<EventDispatcher>>() {
+                    @Nullable
+                    @Override
+                    public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
+                        checkNotNull(eventClass);
+                        final Set<EventDispatcher> dispatchers =
+                                registry().getDispatchers(eventClass);
+                        return dispatchers;
+                    }
+                });
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -197,51 +172,13 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @VisibleForTesting
-    @Nullable
-    SubscriberEventDelivery getSubscriberEventDelivery() {
-        return subscriberEventDelivery;
-    }
-
-    /**
-     * Subscribes the event subscriber to receive events from the bus.
-     *
-     * <p>The event subscriber must expose at least one event subscriber method. If it is not the
-     * case, {@code IllegalArgumentException} will be thrown.
-     *
-     * @param object the event subscriber object
-     * @throws IllegalArgumentException if the object does not have event subscriber methods
-     */
-    public void subscribe(EventSubscriber object) {
-        checkNotNull(object);
-        subscriberRegistry.subscribe(object);
-    }
-
-    @VisibleForTesting
-    boolean hasSubscribers(EventClass eventClass) {
-        final boolean result = subscriberRegistry.hasSubscribers(eventClass);
-        return result;
-    }
-
-    @VisibleForTesting
-    Set<EventSubscriber> getSubscribers(EventClass eventClass) {
-        final Set<EventSubscriber> result = subscriberRegistry.getSubscribers(eventClass);
-        return result;
-    }
-
-    @VisibleForTesting
     Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         return registry().getDispatchers(eventClass);
     }
 
-    /**
-     * Unregisters all subscriber methods on a registered {@code object}.
-     *
-     * @param object the object whose methods should be unregistered
-     * @throws IllegalArgumentException if the object was not previously registered
-     */
-    public void unsubscribe(EventSubscriber object) {
-        checkNotNull(object);
-        subscriberRegistry.unsubscribe(object);
+    @VisibleForTesting
+    boolean hasDispatchers(EventClass eventClass) {
+        return registry().hasDispatchersFor(eventClass);
     }
 
     @Override
@@ -304,10 +241,9 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
             responseObserver.onNext(Responses.ok());
             store(event);
             final Event enriched = enrich(event);
-            final int dispatchersCalled = callDispatchers(enriched);
-            final int subscribersInvoked = invokeSubscribers(enriched);
+            final int dispatchersCalled = callDispatchers(EventEnvelope.of(enriched));
 
-            if (dispatchersCalled == 0 && subscribersInvoked == 0) {
+            if (dispatchersCalled == 0) {
                 handleDeadMessage(EventEnvelope.of(event), responseObserver);
             }
             responseObserver.onCompleted();
@@ -324,30 +260,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     /**
-     * Call the dispatchers for the {@code event}.
+     * Call the dispatchers for the {@code eventEnvelope}.
      *
-     * @param event the event to pass to the dispatchers.
+     * @param eventEnvelope the event envelope to pass to the dispatchers.
      * @return the number of the dispatchers called, or {@code 0} if there weren't any.
      */
-    private int callDispatchers(Event event) {
-        final EventClass eventClass = EventClass.of(event);
+    private int callDispatchers(EventEnvelope eventEnvelope) {
+        final EventClass eventClass = eventEnvelope.getEventClass();
         final Collection<EventDispatcher> dispatchers = registry().getDispatchers(eventClass);
-        dispatcherEventDelivery.deliver(event);
+        dispatcherEventDelivery.deliver(eventEnvelope);
         return dispatchers.size();
-    }
-
-    /**
-     * Invoke the subscribers for the {@code event}.
-     *
-     * @param event the event to pass to the subscribers.
-     * @return the number of the subscribers invoked, or {@code 0}
-     *         if no subscribers were invoked.
-     */
-    private int invokeSubscribers(Event event) {
-        final EventClass eventClass = EventClass.of(event);
-        final Set<EventSubscriber> subscribers = subscriberRegistry.getSubscribers(eventClass);
-        subscriberEventDelivery.deliver(event);
-        return subscribers.size();
     }
 
     private void store(Event event) {
@@ -424,16 +346,13 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     private boolean isUnsupportedEvent(EventClass eventClass) {
-        final boolean noDispatchers = !registry().hasDispatchersFor(eventClass);
-        final boolean noSubscribers = !hasSubscribers(eventClass);
-        final boolean isUnsupported = noDispatchers && noSubscribers;
+        final boolean isUnsupported = !registry().hasDispatchersFor(eventClass);
         return isUnsupported;
     }
 
     @Override
     public void close() throws Exception {
         registry().unregisterAll();
-        subscriberRegistry.unsubscribeAll();
         eventStore.close();
     }
 
@@ -513,14 +432,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
          */
         @Nullable
         private Executor eventStoreStreamExecutor;
-
-        /**
-         * Optional {@code SubscriberEventDelivery} for executing subscriber methods.
-         *
-         * <p>If not set, a default value will be set by the builder.
-         */
-        @Nullable
-        private SubscriberEventDelivery subscriberEventDelivery;
 
         /**
          * Optional {@code DispatcherEventDelivery} for calling the dispatchers.
@@ -618,22 +529,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         }
 
         /**
-         * Sets a {@code SubscriberEventDelivery} to be used for the event delivery
-         * to the subscribers in the {@code EventBus} we build.
-         *
-         * <p>If the {@code SubscriberEventDelivery} is not set,
-         * {@link SubscriberEventDelivery#directDelivery()} will be used.
-         */
-        public Builder setSubscriberEventDelivery(SubscriberEventDelivery delivery) {
-            this.subscriberEventDelivery = checkNotNull(delivery);
-            return this;
-        }
-
-        public Optional<SubscriberEventDelivery> getSubscriberEventDelivery() {
-            return Optional.fromNullable(subscriberEventDelivery);
-        }
-
-        /**
          * Sets a {@code DispatcherEventDelivery} to be used for the event delivery
          * to the dispatchers in the {@code EventBus} we build.
          *
@@ -691,10 +586,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
                                        .setStorage(storageFactory.createEventStorage())
                                        .setLogger(EventStore.log())
                                        .build();
-            }
-
-            if (subscriberEventDelivery == null) {
-                subscriberEventDelivery = SubscriberEventDelivery.directDelivery();
             }
 
             if (dispatcherEventDelivery == null) {

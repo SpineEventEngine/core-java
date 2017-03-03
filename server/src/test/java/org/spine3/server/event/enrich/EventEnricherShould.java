@@ -70,7 +70,7 @@ public class EventEnricherShould {
         boundedContext = newBoundedContext(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();
-        eventBus.subscribe(subscriber);
+        eventBus.register(subscriber);
     }
 
     @After

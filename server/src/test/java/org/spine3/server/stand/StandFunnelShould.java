@@ -35,6 +35,7 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -125,7 +126,8 @@ public class StandFunnelShould {
         final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
             @Override
-            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
+                                                     Stand consumer) {
                 return false;
             }
         });
@@ -136,7 +138,7 @@ public class StandFunnelShould {
         final StandFunnel standFunnel = builder.build();
         Assert.assertNotNull(standFunnel);
 
-        final Object id = new Object();
+        final Object id = Identifiers.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
 
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
@@ -146,7 +148,8 @@ public class StandFunnelShould {
 
         standFunnel.post(entity);
 
-        verify(delivery).deliverNow(eq(entity), eq(Stand.class));
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity);
+        verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
     }
 
     // **** Negative scenarios (unit) ****
@@ -216,7 +219,7 @@ public class StandFunnelShould {
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(delivery, times(dispatchActions.length)).deliver(any(AbstractVersionableEntity.class));
+        verify(delivery, times(dispatchActions.length)).deliver(any(EntityStateEnvelope.class));
 
         if (isConcurrent) {
             try {
@@ -336,7 +339,7 @@ public class StandFunnelShould {
         }
 
         @Override
-        protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+        protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable, Stand consumer) {
             return false;
         }
     }

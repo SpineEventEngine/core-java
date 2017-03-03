@@ -89,7 +89,7 @@ public class BoundedContextShould {
     @After
     public void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus().unsubscribe(subscriber);
+            boundedContext.getEventBus().unregister(subscriber);
         }
         boundedContext.close();
     }
@@ -99,7 +99,7 @@ public class BoundedContextShould {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
-        boundedContext.getEventBus().subscribe(subscriber);
+        boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;
     }
 

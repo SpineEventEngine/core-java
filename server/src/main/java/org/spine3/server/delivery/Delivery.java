@@ -23,6 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.Internal;
+import org.spine3.base.MessageEnvelope;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -42,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class Delivery<D, C> {
+public abstract class Delivery<D extends MessageEnvelope, C> {
 
     private final Executor delegate;
 
@@ -82,8 +83,8 @@ public abstract class Delivery<D, C> {
      *
      * <p>The result is defined as {@link Runnable}, as this action will be executed by
      * a delegate {@code Executor}, according to the strategy implementation regulated by
-     * {@link #shouldPostponeDelivery(Object, Object) shouldPostponeDelivery()} and
-     * {@link #deliverNow(Object, Class) deliverNow()} methods.
+     * {@link #shouldPostponeDelivery(MessageEnvelope, Object) shouldPostponeDelivery()} and
+     * {@link #deliverNow(MessageEnvelope, Class) deliverNow()} methods.
      *
      * @param consumer    the consumer to deliver the item to
      * @param deliverable the item to be delivered
@@ -104,7 +105,7 @@ public abstract class Delivery<D, C> {
      * configured for this instance of {@code Delivery}.
      *
      * <p>The delivery of the item to each of the consumers may be postponed according to
-     * {@link #shouldPostponeDelivery(Object, Object)} invocation result.
+     * {@link #shouldPostponeDelivery(MessageEnvelope, Object)} invocation result.
      *
      * @param deliverable the item to deliver
      */
