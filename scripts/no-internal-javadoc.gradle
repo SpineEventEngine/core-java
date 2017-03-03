@@ -45,8 +45,13 @@ task noInternalJavadoc(type: Javadoc) {
     classpath = javadoc.getClasspath()
 
     options {
+        // Doclet fully qualified name.
         doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
+
+        // Path to the JAR containing the doclet.
         docletpath = configurations.excludeInternalDoclet.files.asType(List)
+
+        // Encoding of the source files.
         encoding = 'UTF8'
     }
 }
