@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
 
 /**
- * Implementation of {@link RecordBasedRepository} that manges entities
+ * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
  *
  * @param <I> the type of IDs of entities
