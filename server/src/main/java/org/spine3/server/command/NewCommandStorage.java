@@ -22,21 +22,16 @@ package org.spine3.server.command;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.base.Command;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.base.FailureThrowable;
 import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.error.CommandException;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
-import org.spine3.server.storage.TenantDataOperation;
 
 import java.util.Iterator;
 
@@ -50,13 +45,13 @@ import static org.spine3.base.CommandStatus.RECEIVED;
  * @author Alexander Yevsyukov
  */
 @SPI
-public class NewCommandStore
+public class NewCommandStorage
         extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
 
     /**
      * {@inheritDoc}
      */
-    protected NewCommandStore(BoundedContext boundedContext) {
+    protected NewCommandStorage(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -68,7 +63,7 @@ public class NewCommandStore
      *
      * @param command a complete command to store
      */
-    public void store(Command command) {
+    protected void store(Command command) {
         checkNotClosed();
         store(command, RECEIVED);
     }
@@ -79,7 +74,7 @@ public class NewCommandStore
      * @param command a command to store
      * @param status a command status
      */
-    public void store(Command command, CommandStatus status) {
+    protected void store(Command command, CommandStatus status) {
         checkNotClosed();
         final CommandEntity commandEntity = CommandEntity.createForStatus(command, status);
         store(commandEntity);
@@ -92,7 +87,7 @@ public class NewCommandStore
      * @param command a command to store
      * @param error   an error occurred
      */
-    public void store(Command command, Error error) {
+    protected void store(Command command, Error error) {
         checkNotClosed();
         final CommandEntity commandEntity = CommandEntity.createForError(command, error);
         store(commandEntity);
@@ -104,24 +99,10 @@ public class NewCommandStore
      * @param command the command to store
      * @param exception an exception occurred to convert to {@link org.spine3.base.Error Error}
      */
-    public void store(Command command, Exception exception) {
+    protected void store(Command command, Exception exception) {
         checkNotClosed();
         store(command, Errors.fromException(exception));
     }
-
-    /**
-     * Stores the command with the error status.
-     *
-     * @param command the command to store
-     * @param exception the exception occurred, which encloses {@link org.spine3.base.Error Error}
-     *                  to store
-     * @throws IllegalStateException if the storage is closed
-     */
-    public void storeWithError(Command command, CommandException exception) {
-        store(command, exception.getError());
-    }
-
-    //TODO:2017-02-14:alexander.yevsyukov: Have reads as tenant-data ops.
 
     /**
      * Returns an iterator over all commands with the given status.
@@ -191,68 +172,5 @@ public class NewCommandStore
         }
 
         return loaded.get();
-    }
-
-    /**
-     * The service for updating a status of a command.
-     */
-    @SuppressWarnings("unused")
-    static class StatusService {
-
-        private final NewCommandStore commandStore;
-
-        private final Log log;
-        StatusService(NewCommandStore commandStore, Log log) {
-            this.commandStore = commandStore;
-            this.log = log;
-        }
-
-        void setOk(final CommandEnvelope commandEnvelope) {
-            final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
-                @Override
-                public void run() {
-                    commandStore.setCommandStatusOk(commandEnvelope.getCommandId());
-                }
-            };
-            op.execute();
-        }
-
-        void setToError(CommandEnvelope commandEnvelope, final Error error) {
-            final Command command = commandEnvelope.getCommand();
-            final TenantDataOperation op = new TenantDataOperation(command) {
-                @Override
-                public void run() {
-                    commandStore.updateStatus(commandId(), error);
-                }
-            };
-            op.execute();
-        }
-
-        void updateCommandStatus(final CommandEnvelope commandEnvelope, final Throwable cause) {
-            final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
-                @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
-                @Override
-                public void run() {
-                    final Message commandMessage = commandEnvelope.getMessage();
-                    final CommandId commandId = commandEnvelope.getCommandId();
-
-                    if (cause instanceof FailureThrowable) {
-                        final FailureThrowable failure = (FailureThrowable) cause;
-                        log.failureHandling(failure, commandMessage, commandId);
-                        commandStore.updateStatus(commandId, failure.toFailure());
-                    } else if (cause instanceof Exception) {
-                        final Exception exception = (Exception) cause;
-                        log.errorHandling(exception, commandMessage, commandId);
-                        commandStore.updateStatus(commandId, exception);
-                    } else {
-                        log.errorHandlingUnknown(cause, commandMessage, commandId);
-                        final Error error = Errors.fromThrowable(cause);
-                        commandStore.updateStatus(commandId, error);
-                    }
-                }
-            };
-            op.execute();
-        }
-
     }
 }
