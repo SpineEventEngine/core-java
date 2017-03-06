@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
@@ -30,11 +31,15 @@ import org.spine3.validate.IllegalConversionArgumentException;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
@@ -203,6 +208,47 @@ public class Stringifiers {
             final CommandId result = CommandId.newBuilder()
                                               .setUuid(s)
                                               .build();
+            return result;
+        }
+    }
+
+    protected static class ListStringifier<T> extends Stringifier<List<T>> {
+
+        private final Class<T> listGenericClass;
+
+        public ListStringifier(Class<T> listGeneric) {
+            this.listGenericClass = listGeneric;
+        }
+
+        @Override
+        protected String doForward(List<T> objects) {
+            final String result = objects.toString();
+            return result;
+        }
+
+        @Override
+        protected List<T> doBackward(String s) {
+            final String[] elements = s.split(",");
+            if (listGenericClass.equals(String.class)) {
+                @SuppressWarnings("unchecked") // It is OK, because it is checked above.
+                final List<T> result = (List<T>) Arrays.asList(elements);
+                return result;
+            }
+            final Optional<Stringifier<T>> optional = StringifierRegistry.getInstance()
+                                                                         .get(listGenericClass);
+            if (!optional.isPresent()) {
+                final String exMessage =
+                        format("Cannot convert from: String.class to %s", listGenericClass);
+                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
+            }
+
+            final Stringifier<T> stringifier = optional.get();
+            final List<T> result = newArrayList();
+            for (String element : elements) {
+                final T convertedValue = stringifier.reverse()
+                                                    .convert(element);
+                result.add(convertedValue);
+            }
             return result;
         }
     }
