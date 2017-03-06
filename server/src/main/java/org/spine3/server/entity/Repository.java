@@ -185,6 +185,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * {@inheritDoc}
      *
      * <p>The returned iterator does not support removal.
+     *
+     * <p>Iteration through entities is performed by {@linkplain #load(Object) loading}
+     * them one by one.
      */
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {

@@ -58,7 +58,8 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
+public abstract class EventStorageShould
+        extends AbstractStorageShould<EventId, Event, EventStorage> {
 
     /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
