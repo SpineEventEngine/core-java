@@ -43,7 +43,6 @@ import java.util.concurrent.Executor;
  * @param <C> the type of the consumer
  * @author Alex Tymchenko
  */
-@Internal
 public abstract class CommandOutputDelivery<E extends MessageEnvelope,
                                             T extends MessageClass, C> extends Delivery<E, C> {
 
