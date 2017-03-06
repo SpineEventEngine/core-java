@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -35,10 +36,9 @@ import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
 import org.spine3.change.ValueMismatch;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
-import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -49,7 +49,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.wrappedCause;
 
@@ -69,11 +69,12 @@ import static org.spine3.util.Exceptions.wrappedCause;
  * <p>The method may throw one or more throwables derived from
  * {@link org.spine3.base.FailureThrowable FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a {@linkplain org.spine3.base.FailureThrowable#getFailure() business failure}.
+ * because of a {@linkplain org.spine3.base.FailureThrowable#getFailureMessage() business failure}.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message> extends Entity<I, S> {
+public abstract class CommandHandlingEntity<I, S extends Message>
+        extends AbstractVersionableEntity<I, S> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
@@ -104,10 +105,10 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
     @CheckReturnValue
     protected EventContext createEventContext(Message event, CommandContext commandContext) {
         final EventId eventId = generateId();
-        final Timestamp whenModified = getCurrentTime();
+        final Timestamp timestamp = getCurrentTime();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
-                                                         .setTimestamp(whenModified)
+                                                         .setTimestamp(timestamp)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(getIdAsAny())
                                                          .setVersion(getVersion());
@@ -215,6 +216,12 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      */
     protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
+        final CommandHandlerMethod method = getCommandHandlerMethod(commandMessage);
+        final List<? extends Message> result = method.invoke(this, commandMessage, context);
+        return result;
+    }
+
+    private CommandHandlerMethod getCommandHandlerMethod(Message commandMessage) {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                                                           .get(getClass(),
@@ -223,8 +230,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final List<? extends Message> result = method.invoke(this, commandMessage, context);
-        return result;
+        return method;
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
@@ -268,7 +274,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedDefault(Message actual, Message newValue) {
-        return MessageMismatch.expectedDefault(actual, newValue, getVersion());
+        return MessageMismatch.expectedDefault(actual, newValue, versionNumber());
     }
 
     /**
@@ -279,7 +285,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedNotDefault(Message expected) {
-        return MessageMismatch.expectedNotDefault(expected, getVersion());
+        return MessageMismatch.expectedNotDefault(expected, versionNumber());
     }
 
     /**
@@ -291,7 +297,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedNotDefault(Message expected, Message newValue) {
-        return MessageMismatch.expectedNotDefault(expected, newValue, getVersion());
+        return MessageMismatch.expectedNotDefault(expected, newValue, versionNumber());
     }
 
     /**
@@ -303,7 +309,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue) {
-        return MessageMismatch.unexpectedValue(expected, actual, newValue, getVersion());
+        return MessageMismatch.unexpectedValue(expected, actual, newValue, versionNumber());
     }
 
     /**
@@ -315,7 +321,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch expectedEmpty(String actual, String newValue) {
-        return StringMismatch.expectedEmpty(actual, newValue, getVersion());
+        return StringMismatch.expectedEmpty(actual, newValue, versionNumber());
     }
 
     /**
@@ -326,7 +332,7 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new ValueMismatch instance
      */
     protected ValueMismatch expectedNotEmpty(String expected) {
-        return StringMismatch.expectedNotEmpty(expected, getVersion());
+        return StringMismatch.expectedNotEmpty(expected, versionNumber());
     }
 
     /**
@@ -339,6 +345,6 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Entity
      * @return new {@code ValueMismatch} instance
      */
     protected ValueMismatch unexpectedValue(String expected, String actual, String newValue) {
-        return StringMismatch.unexpectedValue(expected, actual, newValue, getVersion());
+        return StringMismatch.unexpectedValue(expected, actual, newValue, versionNumber());
     }
 }

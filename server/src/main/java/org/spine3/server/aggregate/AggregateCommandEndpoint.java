@@ -21,13 +21,11 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Stringifiers;
-import org.spine3.server.entity.status.EntityStatus;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.getMessage;
+import org.spine3.server.command.CommandEndpoint;
+import org.spine3.server.entity.Visibility;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -36,12 +34,17 @@ import static org.spine3.base.Commands.getMessage;
  * @param <A> the type of the aggregates managed by this repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> implements CommandEndpoint<A> {
 
     private final AggregateRepository<I, A> repository;
 
-    AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
         this.repository = repository;
+    }
+
+    static <I, A extends Aggregate<I, ?, ?>> AggregateCommandEndpoint<I, A> createFor(
+            AggregateRepository<I, A> repository) {
+        return new AggregateCommandEndpoint<>(repository);
     }
 
     /**
@@ -49,8 +52,9 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
      *
      * @return the aggregate to which the command was dispatched
      */
-    A dispatch(Command command) {
-        final Action<I, A> action = new Action<>(this, command);
+    @Override
+    public A receive(CommandEnvelope envelope) {
+        final Action<I, A> action = new Action<>(this, envelope);
         final A result = action.loadAndDispatch();
         return result;
     }
@@ -68,11 +72,11 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private final CommandContext context;
         private final I aggregateId;
 
-        private Action(AggregateCommandEndpoint<I, A> commandEndpoint, Command command) {
+        private Action(AggregateCommandEndpoint<I, A> commandEndpoint, CommandEnvelope envelope) {
             this.repository = commandEndpoint.repository;
 
-            this.commandMessage = getMessage(checkNotNull(command));
-            this.context = command.getContext();
+            this.commandMessage = envelope.getMessage();
+            this.context = envelope.getCommandContext();
             this.aggregateId = commandEndpoint.getAggregateId(commandMessage, context);
         }
 
@@ -84,10 +88,10 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
          *
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
-         * during the {@link AggregateRepository#load(Object)}
-         * and {@link Aggregate#dispatchCommand(Message, CommandContext)}.
+         * during the {@linkplain AggregateRepository#load(Object) loading}
+         * and {@linkplain Aggregate#dispatchCommand(Message, CommandContext) command dispatching}.
          *
-         * <p>In case the new events are detected, {@code Aggregate} loading and {@code Command}
+         * <p>In case the new events are detected, the loading and command
          * dispatching is repeated from scratch.
          */
         private A loadAndDispatch() {
@@ -114,14 +118,14 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final EntityStatus statusBefore = aggregate.getStatus();
+            final Visibility statusBefore = aggregate.getVisibility();
 
             aggregate.dispatchCommand(commandMessage, context);
 
             // Update status only if the command was handled successfully.
-            final EntityStatus statusAfter = aggregate.getStatus();
+            final Visibility statusAfter = aggregate.getVisibility();
             if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                storage().writeStatus(aggregateId, statusAfter);
+                storage().writeVisibility(aggregateId, statusAfter);
             }
 
             return aggregate;
@@ -134,15 +138,17 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
             return repository.aggregateStorage();
         }
 
-        private void logConcurrentModification(I aggregateId, Message commandMessage, int newEventCount) {
+        private void logConcurrentModification(I aggregateId,
+                                               Message commandMessage,
+                                               int newEventCount) {
             final String idStr = Stringifiers.idToString(aggregateId);
-            final Class<? extends Aggregate<I, ?, ?>> aggregateClass = repository.getAggregateClass();
+            final Class<?> aggregateClass = repository.getAggregateClass();
             AggregateRepository.log()
-                               .warn("Detected the concurrent modification of {} ID: {}. " +
-                                             "New events detected while dispatching the command {} " +
-                                             "The number of new events is {}. " +
-                                             "Restarting the command dispatching.",
-                                     aggregateClass, idStr, commandMessage, newEventCount);
+               .warn("Detected the concurrent modification of {} ID: {}. " +
+                             "New events detected while dispatching the command {} " +
+                             "The number of new events is {}. " +
+                             "Restarting the command dispatching.",
+                     aggregateClass, idStr, commandMessage, newEventCount);
         }
     }
 

@@ -26,9 +26,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -60,14 +60,14 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type) {
+    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type) {
         return readAllByType(type, FieldMask.getDefaultInstance());
     }
 
     @Override
-    public ImmutableCollection<EntityStorageRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
-        final Map<AggregateStateId, EntityStorageRecord> allRecords = readAll(fieldMask);
-        final Map<AggregateStateId, EntityStorageRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
+    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
+        final Map<AggregateStateId, EntityRecord> allRecords = readAll(fieldMask);
+        final Map<AggregateStateId, EntityRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
             @Override
             public boolean apply(@Nullable AggregateStateId stateId) {
                 checkNotNull(stateId);
@@ -77,18 +77,18 @@ class InMemoryStandStorage extends StandStorage {
             }
         });
 
-        final ImmutableList<EntityStorageRecord> result = ImmutableList.copyOf(resultMap.values());
+        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(resultMap.values());
         return result;
     }
 
     @Override
-    public boolean markArchived(AggregateStateId id) {
-        return recordStorage.markArchived(id);
+    public void markArchived(AggregateStateId id) {
+        recordStorage.markArchived(id);
     }
 
     @Override
-    public boolean markDeleted(AggregateStateId id) {
-        return recordStorage.markDeleted(id);
+    public void markDeleted(AggregateStateId id) {
+        recordStorage.markDeleted(id);
     }
 
     @Override
@@ -98,32 +98,32 @@ class InMemoryStandStorage extends StandStorage {
 
     @Nullable
     @Override
-    protected Optional<EntityStorageRecord> readRecord(AggregateStateId id) {
+    protected Optional<EntityRecord> readRecord(AggregateStateId id) {
         return recordStorage.read(id);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids) {
         return recordStorage.readMultiple(ids);
     }
 
     @Override
-    protected Iterable<EntityStorageRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords() {
+    protected Map<AggregateStateId, EntityRecord> readAllRecords() {
         return recordStorage.readAll();
     }
 
     @Override
-    protected Map<AggregateStateId, EntityStorageRecord> readAllRecords(FieldMask fieldMask) {
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage.readAll(fieldMask);
     }
 
     @Override
-    protected void writeRecord(AggregateStateId id, EntityStorageRecord record) {
+    protected void writeRecord(AggregateStateId id, EntityRecord record) {
         final TypeUrl recordType = TypeUrl.of(record.getState()
                                                     .getTypeUrl());
         final TypeUrl recordTypeFromId = id.getStateType();
@@ -135,8 +135,8 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected void writeRecords(Map<AggregateStateId, EntityStorageRecord> records) {
-        for (Map.Entry<AggregateStateId, EntityStorageRecord> record : records.entrySet()) {
+    protected void writeRecords(Map<AggregateStateId, EntityRecord> records) {
+        for (Map.Entry<AggregateStateId, EntityRecord> record : records.entrySet()) {
             writeRecord(record.getKey(), record.getValue());
         }
     }

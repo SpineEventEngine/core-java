@@ -20,16 +20,15 @@
 
 package org.spine3.server.command;
 
-/**
- * A command endpoint is responsible for delivering a command to
- * the place it is handled.
- *
- * @author Alexander Yevsyukov
- */
-interface CommandEndpoint {
+import org.spine3.base.CommandEnvelope;
+import org.spine3.server.bus.MessageEndpoint;
 
-    /**
-     * Receives a command packed into an envelope and passes it for the further processing.
-     */
-    void receive(CommandEnvelope commandEnvelope);
+/**
+ * An endpoint for command handling.
+ *
+ * @param <R> the type of the processing result
+ * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
+ */
+public interface CommandEndpoint<R> extends MessageEndpoint<CommandEnvelope, R> {
 }

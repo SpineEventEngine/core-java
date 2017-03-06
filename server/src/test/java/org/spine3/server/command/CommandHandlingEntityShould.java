@@ -41,7 +41,7 @@ public class CommandHandlingEntityShould {
 
     @Test
     public void set_version_when_creating_mismatches() {
-        final int version = entity.getVersion();
+        final int version = entity.getVersion().getNumber();
 
         assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());
         assertEquals(version, entity.expectedNotDefault(msg()).getVersion());

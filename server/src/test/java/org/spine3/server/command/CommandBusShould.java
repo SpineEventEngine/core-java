@@ -24,14 +24,15 @@ import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
@@ -127,18 +128,22 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     public void verify_tenant_id_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutTenant();
 
         commandBus.post(cmd, responseObserver);
 
-        checkCommandError(responseObserver.getThrowable(), TENANT_UNKNOWN, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(),
+                          TENANT_UNKNOWN,
+                          InvalidCommandException.class,
+                          cmd);
+
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 
     @Test
     public void return_InvalidCommandException_if_command_is_invalid() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
@@ -212,22 +217,6 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         assertTrue(responseObserver.isCompleted());
     }
 
-    @Test
-    public void unregister_command_handler() {
-        final CommandHandler handler = newCommandHandler();
-
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-
-        commandBus.post(createProject(), responseObserver);
-
-        assertTrue(responseObserver.isError());
-    }
-
-    CreateProjectHandler newCommandHandler() {
-        return new CreateProjectHandler(newUuid());
-    }
-
     /*
      * Test of illegal arguments for post()
      ***************************************/
@@ -297,7 +286,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     @Test
     public void store_invalid_command_with_error_status() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmdWithoutContext();
+        final Command cmd = commandWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
@@ -339,7 +328,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+        final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
@@ -349,7 +338,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
      * Test utility methods.
      ***********************/
 
-    private static Command createProjectCmdWithoutContext() {
+    private static Command commandWithoutContext() {
         final Command cmd = createProject();
         final Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
@@ -357,20 +346,31 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
+    private static Command commandWithoutTenant() {
+        final Command cmd = createProject();
+        final Command tenantless = cmd.toBuilder()
+                                      .setContext(cmd.getContext()
+                                                     .toBuilder()
+                                                     .clearTenantId())
+                                      .build();
+        return tenantless;
+    }
+
     /**
-     * The dispatcher that remembers that {@link #dispatch(Command)} was called.
+     * The dispatcher that remembers that
+     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 
         private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
+        public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
         }
 
         @Override
-        public void dispatch(Command request) {
+        public void dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
         }
 

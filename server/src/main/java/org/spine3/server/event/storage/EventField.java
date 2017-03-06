@@ -38,16 +38,16 @@ public enum EventField implements StorageField {
 
     /**
      * A field representing the string representation of
-     * the {@linkplain EventStorageRecord#getProducerId() producer ID} of an event.
+     * the {@linkplain EventRecord#getProducerId() producer ID} of an event.
      *
      * <p>Typically, it's an ID of the {@linkplain Aggregate} that produced the {@linkplain Event}.
      */
     producer_id,
 
     /**
-     * A field representing the {@linkplain EventStorageRecord#getEventId() event ID}.
+     * A field representing the {@linkplain EventRecord#getEventId() event ID}.
      *
-     * <p>An event ID is a protobuf-message type, though the {@link EventStorageRecord#getEventId()} returns its string
+     * <p>An event ID is a protobuf-message type, though the {@link EventRecord#getEventId()} returns its string
      * representation.
      *
      * <p>The string representation is what is stored in this field indeed.

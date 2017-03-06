@@ -26,8 +26,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
-import org.spine3.base.Identifiers;
-import org.spine3.server.aggregate.storage.AggregateStorageRecord;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -44,8 +42,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
+import static org.spine3.protobuf.Durations2.seconds;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -136,7 +134,9 @@ class Given {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        static org.spine3.base.Command createProject(UserId userId,
+                                                     ProjectId projectId,
+                                                     Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
@@ -152,11 +152,13 @@ class Given {
         }
 
         /**
-         * Creates a new {@link Command} with the given command message, userId and timestamp using default
+         * Creates a new {@link Command} with the given command message,
+         * userId and timestamp using default
          * {@link org.spine3.base.CommandId CommandId} instance.
          */
         static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final CommandContext context =
+                    createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.createCommand(command, context);
             return result;
         }
@@ -192,16 +194,15 @@ class Given {
         private StorageRecord() {
         }
 
-        static AggregateStorageRecord create(Timestamp timestamp) {
-            final AggregateStorageRecord.Builder builder
-                    = AggregateStorageRecord.newBuilder()
-                                            .setEventId(Identifiers.newUuid())
-                                            .setTimestamp(timestamp);
+        static AggregateEventRecord create(Timestamp timestamp) {
+            final AggregateEventRecord.Builder builder
+                    = AggregateEventRecord.newBuilder()
+                                          .setTimestamp(timestamp);
             return builder.build();
         }
 
-        static AggregateStorageRecord create(Timestamp timestamp, org.spine3.base.Event event) {
-            final AggregateStorageRecord.Builder builder = create(timestamp)
+        static AggregateEventRecord create(Timestamp timestamp, org.spine3.base.Event event) {
+            final AggregateEventRecord.Builder builder = create(timestamp)
                     .toBuilder()
                     .setEvent(event);
             return builder.build();
@@ -217,7 +218,7 @@ class Given {
          * Returns several records sorted by timestamp ascending.
          * First record's timestamp is the current time.
          */
-        static List<AggregateStorageRecord> sequenceFor(ProjectId id) {
+        static List<AggregateEventRecord> sequenceFor(ProjectId id) {
             return sequenceFor(id, getCurrentTime());
         }
 
@@ -226,17 +227,21 @@ class Given {
          *
          * @param timestamp1 the timestamp of first record.
          */
-        static List<AggregateStorageRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
+        static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp timestamp1) {
             final Duration delta = seconds(10);
             final Timestamp timestamp2 = add(timestamp1, delta);
             final Timestamp timestamp3 = add(timestamp2, delta);
 
-            final AggregateStorageRecord record1 = StorageRecord.create(timestamp1,
-                                                                        Event.projectCreated(id, createEventContext(timestamp1)));
-            final AggregateStorageRecord record2 = StorageRecord.create(timestamp2,
-                                                                        Event.taskAdded(id, createEventContext(timestamp2)));
-            final AggregateStorageRecord record3 = StorageRecord.create(timestamp3,
-                                                                        Event.projectStarted(id, createEventContext(timestamp3)));
+            final AggregateEventRecord record1 =
+                    StorageRecord.create(timestamp1,
+                                         Event.projectCreated(id, createEventContext(timestamp1)));
+            final AggregateEventRecord record2
+                    = StorageRecord.create(timestamp2,
+                                           Event.taskAdded(id, createEventContext(timestamp2)));
+            final AggregateEventRecord record3
+                    = StorageRecord.create(timestamp3,
+                                           Event.projectStarted(id,
+                                                                createEventContext(timestamp3)));
 
             return newArrayList(record1, record2, record3);
         }

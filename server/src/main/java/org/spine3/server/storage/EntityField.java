@@ -24,18 +24,16 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.base.Command;
-import org.spine3.base.Event;
 import org.spine3.protobuf.TypeUrl;
-import org.spine3.server.entity.Entity;
 
 /**
  * A container for the storage fields used in multiple {@link Storage storages}.
  *
  * <p>Basic usage is:
  * <ul>
- *     <li>Storing custom {@link Entity} state fields.
- *     <li>Storing custom {@link Event} and {@link Command} messages fields.
+ *     <li>Storing custom {@link org.spine3.server.entity.Entity Entity} state fields.
+ *     <li>Storing custom {@link org.spine3.base.Event Event} and
+ *                 {@link org.spine3.base.Command Command} messages fields.
  * </ul>
  *
  * @author Dmytro Dashenkov
@@ -52,8 +50,7 @@ public enum EntityField implements StorageField {
     timestamp,
 
     /**
-     * A field for storing the part of a timestamp representing the amount of nanoseconds which is less then
-     * {@link org.spine3.protobuf.Timestamps#NANOS_PER_SECOND  Timestamps.NANOS_PER_SECOND 10^9}.
+     * A field for storing the part of a timestamp representing the amount of nanoseconds.
      *
      * @see Timestamp#getNanos()
      */
@@ -68,16 +65,15 @@ public enum EntityField implements StorageField {
      * @see Message#toByteArray()
      * @see Any#getValue()
      */
-    value,
+    bytes,
 
     /**
      * A field representing a {@link TypeUrl} of a certain {@link Message} type.
      *
-     * <p>This field is commonly used in pair with {@link EntityField#value}
+     * <p>This field is commonly used in pair with {@link EntityField#bytes}
      * to store the fully qualified type name with the type prefix.
      *
      * @see TypeUrl
      */
     type_url
-
 }

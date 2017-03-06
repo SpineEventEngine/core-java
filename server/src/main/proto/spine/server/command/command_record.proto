@@ -1,0 +1,82 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.command;
+
+option (type_url_prefix) = "type.spine3.org";
+option (SPI_all) = true;
+option java_package = "org.spine3.server.command";
+option java_multiple_files = true;
+option java_outer_classname = "CommandRecordProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+import "spine/annotations.proto";
+import "spine/base/command.proto";
+import "spine/base/error.proto";
+import "spine/base/failure.proto";
+
+// This type defines the way commands are stored in command storage.
+//
+// Some of the fields are defined as string representation of corresponding message types
+// so that these fields are available for querying.
+//
+message CommandRecord {
+    option (SPI_type) = true;
+
+    // The ID of the command.
+    base.CommandId command_id = 1;
+
+    // A short name of Protobuf command type.
+    string command_type = 2;
+
+    // The command.
+    base.Command command = 3;
+
+    // The status of command processing.
+    //
+    // This field is empty upon arrival of a command.
+    // It is populated later during the command processing cycle.
+    //
+    ProcessingStatus status = 5;
+
+    // A moment of time when this storage record was created.
+    google.protobuf.Timestamp timestamp = 6;
+}
+
+// The status of command processing.
+message ProcessingStatus {
+
+    // The code of the status.
+    base.CommandStatus code = 1;
+
+    // The `cause` provides additional information on what went wrong
+    // if the value of `status` is `ERROR` or `FAILURE`.
+    oneof cause {
+        // The technical error occurred during command processing.
+        base.Error error = 2;
+
+        // A business failure occurred during command processing.
+        base.Failure failure = 3;
+    }
+}

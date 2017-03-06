@@ -140,9 +140,9 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_several_events_bound_by_fields() {
-        final Event permissionGranted = Given.Event.permissionGranted();
-        final Event permissionRevoked = Given.Event.permissionRevoked();
-        final Event sharingRequestApproved = Given.Event.sharingRequestApproved();
+        final Event permissionGranted = Given.AnEvent.permissionGranted();
+        final Event permissionRevoked = Given.AnEvent.permissionRevoked();
+        final Event sharingRequestApproved = Given.AnEvent.sharingRequestApproved();
 
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));
@@ -166,7 +166,7 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
-        assertTrue(enricher.canBeEnriched(Given.Event.projectStarted()));
+        assertTrue(enricher.canBeEnriched(Given.AnEvent.projectStarted()));
     }
 
     @Test

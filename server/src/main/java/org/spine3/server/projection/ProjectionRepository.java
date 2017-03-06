@@ -29,19 +29,19 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.EntityStorageRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -304,10 +304,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @VisibleForTesting
     void store(Collection<P> projections) {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityStorageRecord> records = new HashMap<>(projections.size());
+        final Map<I, EntityRecord> records = new HashMap<>(projections.size());
         for (P projection : projections) {
             final I id = projection.getId();
-            final EntityStorageRecord record = toEntityRecord(projection);
+            final EntityRecord record = toRecord(projection);
             records.put(id, record);
         }
         storage.write(records);

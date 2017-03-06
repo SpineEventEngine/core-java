@@ -32,12 +32,16 @@ import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.annotations.AnnotationsProto;
 import org.spine3.base.Command;
+import org.spine3.base.CommandEnvelope;
+import org.spine3.base.Event;
+import org.spine3.base.EventEnvelope;
+import org.spine3.base.MessageEnvelope;
 import org.spine3.type.StringTypeValue;
 
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -172,10 +176,26 @@ public final class TypeUrl extends StringTypeValue {
      * @return the type URL of the command message
      */
     public static TypeUrl ofCommand(Command command) {
-        final Any any = command.getMessage();
-        checkNotDefault(any);
-        final TypeUrl typeUrl = ofEnclosed(any);
-        return typeUrl;
+        return ofEnclosedMessage(CommandEnvelope.of(command));
+    }
+
+    /**
+     * Obtains the type URL of the event message.
+     *
+     * <p>The event must contain non-default message.
+     *
+     * @param event the event for which get the type URL
+     * @return the type URL of the event message.
+     */
+    public static TypeUrl ofEvent(Event event) {
+        return ofEnclosedMessage(EventEnvelope.of(event));
+    }
+
+    private static TypeUrl ofEnclosedMessage(MessageEnvelope envelope) {
+        checkNotNull(envelope);
+        final Message message = envelope.getMessage();
+        final TypeUrl result = of(message);
+        return result;
     }
 
     /** Obtains the type URL for the passed message class. */
@@ -195,10 +215,16 @@ public final class TypeUrl extends StringTypeValue {
         return result;
     }
 
+    /**
+     * Obtains the prefix of the type URL.
+     */
     public String getPrefix() {
         return prefix;
     }
 
+    /**
+     * Obtains the type name.
+     */
     public String getTypeName() {
         return typeName;
     }

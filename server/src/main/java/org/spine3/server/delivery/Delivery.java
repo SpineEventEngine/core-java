@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Operates with a pre-configured {@link Executor} to invoke the consumer methods.
  *
- * <p>Allows to postpone the delivery of the items on per-item-per-consumer basis.</p>
+ * <p>Allows to postpone the delivery of the items on per-item-per-consumer basis.
  *
  * @param <D> the type of deliverable package
  * @param <C> the type of consumer
@@ -54,14 +54,16 @@ public abstract class Delivery<D, C> {
     }
 
     /**
-     * Creates an instance of a delivery with a {@link MoreExecutors#directExecutor()} used for the operation.
+     * Creates an instance of a delivery with a
+     * {@link MoreExecutors#directExecutor() directExecutor()} used for the operation.
      */
     protected Delivery() {
         this(MoreExecutors.directExecutor());
     }
 
     /**
-     * Determines whether the item delivery should be postponed for the given {@code deliverable} and {@code consumer}.
+     * Determines whether the item delivery should be postponed for
+     * the given {@code deliverable} and {@code consumer}.
      *
      * <p>This method must be implemented in descendants.
      *
@@ -72,13 +74,16 @@ public abstract class Delivery<D, C> {
     protected abstract boolean shouldPostponeDelivery(D deliverable, C consumer);
 
     /**
-     * Defines what should be done to deliver a given {@code deliverable} to the {@code targetConsumer}.
+     * Defines what should be done to deliver a given {@code deliverable} to
+     * the {@code targetConsumer}.
      *
-     * <p>Each {@code Delivery} implementation defines this behaviour depending on the type of the consumer.
+     * <p>Each {@code Delivery} implementation defines this behaviour depending on
+     * the type of the consumer.
      *
-     * <p>The result is defined as {@link Runnable}, as this action will be executed by a delegate {@code Executor},
-     * according to the strategy implementation regulated by {@link #shouldPostponeDelivery(Object, Object)} and
-     * {@link #deliverNow(Object, Class)} methods.
+     * <p>The result is defined as {@link Runnable}, as this action will be executed by
+     * a delegate {@code Executor}, according to the strategy implementation regulated by
+     * {@link #shouldPostponeDelivery(Object, Object) shouldPostponeDelivery()} and
+     * {@link #deliverNow(Object, Class) deliverNow()} methods.
      *
      * @param consumer    the consumer to deliver the item to
      * @param deliverable the item to be delivered
@@ -95,8 +100,8 @@ public abstract class Delivery<D, C> {
     protected abstract Collection<C> consumersFor(D deliverable);
 
     /**
-     * Passes the deliverable to the matching consumers using the {@code executor} configured for this instance
-     * of {@code Delivery}.
+     * Passes the deliverable to the matching consumers using the {@code executor}
+     * configured for this instance of {@code Delivery}.
      *
      * <p>The delivery of the item to each of the consumers may be postponed according to
      * {@link #shouldPostponeDelivery(Object, Object)} invocation result.

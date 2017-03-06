@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -42,10 +42,10 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
-import static org.spine3.protobuf.Timestamps.getCurrentTime;
-import static org.spine3.validate.Validate.checkPositive;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -82,14 +82,14 @@ public class Commands {
      *
      * <p>This method is not supposed to be called from outside the framework.
      * Commands in client applications should be created by
-     * {@link org.spine3.client.CommandFactory#create(Message) CommandFactory.create(Message)},
+     * {@link org.spine3.client.CommandFactory#createCommand(Message) CommandFactory.create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId     the actor id
+     * @param userId     the actor ID
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
-     * @see org.spine3.client.CommandFactory#create(Message)
+     * @see org.spine3.client.CommandFactory#createCommand(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
@@ -98,6 +98,42 @@ public class Commands {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
 
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        return result.build();
+    }
+
+    /**
+     * Creates a new command context with the current time.
+     *
+     * <p>This method is not supposed to be called from outside the framework.
+     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#createCommand(Message)},
+     * which creates {@code CommandContext} automatically.
+     *
+     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId        the actor id
+     * @param zoneOffset    the offset of the timezone in which the user works
+     * @param targetVersion the the ID of the entity for applying commands
+     * @return new {@code CommandContext}
+     * @see org.spine3.client.CommandFactory#createCommand(Message)
+     */
+    @Internal
+    public static CommandContext createContext(@Nullable TenantId tenantId,
+                                               UserId userId,
+                                               ZoneOffset zoneOffset,
+                                               int targetVersion) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+        checkNotNull(targetVersion);
+
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        result.setTargetVersion(targetVersion);
+
+        return result.build();
+    }
+
+    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
+                                                            UserId userId,
+                                                            ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
@@ -107,7 +143,7 @@ public class Commands {
         if (tenantId != null) {
             result.setTenantId(tenantId);
         }
-        return result.build();
+        return result;
     }
 
     /**
@@ -181,7 +217,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isLaterThan(timestamp, from);
+                return Timestamps2.isLaterThan(timestamp, from);
             }
         };
     }
@@ -197,7 +233,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isBetween(timestamp, from, to);
+                return Timestamps2.isBetween(timestamp, from, to);
             }
         };
     }
@@ -221,7 +257,7 @@ public class Commands {
             public int compare(Command o1, Command o2) {
                 final Timestamp timestamp1 = getTimestamp(o1);
                 final Timestamp timestamp2 = getTimestamp(o2);
-                return Timestamps.compare(timestamp1, timestamp2);
+                return Timestamps2.compare(timestamp1, timestamp2);
             }
         });
     }
@@ -293,8 +329,7 @@ public class Commands {
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
         checkNotNull(command);
         checkNotNull(delay);
-        checkNotNull(schedulingTime);
-        checkPositive(schedulingTime, "command scheduling time");
+        checkValid(schedulingTime);
 
         final CommandContext context = command.getContext();
         final Schedule scheduleUpdated = context.getSchedule()
