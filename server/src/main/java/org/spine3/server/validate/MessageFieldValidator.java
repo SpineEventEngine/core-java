@@ -74,7 +74,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
     }
 
     @Override
-    public List<ConstraintViolation> validate() {
+    protected List<ConstraintViolation> validate() {
         checkIfRequiredAndNotSet();
         if (!getValues().isEmpty()) {
             validateFieldsOfMessageIfNeeded();

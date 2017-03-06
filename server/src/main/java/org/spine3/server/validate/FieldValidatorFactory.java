@@ -89,13 +89,13 @@ class FieldValidatorFactory {
         }
     }
 
-    public static FieldValidator<?> create(FieldDescriptor descriptor,
+    static FieldValidator<?> create(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, false);
     }
 
-    public static FieldValidator<?> createStrict(FieldDescriptor descriptor,
+    static FieldValidator<?> createStrict(FieldDescriptor descriptor,
             Object fieldValue,
             FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, true);

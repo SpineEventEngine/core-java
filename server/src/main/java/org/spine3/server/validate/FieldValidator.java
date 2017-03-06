@@ -108,7 +108,7 @@ abstract class FieldValidator<V> {
      *
      * <p>Use {@link #addViolation(ConstraintViolation)} method in custom implementations.
      */
-    public List<ConstraintViolation> validate() {
+    protected List<ConstraintViolation> validate() {
         if (!isRequiredField() && hasCustomMissingMessage()) {
             log().warn("'if_missing' option is set without '(required) = true'");
         }

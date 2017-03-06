@@ -60,7 +60,7 @@ public abstract class CommonValidatingBuilder<T extends Message> implements Vali
                                              .addFieldName(valueName)
                                              .build();
         final FieldValidator<?> validator =
-                FieldValidatorFactory.createStrict(descriptor, fieldValue, fieldPath);
+                FieldValidatorFactory.create(descriptor, fieldValue, fieldPath);
         final List<ConstraintViolation> constraints = validator.validate();
         if (!constraints.isEmpty()) {
             throw new ConstraintViolationThrowable(constraints);

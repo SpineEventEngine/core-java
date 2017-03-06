@@ -60,7 +60,7 @@ class BooleanFieldValidator extends FieldValidator<Boolean> {
     }
 
     @Override
-    public List<ConstraintViolation> validate() {
+    protected List<ConstraintViolation> validate() {
         if (isRequiredField()) {
             log().warn("'required' option not allowed for boolean field");
         }
