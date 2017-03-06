@@ -38,17 +38,17 @@ public enum EventField implements StorageField {
 
     /**
      * A field representing the string representation of
-     * the {@linkplain EventRecord#getProducerId() producer ID} of an event.
+     * the {@linkplain org.spine3.base.EventContext#getProducerId() producer ID} of an event.
      *
      * <p>Typically, it's an ID of the {@linkplain Aggregate} that produced the {@linkplain Event}.
      */
     producer_id,
 
     /**
-     * A field representing the {@linkplain EventRecord#getEventId() event ID}.
+     * A field representing the {@linkplain org.spine3.base.EventContext#getEventId() event ID}.
      *
-     * <p>An event ID is a protobuf-message type, though the {@link EventRecord#getEventId()} returns its string
-     * representation.
+     * <p>An event ID is a protobuf-message type, though the
+     * {@link org.spine3.base.EventContext#getEventId()} returns its string representation.
      *
      * <p>The string representation is what is stored in this field indeed.
      */

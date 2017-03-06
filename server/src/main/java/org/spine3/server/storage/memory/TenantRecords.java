@@ -29,6 +29,7 @@ import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.Visibility;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,6 +50,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
 
     private final Map<I, EntityRecord> records = newHashMap();
     private final Map<I, EntityRecord> filtered = filterValues(records, isRecordVisible());
+
+    @Override
+    public Iterator<I> index() {
+        final Iterator<I> result = filtered.keySet()
+                                           .iterator();
+        return result;
+    }
 
     @Override
     public void put(I id, EntityRecord record) {

@@ -62,6 +62,11 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
+    public Iterator<I> index() {
+        return getStorage().index();
+    }
+
+    @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
         final int result = getStorage().getEventCount(id);

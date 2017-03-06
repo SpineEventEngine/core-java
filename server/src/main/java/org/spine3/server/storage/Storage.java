@@ -20,7 +20,11 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import org.spine3.SPI;
+
+import java.util.Iterator;
 
 /**
  * The base interface for storages.
@@ -28,10 +32,10 @@ import org.spine3.SPI;
  * @author Alexander Yevsyukov
  */
 @SPI
-public interface Storage extends AutoCloseable {
+public interface Storage<I, R extends Message> extends AutoCloseable {
 
     /**
-     * Verifies is the storage is multitenant.
+     * Verifies whether the storage is multitenant.
      *
      * <p>A multitenant storage should take into account a current tenant (obtained via
      * {@link org.spine3.server.users.CurrentTenant#get() CurrentTenant.get() })
@@ -42,4 +46,29 @@ public interface Storage extends AutoCloseable {
      * @see org.spine3.server.users.CurrentTenant#get() CurrentTenant.get()
      */
     boolean isMultitenant();
+
+    /**
+     * Returns an iterator over identifiers of records in the storage.
+     */
+    Iterator<I> index();
+
+    /**
+     * Reads a record from the storage by the passed ID.
+     *
+     * @param id the ID of the record to load
+     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
+     * @throws IllegalStateException if the storage was closed before
+     */
+    Optional<R> read(I id);
+
+    /**
+     * Writes a record into the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param id     the ID for the record
+     * @param record a record to store
+     * @throws IllegalStateException if the storage is closed
+     */
+    void write(I id, R record);
 }

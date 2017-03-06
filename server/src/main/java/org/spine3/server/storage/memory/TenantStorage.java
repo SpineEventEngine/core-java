@@ -22,6 +22,8 @@ package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
 
+import java.util.Iterator;
+
 /**
  * Base interface for data stored in memory for one tenant.
  *
@@ -29,6 +31,8 @@ import com.google.common.base.Optional;
  * @author Alexander Yevsyukov
  */
 interface TenantStorage<I, R> {
+
+    Iterator<I> index();
 
     Optional<R> get(I id);
 

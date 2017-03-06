@@ -104,7 +104,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<Exception, ?> createStorage(StorageFactory factory) {
             return null;
         }
     }
@@ -139,7 +139,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<ProjectId, ?> createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -191,7 +191,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<ProjectId, ?> createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -243,7 +243,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<ProjectId, ?> createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -304,7 +304,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<ProjectId, ?> createStorage(StorageFactory factory) {
             return factory.createRecordStorage(getEntityClass());
         }
     }
