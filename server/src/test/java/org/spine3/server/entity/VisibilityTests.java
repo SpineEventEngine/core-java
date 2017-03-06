@@ -38,7 +38,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * Tests of working with entity status.
+ * Tests of working with entity visibility.
  *
  * <p>When migrating to JUnit 5, this class may become a
  * {@code @Nested} class of {@link EntityShould}.

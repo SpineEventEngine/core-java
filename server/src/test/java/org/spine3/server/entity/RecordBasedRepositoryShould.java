@@ -203,7 +203,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         }
     }
 
-    private static <E extends AbstractVersionableEntity<?, ?>> void assertMatches(E entity, FieldMask fieldMask) {
+    private static <E extends AbstractVersionableEntity<?, ?>>
+    void assertMatches(E entity, FieldMask fieldMask) {
         final Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
     }
@@ -217,7 +218,10 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        repository.markArchived(id);
+        entity.setVisibility(Visibility.newBuilder()
+                                       .setArchived(true)
+                                       .build());
+        repository.store(entity);
 
         assertFalse(repository.load(id).isPresent());
     }
@@ -231,7 +235,10 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        repository.markDeleted(id);
+        entity.setVisibility(Visibility.newBuilder()
+                                       .setDeleted(true)
+                                       .build());
+        repository.store(entity);
 
         assertFalse(repository.load(id).isPresent());
     }

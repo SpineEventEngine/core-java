@@ -66,10 +66,13 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
+    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type,
+                                                           FieldMask fieldMask) {
         final Map<AggregateStateId, EntityRecord> allRecords = readAll(fieldMask);
-        final Map<AggregateStateId, EntityRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
-            @Override
+        final Map<AggregateStateId, EntityRecord> resultMap = Maps.filterKeys(
+                allRecords,
+                new Predicate<AggregateStateId>() {
+                    @Override
             public boolean apply(@Nullable AggregateStateId stateId) {
                 checkNotNull(stateId);
                 final boolean typeMatches = stateId.getStateType()
@@ -85,16 +88,6 @@ class InMemoryStandStorage extends StandStorage {
     @Override
     public Iterator<AggregateStateId> index() {
         return recordStorage.index();
-    }
-
-    @Override
-    public void markArchived(AggregateStateId id) {
-        recordStorage.markArchived(id);
-    }
-
-    @Override
-    public void markDeleted(AggregateStateId id) {
-        recordStorage.markDeleted(id);
     }
 
     @Override
@@ -114,7 +107,8 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
+                                                         FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 

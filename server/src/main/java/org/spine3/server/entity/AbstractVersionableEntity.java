@@ -48,7 +48,8 @@ import static org.spine3.base.Versions.checkIsIncrement;
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
-        implements VersionableEntity<I, S> {
+        implements VersionableEntity<I, S>,
+                   VisibleEntity<I, S> {
 
     private Version version;
 
@@ -146,9 +147,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Verifies whether visibility of the entity changed since
-     * its {@linkplain #init() initialization}.
+     * {@inheritDoc}
      */
+    @Override
     public boolean visibilityChanged() {
         return visibilityChanged;
     }
@@ -259,9 +260,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Obtains the entity status.
+     * {@inheritDoc}
      */
-    protected Visibility getVisibility() {
+    @Override
+    public Visibility getVisibility() {
         final Visibility result = this.visibility == null
                 ? Visibility.getDefaultInstance()
                 : this.visibility;

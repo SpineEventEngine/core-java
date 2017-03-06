@@ -150,18 +150,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    /** {@inheritDoc} */
-    protected void markArchived(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        storage.markArchived(id);
-    }
-
-    /** {@inheritDoc} */
-    protected void markDeleted(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        storage.markDeleted(id);
-    }
-
     /**
      * Loads all the entities in this repository with IDs,
      * contained within the passed {@code ids} values.

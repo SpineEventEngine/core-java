@@ -74,14 +74,14 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Optional<Visibility> readVisibility(I id) {
+    public Optional<Visibility> readVisibility(I id) {
         checkNotClosed();
         Optional<Visibility> result = getStorage().getStatus(id);
         return result;
     }
 
     @Override
-    protected void writeVisibility(I id, Visibility status) {
+    public void writeVisibility(I id, Visibility status) {
         checkNotClosed();
         getStorage().putStatus(id, status);
     }

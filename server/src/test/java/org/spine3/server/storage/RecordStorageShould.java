@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.Visibility;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -42,6 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
@@ -131,140 +131,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_as_archived() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not archived.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getArchived());
-
-        // Mark archived.
-        storage.markArchived(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getArchived());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void fail_to_mark_non_existing_record_archived() {
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_write_visibility_to_non_existing_record() {
         final I id = newId();
         final RecordStorage<I> storage = getStorage();
 
-        storage.markArchived(id);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_archived_multiple_times() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not archived.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getArchived());
-
-        markArchivedAndCheck(storage, id);
-        markArchivedAndCheck(storage, id);
-        markArchivedAndCheck(storage, id);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    private void markArchivedAndCheck(RecordStorage<I> storage, I id) {
-        // Mark archived.
-        storage.markArchived(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getArchived());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_as_deleted() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not deleted.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getDeleted());
-
-        // Mark deleted.
-        storage.markDeleted(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getDeleted());
-
-        // Check that another attempt to mark deleted returns `false`.
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void fail_to_mark_non_existing_record_deleted() {
-        final I id = newId();
-        final RecordStorage<I> storage = getStorage();
-
-        storage.markDeleted(id);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_deleted_multiple_times() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not archived.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getDeleted());
-
-        markDeletedAndCheck(storage, id);
-        markDeletedAndCheck(storage, id);
-        markDeletedAndCheck(storage, id);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    private void markDeletedAndCheck(RecordStorage<I> storage, I id) {
-        // Mark archived.
-        storage.markArchived(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getArchived());
+        storage.writeVisibility(id, archived());
     }
 
     @Test
@@ -281,60 +153,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // There's no record with such ID.
         assertFalse(storage.read(id).isPresent());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_deleted_after_archived() {
-        final RecordStorage<I> storage = getStorage();
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-
-        // Write the record.
-        storage.write(id, record);
-
-        storage.markArchived(id);
-
-        final Visibility archived = storage.read(id)
-                                           .get()
-                                           .getVisibility();
-        assertTrue(archived.getArchived());
-        assertFalse(archived.getDeleted());
-
-        storage.markDeleted(id);
-
-        final Visibility archivedAndDeleted = storage.read(id)
-                                                       .get()
-                                                       .getVisibility();
-        assertTrue(archivedAndDeleted.getArchived());
-        assertTrue(archivedAndDeleted.getDeleted());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_archived_after_deleted() {
-        final RecordStorage<I> storage = getStorage();
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-
-        // Write the record.
-        storage.write(id, record);
-
-        storage.markDeleted(id);
-
-        final Visibility deleted = storage.read(id)
-                                             .get()
-                                             .getVisibility();
-        assertTrue(deleted.getDeleted());
-        assertFalse(deleted.getArchived());
-
-        storage.markArchived(id);
-
-        final Visibility archivedAndDeleted = storage.read(id)
-                                                       .get()
-                                                       .getVisibility();
-        assertTrue(archivedAndDeleted.getArchived());
-        assertTrue(archivedAndDeleted.getDeleted());
     }
 
     @Test

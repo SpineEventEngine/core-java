@@ -81,16 +81,6 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public void markArchived(I id) {
-        recordStorage().markArchived(id);
-    }
-
-    @Override
-    public void markDeleted(I id) {
-        recordStorage().markDeleted(id);
-    }
-
-    @Override
     public boolean delete(I id) {
         return recordStorage().delete(id);
     }

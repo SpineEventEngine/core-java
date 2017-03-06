@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.Visibility;
 import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.storage.StorageWithVisibility;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -47,7 +47,9 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateStateRecord> {
+public abstract class AggregateStorage<I>
+        extends AbstractStorage<I, AggregateStateRecord>
+        implements StorageWithVisibility<I, AggregateStateRecord> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);
@@ -147,7 +149,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
         writeRecord(aggregateId, record);
     }
 
-    protected static AggregateEventRecord toStorageRecord(Event event) {
+    private static AggregateEventRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
@@ -164,7 +166,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
                                    .build();
     }
 
-    protected static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
+    private static AggregateEventRecord toStorageRecord(Snapshot snapshot) {
         final Timestamp value = checkValid(snapshot.getTimestamp());
         return AggregateEventRecord.newBuilder()
                                    .setTimestamp(value)
@@ -184,28 +186,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
     protected abstract int readEventCountAfterLastSnapshot(I id);
 
     /**
-     * Reads the {@code EntityStatus} for the aggregate with the passed ID.
-     *
-     * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of {@code EntityStatus} were modified before. This means that
-     * the aggregate is visible to the regular queries.
-     *
-     * @param id the ID of the aggregate
-     * @return the aggregate status record or {@code Optional.absent()}
-     */
-    protected abstract Optional<Visibility> readVisibility(I id);
-
-    /**
-     * Writes the {@code EntityStatus} for the aggregate with the passed ID.
-     *
-     * @param id the ID of the aggregate for which we update the status
-     * @param visibility the status to write
-     */
-    protected abstract void writeVisibility(I id, Visibility visibility);
-
-    /**
-     * Writes a count of events which were saved to the storage after the last snapshot was created,
-     * or a count of all events if there were no snapshots yet.
+     * Writes a count of events which were saved to the storage after
+     * the last snapshot was created, or a count of all events if there
+     * were no snapshots yet.
      *
      * @param id         an ID of an aggregate
      * @param eventCount an even count after the last snapshot
@@ -225,11 +208,12 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateSt
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
-     * Records are sorted by timestamp descending (from newer to older).
+     *
+     * <p>Records are sorted by timestamp descending (from newer to older).
+     * The iterator is empty if there's no history for the aggregate with passed ID
      *
      * @param id aggregate ID
-     * @return new iterator instance, the iterator is empty if there's no history for
-     *         the aggregate with passed ID
+     * @return new iterator instance
      */
     protected abstract Iterator<AggregateEventRecord> historyBackward(I id);
 }
