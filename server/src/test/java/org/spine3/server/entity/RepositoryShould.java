@@ -21,6 +21,9 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
@@ -30,6 +33,9 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -275,37 +281,27 @@ public class RepositoryShould {
         }
     }
 
-    private static class TestRepo extends Repository<ProjectId, ProjectEntity> {
+    private static class TestRepo
+            extends DefaultRecordBasedRepository<ProjectId, ProjectEntity, Project> {
+
+        /**
+         * The ID value to simulate failure to load an entity.
+         */
+        private static final ProjectId troublesome = ProjectId.newBuilder()
+                                                              .setId("CANNOT_BE_LOADED")
+                                                              .build();
 
         private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
-        @Override
-        public ProjectEntity create(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected void store(ProjectEntity obj) {}
-
         @Override
         public Optional<ProjectEntity> load(ProjectId id) {
-            return Optional.absent();
-        }
+            if (id.equals(troublesome)) {
+                return Optional.absent();
+            }
 
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
-
-        @Override
-        protected Storage<ProjectId, ?> createStorage(StorageFactory factory) {
-            return factory.createRecordStorage(getEntityClass());
+            return super.load(id);
         }
     }
 
@@ -352,5 +348,57 @@ public class RepositoryShould {
         repository.close();
         assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
+    }
+
+    @Test
+    public void iterate_over_entities() {
+        createAndStoreEntities();
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        final List<ProjectEntity> entities = Lists.newArrayList(
+                repository.iterator(all)
+        );
+
+        assertEquals(3, entities.size());
+    }
+
+    private void createAndStoreEntities() {
+        repository.initStorage(storageFactory);
+
+        createAndStore("Eins");
+        createAndStore("Zwei");
+        createAndStore("Drei");
+    }
+
+    private static ProjectId createId(String value) {
+        return ProjectId.newBuilder()
+                        .setId(value)
+                        .build();
+    }
+
+    private void createAndStore(String entityId) {
+        ProjectEntity entity = repository.create(createId(entityId));
+        repository.store(entity);
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void do_not_allow_removal_from_iterator() {
+        createAndStoreEntities();
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        repository.iterator(all).remove();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
+        createAndStoreEntities();
+        createAndStore(TestRepo.troublesome.getId());
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        final Iterator<ProjectEntity> iterator = repository.iterator(all);
+
+        // This should iterate through all.
+        Lists.newArrayList(iterator);
     }
 }
