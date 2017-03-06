@@ -27,3 +27,5 @@ apply from: generateDescriptorSetScript
 
 apply plugin: spineProtobufPluginId
 
+apply plugin: spineJavadocPluginId
+

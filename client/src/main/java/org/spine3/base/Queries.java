@@ -159,7 +159,8 @@ public class Queries {
     }
 
     /**
-     * Client-side utilities for working with {@link Query} and {@link org.spine3.client.Subscription} targets.
+     * Client-side utilities for working with {@link Query} and
+     * {@link org.spine3.client.Subscription Subscription} targets.
      *
      * @author Alex Tymchenko
      * @author Dmytro Dashenkov

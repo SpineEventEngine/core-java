@@ -125,7 +125,7 @@ public class Stand implements AutoCloseable {
      * Update the state of an entity inside of the current instance of {@code Stand}.
      *
      * <p>In case the entity update represents the new
-     * {@link org.spine3.server.aggregate.Aggregate} Aggregate state,
+     * {@link org.spine3.server.aggregate.Aggregate Aggregate} state,
      * store the new value for the {@code Aggregate} to each of the configured instances of
      * {@link StandStorage}.
      *

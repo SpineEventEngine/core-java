@@ -28,3 +28,5 @@ dependencies {
     // Depend on `org.spine3.server.entity` and other packages for the GivenXxx classes.
     compile project(path: ':server')
 }
+
+apply plugin: spineJavadocPluginId
