@@ -64,7 +64,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
                             .setState(stateAny);
 
         if (entity instanceof AbstractVersionableEntity) {
-            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
                    .setVisibility(versionable.getVisibility());
         }
@@ -86,7 +86,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         final EntityRecord record = tuple.getState();
         if (entity != null) {
             if (entity instanceof AbstractVersionableEntity) {
-                AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+                final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
                 versionable.setState(state, record.getVersion());
                 versionable.setVisibility(record.getVisibility());
             } else {

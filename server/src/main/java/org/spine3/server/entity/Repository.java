@@ -181,6 +181,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     protected abstract void store(E obj);
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The returned iterator does not support removal.
+     */
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         final Iterator<E> unfiltered = new EntityIterator<>(this);
@@ -310,6 +315,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /**
      * An iterator of all entities from the storage.
+     *
+     * <p>This iterator does not allow removal.
      */
     private static class EntityIterator<I, E extends Entity<I, ?>>
             implements Iterator<E> {
