@@ -36,10 +36,13 @@ import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Random;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
@@ -300,6 +303,24 @@ public class StringifiersShould {
         final EventId actual = new Stringifiers.EventIdStringifier().reverse()
                                                                     .convert(id);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_string_to_list() {
+        final String stringToConvert = "1,2,3,4,5";
+        final List<String> convertedList =
+                new Stringifiers.ListStringifier<>(String.class).reverse()
+                                                                .convert(stringToConvert);
+        assertNotNull(convertedList);
+        assertEquals(5, convertedList.size());
+    }
+
+    @Test
+    public void convert_list_to_string() {
+        final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
+        final String actual =
+                new Stringifiers.ListStringifier<>(String.class).convert(listToConvert);
+        assertEquals(listToConvert.toString(), actual);
     }
 
     @Test
