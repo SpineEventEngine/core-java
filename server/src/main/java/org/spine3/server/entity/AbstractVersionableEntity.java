@@ -55,6 +55,14 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     private Visibility visibility;
 
     /**
+     * If {@code true} the visibility of the entity was changed since initialization.
+     *
+     * <p>If so, the visibility status of the entity should be updated when
+     * {@linkplain Repository#store(Entity) storing}.
+     */
+    private volatile boolean visibilityChanged;
+
+    /**
      * Creates a new instance.
      *
      * @param id the ID for the new instance
@@ -64,7 +72,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected AbstractVersionableEntity(I id) {
         super(id);
         setVersion(Versions.create());
-        setVisibility(Visibility.getDefaultInstance());
+        setVisible();
     }
 
     /**
@@ -86,7 +94,12 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         super.init();
         injectState(getDefaultState());
         initVersion(Versions.create());
+        setVisible();
+    }
+
+    private void setVisible() {
         setVisibility(Visibility.getDefaultInstance());
+        visibilityChanged = false;
     }
 
     /**
@@ -126,7 +139,18 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Sets status for the entity.
      */
     void setVisibility(Visibility visibility) {
-        this.visibility = visibility;
+        if (!visibility.equals(this.visibility)) {
+            this.visibility = visibility;
+            this.visibilityChanged = true;
+        }
+    }
+
+    /**
+     * Verifies whether visibility of the entity changed since
+     * its {@linkplain #init() initialization}.
+     */
+    public boolean visibilityChanged() {
+        return visibilityChanged;
     }
 
     /**

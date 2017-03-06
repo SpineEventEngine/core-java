@@ -296,6 +296,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
         aggregate.commitEvents();
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
+
+        if (aggregate.visibilityChanged()) {
+            storage.writeVisibility(aggregate.getId(), aggregate.getVisibility());
+        }
     }
 
     /**
@@ -330,16 +334,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected Storage<I, ?> createStorage(StorageFactory factory) {
         final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
         return result;
-    }
-
-    @Override
-    protected void markArchived(I id) {
-        aggregateStorage().markArchived(id);
-    }
-
-    @Override
-    protected void markDeleted(I id) {
-        aggregateStorage().markDeleted(id);
     }
 
     private static <I> IllegalStateException unableToLoadEvents(I id) {

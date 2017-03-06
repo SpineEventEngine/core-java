@@ -151,14 +151,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /** {@inheritDoc} */
-    @Override
     protected void markArchived(I id) {
         final RecordStorage<I> storage = recordStorage();
         storage.markArchived(id);
     }
 
     /** {@inheritDoc} */
-    @Override
     protected void markDeleted(I id) {
         final RecordStorage<I> storage = recordStorage();
         storage.markDeleted(id);

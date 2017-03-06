@@ -80,74 +80,10 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
     @Test
-    public void mark_aggregate_archived() {
-        storage.markArchived(id);
-        final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
-        assertArchived(aggregateStatus);
-    }
-
-    @Test
-    public void mark_aggregate_deleted() {
-        storage.markDeleted(id);
-        final Optional<Visibility> aggregateStatus = storage.readVisibility(id);
-        assertDeleted(aggregateStatus);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_archived_twice() {
-        storage.markArchived(id);
-        final Optional<Visibility> firstRead = storage.readVisibility(id);
-        assertArchived(firstRead);
-
-        storage.markArchived(id);
-        final Optional<Visibility> secondRead = storage.readVisibility(id);
-        assertArchived(secondRead);
-    }
-
-    @Test
-    public void do_not_mark_aggregate_deleted_twice() {
-        storage.markDeleted(id);
-        final Optional<Visibility> firstRead = storage.readVisibility(id);
-        assertDeleted(firstRead);
-
-        storage.markDeleted(id);
-
-        final Optional<Visibility> secondRead = storage.readVisibility(id);
-        assertDeleted(secondRead);
-    }
-
-    @Test
-    public void mark_archived_if_deleted() {
-        storage.markDeleted(id);
-        assertDeleted(storage.readVisibility(id));
-        storage.markArchived(id);
-        assertStatus(storage.readVisibility(id), true, true);
-    }
-
-    @Test
-    public void mark_deleted_if_archived() {
-        storage.markArchived(id);
-        assertArchived(storage.readVisibility(id));
-        storage.markDeleted(id);
-        assertStatus(storage.readVisibility(id), true, true);
-    }
-
-    @Test
     public void retrieve_empty_status_if_never_written() {
         final Optional<Visibility> entityStatus = storage.readVisibility(id);
         assertNotNull(entityStatus);
         assertFalse(entityStatus.isPresent());
-    }
-
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static void assertArchived(Optional<Visibility> entityStatus) {
-        assertStatus(entityStatus, true, false);
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static void assertDeleted(Optional<Visibility> entityStatus) {
-        assertStatus(entityStatus, false, true);
     }
 
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
