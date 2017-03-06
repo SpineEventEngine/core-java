@@ -23,6 +23,10 @@ package org.spine3.server.validate;
 /**
  * @author Illia Shepilov
  */
-public class StringifierNotFoundException extends RuntimeException {
+class StringifierNotFoundException extends RuntimeException {
     private static final long serialVersionUID = 1L;
+
+    public StringifierNotFoundException(String message) {
+        super(message);
+    }
 }

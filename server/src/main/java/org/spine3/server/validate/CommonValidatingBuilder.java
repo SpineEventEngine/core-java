@@ -31,6 +31,8 @@ import org.spine3.validate.ConstraintViolationThrowable;
 
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
  * @author Illia Shepilov
  */
@@ -45,13 +47,16 @@ public abstract class CommonValidatingBuilder<T extends Message> implements Vali
         return convertedValue;
     }
 
-    private <V> Stringifier<V> getStringifier(Class<V> toValueClass) {
-        final Optional<Stringifier<V>> stringifierOptional = registry.get(toValueClass);
+    private <V> Stringifier<V> getStringifier(Class<V> valueClass) {
+        final Optional<Stringifier<V>> stringifierOptional = registry.get(valueClass);
         if (stringifierOptional.isPresent()) {
             return stringifierOptional.get();
         }
-        //TODO:2017-03-02:illiashepilov: Think about necessary exception body.
-        throw new StringifierNotFoundException();
+
+        final String exMessage =
+                format("StringifierRegistry does not contain converter by specified key: %s",
+                       valueClass);
+        throw new StringifierNotFoundException(exMessage);
     }
 
     public <V> void validate(FieldDescriptor descriptor, V fieldValue, String valueName)
