@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +32,7 @@ import static org.spine3.base.EventPredicates.isBefore;
 import static org.spine3.base.EventPredicates.isBetween;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.EventTests.newEventContext;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
@@ -50,7 +50,7 @@ public class EventPredicatesShould {
 
     @Test
     public void have_private_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(EventPredicates.class);
+        assertHasPrivateParameterlessCtor(EventPredicates.class);
     }
 
     @Test

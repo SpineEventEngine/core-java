@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.spine3.protobuf.Durations2.fromMinutes;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -39,9 +40,9 @@ public class TimeTestsShould {
 
     @Test
     public void have_private_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(TimeTests.class);
-        Tests.hasPrivateParameterlessCtor(TimeTests.Future.class);
-        Tests.hasPrivateParameterlessCtor(TimeTests.Past.class);
+        assertHasPrivateParameterlessCtor(TimeTests.class);
+        assertHasPrivateParameterlessCtor(TimeTests.Future.class);
+        assertHasPrivateParameterlessCtor(TimeTests.Past.class);
     }
 
     @Test

@@ -26,6 +26,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
@@ -40,6 +41,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Utility class for working with {@code Stringifier}s.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  */
 public class Stringifiers {
 
@@ -113,7 +115,7 @@ public class Stringifiers {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
-        if (registry.hasStringiferFor(msgClass)) {
+        if (registry.hasStringifierFor(msgClass)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
             final Stringifier converter = registry.get(msgClass)
                                                   .get();
@@ -167,14 +169,13 @@ public class Stringifiers {
             try {
                 return Timestamps.parse(s);
             } catch (ParseException e) {
-                final ConversionError conversionError = new ConversionError(e.getMessage(),
-                                                                            e.getErrorOffset());
-                throw new IllegalArgumentException(conversionError);
+                final ConversionError conversionError = new ConversionError(e.getMessage());
+                throw new IllegalConversionArgumentException(conversionError);
             }
         }
     }
 
-    static class EventIdStringifier extends Stringifier<EventId> {
+    protected static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String doForward(EventId eventId) {
             final String result = eventId.getUuid();
@@ -190,7 +191,7 @@ public class Stringifiers {
         }
     }
 
-    static class CommandIdStringifier extends Stringifier<CommandId> {
+    protected static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String doForward(CommandId commandId) {
             final String result = commandId.getUuid();

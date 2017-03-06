@@ -20,8 +20,6 @@
 
 package org.spine3.validate;
 
-import java.text.ParseException;
-
 /**
  * Signals that an error has been reached unexpectedly while converting from one type to another.
  *
@@ -31,18 +29,11 @@ import java.text.ParseException;
 // It is OK, because it is not {@code Exception} in usual meaning.
 // It is occurred when input value cannot be converted to desirable type
 // and repeated input is required.
-public class ConversionError extends ParseException {
+public class ConversionError extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructs a ParseException with the specified detail message and offset.
-     * A detail message is a String that describes this particular exception.
-     *
-     * @param s           the detail message
-     * @param errorOffset the position where the error is found while parsing.
-     */
-    public ConversionError(String s, int errorOffset) {
-        super(s, errorOffset);
+    public ConversionError(String message) {
+        super(message);
     }
 }

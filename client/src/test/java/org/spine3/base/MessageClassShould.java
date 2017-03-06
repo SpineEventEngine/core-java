@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "EmptyClass"})
 public class MessageClassShould {
 
     private static final Class<StringValue> MSG_CLASS = StringValue.class;
@@ -87,7 +86,7 @@ public class MessageClassShould {
 
     private static class TestMessageClass extends MessageClass {
 
-        protected TestMessageClass(Class<? extends Message> value) {
+        private TestMessageClass(Class<? extends Message> value) {
             super(value);
         }
     }

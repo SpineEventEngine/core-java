@@ -17,23 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.error;
 
-package org.spine3.server.reflect;
+import com.google.protobuf.Message;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+/**
+ * Indicates that more than one handling method for the same message class are present
+ * in the declaring class.
+ *
+ * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
+ */
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+    private static final long serialVersionUID = 0L;
 
-public class ClassesShould {
-    @Test
-    public void have_private_ctor() {
-        assertHasPrivateParameterlessCtor(Classes.class);
-    }
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Classes.class);
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
     }
 }

@@ -58,7 +58,6 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
 
     /** Small positive delta in seconds or nanoseconds. */

@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
  * @param <R> the type of records kept in the storage
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
 
     private AbstractStorage<I, R> storage;

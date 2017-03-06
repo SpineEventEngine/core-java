@@ -63,6 +63,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -71,7 +72,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods"})
+@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
@@ -502,8 +503,8 @@ public class AggregateShould {
     @SuppressWarnings("unused")
     private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        static final String BROKEN_HANDLER = "broken_handler";
-        static final String BROKEN_APPLIER = "broken_applier";
+        private static final String BROKEN_HANDLER = "broken_handler";
+        private static final String BROKEN_APPLIER = "broken_applier";
 
         private final boolean brokenHandler;
         private final boolean brokenApplier;
@@ -538,7 +539,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_handler_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, true, false);
 
         final Command command = Given.Command.createProject();
         try {
@@ -553,7 +555,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID,false,true);
 
         final Command command = Given.Command.createProject();
         try {
@@ -568,7 +571,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_play_raises_exception() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, false, true);
         try {
             faultyAggregate.play(AggregateStateRecord.newBuilder()
                                                      .addEvent(projectCreated())
@@ -586,6 +590,10 @@ public class AggregateShould {
         new TestAggregateWithIdInteger(100).getBuilder();
     }
 
+    @Test
+    public void have_TypeInfo_utility_class() {
+        assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
+    }
 
     /*
      * Utility methods.

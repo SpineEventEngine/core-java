@@ -64,10 +64,10 @@ public class StringifierRegistry {
      * @param <I> the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(Class<I> toValueClass) {
-        checkNotNull(toValueClass);
+    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
+        checkNotNull(valueClass);
 
-        final Stringifier<?> func = entries.get(toValueClass);
+        final Stringifier<?> func = entries.get(valueClass);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
             @see #register(Class, Stringifier) */
@@ -75,7 +75,7 @@ public class StringifierRegistry {
         return Optional.fromNullable(result);
     }
 
-    public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {
+    public synchronized <I> boolean hasStringifierFor(Class<I> valueClass) {
         final boolean contains = entries.containsKey(valueClass);
         return contains;
     }

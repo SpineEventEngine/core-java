@@ -42,8 +42,8 @@ import java.util.concurrent.Callable;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertBefore;
 import static org.spine3.test.Verify.assertClassNonInstantiable;
 import static org.spine3.test.Verify.assertContains;
@@ -94,7 +94,7 @@ public class VerifyShould {
 
     @Test
     public void has_private_ctor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(Verify.class));
+        assertHasPrivateParameterlessCtor(Verify.class);
     }
 
     @SuppressWarnings({"ThrowCaughtLocally", "ErrorNotRethrown"})

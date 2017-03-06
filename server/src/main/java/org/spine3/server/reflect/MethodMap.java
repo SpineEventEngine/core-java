@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.error.DuplicateHandlerMethodException;
+import org.spine3.server.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -73,8 +73,8 @@ class MethodMap<H extends HandlerMethod> {
     /**
      * Returns a map of the {@link HandlerMethod} objects to the corresponding message class.
      *
-     * @param declaringClass   the class that declares methods to scan
-     * @param filter the predicate that defines rules for subscriber scanning
+     * @param declaringClass the class that declares methods to scan
+     * @param filter         the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      * @throws DuplicateHandlerMethodException if there are more than one handler for
      *                                         the same message class are encountered
