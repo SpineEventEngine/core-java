@@ -27,6 +27,9 @@ import org.spine3.server.bus.MessageDispatcher;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A base registry of the dispatchers, responsible for dispatching the command output to the
  * corresponding objects.
@@ -40,7 +43,7 @@ public class OutputDispatcherRegistry<C extends MessageClass,
                                       D extends MessageDispatcher<C, ?>>
                                 extends DispatcherRegistry<C, D> {
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * <p>Overrides in order to expose itself to
      * {@link CommandOutputBus#post(Message, StreamObserver) CommandOutputBus}.
@@ -49,4 +52,52 @@ public class OutputDispatcherRegistry<C extends MessageClass,
     protected Set<D> getDispatchers(C messageClass) {
         return super.getDispatchers(messageClass);
     }
+
+    @Override
+    protected void register(D dispatcher) {
+        checkNotNull(dispatcher);
+        final Set<C> eventClasses = dispatcher.getMessageClasses();
+        checkNotEmpty(dispatcher, eventClasses);
+
+        super.register(dispatcher);
+    }
+
+    @Override
+    protected void unregister(D dispatcher) {
+        checkNotNull(dispatcher);
+        final Set<C> eventClasses = dispatcher.getMessageClasses();
+        checkNotEmpty(dispatcher, eventClasses);
+
+        super.unregister(dispatcher);
+    }
+
+    protected boolean hasDispatchersFor(C eventClass) {
+        final Set<D> dispatchers = getDispatchers(eventClass);
+        final boolean result = !dispatchers.isEmpty();
+        return result;
+    }
+
+    /**
+     * Ensures that the dispatcher forwards at least one event.
+     *
+     * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
+     * @throws NullPointerException     if the dispatcher returns null set
+     */
+    private void checkNotEmpty(D dispatcher, Set<C> messageClasses) {
+        checkArgument(!messageClasses.isEmpty(),
+                      "%s: No message types are forwarded by this dispatcher: %s",
+                      getClass().getName(),  dispatcher);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides in order to expose itself to {@link CommandOutputBus#close() CommandOutputBus}.
+     */
+    @Override
+    protected void unregisterAll() {
+        super.unregisterAll();
+    }
+
+
 }

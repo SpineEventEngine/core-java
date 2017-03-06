@@ -24,6 +24,8 @@ import org.spine3.base.AbstractMessageEnvelope;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Wraps the business failure into a transferable parcel for
  * transportation along the {@linkplain FailureBus}.
@@ -52,6 +54,7 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
      * Creates instance for the passed failure.
      */
     public static FailureEnvelope of(Failure failure) {
+        checkNotNull(failure);
         return new FailureEnvelope(failure);
     }
 

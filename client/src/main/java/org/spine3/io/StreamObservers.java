@@ -17,44 +17,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.io;
 
-package org.spine3.server.event;
-
-import org.spine3.base.EventClass;
-import org.spine3.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import io.grpc.stub.StreamObserver;
+import org.spine3.Internal;
+import org.spine3.base.Response;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * A utility class for the routines related to
+ * {@linkplain StreamObserver gRPC StreamObserver instances}.
  *
- * <p>There can be multiple dispatchers per event class.
- *
- * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+@Internal
+public class StreamObservers {
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#isUnsupportedEvent(EventClass)}  EventBus}.
-     */
-    @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
+    private StreamObservers() {
+        // Prevent from instantiation.
+    }
+
+    public static StreamObserver<Response> emptyObserver() {
+        return emptyObserver;
     }
 
     /**
-     * {@inheritDoc}
+     * The {@code StreamObserver} which does nothing.
      *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
+     * @see #emptyObserver()
      */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
+    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
+        @Override
+        public void onNext(Response value) {
+            // Do nothing.
+        }
 
+        @Override
+        public void onError(Throwable t) {
+            // Do nothing.
+        }
+
+        @Override
+        public void onCompleted() {
+            // Do nothing.
+        }
+    };
 }

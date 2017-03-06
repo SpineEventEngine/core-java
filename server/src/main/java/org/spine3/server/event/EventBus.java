@@ -50,6 +50,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.io.StreamObservers.emptyObserver;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -121,29 +122,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         this.eventStore = builder.eventStore;
         this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
-
-        injectDispatcherProvider();
-    }
-
-    /**
-     * Sets up the {@code DispatcherEventDelivery} with an ability to obtain
-     * {@link EventDispatcher}s by a given {@link EventClass} instance.
-     *
-     * <p>Such an approach allows to query for an actual state of the
-     * {@code dispatcherRegistry} keeping it private to the {@code EventBus}.
-     */
-    private void injectDispatcherProvider() {
-        delivery().setConsumerProvider(
-                new Function<EventClass, Set<EventDispatcher>>() {
-                    @Nullable
-                    @Override
-                    public Set<EventDispatcher> apply(@Nullable EventClass eventClass) {
-                        checkNotNull(eventClass);
-                        final Set<EventDispatcher> dispatchers =
-                                registry().getDispatchers(eventClass);
-                        return dispatchers;
-                    }
-                });
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -306,7 +284,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
 
     @Override
     public void close() throws Exception {
-        registry().unregisterAll();
+        super.close();
         eventStore.close();
     }
 
@@ -329,32 +307,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     protected DispatcherEventDelivery delivery() {
         return (DispatcherEventDelivery) super.delivery();
     }
-
-    private static StreamObserver<Response> emptyObserver() {
-        return emptyObserver;
-    }
-
-    /**
-     * The {@code StreamObserver} which does nothing.
-     *
-     * @see #emptyObserver()
-     */
-    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response value) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
-    };
 
     /** The {@code Builder} for {@code EventBus}. */
     public static class Builder {

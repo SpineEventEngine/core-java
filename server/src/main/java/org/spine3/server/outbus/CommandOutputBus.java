@@ -19,6 +19,7 @@
  */
 package org.spine3.server.outbus;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.MessageClass;
@@ -29,7 +30,9 @@ import org.spine3.server.bus.Bus;
 import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.delivery.Delivery;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -57,10 +60,30 @@ public abstract class CommandOutputBus< M extends Message,
     /**
      * The strategy to deliver the messages to the dispatchers.
      */
-    private final Delivery<E, D> delivery;
+    private final CommandOutputDelivery<E, C, D> delivery;
 
-    protected CommandOutputBus(Delivery<E, D> delivery) {
+    protected CommandOutputBus(CommandOutputDelivery<E, C, D> delivery) {
         this.delivery = delivery;
+        injectDispatcherProvider();
+    }
+
+    /**
+     * Sets up the {@code CommandOutputDelivery} with an ability to obtain
+     * {@linkplain MessageDispatcher message dispatchers} by a given
+     * {@linkplain MessageClass message class} instance at runtime.
+     */
+    private void injectDispatcherProvider() {
+        delivery().setConsumerProvider(
+                new Function<C, Set<D>>() {
+                    @Nullable
+                    @Override
+                    public Set<D> apply(@Nullable C messageClass) {
+                        checkNotNull(messageClass);
+                        final Set<D> dispatchers =
+                                registry().getDispatchers(messageClass);
+                        return dispatchers;
+                    }
+                });
     }
 
     protected abstract void store(M message);
@@ -81,14 +104,16 @@ public abstract class CommandOutputBus< M extends Message,
      *
      * @return the delivery strategy
      */
-    protected Delivery<E, D> delivery() {
+    protected CommandOutputDelivery<E, C, D> delivery() {
         return this.delivery;
     }
 
     protected abstract E createEnvelope(M message);
 
     /**
-     * @inheritDoc <p>Overrides for return type covariance.
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
      */
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
@@ -142,11 +167,17 @@ public abstract class CommandOutputBus< M extends Message,
     }
 
     /**
-     * @inheritDoc <p>Overrides for return type covariance.
+     * {@inheritDoc}
+     *
+     * <p>Overrides for return type covariance.
      */
-
     @Override
     protected OutputDispatcherRegistry<C, D> registry() {
         return (OutputDispatcherRegistry<C, D>) super.registry();
+    }
+
+    @Override
+    public void close() throws Exception {
+        registry().unregisterAll();
     }
 }

@@ -19,19 +19,19 @@
  */
 package org.spine3.server.failure;
 
+import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.server.bus.Bus;
-import org.spine3.server.bus.DispatcherRegistry;
+import org.spine3.server.outbus.CommandOutputBus;
+import org.spine3.server.outbus.OutputDispatcherRegistry;
 
-import java.util.Set;
+import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -42,13 +42,13 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @see org.spine3.base.FailureThrowable
  * @see org.spine3.server.event.Subscribe Subscribe @Subscribe
  */
-public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
+public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private FailureBus(Builder builder) {
-        //TODO:3/1/17:alex.tymchenko: initialize FailureStore via the Builder.
+        super(checkNotNull(builder.dispatcherFailureDelivery));
     }
 
     /**
@@ -58,34 +58,39 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
         return new Builder();
     }
 
+
     @Override
-    public void post(Failure failure, StreamObserver<Response> responseObserver) {
-        checkNotNull(failure);
-        checkNotNull(responseObserver);
-        checkArgument(isNotDefault(failure));
-
-        final FailureEnvelope failureEnvelope = FailureEnvelope.of(failure);
-        final FailureClass failureClass = failureEnvelope.getMessageClass();
-
-        final Set<FailureDispatcher> dispatchers = registry().getDispatchers(failureClass);
-
-        for (FailureDispatcher dispatcher : dispatchers) {
-            dispatcher.dispatch(failureEnvelope);
-        }
-        final int dispatchersCalled = dispatchers.size();
-        if (dispatchersCalled == 0) {
-            handleDeadMessage(failureEnvelope, responseObserver);
-        }
+    protected void store(Failure message) {
+        // do nothing for now.
+        //TODO:3/6/17:alex.tymchenko: use CommandStatusService for this purpose.
     }
 
     @Override
-    protected DispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
+    protected boolean validateMessage(Message message, StreamObserver<Response> responseObserver) {
+        return true;
+    }
+
+    /**
+     * Always returns the original {@code Failure}, as the enrichment is not supported
+     * for the business failures yet.
+     *
+     * @param originalMessage the business failure to enrich
+     * @return the same message
+     */
+    @Override
+    protected Failure enrich(Failure originalMessage) {
+        return originalMessage;
+    }
+
+    @Override
+    protected FailureEnvelope createEnvelope(Failure message) {
+        final FailureEnvelope result = FailureEnvelope.of(message);
+        return result;
+    }
+
+    @Override
+    protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
         return new FailureDispatcherRegistry();
-    }
-
-    @Override
-    public void close() throws Exception {
-        registry().unregisterAll();
     }
 
     @Override
@@ -107,7 +112,38 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
     /** The {@code Builder} for {@code FailureBus}. */
     public static class Builder {
 
+        /**
+         * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.
+         *
+         * <p>If not set, a default value will be set by the builder.
+         */
+        @Nullable
+        private DispatcherFailureDelivery dispatcherFailureDelivery;
+
+        private Builder(){
+        }
+
+        /**
+         * Sets a {@code DispatcherFailureDelivery} to be used for the failure delivery
+         * to the dispatchers in the {@code FailureBus} being built.
+         *
+         * <p>If the {@code DispatcherFailureDelivery} is not set,
+         * {@linkplain  DispatcherFailureDelivery#directDelivery() direct delivery} will be used.
+         */
+        public Builder setDispatcherFailureDelivery(DispatcherFailureDelivery delivery) {
+            this.dispatcherFailureDelivery = checkNotNull(delivery);
+            return this;
+        }
+
+        public Optional<DispatcherFailureDelivery> getDispatcherFailureDelivery() {
+            return Optional.fromNullable(dispatcherFailureDelivery);
+        }
+
         public FailureBus build() {
+            if(dispatcherFailureDelivery == null) {
+                dispatcherFailureDelivery = DispatcherFailureDelivery.directDelivery();
+            }
+
             return new FailureBus(this);
         }
     }

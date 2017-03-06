@@ -17,68 +17,63 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.event;
+package org.spine3.server.failure;
 
 import org.spine3.SPI;
-import org.spine3.base.EventClass;
-import org.spine3.base.EventEnvelope;
 import org.spine3.server.outbus.CommandOutputDelivery;
 
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Event}s from the {@link EventBus}
- * to the {@link EventDispatcher}s.
- *
  * @author Alex Tymchenko
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherEventDelivery extends CommandOutputDelivery<EventEnvelope,
-                                                                            EventClass,
-                                                                            EventDispatcher> {
+public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<FailureEnvelope,
+                                                                              FailureClass,
+                                                                              FailureDispatcher> {
 
     /**
-     * Create a dispatcher event delivery with an {@link Executor} used for the operation.
+     * Create a dispatcher failure delivery with an {@link Executor} used for the operation.
      *
-     * @param delegate the instance of {@code Executor} used to dispatch events.
+     * @param delegate the instance of {@code Executor} used to dispatch business failures.
      * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
      */
-    protected DispatcherEventDelivery(Executor delegate) {
+    protected DispatcherFailureDelivery(Executor delegate) {
         super(delegate);
     }
 
     /**
-     * Creates an instance of event delivery with a
+     * Creates an instance of failure delivery with a
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
-     * used for event dispatching.
+     * used for the business failure dispatching.
      *
      * @see CommandOutputDelivery#CommandOutputDelivery()
      */
-    protected DispatcherEventDelivery() {
+    protected DispatcherFailureDelivery() {
         super();
     }
 
     @Override
-    protected Runnable getDeliveryAction(final EventDispatcher consumer,
-                                         final EventEnvelope envelope) {
+    protected Runnable getDeliveryAction(final FailureDispatcher consumer,
+                                         final FailureEnvelope deliverable) {
         return new Runnable() {
             @Override
             public void run() {
-                consumer.dispatch(envelope);
+                consumer.dispatch(deliverable);
             }
         };
     }
 
     /**
-     * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT
-     * postpone any event dispatching and uses
+     * Obtains a pre-defined instance of the {@code DispatcherFailureDelivery}, which does NOT
+     * postpone any failure dispatching and uses
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
      * @return the pre-configured default executor.
      */
-    public static DispatcherEventDelivery directDelivery() {
+    public static DispatcherFailureDelivery directDelivery() {
         return PredefinedDeliveryStrategies.DIRECT_DELIVERY;
     }
 
@@ -86,16 +81,16 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
     private static final class PredefinedDeliveryStrategies {
 
         /**
-         * A pre-defined instance of the {@code DispatcherEventDelivery},
-         * which does not postpone any event dispatching and uses
+         * A pre-defined instance of the {@code DispatcherFailureDelivery},
+         * which does not postpone any failure dispatching and uses
          * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
          * for operation.
          */
-        private static final DispatcherEventDelivery DIRECT_DELIVERY =
-                new DispatcherEventDelivery() {
+        private static final DispatcherFailureDelivery DIRECT_DELIVERY =
+                new DispatcherFailureDelivery() {
                     @Override
-                    public boolean shouldPostponeDelivery(EventEnvelope envelope,
-                                                          EventDispatcher dispatcher) {
+                    public boolean shouldPostponeDelivery(FailureEnvelope envelope,
+                                                          FailureDispatcher dispatcher) {
                         return false;
                     }
                 };
