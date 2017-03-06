@@ -25,6 +25,10 @@ import org.spine3.server.outbus.CommandOutputDelivery;
 import java.util.concurrent.Executor;
 
 /**
+ * A base class for the strategies on delivering the {@linkplain org.spine3.base.Failure failures}
+ * from the {@linkplain FailureBus failure bus} to the corresponding
+ * {@linkplain FailureDispatcher failure dispatchers}.
+ *
  * @author Alex Tymchenko
  */
 @SPI

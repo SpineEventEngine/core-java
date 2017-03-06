@@ -27,8 +27,9 @@ import org.spine3.server.outbus.CommandOutputDelivery;
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Event}s from the {@link EventBus}
- * to the {@link EventDispatcher}s.
+ * A base class for the strategies on delivering the {@link org.spine3.base.Event events}
+ * from the {@linkplain EventBus event bus} to the corresponding
+ * {@linkplain EventDispatcher event dispatchers}.
  *
  * @author Alex Tymchenko
  */
