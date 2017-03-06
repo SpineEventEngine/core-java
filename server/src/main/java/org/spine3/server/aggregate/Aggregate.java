@@ -21,9 +21,11 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -32,16 +34,19 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.Visibility;
-import org.spine3.server.reflect.MethodRegistry;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.reflect.EventApplierMethod;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -206,27 +211,18 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * {@inheritDoc}
      *
-     * <p>As the result of this method call, the aggregate generates
-     * event messages and applies them to compute new state.
-     */
-    @Override
-    protected List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
-            throws InvocationTargetException {
-        final List<? extends Message> eventMessages = super.invokeHandler(commandMessage, context);
-
-        apply(eventMessages, context);
-
-        return eventMessages;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
+     * <p>Overrides to apply generated events to the state.
      */
     @Override
     protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
-        return super.dispatchCommand(command, context);
+        final List<? extends Message> eventMessages = super.dispatchCommand(command, context);
+
+        try {
+            apply(eventMessages, context);
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
+        return eventMessages;
     }
 
     /**
@@ -236,13 +232,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final EventApplierMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(),
-                                                             eventMessage.getClass(),
-                                                             EventApplierMethod.factory());
-        if (method == null) {
-            throw missingEventApplier(eventMessage.getClass());
-        }
+        final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
 
@@ -342,7 +332,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                                   .setVersion(getVersion())
                                   .build();
         } else {
-            eventContext = createEventContext(eventMessage, commandContext);
+            eventContext = createEventContext(commandContext);
         }
 
         final Event event = createEvent(eventMessage, eventContext);
@@ -451,12 +441,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder.build();
     }
 
-    private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
-        return new IllegalStateException(
-                String.format("Missing event applier for event class %s in aggregate class %s.",
-                        eventClass.getName(), getClass().getName()));
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -466,5 +450,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    /**
+     * Provides type information on an aggregate class.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction of this utility class.
+        }
+
+        static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> aggregateClass) {
+            return ImmutableSet.copyOf(CommandHandlerMethod.getCommandClasses(aggregateClass));
+        }
     }
 }

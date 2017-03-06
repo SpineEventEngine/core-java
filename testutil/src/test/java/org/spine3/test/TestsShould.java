@@ -30,6 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
 
@@ -37,27 +38,27 @@ public class TestsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Tests.class));
+        assertHasPrivateParameterlessCtor(Tests.class);
     }
 
     @Test
     public void return_false_if_no_private_but_public_ctor() {
-        assertFalse(Tests.hasPrivateParameterlessCtor(ClassWithPublicCtor.class));
+        assertFalse(hasPrivateParameterlessCtor(ClassWithPublicCtor.class));
     }
 
     @Test
     public void return_false_if_only_ctor_with_args_found() {
-        assertFalse(Tests.hasPrivateParameterlessCtor(ClassWithCtorWithArgs.class));
+        assertFalse(hasPrivateParameterlessCtor(ClassWithCtorWithArgs.class));
     }
 
     @Test
     public void return_true_if_class_has_private_ctor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(ClassWithPrivateCtor.class));
+        assertTrue(hasPrivateParameterlessCtor(ClassWithPrivateCtor.class));
     }
 
     @Test
     public void return_true_if_class_has_private_throwing_ctor() {
-        assertTrue(Tests.hasPrivateParameterlessCtor(ClassThrowingExceptionInConstructor.class));
+        assertTrue(hasPrivateParameterlessCtor(ClassThrowingExceptionInConstructor.class));
     }
 
     @Test
@@ -95,6 +96,33 @@ public class TestsShould {
         emptyObserver.onError(Tests.<Throwable>nullRef());
         emptyObserver.onCompleted();
     }
+
+    @Test
+    public void assert_equality_of_booleans() {
+        assertEquals(true, true);
+        assertEquals(false, false);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void fail_boolean_inequality_assertion() {
+        // This should fail.
+        Tests.assertEquals(true, false);
+    }
+
+    @Test
+    public void have_own_boolean_assertion() {
+        Tests.assertTrue(true);
+    }
+
+    @SuppressWarnings("ConstantConditions") // The call with `false` should always fail.
+    @Test(expected = AssertionError.class)
+    public void have_own_assertTrue() {
+        Tests.assertTrue(false);
+    }
+
+    /*
+     * Test environment classes
+     ***************************/
 
     private static class ClassWithPrivateCtor {
         @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.

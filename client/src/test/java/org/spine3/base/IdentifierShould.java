@@ -36,7 +36,6 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.protobuf.Values.newUInt64Value;
 import static org.spine3.protobuf.Values.newUIntValue;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "MagicNumber"})
 public class IdentifierShould {
 
     @Test

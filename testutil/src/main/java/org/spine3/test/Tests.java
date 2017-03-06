@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -33,12 +34,12 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.users.UserId;
 
+import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Utilities for testing.
@@ -52,7 +53,34 @@ public class Tests {
     }
 
     /**
-     * Verifies if the passed class has private parameter-less constructor and invokes it
+     * Asserts that two booleans are equal.
+     *
+     * <p>This method is needed to avoid dependency on JUnit 4.x in projects that use
+     * Spine and JUnit5.
+     */
+    @VisibleForTesting
+    static void assertEquals(boolean expected, boolean actual) {
+        if (expected != actual) {
+            throw new AssertionError();
+        }
+    }
+
+    /**
+     * Asserts that a condition is true. If it isn't, it throws an
+     * {@link AssertionError} without a message.
+     *
+     * <p>This method is needed to avoid dependency on JUnit 4.x in projects that use
+     * Spine and JUnit5.
+     */
+    @VisibleForTesting
+    static void assertTrue(boolean condition) {
+        if (!condition) {
+            throw new AssertionError();
+        }
+    }
+
+    /**
+     * Asserts that if the passed class has private parameter-less constructor and invokes it
      * using Reflection.
      *
      * <p>Typically this method is used to add a constructor of a utility class into
@@ -64,12 +92,24 @@ public class Tests {
      *     ...
      *     {@literal @}Test
      *     public void have_private_utility_ctor() {
-     *         assertTrue(hasPrivateParameterlessCtor(MyUtility.class));
+     *         assertHasPrivateParameterlessCtor(MyUtility.class));
      *     }
      * </pre>
-     * @return true if the class has private parameter-less constructor
      */
-    public static boolean hasPrivateParameterlessCtor(Class<?> targetClass) {
+    public static void assertHasPrivateParameterlessCtor(Class<?> targetClass) {
+        assertTrue(hasPrivateParameterlessCtor(targetClass));
+    }
+
+    /**
+     * Verifies if the passed class has private parameter-less constructor and invokes it
+     * using Reflection.
+     *
+     * @return {@code true} if the class has private parameter-less constructor,
+     *         {@code false} otherwise
+     */
+    @CheckReturnValue
+    @VisibleForTesting
+    static boolean hasPrivateParameterlessCtor(Class<?> targetClass) {
         final Constructor constructor;
         try {
             constructor = targetClass.getDeclaredConstructor();
@@ -127,7 +167,6 @@ public class Tests {
     public static UserId newUserUuid() {
         return newUserId(Identifiers.newUuid());
     }
-
     /**
      * Generates a {@code StringValue} with generated UUID.
      *
@@ -137,6 +176,7 @@ public class Tests {
     public static StringValue newUuidValue() {
         return Values.newStringValue(Identifiers.newUuid());
     }
+
     /**
      * Asserts that the passed message has a field that matches the passed field mask.
      *
@@ -192,5 +232,4 @@ public class Tests {
     public static Version newVersionWithNumber(int number) {
         return Versions.newVersion(number, Timestamps2.getCurrentTime());
     }
-
 }

@@ -18,10 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.reflect;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.server.reflect.HandlerMethod;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.Apply;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.testdata.Sample;
 
@@ -33,15 +36,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EventApplierMethodShould {
 
     private final HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
 
     @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EventApplierMethod.class);
+    }
+
+    @Test
     public void invoke_applier_method() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
-        final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
+        final EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
         final ProjectCreated event = Sample.messageOfType(ProjectCreated.class);
 
         applier.invoke(applierObject, event);
@@ -65,12 +73,12 @@ public class EventApplierMethodShould {
 
         final EventApplierMethod actual = factory.create(method);
 
-        assertEquals(new EventApplierMethod(method), actual);
+        assertEquals(EventApplierMethod.from(method), actual);
     }
 
     @Test
     public void return_method_predicate() {
-        assertEquals(EventApplierMethod.PREDICATE, factory.getPredicate());
+        assertEquals(EventApplierMethod.predicate(), factory.getPredicate());
     }
 
     @Test
@@ -130,11 +138,11 @@ public class EventApplierMethodShould {
     }
 
     private static void assertIsEventApplier(Method applier) {
-        assertTrue(EventApplierMethod.PREDICATE.apply(applier));
+        assertTrue(EventApplierMethod.predicate().apply(applier));
     }
 
     private static void assertIsNotEventApplier(Method applier) {
-        assertFalse(EventApplierMethod.PREDICATE.apply(applier));
+        assertFalse(EventApplierMethod.predicate().apply(applier));
     }
 
     /*
@@ -192,7 +200,13 @@ public class EventApplierMethodShould {
         }
     }
 
-    private abstract static class TestEventApplier {
+    private abstract static class TestEventApplier extends Aggregate<Long,
+                                                                     StringValue,
+                                                                     StringValue.Builder> {
+
+        protected TestEventApplier() {
+            super(0L);
+        }
 
         private static final String APPLIER_METHOD_NAME = "apply";
 

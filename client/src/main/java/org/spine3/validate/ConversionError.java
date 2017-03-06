@@ -18,17 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
-
-import org.spine3.base.CommandEnvelope;
-import org.spine3.server.bus.MessageEndpoint;
+package org.spine3.validate;
 
 /**
- * An endpoint for command handling.
+ * Signals that an error has been reached unexpectedly while converting from one type to another.
  *
- * @param <R> the type of the processing result
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Illia Shepilov
  */
-public interface CommandEndpoint<R> extends MessageEndpoint<CommandEnvelope, R> {
+@SuppressWarnings("ExceptionClassNameDoesntEndWithException")
+// It is OK, because it is not {@code Exception} in usual meaning.
+// It is occurred when input value cannot be converted to desirable type
+// and repeated input is required.
+public class ConversionError extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public ConversionError(String message) {
+        super(message);
+    }
 }

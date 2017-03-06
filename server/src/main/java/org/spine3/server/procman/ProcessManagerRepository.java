@@ -33,7 +33,6 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
@@ -78,8 +77,7 @@ public abstract class ProcessManagerRepository<I,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
-            final Class<? extends ProcessManager> pmClass = getEntityClass();
-            commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
+            commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
         }
         return commandClasses;
     }
@@ -89,9 +87,7 @@ public abstract class ProcessManagerRepository<I,
     public Set<EventClass> getEventClasses() {
         if (eventClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<Class<? extends Message>> classes =
-                    ProcessManager.getHandledEventClasses(pmClass);
-            eventClasses = EventClass.setOf(classes);
+            eventClasses = ProcessManager.TypeInfo.getEventClasses(pmClass);
         }
         return eventClasses;
     }

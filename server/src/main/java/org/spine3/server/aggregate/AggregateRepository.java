@@ -21,7 +21,6 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +30,6 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
@@ -54,7 +51,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -89,14 +87,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             GetTargetIdFromCommand.newInstance();
 
     /** The constructor for creating entity instances. */
-    private final Constructor<A> entityConstructor;
+    private Constructor<A> entityConstructor;
 
+    /** The EventBus to which we post events produced by aggregates. */
     private final EventBus eventBus;
+
+    /** The funnel for sending updated aggregate states to Stand. */
     private final StandFunnel standFunnel;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
+    /** The set of command classes dispatched to aggregates by this repository. */
     @Nullable
     private Set<CommandClass> messageClasses;
 
@@ -109,20 +111,34 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         super(boundedContext);
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
     }
 
-    private Constructor<A> getEntityConstructor() {
-        final Class<A> entityClass = getEntityClass();
-        final Class<I> idClass = getIdClass();
-        final Constructor<A> result = AbstractEntity.getConstructor(entityClass, idClass);
+    /**
+     * Obtains the constructor.
+     *
+     * <p>The method returns cached value if called more than once.
+     * During the first call, it {@linkplain #findEntityConstructor() finds}  the constructor.
+     */
+    protected Constructor<A> getEntityConstructor() {
+        if (this.entityConstructor == null) {
+            this.entityConstructor = findEntityConstructor();
+        }
+        return this.entityConstructor;
+    }
+
+    /**
+     * Obtains the constructor for creating entities.
+     */
+    @VisibleForTesting
+    protected Constructor<A> findEntityConstructor() {
+        final Constructor<A> result = getConstructor(getEntityClass(), getIdClass());
+        this.entityConstructor = result;
         return result;
     }
 
     @Override
     public A create(I id) {
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        return createEntity(getEntityConstructor(), id);
     }
 
     /**
@@ -132,7 +148,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return the class of the aggregates
      */
-    public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
+    Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
     }
 
@@ -141,10 +157,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     public Class<? extends Message> getAggregateStateClass() {
         final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = getGenericParameterType(
-                aggregateClass,
-                Entity.GenericParameter.STATE.getIndex()
-        );
+        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(aggregateClass);
         return stateClass;
     }
 
@@ -155,8 +168,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<CommandClass> getMessageClasses() {
         if (messageClasses == null) {
-            messageClasses = ImmutableSet.copyOf(
-                    CommandHandlingEntity.getCommandClasses(getAggregateClass()));
+            messageClasses = Aggregate.TypeInfo.getCommandClasses(getAggregateClass());
         }
         return messageClasses;
     }
@@ -194,7 +206,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void dispatch(CommandEnvelope command) {
         final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
         final A aggregate = commandEndpoint.receive(command);
-
         final List<Event> events = aggregate.getUncommittedEvents();
         storeAndPostToStand(aggregate);
         postEvents(events);

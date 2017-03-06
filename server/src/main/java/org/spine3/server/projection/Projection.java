@@ -22,16 +22,14 @@ package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.EventSubscriberMethod;
-import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static java.lang.String.format;
-import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
+import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -62,38 +60,29 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
         dispatch(event, ctx);
     }
 
-    private void dispatch(Message event, EventContext ctx) {
-        final Class<? extends Message> eventClass = event.getClass();
-        final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventSubscriberMethod method = registry.get(getClass(),
-                                                          eventClass,
-                                                          EventSubscriberMethod.factory());
-        if (method == null) {
-            throw missingEventHandler(eventClass);
-        }
+    private void dispatch(Message eventMessage, EventContext ctx) {
+        final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
-            method.invoke(this, event, ctx);
+            method.invoke(this, eventMessage, ctx);
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    /**
-     * Returns the set of event classes handled by the passed {@link Projection} class.
-     *
-     * @param clazz the class to inspect
-     * @return immutable set of event classes or an empty set if no events are handled
-     */
-    public static ImmutableSet<Class<? extends Message>>
-    getEventClasses(Class<? extends Projection> clazz) {
-        return Classes.getHandledMessageClasses(clazz, PREDICATE);
-    }
+    static class TypeInfo {
 
-    private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        final String msg = format(
-                "Missing event handler for event class %s in the stream projection class %s",
-                eventClass, this.getClass()
-        );
-        return new IllegalStateException(msg);
+        private TypeInfo() {
+            // Prevent instantiation of this utility class.
+        }
+
+        /**
+         * Returns the set of event classes handled by the passed {@link Projection} class.
+         *
+         * @param cls the class to inspect
+         * @return immutable set of event classes or an empty set if no events are handled
+         */
+        static ImmutableSet<EventClass> getEventClasses(Class<? extends Projection> cls) {
+            return EventSubscriberMethod.getEventClasses(cls);
+        }
     }
 }

@@ -162,7 +162,8 @@ class MatchFilter implements Predicate<Event> {
 
         //TODO:2017-02-22:alexander.yevsyukov: Packing `actualValue` into Any and then verifying would be faster.
         final Collection<Any> expectedAnys = filter.getValueList();
-        final Collection<Message> expectedValues = Collections2.transform(expectedAnys, ANY_UNPACKER);
+        final Collection<Message> expectedValues =
+                Collections2.transform(expectedAnys, ANY_UNPACKER);
         Message actualValue;
 
         try {
@@ -171,7 +172,9 @@ class MatchFilter implements Predicate<Event> {
             if (actualValue instanceof Any) {
                 actualValue = AnyPacker.unpack((Any) actualValue);
             }
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+        } catch (NoSuchMethodException
+                 | IllegalAccessException
+                 | InvocationTargetException ignored) {
             // Wrong Message class -> does not satisfy the criteria
             return false;
         }

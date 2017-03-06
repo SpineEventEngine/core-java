@@ -22,8 +22,11 @@ package org.spine3.server.bus;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.spine3.base.MessageClass;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -46,10 +49,9 @@ public class DispatcherRegistry<C extends MessageClass,
      * will allow only one dispatcher per message class. This should be handled
      * when registering dispatchers.
      */
-    private final HashMultimap<C, D> dispatchers = HashMultimap.create();
+    private final Multimap<C, D> dispatchers =
+            Multimaps.synchronizedMultimap(HashMultimap.<C, D>create());
 
-    //TODO:2017-02-24:alexander.yevsyukov: Make dispatchers concurrency-friendly.
-    
     /**
      * Registers the passed dispatcher.
      *
@@ -104,7 +106,7 @@ public class DispatcherRegistry<C extends MessageClass,
      */
     protected Set<D> getDispatchers(C messageClass) {
         checkNotNull(messageClass);
-        final Set<D> dispatchers = this.dispatchers.get(messageClass);
+        final Collection<D> dispatchers = this.dispatchers.get(messageClass);
         return ImmutableSet.copyOf(dispatchers);
     }
 

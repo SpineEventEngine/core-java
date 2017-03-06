@@ -17,30 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
 
-import com.google.protobuf.Message;
+package org.spine3.validate;
 
 /**
- * Indicates that more than one handling method for the same message class are present in the declaring class.
+ * Thrown to indicate that a method has been passed an illegal or
+ * inappropriate argument during the conversion from one type to another.
  *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
+ * @author Illia Shepilov
+ * @see ConversionError
  */
-public class DuplicateHandlerMethodException extends RuntimeException {
+public class IllegalConversionArgumentException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 1L;
 
-    public DuplicateHandlerMethodException(
-            Class<?> targetClass,
-            Class<? extends Message> messageClass,
-            String firstMethodName,
-            String secondMethodName) {
+    private final ConversionError conversionError;
 
-        super(String.format(
-                "The %s class defines more than one method for handling the message class %s." +
-                        " Methods encountered: %s, %s.",
-                targetClass.getName(), messageClass.getName(),
-                firstMethodName, secondMethodName));
+    public IllegalConversionArgumentException(ConversionError conversionError) {
+        super();
+        this.conversionError = conversionError;
+    }
+
+    public ConversionError getConversionError() {
+        return conversionError;
     }
 }

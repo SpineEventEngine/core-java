@@ -17,23 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.error;
 
-package org.spine3.server.bus;
-
-import org.spine3.base.MessageEnvelope;
+import com.google.protobuf.Message;
 
 /**
- * A destination point of a {@link org.spine3.base.MessageEnvelope MessageEnvelope}.
+ * Indicates that more than one handling method for the same message class are present
+ * in the declaring class.
  *
- * @param <E> the type of the message envelope
- * @param <R> the type of the processing result
+ * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @author Alex Tymchenko
  */
-public interface MessageEndpoint<E extends MessageEnvelope, R> {
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-    /**
-     * Processes the message enclosed in the passed envelope.
-     */
-    R receive(E envelope);
+    private static final long serialVersionUID = 0L;
+
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
+
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
+    }
 }

@@ -38,6 +38,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.ImportEvents;
@@ -62,7 +63,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
-import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -71,7 +72,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods"})
+@SuppressWarnings({"TypeMayBeWeakened", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
@@ -107,7 +108,7 @@ public class AggregateShould {
     @Test
     public void advances_the_version_by_one_upon_handling_command_with_one_event() {
         final int version = aggregate.versionNumber();
-        
+
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         assertEquals(version + 1, aggregate.versionNumber());
@@ -176,7 +177,8 @@ public class AggregateShould {
 
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
-        final Set<CommandClass> classes = getCommandClasses(TestAggregate.class);
+        final Set<CommandClass> classes =
+                Aggregate.TypeInfo.getCommandClasses(TestAggregate.class);
 
         assertTrue(classes.size() == 4);
         assertTrue(classes.contains(CommandClass.of(CreateProject.class)));
@@ -199,18 +201,18 @@ public class AggregateShould {
         final Project state = aggregate.getState();
 
         assertEquals(ID, state.getId());
-        assertEquals(Project.Status.CREATED, state.getStatus());
+        assertEquals(Status.CREATED, state.getStatus());
     }
 
     @Test
     public void return_current_state_after_several_dispatches() {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.CREATED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.CREATED, aggregate.getState()
+                                              .getStatus());
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState()
-                                                      .getStatus());
+        assertEquals(Status.STARTED, aggregate.getState()
+                                              .getStatus());
     }
 
     @Test
@@ -251,7 +253,7 @@ public class AggregateShould {
                 AggregateStateRecord.newBuilder()
                                     .addAllEvent(events)
                                     .build();
-        
+
         aggregate.play(aggregateStateRecord);
 
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -328,7 +330,7 @@ public class AggregateShould {
         final Project state = unpack(snapshot.getState());
 
         assertEquals(ID, state.getId());
-        assertEquals(Project.Status.CREATED, state.getStatus());
+        assertEquals(Status.CREATED, state.getStatus());
     }
 
     @Test
@@ -386,7 +388,8 @@ public class AggregateShould {
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(), cmd.getName());
+            final ProjectCreated event = Given.EventMessage.projectCreated(cmd.getProjectId(),
+                                                                           cmd.getName());
             return event;
         }
 
@@ -413,7 +416,7 @@ public class AggregateShould {
         private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+                    .setStatus(Status.CREATED);
 
             isProjectCreatedEventApplied = true;
         }
@@ -427,7 +430,7 @@ public class AggregateShould {
         private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED);
+                    .setStatus(Status.STARTED);
 
             isProjectStartedEventApplied = true;
         }
@@ -500,8 +503,8 @@ public class AggregateShould {
     @SuppressWarnings("unused")
     private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        static final String BROKEN_HANDLER = "broken_handler";
-        static final String BROKEN_APPLIER = "broken_applier";
+        private static final String BROKEN_HANDLER = "broken_handler";
+        private static final String BROKEN_APPLIER = "broken_applier";
 
         private final boolean brokenHandler;
         private final boolean brokenApplier;
@@ -536,7 +539,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_handler_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, true, false);
 
         final Command command = Given.Command.createProject();
         try {
@@ -551,7 +555,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID,false,true);
 
         final Command command = Given.Command.createProject();
         try {
@@ -566,7 +571,8 @@ public class AggregateShould {
 
     @Test
     public void propagate_RuntimeException_when_play_raises_exception() {
-        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, false, true);
         try {
             faultyAggregate.play(AggregateStateRecord.newBuilder()
                                                      .addEvent(projectCreated())
@@ -584,6 +590,10 @@ public class AggregateShould {
         new TestAggregateWithIdInteger(100).getBuilder();
     }
 
+    @Test
+    public void have_TypeInfo_utility_class() {
+        assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
+    }
 
     /*
      * Utility methods.

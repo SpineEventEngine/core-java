@@ -41,8 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"InstanceMethodNamingConvention",
-                   "OptionalGetWithoutIsPresent" /* OK as we set right before get(). */})
+@SuppressWarnings("OptionalGetWithoutIsPresent" /* OK as we set right before get(). */)
 public class BoundedContextBuilderShould {
 
     private StorageFactory storageFactory;

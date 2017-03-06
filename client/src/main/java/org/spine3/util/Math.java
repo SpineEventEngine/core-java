@@ -77,7 +77,6 @@ public class Math {
      *   <li>returns {@code -1} for {@code floorDiv(-4, 4)}
      *   <li>returns {@code -2} for {@code floorDiv(-5, 4)}
      * </ul>
-     * <li>
      */
     public static long floorDiv(long a, long b) {
         return (a >= 0 ? a / b : ((a + 1) / b) - 1);

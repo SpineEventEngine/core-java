@@ -33,12 +33,13 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.8.13-SNAPSHOT'
+        spineVersion = '0.8.17-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.8.3-SNAPSHOT'
+        spineToolsVersion = '0.8.2-SNAPSHOT'
     }
+
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
         classpath(group: 'com.google.protobuf', name: 'protobuf-gradle-plugin',
@@ -47,11 +48,11 @@ buildscript {
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                                             version: spineProtobufPluginVersion
+                                             version: spineToolsVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
         classpath group: 'org.spine3.tools', name: 'javadocs-checker',
-                version: spineProtobufPluginVersion
+                version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -103,8 +104,8 @@ subprojects {
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
     }
 
-    apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
+    apply plugin: 'java'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -222,6 +223,8 @@ subprojects {
         from sourceSets.test.output
         classifier "test"
     }
+
+    apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"
 
     idea.module.iml {
         beforeMerged { final module ->
