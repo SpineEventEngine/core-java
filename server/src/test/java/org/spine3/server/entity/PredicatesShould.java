@@ -23,6 +23,7 @@ package org.spine3.server.entity;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.server.entity.Predicates.isEntityVisible;
 import static org.spine3.server.entity.Predicates.isRecordVisible;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -75,5 +76,14 @@ public class PredicatesShould {
                                                      .setDeleted(true))
                         .build();
         assertFalse(isRecordVisible().apply(record));
+    }
+
+    /**
+     * We are not likely to encounter {@code null} records,
+     * but making such records “visible” would help identify possible bugs.
+     */
+    @Test
+    public void consider_null_records_visible() {
+        assertTrue(isEntityVisible().apply(null));
     }
 }
