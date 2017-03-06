@@ -55,7 +55,7 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
     /**
      * Reads a record from the storage by the passed ID.
      *
-     * @param id the ID of the record to load
+     * @param id the ID of the record to read
      * @return a record instance or {@code Optional.absent()} if there is no record with this ID
      * @throws IllegalStateException if the storage was closed before
      */

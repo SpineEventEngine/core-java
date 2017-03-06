@@ -330,7 +330,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public E next() {
-            I id = index.next();
+            final I id = index.next();
             final Optional<E> loaded = repository.load(id);
             if (!loaded.isPresent()) {
                 final String idStr = idToString(id);
