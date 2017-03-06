@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
 
@@ -34,7 +33,7 @@ import org.spine3.SPI;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AbstractStorage<I, R extends Message> implements Storage {
+public abstract class AbstractStorage<I, R extends Message> implements Storage<I, R> {
 
     private final boolean multitenant;
     private boolean open = true;
@@ -48,26 +47,6 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage {
     public boolean isMultitenant() {
         return multitenant;
     }
-
-    /**
-     * Reads a record from the storage by the passed ID.
-     *
-     * @param id the ID of the record to load
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
-     * @throws IllegalStateException if the storage was closed before
-     */
-    public abstract Optional<R> read(I id);
-
-    /**
-     * Writes a record into the storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
-     *
-     * @param id     the ID for the record
-     * @param record a record to store
-     * @throws IllegalStateException if the storage is closed
-     */
-    public abstract void write(I id, R record);
 
     /**
      * Ensures the storage is not closed.

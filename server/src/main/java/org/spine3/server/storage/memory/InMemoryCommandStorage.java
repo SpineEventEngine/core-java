@@ -65,6 +65,11 @@ class InMemoryCommandStorage extends CommandStorage {
     }
 
     @Override
+    public Iterator<CommandId> index() {
+        return getStorage().index();
+    }
+
+    @Override
     public Optional<CommandRecord> read(CommandId id) {
         checkNotClosed();
         checkNotDefault(id);

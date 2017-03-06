@@ -46,6 +46,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.FAILURE;
@@ -108,6 +109,11 @@ public abstract class CommandStorageShould
     @Override
     protected CommandId newId() {
         return generateId();
+    }
+
+    @Test
+    public void have_index_of_identifiers() {
+        assertNotNull(storage.index());
     }
 
     /*

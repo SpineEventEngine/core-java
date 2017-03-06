@@ -34,6 +34,7 @@ import org.spine3.server.entity.Visibility;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,13 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
     private final Multimap<I, AggregateEventRecord> filtered = Multimaps.filterKeys(records, isVisible);
 
     private final Map<I, Integer> eventCounts = newHashMap();
+
+    @Override
+    public Iterator<I> index() {
+        final Iterator<I> result = filtered.keySet()
+                                           .iterator();
+        return result;
+    }
 
     /**
      * Always throws {@code UnsupportedOperationException}.

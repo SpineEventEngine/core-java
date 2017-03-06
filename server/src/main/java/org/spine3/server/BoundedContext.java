@@ -38,8 +38,9 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.integration.IntegrationEvent;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
@@ -199,19 +201,42 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
-    public <I, E extends AbstractVersionableEntity<I, ?>> void register(Repository<I, E> repository) {
+    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
+
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
+
         if (repository instanceof EventDispatcher) {
             eventBus.register((EventDispatcher) repository);
         }
+
         if (repository instanceof AggregateRepository) {
             registerAggregateRepository((AggregateRepository)repository);
         }
-        stand.registerTypeSupplier(repository);
+
+        if (managesVersionableEntities(repository)) {
+            stand.registerTypeSupplier(cast(repository));
+        }
+    }
+
+    /**
+     * Verifies if the passed repository manages instances of versionable entities.
+     */
+    private static <I, E extends Entity<I, ?>> boolean managesVersionableEntities(
+            Repository<I, E> repository) {
+        final Class entityClass = repository.getEntityClass();
+        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+        // It is safe because we cast after type check in managesVersionableEntities()
+    private static <I, E extends Entity<I, ?>>
+    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
+        return (Repository<I, VersionableEntity<I, ?>>) repository;
     }
 
     private void checkStorageAssigned(Repository repository) {
@@ -224,17 +249,21 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         final Class<? extends Message> stateClass = repository.getAggregateStateClass();
         final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
         if (alreadyRegistered != null) {
-            final String errMsg = String.format("Repository for aggregates with the state %s already registered: %s",
-                                                stateClass, alreadyRegistered);
+            final String errMsg = format(
+                    "Repository for aggregates with the state %s already registered: %s",
+                    stateClass, alreadyRegistered
+            );
             throw new IllegalStateException(errMsg);
         }
         aggregateRepositories.put(stateClass, repository);
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") /* We ignore method from super because the default
-                                                        implementation sets unimplemented status. */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+        /* We ignore method from super because the default implementation sets
+           unimplemented status. */
     @Override
-    public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
+    public void notify(IntegrationEvent integrationEvent,
+                       StreamObserver<Response> responseObserver) {
         final Message eventMsg = unpack(integrationEvent.getMessage());
         final boolean isValid = eventBus.validate(eventMsg, responseObserver);
         if (isValid) {
@@ -411,8 +440,11 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             final StorageFactory storageFactory = storageFactorySupplier.get();
 
             if (storageFactory == null) {
-                throw new IllegalStateException("Supplier of StorageFactory (" + storageFactorySupplier +
-                                                        ") returned null instance");
+                final String errMsg = format(
+                        "Supplier of StorageFactory (%s) returned null instance",
+                        storageFactorySupplier
+                );
+                throw new IllegalStateException(errMsg);
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
