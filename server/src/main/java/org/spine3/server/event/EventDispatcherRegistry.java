@@ -21,7 +21,7 @@
 package org.spine3.server.event;
 
 import org.spine3.base.EventClass;
-import org.spine3.server.bus.DispatcherRegistry;
+import org.spine3.server.outbus.OutputDispatcherRegistry;
 
 import java.util.Set;
 
@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispatcher> {
+class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
 
     @Override
     protected void register(EventDispatcher dispatcher) {

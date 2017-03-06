@@ -65,7 +65,7 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
         checkArgument(isNotDefault(failure));
 
         final FailureEnvelope failureEnvelope = FailureEnvelope.of(failure);
-        final FailureClass failureClass = failureEnvelope.getFailureClass();
+        final FailureClass failureClass = failureEnvelope.getMessageClass();
 
         final Set<FailureDispatcher> dispatchers = registry().getDispatchers(failureClass);
 
@@ -91,7 +91,7 @@ public class FailureBus extends Bus<Failure, FailureEnvelope, FailureClass, Fail
     @Override
     public void handleDeadMessage(FailureEnvelope message,
                                   StreamObserver<Response> responseObserver) {
-        log().warn("No dispatcher defined for the failure class {}", message.getFailureClass());
+        log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
     }
 
     /**

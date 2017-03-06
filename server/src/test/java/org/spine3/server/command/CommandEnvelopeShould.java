@@ -77,7 +77,7 @@ public class CommandEnvelopeShould {
 
     @Test
     public void obtain_command_class() {
-        assertEquals(CommandClass.of(command), envelope.getCommandClass());
+        assertEquals(CommandClass.of(command), envelope.getMessageClass());
     }
 
     @Test

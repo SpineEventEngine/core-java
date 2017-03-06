@@ -106,7 +106,7 @@ public abstract class ProcessManagerRepository<I,
     public void dispatchCommand(CommandEnvelope envelope) {
         final Message commandMessage = envelope.getMessage();
         final CommandContext context = envelope.getCommandContext();
-        final CommandClass commandClass = envelope.getCommandClass();
+        final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
         final P manager = loadOrCreate(id);
@@ -188,7 +188,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     private void checkEventClass(EventEnvelope eventEnvelope) throws IllegalArgumentException {
-        final EventClass eventClass = eventEnvelope.getEventClass();
+        final EventClass eventClass = eventEnvelope.getMessageClass();
 
         final Set<EventClass> classes = getMessageClasses();
         if (!classes.contains(eventClass)) {

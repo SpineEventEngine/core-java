@@ -17,51 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.failure;
+package org.spine3.server.outbus;
 
 import com.google.protobuf.Message;
-import org.spine3.base.AbstractMessageEnvelope;
-import org.spine3.base.Failure;
-import org.spine3.base.Failures;
+import io.grpc.stub.StreamObserver;
+import org.spine3.base.MessageClass;
+import org.spine3.server.bus.DispatcherRegistry;
+import org.spine3.server.bus.MessageDispatcher;
+
+import java.util.Set;
 
 /**
- * Wraps the business failure into a transferable parcel for
- * transportation along the {@linkplain FailureBus}.
+ * A base registry of the dispatchers, responsible for dispatching the command output to the
+ * corresponding objects.
+ *
+ * <p>The registries of this kind are managed by the descendants of {@link CommandOutputBus}.
  *
  * @author Alex Tymchenko
+ * @see CommandOutputBus
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
-
+public class OutputDispatcherRegistry<C extends MessageClass,
+                                      D extends MessageDispatcher<C, ?>>
+                                extends DispatcherRegistry<C, D> {
     /**
-     * The failure message.
+     * @inheritDoc
+     *
+     * <p>Overrides in order to expose itself to
+     * {@link CommandOutputBus#post(Message, StreamObserver) CommandOutputBus}.
      */
-    private final Message failureMessage;
-
-    /**
-     * The failure class.
-     */
-    private final FailureClass failureClass;
-
-    protected FailureEnvelope(Failure failure) {
-        super(failure);
-        this.failureMessage = Failures.getMessage(failure);
-        this.failureClass = FailureClass.of(failureMessage);
-    }
-
-    /**
-     * Creates instance for the passed failure.
-     */
-    public static FailureEnvelope of(Failure failure) {
-        return new FailureEnvelope(failure);
-    }
-
     @Override
-    public Message getMessage() {
-        return failureMessage;
-    }
-
-    @Override
-    public FailureClass getMessageClass() {
-        return failureClass;
+    protected Set<D> getDispatchers(C messageClass) {
+        return super.getDispatchers(messageClass);
     }
 }

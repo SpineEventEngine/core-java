@@ -22,6 +22,8 @@ package org.spine3.base;
 
 import com.google.protobuf.Message;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
  *
@@ -45,6 +47,7 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
      * Creates instance for the passed event.
      */
     public static EventEnvelope of(Event event) {
+        checkNotNull(event);
         return new EventEnvelope(event);
     }
 
@@ -59,7 +62,8 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     /**
      * Obtains the class of the event.
      */
-    public EventClass getEventClass() {
+    @Override
+    public EventClass getMessageClass() {
         return this.eventClass;
     }
 

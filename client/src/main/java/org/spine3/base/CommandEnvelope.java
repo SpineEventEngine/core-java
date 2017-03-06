@@ -81,16 +81,17 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
     }
 
     /**
+     * Obtains the command class.
+     */
+    @Override
+    public CommandClass getMessageClass() {
+        return commandClass;
+    }
+
+    /**
      * Obtains the command context.
      */
     public CommandContext getCommandContext() {
         return getOuterObject().getContext();
-    }
-
-    /**
-     * Obtains the command class.
-     */
-    public CommandClass getCommandClass() {
-        return commandClass;
     }
 }

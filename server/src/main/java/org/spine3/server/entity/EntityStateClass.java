@@ -17,51 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.failure;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.AbstractMessageEnvelope;
-import org.spine3.base.Failure;
-import org.spine3.base.Failures;
+import org.spine3.base.MessageClass;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Wraps the business failure into a transferable parcel for
- * transportation along the {@linkplain FailureBus}.
+ * A value object holding a class of an {@linkplain Entity#getState() entity state}.
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
+public class EntityStateClass extends MessageClass {
 
-    /**
-     * The failure message.
-     */
-    private final Message failureMessage;
-
-    /**
-     * The failure class.
-     */
-    private final FailureClass failureClass;
-
-    protected FailureEnvelope(Failure failure) {
-        super(failure);
-        this.failureMessage = Failures.getMessage(failure);
-        this.failureClass = FailureClass.of(failureMessage);
+    protected EntityStateClass(Class<? extends Message> value) {
+        super(value);
     }
 
-    /**
-     * Creates instance for the passed failure.
-     */
-    public static FailureEnvelope of(Failure failure) {
-        return new FailureEnvelope(failure);
-    }
+    public static EntityStateClass of(Entity entity) {
+        checkNotNull(entity);
+        final Message state = entity.getState();
 
-    @Override
-    public Message getMessage() {
-        return failureMessage;
-    }
+        checkNotNull(state);
+        final Class<? extends Message> stateClass = state.getClass();
 
-    @Override
-    public FailureClass getMessageClass() {
-        return failureClass;
+        final EntityStateClass result = new EntityStateClass(stateClass);
+        return result;
     }
 }

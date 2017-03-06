@@ -21,7 +21,6 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import org.spine3.Internal;
-import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventEnvelope;
 import org.spine3.server.delivery.Delivery;
@@ -63,7 +62,7 @@ abstract class EventDelivery<C> extends Delivery<EventEnvelope, C> {
 
     @Override
     protected final Collection<C> consumersFor(EventEnvelope envelope) {
-        final EventClass eventClass = envelope.getEventClass();
+        final EventClass eventClass = envelope.getMessageClass();
         return consumerProvider.apply(eventClass);
     }
 }

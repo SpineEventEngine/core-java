@@ -220,7 +220,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         checkArgument(isNotDefault(command));
 
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        final CommandClass commandClass = commandEnvelope.getCommandClass();
+        final CommandClass commandClass = commandEnvelope.getMessageClass();
 
         final Optional<CommandDispatcher> dispatcher = getDispatcher(commandClass);
 
@@ -265,7 +265,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         final Optional<CommandDispatcher> dispatcher = getDispatcher(
-                commandEnvelope.getCommandClass()
+                commandEnvelope.getMessageClass()
         );
         if (!dispatcher.isPresent()) {
             throw noDispatcherFound(commandEnvelope);
@@ -276,7 +276,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
         final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
         final String msg = String.format("No dispatcher found for the command (class: %s id: %s).",
-                                         commandEnvelope.getCommandClass(), idStr);
+                                         commandEnvelope.getMessageClass(), idStr);
         throw new IllegalStateException(msg);
     }
 

@@ -40,4 +40,9 @@ public interface MessageEnvelope<T> {
      * Obtains the message.
      */
     Message getMessage();
+
+    /**
+     * Obtains the message class.
+     */
+    MessageClass getMessageClass();
 }

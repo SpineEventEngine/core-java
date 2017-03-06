@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
+import org.spine3.base.MessageClass;
 import org.spine3.base.MessageEnvelope;
 import org.spine3.base.Version;
 
@@ -39,11 +40,13 @@ public class EntityStateEnvelope<I, S extends Message>
     private final S entityState;
     private final Any entityId;
     private final Version entityVersion;
+    private final MessageClass entityStateClass;
 
     protected EntityStateEnvelope(VersionableEntity<I, S> entity) {
         this.entityState = entity.getState();
         this.entityId = Identifiers.idToAny(entity.getId());
         this.entityVersion = entity.getVersion();
+        this.entityStateClass = EntityStateClass.of(entity);
     }
 
     public static  <I, S extends Message> EntityStateEnvelope of(VersionableEntity<I, S> entity) {
@@ -69,6 +72,11 @@ public class EntityStateEnvelope<I, S extends Message>
     @Override
     public Message getMessage() {
         return entityState;
+    }
+
+    @Override
+    public MessageClass getMessageClass() {
+        return this.entityStateClass;
     }
 
     public I getEntityId() {

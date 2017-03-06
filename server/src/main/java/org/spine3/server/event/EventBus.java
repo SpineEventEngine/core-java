@@ -33,19 +33,17 @@ import org.spine3.base.EventEnvelope;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
-import org.spine3.server.bus.DispatcherRegistry;
 import org.spine3.server.bus.MessageDispatcher;
-import org.spine3.server.delivery.Delivery;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.outbus.CommandOutputBus;
+import org.spine3.server.outbus.OutputDispatcherRegistry;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -74,10 +72,11 @@ import static com.google.common.base.Preconditions.checkState;
  * that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events are posted to an EventBus using {@link #post(Event, StreamObserver)} method.
+ * <p>Events are posted to an EventBus using {@link #post(Message, StreamObserver)} method.
  * Normally this is done by an
- * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository} in the process
- * of handling a command, or by a {@link org.spine3.server.procman.ProcessManager ProcessManager}.
+ * {@linkplain org.spine3.server.aggregate.AggregateRepository AggregateRepository} in the process
+ * of handling a command,
+ * or by a {@linkplain org.spine3.server.procman.ProcessManager ProcessManager}.
  *
  * <p>The passed {@link Event} is stored in the {@link EventStore} associated with
  * the {@code EventBus} <strong>before</strong> it is passed to subscribers.
@@ -184,7 +183,13 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    protected DispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
+    protected EventEnvelope createEnvelope(Event message) {
+        final EventEnvelope result = EventEnvelope.of(message);
+        return result;
+    }
+
+    @Override
+    protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
         return new EventDispatcherRegistry();
     }
 
@@ -196,72 +201,27 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /**
      * Validates and posts the event for handling.
      *
-     * <p>Does performs the same as the {@link #post(Event, StreamObserver) overloaded method}, but
-     * does not require any response observer.
+     * <p>Does performs the same as the
+     * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
+     * require any response observer.
      *
      * <p>This method should be used if the callee does not care about the event acknowledgement.
      *
      * @param event the event to be handled
-     * @see #post(Event, StreamObserver)
+     * @see #CommandOutputBus#post(Message, StreamObserver)
      */
     public void post(Event event) {
         post(event, emptyObserver());
     }
 
-    /**
-     * Validates and posts the event for handling.
-     *
-     * <p>If the event is invalid, the {@code responseObserver} is notified of an error.
-     *
-     * <p>If the event is valid, it is stored in the associated {@link EventStore} before
-     * passing it to dispatchers and subscribers.
-     *
-     * <p>The {@code responseObserver} is then notified of a successful acknowledgement of the
-     * passed event.
-     *
-     * @param event            the event to be handled
-     * @param responseObserver the observer to be notified
-     * @see #validate(Message, StreamObserver)
-     */
     @Override
-    public void post(Event event, StreamObserver<Response> responseObserver) {
-        checkNotNull(responseObserver);
-
-        final boolean validationPassed = validateMessage(event, responseObserver);
-
-        if (validationPassed) {
-            responseObserver.onNext(Responses.ok());
-            store(event);
-            final Event enriched = enrich(event);
-            final int dispatchersCalled = callDispatchers(EventEnvelope.of(enriched));
-
-            if (dispatchersCalled == 0) {
-                handleDeadMessage(EventEnvelope.of(event), responseObserver);
-            }
-            responseObserver.onCompleted();
-        }
-    }
-
-    private Event enrich(Event event) {
+    protected Event enrich(Event event) {
         if (enricher == null ||
                 !enricher.canBeEnriched(event)) {
             return event;
         }
         final Event enriched = enricher.enrich(event);
         return enriched;
-    }
-
-    /**
-     * Call the dispatchers for the {@code eventEnvelope}.
-     *
-     * @param eventEnvelope the event envelope to pass to the dispatchers.
-     * @return the number of the dispatchers called, or {@code 0} if there weren't any.
-     */
-    private int callDispatchers(EventEnvelope eventEnvelope) {
-        final EventClass eventClass = eventEnvelope.getEventClass();
-        final Collection<EventDispatcher> dispatchers = registry().getDispatchers(eventClass);
-        delivery().deliver(eventEnvelope);
-        return dispatchers.size();
     }
 
     @Override
