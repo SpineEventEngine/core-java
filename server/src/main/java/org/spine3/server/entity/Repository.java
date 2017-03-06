@@ -136,7 +136,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of entities managed by this repository. */
     @CheckReturnValue
-    protected Class<E> getEntityClass() {
+    public Class<E> getEntityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
             final Class<? extends Repository<I, E>> repoClass =
