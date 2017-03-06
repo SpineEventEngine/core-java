@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertNotNull;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -84,6 +85,12 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Override
     protected abstract StandStorage getStorage();
+
+    @Test
+    public void have_index_of_identifiers() {
+        final StandStorage storage = getStorage();
+        assertNotNull(storage.index());
+    }
 
     @Test
     public void retrieve_all_records() {
