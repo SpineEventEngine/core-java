@@ -43,10 +43,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * @author Dmytro Dashenkov
@@ -100,6 +102,25 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEmpty(empty);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check in assertion.
+    @Test
+    public void read_single_record_with_mask() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
+        final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
+
+        final Optional<EntityRecord> optional = storage.read(id, idMask);
+        assertTrue(optional.isPresent());
+        final EntityRecord entityRecord = optional.get();
+
+        final Message unpacked = unpack(entityRecord.getState());
+        assertFalse(isDefault(unpacked));
+    }
+
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_multiple_records_with_field_mask() {
@@ -128,7 +149,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final List<EntityRecord> readList = newLinkedList(readRecords);
         assertSize(bulkCount, readList);
         for (EntityRecord record : readRecords) {
-            final Message state = AnyPacker.unpack(record.getState());
+            final Message state = unpack(record.getState());
             assertMatchesMask(state, fieldMask);
         }
     }
@@ -163,7 +184,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
         storage.write(expected);
 
-        final Collection<EntityRecord> actual = newLinkedList(storage.readMultiple(expected.keySet()));
+        final Collection<EntityRecord> actual = newLinkedList(
+                storage.readMultiple(expected.keySet())
+        );
 
         assertEquals(expected.size(), actual.size());
         assertTrue(actual.containsAll(expected.values()));
