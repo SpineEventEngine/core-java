@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
  * An interface for all validating builders.
  *
  * <p>Validating builder is used to validate messages according
- * to the business rules in time of message building.
+ * to the business rules during the message building.
  *
  * @author Illia Shepilov
  */
