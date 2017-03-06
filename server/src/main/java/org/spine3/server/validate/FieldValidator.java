@@ -28,7 +28,6 @@ import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.IfMissingOption;

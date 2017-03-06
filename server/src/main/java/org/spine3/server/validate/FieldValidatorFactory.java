@@ -26,7 +26,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.base.FieldPath;
 
 import java.util.List;
