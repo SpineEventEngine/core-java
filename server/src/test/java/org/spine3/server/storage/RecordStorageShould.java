@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -28,6 +29,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.Visibility;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -131,14 +133,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_write_visibility_to_non_existing_record() {
-        final I id = newId();
-        final RecordStorage<I> storage = getStorage();
-
-        storage.writeVisibility(id, archived());
-    }
-
     @Test
     public void delete_record() {
         final RecordStorage<I> storage = getStorage();
@@ -175,5 +169,49 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(actual.containsAll(expected.values()));
 
         close(storage);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_write_visibility_to_non_existing_record() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+
+        storage.writeVisibility(id, archived());
+    }
+
+    @Test
+    public void return_absent_visibility_for_missing_record() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+        final Optional<Visibility> optional = storage.readVisibility(id);
+        assertFalse(optional.isPresent());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @Test
+    public void return_default_visibility_for_new_record() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        final Optional<Visibility> optional = storage.readVisibility(id);
+        assertTrue(optional.isPresent());
+        assertEquals(Visibility.getDefaultInstance(), optional.get());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @Test
+    public void load_visibility_when_updated() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        storage.writeVisibility(id, archived());
+
+        final Optional<Visibility> optional = storage.readVisibility(id);
+        assertTrue(optional.isPresent());
+        assertTrue(optional.get().getArchived());
     }
 }
