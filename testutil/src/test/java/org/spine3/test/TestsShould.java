@@ -23,6 +23,7 @@ package org.spine3.test;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
+import org.spine3.io.StreamObservers;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.io.StreamObservers.emptyObserver;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
@@ -89,7 +91,7 @@ public class TestsShould {
 
     @Test
     public void return_empty_StreamObserver() {
-        final StreamObserver<Response> emptyObserver = Tests.emptyObserver();
+        final StreamObserver<Response> emptyObserver = emptyObserver();
         assertNotNull(emptyObserver);
         // Call methods just to add to coverage.
         emptyObserver.onNext(Tests.<Response>nullRef());

@@ -195,38 +195,6 @@ public class Tests {
     }
 
     /**
-     * The {@code StreamObserver} which does nothing.
-     * @see #emptyObserver()
-     */
-    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response value) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
-    };
-
-    /**
-     * Returns {@code StringObserver} that does nothing.
-     *
-     * <p>Use this method when you need to call
-     * {@link org.spine3.server.command.CommandBus#post(org.spine3.base.Command, StreamObserver)
-     *  CommandBus.post()} and observing results is not needed.
-     */
-    public static StreamObserver<Response> emptyObserver() {
-        return emptyObserver;
-    }
-
-    /**
      * Factory method for creating versions from tests.
      */
     public static Version newVersionWithNumber(int number) {
