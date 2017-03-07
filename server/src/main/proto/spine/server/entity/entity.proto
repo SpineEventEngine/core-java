@@ -48,19 +48,28 @@ message EntityRecord {
     // The version of the entity.
     base.Version version = 3;
 
-    // The visibility flags of the entity.
-    Visibility visibility = 4;
+    // The lifecycle flags of the entity.
+    LifecycleFlags lifecycle_flags = 4;
 }
 
-// The visibility flags of an entity.
-//
-// If one of the flags is set to `true` the entity becomes “invisible” to regular queries.
-//
-message Visibility {
+// The lifecycle flags of an entity.
+message LifecycleFlags {
 
-    // If `true` the aggregate will not be loaded for regular queries.
+    // Marks the entity as `archived`.
+    //
+    // An application may use this flag for filtering out entities
+    // that finished their normal lifecycle and are kept in the database
+    // for archival purposes.
+    //
     bool archived = 1;
 
-    // If `true` the aggregate will not be loaded for regular queries.
+    // Marks the entity as `deleted.
+    //
+    // An application may use this flag for filtering out entities that were
+    // put aside (e.g. into a Trash) because they are no longer needed.
+    //
+    // An application may also use this flag for periodical automatic removal of entities
+    // marked with this flag.
+    //
     bool deleted = 2;
 }

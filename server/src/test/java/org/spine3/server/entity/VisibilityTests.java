@@ -70,7 +70,7 @@ public class VisibilityTests {
 
     @Test
     public void return_default_status_after_constructor() {
-        assertEquals(Visibility.getDefaultInstance(), new MiniEntity(1L).getVisibility());
+        assertEquals(LifecycleFlags.getDefaultInstance(), new MiniEntity(1L).getLifecycleFlags());
     }
 
     @Test
@@ -124,12 +124,12 @@ public class VisibilityTests {
 
     @Test
     public void assign_status() {
-        final Visibility status = Visibility.newBuilder()
-                                            .setArchived(true)
-                                            .setDeleted(false)
-                                            .build();
-        entity.setVisibility(status);
-        assertEquals(status, entity.getVisibility());
+        final LifecycleFlags status = LifecycleFlags.newBuilder()
+                                                    .setArchived(true)
+                                                    .setDeleted(false)
+                                                    .build();
+        entity.setLifecycleFlags(status);
+        assertEquals(status, entity.getLifecycleFlags());
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)

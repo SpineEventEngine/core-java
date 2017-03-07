@@ -31,9 +31,9 @@ import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Predicates;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
@@ -297,8 +297,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         aggregate.commitEvents();
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
 
-        if (aggregate.isVisibilityChanged()) {
-            storage.writeVisibility(aggregate.getId(), aggregate.getVisibility());
+        if (aggregate.lifecycleFlagsChanged()) {
+            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
         }
     }
 
@@ -319,7 +319,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
-        final Optional<Visibility> status = aggregateStorage().readVisibility(id);
+        final Optional<LifecycleFlags> status = aggregateStorage().readLifecycleFlags(id);
         if (status.isPresent() && !Predicates.isEntityVisible()
                                              .apply(status.get())) {
             // If there is a status that hides the aggregate, return nothing.

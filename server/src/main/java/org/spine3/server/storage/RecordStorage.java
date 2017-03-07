@@ -28,7 +28,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.stand.AggregateStateId;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ import static org.spine3.base.Stringifiers.idToString;
  * @author Alexander Yevsyukov
  */
 public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
-        implements StorageWithVisibility<I, EntityRecord>,
+        implements StorageWithLifecycleFlags<I, EntityRecord>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
     protected RecordStorage(boolean multitenant) {
@@ -119,21 +119,22 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     @Override
-    public Optional<Visibility> readVisibility(I id) {
+    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         final Optional<EntityRecord> optional = read(id);
         if (optional.isPresent()) {
-            return Optional.of(optional.get().getVisibility());
+            return Optional.of(optional.get()
+                                       .getLifecycleFlags());
         }
         return Optional.absent();
     }
 
     @Override
-    public void writeVisibility(I id, Visibility visibility) {
+    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
         final Optional<EntityRecord> optional = read(id);
         if (optional.isPresent()) {
             final EntityRecord record = optional.get();
             final EntityRecord updated = record.toBuilder()
-                                               .setVisibility(visibility)
+                                               .setLifecycleFlags(flags)
                                                .build();
             write(id, updated);
         } else {

@@ -220,9 +220,9 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        entity.setVisibility(Visibility.newBuilder()
-                                       .setArchived(true)
-                                       .build());
+        entity.setLifecycleFlags(LifecycleFlags.newBuilder()
+                                               .setArchived(true)
+                                               .build());
         repository.store(entity);
 
         assertFalse(repository.load(id).isPresent());
@@ -237,9 +237,9 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
         assertTrue(repository.load(id).isPresent());
 
-        entity.setVisibility(Visibility.newBuilder()
-                                       .setDeleted(true)
-                                       .build());
+        entity.setLifecycleFlags(LifecycleFlags.newBuilder()
+                                               .setDeleted(true)
+                                               .build());
         repository.store(entity);
 
         assertFalse(repository.load(id).isPresent());

@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link Visibility}.
+ * Tests covering the behavior of the {@link AggregateStorage} regarding the {@link LifecycleFlags}.
  *
  * @author Dmytro Dashenkov.
  */
@@ -57,11 +57,11 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // Checked in an assertion
     @Test
     public void write_entity_status_of_aggregate() {
-        final Visibility status = Visibility.newBuilder()
-                                            .setArchived(true)
-                                            .build();
-        storage.writeVisibility(id, status);
-        final Optional<Visibility> readStatus = storage.readVisibility(id);
+        final LifecycleFlags status = LifecycleFlags.newBuilder()
+                                                    .setArchived(true)
+                                                    .build();
+        storage.writeLifecycleFlags(id, status);
+        final Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
         assertTrue(readStatus.isPresent());
         assertEquals(status, readStatus.get());
     }
@@ -70,28 +70,28 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     public void save_whole_status() {
         final boolean archived = true;
         final boolean deleted = true;
-        final Visibility expected = Visibility.newBuilder()
-                                                  .setArchived(archived)
-                                                  .setDeleted(deleted)
-                                                  .build();
-        storage.writeVisibility(id, expected);
-        final Optional<Visibility> optionalActual = storage.readVisibility(id);
+        final LifecycleFlags expected = LifecycleFlags.newBuilder()
+                                                      .setArchived(archived)
+                                                      .setDeleted(deleted)
+                                                      .build();
+        storage.writeLifecycleFlags(id, expected);
+        final Optional<LifecycleFlags> optionalActual = storage.readLifecycleFlags(id);
         assertStatus(optionalActual, true, true);
     }
 
     @Test
     public void retrieve_empty_status_if_never_written() {
-        final Optional<Visibility> entityStatus = storage.readVisibility(id);
+        final Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
         assertNotNull(entityStatus);
         assertFalse(entityStatus.isPresent());
     }
 
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "OptionalGetWithoutIsPresent"})
-    private static void assertStatus(Optional<Visibility> entityStatus,
+    private static void assertStatus(Optional<LifecycleFlags> entityStatus,
                                      boolean archived,
                                      boolean deleted) {
         assertTrue(entityStatus.isPresent());
-        final Visibility status = entityStatus.get();
+        final LifecycleFlags status = entityStatus.get();
         assertEquals(archived, status.getArchived());
         assertEquals(deleted, status.getDeleted());
     }

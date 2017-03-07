@@ -22,14 +22,14 @@ package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.LifecycleFlags;
 
 /**
- * A storage that allows to update visibility status of entities.
+ * A storage that allows to update lifecycle flags of entities.
  *
  * @author Alexander Yevsyukov
  */
-public interface StorageWithVisibility<I, R extends Message> extends Storage<I, R> {
+public interface StorageWithLifecycleFlags<I, R extends Message> extends Storage<I, R> {
 
     /**
      * Reads the visibility status for the entity with the passed ID.
@@ -40,13 +40,13 @@ public interface StorageWithVisibility<I, R extends Message> extends Storage<I, 
      * @param id the ID of the entity
      * @return the aggregate visibility or {@code Optional.absent()}
      */
-    Optional<Visibility> readVisibility(I id);
+    Optional<LifecycleFlags> readLifecycleFlags(I id);
 
     /**
      * Writes the visibility status for the entity with the passed ID.
      *
      * @param id         the ID of the entity for which to update the status
-     * @param visibility the status to write
+     * @param flags the status to write
      */
-    void writeVisibility(I id, Visibility visibility);
+    void writeLifecycleFlags(I id, LifecycleFlags flags);
 }

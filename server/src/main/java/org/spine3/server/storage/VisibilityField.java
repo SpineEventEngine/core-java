@@ -20,9 +20,11 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.server.entity.LifecycleFlags;
+
 /**
  * A container for the storage fields used to store the
- * {@linkplain org.spine3.server.entity.Visibility Visibility}.
+ * {@linkplain LifecycleFlags Visibility}.
  *
  * @author Dmytro Dashenkov
  * @see StorageField

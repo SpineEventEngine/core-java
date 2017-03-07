@@ -127,7 +127,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        if (!Predicates.isEntityVisible().apply(record.getVisibility())) {
+        if (!Predicates.isEntityVisible().apply(record.getLifecycleFlags())) {
             return Optional.absent();
         }
         final E entity = toEntity(id, record);

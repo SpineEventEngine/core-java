@@ -23,19 +23,19 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 
 /**
- * An entity which has {@linkplain Visibility visibility}.
+ * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
  *
  * @author Alexander Yevsyukov
  */
-public interface VisibleEntity<I, S extends Message> extends Entity<I, S> {
+public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Obtains the current visibility status.
      */
-    Visibility getVisibility();
+    LifecycleFlags getLifecycleFlags();
 
     /**
      * Tells whether visibility of the entity changed since its initialization.
      */
-    boolean isVisibilityChanged();
+    boolean lifecycleFlagsChanged();
 }

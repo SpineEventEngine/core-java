@@ -40,19 +40,19 @@ public class PredicatesShould {
 
     @Test
     public void consider_archived_entity_invisible() {
-        final Visibility status =
-                Visibility.newBuilder()
-                            .setArchived(true)
-                            .build();
+        final LifecycleFlags status =
+                LifecycleFlags.newBuilder()
+                              .setArchived(true)
+                              .build();
         assertFalse(isEntityVisible().apply(status));
     }
 
     @Test
     public void consider_deleted_entity_invisible() {
-        final Visibility status =
-                Visibility.newBuilder()
-                            .setDeleted(true)
-                            .build();
+        final LifecycleFlags status =
+                LifecycleFlags.newBuilder()
+                              .setDeleted(true)
+                              .build();
         assertFalse(isEntityVisible().apply(status));
     }
 
@@ -61,8 +61,8 @@ public class PredicatesShould {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
-                        .setVisibility(Visibility.newBuilder()
-                                                     .setArchived(true))
+                        .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                         .setArchived(true))
                         .build();
         assertFalse(isRecordVisible().apply(record));
     }
@@ -72,8 +72,8 @@ public class PredicatesShould {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
-                        .setVisibility(Visibility.newBuilder()
-                                                     .setDeleted(true))
+                        .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                         .setDeleted(true))
                         .build();
         assertFalse(isRecordVisible().apply(record));
     }

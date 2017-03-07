@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -199,14 +199,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final RecordStorage<I> storage = getStorage();
 
-        storage.writeVisibility(id, archived());
+        storage.writeLifecycleFlags(id, archived());
     }
 
     @Test
     public void return_absent_visibility_for_missing_record() {
         final I id = newId();
         final RecordStorage<I> storage = getStorage();
-        final Optional<Visibility> optional = storage.readVisibility(id);
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertFalse(optional.isPresent());
     }
 
@@ -218,9 +218,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         storage.write(id, record);
 
-        final Optional<Visibility> optional = storage.readVisibility(id);
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
-        assertEquals(Visibility.getDefaultInstance(), optional.get());
+        assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
@@ -231,9 +231,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         storage.write(id, record);
 
-        storage.writeVisibility(id, archived());
+        storage.writeLifecycleFlags(id, archived());
 
-        final Optional<Visibility> optional = storage.readVisibility(id);
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
         assertTrue(optional.get().getArchived());
     }

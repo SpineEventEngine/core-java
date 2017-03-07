@@ -26,7 +26,7 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.storage.AbstractStorage;
-import org.spine3.server.storage.StorageWithVisibility;
+import org.spine3.server.storage.StorageWithLifecycleFlags;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -49,7 +49,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 @SPI
 public abstract class AggregateStorage<I>
         extends AbstractStorage<I, AggregateStateRecord>
-        implements StorageWithVisibility<I, AggregateStateRecord> {
+        implements StorageWithLifecycleFlags<I, AggregateStateRecord> {
 
     protected AggregateStorage(boolean multitenant) {
         super(multitenant);

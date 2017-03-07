@@ -31,9 +31,9 @@ import javax.annotation.Nullable;
  */
 public class Predicates {
 
-    private static final Predicate<Visibility> isEntityVisible = new Predicate<Visibility>() {
+    private static final Predicate<LifecycleFlags> isEntityVisible = new Predicate<LifecycleFlags>() {
         @Override
-        public boolean apply(@Nullable Visibility input) {
+        public boolean apply(@Nullable LifecycleFlags input) {
             return input == null ||
                     !(input.getArchived() || input.getDeleted());
         }
@@ -44,8 +44,8 @@ public class Predicates {
             if (input == null) {
                 return true;
             }
-            final Visibility entityStatus = input.getVisibility();
-            return !(entityStatus.getArchived() || entityStatus.getDeleted());
+            final LifecycleFlags flags = input.getLifecycleFlags();
+            return !(flags.getArchived() || flags.getDeleted());
         }
     };
 
@@ -54,16 +54,16 @@ public class Predicates {
     }
 
     /**
-     * Obtains the predicate for checking if an aggregate is visible to regular queries.
+     * Obtains the predicate for checking if an entity is visible to regular queries.
      *
      * <p>An aggregate may be marked as archived or deleted. If so, it becomes “invisible”
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code AggregateStatus}es
-     * @see Visibility#getArchived()
-     * @see Visibility#getDeleted()
+     * @see LifecycleFlags#getArchived()
+     * @see LifecycleFlags#getDeleted()
      */
-    public static Predicate<Visibility> isEntityVisible() {
+    public static Predicate<LifecycleFlags> isEntityVisible() {
         return isEntityVisible;
     }
 
@@ -74,7 +74,7 @@ public class Predicates {
      * to regular queries.
      *
      * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
-     * @see EntityRecord#getVisibility()
+     * @see EntityRecord#getLifecycleFlags()
      */
     public static Predicate<EntityRecord> isRecordVisible() {
         return isRecordVisible;
