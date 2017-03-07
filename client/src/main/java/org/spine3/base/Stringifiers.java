@@ -120,9 +120,10 @@ public class Stringifiers {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
-        if (registry.hasStringifierFor(msgClass)) {
+        final SingularKey<? extends Message> registryKey = new SingularKey<>(msgClass);
+        if (registry.hasStringifierFor(registryKey)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgClass)
+            final Stringifier converter = registry.get(registryKey)
                                                   .get();
             result = (String) converter.convert(message);
         } else {
@@ -212,6 +213,19 @@ public class Stringifiers {
         }
     }
 
+    protected static class IntegerStringifier extends Stringifier<Integer> {
+
+        @Override
+        protected String doForward(Integer integer) {
+            return integer.toString();
+        }
+
+        @Override
+        protected Integer doBackward(String s) {
+            return Integer.valueOf(s);
+        }
+    }
+
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
 
         private final Class<T> listGenericClass;
@@ -221,8 +235,8 @@ public class Stringifiers {
         }
 
         @Override
-        protected String doForward(List<T> objects) {
-            final String result = objects.toString();
+        protected String doForward(List<T> list) {
+            final String result = list.toString();
             return result;
         }
 
@@ -234,8 +248,9 @@ public class Stringifiers {
                 final List<T> result = (List<T>) Arrays.asList(elements);
                 return result;
             }
+            final RegistryKey registryKey = new SingularKey<>(listGenericClass);
             final Optional<Stringifier<T>> optional = StringifierRegistry.getInstance()
-                                                                         .get(listGenericClass);
+                                                                         .get(registryKey);
             if (!optional.isPresent()) {
                 final String exMessage =
                         format("Cannot convert from: String.class to %s", listGenericClass);
