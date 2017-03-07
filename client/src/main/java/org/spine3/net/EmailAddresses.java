@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.net.Patterns.EMAIL_ADDRESS;
 
 /**
  * Utility class for working with {@link EmailAddress}es.
@@ -31,14 +32,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class EmailAddresses {
-
-    private static final Pattern PATTERN = Pattern.compile(
-            '(' +
-            "([_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*)" +
-            '@' +
-            InternetDomains.pattern() +
-            ')'
-    );
 
     private EmailAddresses() {
         // Prevent instantiation of this utility class.
@@ -48,7 +41,7 @@ public class EmailAddresses {
      * Obtains pattern for validating email addresses.
      */
     public static Pattern pattern() {
-        return PATTERN;
+        return EMAIL_ADDRESS;
     }
 
     private static void checkArgumentIsEmailAddress(CharSequence value) {

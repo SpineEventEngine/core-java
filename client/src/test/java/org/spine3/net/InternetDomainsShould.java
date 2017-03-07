@@ -56,9 +56,9 @@ public class InternetDomainsShould {
         assertTrue(pattern().matcher("a.com").matches());
         assertTrue(pattern().matcher("boeng747.aero").matches());
 
+        assertFalse(pattern().matcher("192.168.0.1").matches());
         assertFalse(pattern().matcher(".com").matches());
         assertFalse(pattern().matcher("com").matches());
-        assertFalse(pattern().matcher("192.168.0.1").matches());
     }
 
     @Test
