@@ -1,0 +1,3 @@
+---
+exclude_paths:
+- "client/src/main/java/org/spine3/net/Patterns.java"
