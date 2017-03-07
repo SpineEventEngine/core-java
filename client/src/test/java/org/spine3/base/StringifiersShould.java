@@ -34,6 +34,8 @@ import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
+import org.spine3.test.types.TaskId;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.text.ParseException;
 import java.util.List;
@@ -340,6 +342,13 @@ public class StringifiersShould {
                                                                         .convert(stringToConvert);
         assertNotNull(convertedList);
         assertEquals(5, convertedList.size());
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
+        final String stringToConvert = "{value:123456}";
+        new Stringifiers.ListStringifier<>(TaskId.class).reverse()
+                                                        .convert(stringToConvert);
     }
 
     @Test
