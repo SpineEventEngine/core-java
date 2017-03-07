@@ -35,8 +35,8 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
-import static org.spine3.server.entity.Predicates.isRecordVisible;
 
 /**
  * The memory-based storage for {@code EntityStorageRecord} that represents

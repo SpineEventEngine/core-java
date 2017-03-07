@@ -52,6 +52,7 @@ import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.server.entity.EntityStorageConverter.tuple;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 
 /**
  * The base class for repositories that store entities as records.
@@ -127,7 +128,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        if (!Predicates.isEntityVisible().apply(record.getLifecycleFlags())) {
+        if (!isEntityVisible().apply(record.getLifecycleFlags())) {
             return Optional.absent();
         }
         final E entity = toEntity(id, record);

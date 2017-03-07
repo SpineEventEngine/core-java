@@ -20,7 +20,10 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+
+import javax.annotation.Nullable;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
@@ -38,4 +41,66 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
      * Tells whether visibility of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();
+
+    /**
+     * Collection of predicates for filtering entities with lifecycle flags.
+     */
+    class Predicates {
+
+        private static final Predicate<LifecycleFlags> isEntityVisible =
+                new Predicate<LifecycleFlags>() {
+            @Override
+            public boolean apply(@Nullable LifecycleFlags input) {
+                return input == null ||
+                        !(input.getArchived() || input.getDeleted());
+            }
+        };
+
+        private static final Predicate<EntityRecord> isRecordVisible =
+                new Predicate<EntityRecord>() {
+
+            private final Predicate<LifecycleFlags> isVisible =
+                    isEntityVisible();
+
+            @Override
+            public boolean apply(@Nullable EntityRecord input) {
+                if (input == null) {
+                    return true;
+                }
+                final LifecycleFlags flags = input.getLifecycleFlags();
+                final boolean result = isVisible.apply(flags);
+                return result;
+            }
+        };
+
+        private Predicates() {
+            // Prevent instantiation of this utility class.
+        }
+
+        /**
+         * Obtains the predicate for checking if an entity has
+         * any of the {@link LifecycleFlags} set.
+         *
+         * <p>If so, an entity becomes “invisible” to load methods of a repository.
+         * Entities with flags set must be treated by special {@linkplain RepositoryView views}
+         * of a repository.
+         *
+         * @return the filter predicate
+         * @see LifecycleFlags
+         */
+        public static Predicate<LifecycleFlags> isEntityVisible() {
+            return isEntityVisible;
+        }
+
+        /**
+         * Obtains the predicate for checking if an entity record has any
+         * of the {@link LifecycleFlags} set.
+         *
+         * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
+         * @see EntityRecord#getLifecycleFlags()
+         */
+        public static Predicate<EntityRecord> isRecordVisible() {
+            return isRecordVisible;
+        }
+    }
 }

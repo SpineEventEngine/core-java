@@ -28,8 +28,8 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
+import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.Predicates;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -62,8 +62,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
             final LifecycleFlags entityStatus = statuses.get(input);
 
             return entityStatus == null
-                    || Predicates.isEntityVisible()
-                                 .apply(entityStatus);
+                   || EntityWithLifecycle.Predicates.isEntityVisible()
+                                                    .apply(entityStatus);
         }
     };
 

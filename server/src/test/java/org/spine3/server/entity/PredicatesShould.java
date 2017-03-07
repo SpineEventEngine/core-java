@@ -24,19 +24,13 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.entity.Predicates.isEntityVisible;
-import static org.spine3.server.entity.Predicates.isRecordVisible;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class PredicatesShould {
-
-    @Test
-    public void have_private_default_ctor() {
-        assertHasPrivateParameterlessCtor(Predicates.class);
-    }
 
     @Test
     public void consider_archived_entity_invisible() {
