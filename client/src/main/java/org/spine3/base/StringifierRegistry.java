@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,12 +39,19 @@ import static java.util.Collections.synchronizedMap;
  */
 public class StringifierRegistry {
 
-    private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<RegistryKey, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<Class<?>, Stringifier<?>>builder()
-                            .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
-                            .put(EventId.class, new Stringifiers.EventIdStringifier())
-                            .put(CommandId.class, new Stringifiers.CommandIdStringifier())
+                    ImmutableMap.<RegistryKey, Stringifier<?>>builder()
+                            .put(new SingularKey<>(Timestamp.class),
+                                 new Stringifiers.TimestampIdStringifer())
+                            .put(new SingularKey<>(EventId.class),
+                                 new Stringifiers.EventIdStringifier())
+                            .put(new SingularKey<>(CommandId.class),
+                                 new Stringifiers.CommandIdStringifier())
+                            .put(new SingularKey<>(Integer.class),
+                                 new Stringifiers.IntegerStringifier())
+                            .put(new PluralKey<>(List.class, Integer.class),
+                                 new Stringifiers.ListStringifier<>(Integer.class))
                             .build()
             )
     );
@@ -52,10 +60,10 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> valueClass, Stringifier<I> converter) {
-        checkNotNull(valueClass);
+    public <I extends Message> void register(RegistryKey registryKey, Stringifier<I> converter) {
+        checkNotNull(registryKey);
         checkNotNull(converter);
-        entries.put(valueClass, converter);
+        entries.put(registryKey, converter);
     }
 
     /**
@@ -64,19 +72,19 @@ public class StringifierRegistry {
      * @param <I> the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
-        checkNotNull(valueClass);
+    public <I> Optional<Stringifier<I>> get(RegistryKey registryKey) {
+        checkNotNull(registryKey);
 
-        final Stringifier<?> func = entries.get(valueClass);
+        final Stringifier<?> func = entries.get(registryKey);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-            @see #register(Class, Stringifier) */
+         @see #register(Class, Stringifier) */
         final Stringifier<I> result = (Stringifier<I>) func;
         return Optional.fromNullable(result);
     }
 
-    public synchronized <I> boolean hasStringifierFor(Class<I> valueClass) {
-        final boolean contains = entries.containsKey(valueClass);
+    public synchronized <I> boolean hasStringifierFor(RegistryKey registryKey) {
+        final boolean contains = entries.containsKey(registryKey);
         return contains;
     }
 
