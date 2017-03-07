@@ -315,6 +315,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
                                 commandEnvelope.getCommandId());
 
             commandStatusService.setToFailure(commandEnvelope.getCommandId(), failure);
+            failureBus.post(failure.toFailure());
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
 

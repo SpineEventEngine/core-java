@@ -32,6 +32,7 @@ import org.spine3.server.outbus.OutputDispatcherRegistry;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.io.StreamObservers.emptyObserver;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -107,6 +108,20 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, Failu
     @Override
     protected FailureDispatcherRegistry registry() {
         return (FailureDispatcherRegistry) super.registry();
+    }
+
+    /**
+     * Posts the business failure to this bus instance.
+     *
+     * <p>This method should be used if the callee does not need to follow the
+     * acknowledgement responses. Otherwise, an
+     * {@linkplain #post(Message, StreamObserver) alternative method} should be used.
+     *
+     * @param failure the business failure to deliver to the dispatchers.
+     * @see #post(Message, StreamObserver)
+     */
+    public void post(Failure failure) {
+        post(failure, emptyObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
