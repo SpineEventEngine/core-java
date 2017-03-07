@@ -216,7 +216,8 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_registered_id_message_type() {
         StringifierRegistry.getInstance()
-                           .register(IdWithPrimitiveFields.class, ID_TO_STRING_CONVERTER);
+                           .register(new SingularKey<>(IdWithPrimitiveFields.class),
+                                     ID_TO_STRING_CONVERTER);
 
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
                                                               .setName(TEST_ID)
@@ -232,13 +233,13 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(Timestamp.class)
+        assertNull(registry.get(new SingularKey<>(Timestamp.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(EventId.class)
+        assertNull(registry.get(new SingularKey<>(EventId.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(CommandId.class)
+        assertNull(registry.get(new SingularKey<>(CommandId.class))
                            .get()
                            .convert(null));
     }
@@ -246,7 +247,7 @@ public class StringifiersShould {
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringifierFor(Random.class));
+                                       .hasStringifierFor(new SingularKey<>(Random.class)));
     }
 
     @Test
@@ -306,7 +307,7 @@ public class StringifiersShould {
     }
 
     @Test
-    public void convert_string_to_list() {
+    public void convert_string_to_list_of_strings() {
         final String stringToConvert = "1,2,3,4,5";
         final List<String> convertedList =
                 new Stringifiers.ListStringifier<>(String.class).reverse()
@@ -316,11 +317,29 @@ public class StringifiersShould {
     }
 
     @Test
-    public void convert_list_to_string() {
+    public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
         final String actual =
                 new Stringifiers.ListStringifier<>(String.class).convert(listToConvert);
         assertEquals(listToConvert.toString(), actual);
+    }
+
+    @Test
+    public void convert_list_of_integers_to_string() {
+        final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
+        final String actual =
+                new Stringifiers.ListStringifier<>(Integer.class).convert(listToConvert);
+        assertEquals(listToConvert.toString(), actual);
+    }
+
+    @Test
+    public void convert_string_to_list_of_integers() {
+        final String stringToConvert = "1,2,3,4,5";
+        final List<Integer> convertedList =
+                new Stringifiers.ListStringifier<>(Integer.class).reverse()
+                                                                 .convert(stringToConvert);
+        assertNotNull(convertedList);
+        assertEquals(5, convertedList.size());
     }
 
     @Test
