@@ -34,10 +34,6 @@ import java.util.regex.Pattern;
          "unused" /* For future use of other value object classes in this package. */})
 class Patterns {
 
-    private Patterns() {
-        // Prevent instantiation of this utility class.
-    }
-
     /**
      *  Regular expression to match all IANA top-level domains.
      *
@@ -358,4 +354,8 @@ class Patterns {
             "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
             ")+"
     );
+
+    private Patterns() {
+        // Prevent instantiation of this utility class.
+    }
 }
