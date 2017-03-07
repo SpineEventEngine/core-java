@@ -25,7 +25,7 @@ import com.google.common.base.Objects;
 /**
  * A value object, serves as key of the {@code StringifierRegistry} warehouse.
  *
- * <p>It used when it is needed to identify object by the few classes.
+ * <p>It used when is needed to identify object by the few classes.
  *    For example:
  *         {@code
  *               class SetStringifier<T> extends Stringifier<Set<T>>{
