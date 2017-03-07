@@ -222,7 +222,12 @@ public class Stringifiers {
 
         @Override
         protected Integer doBackward(String s) {
-            return Integer.valueOf(s);
+            try {
+                return Integer.valueOf(s);
+            } catch (NumberFormatException ignored) {
+                final String exMessage = format("Cannot convert %s to Integer.", s);
+                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
+            }
         }
     }
 
@@ -245,6 +250,7 @@ public class Stringifiers {
         private String delimiter = ",";
 
         public ListStringifier(Class<T> listGeneric) {
+            super();
             this.listGenericClass = listGeneric;
         }
 
@@ -252,6 +258,7 @@ public class Stringifiers {
          * That constructor should be used when need to change the {@code delimiter}.
          */
         public ListStringifier(Class<T> listGenericClass, String delimiter) {
+            super();
             this.listGenericClass = listGenericClass;
             this.delimiter = delimiter;
         }
