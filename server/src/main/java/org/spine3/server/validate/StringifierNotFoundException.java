@@ -21,6 +21,7 @@
 package org.spine3.server.validate;
 
 /**
+ *
  * @author Illia Shepilov
  */
 class StringifierNotFoundException extends RuntimeException {

@@ -25,6 +25,8 @@ import java.util.List;
 import static java.util.Collections.unmodifiableList;
 
 /**
+ * Signals that the validated value contains the constraint violations.
+ *
  * @author Illia Shepilov
  */
 public class ConstraintViolationThrowable extends Throwable {

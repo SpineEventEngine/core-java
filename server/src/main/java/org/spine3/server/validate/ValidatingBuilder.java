@@ -30,6 +30,8 @@ import com.google.protobuf.Message;
  *
  * @author Illia Shepilov
  */
+@SuppressWarnings("InterfaceNeverImplemented")
+// It will be implemented during the build of project after the validating builders generation.
 public interface ValidatingBuilder<T extends Message> {
 
     /**

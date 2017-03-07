@@ -226,15 +226,27 @@ public class Stringifiers {
         }
     }
 
+    /**
+     * The stringifier for the {@code List} classes.
+     *
+     * @param <T> the type of the elements in the list.
+     */
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
 
         private final Class<T> listGenericClass;
+
+        /**
+         * The delimiter for the passed elements in the String representation. Comma by default.
+         */
         private String delimiter = ",";
 
         public ListStringifier(Class<T> listGeneric) {
             this.listGenericClass = listGeneric;
         }
 
+        /**
+         * That constructor should be used when need to change the {@code delimiter}.
+         */
         public ListStringifier(Class<T> listGenericClass, String delimiter) {
             this.listGenericClass = listGenericClass;
             this.delimiter = delimiter;
@@ -249,11 +261,13 @@ public class Stringifiers {
         @Override
         protected List<T> doBackward(String s) {
             final String[] elements = s.split(delimiter);
+
             if (listGenericClass.equals(String.class)) {
                 @SuppressWarnings("unchecked") // It is OK, because it is checked above.
                 final List<T> result = (List<T>) Arrays.asList(elements);
                 return result;
             }
+
             final RegistryKey registryKey = new SingularKey<>(listGenericClass);
             final Optional<Stringifier<T>> optional = StringifierRegistry.getInstance()
                                                                          .get(registryKey);

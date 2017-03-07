@@ -39,6 +39,12 @@ import static java.lang.String.format;
 /**
  * @author Illia Shepilov
  */
+@SuppressWarnings({
+        "AbstractClassNeverImplemented",
+        /* It will be implemented during the build of project
+         after the validating builders generation.*/
+        "unused" // It will be used by auto-generated code.
+})
 public abstract class AbstractValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
 
     private final StringifierRegistry registry = StringifierRegistry.getInstance();

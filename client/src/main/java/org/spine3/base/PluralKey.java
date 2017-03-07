@@ -23,6 +23,21 @@ package org.spine3.base;
 import com.google.common.base.Objects;
 
 /**
+ * A value object, serves as key of the {@code StringifierRegistry} warehouse.
+ *
+ * <p>It used when it is needed to identify object by the few classes.
+ *    For example:
+ *         {@code
+ *               class SetStringifier<T> extends Stringifier<Set<T>>{
+ *                   ...
+ *               }
+ *
+ *              final Stringifier<Set<CustomType>> setStringifier = new SetStringifier<>();
+ *
+ *              final StringifierRegistry registry = StringifierRegistry.getInstance();
+ *              registry.put(new PluralKey<>(Set.class, CustomType.class), setStringifier)
+ *         }
+ *
  * @author Illia Shepilov
  */
 public class PluralKey<A, B> implements RegistryKey {

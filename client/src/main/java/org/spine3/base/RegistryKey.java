@@ -21,7 +21,11 @@
 package org.spine3.base;
 
 /**
+ * A marker interface, serves as type identifier
+ * for the keys into {@code StringRegistry} warehouse.
+ *
  * @author Illia Shepilov
+ * @see StringifierRegistry
  */
 public interface RegistryKey {
 }
