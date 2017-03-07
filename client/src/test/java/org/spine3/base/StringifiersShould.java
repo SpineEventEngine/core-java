@@ -334,10 +334,10 @@ public class StringifiersShould {
 
     @Test
     public void convert_string_to_list_of_integers() {
-        final String stringToConvert = "1,2,3,4,5";
+        final String stringToConvert = "1|2|3|4|5";
         final List<Integer> convertedList =
-                new Stringifiers.ListStringifier<>(Integer.class).reverse()
-                                                                 .convert(stringToConvert);
+                new Stringifiers.ListStringifier<>(Integer.class, "\\|").reverse()
+                                                                        .convert(stringToConvert);
         assertNotNull(convertedList);
         assertEquals(5, convertedList.size());
     }

@@ -229,9 +229,15 @@ public class Stringifiers {
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
 
         private final Class<T> listGenericClass;
+        private String delimiter = ",";
 
         public ListStringifier(Class<T> listGeneric) {
             this.listGenericClass = listGeneric;
+        }
+
+        public ListStringifier(Class<T> listGenericClass, String delimiter) {
+            this.listGenericClass = listGenericClass;
+            this.delimiter = delimiter;
         }
 
         @Override
@@ -242,7 +248,7 @@ public class Stringifiers {
 
         @Override
         protected List<T> doBackward(String s) {
-            final String[] elements = s.split(",");
+            final String[] elements = s.split(delimiter);
             if (listGenericClass.equals(String.class)) {
                 @SuppressWarnings("unchecked") // It is OK, because it is checked above.
                 final List<T> result = (List<T>) Arrays.asList(elements);
