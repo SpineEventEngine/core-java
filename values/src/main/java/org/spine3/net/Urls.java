@@ -23,16 +23,16 @@ package org.spine3.net;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class, which simplifies working with {@link Url}.
+ * Utility class for working with {@link Url}.
  *
- * <p>Provides all necessary operations, such as conversion and validation.
+ * <p>Provides conversion and validation operations.
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class Urls {
 
     private Urls() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
