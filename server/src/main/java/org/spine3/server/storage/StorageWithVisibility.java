@@ -35,8 +35,7 @@ public interface StorageWithVisibility<I, R extends Message> extends Storage<I, 
      * Reads the visibility status for the entity with the passed ID.
      *
      * <p>This method returns {@code Optional.absent()} if none of the
-     * flags of visibility flags were set before. This means that
-     * the entity is visible to the regular queries.
+     * flags of visibility flags were set before.
      *
      * @param id the ID of the entity
      * @return the aggregate visibility or {@code Optional.absent()}
