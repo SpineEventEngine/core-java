@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
+import org.spine3.base.RegistryKey;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.validate.ConstraintViolation;
@@ -36,26 +37,26 @@ import static java.lang.String.format;
 /**
  * @author Illia Shepilov
  */
-public abstract class CommonValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
+public abstract class AbstractValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
 
     private final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-    public <V> V getConvertedValue(Class<V> valueClass, String value) {
-        final Stringifier<V> stringifier = getStringifier(valueClass);
+    public <V> V getConvertedValue(RegistryKey registryKey, String value) {
+        final Stringifier<V> stringifier = getStringifier(registryKey);
         final V convertedValue = stringifier.reverse()
                                             .convert(value);
         return convertedValue;
     }
 
-    private <V> Stringifier<V> getStringifier(Class<V> valueClass) {
-        final Optional<Stringifier<V>> stringifierOptional = registry.get(valueClass);
+    private <V> Stringifier<V> getStringifier(RegistryKey registryKey) {
+        final Optional<Stringifier<V>> stringifierOptional = registry.get(registryKey);
         if (stringifierOptional.isPresent()) {
             return stringifierOptional.get();
         }
 
         final String exMessage =
                 format("StringifierRegistry does not contain converter by specified key: %s",
-                       valueClass);
+                       registryKey);
         throw new StringifierNotFoundException(exMessage);
     }
 
