@@ -229,6 +229,10 @@ public class Stringifiers {
     /**
      * The stringifier for the {@code List} classes.
      *
+     * <p> The converter for the type of the elements in the list
+     * should be registered in the {@code StringifierRegistry} class
+     * for the correct usage of the {@code ListStringifier} converter.
+     *
      * @param <T> the type of the elements in the list.
      */
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
