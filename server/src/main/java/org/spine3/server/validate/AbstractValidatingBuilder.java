@@ -29,6 +29,8 @@ import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolationThrowable;
+import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.util.List;
 
@@ -41,11 +43,17 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
 
     private final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-    public <V> V getConvertedValue(RegistryKey registryKey, String value) {
-        final Stringifier<V> stringifier = getStringifier(registryKey);
-        final V convertedValue = stringifier.reverse()
-                                            .convert(value);
-        return convertedValue;
+    @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+    // It is OK because caught exception is not ignored, it delivers exception to throw.
+    public <V> V getConvertedValue(RegistryKey registryKey, String value) throws ConversionError {
+        try {
+            final Stringifier<V> stringifier = getStringifier(registryKey);
+            final V convertedValue = stringifier.reverse()
+                                                .convert(value);
+            return convertedValue;
+        } catch (IllegalConversionArgumentException ex) {
+            throw ex.getConversionError();
+        }
     }
 
     private <V> Stringifier<V> getStringifier(RegistryKey registryKey) {
