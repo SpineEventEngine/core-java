@@ -221,7 +221,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
+    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                                  FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords();
