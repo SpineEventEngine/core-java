@@ -120,7 +120,7 @@ public class Stringifiers {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
-        final SingularKey<? extends Message> registryKey = new SingularKey<>(msgClass);
+        final RegistryKey registryKey = new SingularKey<>(msgClass);
         if (registry.hasStringifierFor(registryKey)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
             final Stringifier converter = registry.get(registryKey)
