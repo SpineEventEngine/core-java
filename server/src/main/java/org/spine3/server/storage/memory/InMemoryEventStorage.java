@@ -72,6 +72,11 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
+    public Iterator<EventId> index() {
+        return getStorage().index();
+    }
+
+    @Override
     public Optional<Event> read(EventId eventId) {
         checkNotNull(eventId);
         checkNotClosed();
@@ -96,6 +101,13 @@ class InMemoryEventStorage extends EventStorage {
         /**
          * The index of records where keys are string values of {@code EventId}s. */
         private final Map<EventId, Event> index = Maps.newConcurrentMap();
+
+        @Override
+        public Iterator<EventId> index() {
+            final Iterator<EventId> result = index.keySet()
+                                                  .iterator();
+            return result;
+        }
 
         @Nullable
         @Override

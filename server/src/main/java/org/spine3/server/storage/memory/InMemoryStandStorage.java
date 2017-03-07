@@ -31,6 +31,7 @@ import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,6 +80,11 @@ class InMemoryStandStorage extends StandStorage {
 
         final ImmutableList<EntityRecord> result = ImmutableList.copyOf(resultMap.values());
         return result;
+    }
+
+    @Override
+    public Iterator<AggregateStateId> index() {
+        return recordStorage.index();
     }
 
     @Override
