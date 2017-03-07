@@ -59,16 +59,13 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
         private static final Predicate<EntityRecord> isRecordVisible =
                 new Predicate<EntityRecord>() {
 
-            private final Predicate<LifecycleFlags> isVisible =
-                    isEntityVisible();
-
             @Override
             public boolean apply(@Nullable EntityRecord input) {
                 if (input == null) {
                     return true;
                 }
                 final LifecycleFlags flags = input.getLifecycleFlags();
-                final boolean result = isVisible.apply(flags);
+                final boolean result = isEntityVisible.apply(flags);
                 return result;
             }
         };
