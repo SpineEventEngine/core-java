@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 
 /**
- * An entity which has visibility
+ * An entity which has visibility.
  *
  * @author Alexander Yevsyukov
  */
