@@ -21,7 +21,7 @@
 package org.spine3.base;
 
 /**
- * A marker interface, serves as type identifier
+ * A marker interface, serves as the type identifier
  * for the keys into {@code StringRegistry} warehouse.
  *
  * @author Illia Shepilov
