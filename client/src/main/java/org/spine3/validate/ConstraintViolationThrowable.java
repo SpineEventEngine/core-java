@@ -36,6 +36,7 @@ public class ConstraintViolationThrowable extends Throwable {
     private final List<ConstraintViolation> constraintViolations;
 
     public ConstraintViolationThrowable(List<ConstraintViolation> constraintViolations) {
+        super();
         this.constraintViolations = constraintViolations;
     }
 
