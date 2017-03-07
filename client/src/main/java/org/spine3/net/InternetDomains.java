@@ -79,7 +79,6 @@ public class InternetDomains {
      */
     private static final String GOOD_IRI_CHAR = "a-zA-Z0-9\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF";
 
-
     private static final Pattern DOMAIN_NAME_PATTERN = Pattern.compile(
             "((([" + GOOD_IRI_CHAR + "][" + GOOD_IRI_CHAR + "\\-]*)*[" + GOOD_IRI_CHAR + "]\\.)+"
             + TOP_LEVEL_DOMAIN + ')');
