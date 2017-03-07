@@ -63,7 +63,6 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, Failu
     @Override
     protected void store(Failure message) {
         // do nothing for now.
-        //TODO:3/6/17:alex.tymchenko: use CommandStatusService for this purpose.
     }
 
     @Override
