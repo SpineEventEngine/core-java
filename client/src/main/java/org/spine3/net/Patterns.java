@@ -30,7 +30,8 @@ import java.util.regex.Pattern;
  *  android.util.Patterns.java</a>
  */
 @SuppressWarnings(
-        {"SingleCharacterStringConcatenation" /* ... will be concatenated during compilation*/,
+        {"DuplicateStringLiteralInspection" /* OK as they are parts of patterns. */,
+         "SingleCharacterStringConcatenation" /* ... will be concatenated during compilation*/,
          "unused" /* For future use of other value object classes in this package. */})
 class Patterns {
 
