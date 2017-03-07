@@ -23,6 +23,7 @@ package org.spine3.net;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class for working with {@link InternetDomain}s.
@@ -106,6 +107,7 @@ public class InternetDomains {
      * @throws IllegalArgumentException if the passed domain name is not valid
      */
     public static InternetDomain valueOf(CharSequence name) {
+        checkNotNull(name);
         checkArgumentIsDomainName(name);
 
         final InternetDomain result = InternetDomain.newBuilder()

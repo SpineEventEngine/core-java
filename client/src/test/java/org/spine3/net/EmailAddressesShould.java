@@ -26,50 +26,49 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.net.InternetDomains.pattern;
-import static org.spine3.net.InternetDomains.valueOf;
+import static org.spine3.net.EmailAddresses.valueOf;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
-public class InternetDomainsShould {
+public class EmailAddressesShould {
 
     @Test
     public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(InternetDomains.class);
+        assertHasPrivateParameterlessCtor(EmailAddresses.class);
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(InternetDomains.class);
+                .testAllPublicStaticMethods(EmailAddresses.class);
     }
 
     @Test
-    public void provide_matching_pattern() {
-        assertTrue(pattern().matcher("spine3.org")
-                            .matches());
+    public void provide_pattern() {
+        assertTrue(patternMatches("user@site.com"));
+        assertTrue(patternMatches("a@b.com"));
+        assertTrue(patternMatches("a@b-c.com"));
 
-        assertTrue(pattern().matcher("teamdev.com").matches());
-        assertTrue(pattern().matcher("a.com").matches());
-        assertTrue(pattern().matcher("boeng747.aero").matches());
+        assertFalse(patternMatches("@site.org"));
+        assertFalse(patternMatches("user@"));
+        assertFalse(patternMatches("user @ site.com"));
+    }
 
-        assertFalse(pattern().matcher(".com").matches());
-        assertFalse(pattern().matcher("com").matches());
-        assertFalse(pattern().matcher("192.168.0.1").matches());
+    private static boolean patternMatches(CharSequence input) {
+        return EmailAddresses.pattern().matcher(input).matches();
     }
 
     @Test
-    public void create_InternetDomain_instance() {
-        final String domainName = "example.org";
+    public void create_EmailAddress_instance() {
+        final String email = "jdoe@spine3.org";
 
-        assertEquals(domainName, valueOf(domainName).getValue());
+        assertEquals(email, valueOf(email).getValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void reject_invalid_name() {
-        valueOf("1.0");
+    public void reject_invalid_email() {
+        valueOf("fiz baz");
     }
 }
