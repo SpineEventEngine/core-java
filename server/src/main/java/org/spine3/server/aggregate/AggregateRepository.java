@@ -297,7 +297,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         aggregate.commitEvents();
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
 
-        if (aggregate.visibilityChanged()) {
+        if (aggregate.isVisibilityChanged()) {
             storage.writeVisibility(aggregate.getId(), aggregate.getVisibility());
         }
     }

@@ -150,7 +150,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * {@inheritDoc}
      */
     @Override
-    public boolean visibilityChanged() {
+    public boolean isVisibilityChanged() {
         return visibilityChanged;
     }
 

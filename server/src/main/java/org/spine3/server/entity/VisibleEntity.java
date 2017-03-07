@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 
 /**
- * An entity which has visibility.
+ * An entity which has {@linkplain Visibility visibility}.
  *
  * @author Alexander Yevsyukov
  */
@@ -35,7 +35,7 @@ public interface VisibleEntity<I, S extends Message> extends Entity<I, S> {
     Visibility getVisibility();
 
     /**
-     * Verifies whether visibility of the entity changed since its initialization.
+     * Tells whether visibility of the entity changed since its initialization.
      */
-    boolean visibilityChanged();
+    boolean isVisibilityChanged();
 }
