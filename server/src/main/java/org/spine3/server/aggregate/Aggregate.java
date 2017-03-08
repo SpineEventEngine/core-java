@@ -423,6 +423,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>The method circumvents the protection in the {@link #setState(Message, Version)
      * setState()} method by creating a fake builder instance, which is cleared
      * after the call.
+     *
+     * <p>This method has package-private access to be accessible by the
+     * {@code AggregateBuilder} test utility class from the {@code testutil} module.
      */
     @VisibleForTesting
     void injectState(S stateToRestore, Version versionFromSnapshot) {
