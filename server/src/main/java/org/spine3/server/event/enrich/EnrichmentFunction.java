@@ -31,6 +31,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * {@code EnrichmentFunction} defines how a source message class can be transformed into a target message class.
@@ -57,8 +58,11 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
     EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
         this.eventClass = checkNotNull(eventClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
-        checkArgument(!eventClass.equals(enrichmentClass),
-                      "Event and enrichment class must not be equal. Passed two values of %", eventClass);
+        checkArgument(
+            !eventClass.equals(enrichmentClass),
+            "Event and enrichment class must not be equal. Passed two values of %",
+            eventClass
+        );
     }
 
     Class<S> getEventClass() {
@@ -89,13 +93,13 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      * definitions. The function internal state in this case is appended with the parsed data, which
      * is later used at runtime.
      *
-     * <p>After the function is activated successfully, the {@link #isActive()} returns {@code true}.
+     * <p>After the function is activated, the {@link #isActive()} returns {@code true}.
      *
      * <p>If an activation cannot be performed flawlessly, the {@code IllegalStateException}
      * should be thrown. In this case {@link #isActive()} should return {@code false}.
      *
-     * @throws IllegalStateException if the function cannot perform the conversion in its current state
-     * or because of the state of its environment
+     * @throws IllegalStateException if the function cannot perform the conversion in its
+     *                               current state or because of the state of its environment
      */
     abstract void activate();
 
@@ -153,8 +157,12 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      */
     protected void ensureActive() {
         if(!isActive()) {
-            throw new IllegalStateException("The given instance of " + getClass() + " is not active at the moment. " +
-                                                    "Please use `activate()` first.");
+            final String errMsg = format(
+                    "The given instance of %s is not active at the moment. " +
+                    "Please use `activate()` first.",
+                    getClass().getName()
+            );
+            throw new IllegalStateException(errMsg);
         }
     }
 }
