@@ -279,20 +279,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                               .getIdsList();
         final Class<I> expectedIdClass = getIdClass();
 
-        final Collection<I> result = Collections2.transform(idsList,
-                                                            new EntityIdFunction<>(expectedIdClass));
+        final EntityIdFunction<I> func = new EntityIdFunction<>(expectedIdClass);
+        final Collection<I> result = Collections2.transform(idsList, func);
 
         return result;
     }
 
     /**
-     * Converts the passed entity into {@code EntityStorageRecord} that
-     * stores the entity data.
+     * Converts the passed entity into the record.
      */
     protected EntityRecord toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
-        return entityRecord != null ? entityRecord
-                             : EntityRecord.getDefaultInstance();
+        return entityRecord;
     }
 
     private E toEntity(EntityRecord record) {
