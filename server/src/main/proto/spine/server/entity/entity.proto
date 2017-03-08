@@ -38,7 +38,6 @@ import "spine/base/version.proto";
 message EntityRecord {
     option (SPI_type) = true;
 
-    //TODO:2017-02-19:alexander.yevsyukov: find usages and fill in this field
     // The ID of the entity.
     google.protobuf.Any entity_id = 1;
 
