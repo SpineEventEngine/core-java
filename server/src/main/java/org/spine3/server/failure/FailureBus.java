@@ -19,6 +19,7 @@
  */
 package org.spine3.server.failure;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -107,6 +108,15 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, Failu
     @Override
     protected FailureDispatcherRegistry registry() {
         return (FailureDispatcherRegistry) super.registry();
+    }
+
+    /**
+     * Exposes the associated message delivery strategy to tests.
+     */
+    @VisibleForTesting
+    @Override
+    protected DispatcherFailureDelivery delivery() {
+        return (DispatcherFailureDelivery) super.delivery();
     }
 
     /**
