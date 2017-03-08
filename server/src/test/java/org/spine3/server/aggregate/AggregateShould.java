@@ -33,6 +33,7 @@ import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.test.TimeTests;
@@ -509,10 +510,18 @@ public class AggregateShould {
         private final boolean brokenHandler;
         private final boolean brokenApplier;
 
-        public FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
+        private FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
             super(id);
             this.brokenHandler = brokenHandler;
             this.brokenApplier = brokenApplier;
+        }
+
+        /**
+         * This method attempts to call {@link #setState(Message, Version)} setState()}
+         * directly, which should result in {@link IllegalStateException}.
+         */
+        void tryToUpdateStateDirectly() {
+            setState(Project.getDefaultInstance(), Version.getDefaultInstance());
         }
 
         @Assign
@@ -583,6 +592,15 @@ public class AggregateShould {
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void reject_direct_calls_to_setState() {
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, false, false);
+
+        // This should throw ISE.
+        faultyAggregate.tryToUpdateStateDirectly();
     }
 
     @Test(expected = IllegalStateException.class)
