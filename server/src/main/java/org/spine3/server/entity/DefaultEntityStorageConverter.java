@@ -34,7 +34,6 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
  *
  * @author Alexander Yevsyukov
- * @see Tuple
  */
 class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
@@ -59,7 +58,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     }
 
     @Override
-    protected Tuple<I> doForward(E entity) {
+    protected EntityRecord doForward(E entity) {
         final Any entityId = idToAny(entity.getId());
         final Any stateAny = pack(entity.getState());
         final EntityRecord.Builder builder =
@@ -73,14 +72,12 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
                    .setLifecycleFlags(versionable.getLifecycleFlags());
         }
 
-        final Tuple<I> result = tuple(entity.getId(), builder.build());
-        return result;
+        return builder.build();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected E doBackward(Tuple<I> tuple) {
-        final EntityRecord entityRecord = tuple.getState();
+    protected E doBackward(EntityRecord entityRecord) {
         final Message unpacked = unpack(entityRecord.getState());
         final TypeUrl entityStateType = repository.getEntityStateType();
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);

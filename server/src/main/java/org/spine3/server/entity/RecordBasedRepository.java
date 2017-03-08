@@ -51,7 +51,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
-import static org.spine3.server.entity.EntityStorageConverter.tuple;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 
 /**
@@ -131,7 +130,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         if (!isEntityVisible().apply(record.getLifecycleFlags())) {
             return Optional.absent();
         }
-        final E entity = toEntity(id, record);
+        final E entity = toEntity(record);
         return Optional.of(entity);
     }
 
@@ -203,13 +202,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final RecordStorage<I> storage = recordStorage();
         final Iterable<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
 
-        final Iterator<I> idIterator = ids.iterator();
         final Iterator<EntityRecord> recordIterator = entityStorageRecords.iterator();
         final List<E> entities = Lists.newLinkedList();
-        final EntityStorageConverter<I, E, S> converter = entityConverter().withFieldMask(fieldMask);
+        final EntityStorageConverter<I, E, S> converter =
+                entityConverter().withFieldMask(fieldMask);
 
-        while (idIterator.hasNext() && recordIterator.hasNext()) {
-            final I id = idIterator.next();
+        while (recordIterator.hasNext()) {
             final EntityRecord record = recordIterator.next();
 
             if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
@@ -217,9 +215,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 continue;
             }
 
-            final EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
             final E entity = converter.reverse()
-                                       .convert(tuple);
+                                      .convert(record);
             entities.add(entity);
         }
 
@@ -293,15 +290,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * stores the entity data.
      */
     protected EntityRecord toRecord(E entity) {
-        final EntityStorageConverter.Tuple<I> tuple = entityConverter().convert(entity);
-        return tuple != null ? tuple.getState()
+        final EntityRecord entityRecord = entityConverter().convert(entity);
+        return entityRecord != null ? entityRecord
                              : EntityRecord.getDefaultInstance();
     }
 
-    private E toEntity(I id, EntityRecord record) {
-        EntityStorageConverter.Tuple<I> tuple = tuple(id, record);
+    private E toEntity(EntityRecord record) {
         final E result = entityConverter().reverse()
-                                          .convert(tuple);
+                                          .convert(record);
         return result;
     }
 
@@ -317,7 +313,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             @Override
             public E apply(@Nullable Map.Entry<I, EntityRecord> input) {
                 checkNotNull(input);
-                final E result = toEntity(input.getKey(), input.getValue());
+                final E result = toEntity(input.getValue());
                 return result;
             }
         };
