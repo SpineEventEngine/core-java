@@ -69,19 +69,25 @@ class InMemoryStandStorage extends StandStorage {
     public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type,
                                                            FieldMask fieldMask) {
         final Map<AggregateStateId, EntityRecord> allRecords = readAll(fieldMask);
-        final Map<AggregateStateId, EntityRecord> resultMap = Maps.filterKeys(
-                allRecords,
+        final Map<AggregateStateId, EntityRecord> resultMap = filterByType(allRecords, type);
+        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(resultMap.values());
+        return result;
+    }
+
+    private static Map<AggregateStateId, EntityRecord> filterByType(
+            Map<AggregateStateId, EntityRecord> records,
+            final TypeUrl type) {
+        final Map<AggregateStateId, EntityRecord> result = Maps.filterKeys(
+                records,
                 new Predicate<AggregateStateId>() {
                     @Override
-            public boolean apply(@Nullable AggregateStateId stateId) {
-                checkNotNull(stateId);
-                final boolean typeMatches = stateId.getStateType()
-                                                   .equals(type);
-                return typeMatches;
-            }
-        });
-
-        final ImmutableList<EntityRecord> result = ImmutableList.copyOf(resultMap.values());
+                    public boolean apply(@Nullable AggregateStateId stateId) {
+                        checkNotNull(stateId);
+                        final boolean typeMatches = stateId.getStateType()
+                                                           .equals(type);
+                        return typeMatches;
+                    }
+                });
         return result;
     }
 
