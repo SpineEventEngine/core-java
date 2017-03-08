@@ -51,8 +51,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static void checkNotEqual(int previousValue, int newValue) {
-        checkArgument(Integer.compare(newValue, previousValue) != 0,
-                      VALUES_CANNOT_BE_EQUAL);
+        checkArgument(newValue != previousValue, VALUES_CANNOT_BE_EQUAL);
     }
 
     /**
@@ -61,8 +60,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static void checkNotEqual(long previousValue, long newValue) {
-        checkArgument(Long.compare(newValue, previousValue) != 0,
-                      VALUES_CANNOT_BE_EQUAL);
+        checkArgument(newValue != previousValue, VALUES_CANNOT_BE_EQUAL);
     }
 
     /**
@@ -91,6 +89,8 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if values are equal
      */
     public static <T> void checkNotEqual(T previousValue, T newValue) {
+        checkNotNull(previousValue);
+        checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), VALUES_CANNOT_BE_EQUAL);
     }
 
@@ -100,6 +100,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if parameter is empty
      */
     public static void checkNewValueNotEmpty(ByteString newValue) {
+        checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }
 
@@ -109,6 +110,7 @@ public class Preconditions {
      * @throws IllegalArgumentException in case if parameter is empty
      */
     public static void checkNewValueNotEmpty(String newValue) {
+        checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }
 
