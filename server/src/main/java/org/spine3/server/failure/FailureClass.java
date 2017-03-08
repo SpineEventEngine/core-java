@@ -19,10 +19,13 @@
  */
 package org.spine3.server.failure;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
 import org.spine3.base.MessageClass;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -65,5 +68,14 @@ public class FailureClass extends MessageClass {
         }
         final FailureClass result = of(message.getClass());
         return result;
+    }
+
+    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
+    public static ImmutableSet<FailureClass> setOf(Set<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
     }
 }

@@ -17,53 +17,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.server.event;
+package org.spine3.server.failure;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.EventClass;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventEnvelope;
+import org.spine3.base.CommandContext;
 import org.spine3.server.bus.MessageDispatcher;
-import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.server.reflect.FailureSubscriberMethod;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
+ * The abstract base for objects that can be subscribed to receive business failures
+ * from {@link org.spine3.server.failure.FailureBus FailureBus}.
  *
- * <p>Objects may also receive events via {@link EventDispatcher}s that can be
- * registered with {@code EventBus}.
- *
- * @author Alexander Yevsyukov
  * @author Alex Tymchenko
- * @see EventBus#register(MessageDispatcher)
+ * @author Alexander Yevsyukov
+ * @see org.spine3.server.failure.FailureBus#register(MessageDispatcher)
  */
-public abstract class EventSubscriber implements EventDispatcher {
-
+public class FailureSubscriber implements FailureDispatcher {
     /**
      * Cached set of the event classes this subscriber is subscribed to.
      */
     @Nullable
-    private Set<EventClass> eventClasses;
+    private Set<FailureClass> failureClasses;
 
     @Override
-    public void dispatch(EventEnvelope envelope) {
-        handle(envelope.getMessage(), envelope.getEventContext());
+    public void dispatch(FailureEnvelope envelope) {
+        handle(envelope.getMessage(), envelope.getCommandMessage(), envelope.getCommandContext());
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<EventClass> getMessageClasses() {
-        if (eventClasses == null) {
-            eventClasses = ImmutableSet.copyOf(EventSubscriberMethod.getEventClasses(getClass()));
+    public Set<FailureClass> getMessageClasses() {
+        if (failureClasses == null) {
+            failureClasses = ImmutableSet.copyOf(
+                    FailureSubscriberMethod.getFailureClasses(getClass()));
         }
-        return eventClasses;
+        return failureClasses;
     }
 
-    public void handle(Message eventMessage, EventContext context) {
-        EventSubscriberMethod.invokeSubscriber(this, eventMessage, context);
+    public void handle(Message failureMessage, Message commandMessage, CommandContext context) {
+        FailureSubscriberMethod.invokeSubscriber(this,
+                                                 failureMessage, commandMessage, context);
     }
 }

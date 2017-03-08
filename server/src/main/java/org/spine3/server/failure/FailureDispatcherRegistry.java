@@ -21,6 +21,8 @@ package org.spine3.server.failure;
 
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 
+import java.util.Set;
+
 /**
  * The registry of objects dispatching the business failures to their subscribers.
  *
@@ -30,4 +32,25 @@ import org.spine3.server.outbus.OutputDispatcherRegistry;
  */
 public class FailureDispatcherRegistry extends OutputDispatcherRegistry<FailureClass,
                                                                         FailureDispatcher> {
+    /**
+     * {@inheritDoc}
+     *
+     * Overrides to expose this method to
+     * {@linkplain FailureBus#getDispatchers(FailureClass) failureBus}.
+     */
+    @Override
+    protected Set<FailureDispatcher> getDispatchers(FailureClass messageClass) {
+        return super.getDispatchers(messageClass);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Overrides to expose this method to
+     * {@linkplain FailureBus#hasDispatchers(FailureClass) failureBus}.
+     */
+    @Override
+    protected boolean hasDispatchersFor(FailureClass eventClass) {
+        return super.hasDispatchersFor(eventClass);
+    }
 }

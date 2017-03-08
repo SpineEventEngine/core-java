@@ -20,10 +20,12 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Utility class for working with failures.
@@ -55,5 +57,34 @@ public class Failures {
         checkNotNull(failure);
         final M result = AnyPacker.unpack(failure.getMessage());
         return result;
+    }
+
+    /**
+     * Creates a new {@code Failure} instance.
+     *
+     * @param messageOrAny the failure message or {@code Any} containing the message
+     * @param command      the {@code Command}, which triggered the failure.
+     * @return created failure instance
+     */
+    public static Failure createFailure(Message messageOrAny,
+                                        Command command) {
+        checkNotNull(messageOrAny);
+        checkNotNull(command);
+
+        final Any packedFailureMessage = toAny(messageOrAny);
+        final FailureContext context = FailureContext.newBuilder()
+                                                     .setCommand(command)
+                                                     .build();
+        final Failure result = Failure.newBuilder()
+                                      .setMessage(packedFailureMessage)
+                                      .setContext(context)
+                                      .build();
+        return result;
+    }
+
+    private static Any toAny(Message messageOrAny) {
+        return (messageOrAny instanceof Any)
+                                         ? (Any) messageOrAny
+                                         : pack(messageOrAny);
     }
 }

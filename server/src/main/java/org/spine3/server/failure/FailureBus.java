@@ -31,6 +31,7 @@ import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.io.StreamObservers.emptyObserver;
@@ -108,6 +109,16 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, Failu
     @Override
     protected FailureDispatcherRegistry registry() {
         return (FailureDispatcherRegistry) super.registry();
+    }
+
+    @VisibleForTesting
+    Set<FailureDispatcher> getDispatchers(FailureClass failureClass) {
+        return registry().getDispatchers(failureClass);
+    }
+
+    @VisibleForTesting
+    boolean hasDispatchers(FailureClass failureClass) {
+        return registry().hasDispatchersFor(failureClass);
     }
 
     /**

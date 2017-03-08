@@ -21,6 +21,9 @@ package org.spine3.server.failure;
 
 import com.google.protobuf.Message;
 import org.spine3.base.AbstractMessageEnvelope;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
 
@@ -44,10 +47,25 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
      */
     private final FailureClass failureClass;
 
+    /**
+     * The message of a {@link Command}, which processing triggered the failure.
+     */
+    private final Message commandMessage;
+
+    /**
+     * The context of a {@link Command}, which processing triggered the failure.
+     */
+    private final CommandContext commandContext;
+
     protected FailureEnvelope(Failure failure) {
         super(failure);
         this.failureMessage = Failures.getMessage(failure);
         this.failureClass = FailureClass.of(failureMessage);
+        this.commandMessage = Commands.getMessage(failure.getContext()
+                                                         .getCommand());
+        this.commandContext = failure.getContext()
+                                     .getCommand()
+                                     .getContext();
     }
 
     /**
@@ -66,5 +84,13 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
     @Override
     public FailureClass getMessageClass() {
         return failureClass;
+    }
+
+    public Message getCommandMessage() {
+        return commandMessage;
+    }
+
+    public CommandContext getCommandContext() {
+        return commandContext;
     }
 }
