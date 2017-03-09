@@ -25,6 +25,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.TypeUrl;
 
+import static org.spine3.base.Identifiers.idFromAny;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -32,7 +34,6 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
  *
  * @author Alexander Yevsyukov
- * @see Tuple
  */
 class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
@@ -57,38 +58,38 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     }
 
     @Override
-    protected Tuple<I> doForward(E entity) {
+    protected EntityRecord doForward(E entity) {
+        final Any entityId = idToAny(entity.getId());
         final Any stateAny = pack(entity.getState());
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
+                            .setEntityId(entityId)
                             .setState(stateAny);
 
         if (entity instanceof AbstractVersionableEntity) {
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
-                   .setVisibility(versionable.getVisibility());
+                   .setLifecycleFlags(versionable.getLifecycleFlags());
         }
 
-        final Tuple<I> result = tuple(entity.getId(), builder.build());
-        return result;
+        return builder.build();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected E doBackward(Tuple<I> tuple) {
-        final Message unpacked = unpack(tuple.getState()
-                                             .getState());
+    protected E doBackward(EntityRecord entityRecord) {
+        final Message unpacked = unpack(entityRecord.getState());
         final TypeUrl entityStateType = repository.getEntityStateType();
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
 
-        final E entity = repository.create(tuple.getId());
+        final I id = (I) idFromAny(entityRecord.getEntityId());
+        final E entity = repository.create(id);
 
-        final EntityRecord record = tuple.getState();
         if (entity != null) {
             if (entity instanceof AbstractVersionableEntity) {
                 final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                versionable.setState(state, record.getVersion());
-                versionable.setVisibility(record.getVisibility());
+                versionable.setState(state, entityRecord.getVersion());
+                versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
             } else {
                 entity.injectState(state);
             }

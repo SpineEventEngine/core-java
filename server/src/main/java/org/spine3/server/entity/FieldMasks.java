@@ -92,9 +92,10 @@ public class FieldMasks {
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(FieldMask mask,
-                                                                                         Collection<M> messages,
-                                                                                         TypeUrl type) {
+    public static <M extends Message, B extends Message.Builder>
+    Collection<M> applyMask(FieldMask mask,
+                            Collection<M> messages,
+                            TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);

@@ -197,23 +197,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Marks the entity with the passed ID as {@code archived}.
-     *
-     * @param id the ID of the entity
-     */
-    protected abstract void markArchived(I id);
-
-    /**
-     * Marks the entity with the passed ID as {@code deleted}.
-     *
-     * <p>This method does not delete information. Entities marked as {@code deleted}
-     * can be later physically removed from a storage by custom clean-up operation.
-     *
-     * @param id the ID of the entity
-     */
-    protected abstract void markDeleted(I id);
-
-    /**
      * Returns the storage assigned to this repository or {@code null} if
      * the storage is not assigned yet.
      */

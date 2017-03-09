@@ -20,27 +20,33 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.SPI;
+import com.google.common.base.Optional;
+import com.google.protobuf.Message;
+import org.spine3.server.entity.LifecycleFlags;
 
 /**
- * A container for the storage fields used to store the
- * {@linkplain org.spine3.server.entity.Visibility Visibility}.
+ * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
  *
- * @author Dmytro Dashenkov
- * @see StorageField
+ * @author Alexander Yevsyukov
  */
-@SPI
-public enum VisibilityField implements StorageField {
+public interface StorageWithLifecycleFlags<I, R extends Message> extends Storage<I, R> {
 
     /**
-     * A {@linkplain boolean} field representing whether
-     * the relevant record is {@code archived} or not.
+     * Reads the visibility status for the entity with the passed ID.
+     *
+     * <p>This method returns {@code Optional.absent()} if none of the
+     * flags of visibility flags were set before.
+     *
+     * @param id the ID of the entity
+     * @return the aggregate visibility or {@code Optional.absent()}
      */
-    archived,
+    Optional<LifecycleFlags> readLifecycleFlags(I id);
 
     /**
-     * A {@linkplain boolean} field representing whether
-     * the relevant record is {@code deleted} or not.
+     * Writes the visibility status for the entity with the passed ID.
+     *
+     * @param id         the ID of the entity for which to update the status
+     * @param flags the status to write
      */
-    deleted
+    void writeLifecycleFlags(I id, LifecycleFlags flags);
 }
