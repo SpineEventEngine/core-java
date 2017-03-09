@@ -242,16 +242,20 @@ public class Stringifiers {
      */
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
 
+        private static final String DEFAULT_DELIMITER = ",";
+
         private final Class<T> listGenericClass;
 
         /**
-         * The delimiter for the passed elements in the String representation. Comma by default.
+         * The delimiter for the passed elements in the String representation,
+         *  {@code DEFAULT_DELIMITER} by default.
          */
-        private String delimiter = ",";
+        private final String delimiter;
 
-        public ListStringifier(Class<T> listGeneric) {
+        public ListStringifier(Class<T> listGenericClass) {
             super();
-            this.listGenericClass = listGeneric;
+            this.delimiter = DEFAULT_DELIMITER;
+            this.listGenericClass = listGenericClass;
         }
 
         /**
