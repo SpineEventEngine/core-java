@@ -25,6 +25,8 @@ import org.junit.Test;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * @author Alexander Litus
@@ -53,5 +55,20 @@ public class ExceptionsShould {
                 .setDefault(Exception.class, new RuntimeException(""))
                 .setDefault(Throwable.class, new Error())
                 .testAllPublicStaticMethods(Exceptions.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_formatted_IAE() {
+        newIllegalArgumentException("%d, %d, %s kaboom", 1, 2, "three");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_formatted_IAE_with_cause() {
+        newIllegalArgumentException(new RuntimeException("checking"), "%s", "stuff");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_formatted_ISE() {
+        newIllegalStateException("%s check %s", "state", "failed");
     }
 }
