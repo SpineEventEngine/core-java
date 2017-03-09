@@ -517,7 +517,7 @@ public class AggregateShould {
         }
 
         /**
-         * This method attempts to call {@link #setState(Message, Version)} setState()}
+         * This method attempts to call {@link #setState(Message, Version) setState()}
          * directly, which should result in {@link IllegalStateException}.
          */
         void tryToUpdateStateDirectly() {
