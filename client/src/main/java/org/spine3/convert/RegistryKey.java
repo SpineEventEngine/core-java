@@ -22,7 +22,7 @@ package org.spine3.convert;
 
 /**
  * A marker interface, serves as the type identifier for the keys
- * of the {@code StringRegistry} warehouse to save and retrieve the {@code Stringifier} instances.
+ * of the {@code StringRegistry} storage to save and retrieve the {@code Stringifier} instances.
  *
  * @author Illia Shepilov
  * @see StringifierRegistry
