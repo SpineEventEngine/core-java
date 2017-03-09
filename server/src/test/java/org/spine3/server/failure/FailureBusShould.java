@@ -240,6 +240,35 @@ public class FailureBusShould {
                               .contains(dispatcherTwo));
     }
 
+    @Test
+    public void catch_exceptions_caused_by_subscribers() {
+        final FaultySubscriber faultySubscriber = new FaultySubscriber();
+
+        failureBus.register(faultySubscriber);
+        failureBus.post(invalidProjectNameFailure());
+
+        assertTrue(faultySubscriber.isMethodCalled());
+    }
+
+    @Test
+    public void unregister_registries_on_close() throws Exception {
+        final FailureBus failureBus = FailureBus.newBuilder()
+                                                .build();
+        failureBus.register(new BareDispatcher());
+        failureBus.register(new InvalidProjectNameSubscriber());
+        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+
+        failureBus.close();
+
+        assertTrue(failureBus.getDispatchers(failureClass)
+                             .isEmpty());
+    }
+
+    @Test
+    public void have_log() {
+        assertNotNull(FailureBus.log());
+    }
+
     private static Failure invalidProjectNameFailure() {
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId(newUuid())
@@ -328,6 +357,25 @@ public class FailureBusShould {
         private Set<FailureEnvelope> getPostponedFailures() {
             final Set<FailureEnvelope> envelopes = postponedExecutions.keySet();
             return envelopes;
+        }
+    }
+
+    /** The subscriber which throws exception from the subscriber method. */
+    private static class FaultySubscriber extends FailureSubscriber {
+
+        private boolean methodCalled = false;
+
+        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+        @Subscribe
+        public void on(ProjectFailures.InvalidProjectName failure, Command command) {
+            methodCalled = true;
+            throw new UnsupportedOperationException(
+                    "Faulty subscriber should have failed: " +
+                    FaultySubscriber.class.getSimpleName());
+        }
+
+        private boolean isMethodCalled() {
+            return this.methodCalled;
         }
     }
 }

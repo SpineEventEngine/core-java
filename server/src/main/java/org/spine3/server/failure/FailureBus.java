@@ -189,6 +189,7 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, Failu
         private final Logger value = LoggerFactory.getLogger(FailureBus.class);
     }
 
+    @VisibleForTesting
     static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
