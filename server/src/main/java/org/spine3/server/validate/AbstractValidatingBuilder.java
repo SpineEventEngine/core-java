@@ -88,13 +88,13 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     }
 
     /**
-     * Validates the field according to the protoBuf declaration.
+     * Validates the field according to the protocol buffer message declaration.
      *
      * @param descriptor the {@code FieldDescriptor} of the field
      * @param fieldValue the value of the field
      * @param fieldName  the name of the field
      * @param <V>        the type of the field value
-     * @throws ConstraintViolationThrowable if the validating value contains constraint violations
+     * @throws ConstraintViolationThrowable if there are some constraint violations
      */
     public <V> void validate(FieldDescriptor descriptor, V fieldValue, String fieldName)
             throws ConstraintViolationThrowable {

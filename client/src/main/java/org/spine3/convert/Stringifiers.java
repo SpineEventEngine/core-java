@@ -250,7 +250,7 @@ public class Stringifiers {
         private final Class<T> listGenericClass;
 
         /**
-         * The delimiter for the passed elements in the String representation,
+         * The delimiter for the passed elements in the {@code String} representation,
          * {@code DEFAULT_DELIMITER} by default.
          */
         private final String delimiter;
@@ -262,7 +262,11 @@ public class Stringifiers {
         }
 
         /**
-         * That constructor should be used when need to change the {@code delimiter}.
+         * That constructor should be used when need to use
+         * a custom delimiter during conversion.
+         *
+         * @param listGenericClass the class of the list elements
+         * @param delimiter        the delimiter for the passed elements via string
          */
         public ListStringifier(Class<T> listGenericClass, String delimiter) {
             super();
