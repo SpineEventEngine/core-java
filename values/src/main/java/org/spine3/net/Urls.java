@@ -21,6 +21,7 @@
 package org.spine3.net;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utility class for working with {@link Url}.
@@ -46,7 +47,7 @@ public class Urls {
     public static Url of(Url rawUrl) {
         checkNotNull(rawUrl);
         if (rawUrl.getValueCase() != Url.ValueCase.RAW) {
-            throw new IllegalArgumentException("Given url is already built");
+            throw newIllegalArgumentException("Given url is already built (%s)", rawUrl);
         }
 
         final String rawUrlString = rawUrl.getRaw();
@@ -117,7 +118,7 @@ public class Urls {
         final Url.Record record = url.getRecord();
         final String host = record.getHost();
         if (host.isEmpty()) {
-            throw new IllegalArgumentException("Url host can not be empty!");
+            throw newIllegalArgumentException("Url host can not be empty (%s)", url);
         }
 
         final Url.Record.Authorization auth = record.getAuth();

@@ -31,6 +31,7 @@ import org.spine3.protobuf.Messages;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Wrapper of an identifier value.
@@ -319,11 +320,12 @@ class Identifier<I> {
         }
 
         static <I> IllegalArgumentException unsupported(I id) {
-            return new IllegalArgumentException("ID of unsupported type encountered: " + id);
+            return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
         }
 
         private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return new IllegalArgumentException("Unsupported ID class encountered: " + idClass);
+            return newIllegalArgumentException("Unsupported ID class encountered: %s",
+                                               idClass.getName());
         }
     }
 }

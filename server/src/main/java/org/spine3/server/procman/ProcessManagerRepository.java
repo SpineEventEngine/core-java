@@ -43,6 +43,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+
 /**
  * The abstract base for Process Managers repositories.
  *
@@ -177,7 +179,7 @@ public abstract class ProcessManagerRepository<I,
         if (!classes.contains(commandClass)) {
             final String eventClassName = commandClass.value()
                                                       .getName();
-            throw new IllegalArgumentException("Unexpected command of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected command of class: %s", eventClassName);
         }
     }
 
@@ -189,7 +191,7 @@ public abstract class ProcessManagerRepository<I,
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()
                                                     .getName();
-            throw new IllegalArgumentException("Unexpected event of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
         }
     }
 

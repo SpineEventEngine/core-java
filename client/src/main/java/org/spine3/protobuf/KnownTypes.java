@@ -75,6 +75,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A map which contains all Protobuf types known to the application.
@@ -212,19 +213,21 @@ public class KnownTypes {
         checkArgument(typeUrl != null, "Given type name is invalid");
 
         final ClassName className = getClassName(typeUrl);
-        final Class<?> clazz;
+        final Class<?> cls;
         try {
-            clazz = Class.forName(className.value());
+            cls = Class.forName(className.value());
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
         final Descriptors.Descriptor descriptor;
         try {
-            final java.lang.reflect.Method descriptorGetter = clazz.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
+            final java.lang.reflect.Method descriptorGetter =
+                    cls.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
             descriptor = (Descriptors.Descriptor) descriptorGetter.invoke(null);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Type " + typeName +
-                                               " is not a protobuf Message", e);
+        } catch (NoSuchMethodException
+                | IllegalAccessException
+                | InvocationTargetException e) {
+            throw newIllegalArgumentException(e, "Type %s is not a protobuf Message", typeName);
         }
         return descriptor;
     }

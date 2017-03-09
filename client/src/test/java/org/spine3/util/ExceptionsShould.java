@@ -51,6 +51,7 @@ public class ExceptionsShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Exception.class, new RuntimeException(""))
+                .setDefault(Throwable.class, new Error())
                 .testAllPublicStaticMethods(Exceptions.class);
     }
 }
