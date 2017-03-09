@@ -27,6 +27,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
+import static org.spine3.util.Exceptions.unsupported;
 
 /**
  * @author Alexander Litus
@@ -41,12 +42,12 @@ public class ExceptionsShould {
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception() {
-        Exceptions.unsupported();
+        unsupported();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
-        Exceptions.unsupported(newUuid());
+        unsupported(newUuid());
     }
 
     @Test
