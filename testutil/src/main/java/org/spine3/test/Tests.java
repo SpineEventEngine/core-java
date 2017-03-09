@@ -26,7 +26,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
@@ -206,8 +205,8 @@ public class Tests {
      * Returns {@code StreamObserver} that records the responses.
      *
      * <p>Use this method when you need to verify the responses of calls like
-     * {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)} CommandBus.post()}
-     * and similar methods.
+     * {@link org.spine3.server.command.CommandBus#post(org.spine3.base.Command, StreamObserver)
+     * CommandBus.post()} and similar methods.
      *
      * <p>Returns a fresh instance upon every call to avoid state clashes.
      */
