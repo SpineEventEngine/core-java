@@ -367,7 +367,7 @@ public class FailureBusShould {
 
         @SuppressWarnings("unused") // It's fine for a faulty subscriber.
         @Subscribe
-        public void on(ProjectFailures.InvalidProjectName failure, Command command) {
+        public void on(ProjectFailures.InvalidProjectName failure, UpdateProjectName command) {
             methodCalled = true;
             throw new UnsupportedOperationException(
                     "Faulty subscriber should have failed: " +
