@@ -29,7 +29,7 @@ import static java.lang.String.format;
 
 /**
  * Utility class for working with exceptions for cases that are not
- * supported by {@link com.google.common.base.Throwables Throwables}.
+ * covered by {@link com.google.common.base.Throwables Throwables} class from Guava.
  *
  * @author Alexander Yevsyukov
  */
@@ -57,8 +57,7 @@ public class Exceptions {
      * @return nothing ever
      * @throws UnsupportedOperationException always
      */
-    public static UnsupportedOperationException unsupported(String message)
-            throws UnsupportedOperationException {
+    public static UnsupportedOperationException unsupported(String message) {
         checkNotNull(message);
         throw new UnsupportedOperationException(message);
     }
@@ -83,7 +82,7 @@ public class Exceptions {
      * @throws UnsupportedOperationException always
      */
     @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
-    public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {
+    public static UnsupportedOperationException unsupported() {
         throw new UnsupportedOperationException();
     }
 
@@ -114,8 +113,8 @@ public class Exceptions {
      * @return nothing ever, always throws an exception. The return type is given for convenience.
      * @throws IllegalArgumentException always
      */
-    public static IllegalArgumentException newIllegalArgumentException(
-            String format, Object... args) {
+    public static IllegalArgumentException newIllegalArgumentException(String format,
+                                                                       Object... args) {
         final String errMsg = formatMessage(format, args);
         throw new IllegalArgumentException(errMsg);
     }
