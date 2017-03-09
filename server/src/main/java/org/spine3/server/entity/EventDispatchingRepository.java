@@ -44,11 +44,9 @@ import java.util.Set;
 public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractVersionableEntity<I, S>,
                                                  S extends Message>
-        extends RecordBasedRepository<I, E, S>
+        extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final EntityFactory<I, E> entityFactory;
-    private final EntityStorageConverter<I, E, S> storageConverter;
     private final IdSetFunctions<I> idSetFunctions;
 
     /**
@@ -57,23 +55,10 @@ public abstract class EventDispatchingRepository<I,
      * @param boundedContext the {@code BoundedContext} in which the repository works
      * @param defaultFunction the default function for getting an target entity IDs
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
     protected EventDispatchingRepository(BoundedContext boundedContext,
                                          IdSetEventFunction<I, Message> defaultFunction) {
         super(boundedContext);
-        this.entityFactory = new DefaultEntityFactory<>(this);
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
-    }
-
-    @Override
-    protected EntityFactory<I, E> entityFactory() {
-        return this.entityFactory;
-    }
-
-    @Override
-    protected EntityStorageConverter<I, E, S> entityConverter() {
-        return this.storageConverter;
     }
 
     /**

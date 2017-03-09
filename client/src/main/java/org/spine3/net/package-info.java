@@ -18,21 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
-
-import com.google.common.base.Converter;
-
 /**
- * Serves as converter from {@code I} to {@code String} with an associated
- * reverse function from {@code String} to {@code I}.
- *
- * <p>It is used for converting back and forth between the different
- * representations of the same information.
- *
- * @author Alexander Yevsyukov
- * @author Illia Shepilov
- * @see #convert(Object)
- * @see #reverse()
+ * This package contains classes and interfaces for Internet data types.
  */
-public abstract class Stringifier<I> extends Converter<I, String> {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.net;
+
+import javax.annotation.ParametersAreNonnullByDefault;

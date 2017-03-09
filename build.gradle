@@ -33,11 +33,11 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.8.16-SNAPSHOT'
+        spineVersion = '0.8.18-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.8.3-SNAPSHOT'
+        spineToolsVersion = '0.8.3-SNAPSHOT'
     }
 
     dependencies {
@@ -48,7 +48,7 @@ buildscript {
             exclude group: 'com.google.guava'
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
-                                             version: spineProtobufPluginVersion
+                                             version: spineToolsVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
     }
@@ -102,8 +102,8 @@ subprojects {
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
     }
 
-    apply plugin: 'java'
     apply plugin: 'com.google.protobuf'
+    apply plugin: 'java'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -221,6 +221,8 @@ subprojects {
         from sourceSets.test.output
         classifier "test"
     }
+
+    apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"
 
     idea.module.iml {
         beforeMerged { final module ->

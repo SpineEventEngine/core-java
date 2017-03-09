@@ -74,8 +74,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /** {@inheritDoc} */
     @Override
-    protected Storage createStorage(StorageFactory factory) {
-        final Storage result = factory.createRecordStorage(getEntityClass());
+    protected Storage<I, ?> createStorage(StorageFactory factory) {
+        final Storage<I, ?> result = factory.createRecordStorage(getEntityClass());
         return result;
     }
 
@@ -265,7 +265,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Field mask is applied according to
      * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask
+     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
      * >FieldMask specs</a>.
      *
      * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.

@@ -20,7 +20,10 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
@@ -33,11 +36,14 @@ import org.spine3.type.ClassName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Exceptions.unsupported;
 
 /**
  * Abstract base class for repositories.
@@ -50,13 +56,13 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                 implements RepositoryView<I, E>,
                            AutoCloseable {
 
-    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+    private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
 
     /** The data storage for this repository. */
-    private Storage storage;
+    private Storage<I, ?> storage;
 
     /**
      * Cached value for the entity state type.
@@ -130,7 +136,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of entities managed by this repository. */
     @CheckReturnValue
-    protected Class<E> getEntityClass() {
+    public Class<E> getEntityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
             final Class<? extends Repository<I, E>> repoClass =
@@ -174,6 +180,21 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param obj an instance to store
      */
     protected abstract void store(E obj);
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The returned iterator does not support removal.
+     *
+     * <p>Iteration through entities is performed by {@linkplain #load(Object) loading}
+     * them one by one.
+     */
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterator<E> unfiltered = new EntityIterator<>(this);
+        final Iterator<E> filtered = Iterators.filter(unfiltered, filter);
+        return filtered;
+    }
 
     /**
      * Marks the entity with the passed ID as {@code archived}.
@@ -245,7 +266,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param factory the factory to create the storage
      * @return the created storage instance
      */
-    protected abstract Storage createStorage(StorageFactory factory);
+    protected abstract Storage<I, ?> createStorage(StorageFactory factory);
 
     /**
      * Closes the repository by closing the underlying storage.
@@ -292,6 +313,48 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             final Class<E> result = getGenericParameterType(repositoryClass,
                                                             GenericParameter.ENTITY.getIndex());
             return result;
+        }
+    }
+
+    /**
+     * An iterator of all entities from the storage.
+     *
+     * <p>This iterator does not allow removal.
+     */
+    private static class EntityIterator<I, E extends Entity<I, ?>>
+            implements Iterator<E> {
+
+        private final Repository<I, E> repository;
+        private final Iterator<I> index;
+
+        private EntityIterator(Repository<I, E> repository) {
+            this.repository = repository;
+            this.index = repository.storage.index();
+        }
+
+        @Override
+        public boolean hasNext() {
+            final boolean result = index.hasNext();
+            return result;
+        }
+
+        @Override
+        public E next() {
+            final I id = index.next();
+            final Optional<E> loaded = repository.load(id);
+            if (!loaded.isPresent()) {
+                final String idStr = idToString(id);
+                final String errMsg = format("Unable to load entity with ID: %s", idStr);
+                throw new IllegalStateException(errMsg);
+            }
+
+            final E entity = loaded.get();
+            return entity;
+        }
+
+        @Override
+        public void remove() {
+            throw unsupported();
         }
     }
 }
