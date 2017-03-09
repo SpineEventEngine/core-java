@@ -322,7 +322,6 @@ public class StringifiersShould {
                 new Stringifiers.ListStringifier<>(String.class).reverse()
                                                                 .convert(stringToConvert);
         assertNotNull(actualList);
-        assertEquals(5, actualList.size());
 
         final List<String> expectedList = Arrays.asList(stringToConvert.split(","));
         assertThat(actualList, is(expectedList));
@@ -353,7 +352,6 @@ public class StringifiersShould {
                                                    delimiter).reverse()
                                                              .convert(stringToConvert);
         assertNotNull(actualList);
-        assertEquals(5, actualList.size());
 
         final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
         assertThat(actualList, is(expectedList));
@@ -371,7 +369,7 @@ public class StringifiersShould {
         final Integer integerToConvert = 1;
         final String convertedValue =
                 new Stringifiers.IntegerStringifier().convert(integerToConvert);
-        assertEquals("1", convertedValue);
+        assertEquals(integerToConvert.toString(), convertedValue);
     }
 
     @Test
