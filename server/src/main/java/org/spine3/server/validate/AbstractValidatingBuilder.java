@@ -37,7 +37,10 @@ import java.util.List;
 import static java.lang.String.format;
 
 /**
+ * Serves as an abstract base for all validating builders.
+ *
  * @author Illia Shepilov
+ * @see ValidatingBuilder
  */
 @SuppressWarnings({
         "AbstractClassNeverImplemented",
@@ -49,6 +52,16 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
 
     private final StringifierRegistry registry = StringifierRegistry.getInstance();
 
+    /**
+     * Converts the passed `raw` value and returns it.
+     *
+     * @param registryKey the key of the {@code StringifierRegistry} warehouse
+     *                    to obtain {@code Stringifier}
+     * @param value       the value to convert
+     * @param <V>         the type of the converted value
+     * @return the converted value
+     * @throws ConversionError if passed value cannot be converted
+     */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
     // It is OK because caught exception is not ignored, it delivers exception to throw.
     public <V> V getConvertedValue(RegistryKey registryKey, String value) throws ConversionError {
@@ -74,10 +87,19 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
         throw new StringifierNotFoundException(exMessage);
     }
 
-    public <V> void validate(FieldDescriptor descriptor, V fieldValue, String valueName)
+    /**
+     * Validates the field according to the protoBuf declaration.
+     *
+     * @param descriptor the {@code FieldDescriptor} of the field
+     * @param fieldValue the value of the field
+     * @param fieldName  the name of the field
+     * @param <V>        the type of the field value
+     * @throws ConstraintViolationThrowable if the validating value contains constraint violations
+     */
+    public <V> void validate(FieldDescriptor descriptor, V fieldValue, String fieldName)
             throws ConstraintViolationThrowable {
         final FieldPath fieldPath = FieldPath.newBuilder()
-                                             .addFieldName(valueName)
+                                             .addFieldName(fieldName)
                                              .build();
         final FieldValidator<?> validator =
                 FieldValidatorFactory.create(descriptor, fieldValue, fieldPath);
