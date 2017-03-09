@@ -22,7 +22,7 @@ package org.spine3.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.test.failure.command.UpdateProjectName;
 import org.spine3.test.reflect.ReflectFailures;
 

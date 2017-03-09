@@ -27,7 +27,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
 import org.spine3.change.StringChange;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.test.failure.ProjectFailures;
 import org.spine3.test.failure.ProjectId;
 import org.spine3.test.failure.command.UpdateProjectName;

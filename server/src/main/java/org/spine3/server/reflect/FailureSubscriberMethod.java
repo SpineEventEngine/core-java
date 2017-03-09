@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.failure.FailureClass;
 
 import javax.annotation.CheckReturnValue;
@@ -96,7 +96,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
                                                             throws InvocationTargetException {
         throw new IllegalStateException("Failure handling method requires " +
                                         "at least two Message arguments. " +
-                                        "See org.spine3.server.outbus.Subscribe for more details");
+                                        "See org.spine3.base.Subscribe for more details");
     }
 
     /**

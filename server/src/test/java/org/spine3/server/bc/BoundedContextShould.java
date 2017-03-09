@@ -37,7 +37,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;

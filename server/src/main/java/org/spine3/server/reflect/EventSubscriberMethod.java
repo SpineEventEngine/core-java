@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

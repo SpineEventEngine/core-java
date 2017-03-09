@@ -31,6 +31,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventEnvelope;
 import org.spine3.base.Response;
+import org.spine3.base.Subscribe;
 import org.spine3.server.Statuses;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
@@ -59,7 +60,7 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  *    <li>Expose a {@code public} method that accepts an event message as the first parameter
  *        and an {@link org.spine3.base.EventContext EventContext} as the second
  *        (optional) parameter.
- *    <li>Mark the method with the {@link org.spine3.server.outbus.Subscribe @Subscribe} annotation.
+ *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
  *    <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
  *    instance of {@code EventBus} directly, or rely on message delivery
  *    from an {@link EventDispatcher}. An example of such a dispatcher is
@@ -91,7 +92,7 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see org.spine3.server.projection.Projection Projection
- * @see org.spine3.server.outbus.Subscribe @Subscribe
+ * @see Subscribe @Subscribe
  */
 public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher> {
 

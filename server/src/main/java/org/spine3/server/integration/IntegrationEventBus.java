@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventClass;
 import org.spine3.base.Response;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 
 import java.util.Collection;
 

@@ -29,7 +29,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 
 import javax.annotation.Nullable;
 import java.util.Set;

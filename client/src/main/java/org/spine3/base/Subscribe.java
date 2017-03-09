@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.outbus;
+package org.spine3.base;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.server.outbus.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.test.Given;
 
 import static org.junit.Assert.assertEquals;
