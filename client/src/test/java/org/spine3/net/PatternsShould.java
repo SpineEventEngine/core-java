@@ -18,38 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.net;
 
-import com.google.common.base.Optional;
+import org.junit.Test;
 
-import java.util.Iterator;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * Base interface for data stored in memory for one tenant.
- *
- * @param <I> the type of entity IDs
- * @param <R> the type of stored records
  * @author Alexander Yevsyukov
  */
-interface TenantStorage<I, R> {
+public class PatternsShould {
 
-    /**
-     * Returns an iterator over identifiers of stored records.
-     */
-    Iterator<I> index();
-
-    /**
-     * Obtains a record with the passed ID.
-     */
-    Optional<R> get(I id);
-
-    /**
-     * Puts the record into the storage.
-     */
-    void put(I id, R record);
-
-    /**
-     * Verifies whether the storage is empty.
-     */
-    boolean isEmpty();
+    @Test
+    public void have_utility_ctor() {
+        assertHasPrivateParameterlessCtor(Patterns.class);
+    }
 }

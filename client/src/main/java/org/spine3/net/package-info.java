@@ -18,38 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
-
-import com.google.common.base.Optional;
-
-import java.util.Iterator;
-
 /**
- * Base interface for data stored in memory for one tenant.
- *
- * @param <I> the type of entity IDs
- * @param <R> the type of stored records
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for Internet data types.
  */
-interface TenantStorage<I, R> {
 
-    /**
-     * Returns an iterator over identifiers of stored records.
-     */
-    Iterator<I> index();
+@ParametersAreNonnullByDefault
+package org.spine3.net;
 
-    /**
-     * Obtains a record with the passed ID.
-     */
-    Optional<R> get(I id);
-
-    /**
-     * Puts the record into the storage.
-     */
-    void put(I id, R record);
-
-    /**
-     * Verifies whether the storage is empty.
-     */
-    boolean isEmpty();
-}
+import javax.annotation.ParametersAreNonnullByDefault;

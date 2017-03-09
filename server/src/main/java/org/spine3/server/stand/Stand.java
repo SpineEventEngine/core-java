@@ -35,11 +35,11 @@ import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -306,7 +306,7 @@ public class Stand implements AutoCloseable {
      * @see #update(Object, Any, Version)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    public <I, E extends AbstractVersionableEntity<I, ?>>
+    public <I, E extends VersionableEntity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {
         final TypeUrl entityType = repository.getEntityStateType();
 
