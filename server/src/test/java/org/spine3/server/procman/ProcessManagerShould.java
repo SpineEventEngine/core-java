@@ -40,7 +40,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;

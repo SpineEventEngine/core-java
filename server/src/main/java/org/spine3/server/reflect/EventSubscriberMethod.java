@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +34,6 @@ import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * A wrapper for an event subscriber method.

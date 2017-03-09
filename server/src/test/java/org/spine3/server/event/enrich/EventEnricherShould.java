@@ -33,7 +33,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;

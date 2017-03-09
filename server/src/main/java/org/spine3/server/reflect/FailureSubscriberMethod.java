@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 import org.spine3.server.failure.FailureClass;
 
 import javax.annotation.CheckReturnValue;

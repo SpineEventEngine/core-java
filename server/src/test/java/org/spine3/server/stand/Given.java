@@ -37,7 +37,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.test.projection.Project;

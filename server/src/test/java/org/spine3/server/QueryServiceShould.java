@@ -28,7 +28,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Responses;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
-import org.spine3.server.event.Subscribe;
+import org.spine3.server.outbus.Subscribe;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;

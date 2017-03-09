@@ -21,6 +21,7 @@ package org.spine3.server.outbus;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.Internal;
 import org.spine3.base.MessageClass;
 import org.spine3.server.bus.DispatcherRegistry;
 import org.spine3.server.bus.MessageDispatcher;
@@ -39,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  * @see CommandOutputBus
  */
+@Internal
 public class OutputDispatcherRegistry<C extends MessageClass,
                                       D extends MessageDispatcher<C, ?>>
                                 extends DispatcherRegistry<C, D> {

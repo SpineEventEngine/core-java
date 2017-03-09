@@ -22,6 +22,7 @@ package org.spine3.server.outbus;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.Internal;
 import org.spine3.base.MessageClass;
 import org.spine3.base.MessageEnvelope;
 import org.spine3.base.Response;
@@ -52,6 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
+@Internal
 public abstract class CommandOutputBus< M extends Message,
                                         E extends MessageEnvelope<M>,
                                         C extends MessageClass,

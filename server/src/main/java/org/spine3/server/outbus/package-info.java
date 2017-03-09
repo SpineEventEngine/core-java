@@ -23,10 +23,7 @@
  * {@linkplain org.spine3.server.command.CommandBus bus} output.
  */
 
-@Internal
 @ParametersAreNonnullByDefault
 package org.spine3.server.outbus;
-
-import org.spine3.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

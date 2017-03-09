@@ -29,6 +29,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
+import org.spine3.server.outbus.Subscribe;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -43,7 +44,7 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see org.spine3.base.FailureThrowable
- * @see org.spine3.server.event.Subscribe Subscribe @Subscribe
+ * @see Subscribe Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
 
