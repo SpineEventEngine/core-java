@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
+import org.spine3.base.stringifiers.Identifiers;
 import org.spine3.server.entity.Visibility;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;

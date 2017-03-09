@@ -55,7 +55,7 @@ import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.stringifiers.Stringifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;

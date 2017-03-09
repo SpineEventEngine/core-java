@@ -32,7 +32,7 @@ import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.users.UserId;
 
 import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;

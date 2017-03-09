@@ -27,7 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.CommandEnvelope;
-import org.spine3.base.Identifiers;
+import org.spine3.base.stringifiers.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;

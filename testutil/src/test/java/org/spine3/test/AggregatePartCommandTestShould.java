@@ -33,7 +33,7 @@ import org.spine3.server.command.Assign;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.test.CommandTestShould.newCommandFactory;
 
 /**

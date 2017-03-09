@@ -24,7 +24,7 @@ import org.spine3.test.Given;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 
 /**
  * Extracted from {@link EntityShould}

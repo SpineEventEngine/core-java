@@ -29,7 +29,7 @@ import org.spine3.base.Commands;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.time.ZoneOffsets.UTC;

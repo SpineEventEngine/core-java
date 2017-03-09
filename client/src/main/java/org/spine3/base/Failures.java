@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import org.spine3.base.stringifiers.Identifiers;
+
 /**
  * Utility class for working with failures.
  *

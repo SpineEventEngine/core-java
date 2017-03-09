@@ -50,7 +50,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.getEnrichment;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;

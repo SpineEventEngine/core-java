@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.base.stringifiers;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
-import org.spine3.base.Identifier.Type;
+import org.spine3.base.stringifiers.Identifier.Type;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

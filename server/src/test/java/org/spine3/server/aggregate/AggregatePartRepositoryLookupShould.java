@@ -38,7 +38,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 
 public class AggregatePartRepositoryLookupShould {

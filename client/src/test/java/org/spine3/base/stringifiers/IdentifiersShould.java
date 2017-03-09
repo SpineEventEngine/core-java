@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.base.stringifiers;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
@@ -26,9 +26,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.stringifiers.Identifiers.idToAny;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Stringifiers.idToString;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**

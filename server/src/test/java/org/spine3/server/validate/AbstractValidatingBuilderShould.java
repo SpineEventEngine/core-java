@@ -23,8 +23,8 @@ package org.spine3.server.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.PluralKey;
-import org.spine3.base.SingularKey;
+import org.spine3.base.stringifiers.PluralKey;
+import org.spine3.base.stringifiers.SingularKey;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
@@ -35,7 +35,7 @@ import org.spine3.validate.ConversionError;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 
 /**
  * @author Illia Shepilov

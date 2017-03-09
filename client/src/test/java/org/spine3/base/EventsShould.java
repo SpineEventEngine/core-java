@@ -46,7 +46,7 @@ import static org.spine3.base.Events.getProducer;
 import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.base.Events.sort;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;

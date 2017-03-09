@@ -33,7 +33,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.base.Stringifiers;
+import org.spine3.base.stringifiers.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;

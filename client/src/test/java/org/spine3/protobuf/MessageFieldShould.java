@@ -27,7 +27,7 @@ import org.junit.Test;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class MessageFieldShould {

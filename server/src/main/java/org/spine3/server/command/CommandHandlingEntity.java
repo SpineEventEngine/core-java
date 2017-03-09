@@ -34,7 +34,7 @@ import org.spine3.server.reflect.CommandHandlerMethod;
 import javax.annotation.CheckReturnValue;
 import java.util.List;
 
-import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.base.stringifiers.Identifiers.idToAny;
 
 /**
  * An entity that can handle commands.

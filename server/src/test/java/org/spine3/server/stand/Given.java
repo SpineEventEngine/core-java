@@ -29,7 +29,7 @@ import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
+import org.spine3.base.stringifiers.Identifiers;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;

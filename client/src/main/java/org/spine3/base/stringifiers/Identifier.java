@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.base.stringifiers;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,7 +29,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
+import static org.spine3.base.stringifiers.Stringifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**

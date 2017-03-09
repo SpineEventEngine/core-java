@@ -25,7 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.stringifiers.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
@@ -41,7 +41,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.stringifiers.Stringifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.util.Exceptions.unsupported;
 

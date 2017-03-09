@@ -28,7 +28,7 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.protobuf.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.stringifiers.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**

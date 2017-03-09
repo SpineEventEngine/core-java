@@ -37,7 +37,7 @@ import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
 import static org.spine3.protobuf.TypeUrl.GOOGLE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.protobuf.TypeUrl.composeTypeUrl;

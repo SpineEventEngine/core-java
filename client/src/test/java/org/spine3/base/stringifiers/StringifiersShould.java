@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.base.stringifiers;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
@@ -27,6 +27,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
@@ -50,11 +54,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.NULL_ID;
-import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.base.Stringifiers.toIdString;
+import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.stringifiers.Stringifiers.EMPTY_ID;
+import static org.spine3.base.stringifiers.Stringifiers.NULL_ID;
+import static org.spine3.base.stringifiers.Stringifiers.idToString;
+import static org.spine3.base.stringifiers.Stringifiers.toIdString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
