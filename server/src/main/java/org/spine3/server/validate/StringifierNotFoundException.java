@@ -21,8 +21,8 @@
 package org.spine3.server.validate;
 
 /**
- * Signals that {@code StringifierRegistry} does not contain
- * the {@code Stringifier} converter by the specified key.
+ * Thrown when {@code StringifierRegistry} does not contain
+ * the required {@code Stringifier} converter.
  *
  * @author Illia Shepilov
  */

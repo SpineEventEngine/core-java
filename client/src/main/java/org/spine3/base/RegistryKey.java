@@ -21,8 +21,8 @@
 package org.spine3.base;
 
 /**
- * A marker interface, serves as the type identifier
- * for the keys into {@code StringRegistry} warehouse.
+ * A marker interface, serves as the type identifier for the keys
+ * of the {@code StringRegistry} warehouse to save and retrieve the {@code Stringifier} instances.
  *
  * @author Illia Shepilov
  * @see StringifierRegistry

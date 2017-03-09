@@ -27,6 +27,7 @@ import com.google.common.base.Objects;
  *
  * <p>It used when is needed to identify object by the few classes.
  *    For example:
+ *    <pre>
  *         {@code
  *               class SetStringifier<T> extends Stringifier<Set<T>>{
  *                   ...
@@ -37,7 +38,7 @@ import com.google.common.base.Objects;
  *              final StringifierRegistry registry = StringifierRegistry.getInstance();
  *              registry.put(new PluralKey<>(Set.class, CustomType.class), setStringifier)
  *         }
- *
+ *    </pre>
  * @author Illia Shepilov
  */
 public class PluralKey<A, B> implements RegistryKey {
