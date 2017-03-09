@@ -363,6 +363,14 @@ public class StringifiersShould {
     }
 
     @Test
+    public void convert_integer_to_string() {
+        final Integer integerToConvert = 1;
+        final String convertedValue =
+                new Stringifiers.IntegerStringifier().convert(integerToConvert);
+        assertEquals("1", convertedValue);
+    }
+
+    @Test
     public void pass_the_null_tolerance_check() {
         final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
                                                                      .setClass(Stringifiers.class)
