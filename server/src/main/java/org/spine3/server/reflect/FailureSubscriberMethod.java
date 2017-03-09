@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.throwIfUnchecked;
 import static java.lang.String.format;
 
 /**
@@ -54,6 +55,43 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
     }
 
     /**
+     * Invokes the wrapped subscriber method to handle {@code failureMessage},
+     * {@code commandMessage}  with the passed {@code context} of the {@code Command}.
+     *
+     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
+     * this one does return any value, since the failure subscriber methods are {@code void}
+     * by design.
+     *
+     * @param target         the target object on which call the method
+     * @param failureMessage the failure message to handle
+     * @param commandMessage the command message
+     * @param context        the context of the command
+     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that
+     *                                   is not an {@link Error}.
+     *                                   {@code Error} instances are propagated as-is.
+     */
+    public void invoke(Object target, Message failureMessage,
+                       Message commandMessage, CommandContext context)
+            throws InvocationTargetException {
+        checkNotNull(failureMessage);
+        checkNotNull(commandMessage);
+        checkNotNull(context);
+        try {
+            final int paramCount = getParamCount();
+            if (paramCount == 2) {
+
+                getMethod().invoke(target, failureMessage, commandMessage);
+
+            } else {
+                getMethod().invoke(target, failureMessage, commandMessage, context);
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throwIfUnchecked(e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Invokes the subscriber method in the passed object.
      */
     public static void invokeSubscriber(Object target, Message failureMessage,
@@ -66,7 +104,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         try {
             final FailureSubscriberMethod method = forMessage(target.getClass(),
                                                               failureMessage, commandMessage);
-            method.invoke(target, failureMessage, context);
+            method.invoke(target, failureMessage, commandMessage, context);
         } catch (InvocationTargetException e) {
             log().error("Exception handling failure. Failure message: {}, context: {}, cause: {}",
                         failureMessage, context, e.getCause());
@@ -199,7 +237,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
                 final Class<? extends Message> contextClass = getContextClass();
                 final boolean paramsCorrect = isFirstParamMsg
                                               && isSecondParamMsg
-                                              && contextClass.equals(paramTypes[3]);
+                                              && contextClass.equals(paramTypes[2]);
                 return paramsCorrect;
             }
         }
