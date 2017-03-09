@@ -37,7 +37,7 @@ buildscript {
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all the components and change
         // the version of the dependency below to `spineVersion` defined above.
-        spineProtobufPluginVersion = '0.8.1-SNAPSHOT'
+        spineProtobufPluginVersion = '0.8.3-SNAPSHOT'
     }
 
     dependencies {
@@ -95,6 +95,7 @@ subprojects {
         generatedTestGrpcDir = "$generatedRootDir/test/grpc"
 
         generatedSpineDir = "$generatedRootDir/main/spine"
+        generatedTestSpineDir = "$generatedRootDir/test/spine"
 
         testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
         generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
@@ -148,7 +149,7 @@ subprojects {
         }
         test {
             proto.srcDirs = ["$sourcesRootDir/test/proto"]
-            java.srcDirs = [generatedTestJavaDir, "$sourcesRootDir/test/java"]
+            java.srcDirs = [generatedTestJavaDir, "$sourcesRootDir/test/java", generatedTestSpineDir]
             resources.srcDirs = ["$generatedRootDir/test/resources"]
         }
     }
