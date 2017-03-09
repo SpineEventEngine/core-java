@@ -22,7 +22,6 @@ package org.spine3.server.failure;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.reflect.FailureSubscriberMethod;
 
 import javax.annotation.Nullable;
@@ -34,7 +33,7 @@ import java.util.Set;
  *
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
- * @see org.spine3.server.failure.FailureBus#register(MessageDispatcher)
+ * @see org.spine3.server.failure.FailureBus#register(org.spine3.server.bus.MessageDispatcher)
  */
 public class FailureSubscriber implements FailureDispatcher {
     /**
