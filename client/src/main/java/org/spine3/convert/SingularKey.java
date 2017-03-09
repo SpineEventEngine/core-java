@@ -18,14 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.convert;
+
+import com.google.common.base.Objects;
 
 /**
- * A marker interface, serves as the type identifier for the keys
- * of the {@code StringRegistry} warehouse to save and retrieve the {@code Stringifier} instances.
+ * A value object, serves as key of the {@code StringifierRegistry} warehouse.
+ *
+ * <p>It is used when one class type is enough for the store/retrieve procedure in the warehouse.
  *
  * @author Illia Shepilov
- * @see StringifierRegistry
  */
-public interface RegistryKey {
+public class SingularKey<T> implements RegistryKey {
+
+    private final Class<T> classType;
+
+    public SingularKey(Class<T> classType) {
+        this.classType = classType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SingularKey<?> that = (SingularKey<?>) o;
+        return Objects.equal(classType, that.classType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(classType);
+    }
 }

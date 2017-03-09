@@ -42,8 +42,8 @@ import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.stringifiers.Stringifiers.EMPTY_ID;
-import static org.spine3.base.stringifiers.Stringifiers.idToString;
+import static org.spine3.convert.Stringifiers.EMPTY_ID;
+import static org.spine3.convert.Stringifiers.idToString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkNotDefault;
 

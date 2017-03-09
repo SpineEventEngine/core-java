@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.convert;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
@@ -55,10 +55,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.stringifiers.Stringifiers.EMPTY_ID;
-import static org.spine3.base.stringifiers.Stringifiers.NULL_ID;
-import static org.spine3.base.stringifiers.Stringifiers.idToString;
-import static org.spine3.base.stringifiers.Stringifiers.toIdString;
+import static org.spine3.convert.Stringifiers.EMPTY_ID;
+import static org.spine3.convert.Stringifiers.NULL_ID;
+import static org.spine3.convert.Stringifiers.idToString;
+import static org.spine3.convert.Stringifiers.toIdString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;

@@ -18,39 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.convert;
 
-import com.google.common.base.Objects;
+import com.google.common.base.Converter;
 
 /**
- * A value object, serves as key of the {@code StringifierRegistry} warehouse.
+ * Serves as converter from {@code I} to {@code String} with an associated
+ * reverse function from {@code String} to {@code I}.
  *
- * <p>It is used when one class type is enough for the store/retrieve procedure in the warehouse.
+ * <p>It is used for converting back and forth between the different
+ * representations of the same information.
  *
+ * @author Alexander Yevsyukov
  * @author Illia Shepilov
+ * @see #convert(Object)
+ * @see #reverse()
  */
-public class SingularKey<T> implements RegistryKey {
-
-    private final Class<T> classType;
-
-    public SingularKey(Class<T> classType) {
-        this.classType = classType;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SingularKey<?> that = (SingularKey<?>) o;
-        return Objects.equal(classType, that.classType);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(classType);
-    }
+public abstract class Stringifier<I> extends Converter<I, String> {
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.convert;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;

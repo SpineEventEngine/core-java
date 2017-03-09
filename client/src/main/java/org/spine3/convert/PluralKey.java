@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.convert;
 
 import com.google.common.base.Objects;
 
@@ -39,6 +39,7 @@ import com.google.common.base.Objects;
  *              registry.put(new PluralKey<>(Set.class, CustomType.class), setStringifier)
  *         }
  *    </pre>
+ *
  * @author Illia Shepilov
  */
 public class PluralKey<A, B> implements RegistryKey {

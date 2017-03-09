@@ -18,21 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
-
-import com.google.common.base.Converter;
+package org.spine3.convert;
 
 /**
- * Serves as converter from {@code I} to {@code String} with an associated
- * reverse function from {@code String} to {@code I}.
+ * A marker interface, serves as the type identifier for the keys
+ * of the {@code StringRegistry} warehouse to save and retrieve the {@code Stringifier} instances.
  *
- * <p>It is used for converting back and forth between the different
- * representations of the same information.
- *
- * @author Alexander Yevsyukov
  * @author Illia Shepilov
- * @see #convert(Object)
- * @see #reverse()
+ * @see StringifierRegistry
  */
-public abstract class Stringifier<I> extends Converter<I, String> {
+public interface RegistryKey {
 }

@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandEnvelope;
-import org.spine3.base.stringifiers.Stringifiers;
+import org.spine3.convert.Stringifiers;
 import org.spine3.server.entity.Visibility;
 
 /**
