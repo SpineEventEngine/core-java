@@ -65,6 +65,7 @@ public abstract class CommandOutputBus< M extends Message,
     private final CommandOutputDelivery<E, C, D> delivery;
 
     protected CommandOutputBus(CommandOutputDelivery<E, C, D> delivery) {
+        super();
         this.delivery = delivery;
         injectDispatcherProvider();
     }
