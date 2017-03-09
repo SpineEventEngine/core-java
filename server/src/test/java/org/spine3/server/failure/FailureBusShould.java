@@ -190,7 +190,7 @@ public class FailureBusShould {
     }
 
     @Test
-    public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
+    public void not_call_dispatchers_if_dispatcher_failure_execution_postponed() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
         failureBusWithPostponedExecution.register(dispatcher);
@@ -199,20 +199,20 @@ public class FailureBusShould {
         failureBusWithPostponedExecution.post(failure);
         assertFalse(dispatcher.isDispatchCalled());
 
-        final boolean eventPostponed = postponedDelivery.isPostponed(failure, dispatcher);
-        assertTrue(eventPostponed);
+        final boolean failurePostponed = postponedDelivery.isPostponed(failure, dispatcher);
+        assertTrue(failurePostponed);
     }
 
     @Test
-    public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
+    public void deliver_postponed_failure_to_dispatcher_using_configured_executor() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
         failureBusWithPostponedExecution.register(dispatcher);
 
         final Failure failure = invalidProjectNameFailure();
         failureBusWithPostponedExecution.post(failure);
-        final Set<FailureEnvelope> postponedEvents = postponedDelivery.getPostponedFailures();
-        final FailureEnvelope postponedFailure = postponedEvents.iterator()
+        final Set<FailureEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
+        final FailureEnvelope postponedFailure = postponedFailures.iterator()
                                                                 .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
         postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
@@ -339,8 +339,8 @@ public class FailureBusShould {
         }
 
         @Override
-        public boolean shouldPostponeDelivery(FailureEnvelope event, FailureDispatcher consumer) {
-            postponedExecutions.put(event, consumer.getClass());
+        public boolean shouldPostponeDelivery(FailureEnvelope failure, FailureDispatcher consumer) {
+            postponedExecutions.put(failure, consumer.getClass());
             return true;
         }
 
@@ -348,8 +348,8 @@ public class FailureBusShould {
             final FailureEnvelope envelope = FailureEnvelope.of(failure);
             final Class<? extends FailureDispatcher> actualClass = postponedExecutions.get(
                     envelope);
-            final boolean eventPostponed = actualClass != null;
-            final boolean dispatcherMatches = eventPostponed && dispatcher.getClass()
+            final boolean failurePostponed = actualClass != null;
+            final boolean dispatcherMatches = failurePostponed && dispatcher.getClass()
                                                                           .equals(actualClass);
             return dispatcherMatches;
         }
