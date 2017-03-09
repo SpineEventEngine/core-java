@@ -32,6 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Wrapper of an identifier value.
@@ -111,7 +112,7 @@ class Identifier<I> {
                 result = result.trim();
                 break;
             default:
-                throw new IllegalStateException("toString() is not supported for type: " + type);
+                throw newIllegalStateException("toString() is not supported for type: %s", type);
         }
 
         if (result.isEmpty()) {

@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for an event subscriber method.
@@ -80,11 +80,10 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     private static IllegalStateException missingEventHandler(Class<?> cls,
                                                              Class<? extends Message> eventClass) {
-        final String msg = format(
+        return newIllegalStateException(
                 "Missing event handler for event class %s in the stream projection class %s",
-                eventClass, cls
-        );
-        return new IllegalStateException(msg);
+                eventClass,
+                cls);
     }
 
     @CheckReturnValue

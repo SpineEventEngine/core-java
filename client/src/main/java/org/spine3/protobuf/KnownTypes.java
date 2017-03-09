@@ -76,6 +76,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A map which contains all Protobuf types known to the application.
@@ -160,7 +161,7 @@ public class KnownTypes {
         final TypeUrl result = knownTypes.inverse()
                                          .get(className);
         if (result == null) {
-            throw new IllegalStateException("No Protobuf type URL found for the Java class " +
+            throw newIllegalStateException("No Protobuf type URL found for the Java class %s",
                                             className);
         }
         return result;

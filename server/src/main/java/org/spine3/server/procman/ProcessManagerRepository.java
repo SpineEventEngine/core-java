@@ -133,7 +133,8 @@ public abstract class ProcessManagerRepository<I,
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by the process manager
+     * @throws IllegalArgumentException if events of this type are not handled by
+     *                                  this process manager
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override

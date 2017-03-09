@@ -47,6 +47,7 @@ import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type.MESSAGE;
 import static java.lang.String.format;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Performs validation analyzing which of fields annotated in the enrichment message
@@ -236,9 +237,8 @@ class ReferenceValidator {
     /** Checks if the source field name (from event or context) is not empty. */
     private static void checkSourceFieldName(String srcFieldName, FieldDescriptor enrichmentField) {
         if (srcFieldName.isEmpty()) {
-            final String msg = format("There is no `by` option for the enrichment field `%s`",
-                                      enrichmentField.getFullName());
-            throw new IllegalStateException(msg);
+            throw newIllegalStateException("There is no `by` option for the enrichment field `%s`",
+                                            enrichmentField.getFullName());
         }
     }
 
@@ -246,13 +246,12 @@ class ReferenceValidator {
             String eventFieldName,
             Descriptor srcMessage,
             FieldDescriptor enrichmentField) {
-        final String msg = format(
+        throw newIllegalStateException(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",
                 eventFieldName,
                 srcMessage.getFullName(),
                 enrichmentField.getFullName());
-        throw new IllegalStateException(msg);
     }
 
     private static void logNoFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {

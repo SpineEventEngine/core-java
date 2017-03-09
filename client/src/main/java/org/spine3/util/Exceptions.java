@@ -135,4 +135,18 @@ public class Exceptions {
         final String errMsg = formatMessage(format, args);
         throw new IllegalArgumentException(errMsg, cause);
     }
+
+    /**
+     * Throws {@code IllegalStateException} with the formatted string.
+     *
+     * @param format the format string
+     * @param args formatting parameters
+     * @return nothing ever, always throws an exception. The return type is given for convenience.
+     * @throws IllegalStateException always
+     */
+    public static IllegalStateException newIllegalStateException(String format,
+                                                                 Object... args) {
+        final String errMsg = formatMessage(format, args);
+        throw new IllegalStateException(errMsg);
+    }
 }
