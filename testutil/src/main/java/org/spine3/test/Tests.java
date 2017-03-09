@@ -26,6 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
@@ -199,5 +200,60 @@ public class Tests {
      */
     public static Version newVersionWithNumber(int number) {
         return Versions.newVersion(number, Timestamps2.getCurrentTime());
+    }
+
+    /**
+     * Returns {@code StreamObserver} that records the responses.
+     *
+     * <p>Use this method when you need to verify the responses of calls like
+     * {@link org.spine3.server.command.CommandBus#post(Command, StreamObserver)} CommandBus.post()}
+     * and similar methods.
+     *
+     * <p>Returns a fresh instance upon every call to avoid state clashes.
+     */
+    public static MemoizingObserver memoizingObserver() {
+        return new MemoizingObserver();
+    }
+
+    /**
+     * The {@code StreamObserver} recording the responses.
+     *
+     * @see #memoizingObserver()
+     */
+    public static class MemoizingObserver implements StreamObserver<Response> {
+
+        private Response response;
+        private Throwable throwable;
+        private boolean completed = false;
+
+        protected MemoizingObserver() {
+        }
+
+        @Override
+        public void onNext(Response response) {
+            this.response = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.completed = true;
+        }
+
+        public Response getResponse() {
+            return response;
+        }
+
+        public Throwable getThrowable() {
+            return throwable;
+        }
+
+        public boolean isCompleted() {
+            return this.completed;
+        }
     }
 }
