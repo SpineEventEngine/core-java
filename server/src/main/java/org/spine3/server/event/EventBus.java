@@ -32,13 +32,11 @@ import org.spine3.base.EventClass;
 import org.spine3.base.EventEnvelope;
 import org.spine3.base.Response;
 import org.spine3.server.Statuses;
-import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
-import org.spine3.server.outbus.Subscribe;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
@@ -61,10 +59,10 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  *    <li>Expose a {@code public} method that accepts an event message as the first parameter
  *        and an {@link org.spine3.base.EventContext EventContext} as the second
  *        (optional) parameter.
- *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
- *    <li>{@linkplain #register(MessageDispatcher)} Register} with an instance of
- *    {@code EventBus} directly, or rely on message delivery from an {@link EventDispatcher}.
- *    An example of such a dispatcher is
+ *    <li>Mark the method with the {@link org.spine3.server.outbus.Subscribe @Subscribe} annotation.
+ *    <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
+ *    instance of {@code EventBus} directly, or rely on message delivery
+ *    from an {@link EventDispatcher}. An example of such a dispatcher is
  *    {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
  * </ol>
  *
@@ -93,7 +91,7 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see org.spine3.server.projection.Projection Projection
- * @see Subscribe @Subscribe
+ * @see org.spine3.server.outbus.Subscribe @Subscribe
  */
 public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher> {
 
@@ -157,7 +155,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         log().warn("No subscriber or dispatcher defined for the event class: {}",
                    event.getClass()
                         .getName());
-        //TODO:3/2/17:alex.tymchenko: should we notify the observer?
     }
 
     @Override
