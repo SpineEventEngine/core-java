@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
- * delivery from the relevant {@linkplain org.spine3.server.bus.Bus bus}.
+ * delivery.
  *
  * @author Alexander Yevsyukov
  */
