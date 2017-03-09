@@ -19,16 +19,16 @@
 //
 syntax = "proto3";
 
-package spine.test.failure;
+package spine.test.reflect;
 
 option (type_url_prefix) = "type.spine3.org";
 option (SPI_all) = true;
-option java_package = "org.spine3.test.failure";
-// Keep all the failures under the same outer class called `ProjectFailures`.
+option java_package = "org.spine3.test.reflect";
+// Keep all the failures under the same outer class called `ReflectFailures`.
 option java_generate_equals_and_hash = true;
 
 import "spine/annotations.proto";
-import "spine/test/failure/project.proto";
+import "spine/test/reflect/project.proto";
 
 message InvalidProjectName {
 

@@ -91,6 +91,14 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         }
     }
 
+    @Override
+    public <R> R invoke(Object target, Message message, CommandContext context)
+                                                            throws InvocationTargetException {
+        throw new IllegalStateException("Failure handling method requires " +
+                                        "at least two Message arguments. " +
+                                        "See org.spine3.server.outbus.Subscribe for more details");
+    }
+
     /**
      * Invokes the subscriber method in the passed object.
      */

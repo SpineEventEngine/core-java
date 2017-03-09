@@ -20,8 +20,16 @@
 
 package org.spine3.server.reflect;
 
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
+import org.spine3.base.Failures;
+import org.spine3.change.StringChange;
 import org.spine3.test.reflect.ProjectId;
+import org.spine3.test.reflect.ReflectFailures;
+import org.spine3.test.reflect.ReflectFailures.InvalidProjectName;
 import org.spine3.test.reflect.command.CreateProject;
+import org.spine3.test.reflect.command.UpdateProjectName;
 import org.spine3.test.reflect.event.ProjectCreated;
 
 import static org.spine3.base.Identifiers.newUuid;
@@ -71,4 +79,27 @@ class Given {
                                 .build();
         }
     }
+
+    static class FailureMessage {
+
+        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
+        private static final InvalidProjectName INVALID_PROJECT_NAME =
+                invalidProjectName(DUMMY_PROJECT_ID);
+
+        private FailureMessage() {
+        }
+
+        public static InvalidProjectName invalidProjectName() {
+            return INVALID_PROJECT_NAME;
+        }
+
+        public static InvalidProjectName invalidProjectName(ProjectId id) {
+            final InvalidProjectName invalidProjectName =
+                    InvalidProjectName.newBuilder()
+                                                      .setProjectId(id)
+                                                      .build();
+            return invalidProjectName;
+        }
+    }
+
 }

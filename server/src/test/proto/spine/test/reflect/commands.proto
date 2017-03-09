@@ -27,6 +27,7 @@ option java_outer_classname = "ReflectCommandsProto";
 option java_multiple_files = true;
 
 import "spine/annotations.proto";
+import "spine/change/change.proto";
 import "spine/test/reflect/project.proto";
 
 message CreateProject {
@@ -41,3 +42,11 @@ message AddTask {
 message StartProject {
     ProjectId project_id = 1;
 }
+
+message UpdateProjectName {
+
+    ProjectId id = 1;
+
+    spine.change.StringChange name_update = 2;
+}
+
