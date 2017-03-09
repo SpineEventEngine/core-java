@@ -31,6 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConstraintViolations {
 
+    @SuppressWarnings("HardcodedLineSeparator") // required for better violation message formatting.
+    private static final String VIOLATION_DELIMITER = "\n  ";
+
     private ConstraintViolations() {
     }
 
@@ -73,7 +76,7 @@ public class ConstraintViolations {
 
         for (ConstraintViolation childViolation : violations) {
             final String childViolationFormatted = toText(childViolation);
-            resultBuilder.append("\n  ")
+            resultBuilder.append(VIOLATION_DELIMITER)
                          .append(childViolationFormatted);
         }
         return resultBuilder.toString();
@@ -89,7 +92,6 @@ public class ConstraintViolations {
      * @return a formatted string
      * @see String#format(String, Object...)
      */
-    @SuppressWarnings("HardcodedLineSeparator")     // required for better formatting.
     public static String toText(String format, ConstraintViolation violation) {
         checkNotNull(format);
         checkNotNull(violation);
@@ -115,7 +117,6 @@ public class ConstraintViolations {
      * @return a formatted string
      * @see String#format(String, Object...)
      */
-    @SuppressWarnings("HardcodedLineSeparator")     // required for better formatting.
     public static String toText(String format, Iterable<ConstraintViolation> violations) {
         checkNotNull(format);
         checkNotNull(violations);
@@ -124,7 +125,7 @@ public class ConstraintViolations {
 
         for (ConstraintViolation childViolation : violations) {
             final String childViolationFormatted = toText(format, childViolation);
-            resultBuilder.append("\n  ")
+            resultBuilder.append(VIOLATION_DELIMITER)
                          .append(childViolationFormatted);
         }
         return resultBuilder.toString();
