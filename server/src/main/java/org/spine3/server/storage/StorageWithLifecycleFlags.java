@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.entity.LifecycleFlags;
 
 /**
- * A storage that allows to update lifecycle flags of entities.
+ * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
  *
  * @author Alexander Yevsyukov
  */
