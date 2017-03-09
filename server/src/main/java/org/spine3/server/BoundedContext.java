@@ -228,23 +228,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
     }
 
-    /**
-     * Verifies if the passed repository manages instances of versionable entities.
-     */
-    private static <I, E extends Entity<I, ?>> boolean managesVersionableEntities(
-            Repository<I, E> repository) {
-        final Class entityClass = repository.getEntityClass();
-        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-        // It is safe because we cast after type check in managesVersionableEntities()
-    private static <I, E extends Entity<I, ?>>
-    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
-        return (Repository<I, VersionableEntity<I, ?>>) repository;
-    }
-
     private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
             repository.initStorage(storageFactory.get());
@@ -262,6 +245,33 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             throw new IllegalStateException(errMsg);
         }
         aggregateRepositories.put(stateClass, repository);
+    }
+
+    /**
+     * Verifies if the passed repository manages instances of versionable entities.
+     */
+    private static <I, E extends Entity<I, ?>> boolean managesVersionableEntities(
+            Repository<I, E> repository) {
+        final Class entityClass = repository.getEntityClass();
+        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
+        return result;
+    }
+
+    /**
+     * Casts the passed repository to one that manages {@link VersionableEntity}
+     * instead of just {@link Entity}.
+     *
+     * <p>The cast is required for registering the repository as a type supplier
+     * in the {@link Stand}.
+     *
+     * <p>The cast is safe because the method is called after the
+     * {@linkplain #managesVersionableEntities(Repository) type check}.
+     * @see #register(Repository)
+     */
+    @SuppressWarnings("unchecked") // See Javadoc above.
+    private static <I, E extends Entity<I, ?>>
+    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
+        return (Repository<I, VersionableEntity<I, ?>>) repository;
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")

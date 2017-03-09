@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.LifecycleFlags;
 
 import java.util.Iterator;
 import java.util.List;
@@ -74,14 +74,14 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected Optional<Visibility> readVisibility(I id) {
+    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         checkNotClosed();
-        Optional<Visibility> result = getStorage().getStatus(id);
+        Optional<LifecycleFlags> result = getStorage().getStatus(id);
         return result;
     }
 
     @Override
-    protected void writeVisibility(I id, Visibility status) {
+    public void writeLifecycleFlags(I id, LifecycleFlags status) {
         checkNotClosed();
         getStorage().putStatus(id, status);
     }
@@ -104,45 +104,4 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         return records.iterator();
     }
 
-    @Override
-    protected void markArchived(I id) {
-        final Optional<Visibility> found = getStorage().getStatus(id);
-
-        if (!found.isPresent()) {
-            getStorage().putStatus(id, Visibility.newBuilder()
-                                                 .setArchived(true)
-                                                 .build());
-            return;
-        }
-        final Visibility currentStatus = found.get();
-        if (currentStatus.getArchived()) {
-            return; // Already archived.
-        }
-
-        getStorage().putStatus(id, currentStatus.toBuilder()
-                                                .setArchived(true)
-                                                .build());
-    }
-
-    @Override
-    protected void markDeleted(I id) {
-        final Optional<Visibility> found = getStorage().getStatus(id);
-
-        if (!found.isPresent()) {
-            getStorage().putStatus(id, Visibility.newBuilder()
-                                                 .setDeleted(true)
-                                                 .build());
-            return;
-        }
-
-        final Visibility currentStatus = found.get();
-
-        if (currentStatus.getDeleted()) {
-            return; // Already deleted.
-        }
-
-        getStorage().putStatus(id, currentStatus.toBuilder()
-                                                .setDeleted(true)
-                                                .build());
-    }
 }

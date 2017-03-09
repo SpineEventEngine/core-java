@@ -102,14 +102,6 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void markArchived(Exception id) {
-        }
-
-        @Override
-        protected void markDeleted(Exception id) {
-        }
-
-        @Override
         protected Storage<Exception, ?> createStorage(StorageFactory factory) {
             return null;
         }
@@ -158,13 +150,6 @@ public class RepositoryShould {
             return Optional.absent();
         }
 
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
     }
 
     @Test
@@ -210,13 +195,6 @@ public class RepositoryShould {
             return Optional.absent();
         }
 
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
     }
 
     @Test
@@ -262,13 +240,6 @@ public class RepositoryShould {
             return Optional.absent();
         }
 
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
     }
 
     //

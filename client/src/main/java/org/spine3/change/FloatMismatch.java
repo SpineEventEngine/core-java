@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FloatValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.change.Mismatches.checkNotNullOrEqual;
+import static org.spine3.change.Preconditions.checkNotNullOrEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.pack;
 

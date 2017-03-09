@@ -21,7 +21,6 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Message;
-import org.spine3.SPI;
 
 /**
  * Abstract base for storages.
@@ -32,7 +31,6 @@ import org.spine3.SPI;
  * @param <R> the type of records kept in the storage
  * @author Alexander Yevsyukov
  */
-@SPI
 public abstract class AbstractStorage<I, R extends Message> implements Storage<I, R> {
 
     private final boolean multitenant;

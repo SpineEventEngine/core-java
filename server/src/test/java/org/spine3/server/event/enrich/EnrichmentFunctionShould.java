@@ -142,11 +142,14 @@ public class EnrichmentFunctionShould {
         assertNull(fieldEnricher.apply(Tests.<ProjectCreated>nullRef()));
     }
 
-    @SuppressWarnings({"EqualsWithItself",
-            "EqualsBetweenInconvertibleTypes"}) // OK, it's the purpose of the method.
     @Test
     public void have_smart_equals() {
-        new EqualsTester().addEqualityGroup(fieldEnricher)
+        final FieldEnricher<ProjectCreated, ProjectCreated.Enrichment> anotherEnricher =
+                FieldEnricher.newInstance(
+                    ProjectCreated.class,
+                    ProjectCreated.Enrichment.class,
+                    function);
+        new EqualsTester().addEqualityGroup(fieldEnricher, anotherEnricher)
                           .testEquals();
     }
 }
