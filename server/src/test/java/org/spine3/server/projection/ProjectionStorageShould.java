@@ -67,7 +67,7 @@ public abstract class ProjectionStorageShould<I>
     @Override
     protected Message newState(I id) {
         final String projectId = id.getClass()
-                              .getName();
+                                   .getName();
         final Project state = Given.project(projectId,"Projection name " + projectId);
         return state;
     }
