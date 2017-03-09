@@ -21,13 +21,9 @@ package org.spine3.server.outbus;
 
 import com.google.common.base.Function;
 import org.spine3.Internal;
-import org.spine3.base.EventClass;
-import org.spine3.base.EventEnvelope;
 import org.spine3.base.MessageClass;
 import org.spine3.base.MessageEnvelope;
 import org.spine3.server.delivery.Delivery;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventDispatcher;
 
 import java.util.Collection;
 import java.util.Set;
