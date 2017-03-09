@@ -23,9 +23,9 @@ package org.spine3.convert;
 import com.google.common.base.Objects;
 
 /**
- * A value object, serves as key of the {@code StringifierRegistry} warehouse.
+ * A value object, serves as key of the {@code StringifierRegistry} storage.
  *
- * <p>It is used when one class type is enough for the store/retrieve procedure in the warehouse.
+ * <p>It is used when one class type is enough for the store/retrieve procedure in the storage.
  *
  * @author Illia Shepilov
  */

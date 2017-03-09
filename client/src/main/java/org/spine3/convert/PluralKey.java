@@ -23,7 +23,7 @@ package org.spine3.convert;
 import com.google.common.base.Objects;
 
 /**
- * A value object, serves as key of the {@code StringifierRegistry} warehouse.
+ * A value object, serves as key of the {@code StringifierRegistry} storage.
  *
  * <p>It used when is needed to identify object by the few classes.
  *    For example:

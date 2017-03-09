@@ -55,7 +55,7 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     /**
      * Converts the passed `raw` value and returns it.
      *
-     * @param registryKey the key of the {@code StringifierRegistry} warehouse
+     * @param registryKey the key of the {@code StringifierRegistry} storage
      *                    to obtain {@code Stringifier}
      * @param value       the value to convert
      * @param <V>         the type of the converted value
