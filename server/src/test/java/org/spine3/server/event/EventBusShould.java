@@ -23,7 +23,6 @@ package org.spine3.server.event;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -31,7 +30,6 @@ import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventEnvelope;
 import org.spine3.base.Events;
-import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
@@ -39,6 +37,8 @@ import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
+import org.spine3.test.Tests;
+import org.spine3.test.Tests.MemoizingObserver;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.validate.ConstraintViolation;
@@ -70,7 +70,7 @@ public class EventBusShould {
 
     private EventBus eventBus;
     private EventBus eventBusWithPosponedExecution;
-    private TestResponseObserver responseObserver;
+    private MemoizingObserver responseObserver;
     private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
     private Executor delegateDispatcherExecutor;
     private StorageFactory storageFactory;
@@ -91,7 +91,7 @@ public class EventBusShould {
                 new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
-        this.responseObserver = new TestResponseObserver();
+        this.responseObserver = Tests.memoizingObserver();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
@@ -442,7 +442,7 @@ public class EventBusShould {
         eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
     }
 
-    private static void assertResponseIsOk(TestResponseObserver responseObserver) {
+    private static void assertResponseIsOk(MemoizingObserver responseObserver) {
         assertEquals(Responses.ok(), responseObserver.getResponse());
         assertTrue(responseObserver.isCompleted());
         assertNull(responseObserver.getThrowable());
@@ -450,7 +450,7 @@ public class EventBusShould {
 
     private static void assertReturnedExceptionAndNoResponse(
             Class<? extends Exception> exceptionClass,
-            TestResponseObserver responseObserver) {
+            MemoizingObserver responseObserver) {
         final Throwable cause = responseObserver.getThrowable()
                                                 .getCause();
         assertEquals(exceptionClass, cause.getClass());
@@ -510,40 +510,6 @@ public class EventBusShould {
 
         private boolean isDispatchCalled() {
             return dispatchCalled;
-        }
-    }
-
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private Response response;
-        private Throwable throwable;
-        private boolean completed = false;
-
-        @Override
-        public void onNext(Response response) {
-            this.response = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.completed = true;
-        }
-
-        Response getResponse() {
-            return response;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return this.completed;
         }
     }
 
