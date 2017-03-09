@@ -33,12 +33,20 @@ import org.spine3.test.failure.ProjectId;
 import org.spine3.test.failure.command.UpdateProjectName;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
@@ -47,11 +55,32 @@ import static org.spine3.base.Identifiers.newUuid;
 public class FailureBusShould {
 
     private FailureBus failureBus;
+    private PostponedDispatcherFailureDelivery postponedDelivery;
+    private Executor delegateDispatcherExecutor;
+    private FailureBus failureBusWithPostponedExecution;
 
     @Before
     public void setUp() {
         this.failureBus = FailureBus.newBuilder()
                                     .build();
+        this.delegateDispatcherExecutor = spy(directExecutor());
+        this.postponedDelivery =
+                new PostponedDispatcherFailureDelivery(delegateDispatcherExecutor);
+        this.failureBusWithPostponedExecution =
+                FailureBus.newBuilder()
+                          .setDispatcherFailureDelivery(
+                                  postponedDelivery)
+                          .build();
+    }
+
+    @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
+    private Executor directExecutor() {
+        return new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
     }
 
     @Test
@@ -130,7 +159,88 @@ public class FailureBusShould {
     @Test
     public void call_subscriber_when_failure_posted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
+        final Failure failure = invalidProjectNameFailure();
+        failureBus.register(subscriber);
 
+        failureBus.post(failure);
+
+        assertEquals(failure, subscriber.getFailureHandled());
+    }
+
+    @Test
+    public void register_dispatchers() {
+        final FailureDispatcher dispatcher = new BareDispatcher();
+
+        failureBus.register(dispatcher);
+
+        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        assertTrue(failureBus.getDispatchers(failureClass)
+                             .contains(dispatcher));
+    }
+
+    @Test
+    public void call_dispatchers() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        failureBus.register(dispatcher);
+
+        failureBus.post(invalidProjectNameFailure());
+
+        assertTrue(dispatcher.isDispatchCalled());
+    }
+
+    @Test
+    public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        failureBusWithPostponedExecution.register(dispatcher);
+
+        final Failure failure = invalidProjectNameFailure();
+        failureBusWithPostponedExecution.post(failure);
+        assertFalse(dispatcher.isDispatchCalled());
+
+        final boolean eventPostponed = postponedDelivery.isPostponed(failure, dispatcher);
+        assertTrue(eventPostponed);
+    }
+
+    @Test
+    public void deliver_postponed_event_to_dispatcher_using_configured_executor() {
+        final BareDispatcher dispatcher = new BareDispatcher();
+
+        failureBusWithPostponedExecution.register(dispatcher);
+
+        final Failure failure = invalidProjectNameFailure();
+        failureBusWithPostponedExecution.post(failure);
+        final Set<FailureEnvelope> postponedEvents = postponedDelivery.getPostponedFailures();
+        final FailureEnvelope postponedFailure = postponedEvents.iterator()
+                                                                .next();
+        verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
+        postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
+        assertTrue(dispatcher.isDispatchCalled());
+        verify(delegateDispatcherExecutor).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void unregister_dispatchers() {
+        final FailureDispatcher dispatcherOne = new BareDispatcher();
+        final FailureDispatcher dispatcherTwo = new BareDispatcher();
+        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        failureBus.register(dispatcherOne);
+        failureBus.register(dispatcherTwo);
+
+        failureBus.unregister(dispatcherOne);
+        final Set<FailureDispatcher> dispatchers = failureBus.getDispatchers(failureClass);
+
+        // Check we don't have 1st dispatcher, but have 2nd.
+        assertFalse(dispatchers.contains(dispatcherOne));
+        assertTrue(dispatchers.contains(dispatcherTwo));
+
+        failureBus.unregister(dispatcherTwo);
+        assertFalse(failureBus.getDispatchers(failureClass)
+                              .contains(dispatcherTwo));
+    }
+
+    private static Failure invalidProjectNameFailure() {
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId(newUuid())
                                              .build();
@@ -147,12 +257,30 @@ public class FailureBusShould {
                                                                      .build();
         final Command command = Commands.createCommand(updateProjectName,
                                                        CommandContext.getDefaultInstance());
-        final Failure failure = Failures.createFailure(invalidProjectName, command);
-        failureBus.register(subscriber);
+        return Failures.createFailure(invalidProjectName, command);
+    }
 
-        failureBus.post(failure);
+    /**
+     * A simple dispatcher class, which only dispatch and does not have own failure
+     * subscribing methods.
+     */
+    private static class BareDispatcher implements FailureDispatcher {
 
-        assertEquals(failure, subscriber.getFailureHandled());
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<FailureClass> getMessageClasses() {
+            return FailureClass.setOf(ProjectFailures.InvalidProjectName.class);
+        }
+
+        @Override
+        public void dispatch(FailureEnvelope failure) {
+            dispatchCalled = true;
+        }
+
+        private boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
     }
 
     private static class InvalidProjectNameSubscriber extends FailureSubscriber {
@@ -169,6 +297,37 @@ public class FailureBusShould {
 
         private Failure getFailureHandled() {
             return failureHandled;
+        }
+    }
+
+    private static class PostponedDispatcherFailureDelivery extends DispatcherFailureDelivery {
+
+        private final Map<FailureEnvelope,
+                Class<? extends FailureDispatcher>> postponedExecutions = newHashMap();
+
+        private PostponedDispatcherFailureDelivery(Executor delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public boolean shouldPostponeDelivery(FailureEnvelope event, FailureDispatcher consumer) {
+            postponedExecutions.put(event, consumer.getClass());
+            return true;
+        }
+
+        private boolean isPostponed(Failure failure, FailureDispatcher dispatcher) {
+            final FailureEnvelope envelope = FailureEnvelope.of(failure);
+            final Class<? extends FailureDispatcher> actualClass = postponedExecutions.get(
+                    envelope);
+            final boolean eventPostponed = actualClass != null;
+            final boolean dispatcherMatches = eventPostponed && dispatcher.getClass()
+                                                                          .equals(actualClass);
+            return dispatcherMatches;
+        }
+
+        private Set<FailureEnvelope> getPostponedFailures() {
+            final Set<FailureEnvelope> envelopes = postponedExecutions.keySet();
+            return envelopes;
         }
     }
 }

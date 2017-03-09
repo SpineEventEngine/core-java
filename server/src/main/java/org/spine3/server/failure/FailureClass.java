@@ -78,4 +78,14 @@ public class FailureClass extends MessageClass {
         }
         return builder.build();
     }
+
+    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
+    @SafeVarargs
+    public static ImmutableSet<FailureClass> setOf(Class<? extends Message> ...classes) {
+        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
+    }
 }
