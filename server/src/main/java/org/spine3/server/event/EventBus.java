@@ -207,32 +207,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         eventStore.append(event);
     }
 
-    /**
-     * Verifies that an event can be posted to this {@code EventBus}.
-     *
-     * <p>An event can be posted if its message has either dispatcher or handler registered with
-     * this {@code EventBus}.
-     * The message also must satisfy validation constraints defined in its Protobuf type.
-     *
-     * @param event            the event message to check
-     * @param responseObserver the observer to obtain the result of the call;
-     *                         {@link StreamObserver#onError(Throwable)} is called if
-     *                         an event is unsupported or invalid
-     * @return {@code true} if event is supported and valid and can be posted,
-     *         {@code false} otherwise
-     */
-    public boolean validate(Message event, StreamObserver<Response> responseObserver) {
-        if (!validateMessage(event, responseObserver)) {
-            return false;
-        }
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-        return true;
-    }
-
-    /**
-     * Validates the event message and notifies the observer of those (if any).
-     */
     @Override
     protected boolean validateMessage(Message event, StreamObserver<Response> responseObserver) {
         final EventClass eventClass = EventClass.of(event);

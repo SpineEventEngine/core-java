@@ -86,8 +86,39 @@ public abstract class CommandOutputBus< M extends Message,
                 });
     }
 
+    /**
+     * Verifies that a message can be posted to this {@code CommandOutputBus}.
+     *
+     * <p>A command output can be posted if its message has either dispatcher or handler
+     * registered with this {@code CommandOutputBus}.
+     *
+     * <p>The message also must satisfy validation constraints defined in its Protobuf type.
+     *
+     * @param message          the command output message to check
+     * @param responseObserver the observer to obtain the result of the call;
+     *                         {@link StreamObserver#onError(Throwable)} is called if
+     *                         a message is unsupported or invalid
+     * @return {@code true} if a message is supported and valid and can be posted,
+     * {@code false} otherwise
+     */
+    public boolean validate(Message message, StreamObserver<Response> responseObserver) {
+        if (!validateMessage(message, responseObserver)) {
+            return false;
+        }
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+        return true;
+    }
+
     protected abstract void store(M message);
 
+    /**
+     * Validates the message and notifies the observer of those (if any).
+     *
+     * <p>Does not call {@link StreamObserver#onNext(Object) StreamObserver.onNext(..)} or
+     * {@link StreamObserver#onCompleted() StreamObserver.onCompleted(..)}
+     * for the given {@code responseObserver}.
+     */
     protected abstract boolean validateMessage(Message message,
                                                StreamObserver<Response> responseObserver);
 
