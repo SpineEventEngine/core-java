@@ -38,14 +38,17 @@ import org.spine3.test.types.TaskId;
 import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.EMPTY_ID;
@@ -311,11 +314,14 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_list_of_strings() {
         final String stringToConvert = "1,2,3,4,5";
-        final List<String> convertedList =
+        final List<String> actualList =
                 new Stringifiers.ListStringifier<>(String.class).reverse()
                                                                 .convert(stringToConvert);
-        assertNotNull(convertedList);
-        assertEquals(5, convertedList.size());
+        assertNotNull(actualList);
+        assertEquals(5, actualList.size());
+
+        final List<String> expectedList = Arrays.asList(stringToConvert.split(","));
+        assertThat(actualList, is(expectedList));
     }
 
     @Test
@@ -337,11 +343,16 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1|2|3|4|5";
-        final List<Integer> convertedList =
-                new Stringifiers.ListStringifier<>(Integer.class, "\\|").reverse()
-                                                                        .convert(stringToConvert);
-        assertNotNull(convertedList);
-        assertEquals(5, convertedList.size());
+        final String delimiter = "\\|";
+        final List<Integer> actualList =
+                new Stringifiers.ListStringifier<>(Integer.class,
+                                                   delimiter).reverse()
+                                                             .convert(stringToConvert);
+        assertNotNull(actualList);
+        assertEquals(5, actualList.size());
+
+        final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
+        assertThat(actualList, is(expectedList));
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
