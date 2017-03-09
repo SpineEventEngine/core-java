@@ -69,7 +69,6 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         } catch (InvocationTargetException e) {
             log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
                         eventMessage, context, e.getCause());
-            //TODO:3/3/17:alex.tymchenko: why just catch?
         }
     }
 
