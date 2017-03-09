@@ -22,7 +22,7 @@ package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 
 /**
  * Obtains an event producer ID based on an event {@link Message} and context.

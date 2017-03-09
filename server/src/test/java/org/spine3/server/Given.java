@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.TypeName;
@@ -52,7 +52,7 @@ import org.spine3.users.UserId;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;

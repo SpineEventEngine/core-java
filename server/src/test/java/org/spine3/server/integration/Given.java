@@ -25,7 +25,7 @@ import org.spine3.test.integration.ProjectId;
 import org.spine3.test.integration.event.ProjectCreated;
 import org.spine3.test.integration.event.TaskAdded;
 
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 
 class Given {

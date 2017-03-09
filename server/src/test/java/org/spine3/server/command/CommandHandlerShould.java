@@ -56,7 +56,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
 
 /**

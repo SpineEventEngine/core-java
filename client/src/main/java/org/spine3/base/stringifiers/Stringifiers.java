@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.base.Identifier;
 import org.spine3.validate.ConversionError;
 import org.spine3.validate.IllegalConversionArgumentException;
 
@@ -117,7 +118,7 @@ public class Stringifiers {
     }
 
     @SuppressWarnings("unchecked") // OK to cast to String as output type of Stringifier.
-    static String idMessageToString(Message message) {
+    public static String idMessageToString(Message message) {
         checkNotNull(message);
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
@@ -250,7 +251,7 @@ public class Stringifiers {
 
         /**
          * The delimiter for the passed elements in the String representation,
-         *  {@code DEFAULT_DELIMITER} by default.
+         * {@code DEFAULT_DELIMITER} by default.
          */
         private final String delimiter;
 

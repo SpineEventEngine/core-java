@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;

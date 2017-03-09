@@ -19,9 +19,9 @@
  */
 package org.spine3.server.error;
 
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 
-import static org.spine3.base.stringifiers.Identifiers.ID_PROPERTY_SUFFIX;
+import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * This exception is thrown if the corresponding Protobuf command/event message definition

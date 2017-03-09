@@ -25,7 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.KnownTypes;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;

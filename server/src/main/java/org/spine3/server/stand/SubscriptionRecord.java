@@ -21,7 +21,7 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;

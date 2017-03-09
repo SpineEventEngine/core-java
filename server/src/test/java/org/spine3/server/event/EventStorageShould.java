@@ -33,7 +33,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
-import org.spine3.base.stringifiers.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.TypeName;

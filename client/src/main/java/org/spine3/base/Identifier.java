@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.stringifiers;
+package org.spine3.base;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
+import org.spine3.base.stringifiers.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
@@ -37,19 +38,19 @@ import static org.spine3.protobuf.Values.newStringValue;
  *
  * @author Alexander Yevsyukov
  */
-class Identifier<I> {
+public class Identifier<I> {
 
     private final Type type;
     private final I value;
 
-    static <I> Identifier<I> from(I value) {
+   public static <I> Identifier<I> from(I value) {
         checkNotNull(value);
         final Type type = Type.getType(value);
         final Identifier<I> result = create(type, value);
         return result;
     }
 
-    static Identifier<Message> fromMessage(Message value) {
+   public static Identifier<Message> fromMessage(Message value) {
         checkNotNull(value);
         final Identifier<Message> result = create(Type.MESSAGE, value);
         return result;

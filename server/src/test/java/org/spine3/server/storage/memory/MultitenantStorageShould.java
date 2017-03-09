@@ -26,7 +26,7 @@ import org.spine3.server.users.CurrentTenant;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Yevsyukov

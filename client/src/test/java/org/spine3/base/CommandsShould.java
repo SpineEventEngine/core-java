@@ -53,7 +53,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.stringifiers.Stringifiers.idToString;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;

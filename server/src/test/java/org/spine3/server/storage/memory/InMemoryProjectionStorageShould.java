@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
 
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Litus

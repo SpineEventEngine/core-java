@@ -54,7 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.stringifiers.Stringifiers.EMPTY_ID;
 import static org.spine3.base.stringifiers.Stringifiers.NULL_ID;
 import static org.spine3.base.stringifiers.Stringifiers.idToString;

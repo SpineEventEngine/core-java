@@ -35,7 +35,7 @@ import org.spine3.validate.ConversionError;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.stringifiers.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Illia Shepilov
