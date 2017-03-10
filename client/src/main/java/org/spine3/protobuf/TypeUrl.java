@@ -32,10 +32,10 @@ import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.annotations.AnnotationsProto;
 import org.spine3.base.Command;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
-import org.spine3.base.EventEnvelope;
-import org.spine3.base.MessageEnvelope;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.envelope.EventEnvelope;
+import org.spine3.envelope.MessageEnvelope;
 import org.spine3.type.StringTypeValue;
 
 import java.util.regex.Pattern;

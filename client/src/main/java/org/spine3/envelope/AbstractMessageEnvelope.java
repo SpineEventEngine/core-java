@@ -18,26 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.envelope;
 
-import com.google.protobuf.Message;
+import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A common interface for obtaining messages from wrapping objects.
+ * Abstract base for classes implementing {@link MessageEnvelope}.
  *
  * @param <T> the type of the object that wraps a message
- * @author Alex Tymchenko
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public interface MessageEnvelope<T> {
+public abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
 
-    /**
-     * Obtains the object which contains the message of interest.
-     */
-    T getOuterObject();
+    private final T object;
 
-    /**
-     * Obtains the message.
-     */
-    Message getMessage();
+    protected AbstractMessageEnvelope(T object) {
+        checkNotNull(object);
+        this.object = object;
+    }
+
+    @Override
+    public T getOuterObject() {
+        return object;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(object);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
+        return Objects.equals(this.object, other.object);
+    }
 }

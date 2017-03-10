@@ -21,7 +21,7 @@
 package org.spine3.server.bus;
 
 import org.spine3.base.MessageClass;
-import org.spine3.base.MessageEnvelope;
+import org.spine3.envelope.MessageEnvelope;
 
 import java.util.Set;
 

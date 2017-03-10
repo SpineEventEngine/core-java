@@ -18,18 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
-
-import org.spine3.base.CommandClass;
-import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.bus.MessageDispatcher;
-
 /**
- * Delivers commands to their handlers.
+ * This package provides classes that wrap {@code Message} objects that
+ * hold other {@code Message} objects if interest.
  *
- * <p>A dispatcher can deliver more than one class of commands.
- *
- * @author Alexander Yevsyukov
+ * <p>For example, {@link org.spine3.envelope.CommandEnvelope CommandEnvelope}
+ * holds {@link org.spine3.base.Command Command} and provides access to its message,
+ * context, type, etc.
  */
-public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.envelope;
+
+import javax.annotation.ParametersAreNonnullByDefault;

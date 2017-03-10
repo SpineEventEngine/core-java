@@ -18,47 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.envelope;
 
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.protobuf.Message;
+import org.spine3.base.Event;
+import org.spine3.base.Events;
 
 /**
- * Abstract base for classes implementing {@link MessageEnvelope}.
+ * The holder of an {@code Event} which provides convenient access to its properties.
  *
- * @param <T> the type of the object that wraps a message
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
 
-    private final T object;
+    private final Message eventMessage;
 
-    protected AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+    private EventEnvelope(Event object) {
+        super(object);
+        this.eventMessage = Events.getMessage(object);
     }
 
-    @Override
-    public T getOuterObject() {
-        return object;
+    /**
+     * Creates instance for the passed event.
+     */
+    public static EventEnvelope of(Event event) {
+        return new EventEnvelope(event);
     }
 
+    /**
+     * Obtains the event message.
+     */
     @Override
-    public int hashCode() {
-        return Objects.hash(object);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
+    public Message getMessage() {
+        return this.eventMessage;
     }
 }

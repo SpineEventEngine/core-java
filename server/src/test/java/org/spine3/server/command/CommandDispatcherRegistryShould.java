@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.procman.ProcessManagerRepository;

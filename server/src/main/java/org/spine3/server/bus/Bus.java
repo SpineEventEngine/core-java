@@ -23,8 +23,8 @@ package org.spine3.server.bus;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.MessageClass;
-import org.spine3.base.MessageEnvelope;
 import org.spine3.base.Response;
+import org.spine3.envelope.MessageEnvelope;
 import org.spine3.server.command.CommandDispatcher;
 
 import javax.annotation.Nullable;
