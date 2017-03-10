@@ -251,17 +251,17 @@ public class Stringifiers {
         @SuppressWarnings("unchecked") // It is OK because class is verified.
         private static <I> I convert(Class<I> elementClass, String elementToConvert) {
 
-            if (isIntegerClass(elementClass)) {
+            if (isInteger(elementClass)) {
                 return (I) Ints.stringConverter()
                                .convert(elementToConvert);
             }
 
-            if (isLongClass(elementClass)) {
+            if (isLong(elementClass)) {
                 return (I) Longs.stringConverter()
                                 .convert(elementToConvert);
             }
 
-            if (isStringClass(elementClass)) {
+            if (isString(elementClass)) {
                 return (I) elementToConvert;
             }
 
@@ -280,15 +280,15 @@ public class Stringifiers {
         }
     }
 
-    private static boolean isStringClass(Class<?> aClass) {
+    private static boolean isString(Class<?> aClass) {
         return String.class.equals(aClass);
     }
 
-    private static boolean isLongClass(Class<?> aClass) {
+    private static boolean isLong(Class<?> aClass) {
         return Long.class.equals(aClass);
     }
 
-    private static boolean isIntegerClass(Class<?> aClass) {
+    private static boolean isInteger(Class<?> aClass) {
         return Integer.class.equals(aClass);
     }
 }
