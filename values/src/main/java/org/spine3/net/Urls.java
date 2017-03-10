@@ -37,14 +37,15 @@ public class Urls {
     }
 
     /**
-     * Converts {@link Url} with raw data into the instance with structurized record.
+     * Converts {@link Url} with {@linkplain Url#getRaw() raw} data into the
+     * {@linkplain Url#getRecord() structurized} instance.
      *
-     * @param rawUrl {@link Url} with raw String
+     * @param rawUrl {@link Url} a {@linkplain Url#getRaw() raw} instance
      * @return {@link Url} with {@link org.spine3.net.Url.Record Url.Record} instance
-     * @throws IllegalArgumentException if the argument already has a structurized record
+     * @throws IllegalArgumentException if the argument is already structurized
      */
     @SuppressWarnings("TypeMayBeWeakened")
-    public static Url of(Url rawUrl) {
+    public static Url structurize(Url rawUrl) {
         checkNotNull(rawUrl);
         if (rawUrl.getValueCase() != Url.ValueCase.RAW) {
             throw newIllegalArgumentException("Given url is already built (%s)", rawUrl);
@@ -60,19 +61,21 @@ public class Urls {
     }
 
     /**
-     * Converts String URL representation into {@link Url} instance.
+     * Creates a {@link Url} from a string value.
      *
      * <p>Does not perform any additional validation of the value, except
      * calling {@link Urls#validate(Url)}.
      *
+     * <p>The returned instance is {@linkplain #structurize(Url) structured}.
+     *
      * @param rawUrlString raw URL String
      * @return {@link Url} with {@link org.spine3.net.Url.Record Url.Record} instance
      */
-    public static Url of(String rawUrlString) {
+    public static Url create(String rawUrlString) {
         checkNotNull(rawUrlString);
         final Url.Builder builder = Url.newBuilder();
         builder.setRaw(rawUrlString);
-        final Url rawUrl = of(builder.build());
+        final Url rawUrl = structurize(builder.build());
         return rawUrl;
     }
 
