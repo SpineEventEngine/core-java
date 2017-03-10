@@ -107,6 +107,7 @@ public class Exceptions {
      * @throws IllegalConversionArgumentException always
      */
     public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
+        checkNotNull(exMessage);
         throw new IllegalConversionArgumentException(new ConversionError(exMessage));
     }
 }
