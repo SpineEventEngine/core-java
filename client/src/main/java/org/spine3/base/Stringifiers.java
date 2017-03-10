@@ -273,7 +273,8 @@ public class Stringifiers {
         private static void checkKeyValue(String[] keyValue) {
             if (keyValue.length != 2) {
                 final String exMessage =
-                        "Illegal key - value format, key value should be separated with `:`";
+                        "Illegal key - value format, key value should be " +
+                        "separated with single `:` character";
                 throw conversionArgumentException(exMessage);
             }
         }
