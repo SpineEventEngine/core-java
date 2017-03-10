@@ -49,8 +49,8 @@ public class UrlPrinterShould {
                                               .setSchema(Record.Schema.HTTP))
                   .setAuth(AUTH)
                   .setPath("index")
-                  .addQuery(QueryParameters.parse("key=value"))
-                  .addQuery(QueryParameters.parse("key2=value2"))
+                  .addQuery(UrlQueryParameters.parse("key=value"))
+                  .addQuery(UrlQueryParameters.parse("key2=value2"))
                   .setFragment("frag1")
                   .build();
 

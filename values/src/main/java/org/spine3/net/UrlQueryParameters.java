@@ -32,11 +32,11 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class QueryParameters {
+public class UrlQueryParameters {
 
     private static final char SEPARATOR = '=';
 
-    private QueryParameters() {
+    private UrlQueryParameters() {
     }
 
     /**
@@ -72,7 +72,7 @@ public class QueryParameters {
      * @param value {@link QueryParameter} value
      * @return {@link QueryParameter} instance
      */
-    public static QueryParameter of(String key, String value) {
+    public static QueryParameter from(String key, String value) {
         checkNotNull(key);
         checkNotNull(value);
         checkArgument(!key.isEmpty(), "Query parameter key cannot be empty.");
