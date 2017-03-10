@@ -31,6 +31,8 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.test.types.Task;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -180,6 +182,36 @@ public class StringifiersShould {
                 new Stringifiers.MapStringifier<>(String.class,
                                                   Integer.class).convert(mapToConvert);
         assertEquals(mapToConvert.toString(), convertedMap);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
+        final String incorrectRawMap = "{first-1}, second-2";
+        new Stringifiers.MapStringifier<>(String.class, Integer.class).reverse()
+                                                                      .convert(incorrectRawMap);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_required_stringifier_is_not_found() {
+        new Stringifiers.MapStringifier<>(Long.class, Task.class).reverse()
+                                                                 .convert("1:1");
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_occured_exception_during_conversion() {
+        new Stringifiers.MapStringifier<>(Long.class, Long.class).reverse()
+                                                                 .convert("first:first");
+    }
+
+    @Test
+    public void convert_map_with_custom_delimiter() {
+        final String rawMap = "first:1|second:2|third:3";
+        final Map<String, Integer> convertedMap =
+                new Stringifiers.MapStringifier<>(String.class,
+                                                  Integer.class,
+                                                  "\\|").reverse()
+                                                        .convert(rawMap);
+        assertThat(convertedMap, is(createTestMap()));
     }
 
     private static Map<String, Integer> createTestMap() {
