@@ -99,24 +99,12 @@ public class Exceptions {
     }
 
     /**
-     * Always throws {@code UnsupportedOperationException}.
-     *
-     * <p>Use this method in combination with static import for brevity of code for
-     * unsupported operations.
-     * The return type is given to keep Java type system happy when called in methods with
-     * return type as shown below:
-     *
-     * <pre>
-     *   import static com.teamdev.commons.Exceptions.unsupported;
-     *   ...
-     *   T doSomething() {
-     *      throw unsupported();
-     *   }
-     * </pre>
+     * Creates {@link IllegalConversionArgumentException}
+     * with specified exception message and throws it.
      *
      * @param exMessage a message for exception
-     * @return nothing ever
-     * @throws UnsupportedOperationException always
+     * @return always throws an exception, the return type is for convenience
+     * @throws IllegalConversionArgumentException always
      */
     public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
         throw new IllegalConversionArgumentException(new ConversionError(exMessage));
