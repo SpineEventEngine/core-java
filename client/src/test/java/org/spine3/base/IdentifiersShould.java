@@ -25,12 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
-import org.spine3.test.identifiers.TimestampFieldId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -38,10 +36,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.NULL_ID;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Identifiers.toIdString;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -58,7 +54,6 @@ public class IdentifiersShould {
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Identifiers.class);
     }
-
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_object_of_unsupported_class_passed() {
@@ -162,19 +157,6 @@ public class IdentifiersShould {
         final String result = idToString(id);
 
         assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    public void convert_to_string_message_id_with_timestamp_field() {
-        final Timestamp currentTime = getCurrentTime();
-        final TimestampFieldId id = TimestampFieldId.newBuilder()
-                                                    .setId(currentTime)
-                                                    .build();
-        final String expected = toIdString(currentTime);
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
     }
 
     @Test
