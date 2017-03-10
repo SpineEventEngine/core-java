@@ -28,8 +28,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeName;
 import org.spine3.test.EventTests;
+import org.spine3.type.TypeName;
 
 import java.util.Comparator;
 import java.util.List;

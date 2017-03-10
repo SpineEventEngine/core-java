@@ -33,11 +33,11 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

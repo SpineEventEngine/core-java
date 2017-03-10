@@ -24,7 +24,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.protobuf.TypeName;
 import org.spine3.test.event.EnrichmentByContextFields;
 import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
@@ -51,6 +50,7 @@ import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
 import org.spine3.test.event.user.sharing.SharingRequestSent;
+import org.spine3.type.TypeName;
 
 import java.util.Collection;
 

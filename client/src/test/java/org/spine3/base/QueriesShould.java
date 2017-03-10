@@ -28,10 +28,10 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeName;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.queries.TestEntity;
 import org.spine3.test.queries.TestEntityId;
+import org.spine3.type.TypeName;
+import org.spine3.type.TypeUrl;
 
 import java.util.List;
 import java.util.Set;

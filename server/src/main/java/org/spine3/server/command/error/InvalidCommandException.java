@@ -27,8 +27,8 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
-import org.spine3.protobuf.TypeName;
 import org.spine3.type.CommandClass;
+import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.lang.String.format;

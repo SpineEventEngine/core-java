@@ -28,8 +28,8 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.protobuf.TypeName;
 import org.spine3.test.Tests;
+import org.spine3.type.TypeName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

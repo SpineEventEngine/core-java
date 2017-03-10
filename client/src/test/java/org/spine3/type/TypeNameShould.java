@@ -18,32 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf.error;
+package org.spine3.type;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Descriptors;
 import org.junit.Test;
-import org.spine3.type.error.UnknownTypeException;
+import org.spine3.base.Command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-public class UnknownTypeExceptionShould {
+/**
+ * Provides only class-level tests.
+ *
+ * <p>Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by
+ * its own set of tests.
+ */
+public class TypeNameShould {
 
     @Test
-    public void have_ctor_with_type_name() {
-        final String str = newUuid();
-        final UnknownTypeException exception = new UnknownTypeException(str);
-
-        assertTrue(exception.getMessage().contains(str));
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(TypeName.class);
     }
 
     @Test
-    public void have_ctor_with_type_name_and_cause() {
-        final String str = newUuid();
-        RuntimeException cause = new RuntimeException("");
-        final UnknownTypeException exception = new UnknownTypeException(str, cause);
-
-        assertTrue(exception.getMessage().contains(str));
-        assertEquals(cause, exception.getCause());
+    public void pass_the_null_tolerance_check() {
+        new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(Descriptors.Descriptor.class, Command.getDefaultInstance()
+                                                                 .getDescriptorForType())
+                .testAllPublicStaticMethods(TypeName.class);
     }
 }

@@ -23,13 +23,13 @@ package org.spine3.server.entity;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import org.junit.Test;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.commandservice.customer.Customer;
+import org.spine3.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Iterator;

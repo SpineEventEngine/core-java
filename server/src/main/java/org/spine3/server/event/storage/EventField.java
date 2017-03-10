@@ -22,10 +22,10 @@ package org.spine3.server.event.storage;
 
 import org.spine3.SPI;
 import org.spine3.base.Event;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
+import org.spine3.type.TypeUrl;
 
 /**
  * A container for the storage fields specific for the {@link EventStorage} and its implementations.

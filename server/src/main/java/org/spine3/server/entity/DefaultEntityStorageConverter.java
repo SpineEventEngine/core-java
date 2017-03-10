@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import static org.spine3.base.Identifiers.idFromAny;
 import static org.spine3.base.Identifiers.idToAny;

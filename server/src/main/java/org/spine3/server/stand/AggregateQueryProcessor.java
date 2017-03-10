@@ -35,8 +35,8 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

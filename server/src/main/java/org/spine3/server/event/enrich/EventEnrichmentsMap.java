@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
 import org.spine3.annotations.EventAnnotationsProto;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

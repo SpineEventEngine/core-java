@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;

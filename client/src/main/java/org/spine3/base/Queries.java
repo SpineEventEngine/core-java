@@ -28,9 +28,9 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeName;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeName;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -54,8 +54,9 @@ public class Queries {
      * Create a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
      * applied to each of the results.
      *
-     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing. The processing
-     * results will contain only the entities, which IDs are present among the {@code ids}.
+     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
+     * The processing results will contain only the entities, which IDs are present among
+     * the {@code ids}.
      *
      * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query results.
      * This processing is performed according to the
@@ -69,7 +70,9 @@ public class Queries {
      * @param paths       the property paths for the {@code FieldMask} applied to each of results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids, String... paths) {
+    public static Query readByIds(Class<? extends Message> entityClass,
+                                  Set<? extends Message> ids,
+                                  String... paths) {
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
                                              .build();
@@ -103,25 +106,27 @@ public class Queries {
     /**
      * Create a {@link Query} to read certain entity states by IDs.
      *
-     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing. The processing
-     * results will contain only the entities, which IDs are present among the {@code ids}.
+     * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
+     * The processing results will contain only the entities, which IDs are present among
+     * the {@code ids}.
      *
-     * <p>Unlike {@link Queries#readByIds(Class, Set, String...)}, the {@code Query} processing will not change
-     * the resulting entities.
+     * <p>Unlike {@link Queries#readByIds(Class, Set, String...)}, the {@code Query} processing
+     * will not change the resulting entities.
      *
      * @param entityClass the class of a target entity
      * @param ids         the entity IDs of interest
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public static Query readByIds(Class<? extends Message> entityClass, Set<? extends Message> ids) {
+    public static Query readByIds(Class<? extends Message> entityClass,
+                                  Set<? extends Message> ids) {
         return composeQuery(entityClass, ids, null);
     }
 
     /**
      * Create a {@link Query} to read all states of a certain entity.
      *
-     * <p>Unlike {@link Queries#readAll(Class, String...)}, the {@code Query} processing will not change
-     * the resulting entities.
+     * <p>Unlike {@link Queries#readAll(Class, String...)}, the {@code Query} processing will
+     * not change the resulting entities.
      *
      * @param entityClass the class of a target entity
      * @return an instance of {@code Query} formed according to the passed parameters
@@ -130,7 +135,9 @@ public class Queries {
         return composeQuery(entityClass, null, null);
     }
 
-    private static Query composeQuery(Class<? extends Message> entityClass, @Nullable Set<? extends Message> ids, @Nullable FieldMask fieldMask) {
+    private static Query composeQuery(Class<? extends Message> entityClass,
+                                      @Nullable Set<? extends Message> ids,
+                                      @Nullable FieldMask fieldMask) {
         final Target target = ids == null ? allOf(entityClass) : someOf(entityClass, ids);
         final Query.Builder queryBuilder = Query.newBuilder()
                                                 .setTarget(target);
@@ -159,7 +166,8 @@ public class Queries {
     }
 
     /**
-     * Client-side utilities for working with {@link Query} and {@link org.spine3.client.Subscription} targets.
+     * Client-side utilities for working with {@link Query} and
+     * {@link org.spine3.client.Subscription Subscription} targets.
      *
      * @author Alex Tymchenko
      * @author Dmytro Dashenkov
@@ -176,7 +184,8 @@ public class Queries {
          * @param ids         the IDs of interest
          * @return the instance of {@code Target} assembled according to the parameters.
          */
-        public static Target someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
+        public static Target someOf(Class<? extends Message> entityClass,
+                                    Set<? extends Message> ids) {
             final Target result = composeTarget(entityClass, ids);
             return result;
         }

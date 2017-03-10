@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.TypeName;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.EventDispatchingRepository;
@@ -43,6 +42,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.EventClass;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

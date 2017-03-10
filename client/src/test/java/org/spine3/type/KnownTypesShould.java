@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
@@ -33,11 +33,10 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.test.types.Task;
 import org.spine3.test.types.TaskId;
 import org.spine3.test.types.TaskName;
-import org.spine3.type.ClassName;
+import org.spine3.type.error.UnknownTypeException;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,9 +47,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 /**
  * @author Alexander Litus

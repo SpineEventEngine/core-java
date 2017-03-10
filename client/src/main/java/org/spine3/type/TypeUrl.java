@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
@@ -36,7 +36,6 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
-import org.spine3.type.StringTypeValue;
 
 import java.util.regex.Pattern;
 

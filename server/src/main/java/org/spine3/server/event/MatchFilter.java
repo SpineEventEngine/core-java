@@ -30,8 +30,8 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.reflect.Classes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

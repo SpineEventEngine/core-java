@@ -33,7 +33,6 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -41,6 +40,7 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -130,7 +130,7 @@ public class Stand implements AutoCloseable {
      * {@link StandStorage}.
      *
      * <p>Each {@code Aggregate} state value is stored as one-to-one to its
-     * {@link org.spine3.protobuf.TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
+     * {@link TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
      *
      * <p>In case {@code Stand} already contains the state for this {@code Aggregate},
      * the value will be replaced.

@@ -29,8 +29,8 @@ import org.spine3.base.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.Stand;
+import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;

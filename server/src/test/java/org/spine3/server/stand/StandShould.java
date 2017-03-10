@@ -45,7 +45,6 @@ import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
@@ -58,6 +57,7 @@ import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

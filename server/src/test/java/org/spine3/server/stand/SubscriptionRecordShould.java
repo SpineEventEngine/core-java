@@ -27,10 +27,10 @@ import org.spine3.base.Queries;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.commandservice.customer.Customer;
+import org.spine3.type.TypeUrl;
 
 import java.util.Collections;
 

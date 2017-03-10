@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf.error;
+package org.spine3.type.error;
 
 /**
  * Exception thrown when the content of {@link com.google.protobuf.Any Any} does not

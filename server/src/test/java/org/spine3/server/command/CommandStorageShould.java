@@ -35,10 +35,10 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
 import org.spine3.base.Failures;
-import org.spine3.protobuf.TypeName;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
+import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;

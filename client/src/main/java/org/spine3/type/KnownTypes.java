@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -62,8 +62,7 @@ import com.google.protobuf.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
-import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.type.ClassName;
+import org.spine3.type.error.UnknownTypeException;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

@@ -23,7 +23,7 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 

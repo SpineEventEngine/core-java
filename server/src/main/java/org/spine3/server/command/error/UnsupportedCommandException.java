@@ -24,8 +24,8 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.protobuf.TypeName;
 import org.spine3.type.CommandClass;
+import org.spine3.type.TypeName;
 
 /**
  * Exception that is thrown when unsupported command is obtained
