@@ -21,11 +21,11 @@
 package org.spine3.base;
 
 import com.google.common.reflect.TypeToken;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.identifiers.TimestampFieldId;
 
@@ -35,7 +35,6 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -74,7 +73,6 @@ public class StringifiersShould {
                                                               .setName(testId)
                                                               .build();
         final String result = idToString(id);
-
         assertEquals(testId, result);
     }
 
@@ -104,8 +102,8 @@ public class StringifiersShould {
     @Test
     public void convert_command_id_to_string() {
         final CommandId id = Commands.generateId();
-        final String actual = new Stringifiers.CommandIdStringifier().convert(id);
 
+        final String actual = Stringifiers.toString(id, TypeToken.of(CommandId.class));
         assertEquals(idToString(id), actual);
     }
 
@@ -115,9 +113,8 @@ public class StringifiersShould {
         final CommandId expected = CommandId.newBuilder()
                                             .setUuid(id)
                                             .build();
-        final CommandId actual = new Stringifiers.CommandIdStringifier().reverse()
-                                                                        .convert(id);
 
+        final CommandId actual = Stringifiers.parse(id, TypeToken.of(CommandId.class));
         assertEquals(expected, actual);
     }
 
@@ -125,16 +122,14 @@ public class StringifiersShould {
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         final String time = Timestamps2.getCurrentTime()
                                        .toString();
-        new Stringifiers.TimestampStringifer().reverse()
-                                              .convert(time);
+        Stringifiers.parse(time, TypeToken.of(Timestamp.class));
     }
 
     @Test
     public void convert_string_to_timestamp() throws ParseException {
         final String date = "1972-01-01T10:00:20.021-05:00";
         final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = new Stringifiers.TimestampStringifer().reverse()
-                                                                       .convert(date);
+        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
         assertEquals(expected, actual);
     }
 
@@ -144,7 +139,7 @@ public class StringifiersShould {
         final TimestampFieldId id = TimestampFieldId.newBuilder()
                                                     .setId(currentTime)
                                                     .build();
-        final String expected = new Stringifiers.TimestampStringifer().convert(currentTime);
+        final String expected = Stringifiers.toString(currentTime, TypeToken.of(Timestamp.class));
         final String actual = idToString(id);
 
         assertEquals(expected, actual);
@@ -153,7 +148,7 @@ public class StringifiersShould {
     @Test
     public void convert_event_id_to_string() {
         final EventId id = Events.generateId();
-        final String actual = new Stringifiers.EventIdStringifier().convert(id);
+        final String actual = Stringifiers.toString(id, TypeToken.of(EventId.class));
 
         assertEquals(idToString(id), actual);
     }
@@ -164,17 +159,13 @@ public class StringifiersShould {
         final EventId expected = EventId.newBuilder()
                                         .setUuid(id)
                                         .build();
-        final EventId actual = new Stringifiers.EventIdStringifier().reverse()
-                                                                    .convert(id);
+        final EventId actual = Stringifiers.parse(id, TypeToken.of(EventId.class));
         assertEquals(expected, actual);
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Stringifiers.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        final NullPointerTester tester = new NullPointerTester();
+        tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
     }
 }
