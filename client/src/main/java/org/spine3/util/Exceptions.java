@@ -21,6 +21,8 @@
 package org.spine3.util;
 
 import com.google.common.base.Throwables;
+import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -94,5 +96,18 @@ public class Exceptions {
         checkNotNull(throwable);
         final Throwable cause = Throwables.getRootCause(throwable);
         throw new IllegalStateException(cause);
+    }
+
+    /**
+     * Creates {@link IllegalConversionArgumentException}
+     * with specified exception message and throws it.
+     *
+     * @param exMessage a message for exception
+     * @return always throws an exception, the return type is for convenience
+     * @throws IllegalConversionArgumentException always
+     */
+    public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
+        checkNotNull(exMessage);
+        throw new IllegalConversionArgumentException(new ConversionError(exMessage));
     }
 }
