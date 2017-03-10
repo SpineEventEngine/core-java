@@ -37,8 +37,12 @@ import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
 
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Random;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -302,6 +306,33 @@ public class StringifiersShould {
         final EventId actual = new Stringifiers.EventIdStringifier().reverse()
                                                                     .convert(id);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_string_to_map() {
+        final String rawMap = "first:1,second:2,third:3";
+        final Map<String, Integer> actualMap =
+                new Stringifiers.MapStringifier<>(String.class, Integer.class).reverse()
+                                                                              .convert(rawMap);
+        final Map<String, Integer> expectedMap = createTestMap();
+        assertThat(actualMap, is(expectedMap));
+    }
+
+    @Test
+    public void convert_map_to_string() {
+        final Map<String, Integer> mapToConvert = createTestMap();
+        final String convertedMap =
+                new Stringifiers.MapStringifier<>(String.class,
+                                                  Integer.class).convert(mapToConvert);
+        assertEquals(mapToConvert.toString(), convertedMap);
+    }
+
+    private static Map<String, Integer> createTestMap() {
+        final Map<String, Integer> expectedMap = newHashMap();
+        expectedMap.put("first", 1);
+        expectedMap.put("second", 2);
+        expectedMap.put("third", 3);
+        return expectedMap;
     }
 
     @Test
