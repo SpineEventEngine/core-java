@@ -29,7 +29,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
@@ -108,7 +108,7 @@ class Identifier<I> {
                 break;
 
             case MESSAGE:
-                result = Stringifiers.idMessageToString((Message)value);
+                result = Identifiers.idMessageToString((Message)value);
                 result = result.trim();
                 break;
             default:

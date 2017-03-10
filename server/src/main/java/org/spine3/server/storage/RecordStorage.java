@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**

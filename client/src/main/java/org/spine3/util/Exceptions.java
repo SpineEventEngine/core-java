@@ -21,6 +21,8 @@
 package org.spine3.util;
 
 import com.google.common.base.Throwables;
+import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.util.Locale;
 
@@ -148,5 +150,18 @@ public class Exceptions {
                                                                  Object... args) {
         final String errMsg = formatMessage(format, args);
         throw new IllegalStateException(errMsg);
+    }
+
+    /**
+     * Creates {@link IllegalConversionArgumentException}
+     * with specified exception message and throws it.
+     *
+     * @param exMessage a message for exception
+     * @return always throws an exception, the return type is for convenience
+     * @throws IllegalConversionArgumentException always
+     */
+    public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
+        checkNotNull(exMessage);
+        throw new IllegalConversionArgumentException(new ConversionError(exMessage));
     }
 }
