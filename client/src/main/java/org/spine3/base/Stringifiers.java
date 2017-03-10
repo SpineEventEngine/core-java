@@ -44,7 +44,6 @@ public class Stringifiers {
     }
 
     protected static class TimestampIdStringifer extends Stringifier<Timestamp> {
-
         @Override
         protected String doForward(Timestamp timestamp) {
             final String result = Identifiers.toIdString(timestamp);
