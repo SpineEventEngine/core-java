@@ -176,12 +176,12 @@ public class KnownTypes {
     }
 
     /**
-     * Retrieves all the types that belong to the given package or it's subpackages.
+     * Retrieves all the types that belong to the given package or its subpackages.
      *
-     * @param packageName protobuf-style package
-     * @return set of {@link TypeUrl TypeUrls} for types that belong to the given package
+     * @param packageName proto package name
+     * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
      */
-    public static Set<TypeUrl> getTypesFromPackage(final String packageName) {
+    static Set<TypeUrl> getTypesFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
         final Collection<TypeUrl> resultCollection = Collections2.filter(
                 knownTypeUrls, new Predicate<TypeUrl>() {

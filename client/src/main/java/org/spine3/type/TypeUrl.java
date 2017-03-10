@@ -37,6 +37,7 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -228,7 +229,9 @@ public final class TypeUrl extends StringTypeValue {
         return typeName;
     }
 
-    /** Returns the unqualified name of the Protobuf type, for example: `StringValue`. */
+    /**
+     * Returns the unqualified name of the Protobuf type, for example: {@code StringValue}.
+     */
     public String getSimpleName() {
         if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
             final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
@@ -238,5 +241,15 @@ public final class TypeUrl extends StringTypeValue {
         } else {
             return typeName;
         }
+    }
+
+    /**
+     * Retrieves all the types that belong to the given package or its subpackages.
+     *
+     * @param packageName proto package name
+     * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
+     */
+    public static Set<TypeUrl> getTypesFromPackage(String packageName) {
+        return KnownTypes.getTypesFromPackage(packageName);
     }
 }
