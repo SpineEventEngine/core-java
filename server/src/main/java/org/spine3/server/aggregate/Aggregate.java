@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -36,6 +35,7 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

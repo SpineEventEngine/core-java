@@ -20,8 +20,8 @@
 
 package org.spine3.server.bus;
 
-import org.spine3.base.MessageClass;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.type.MessageClass;
 
 import java.util.Set;
 

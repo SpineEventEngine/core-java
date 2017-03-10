@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
@@ -41,6 +40,7 @@ import org.spine3.test.command.event.TaskAdded;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.type.CommandClass;
 
 import java.util.Collections;
 import java.util.Set;

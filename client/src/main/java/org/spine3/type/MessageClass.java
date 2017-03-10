@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.type;
 
 import com.google.protobuf.Message;
-import org.spine3.type.ClassName;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

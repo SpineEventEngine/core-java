@@ -26,10 +26,10 @@ import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.Commands;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TestCommandFactory;
+import org.spine3.type.CommandClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

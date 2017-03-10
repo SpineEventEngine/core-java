@@ -28,7 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
@@ -45,6 +44,7 @@ import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nonnull;
 import java.util.List;

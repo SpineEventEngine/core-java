@@ -25,7 +25,6 @@ import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
@@ -40,6 +39,7 @@ import org.spine3.server.bus.Bus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.users.CurrentTenant;
+import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
 
 import java.util.Set;

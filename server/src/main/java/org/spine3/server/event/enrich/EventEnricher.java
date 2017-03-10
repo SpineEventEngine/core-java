@@ -36,11 +36,11 @@ import com.google.protobuf.Message;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Enrichment.Container;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeName;
 import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.EventClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

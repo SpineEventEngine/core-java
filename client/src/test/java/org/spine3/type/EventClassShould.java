@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.type;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;

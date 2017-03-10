@@ -26,10 +26,10 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.Given;
+import org.spine3.type.EventClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
