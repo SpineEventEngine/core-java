@@ -36,7 +36,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * A storage keeping messages with identity.

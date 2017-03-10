@@ -31,8 +31,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * This class provides general validation routines.
