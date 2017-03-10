@@ -45,11 +45,11 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
- * A wrapper for the Protobuf type URL.
+ * A URL of a Protobuf type.
  *
- * <p>Consists of the two parts separated with {@link TypeUrl#SEPARATOR}.
- * The first part is the type URL prefix (for example, {@link TypeUrl#GOOGLE_TYPE_URL_PREFIX});
- * the second one is the fully-qualified Protobuf type name.
+ * <p>Consists of the two parts separated with a slash.
+ * The first part is the type URL prefix (for example, {@code "type.googleapis.com"});
+ * the second part is a fully-qualified Protobuf type name.
  *
  * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
@@ -61,7 +61,8 @@ public final class TypeUrl extends StringTypeValue {
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
 
     private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN = Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN =
+            Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
 
     @VisibleForTesting
     static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
