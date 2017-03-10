@@ -88,15 +88,15 @@ public class Stringifiers {
     }
 
     private static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
-        final Optional<Stringifier<I>> keyStringifierOpt = StringifierRegistry.getInstance()
-                                                                              .get(typeToken);
+        final Optional<Stringifier<I>> stringifierOptional = StringifierRegistry.getInstance()
+                                                                                .get(typeToken);
 
-        if (!keyStringifierOpt.isPresent()) {
+        if (!stringifierOptional.isPresent()) {
             final String exMessage =
                     format("Stringifier for the %s is not provided", typeToken);
             throw conversionArgumentException(exMessage);
         }
-        final Stringifier<I> stringifier = keyStringifierOpt.get();
+        final Stringifier<I> stringifier = stringifierOptional.get();
         return stringifier;
     }
 
@@ -107,7 +107,7 @@ public class Stringifiers {
 
         @Override
         protected String doForward(Timestamp timestamp) {
-            final String result = toIdString(timestamp);
+            final String result = toString(timestamp);
             return result;
         }
 
@@ -126,14 +126,12 @@ public class Stringifiers {
          * @param timestamp the value to convert
          * @return the string representation of the timestamp
          */
-        private static String toIdString(Timestamp timestamp) {
-            checkNotNull(timestamp);
+        private static String toString(Timestamp timestamp) {
             String result = Timestamps.toString(timestamp);
             result = PATTERN_COLON.matcher(result)
                                   .replaceAll("-");
             result = PATTERN_T.matcher(result)
                               .replaceAll("_T");
-
             return result;
         }
     }
