@@ -82,15 +82,15 @@ public class Stringifiers {
     }
 
     private static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
-        final Optional<Stringifier<I>> keyStringifierOpt = StringifierRegistry.getInstance()
-                                                                              .get(typeToken);
+        final Optional<Stringifier<I>> stringifierOptional = StringifierRegistry.getInstance()
+                                                                                .get(typeToken);
 
-        if (!keyStringifierOpt.isPresent()) {
+        if (!stringifierOptional.isPresent()) {
             final String exMessage =
                     format("Stringifier for the %s is not provided", typeToken);
             throw conversionArgumentException(exMessage);
         }
-        final Stringifier<I> stringifier = keyStringifierOpt.get();
+        final Stringifier<I> stringifier = stringifierOptional.get();
         return stringifier;
     }
 
