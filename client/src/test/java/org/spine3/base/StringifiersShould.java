@@ -197,8 +197,11 @@ public class StringifiersShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
-        final String incorrectRawMap = "{first-1}, second-2";
-        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final String incorrectRawMap = "first:1, second:2";
+        final TypeToken<Map<Integer, Integer>> typeToken = new TypeToken<Map<Integer, Integer>>() {};
+        final Stringifiers.MapStringifier<Integer, Integer> stringifier =
+                new Stringifiers.MapStringifier<>(Integer.class, Integer.class);
+        StringifierRegistry.getInstance().register(typeToken, stringifier);
         Stringifiers.parse(incorrectRawMap, typeToken);
     }
 
