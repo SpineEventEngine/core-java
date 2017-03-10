@@ -21,6 +21,8 @@
 package org.spine3.util;
 
 import com.google.common.base.Throwables;
+import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -94,5 +96,29 @@ public class Exceptions {
         checkNotNull(throwable);
         final Throwable cause = Throwables.getRootCause(throwable);
         throw new IllegalStateException(cause);
+    }
+
+    /**
+     * Always throws {@code UnsupportedOperationException}.
+     *
+     * <p>Use this method in combination with static import for brevity of code for
+     * unsupported operations.
+     * The return type is given to keep Java type system happy when called in methods with
+     * return type as shown below:
+     *
+     * <pre>
+     *   import static com.teamdev.commons.Exceptions.unsupported;
+     *   ...
+     *   T doSomething() {
+     *      throw unsupported();
+     *   }
+     * </pre>
+     *
+     * @param exMessage a message for exception
+     * @return nothing ever
+     * @throws UnsupportedOperationException always
+     */
+    public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
+        throw new IllegalConversionArgumentException(new ConversionError(exMessage));
     }
 }
