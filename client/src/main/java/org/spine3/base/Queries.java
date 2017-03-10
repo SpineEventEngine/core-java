@@ -58,8 +58,8 @@ public class Queries {
      * The processing results will contain only the entities, which IDs are present among
      * the {@code ids}.
      *
-     * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query results.
-     * This processing is performed according to the
+     * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
+     * results. This processing is performed according to the
      * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
      *
      * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
