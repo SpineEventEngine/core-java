@@ -142,12 +142,10 @@ public class StringifiersShould {
         assertEquals(expected, actual);
     }
 
-    @Test
+    @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_string_cannot_be_converted_to_timestamp() throws ParseException {
         final String date = "incorrect date";
-        final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
-        assertEquals(expected, actual);
+        Stringifiers.parse(date, TypeToken.of(Timestamp.class));
     }
 
     @Test
