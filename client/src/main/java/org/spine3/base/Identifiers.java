@@ -53,8 +53,6 @@ public class Identifiers {
     public static final String NULL_ID = "NULL";
     /** An empty ID string representation. */
     public static final String EMPTY_ID = "EMPTY";
-    private static final Pattern PATTERN_COLON = Pattern.compile(":");
-    private static final Pattern PATTERN_T = Pattern.compile("T");
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
     private static final String EQUAL_SIGN = "=";
 
@@ -156,23 +154,6 @@ public class Identifiers {
     public static <I> I getDefaultValue(Class<I> idClass) {
         checkNotNull(idClass);
         return Identifier.getDefaultValue(idClass);
-    }
-
-    /**
-     * Converts the passed timestamp to the string, which will serve as ID.
-     *
-     * @param timestamp the value to convert
-     * @return string representation of timestamp-based ID
-     */
-    public static String toIdString(Timestamp timestamp) {
-        checkNotNull(timestamp);
-        String result = Timestamps.toString(timestamp);
-        result = PATTERN_COLON.matcher(result)
-                              .replaceAll("-");
-        result = PATTERN_T.matcher(result)
-                          .replaceAll("_T");
-
-        return result;
     }
 
     /**

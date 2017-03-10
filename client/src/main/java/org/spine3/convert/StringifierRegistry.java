@@ -45,7 +45,7 @@ public class StringifierRegistry {
             newHashMap(
                     ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
                             .put(TypeToken.of(Timestamp.class),
-                                 new Stringifiers.TimestampIdStringifer())
+                                 new Stringifiers.TimestampStringifer())
                             .put(TypeToken.of(EventId.class),
                                  new Stringifiers.EventIdStringifier())
                             .put(TypeToken.of(CommandId.class),

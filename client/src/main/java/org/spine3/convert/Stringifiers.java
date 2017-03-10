@@ -24,11 +24,13 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
 import org.spine3.validate.ConversionError;
 import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.text.ParseException;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class for working with {@code Stringifier}s.
@@ -42,10 +44,14 @@ public class Stringifiers {
         // Disable instantiation of this utility class.
     }
 
-    protected static class TimestampIdStringifer extends Stringifier<Timestamp> {
+    protected static class TimestampStringifer extends Stringifier<Timestamp> {
+
+        private static final Pattern PATTERN_COLON = Pattern.compile(":");
+        private static final Pattern PATTERN_T = Pattern.compile("T");
+
         @Override
         protected String doForward(Timestamp timestamp) {
-            final String result = Identifiers.toIdString(timestamp);
+            final String result = toIdString(timestamp);
             return result;
         }
 
@@ -60,6 +66,23 @@ public class Stringifiers {
                 final ConversionError conversionError = new ConversionError(e.getMessage());
                 throw new IllegalConversionArgumentException(conversionError);
             }
+        }
+
+        /**
+         * Converts the passed timestamp to the string.
+         *
+         * @param timestamp the value to convert
+         * @return the string representation of the timestamp
+         */
+        private static String toIdString(Timestamp timestamp) {
+            checkNotNull(timestamp);
+            String result = Timestamps.toString(timestamp);
+            result = PATTERN_COLON.matcher(result)
+                                  .replaceAll("-");
+            result = PATTERN_T.matcher(result)
+                              .replaceAll("_T");
+
+            return result;
         }
     }
 

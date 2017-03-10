@@ -31,6 +31,7 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.test.identifiers.TimestampFieldId;
 
 import java.text.ParseException;
 import java.util.Random;
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StringifiersShould {
@@ -127,16 +129,28 @@ public class StringifiersShould {
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         final String time = Timestamps2.getCurrentTime()
                                        .toString();
-        new Stringifiers.TimestampIdStringifer().reverse()
-                                                .convert(time);
+        new Stringifiers.TimestampStringifer().reverse()
+                                              .convert(time);
     }
 
     @Test
     public void convert_string_to_timestamp() throws ParseException {
         final String date = "1972-01-01T10:00:20.021-05:00";
         final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = new Stringifiers.TimestampIdStringifer().reverse()
-                                                                         .convert(date);
+        final Timestamp actual = new Stringifiers.TimestampStringifer().reverse()
+                                                                       .convert(date);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_timestamp_to_string() {
+        final Timestamp currentTime = getCurrentTime();
+        final TimestampFieldId id = TimestampFieldId.newBuilder()
+                                                    .setId(currentTime)
+                                                    .build();
+        final String expected = new Stringifiers.TimestampStringifer().convert(currentTime);
+        final String actual = idToString(id);
+
         assertEquals(expected, actual);
     }
 
