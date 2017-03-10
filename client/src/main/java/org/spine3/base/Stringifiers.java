@@ -239,8 +239,8 @@ public class Stringifiers {
             final String value = keyValue[1];
 
             try {
-                final K convertedKey = getConvertedElement(keyClass, key);
-                final V convertedValue = getConvertedElement(valueClass, value);
+                final K convertedKey = convert(keyClass, key);
+                final V convertedValue = convert(valueClass, value);
                 resultMap.put(convertedKey, convertedValue);
                 return resultMap;
             } catch (Throwable ignored) {
@@ -249,7 +249,7 @@ public class Stringifiers {
         }
 
         @SuppressWarnings("unchecked") // It is OK because class is verified.
-        private static <I> I getConvertedElement(Class<I> elementClass, String elementToConvert) {
+        private static <I> I convert(Class<I> elementClass, String elementToConvert) {
 
             if (isIntegerClass(elementClass)) {
                 return (I) Ints.stringConverter()
