@@ -115,13 +115,14 @@ public class KnownTypes {
      *
      * @see TypeUrl
      */
-    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap =
-            buildTypeToUrlMap(knownTypes);
+    private static final ImmutableMap<String, TypeUrl> typeUrls = buildTypeToUrlMap(knownTypes);
 
     private KnownTypes() {
     }
 
-    /** Retrieves Protobuf type URLs known to the application. */
+    /**
+     * Retrieves Protobuf type URLs known to the application.
+     */
     public static ImmutableSet<TypeUrl> getTypeUrls() {
         final Set<TypeUrl> result = knownTypes.keySet();
         return ImmutableSet.copyOf(result);
@@ -170,7 +171,7 @@ public class KnownTypes {
     /** Returns a Protobuf type URL by Protobuf type name. */
     @Nullable
     public static TypeUrl getTypeUrl(String typeName) {
-        final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
+        final TypeUrl typeUrl = typeUrls.get(typeName);
         return typeUrl;
     }
 
