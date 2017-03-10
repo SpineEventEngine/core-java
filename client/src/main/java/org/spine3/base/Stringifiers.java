@@ -18,12 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.convert;
+package org.spine3.base;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.validate.ConversionError;
 import org.spine3.validate.IllegalConversionArgumentException;
 

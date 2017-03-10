@@ -18,16 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.convert;
+package org.spine3.base;
 
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;

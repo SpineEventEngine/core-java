@@ -24,11 +24,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import org.spine3.Internal;
-import org.spine3.convert.Stringifier;
-import org.spine3.convert.StringifierRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
