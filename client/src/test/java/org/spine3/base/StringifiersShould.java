@@ -210,7 +210,10 @@ public class StringifiersShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {};
+        final TypeToken<Map<Task, Long>> typeToken = new TypeToken<Map<Task, Long>>() {};
+        final Stringifiers.MapStringifier<Task, Long> stringifier =
+                new Stringifiers.MapStringifier<>(Task.class, Long.class);
+        StringifierRegistry.getInstance().register(typeToken, stringifier);
         Stringifiers.parse("first:first:first", typeToken);
     }
 
