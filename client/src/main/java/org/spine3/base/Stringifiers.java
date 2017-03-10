@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
@@ -211,27 +213,49 @@ public class Stringifiers {
         }
     }
 
+    /**
+     * The stringifier for the {@code Map} classes.
+     *
+     * <p> The converter for the type of the elements in the map
+     * should be registered in the {@code StringifierRegistry} class
+     * for the correct usage of the {@code MapStringifier} converter.
+     *
+     * @param <K> the type of the keys in the map
+     * @param <V> the type of the values in the map
+     */
     protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
         private static final String DEFAULT_ELEMENTS_DELIMITER = ",";
         private static final String KEY_VALUE_DELIMITER = ":";
 
+        /**
+         * The delimiter for the passed elements in the {@code String} representation,
+         * {@code DEFAULT_ELEMENTS+DELIMITER} by default.
+         */
         private final String delimiter;
-        private final Class<K> keyClass;
-        private final Class<V> valueClass;
+        private final Stringifier<K> keyStringifier;
+        private final Stringifier<V> valueStringifier;
         private final StringifierRegistry stringifierRegistry = StringifierRegistry.getInstance();
 
         public MapStringifier(Class<K> keyClass, Class<V> valueClass) {
             super();
-            this.keyClass = keyClass;
-            this.valueClass = valueClass;
+            keyStringifier = getStringifier(keyClass);
+            valueStringifier = getStringifier(valueClass);
             this.delimiter = DEFAULT_ELEMENTS_DELIMITER;
         }
 
-        public MapStringifier(String delimiter, Class<K> keyClass, Class<V> valueClass) {
+        /**
+         * That constructor should be used when need to use
+         * a custom delimiter of the elements during conversion.
+         *
+         * @param keyClass   the class of the key elements
+         * @param valueClass the class of the value elements
+         * @param delimiter  the delimiter for the passed elements via string
+         */
+        public MapStringifier(Class<K> keyClass, Class<V> valueClass, String delimiter) {
             this.delimiter = delimiter;
-            this.keyClass = keyClass;
-            this.valueClass = valueClass;
+            keyStringifier = getStringifier(keyClass);
+            valueStringifier = getStringifier(valueClass);
         }
 
         @Override
@@ -242,25 +266,53 @@ public class Stringifiers {
 
         @Override
         protected Map<K, V> doBackward(String s) {
-
             final String[] elements = s.split(delimiter);
             final Map<K, V> resultMap = newHashMap();
 
             for (String element : elements) {
-                final String[] keyValue = element.split(":");
-                checkKeyValue(keyValue);
-
+                saveConvertedElement(resultMap, element);
             }
 
-            return null;
+            return resultMap;
+        }
+
+        private Map<K, V> saveConvertedElement(Map<K, V> resultMap, String element) {
+            final String[] keyValue = element.split(KEY_VALUE_DELIMITER);
+            checkKeyValue(keyValue);
+
+            final String key = keyValue[0];
+            final String value = keyValue[1];
+            final K convertedKey = keyStringifier.reverse()
+                                                 .convert(key);
+            final V convertedValue = valueStringifier.reverse()
+                                                     .convert(value);
+            resultMap.put(convertedKey, convertedValue);
+            return resultMap;
         }
 
         private static void checkKeyValue(String[] keyValue) {
             if (keyValue.length != 2) {
                 final String exMessage =
                         "Illegal key - value format, key value should be separated with `:`";
-                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
+                throw conversionError(exMessage);
             }
+        }
+
+        private <I> Stringifier<I> getStringifier(Class<I> valueClass) {
+            final Optional<Stringifier<I>> keyStringifierOpt =
+                    stringifierRegistry.get(TypeToken.of(valueClass));
+
+            if (!keyStringifierOpt.isPresent()) {
+                final String exMessage =
+                        format("Stringifier for the %s type is not provided", valueClass);
+                throw conversionError(exMessage);
+            }
+            final Stringifier<I> stringifier = keyStringifierOpt.get();
+            return stringifier;
+        }
+
+        private static IllegalConversionArgumentException conversionError(String exMessage) {
+            return new IllegalConversionArgumentException(new ConversionError(exMessage));
         }
     }
 }
