@@ -22,9 +22,11 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
+import org.spine3.client.Query;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.server.aggregate.Aggregate;
@@ -104,32 +106,34 @@ public class Given {
         }
     }
 
-    static class Command {
+    static class ACommand {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = newProjectId();
 
-        private Command() {}
+        private ACommand() {}
 
         /**
-         * Creates a new {@link Command} with the given command message, userId and timestamp using default
-         * {@link Command} instance.
+         * Creates a new {@link ACommand} with the given command message, userId and timestamp using default
+         * {@link ACommand} instance.
          */
-        static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
-            final org.spine3.base.Command result = Commands.createCommand(command, context);
+        static Command create(Message command, UserId userId, Timestamp when) {
+            final CommandContext context = createCommandContext(userId,
+                                                                Commands.generateId(),
+                                                                when);
+            final Command result = Commands.createCommand(command, context);
             return result;
         }
 
-        static org.spine3.base.Command createProject() {
+        static Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        static org.spine3.base.Command createProject(Timestamp when) {
+        static Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+        static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
@@ -138,7 +142,7 @@ public class Given {
         The production code should use more sane approach to generating the IDs. */
         private static int customerNumber = 1;
 
-        static org.spine3.base.Command createCustomer() {
+        static Command createCustomer() {
             final LocalDate localDate = LocalDates.now();
             final CustomerId customerId = CustomerId.newBuilder()
                                                     .setRegistrationDate(localDate)
@@ -155,32 +159,34 @@ public class Given {
                                                                                       .setHonorificSuffix("Cmd")))
                                               .build();
             final UserId userId = newUserId(Identifiers.newUuid());
-            final org.spine3.base.Command result = create(msg, userId, getCurrentTime());
+            final Command result = create(msg, userId, getCurrentTime());
 
             return result;
         }
     }
 
-    static class Query {
+    static class AQuery {
 
-        private Query() {}
+        private AQuery() {}
 
-        static org.spine3.client.Query readAllProjects() {
+        static Query readAllProjects() {
 
-            final String typeName = TypeName.of(org.spine3.test.projection.Project.class);
+            final String typeName = TypeName.of(org.spine3.test.projection.Project.class)
+                                            .value();
             final Target queryTarget = Target.newBuilder()
                                              .setType(typeName)
                                              .setIncludeAll(true)
                                              .build();
 
-            final org.spine3.client.Query query = org.spine3.client.Query.newBuilder()
-                                                                         .setTarget(queryTarget)
-                                                                         .build();
+            final Query query = Query.newBuilder()
+                                     .setTarget(queryTarget)
+                                     .build();
             return query;
         }
     }
 
-    static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+    static class ProjectAggregateRepository
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
         ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -230,7 +236,8 @@ public class Given {
         }
     }
 
-    public static class CustomerAggregateRepository extends AggregateRepository<CustomerId, CustomerAggregate> {
+    public static class CustomerAggregateRepository
+            extends AggregateRepository<CustomerId, CustomerAggregate> {
         public CustomerAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }

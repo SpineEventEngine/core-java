@@ -137,7 +137,7 @@ public abstract class EventStorageShould
     @Test
     public void filter_events_by_type() {
         givenSequentialRecords();
-        final String typeName = TypeName.ofEvent(event1);
+        final String typeName = TypeName.ofEvent(event1).value();
         final EventFilter filter = EventFilter.newBuilder()
                                               .setEventType(typeName)
                                               .build();

@@ -203,7 +203,8 @@ public class EventEnricher {
                 function.setContext(eventContext);
                 final Message enriched = apply(function, eventMessage);
                 checkResult(enriched, function);
-                final String typeName = TypeName.of(enriched);
+                final String typeName = TypeName.of(enriched)
+                                                .value();
                 enrichments.put(typeName, AnyPacker.pack(enriched));
             }
         }

@@ -215,8 +215,10 @@ public class Queries {
             final EntityFilters filters = EntityFilters.newBuilder()
                                                        .setIdFilter(idFilter)
                                                        .build();
+            final String typeName = TypeName.of(entityClass)
+                                            .value();
             final Target.Builder builder = Target.newBuilder()
-                                                 .setType(TypeName.of(entityClass));
+                                                 .setType(typeName);
             if (includeAll) {
                 builder.setIncludeAll(true);
             } else {

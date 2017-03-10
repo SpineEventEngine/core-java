@@ -32,57 +32,63 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class TypeName {
+public class TypeName extends StringTypeValue {
 
-    private TypeName() {
-        // Prevent instantiation of this utility class.
+    private TypeName(String value) {
+        super(value);
+    }
+
+    private static TypeName create(String value) {
+        return new TypeName(value);
     }
 
     /**
      * Obtains type name for the passed message.
      */
-    public static String of(Message message) {
+    public static TypeName of(Message message) {
         checkNotNull(message);
-        final String result = TypeUrl.of(message)
-                                     .getTypeName();
-        return result;
+        final String typeName = TypeUrl.of(message)
+                                       .getTypeName();
+        return create(typeName);
     }
 
     /**
      * Obtains type name for the passed message class.
      */
-    public static String of(Class<? extends Message> clazz) {
+    public static TypeName of(Class<? extends Message> clazz) {
         checkNotNull(clazz);
-        return TypeUrl.of(clazz).getTypeName();
+        final String typeName = TypeUrl.of(clazz)
+                                       .getTypeName();
+        return create(typeName);
     }
 
     /**
      * Obtains type name from the message of the passed command.
      */
-    public static String ofCommand(Command command) {
+    public static TypeName ofCommand(Command command) {
         checkNotNull(command);
-        final String result = TypeUrl.ofCommand(command)
-                                     .getTypeName();
-        return result;
+        final String typeName = TypeUrl.ofCommand(command)
+                                       .getTypeName();
+        return create(typeName);
     }
 
     /**
      * Obtains type name from the message of the passed event.
      */
-    public static String ofEvent(Event event) {
+    public static TypeName ofEvent(Event event) {
         checkNotNull(event);
-        final String result = TypeUrl.ofEvent(event)
-                                     .getTypeName();
-        return result;
+        final String typeName = TypeUrl.ofEvent(event)
+                                       .getTypeName();
+        return create(typeName);
     }
 
     /**
      * Obtains type name for the message type by its descriptor.
      */
-    public static String from(Descriptor descriptor) {
+    public static TypeName from(Descriptor descriptor) {
         checkNotNull(descriptor);
-        final String result = TypeUrl.from(descriptor)
-                                     .getTypeName();
-        return result;
+        final String typeName = TypeUrl.from(descriptor)
+                                       .getTypeName();
+        return create(typeName);
     }
 }

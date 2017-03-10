@@ -68,7 +68,8 @@ public abstract class CommandException extends RuntimeException {
      * @param commandMessage a command message to get the type from
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
-        final String commandType = TypeName.of(commandMessage);
+        final String commandType = TypeName.of(commandMessage)
+                                           .value();
         final Value value = Value.newBuilder()
                                  .setStringValue(commandType)
                                  .build();

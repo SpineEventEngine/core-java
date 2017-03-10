@@ -231,7 +231,8 @@ public class QueriesShould {
         final Target entityTarget = query.getTarget();
         assertNotNull(entityTarget);
 
-        final String expectedTypeName = TypeName.of(targetEntityClass);
+        final String expectedTypeName = TypeName.of(targetEntityClass)
+                                                .value();
         assertEquals(expectedTypeName, entityTarget.getType());
         return entityTarget;
     }

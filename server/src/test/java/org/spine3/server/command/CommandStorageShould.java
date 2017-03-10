@@ -93,7 +93,8 @@ public abstract class CommandStorageShould
     @Override
     protected CommandRecord newStorageRecord() {
         final Command command = createProject();
-        final String commandType = TypeName.ofCommand(command);
+        final String commandType = TypeName.ofCommand(command)
+                                           .value();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

@@ -33,6 +33,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * This class provides general validation routines.
@@ -113,7 +114,9 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
+        checkNotDefault(object,
+                        "The message is in the default state: %s",
+                        TypeName.of(object));
         return object;
     }
 
@@ -159,9 +162,8 @@ public class Validate {
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
         if (!isDefault(object)) {
-            final String typeName = TypeName.of(object);
-            final String errorMessage = "The message is not in the default state: " + typeName;
-            throw new IllegalStateException(errorMessage);
+            final String typeName = TypeName.of(object).value();
+            throw newIllegalStateException("The message is not in the default state: %s", typeName);
         }
         return object;
     }

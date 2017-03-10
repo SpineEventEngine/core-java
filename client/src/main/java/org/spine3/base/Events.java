@@ -236,7 +236,8 @@ public class Events {
             return Optional.absent();
         }
         final Enrichment.Container enrichments = value.get();
-        final String typeName = TypeName.of(enrichmentClass);
+        final String typeName = TypeName.of(enrichmentClass)
+                                        .value();
         final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {

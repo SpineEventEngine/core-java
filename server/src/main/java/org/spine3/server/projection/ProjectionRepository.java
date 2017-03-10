@@ -356,7 +356,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getEventClasses();
         for (EventClass eventClass : eventClasses) {
-            final String typeName = TypeName.of(eventClass.value());
+            final String typeName = TypeName.of(eventClass.value())
+                                            .value();
             builder.add(EventFilter.newBuilder()
                                    .setEventType(typeName)
                                    .build());

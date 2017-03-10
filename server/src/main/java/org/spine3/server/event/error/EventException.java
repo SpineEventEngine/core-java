@@ -80,7 +80,8 @@ public abstract class EventException extends RuntimeException {
      * @param eventMessage an event message to get the type from
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
-        final String type = TypeName.of(eventMessage);
+        final String type = TypeName.of(eventMessage)
+                                    .value();
         final Value value = Value.newBuilder()
                                  .setStringValue(type)
                                  .build();

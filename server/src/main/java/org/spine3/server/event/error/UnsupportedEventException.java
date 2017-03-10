@@ -25,6 +25,8 @@ import org.spine3.base.EventValidationError;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 
+import static java.lang.String.format;
+
 /**
  * Exception that is thrown when unsupported event is obtained
  * or in case there is no class for given Protobuf event message.
@@ -41,17 +43,20 @@ public class UnsupportedEventException extends EventException {
 
     private static String messageFormat(Message eventMsg) {
         final EventClass eventClass = EventClass.of(eventMsg);
-        final String typeName = TypeName.of(eventMsg);
-        final String result = String.format(
-                "There is no registered handler or dispatcher for the event of class: `%s`. Protobuf type: `%s`",
-                eventClass, typeName);
+        final String typeName = TypeName.of(eventMsg)
+                                        .value();
+        final String result = format(
+                "There is no registered handler or dispatcher for the event of class: `%s`." +
+                " Protobuf type: `%s`",
+                eventClass,
+                typeName);
         return result;
     }
 
     /** Creates an instance of unsupported event error. */
     private static Error unsupportedEventError(Message eventMessage) {
         final String type = eventMessage.getDescriptorForType().getFullName();
-        final String errMsg = String.format("Events of the type `%s` are not supported.", type);
+        final String errMsg = format("Events of the type `%s` are not supported.", type);
         final Error.Builder error = Error.newBuilder()
                 .setType(EventValidationError.getDescriptor().getFullName())
                 .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())

@@ -218,10 +218,12 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
                 EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass));
+                                   .get(TypeName.of(enrichmentClass)
+                                                .value());
 
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
-            final String expectedTypeName = TypeName.of(expectedClass);
+            final String expectedTypeName = TypeName.of(expectedClass)
+                                                    .value();
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }
     }
@@ -232,7 +234,8 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
                 EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass));
+                                   .get(TypeName.of(enrichmentClass)
+                                                .value());
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         assertEventTypeByEnrichmentType(enrichmentClass, eventClassesExpected);
     }
