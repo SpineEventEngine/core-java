@@ -46,6 +46,9 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
+@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+        "SerializableInnerClassWithNonSerializableOuterClass"})
+// It is OK for test methods.
 public class StringifiersShould {
 
     @Test
@@ -172,9 +175,8 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_map() {
         final String rawMap = "first:1,second:2,third:3";
-        final Map<String, Integer> actualMap =
-                new Stringifiers.MapStringifier<>(String.class, Integer.class).reverse()
-                                                                              .convert(rawMap);
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final Map<String, Integer> actualMap = Stringifiers.parse(rawMap, typeToken);
         final Map<String, Integer> expectedMap = createTestMap();
         assertThat(actualMap, is(expectedMap));
     }
@@ -182,39 +184,41 @@ public class StringifiersShould {
     @Test
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final String convertedMap =
-                new Stringifiers.MapStringifier<>(String.class,
-                                                  Integer.class).convert(mapToConvert);
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final String convertedMap = Stringifiers.toString(mapToConvert, typeToken);
         assertEquals(mapToConvert.toString(), convertedMap);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "{first-1}, second-2";
-        new Stringifiers.MapStringifier<>(String.class, Integer.class).reverse()
-                                                                      .convert(incorrectRawMap);
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        Stringifiers.parse(incorrectRawMap, typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_required_stringifier_is_not_found() {
-        new Stringifiers.MapStringifier<>(Long.class, Task.class).reverse()
-                                                                 .convert("1:1");
+        final TypeToken<Map<Long, Task>> typeToken = new TypeToken<Map<Long, Task>>() {};
+        Stringifiers.parse("1:1", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
-    public void throw_exception_when_occured_exception_during_conversion() {
-        new Stringifiers.MapStringifier<>(Long.class, Long.class).reverse()
-                                                                 .convert("first:first");
+    public void throw_exception_when_occurred_exception_during_conversion() {
+        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {};
+        Stringifiers.parse("first:first", typeToken);
     }
 
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first:1|second:2|third:3";
-        final Map<String, Integer> convertedMap =
-                new Stringifiers.MapStringifier<>(String.class,
-                                                  Integer.class,
-                                                  "\\|").reverse()
-                                                        .convert(rawMap);
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final Stringifier<Map<String, Integer>> stringifier =
+                new Stringifiers.MapStringifier<>(String.class, Integer.class, "\\|");
+
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
+
+        final Map<String, Integer> convertedMap = Stringifiers.parse(rawMap, typeToken);
         assertThat(convertedMap, is(createTestMap()));
     }
 

@@ -48,6 +48,10 @@ public class StringifierRegistry {
                                  new Stringifiers.EventIdStringifier())
                             .put(TypeToken.of(CommandId.class),
                                  new Stringifiers.CommandIdStringifier())
+                            .put(new TypeToken<Map<String, Integer>>() {},
+                                 new Stringifiers.MapStringifier<>(String.class, Integer.class))
+                            .put(new TypeToken<Map<String, Long>>() {},
+                                 new Stringifiers.MapStringifier<>(String.class, Long.class))
                             .build()
             )
     );
@@ -56,7 +60,7 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
+    public <I> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
         checkNotNull(valueClass);
         checkNotNull(converter);
         entries.put(valueClass, converter);
