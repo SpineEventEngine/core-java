@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
@@ -31,9 +32,11 @@ import org.spine3.validate.IllegalConversionArgumentException;
 import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -204,6 +207,59 @@ public class Stringifiers {
                                               .setUuid(s)
                                               .build();
             return result;
+        }
+    }
+
+    protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
+
+        private static final String DEFAULT_ELEMENTS_DELIMITER = ",";
+        private static final String KEY_VALUE_DELIMITER = ":";
+
+        private final String delimiter;
+        private final Class<K> keyClass;
+        private final Class<V> valueClass;
+        private final StringifierRegistry stringifierRegistry = StringifierRegistry.getInstance();
+
+        public MapStringifier(Class<K> keyClass, Class<V> valueClass) {
+            super();
+            this.keyClass = keyClass;
+            this.valueClass = valueClass;
+            this.delimiter = DEFAULT_ELEMENTS_DELIMITER;
+        }
+
+        public MapStringifier(String delimiter, Class<K> keyClass, Class<V> valueClass) {
+            this.delimiter = delimiter;
+            this.keyClass = keyClass;
+            this.valueClass = valueClass;
+        }
+
+        @Override
+        protected String doForward(Map<K, V> map) {
+            final String result = map.toString();
+            return result;
+        }
+
+        @Override
+        protected Map<K, V> doBackward(String s) {
+
+            final String[] elements = s.split(delimiter);
+            final Map<K, V> resultMap = newHashMap();
+
+            for (String element : elements) {
+                final String[] keyValue = element.split(":");
+                checkKeyValue(keyValue);
+
+            }
+
+            return null;
+        }
+
+        private static void checkKeyValue(String[] keyValue) {
+            if (keyValue.length != 2) {
+                final String exMessage =
+                        "Illegal key - value format, key value should be separated with `:`";
+                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
+            }
         }
     }
 }
