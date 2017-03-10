@@ -244,12 +244,19 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     /**
-     * Retrieves all the types that belong to the given package or its subpackages.
+     * Retrieves all the type URLs that belong to the given package or its subpackages.
      *
      * @param packageName proto package name
      * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
      */
-    public static Set<TypeUrl> getTypesFromPackage(String packageName) {
+    public static Set<TypeUrl> getAllFromPackage(String packageName) {
         return KnownTypes.getTypesFromPackage(packageName);
+    }
+
+    /**
+     * Obtains all type URLs known to the application.
+     */
+    public static Set<TypeUrl> getAll() {
+        return KnownTypes.getTypeUrls();
     }
 }

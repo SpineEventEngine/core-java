@@ -115,7 +115,7 @@ public class Messages {
      */
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeUrl typeUrl : KnownTypes.getTypeUrls()) {
+        for (TypeUrl typeUrl : TypeUrl.getAll()) {
             final Class<? extends Message> clazz = toMessageClass(typeUrl);
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.

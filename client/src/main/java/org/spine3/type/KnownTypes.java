@@ -123,7 +123,7 @@ public class KnownTypes {
     /**
      * Retrieves Protobuf type URLs known to the application.
      */
-    public static ImmutableSet<TypeUrl> getTypeUrls() {
+    static ImmutableSet<TypeUrl> getTypeUrls() {
         final Set<TypeUrl> result = knownTypes.keySet();
         return ImmutableSet.copyOf(result);
     }
