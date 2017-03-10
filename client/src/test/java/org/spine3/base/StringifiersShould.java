@@ -143,6 +143,14 @@ public class StringifiersShould {
     }
 
     @Test
+    public void throw_exception_when_string_cannot_be_converted_to_timestamp() throws ParseException {
+        final String date = "incorrect date";
+        final Timestamp expected = Timestamps.parse(date);
+        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void convert_timestamp_to_string() {
         final Timestamp currentTime = getCurrentTime();
         final TimestampFieldId id = TimestampFieldId.newBuilder()
@@ -205,7 +213,7 @@ public class StringifiersShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
         final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {};
-        Stringifiers.parse("first:first", typeToken);
+        Stringifiers.parse("first:first:first", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
