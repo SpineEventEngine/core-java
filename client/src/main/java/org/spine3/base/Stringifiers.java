@@ -101,7 +101,7 @@ public class Stringifiers {
 
         @Override
         protected String doForward(Timestamp timestamp) {
-            final String result = toIdString(timestamp);
+            final String result = toString(timestamp);
             return result;
         }
 
@@ -120,14 +120,12 @@ public class Stringifiers {
          * @param timestamp the value to convert
          * @return the string representation of the timestamp
          */
-        private static String toIdString(Timestamp timestamp) {
-            checkNotNull(timestamp);
+        private static String toString(Timestamp timestamp) {
             String result = Timestamps.toString(timestamp);
             result = PATTERN_COLON.matcher(result)
                                   .replaceAll("-");
             result = PATTERN_T.matcher(result)
                               .replaceAll("_T");
-
             return result;
         }
     }
