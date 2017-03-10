@@ -44,6 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.server.reflect.CommandHandlerMethod.from;
 import static org.spine3.server.reflect.CommandHandlerMethod.predicate;
 import static org.spine3.server.reflect.Given.CommandMessage.createProject;
+import static org.spine3.server.reflect.Given.CommandMessage.startProject;
 import static org.spine3.server.reflect.Given.EventMessage.projectCreated;
 
 /**
@@ -179,6 +180,14 @@ public class CommandHandlerMethodShould {
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
         assertEquals(isHandler, predicate().apply(handler));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_for_not_handled_command_type() {
+        final Object handler = new ValidHandlerOneParam();
+        CommandHandlerMethod.invokeHandler(handler,
+                                           startProject(),
+                                           CommandContext.getDefaultInstance());
     }
 
     /*

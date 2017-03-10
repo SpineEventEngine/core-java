@@ -152,7 +152,8 @@ public class Messages {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final JsonFormat.Printer value = JsonFormat.printer().usingTypeRegistry(forKnownTypes());
+        private final JsonFormat.Printer value = JsonFormat.printer()
+                                                           .usingTypeRegistry(forKnownTypes());
 
         private static JsonFormat.Printer instance() {
             return INSTANCE.value;
