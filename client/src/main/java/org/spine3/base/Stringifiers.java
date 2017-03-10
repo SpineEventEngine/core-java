@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
@@ -115,9 +116,10 @@ public class Stringifiers {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
-        if (registry.hasStringifierFor(msgClass)) {
+        final TypeToken<? extends Message> msgToken = TypeToken.of(msgClass);
+        if (registry.hasStringifierFor(msgToken)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgClass)
+            final Stringifier converter = registry.get(msgToken)
                                                   .get();
             result = (String) converter.convert(message);
         } else {

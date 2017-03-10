@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
@@ -213,7 +214,8 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_registered_id_message_type() {
         StringifierRegistry.getInstance()
-                           .register(IdWithPrimitiveFields.class, ID_TO_STRING_CONVERTER);
+                           .register(TypeToken.of(IdWithPrimitiveFields.class),
+                                     ID_TO_STRING_CONVERTER);
 
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
                                                               .setName(TEST_ID)
@@ -229,13 +231,13 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(Timestamp.class)
+        assertNull(registry.get(TypeToken.of(Timestamp.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(EventId.class)
+        assertNull(registry.get(TypeToken.of(EventId.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(CommandId.class)
+        assertNull(registry.get(TypeToken.of(CommandId.class))
                            .get()
                            .convert(null));
     }
@@ -243,7 +245,7 @@ public class StringifiersShould {
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringifierFor(Random.class));
+                                       .hasStringifierFor(TypeToken.of(Random.class)));
     }
 
     @Test
