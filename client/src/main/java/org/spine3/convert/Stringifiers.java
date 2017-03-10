@@ -175,11 +175,14 @@ public class Stringifiers {
             final String key = keyValue[0];
             final String value = keyValue[1];
 
-            final K convertedKey = getConvertedElement(keyClass, key);
-            final V convertedValue = getConvertedElement(valueClass, value);
-
-            resultMap.put(convertedKey, convertedValue);
-            return resultMap;
+            try {
+                final K convertedKey = getConvertedElement(keyClass, key);
+                final V convertedValue = getConvertedElement(valueClass, value);
+                resultMap.put(convertedKey, convertedValue);
+                return resultMap;
+            } catch (Throwable ignored) {
+                throw conversionArgumentException("Occured exception during conversion");
+            }
         }
 
         @SuppressWarnings("unchecked") // It is OK because class is verified.
