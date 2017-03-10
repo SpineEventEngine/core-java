@@ -76,7 +76,8 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
         final Optional<TenantId> currentTenant = CurrentTenant.get();
 
         if (!currentTenant.isPresent()) {
-            throw new IllegalStateException("No current tenant found in multitenant execution context.");
+            throw new IllegalStateException(
+                    "No current tenant found in multitenant execution context.");
         }
 
         return currentTenant.get();

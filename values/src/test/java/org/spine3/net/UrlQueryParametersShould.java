@@ -24,34 +24,27 @@ import org.junit.Test;
 import org.spine3.net.Url.Record.QueryParameter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-public class QueryParametersShould {
+public class UrlQueryParametersShould {
 
-    @Test
-    public void fail_on_wrong_queries() {
-        try {
-            QueryParameters.parse("123");
-            fail();
-        } catch (IllegalArgumentException ignored) {
-        }
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_on_parsing_wrong_query() {
+        UrlQueryParameters.parse("123");
+    }
 
-        try {
-            QueryParameters.of("", "123");
-            fail();
-        } catch (IllegalArgumentException ignored) {
-        }
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_on_missing_key() {
+        UrlQueryParameters.from("", "123");
+    }
 
-        try {
-            QueryParameters.of("123", "");
-            fail();
-        } catch (IllegalArgumentException ignored) {
-        }
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_on_missing_value() {
+        UrlQueryParameters.from("123", "");
     }
 
     @Test
@@ -61,18 +54,18 @@ public class QueryParametersShould {
 
         final String query = key + '=' + value;
 
-        final QueryParameter parameter1 = QueryParameters.parse(query);
-        final QueryParameter parameter2 = QueryParameters.of(key, value);
+        final QueryParameter parameter1 = UrlQueryParameters.parse(query);
+        final QueryParameter parameter2 = UrlQueryParameters.from(key, value);
 
         assertEquals(key, parameter1.getKey());
         assertEquals(value, parameter1.getValue());
 
-        assertEquals(query, QueryParameters.toString(parameter1));
-        assertEquals(query, QueryParameters.toString(parameter2));
+        assertEquals(query, UrlQueryParameters.toString(parameter1));
+        assertEquals(query, UrlQueryParameters.toString(parameter2));
     }
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(QueryParameters.class);
+        assertHasPrivateParameterlessCtor(UrlQueryParameters.class);
     }
 }

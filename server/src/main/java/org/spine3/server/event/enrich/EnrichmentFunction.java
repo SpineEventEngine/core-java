@@ -31,7 +31,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * {@code EnrichmentFunction} defines how a source message class can be transformed into a target message class.
@@ -157,12 +157,10 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      */
     protected void ensureActive() {
         if(!isActive()) {
-            final String errMsg = format(
+            throw newIllegalStateException(
                     "The given instance of %s is not active at the moment. " +
                     "Please use `activate()` first.",
-                    getClass().getName()
-            );
-            throw new IllegalStateException(errMsg);
+                    getClass().getName());
         }
     }
 }

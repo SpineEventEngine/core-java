@@ -22,17 +22,21 @@ package org.spine3.net;
 
 import org.spine3.net.Url.Record.QueryParameter;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+
 /**
  * The utility class, which helps performing URL query parameters parsing and String conversion.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class QueryParameters {
+public class UrlQueryParameters {
 
     private static final char SEPARATOR = '=';
 
-    private QueryParameters() {
+    private UrlQueryParameters() {
     }
 
     /**
@@ -46,7 +50,7 @@ public class QueryParameters {
         final int separatorIndex = queryParameter.indexOf(SEPARATOR);
 
         if (separatorIndex == -1) {
-            throw new IllegalArgumentException("Query Parameter is invalid: " + queryParameter);
+            throw newIllegalArgumentException("Query Parameter is invalid: %s", queryParameter);
         }
 
         final String key = queryParameter.substring(0, separatorIndex);
@@ -68,10 +72,12 @@ public class QueryParameters {
      * @param value {@link QueryParameter} value
      * @return {@link QueryParameter} instance
      */
-    public static QueryParameter of(String key, String value) {
-        if (key.isEmpty() || value.isEmpty()) {
-            throw new IllegalArgumentException("Query parameter can not contain empty values.");
-        }
+    public static QueryParameter from(String key, String value) {
+        checkNotNull(key);
+        checkNotNull(value);
+        checkArgument(!key.isEmpty(), "Query parameter key cannot be empty.");
+        checkArgument(!value.isEmpty(), "Query parameter value cannot be empty.");
+
         final QueryParameter result = QueryParameter.newBuilder()
                                                     .setKey(key)
                                                     .setValue(value)

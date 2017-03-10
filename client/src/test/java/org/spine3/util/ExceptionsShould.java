@@ -26,6 +26,9 @@ import org.spine3.validate.IllegalConversionArgumentException;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
+import static org.spine3.util.Exceptions.unsupported;
 
 /**
  * @author Alexander Litus
@@ -40,12 +43,12 @@ public class ExceptionsShould {
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception() {
-        Exceptions.unsupported();
+        unsupported();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
-        Exceptions.unsupported(newUuid());
+        unsupported(newUuid());
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
@@ -57,6 +60,22 @@ public class ExceptionsShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Exception.class, new RuntimeException(""))
+                .setDefault(Throwable.class, new Error())
                 .testAllPublicStaticMethods(Exceptions.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_formatted_IAE() {
+        newIllegalArgumentException("%d, %d, %s kaboom", 1, 2, "three");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_formatted_IAE_with_cause() {
+        newIllegalArgumentException(new RuntimeException("checking"), "%s", "stuff");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_formatted_ISE() {
+        newIllegalStateException("%s check %s", "state", "failed");
     }
 }
