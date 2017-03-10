@@ -230,15 +230,19 @@ public class Stringifiers {
 
         /**
          * The delimiter for the passed elements in the {@code String} representation,
-         * {@code DEFAULT_ELEMENTS+DELIMITER} by default.
+         * {@code DEFAULT_ELEMENTS_DELIMITER} by default.
          */
         private final String delimiter;
         private final Stringifier<K> keyStringifier;
         private final Stringifier<V> valueStringifier;
+        private final Class<K> keyClass;
+        private final Class<V> valueClass;
         private final StringifierRegistry stringifierRegistry = StringifierRegistry.getInstance();
 
         public MapStringifier(Class<K> keyClass, Class<V> valueClass) {
             super();
+            this.keyClass = keyClass;
+            this.valueClass = valueClass;
             keyStringifier = getStringifier(keyClass);
             valueStringifier = getStringifier(valueClass);
             this.delimiter = DEFAULT_ELEMENTS_DELIMITER;
@@ -253,6 +257,9 @@ public class Stringifiers {
          * @param delimiter  the delimiter for the passed elements via string
          */
         public MapStringifier(Class<K> keyClass, Class<V> valueClass, String delimiter) {
+            super();
+            this.keyClass = keyClass;
+            this.valueClass = valueClass;
             this.delimiter = delimiter;
             keyStringifier = getStringifier(keyClass);
             valueStringifier = getStringifier(valueClass);
@@ -266,28 +273,47 @@ public class Stringifiers {
 
         @Override
         protected Map<K, V> doBackward(String s) {
-            final String[] elements = s.split(delimiter);
+            final String[] buckets = s.split(delimiter);
             final Map<K, V> resultMap = newHashMap();
 
-            for (String element : elements) {
-                saveConvertedElement(resultMap, element);
+            for (String bucket : buckets) {
+                saveConvertedBucket(resultMap, bucket);
             }
 
             return resultMap;
         }
 
-        private Map<K, V> saveConvertedElement(Map<K, V> resultMap, String element) {
+        private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
             final String[] keyValue = element.split(KEY_VALUE_DELIMITER);
             checkKeyValue(keyValue);
 
             final String key = keyValue[0];
             final String value = keyValue[1];
-            final K convertedKey = keyStringifier.reverse()
-                                                 .convert(key);
-            final V convertedValue = valueStringifier.reverse()
-                                                     .convert(value);
+
+            final K convertedKey = getConvertedElement(keyStringifier, keyClass, key);
+            final V convertedValue = getConvertedElement(valueStringifier, valueClass, value);
+
             resultMap.put(convertedKey, convertedValue);
             return resultMap;
+        }
+
+        @SuppressWarnings("unchecked")
+        // It is OK because it is checked with #isStringClass(Class<?>) method
+        private static <I> I getConvertedElement(Stringifier<I> stringifier,
+                                                 Class<I> elementClass,
+                                                 String elementToConvert) {
+            final I result;
+            if (isStringClass(elementClass)) {
+                result = stringifier.reverse()
+                                    .convert(elementToConvert);
+            } else {
+                result = (I) elementToConvert;
+            }
+            return result;
+        }
+
+        private static boolean isStringClass(Class<?> aClass) {
+            return String.class.equals(aClass);
         }
 
         private static void checkKeyValue(String[] keyValue) {
