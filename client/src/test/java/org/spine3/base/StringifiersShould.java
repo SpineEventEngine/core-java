@@ -208,6 +208,12 @@ public class StringifiersShould {
         Stringifiers.parse("first:first", typeToken);
     }
 
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_key_value_delimiter_is_wrong(){
+        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {};
+        Stringifiers.parse("1-1", typeToken);
+    }
+
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first:1|second:2|third:3";
