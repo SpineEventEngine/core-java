@@ -25,7 +25,7 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Queries;
+import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;

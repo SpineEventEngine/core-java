@@ -17,16 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.base;
+package org.spine3.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.ProtocolStringList;
 import org.junit.Test;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.client.Query;
-import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.queries.TestEntity;
 import org.spine3.test.queries.TestEntityId;

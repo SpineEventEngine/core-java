@@ -92,13 +92,13 @@ public class AnyPacker {
      * will be thrown.
      *
      * @param any   instance of {@link Any} that should be unwrapped
-     * @param clazz the class implementing the type of the enclosed object
+     * @param cls the class implementing the type of the enclosed object
      * @param <T>   the type enclosed into {@code Any}
      * @return unwrapped message instance
      */
-    public static <T extends Message> T unpack(Any any, Class<T> clazz) {
+    public static <T extends Message> T unpack(Any any, Class<T> cls) {
         try {
-            final T result = any.unpack(clazz);
+            final T result = any.unpack(cls);
             return result;
         } catch (InvalidProtocolBufferException e) {
             throw new UnexpectedTypeException(e);

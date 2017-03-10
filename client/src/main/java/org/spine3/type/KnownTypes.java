@@ -115,7 +115,8 @@ public class KnownTypes {
      *
      * @see TypeUrl
      */
-    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(knownTypes);
+    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap =
+            buildTypeToUrlMap(knownTypes);
 
     private KnownTypes() {
     }
@@ -232,7 +233,8 @@ public class KnownTypes {
         return descriptor;
     }
 
-    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {
+    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl,
+                                                                   ClassName> knownTypes) {
         final ImmutableMap.Builder<String, TypeUrl> builder = ImmutableMap.builder();
         for (TypeUrl typeUrl : knownTypes.keySet()) {
             builder.put(typeUrl.getTypeName(), typeUrl);
@@ -249,7 +251,8 @@ public class KnownTypes {
             final Builder builder = new Builder()
                     .addStandardProtobufTypes()
                     .loadNamesFromProperties();
-            final ImmutableBiMap<TypeUrl, ClassName> result = ImmutableBiMap.copyOf(builder.resultMap);
+            final ImmutableBiMap<TypeUrl, ClassName> result =
+                    ImmutableBiMap.copyOf(builder.resultMap);
             return result;
         }
 

@@ -17,16 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.base;
+package org.spine3.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.client.Query;
-import org.spine3.client.Target;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeName;
@@ -36,8 +31,8 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Set;
 
-import static org.spine3.base.Queries.Targets.allOf;
-import static org.spine3.base.Queries.Targets.someOf;
+import static org.spine3.client.Queries.Targets.allOf;
+import static org.spine3.client.Queries.Targets.someOf;
 
 /**
  * Client-side utilities for working with queries.
