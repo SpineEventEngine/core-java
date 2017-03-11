@@ -25,12 +25,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import org.spine3.convert.Stringifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.convert.Stringifiers.EMPTY_ID;
+import static org.spine3.base.Stringifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**

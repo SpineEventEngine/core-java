@@ -32,7 +32,7 @@ import org.spine3.protobuf.TypeName;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.lang.String.format;
-import static org.spine3.convert.Stringifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 
 /**
  * The exception for reporting invalid commands.

@@ -23,8 +23,6 @@ package org.spine3.server.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.convert.PluralKey;
-import org.spine3.convert.SingularKey;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;

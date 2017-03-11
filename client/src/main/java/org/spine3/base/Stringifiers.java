@@ -18,17 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.convert;
+package org.spine3.base;
 
 import com.google.common.base.Optional;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
-import org.spine3.base.Identifier;
 import org.spine3.validate.ConversionError;
 import org.spine3.validate.IllegalConversionArgumentException;
 
@@ -123,10 +121,10 @@ public class Stringifiers {
         final String result;
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
-        final RegistryKey registryKey = new SingularKey<>(msgClass);
-        if (registry.hasStringifierFor(registryKey)) {
+        final TypeToken<? extends Message> typeToken = TypeToken.of(msgClass);
+        if (registry.hasStringifierFor(typeToken)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(registryKey)
+            final Stringifier converter = registry.get(typeToken)
                                                   .get();
             result = (String) converter.convert(message);
         } else {

@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.convert.Stringifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**

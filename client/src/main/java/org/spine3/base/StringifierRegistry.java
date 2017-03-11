@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.convert;
+package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 
 import java.util.List;
 import java.util.Map;

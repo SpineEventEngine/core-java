@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static org.spine3.convert.Stringifiers.idToString;
+import static org.spine3.base.Stringifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
