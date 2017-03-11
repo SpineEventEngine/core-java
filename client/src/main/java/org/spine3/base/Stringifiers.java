@@ -44,7 +44,7 @@ import static org.spine3.util.Exceptions.conversionArgumentException;
  */
 public class Stringifiers {
 
-    private static final String CONVERSION_EXCEPTION = "Occurred exception during conversion";
+    private static final String CONVERSION_EXCEPTION = "Occurred exception during the conversion";
 
     private Stringifiers() {
         // Disable instantiation of this utility class.
