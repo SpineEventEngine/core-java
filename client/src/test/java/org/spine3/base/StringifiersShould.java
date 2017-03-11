@@ -182,14 +182,14 @@ public class StringifiersShould {
 
     @Test
     public void convert_string_to_map() throws ParseException {
-        final String rawMap = "first:1972-01-01T10:00:20.021-05:00";
-        final TypeToken<Map<String, Timestamp>> typeToken = new TypeToken<Map<String, Timestamp>>(){};
-        final Stringifier<Map<String, Timestamp>> stringifier =
-                new Stringifiers.MapStringifier<>(String.class, Timestamp.class);
+        final String rawMap = "1:1972-01-01T10:00:20.021-05:00";
+        final TypeToken<Map<Long, Timestamp>> typeToken = new TypeToken<Map<Long, Timestamp>>(){};
+        final Stringifier<Map<Long, Timestamp>> stringifier =
+                new Stringifiers.MapStringifier<>(Long.class, Timestamp.class);
         StringifierRegistry.getInstance().register(typeToken, stringifier);
-        final Map<String, Timestamp> actualMap = Stringifiers.parse(rawMap, typeToken);
-        final Map<String, Timestamp> expectedMap = newHashMap();
-        expectedMap.put("first", Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
+        final Map<Long, Timestamp> actualMap = Stringifiers.parse(rawMap, typeToken);
+        final Map<Long, Timestamp> expectedMap = newHashMap();
+        expectedMap.put(1L, Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
         assertThat(actualMap, is(expectedMap));
     }
 
