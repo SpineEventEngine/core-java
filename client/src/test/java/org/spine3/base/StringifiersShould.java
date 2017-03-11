@@ -47,7 +47,8 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-        "SerializableInnerClassWithNonSerializableOuterClass"})
+                   "SerializableInnerClassWithNonSerializableOuterClass",
+                   "DuplicateStringLiteralInspection"})
 // It is OK for test methods.
 public class StringifiersShould {
 
@@ -143,7 +144,8 @@ public class StringifiersShould {
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
-    public void throw_exception_when_string_cannot_be_converted_to_timestamp() throws ParseException {
+    public void throw_exception_when_string_cannot_be_converted_to_timestamp() throws
+                                                                               ParseException {
         final String date = "incorrect date";
         Stringifiers.parse(date, TypeToken.of(Timestamp.class));
     }
@@ -179,18 +181,22 @@ public class StringifiersShould {
     }
 
     @Test
-    public void convert_string_to_map() {
-        final String rawMap = "first:1,second:2,third:3";
-        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
-        final Map<String, Integer> actualMap = Stringifiers.parse(rawMap, typeToken);
-        final Map<String, Integer> expectedMap = createTestMap();
+    public void convert_string_to_map() throws ParseException {
+        final String rawMap = "first:1972-01-01T10:00:20.021-05:00";
+        final TypeToken<Map<String, Timestamp>> typeToken = new TypeToken<Map<String, Timestamp>>(){};
+        final Stringifier<Map<String, Timestamp>> stringifier =
+                new Stringifiers.MapStringifier<>(String.class, Timestamp.class);
+        StringifierRegistry.getInstance().register(typeToken, stringifier);
+        final Map<String, Timestamp> actualMap = Stringifiers.parse(rawMap, typeToken);
+        final Map<String, Timestamp> expectedMap = newHashMap();
+        expectedMap.put("first", Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
         assertThat(actualMap, is(expectedMap));
     }
 
     @Test
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>(){};
         final String convertedMap = Stringifiers.toString(mapToConvert, typeToken);
         assertEquals(mapToConvert.toString(), convertedMap);
     }
@@ -198,38 +204,45 @@ public class StringifiersShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "first:1, second:2";
-        final TypeToken<Map<Integer, Integer>> typeToken = new TypeToken<Map<Integer, Integer>>() {};
+        final TypeToken<Map<Integer, Integer>> typeToken = new TypeToken<Map<Integer, Integer>>() {
+        };
         final Stringifiers.MapStringifier<Integer, Integer> stringifier =
                 new Stringifiers.MapStringifier<>(Integer.class, Integer.class);
-        StringifierRegistry.getInstance().register(typeToken, stringifier);
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
         Stringifiers.parse(incorrectRawMap, typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_required_stringifier_is_not_found() {
-        final TypeToken<Map<Long, Task>> typeToken = new TypeToken<Map<Long, Task>>() {};
+        final TypeToken<Map<Long, Task>> typeToken = new TypeToken<Map<Long, Task>>() {
+        };
         Stringifiers.parse("1:1", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final TypeToken<Map<Task, Long>> typeToken = new TypeToken<Map<Task, Long>>() {};
+        final TypeToken<Map<Task, Long>> typeToken = new TypeToken<Map<Task, Long>>() {
+        };
         final Stringifiers.MapStringifier<Task, Long> stringifier =
                 new Stringifiers.MapStringifier<>(Task.class, Long.class);
-        StringifierRegistry.getInstance().register(typeToken, stringifier);
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
         Stringifiers.parse("first:first:first", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
-    public void throw_exception_when_key_value_delimiter_is_wrong(){
-        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {};
+    public void throw_exception_when_key_value_delimiter_is_wrong() {
+        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {
+        };
         Stringifiers.parse("1-1", typeToken);
     }
 
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first:1|second:2|third:3";
-        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {};
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {
+        };
         final Stringifier<Map<String, Integer>> stringifier =
                 new Stringifiers.MapStringifier<>(String.class, Integer.class, "\\|");
 
