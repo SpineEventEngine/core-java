@@ -180,8 +180,9 @@ public class Stringifiers {
      */
     protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
-        private static final String DEFAULT_ELEMENTS_DELIMITER = ",";
-        private static final String KEY_VALUE_DELIMITER = ":";
+        private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
+        private static final String ESCAPE_SEQUENCE = "\\";
+        private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
 
         /**
          * The delimiter for the passed elements in the {@code String} representation,
@@ -195,7 +196,7 @@ public class Stringifiers {
             super();
             this.keyClass = keyClass;
             this.valueClass = valueClass;
-            this.delimiter = DEFAULT_ELEMENTS_DELIMITER;
+            this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
         }
 
         /**
@@ -210,7 +211,7 @@ public class Stringifiers {
             super();
             this.keyClass = keyClass;
             this.valueClass = valueClass;
-            this.delimiter = delimiter;
+            this.delimiter = ESCAPE_SEQUENCE + delimiter;
         }
 
         @Override
@@ -221,7 +222,7 @@ public class Stringifiers {
 
         @Override
         protected Map<K, V> doBackward(String s) {
-            final String[] buckets = s.split(delimiter);
+            final String[] buckets = s.split(Pattern.quote(delimiter));
             final Map<K, V> resultMap = newHashMap();
 
             for (String bucket : buckets) {
@@ -232,7 +233,7 @@ public class Stringifiers {
         }
 
         private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
-            final String[] keyValue = element.split(KEY_VALUE_DELIMITER, 2);
+            final String[] keyValue = element.split(Pattern.quote(KEY_VALUE_DELIMITER));
             checkKeyValue(keyValue);
 
             final String key = keyValue[0];

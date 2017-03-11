@@ -182,7 +182,7 @@ public class StringifiersShould {
 
     @Test
     public void convert_string_to_map() throws ParseException {
-        final String rawMap = "1:1972-01-01T10:00:20.021-05:00";
+        final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
         final TypeToken<Map<Long, Timestamp>> typeToken = new TypeToken<Map<Long, Timestamp>>(){};
         final Stringifier<Map<Long, Timestamp>> stringifier =
                 new Stringifiers.MapStringifier<>(Long.class, Timestamp.class);
@@ -203,7 +203,7 @@ public class StringifiersShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
-        final String incorrectRawMap = "first:1, second:2";
+        final String incorrectRawMap = "first\\:1\\,second\\:2";
         final TypeToken<Map<Integer, Integer>> typeToken = new TypeToken<Map<Integer, Integer>>() {
         };
         final Stringifiers.MapStringifier<Integer, Integer> stringifier =
@@ -217,7 +217,7 @@ public class StringifiersShould {
     public void throw_exception_when_required_stringifier_is_not_found() {
         final TypeToken<Map<Long, Task>> typeToken = new TypeToken<Map<Long, Task>>() {
         };
-        Stringifiers.parse("1:1", typeToken);
+        Stringifiers.parse("1\\:1", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
@@ -228,23 +228,23 @@ public class StringifiersShould {
                 new Stringifiers.MapStringifier<>(Task.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(typeToken, stringifier);
-        Stringifiers.parse("first:first:first", typeToken);
+        Stringifiers.parse("first\\:first\\:first", typeToken);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
         final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {
         };
-        Stringifiers.parse("1-1", typeToken);
+        Stringifiers.parse("1\\-1", typeToken);
     }
 
     @Test
     public void convert_map_with_custom_delimiter() {
-        final String rawMap = "first:1|second:2|third:3";
+        final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
         final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {
         };
         final Stringifier<Map<String, Integer>> stringifier =
-                new Stringifiers.MapStringifier<>(String.class, Integer.class, "\\|");
+                new Stringifiers.MapStringifier<>(String.class, Integer.class, "|");
 
         StringifierRegistry.getInstance()
                            .register(typeToken, stringifier);
