@@ -180,7 +180,7 @@ public class Stringifiers {
      */
     protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
-        private static final String DEFAULT_ELEMENTS_DELIMITER = "\\,";
+        private static final String DEFAULT_ELEMENTS_DELIMITER = ",";
         private static final String KEY_VALUE_DELIMITER = ":";
 
         /**
@@ -232,7 +232,7 @@ public class Stringifiers {
         }
 
         private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
-            final String[] keyValue = element.split(KEY_VALUE_DELIMITER);
+            final String[] keyValue = element.split(KEY_VALUE_DELIMITER, 2);
             checkKeyValue(keyValue);
 
             final String key = keyValue[0];
