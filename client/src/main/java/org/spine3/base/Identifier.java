@@ -29,8 +29,10 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Wrapper of an identifier value.
@@ -106,11 +108,11 @@ public class Identifier<I> {
                 break;
 
             case MESSAGE:
-                result = Stringifiers.idMessageToString((Message)value);
+                result = Identifiers.idMessageToString((Message)value);
                 result = result.trim();
                 break;
             default:
-                throw new IllegalStateException("toString() is not supported for type: " + type);
+                throw newIllegalStateException("toString() is not supported for type: %s", type);
         }
 
         if (result.isEmpty()) {
@@ -319,11 +321,12 @@ public class Identifier<I> {
         }
 
         static <I> IllegalArgumentException unsupported(I id) {
-            return new IllegalArgumentException("ID of unsupported type encountered: " + id);
+            return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
         }
 
         private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return new IllegalArgumentException("Unsupported ID class encountered: " + idClass);
+            return newIllegalArgumentException("Unsupported ID class encountered: %s",
+                                               idClass.getName());
         }
     }
 }

@@ -22,6 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import org.spine3.base.Version;
 import org.spine3.server.entity.EntityBuilder;
 
 /**
@@ -49,5 +50,10 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>, I, S extends Message
     public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
         return this;
+    }
+
+    @Override
+    protected void setState(A result, S state, Version version) {
+        result.injectState(state, version);
     }
 }

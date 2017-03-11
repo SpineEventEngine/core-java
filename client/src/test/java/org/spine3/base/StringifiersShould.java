@@ -18,196 +18,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.convert;
+package org.spine3.base;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.StringValue;
+import com.google.common.reflect.TypeToken;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
-import org.spine3.base.Stringifiers;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
-import org.spine3.test.identifiers.NestedMessageId;
-import org.spine3.test.identifiers.SeveralFieldsId;
 import org.spine3.test.identifiers.TimestampFieldId;
-import org.spine3.test.types.TaskId;
+import org.spine3.test.types.Task;
 import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.NULL_ID;
-import static org.spine3.base.Stringifiers.idToString;
-import static org.spine3.base.Stringifiers.toIdString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
+@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+        "SerializableInnerClassWithNonSerializableOuterClass",
+        "DuplicateStringLiteralInspection"})
+// It is OK for test methods.
 public class StringifiersShould {
-
-    private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
 
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Stringifiers.class);
-    }
-
-    @Test
-    public void return_NULL_ID_if_convert_null_to_string() {
-        assertEquals(NULL_ID, idToString(null));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_convert_empty_string_to_string() {
-        assertEquals(EMPTY_ID, idToString(""));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_convert_blank_string_to_string() {
-        assertEquals(EMPTY_ID, idToString(" "));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_empty_string() {
-        assertEquals(EMPTY_ID, idToString(CommandId.getDefaultInstance()));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_blank_string() {
-        assertEquals(EMPTY_ID, idToString(newStringValue("  ")));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_convert_empty_message_to_string() {
-        assertEquals(EMPTY_ID, idToString(StringValue.getDefaultInstance()));
-    }
-
-    @Test
-    public void return_string_id_as_is() {
-        assertEquals(TEST_ID, idToString(TEST_ID));
-    }
-
-    @Test
-    public void return_same_string_when_convert_string_wrapped_into_message() {
-
-        final StringValue id = newStringValue(TEST_ID);
-
-        final String result = idToString(id);
-
-        assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    public void convert_to_string_integer_id_wrapped_into_message() {
-        final Integer value = 1024;
-        final Int32Value id = newIntValue(value);
-        final String expected = value.toString();
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_long_id_wrapped_into_message() {
-        final Long value = 100500L;
-        final Int64Value id = newLongValue(value);
-        final String expected = value.toString();
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_message_id_with_string_field() {
-        final StringValue id = newStringValue(TEST_ID);
-
-        final String result = idToString(id);
-
-        assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    public void convert_to_string_message_id_with_timestamp_field() {
-        final Timestamp currentTime = getCurrentTime();
-        final TimestampFieldId id = TimestampFieldId.newBuilder()
-                                                    .setId(currentTime)
-                                                    .build();
-        final String expected = toIdString(currentTime);
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_message_id_with_message_field() {
-        final StringValue value = newStringValue(TEST_ID);
-        final NestedMessageId idToConvert = NestedMessageId.newBuilder()
-                                                           .setId(value)
-                                                           .build();
-
-        final String result = idToString(idToConvert);
-
-        assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    public void have_default_to_string_conversion_of_message_id_with_several_fields() {
-        final String nestedString = "nested_string";
-        final String outerString = "outer_string";
-        final Integer number = 256;
-
-        final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
-                                                           .setString(outerString)
-                                                           .setInt(number)
-                                                           .setMessage(newStringValue(nestedString))
-                                                           .build();
-
-        final String expected =
-                "string=\"" + outerString + '\"' +
-                " int=" + number +
-                " message { value=\"" + nestedString + "\" }";
-
-        final String actual = idToString(idToConvert);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_message_id_wrapped_in_Any() {
-        final StringValue messageToWrap = newStringValue(TEST_ID);
-        final Any any = AnyPacker.pack(messageToWrap);
-
-        final String result = idToString(any);
-
-        assertEquals(TEST_ID, result);
     }
 
     private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
@@ -228,15 +78,15 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_registered_id_message_type() {
         StringifierRegistry.getInstance()
-                           .register(new SingularKey<>(IdWithPrimitiveFields.class),
+                           .register(TypeToken.of(IdWithPrimitiveFields.class),
                                      ID_TO_STRING_CONVERTER);
 
+        final String testId = "testId 123456";
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
-                                                              .setName(TEST_ID)
+                                                              .setName(testId)
                                                               .build();
         final String result = idToString(id);
-
-        assertEquals(TEST_ID, result);
+        assertEquals(testId, result);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -245,13 +95,13 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(new SingularKey<>(Timestamp.class))
+        assertNull(registry.get(TypeToken.of(Timestamp.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(new SingularKey<>(EventId.class))
+        assertNull(registry.get(TypeToken.of(EventId.class))
                            .get()
                            .convert(null));
-        assertNull(registry.get(new SingularKey<>(CommandId.class))
+        assertNull(registry.get(TypeToken.of(CommandId.class))
                            .get()
                            .convert(null));
     }
@@ -259,14 +109,14 @@ public class StringifiersShould {
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringifierFor(new SingularKey<>(Random.class)));
+                                       .hasStringifierFor(TypeToken.of(Random.class)));
     }
 
     @Test
     public void convert_command_id_to_string() {
         final CommandId id = Commands.generateId();
-        final String actual = new Stringifiers.CommandIdStringifier().convert(id);
 
+        final String actual = Stringifiers.toString(id, TypeToken.of(CommandId.class));
         assertEquals(idToString(id), actual);
     }
 
@@ -276,9 +126,8 @@ public class StringifiersShould {
         final CommandId expected = CommandId.newBuilder()
                                             .setUuid(id)
                                             .build();
-        final CommandId actual = new Stringifiers.CommandIdStringifier().reverse()
-                                                                        .convert(id);
 
+        final CommandId actual = Stringifiers.parse(id, TypeToken.of(CommandId.class));
         assertEquals(expected, actual);
     }
 
@@ -286,23 +135,40 @@ public class StringifiersShould {
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         final String time = Timestamps2.getCurrentTime()
                                        .toString();
-        new Stringifiers.TimestampIdStringifer().reverse()
-                                                .convert(time);
+        Stringifiers.parse(time, TypeToken.of(Timestamp.class));
     }
 
     @Test
     public void convert_string_to_timestamp() throws ParseException {
         final String date = "1972-01-01T10:00:20.021-05:00";
         final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = new Stringifiers.TimestampIdStringifer().reverse()
-                                                                         .convert(date);
+        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
+        assertEquals(expected, actual);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_string_cannot_be_converted_to_timestamp() throws
+                                                                               ParseException {
+        final String date = "incorrect date";
+        Stringifiers.parse(date, TypeToken.of(Timestamp.class));
+    }
+
+    @Test
+    public void convert_timestamp_to_string() {
+        final Timestamp currentTime = getCurrentTime();
+        final TimestampFieldId id = TimestampFieldId.newBuilder()
+                                                    .setId(currentTime)
+                                                    .build();
+        final String expected = Stringifiers.toString(currentTime, TypeToken.of(Timestamp.class));
+        final String actual = idToString(id);
+
         assertEquals(expected, actual);
     }
 
     @Test
     public void convert_event_id_to_string() {
         final EventId id = Events.generateId();
-        final String actual = new Stringifiers.EventIdStringifier().convert(id);
+        final String actual = Stringifiers.toString(id, TypeToken.of(EventId.class));
 
         assertEquals(idToString(id), actual);
     }
@@ -313,9 +179,92 @@ public class StringifiersShould {
         final EventId expected = EventId.newBuilder()
                                         .setUuid(id)
                                         .build();
-        final EventId actual = new Stringifiers.EventIdStringifier().reverse()
-                                                                    .convert(id);
+        final EventId actual = Stringifiers.parse(id, TypeToken.of(EventId.class));
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_string_to_map() throws ParseException {
+        final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
+        final TypeToken<Map<Long, Timestamp>> typeToken = new TypeToken<Map<Long, Timestamp>>() {
+        };
+        final Stringifier<Map<Long, Timestamp>> stringifier =
+                new Stringifiers.MapStringifier<>(Long.class, Timestamp.class);
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
+        final Map<Long, Timestamp> actualMap = Stringifiers.parse(rawMap, typeToken);
+        final Map<Long, Timestamp> expectedMap = newHashMap();
+        expectedMap.put(1L, Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
+        assertThat(actualMap, is(expectedMap));
+    }
+
+    @Test
+    public void convert_map_to_string() {
+        final Map<String, Integer> mapToConvert = createTestMap();
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {
+        };
+        final String convertedMap = Stringifiers.toString(mapToConvert, typeToken);
+        assertEquals(mapToConvert.toString(), convertedMap);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
+        final String incorrectRawMap = "first\\:1\\,second\\:2";
+        final TypeToken<Map<Integer, Integer>> typeToken = new TypeToken<Map<Integer, Integer>>() {
+        };
+        final Stringifiers.MapStringifier<Integer, Integer> stringifier =
+                new Stringifiers.MapStringifier<>(Integer.class, Integer.class);
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
+        Stringifiers.parse(incorrectRawMap, typeToken);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_required_stringifier_is_not_found() {
+        final TypeToken<Map<Long, Task>> typeToken = new TypeToken<Map<Long, Task>>() {
+        };
+        Stringifiers.parse("1\\:1", typeToken);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_occurred_exception_during_conversion() {
+        final TypeToken<Map<Task, Long>> typeToken = new TypeToken<Map<Task, Long>>() {
+        };
+        final Stringifiers.MapStringifier<Task, Long> stringifier =
+                new Stringifiers.MapStringifier<>(Task.class, Long.class);
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
+        Stringifiers.parse("first\\:first\\:first", typeToken);
+    }
+
+    @Test(expected = IllegalConversionArgumentException.class)
+    public void throw_exception_when_key_value_delimiter_is_wrong() {
+        final TypeToken<Map<Long, Long>> typeToken = new TypeToken<Map<Long, Long>>() {
+        };
+        Stringifiers.parse("1\\-1", typeToken);
+    }
+
+    @Test
+    public void convert_map_with_custom_delimiter() {
+        final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
+        final TypeToken<Map<String, Integer>> typeToken = new TypeToken<Map<String, Integer>>() {
+        };
+        final Stringifier<Map<String, Integer>> stringifier =
+                new Stringifiers.MapStringifier<>(String.class, Integer.class, "|");
+
+        StringifierRegistry.getInstance()
+                           .register(typeToken, stringifier);
+
+        final Map<String, Integer> convertedMap = Stringifiers.parse(rawMap, typeToken);
+        assertThat(convertedMap, is(createTestMap()));
+    }
+
+    private static Map<String, Integer> createTestMap() {
+        final Map<String, Integer> expectedMap = newHashMap();
+        expectedMap.put("first", 1);
+        expectedMap.put("second", 2);
+        expectedMap.put("third", 3);
+        return expectedMap;
     }
 
     @Test
@@ -377,10 +326,7 @@ public class StringifiersShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Stringifiers.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        final NullPointerTester tester = new NullPointerTester();
+        tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
     }
 }

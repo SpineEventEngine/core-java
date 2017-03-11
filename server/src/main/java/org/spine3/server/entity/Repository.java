@@ -40,9 +40,9 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
 
 /**
@@ -230,11 +230,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            final String errMsg = format(
-                    "The repository %s already has storage %s.",
-                    this, this.storage
-            );
-            throw new IllegalStateException(errMsg);
+            throw newIllegalStateException("The repository %s already has storage %s.",
+                                           this, this.storage);
         }
 
         this.storage = createStorage(factory);
@@ -327,8 +324,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             final Optional<E> loaded = repository.load(id);
             if (!loaded.isPresent()) {
                 final String idStr = idToString(id);
-                final String errMsg = format("Unable to load entity with ID: %s", idStr);
-                throw new IllegalStateException(errMsg);
+                throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
             }
 
             final E entity = loaded.get();

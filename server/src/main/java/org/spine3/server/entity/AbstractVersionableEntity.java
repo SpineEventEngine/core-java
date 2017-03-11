@@ -33,8 +33,9 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Versions.checkIsIncrement;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An abstract base for entities with versions.
@@ -204,12 +205,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         final int currentVersionNumber = versionNumber();
         final int newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
-            final String errMsg = format(
+            throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
                     "of the entity with the version number %d.",
-                    newVersionNumber, currentVersionNumber
-            );
-            throw new IllegalArgumentException(errMsg);
+                    newVersionNumber, currentVersionNumber);
         }
 
         setVersion(newVersion);

@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 
@@ -39,19 +40,19 @@ import static java.util.Collections.synchronizedMap;
  */
 public class StringifierRegistry {
 
-    private final Map<RegistryKey, Stringifier<?>> entries = synchronizedMap(
+    private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<RegistryKey, Stringifier<?>>builder()
-                            .put(new SingularKey<>(Timestamp.class),
-                                 new Stringifiers.TimestampIdStringifer())
-                            .put(new SingularKey<>(EventId.class),
+                    ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
+                            .put(TypeToken.of(Timestamp.class),
+                                 new Stringifiers.TimestampStringifer())
+                            .put(TypeToken.of(EventId.class),
                                  new Stringifiers.EventIdStringifier())
-                            .put(new SingularKey<>(CommandId.class),
+                            .put(TypeToken.of(CommandId.class),
                                  new Stringifiers.CommandIdStringifier())
-                            .put(new SingularKey<>(Integer.class),
-                                 new Stringifiers.IntegerStringifier())
-                            .put(new PluralKey<>(List.class, Integer.class),
-                                 new Stringifiers.ListStringifier<>(Integer.class))
+                            .put(new TypeToken<Map<String, Integer>>() {},
+                                 new Stringifiers.MapStringifier<>(String.class, Integer.class))
+                            .put(new TypeToken<Map<String, Long>>() {},
+                                 new Stringifiers.MapStringifier<>(String.class, Long.class))
                             .build()
             )
     );
@@ -60,10 +61,10 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(RegistryKey registryKey, Stringifier<I> converter) {
-        checkNotNull(registryKey);
+    public <I> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
+        checkNotNull(valueClass);
         checkNotNull(converter);
-        entries.put(registryKey, converter);
+        entries.put(valueClass, converter);
     }
 
     /**
@@ -72,10 +73,10 @@ public class StringifierRegistry {
      * @param <I> the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(RegistryKey registryKey) {
-        checkNotNull(registryKey);
+    public <I> Optional<Stringifier<I>> get(TypeToken<I> valueToken) {
+        checkNotNull(valueToken);
 
-        final Stringifier<?> func = entries.get(registryKey);
+        final Stringifier<?> func = entries.get(valueToken);
 
         @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
          @see #register(Class, Stringifier) */
@@ -83,8 +84,8 @@ public class StringifierRegistry {
         return Optional.fromNullable(result);
     }
 
-    public synchronized <I> boolean hasStringifierFor(RegistryKey registryKey) {
-        final boolean contains = entries.containsKey(registryKey);
+    public synchronized <I> boolean hasStringifierFor(TypeToken<I> valueToken) {
+        final boolean contains = entries.containsKey(valueToken);
         return contains;
     }
 

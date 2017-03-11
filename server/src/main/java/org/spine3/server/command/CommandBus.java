@@ -31,9 +31,9 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.FailureThrowable;
+import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.base.Stringifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
@@ -253,7 +253,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        final String idStr = Stringifiers.idToString(commandEnvelope.getCommandId());
+        final String idStr = Identifiers.idToString(commandEnvelope.getCommandId());
         final String msg = String.format("No dispatcher found for the command (class: %s id: %s).",
                                          commandEnvelope.getCommandClass(), idStr);
         throw new IllegalStateException(msg);

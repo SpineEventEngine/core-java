@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -185,7 +186,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder;
     }
 
-    /** Updates the aggregate state and closes the update phase of the aggregate. */
+    /**
+     * Updates the aggregate state and closes the update phase of the aggregate.
+     */
     private void updateState() {
         @SuppressWarnings("unchecked")
          /* It is safe to assume that correct builder type is passed to the aggregate,
@@ -195,6 +198,26 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         final Version version = getVersion();
         setState(newState, version);
         this.builder = null;
+    }
+
+    /**
+     * Sets the new state of the aggregate.
+     *
+     * <p>This method is called during the aggregate update phase.
+     * It is not not supposed to be called from outside of this class.
+     *
+     * @param state   the state object to set
+     * @param version the entity version to set
+     * @throws IllegalStateException if the method is called from outside
+     */
+    @Internal
+    @Override
+    protected final void setState(S state, Version version) {
+        if (builder == null) {
+            throw new IllegalStateException(
+                    "setState() is called from outside of the aggregate update phase.");
+        }
+        super.setState(state, version);
     }
 
     /**
@@ -390,7 +413,30 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             builder.mergeFrom(stateToRestore);
             initVersion(versionFromSnapshot);
         } else {
+            injectState(stateToRestore, versionFromSnapshot);
+        }
+    }
+
+    /**
+     * Sets the passed state and version.
+     *
+     * <p>The method circumvents the protection in the {@link #setState(Message, Version)
+     * setState()} method by creating a fake builder instance, which is cleared
+     * after the call.
+     *
+     * <p>This method has package-private access to be accessible by the
+     * {@code AggregateBuilder} test utility class from the {@code testutil} module.
+     */
+    @VisibleForTesting
+    void injectState(S stateToRestore, Version versionFromSnapshot) {
+        try {
+            @SuppressWarnings("unchecked")
+                // The cast is safe as we checked the type on the construction.
+            final B fakeBuilder = (B) getState().newBuilderForType();
+            this.builder = fakeBuilder;
             setState(stateToRestore, versionFromSnapshot);
+        } finally {
+            this.builder = null;
         }
     }
 
