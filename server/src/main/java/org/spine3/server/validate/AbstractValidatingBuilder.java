@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
+import org.spine3.base.Stringifiers;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ConversionError;
@@ -66,25 +67,11 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     // It is OK because caught exception is not ignored, it delivers exception to throw.
     public <V> V getConvertedValue(TypeToken<V> typeToken, String value) throws ConversionError {
         try {
-            final Stringifier<V> stringifier = getStringifier(typeToken);
-            final V convertedValue = stringifier.reverse()
-                                                .convert(value);
+            final V convertedValue = Stringifiers.parse(value, typeToken);
             return convertedValue;
         } catch (IllegalConversionArgumentException ex) {
             throw ex.getConversionError();
         }
-    }
-
-    private <V> Stringifier<V> getStringifier(TypeToken<V> typeToken) {
-        final Optional<Stringifier<V>> stringifierOptional = registry.get(typeToken);
-        if (stringifierOptional.isPresent()) {
-            return stringifierOptional.get();
-        }
-
-        final String exMessage =
-                format("StringifierRegistry does not contain converter by specified key: %s",
-                       typeToken);
-        throw new StringifierNotFoundException(exMessage);
     }
 
     /**

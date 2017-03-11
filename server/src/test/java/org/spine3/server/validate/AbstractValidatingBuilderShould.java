@@ -22,6 +22,7 @@ package org.spine3.server.validate;
 
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.aggregate.ProjectId;
@@ -33,7 +34,9 @@ import org.spine3.validate.ConversionError;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
@@ -50,12 +53,13 @@ public class AbstractValidatingBuilderShould {
 
     @Test
     public void return_converted_value() throws ConversionError {
-        final Integer convertedValue =
-                validatingBuilder.getConvertedValue(TypeToken.of(Integer.class), "1");
-        assertEquals(1, convertedValue.intValue());
+        final List<Integer> convertedValue =
+                validatingBuilder.getConvertedValue(new TypeToken<List<Integer>>() {}, "1");
+        final List<Integer> expectedList = newArrayList(1);
+        assertThat(convertedValue, is(expectedList));
     }
 
-    @Test(expected = StringifierNotFoundException.class)
+    @Test(expected = ConversionError.class)
     public void throw_exception_when_appropriate_stringifier_is_not_found() throws ConversionError {
         final String stringToConvert = "{value:1}";
         validatingBuilder.getConvertedValue(TypeToken.of(TaskId.class), stringToConvert);
@@ -64,7 +68,7 @@ public class AbstractValidatingBuilderShould {
     @Test(expected = ConversionError.class)
     public void throw_exception_when_string_cannot_be_converted() throws ConversionError {
         final String stringToConvert = "";
-        validatingBuilder.getConvertedValue(new TypeToken<List<Integer>>() {}, stringToConvert);
+        validatingBuilder.getConvertedValue(new TypeToken<List<Timestamp>>() {}, stringToConvert);
     }
 
     @Test
