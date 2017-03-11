@@ -369,6 +369,9 @@
         <option name="ignoreGettersAndSetters" value="false" />
         <option name="ignoreOverridingMethods" value="false" />
       </scope>
+      <option name="m_limit" value="20" />
+      <option name="ignoreGettersAndSetters" value="true" />
+      <option name="ignoreOverridingMethods" value="true" />
     </inspection_tool>
     <inspection_tool class="MethodCoupling" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_includeJavaClasses" value="false" />
@@ -466,7 +469,7 @@
         <option name="REPORT_NOT_ANNOTATED_GETTER" value="true" />
         <option name="REPORT_NOT_ANNOTATED_SETTER_PARAMETER" value="true" />
         <option name="REPORT_ANNOTATION_NOT_PROPAGATED_TO_OVERRIDERS" value="true" />
-        <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="true" />
+        <option name="REPORT_NULLS_PASSED_TO_NON_ANNOTATED_METHOD" value="false" />
       </scope>
       <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
       <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />

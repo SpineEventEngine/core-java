@@ -39,19 +39,19 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class Identifier<I> {
+class Identifier<I> {
 
     private final Type type;
     private final I value;
 
-   public static <I> Identifier<I> from(I value) {
+    static <I> Identifier<I> from(I value) {
         checkNotNull(value);
         final Type type = Type.getType(value);
         final Identifier<I> result = create(type, value);
         return result;
     }
 
-   public static Identifier<Message> fromMessage(Message value) {
+    static Identifier<Message> fromMessage(Message value) {
         checkNotNull(value);
         final Identifier<Message> result = create(Type.MESSAGE, value);
         return result;
@@ -104,11 +104,12 @@ public class Identifier<I> {
                 break;
 
             case STRING:
-                result = value.toString().trim();
+                result = value.toString()
+                              .trim();
                 break;
 
             case MESSAGE:
-                result = Identifiers.idMessageToString((Message)value);
+                result = Identifiers.idMessageToString((Message) value);
                 result = result.trim();
                 break;
             default:
@@ -126,8 +127,8 @@ public class Identifier<I> {
      * Supported types of identifiers.
      */
     @SuppressWarnings(
-       {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
-        "unchecked" /* We ensure type by matching it first. */})
+            {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
+                    "unchecked" /* We ensure type by matching it first. */})
     enum Type {
         STRING {
             @Override
@@ -147,12 +148,12 @@ public class Identifier<I> {
 
             @Override
             <I> Message toMessage(I id) {
-                return newStringValue((String)id);
+                return newStringValue((String) id);
             }
 
             @Override
             String fromMessage(Message message) {
-                return ((StringValue)message).getValue();
+                return ((StringValue) message).getValue();
             }
 
             @Override
@@ -186,7 +187,7 @@ public class Identifier<I> {
 
             @Override
             Integer fromMessage(Message message) {
-                return ((UInt32Value)message).getValue();
+                return ((UInt32Value) message).getValue();
             }
 
             @Override
@@ -220,7 +221,7 @@ public class Identifier<I> {
 
             @Override
             Long fromMessage(Message message) {
-                return ((UInt64Value)message).getValue();
+                return ((UInt64Value) message).getValue();
             }
 
             @Override
@@ -244,8 +245,8 @@ public class Identifier<I> {
             @Override
             boolean matchMessage(Message message) {
                 return !(message instanceof StringValue
-                        || message instanceof UInt32Value
-                        || message instanceof UInt64Value);
+                         || message instanceof UInt32Value
+                         || message instanceof UInt64Value);
             }
 
             @Override
