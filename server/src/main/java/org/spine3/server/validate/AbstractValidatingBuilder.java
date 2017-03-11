@@ -21,6 +21,7 @@
 package org.spine3.server.validate;
 
 import com.google.common.base.Optional;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
@@ -54,18 +55,18 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     /**
      * Converts the passed `raw` value and returns it.
      *
-     * @param registryKey the key of the {@code StringifierRegistry} storage
-     *                    to obtain {@code Stringifier}
-     * @param value       the value to convert
-     * @param <V>         the type of the converted value
+     * @param typeToken the key of the {@code StringifierRegistry} storage
+     *                  to obtain {@code Stringifier}
+     * @param value     the value to convert
+     * @param <V>       the type of the converted value
      * @return the converted value
      * @throws ConversionError if passed value cannot be converted
      */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
     // It is OK because caught exception is not ignored, it delivers exception to throw.
-    public <V> V getConvertedValue(RegistryKey registryKey, String value) throws ConversionError {
+    public <V> V getConvertedValue(TypeToken<V> typeToken, String value) throws ConversionError {
         try {
-            final Stringifier<V> stringifier = getStringifier(registryKey);
+            final Stringifier<V> stringifier = getStringifier(typeToken);
             final V convertedValue = stringifier.reverse()
                                                 .convert(value);
             return convertedValue;
@@ -74,15 +75,15 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
         }
     }
 
-    private <V> Stringifier<V> getStringifier(RegistryKey registryKey) {
-        final Optional<Stringifier<V>> stringifierOptional = registry.get(registryKey);
+    private <V> Stringifier<V> getStringifier(TypeToken<V> typeToken) {
+        final Optional<Stringifier<V>> stringifierOptional = registry.get(typeToken);
         if (stringifierOptional.isPresent()) {
             return stringifierOptional.get();
         }
 
         final String exMessage =
                 format("StringifierRegistry does not contain converter by specified key: %s",
-                       registryKey);
+                       typeToken);
         throw new StringifierNotFoundException(exMessage);
     }
 

@@ -29,16 +29,12 @@ import com.google.protobuf.util.Timestamps;
 
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static java.lang.String.format;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static org.spine3.util.Exceptions.conversionArgumentException;
@@ -52,6 +48,8 @@ import static org.spine3.util.Exceptions.conversionArgumentException;
 public class Stringifiers {
 
     private static final String CONVERSION_EXCEPTION = "Occurred exception during conversion";
+    private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
+    private static final String ESCAPE_SEQUENCE = "\\";
 
     private Stringifiers() {
         // Disable instantiation of this utility class.
@@ -105,6 +103,40 @@ public class Stringifiers {
         }
         final Stringifier<I> stringifier = stringifierOptional.get();
         return stringifier;
+    }
+
+    @SuppressWarnings("unchecked") // It is OK because class is verified.
+    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
+
+        if (isInteger(elementClass)) {
+            return (I) Ints.stringConverter()
+                           .convert(elementToConvert);
+        }
+
+        if (isLong(elementClass)) {
+            return (I) Longs.stringConverter()
+                            .convert(elementToConvert);
+        }
+
+        if (isString(elementClass)) {
+            return (I) elementToConvert;
+        }
+
+        final I convertedValue = parse(elementToConvert, TypeToken.of(elementClass));
+        return convertedValue;
+
+    }
+
+    private static boolean isString(Class<?> aClass) {
+        return String.class.equals(aClass);
+    }
+
+    private static boolean isLong(Class<?> aClass) {
+        return Long.class.equals(aClass);
+    }
+
+    private static boolean isInteger(Class<?> aClass) {
+        return Integer.class.equals(aClass);
     }
 
     protected static class TimestampStringifer extends Stringifier<Timestamp> {
@@ -187,8 +219,6 @@ public class Stringifiers {
      */
     protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
-        private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
-        private static final String ESCAPE_SEQUENCE = "\\";
         private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
 
         /**
@@ -247,35 +277,13 @@ public class Stringifiers {
             final String value = keyValue[1];
 
             try {
-                final K convertedKey = convert(keyClass, key);
-                final V convertedValue = convert(valueClass, value);
+                final K convertedKey = Stringifiers.convert(keyClass, key);
+                final V convertedValue = Stringifiers.convert(valueClass, value);
                 resultMap.put(convertedKey, convertedValue);
                 return resultMap;
             } catch (Throwable ignored) {
                 throw conversionArgumentException(CONVERSION_EXCEPTION);
             }
-        }
-
-        @SuppressWarnings("unchecked") // It is OK because class is verified.
-        private static <I> I convert(Class<I> elementClass, String elementToConvert) {
-
-            if (isInteger(elementClass)) {
-                return (I) Ints.stringConverter()
-                               .convert(elementToConvert);
-            }
-
-            if (isLong(elementClass)) {
-                return (I) Longs.stringConverter()
-                                .convert(elementToConvert);
-            }
-
-            if (isString(elementClass)) {
-                return (I) elementToConvert;
-            }
-
-            final I convertedValue = parse(elementToConvert, TypeToken.of(elementClass));
-            return convertedValue;
-
         }
 
         private static void checkKeyValue(String[] keyValue) {
@@ -284,36 +292,6 @@ public class Stringifiers {
                         "Illegal key - value format, key value should be " +
                         "separated with single `:` character";
                 throw conversionArgumentException(exMessage);
-            }
-        }
-    }
-
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
-    }
-
-    protected static class IntegerStringifier extends Stringifier<Integer> {
-
-        @Override
-        protected String doForward(Integer integer) {
-            return integer.toString();
-        }
-
-        @Override
-        protected Integer doBackward(String s) {
-            try {
-                return Integer.valueOf(s);
-            } catch (NumberFormatException ignored) {
-                final String exMessage = format("Cannot convert %s to Integer.", s);
-                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
             }
         }
     }
@@ -329,8 +307,6 @@ public class Stringifiers {
      */
     protected static class ListStringifier<T> extends Stringifier<List<T>> {
 
-        private static final String DEFAULT_DELIMITER = ",";
-
         private final Class<T> listGenericClass;
 
         /**
@@ -341,7 +317,7 @@ public class Stringifiers {
 
         public ListStringifier(Class<T> listGenericClass) {
             super();
-            this.delimiter = DEFAULT_DELIMITER;
+            this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
             this.listGenericClass = listGenericClass;
         }
 
@@ -355,7 +331,7 @@ public class Stringifiers {
         public ListStringifier(Class<T> listGenericClass, String delimiter) {
             super();
             this.listGenericClass = listGenericClass;
-            this.delimiter = delimiter;
+            this.delimiter = ESCAPE_SEQUENCE + delimiter;
         }
 
         @Override
@@ -368,26 +344,9 @@ public class Stringifiers {
         protected List<T> doBackward(String s) {
             final String[] elements = s.split(delimiter);
 
-            if (listGenericClass.equals(String.class)) {
-                @SuppressWarnings("unchecked") // It is OK, because it is checked above.
-                final List<T> result = (List<T>) Arrays.asList(elements);
-                return result;
-            }
-
-            final RegistryKey registryKey = new SingularKey<>(listGenericClass);
-            final Optional<Stringifier<T>> optional = StringifierRegistry.getInstance()
-                                                                         .get(registryKey);
-            if (!optional.isPresent()) {
-                final String exMessage =
-                        format("Cannot convert from: String.class to %s", listGenericClass);
-                throw new IllegalConversionArgumentException(new ConversionError(exMessage));
-            }
-
-            final Stringifier<T> stringifier = optional.get();
             final List<T> result = newArrayList();
             for (String element : elements) {
-                final T convertedValue = stringifier.reverse()
-                                                    .convert(element);
+                final T convertedValue = Stringifiers.convert(listGenericClass, element);
                 result.add(convertedValue);
             }
             return result;

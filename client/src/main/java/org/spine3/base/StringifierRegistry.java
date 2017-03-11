@@ -53,6 +53,12 @@ public class StringifierRegistry {
                                  new Stringifiers.MapStringifier<>(String.class, Integer.class))
                             .put(new TypeToken<Map<String, Long>>() {},
                                  new Stringifiers.MapStringifier<>(String.class, Long.class))
+                            .put(new TypeToken<List<String>>() {},
+                                 new Stringifiers.ListStringifier<>(String.class))
+                            .put(new TypeToken<List<Integer>>() {},
+                                 new Stringifiers.ListStringifier<>(Integer.class))
+                            .put(new TypeToken<List<Long>>() {},
+                                 new Stringifiers.ListStringifier<>(Long.class))
                             .build()
             )
     );

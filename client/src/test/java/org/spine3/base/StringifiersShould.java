@@ -40,6 +40,7 @@ import java.util.Random;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -298,11 +299,12 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1|2|3|4|5";
-        final String delimiter = "\\|";
-        final List<Integer> actualList =
-                new Stringifiers.ListStringifier<>(Integer.class,
-                                                   delimiter).reverse()
-                                                             .convert(stringToConvert);
+        final String delimiter = "|";
+        final TypeToken<List<Integer>> typeToken = new TypeToken<List<Integer>>(){};
+        final Stringifiers.ListStringifier<Integer> stringifier =
+                new Stringifiers.ListStringifier<>(Integer.class, delimiter);
+        StringifierRegistry.getInstance().register(typeToken, stringifier);
+        final List<Integer> actualList = Stringifiers.parse(stringToConvert, typeToken);
         assertNotNull(actualList);
 
         final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
@@ -312,16 +314,8 @@ public class StringifiersShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "{value:123456}";
-        new Stringifiers.ListStringifier<>(TaskId.class).reverse()
-                                                        .convert(stringToConvert);
-    }
-
-    @Test
-    public void convert_integer_to_string() {
-        final Integer integerToConvert = 1;
-        final String convertedValue =
-                new Stringifiers.IntegerStringifier().convert(integerToConvert);
-        assertEquals(integerToConvert.toString(), convertedValue);
+        new Stringifiers.ListStringifier<>(Task.class).reverse()
+                                                      .convert(stringToConvert);
     }
 
     @Test
