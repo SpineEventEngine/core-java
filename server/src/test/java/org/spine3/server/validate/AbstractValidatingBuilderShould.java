@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,22 +50,21 @@ public class AbstractValidatingBuilderShould {
 
     @Test
     public void return_converted_value() throws ConversionError {
-        final Integer convertedValue = validatingBuilder.getConvertedValue(
-                new SingularKey<>(Integer.class), "1");
+        final Integer convertedValue =
+                validatingBuilder.getConvertedValue(TypeToken.of(Integer.class), "1");
         assertEquals(1, convertedValue.intValue());
     }
 
     @Test(expected = StringifierNotFoundException.class)
     public void throw_exception_when_appropriate_stringifier_is_not_found() throws ConversionError {
         final String stringToConvert = "{value:1}";
-        validatingBuilder.getConvertedValue(new SingularKey<>(TaskId.class), stringToConvert);
+        validatingBuilder.getConvertedValue(TypeToken.of(TaskId.class), stringToConvert);
     }
 
     @Test(expected = ConversionError.class)
     public void throw_exception_when_string_cannot_be_converted() throws ConversionError {
         final String stringToConvert = "";
-        validatingBuilder.getConvertedValue(new PluralKey<>(List.class, Integer.class),
-                                            stringToConvert);
+        validatingBuilder.getConvertedValue(new TypeToken<List<Integer>>() {}, stringToConvert);
     }
 
     @Test
