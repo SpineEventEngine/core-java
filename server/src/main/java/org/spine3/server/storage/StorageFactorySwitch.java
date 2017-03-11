@@ -29,6 +29,7 @@ import org.spine3.util.Environment;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * The {@code Supplier} of {@code StorageFactory} that takes into account
@@ -134,10 +135,10 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
                              : InMemoryStorageFactory.getInstance();
         } else {
             if (productionSupplier == null) {
-                throw new IllegalStateException(
+                throw newIllegalStateException(
                         "A supplier of a production StorageFactory is not set " +
                                 "but the code runs in the production mode. " +
-                        "Please call " + getClass().getSimpleName() + ".init().");
+                        "Please call %s.init().", getClass().getSimpleName());
             }
             storageFactory = productionSupplier.get();
         }

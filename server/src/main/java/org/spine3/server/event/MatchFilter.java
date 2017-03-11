@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
-import static java.lang.String.format;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The predicate for filtering events by {@link EventFilter}.
@@ -188,11 +188,9 @@ class MatchFilter implements Predicate<Event> {
         final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
 
         if (fieldName.isEmpty()) {
-            final String errMsg = format(
-                "Unable to get a field name from the field filter: %s",
-                filter
-            );
-            throw new IllegalArgumentException(errMsg);
+            throw newIllegalArgumentException(
+                    "Unable to get a field name from the field filter: %s",
+                    filter);
         }
         return fieldName;
     }

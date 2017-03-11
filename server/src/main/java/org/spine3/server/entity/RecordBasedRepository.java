@@ -48,10 +48,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * The base class for repositories that store entities as records.
@@ -353,11 +353,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         private void checkIdClass(Class messageClass) {
             final boolean classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
-                final String errMsg = format(
-                        "Unexpected ID class encountered: %s. Expected: %s",
-                        messageClass, expectedIdClass
-                );
-                throw new IllegalStateException(errMsg);
+                throw newIllegalStateException("Unexpected ID class encountered: %s. Expected: %s",
+                                               messageClass, expectedIdClass);
             }
         }
     }
