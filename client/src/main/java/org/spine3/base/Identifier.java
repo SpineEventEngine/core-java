@@ -128,7 +128,7 @@ class Identifier<I> {
      */
     @SuppressWarnings(
             {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
-                    "unchecked" /* We ensure type by matching it first. */})
+             "unchecked" /* We ensure type by matching it first. */})
     enum Type {
         STRING {
             @Override
