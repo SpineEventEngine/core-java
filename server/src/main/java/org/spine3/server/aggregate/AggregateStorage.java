@@ -38,6 +38,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -79,8 +80,8 @@ public abstract class AggregateStorage<I>
                     break;
                 case KIND_NOT_SET:
                 default:
-                    throw new IllegalStateException("Event or snapshot missing in record: \"" +
-                                                            shortDebugString(record) + '\"');
+                    throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
+                                                   shortDebugString(record));
             }
         }
 
@@ -99,16 +100,12 @@ public abstract class AggregateStorage<I>
      * <p>NOTE: does not rewrite any events. Several events can be associated with one aggregate ID.
      *
      * @param id     the ID for the record
-     * @param events events to store
-     * @throws IllegalStateException    if the storage is closed
-     * @throws IllegalArgumentException if event list is empty
+     * @param events non empty aggregate state record to store
      */
     @Override
-    public void write(I id, AggregateStateRecord events)
-            throws IllegalStateException, IllegalArgumentException {
-        checkNotClosed();
-        checkNotNull(id);
-        checkNotNull(events);
+    public void write(I id, AggregateStateRecord events) {
+        checkNotClosedAndArguments(id, events);
+
         final List<Event> eventList = events.getEventList();
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
@@ -125,9 +122,7 @@ public abstract class AggregateStorage<I>
      * @param event the event to write
      */
     void writeEvent(I id, Event event) {
-        checkNotClosed();
-        checkNotNull(id);
-        checkNotNull(event);
+        checkNotClosedAndArguments(id, event);
 
         final AggregateEventRecord record = toStorageRecord(event);
         writeRecord(id, record);
@@ -138,15 +133,18 @@ public abstract class AggregateStorage<I>
      *
      * @param aggregateId an ID of an aggregate of which the snapshot is made
      * @param snapshot    the snapshot of the aggregate
-     * @throws IllegalStateException if the storage is closed
      */
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
-        checkNotClosed();
-        checkNotNull(aggregateId);
-        checkNotNull(snapshot);
+        checkNotClosedAndArguments(aggregateId, snapshot);
 
         final AggregateEventRecord record = toStorageRecord(snapshot);
         writeRecord(aggregateId, record);
+    }
+
+    private void checkNotClosedAndArguments(I id, Object argument) {
+        checkNotClosed();
+        checkNotNull(id);
+        checkNotNull(argument);
     }
 
     private static AggregateEventRecord toStorageRecord(Event event) {
@@ -181,7 +179,6 @@ public abstract class AggregateStorage<I>
      *
      * @param id an ID of an aggregate
      * @return an even count after the last snapshot
-     * @throws IllegalStateException if the storage is closed
      */
     protected abstract int readEventCountAfterLastSnapshot(I id);
 

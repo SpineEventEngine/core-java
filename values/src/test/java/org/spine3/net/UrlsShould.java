@@ -36,8 +36,19 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 public class UrlsShould {
 
     @Test
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(Urls.class);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Urls.class);
+    }
+
+    @Test
     public void convert_proper_urls() {
-        final Url url = Urls.of("http://convert-proper-url.com");
+        final Url url = Urls.create("http://convert-proper-url.com");
 
         assertEquals("convert-proper-url.com", url.getRecord()
                                                   .getHost());
@@ -46,15 +57,10 @@ public class UrlsShould {
                                             .getSchema());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void fail_on_already_formed_url() {
-        final Url url = Urls.of("http://already-formed-url.com");
-
-        try {
-            Urls.of(url);
-            fail();
-        } catch (IllegalArgumentException ignored) {
-        }
+        final Url url = Urls.create("http://already-formed-url.com");
+        Urls.structurize(url);
     }
 
     @Test
@@ -110,17 +116,6 @@ public class UrlsShould {
     public void convert_to_string_properly() {
         final String rawUrl = "http://foo-bar.com/index";
 
-        assertEquals(rawUrl, Urls.toString(Urls.of(rawUrl)));
-    }
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Urls.class);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Urls.class);
+        assertEquals(rawUrl, Urls.toString(Urls.create(rawUrl)));
     }
 }

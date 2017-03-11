@@ -194,7 +194,7 @@ class UrlParser {
 
         final Iterable<String> queries = querySplitter.split(queriesString);
         for (String query : queries) {
-            final QueryParameter param = QueryParameters.parse(query);
+            final QueryParameter param = UrlQueryParameters.parse(query);
             record.addQuery(param);
         }
     }

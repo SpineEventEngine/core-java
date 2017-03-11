@@ -30,9 +30,9 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * This class provides general validation routines.
@@ -181,8 +181,7 @@ public class Validate {
         checkNotNull(errorMessageFormat);
         checkNotNull(parameterName);
         if (!expression) {
-            final String errorMessage = format(errorMessageFormat, parameterName);
-            throw new IllegalArgumentException(errorMessage);
+            throw newIllegalArgumentException(errorMessageFormat, parameterName);
         }
     }
 
@@ -215,8 +214,7 @@ public class Validate {
      */
     public static void checkPositive(long value) {
         if (value <= 0) {
-            final String errMsg = format("value (%d) must be positive", value);
-            throw new IllegalArgumentException(errMsg);
+            throw newIllegalArgumentException("value (%d) must be positive", value);
         }
     }
 
@@ -253,10 +251,8 @@ public class Validate {
     public static void checkBounds(int value, String paramName, int lowBound, int highBound) {
         checkNotNull(paramName);
         if (!isBetween(value, lowBound, highBound)) {
-            final String errMsg = format(
-                    "%s (%d) should be in bounds [%d, %d] inclusive",
-                    paramName, value, lowBound, highBound);
-            throw new IllegalArgumentException(errMsg);
+            throw newIllegalArgumentException("%s (%d) should be in bounds [%d, %d] inclusive",
+                                              paramName, value, lowBound, highBound);
         }
     }
 
