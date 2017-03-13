@@ -89,8 +89,8 @@ public class CommandServiceShould {
 
     @Test
     public void post_commands_to_appropriate_bounded_context() {
-        verifyPostsCommand(Given.Command.createProject(), projectsContext.getCommandBus());
-        verifyPostsCommand(Given.Command.createCustomer(), customersContext.getCommandBus());
+        verifyPostsCommand(Given.ACommand.createProject(), projectsContext.getCommandBus());
+        verifyPostsCommand(Given.ACommand.createCustomer(), customersContext.getCommandBus());
     }
 
     @Test

@@ -22,7 +22,7 @@ package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 
 import java.util.Iterator;
 

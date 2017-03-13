@@ -22,8 +22,8 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Identifiers;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.LifecycleFlags;
 
 /**

@@ -18,16 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains generated classes which are internal to Spine.
- * Corresponding Protobuf types are the part of the public API.
- *
- * @see org.spine3.Internal
- */
-@ParametersAreNonnullByDefault
-@Internal
-package org.spine3.type.internal;
+package org.spine3.type;
 
-import org.spine3.Internal;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static org.junit.Assert.assertEquals;
+
+public class EventClassShould {
+
+    @Test
+    public void create_set_on_varargs() {
+        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+    }
+}

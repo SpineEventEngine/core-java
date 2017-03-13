@@ -27,7 +27,6 @@ import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
@@ -40,6 +39,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
+import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;

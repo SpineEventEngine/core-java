@@ -24,9 +24,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
-import org.spine3.base.CommandClass;
 import org.spine3.server.bus.DispatcherRegistry;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

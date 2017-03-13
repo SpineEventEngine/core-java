@@ -18,23 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.envelope;
 
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Commands;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.type.CommandClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -42,12 +43,15 @@ import static org.spine3.validate.Validate.isDefault;
  */
 public class CommandEnvelopeShould {
 
+    private final TestCommandFactory commandFactory =
+            TestCommandFactory.newInstance(CommandEnvelopeShould.class);
+
     private Command command;
     private CommandEnvelope envelope;
 
     @Before
     public void setUp() {
-        command = createProject();
+        command = commandFactory.createCommand(newUuidValue());
         envelope = CommandEnvelope.of(command);
     }
 
@@ -85,13 +89,13 @@ public class CommandEnvelopeShould {
         assertEquals(Commands.getId(command), envelope.getCommandId());
     }
 
-    @SuppressWarnings({"EqualsWithItself", "EqualsBetweenInconvertibleTypes"}) // are parts of this test
     @Test
     public void have_equals() {
+        final Command anotherCommand = commandFactory.createCommand(Timestamps2.getCurrentTime());
 
-        assertEquals(envelope, CommandEnvelope.of(command));
-        assertTrue(envelope.equals(envelope));
-        assertFalse(envelope.equals(command));
+        new EqualsTester().addEqualityGroup(envelope)
+                          .addEqualityGroup(CommandEnvelope.of(anotherCommand))
+                          .testEquals();
     }
 
     @Test

@@ -80,9 +80,9 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final Command cmd1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
-        final Command cmd2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
-        final Command cmd3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final Command cmd1 = commandFactory.createCommand(StringValue.getDefaultInstance(), minutesAgo(1));
+        final Command cmd2 = commandFactory.createCommand(Int64Value.getDefaultInstance(), secondsAgo(30));
+        final Command cmd3 = commandFactory.createCommand(BoolValue.getDefaultInstance(), secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertFalse(sortedCommands.equals(commandsToSort));
@@ -118,8 +118,8 @@ public class CommandsShould {
                 .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
-                            commandFactory.create(StringValue.getDefaultInstance(),
-                                                  minutesAgo(1)))
+                            commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                         minutesAgo(1)))
                 .setDefault(CommandContext.class, commandFactory.createContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, Tests.newUserUuid())
@@ -177,16 +177,16 @@ public class CommandsShould {
 
     @Test
     public void create_wereBetween_predicate() {
-        final Command command1 = commandFactory.create(StringValue.getDefaultInstance(),
-                                                       minutesAgo(5));
-        final Command command2 = commandFactory.create(Int64Value.getDefaultInstance(),
-                                                       minutesAgo(2));
-        final Command command3 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(30));
-        final Command command4 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(20));
-        final Command command5 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(5));
+        final Command command1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                              minutesAgo(5));
+        final Command command2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                              minutesAgo(2));
+        final Command command3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(30));
+        final Command command4 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(20));
+        final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(5));
 
         final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3,
                                                                  command4, command5);

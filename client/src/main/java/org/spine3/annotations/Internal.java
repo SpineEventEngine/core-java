@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -27,15 +27,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a program element (class, method, package etc.) as an element of Service Provider Interface (SPI).
+ * Annotates a program element (class, method, package etc.) which is internal to Spine,
+ * not part of the public API, and should not be used by users of the framework.
  *
- * <p>SPI is used to enable framework extension and replaceable components (implement a new storage, etc).
+ * <p>If you plan to implement an extension of the framework, which is going to be
+ * wired into the framework, you may use the internal parts. Please consult with the Spine
+ * team, as the internal APIs do not have the same stability API guarantee as public ones.
  *
- * <p>See "Effective Java 2nd Edition", chapter 2, item 1 for more info about service provider framework pattern.
+ * <p>See {@link SPI} annotation if you plan to write an extension of the framework.
  *
+ * @author Alexander Yevsyukov
  * @author Alexander Litus
+ * @see SPI
  */
-@SPI
+@Internal
 @Retention(RetentionPolicy.SOURCE)
 @Target({
         ElementType.ANNOTATION_TYPE,
@@ -45,5 +50,5 @@ import java.lang.annotation.Target;
         ElementType.PACKAGE,
         ElementType.TYPE})
 @Documented
-public @interface SPI {
+public @interface Internal {
 }

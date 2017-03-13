@@ -33,11 +33,11 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -49,7 +49,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -339,7 +338,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             final Any idAsAny = input.getId();
 
             final TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            final Class messageClass = toMessageClass(typeUrl);
+            final Class messageClass = typeUrl.toMessageClass();
             checkIdClass(messageClass);
 
             final Message idAsMessage = unpack(idAsAny);

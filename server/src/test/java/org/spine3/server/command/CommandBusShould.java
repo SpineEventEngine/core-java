@@ -24,12 +24,12 @@ import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.envelope.MessageEnvelope;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -37,6 +37,7 @@ import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
+import org.spine3.type.CommandClass;
 import org.spine3.users.TenantId;
 
 import java.util.Set;
@@ -357,7 +358,7 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
 
     /**
      * The dispatcher that remembers that
-     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
+     * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()} was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 

@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.test.Tests;
+import org.spine3.type.TypeUrl;
 import org.spine3.users.UserId;
 
 import java.util.Iterator;
@@ -34,8 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.TypeUrl.SPINE_TYPE_URL_PREFIX;
-import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
@@ -57,10 +56,11 @@ public class AnyPackerShould {
     @Test
     public void pack_spine_message_to_Any() {
         final Any actual = AnyPacker.pack(spineMsg);
-        final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, UserId.getDescriptor().getFullName());
+        final TypeUrl typeUrl = TypeUrl.of(spineMsg);
+
 
         assertEquals(Any.pack(spineMsg).getValue(), actual.getValue());
-        assertEquals(expectedUrl, actual.getTypeUrl());
+        assertEquals(typeUrl.value(), actual.getTypeUrl());
     }
 
     @Test

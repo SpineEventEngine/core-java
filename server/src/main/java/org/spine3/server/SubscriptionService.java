@@ -34,9 +34,9 @@ import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.client.grpc.SubscriptionServiceGrpc;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.Stand;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;

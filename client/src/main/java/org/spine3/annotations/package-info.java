@@ -18,23 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf.error;
-
 /**
- * Exception thrown when the content of {@link com.google.protobuf.Any Any} does not
- * match one we expect when unpacking.
- *
- * <p>Typically this exception wraps
- * {@link com.google.protobuf.InvalidProtocolBufferException InvalidProtocolBufferException} thrown
- * in unsuccessful call of {@link com.google.protobuf.Any#unpack(Class) Any.unpack(Class)}.
- *
- * @author Alexander Yevsyukov
+ * This package contains common annotation types for Java code and
+ * generated classes for annotations of Proto types.
  */
-public class UnexpectedTypeException extends RuntimeException {
 
-    private static final long serialVersionUID = 0L;
+@ParametersAreNonnullByDefault
+package org.spine3.annotations;
 
-    public UnexpectedTypeException(Throwable cause) {
-        super(cause);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,12 +23,12 @@ package org.spine3.protobuf;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.error.UnexpectedTypeException;
+import org.spine3.type.TypeUrl;
+import org.spine3.type.error.UnexpectedTypeException;
 
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
  * Utilities for packing messages into {@link Any} and unpacking them.
@@ -79,7 +79,7 @@ public class AnyPacker {
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
         final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
-        final Class<T> messageClass = toMessageClass(typeUrl);
+        final Class<T> messageClass = typeUrl.toMessageClass();
         return unpack(any, messageClass);
     }
 
@@ -87,17 +87,17 @@ public class AnyPacker {
      * Unwraps {@code Any} value into an instance of the passed class.
      *
      * <p>If there is no Java class for the type,
-     * {@link org.spine3.protobuf.error.UnexpectedTypeException UnexpectedTypeException}
+     * {@link UnexpectedTypeException UnexpectedTypeException}
      * will be thrown.
      *
      * @param any   instance of {@link Any} that should be unwrapped
-     * @param clazz the class implementing the type of the enclosed object
+     * @param cls the class implementing the type of the enclosed object
      * @param <T>   the type enclosed into {@code Any}
      * @return unwrapped message instance
      */
-    public static <T extends Message> T unpack(Any any, Class<T> clazz) {
+    public static <T extends Message> T unpack(Any any, Class<T> cls) {
         try {
-            final T result = any.unpack(clazz);
+            final T result = any.unpack(cls);
             return result;
         } catch (InvalidProtocolBufferException e) {
             throw new UnexpectedTypeException(e);

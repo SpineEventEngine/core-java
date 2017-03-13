@@ -24,7 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import org.spine3.base.MessageClass;
+import org.spine3.type.MessageClass;
 
 import java.util.Collection;
 import java.util.Set;

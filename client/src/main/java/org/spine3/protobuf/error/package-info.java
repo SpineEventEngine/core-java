@@ -18,37 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
-
-import com.google.protobuf.Message;
-
 /**
- * The holder of an {@code Event} which provides convenient access to its properties.
- *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * This package contains exceptions related to working with Protobuf messages.
  */
-public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
 
-    private final Message eventMessage;
+@ParametersAreNonnullByDefault
+package org.spine3.protobuf.error;
 
-    private EventEnvelope(Event object) {
-        super(object);
-        this.eventMessage = Events.getMessage(object);
-    }
-
-    /**
-     * Creates instance for the passed event.
-     */
-    public static EventEnvelope of(Event event) {
-        return new EventEnvelope(event);
-    }
-
-    /**
-     * Obtains the event message.
-     */
-    @Override
-    public Message getMessage() {
-        return this.eventMessage;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

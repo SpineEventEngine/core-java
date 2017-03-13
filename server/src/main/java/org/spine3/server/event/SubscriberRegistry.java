@@ -24,8 +24,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import org.spine3.base.EventClass;
 import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.type.EventClass;
 
 import java.util.Set;
 

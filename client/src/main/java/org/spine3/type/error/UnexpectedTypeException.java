@@ -18,19 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.type.error;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
-import org.junit.Test;
+/**
+ * Exception thrown when the content of {@link com.google.protobuf.Any Any} does not
+ * match one we expect when unpacking.
+ *
+ * <p>Typically this exception wraps
+ * {@link com.google.protobuf.InvalidProtocolBufferException InvalidProtocolBufferException} thrown
+ * in unsuccessful call of {@link com.google.protobuf.Any#unpack(Class) Any.unpack(Class)}.
+ *
+ * @author Alexander Yevsyukov
+ */
+public class UnexpectedTypeException extends RuntimeException {
 
-import static org.junit.Assert.assertEquals;
+    private static final long serialVersionUID = 0L;
 
-public class EventClassShould {
-
-    @Test
-    public void create_set_on_varargs() {
-        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+    public UnexpectedTypeException(Throwable cause) {
+        super(cause);
     }
 }

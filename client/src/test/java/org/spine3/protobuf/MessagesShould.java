@@ -38,6 +38,8 @@ import org.spine3.test.Tests;
 import org.spine3.test.messages.MessageWithStringValue;
 import org.spine3.test.messages.TestEnum;
 import org.spine3.test.messages.TestEnumValue;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import java.util.List;
 
@@ -76,7 +78,7 @@ public class MessagesShould {
         final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
 
         final List<Descriptors.Descriptor> found = Lists.newLinkedList();
-        for (TypeUrl typeUrl : KnownTypes.getTypeUrls()) {
+        for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
             final Descriptors.Descriptor descriptor = typeRegistry.find(typeUrl.getTypeName());
             if (descriptor != null) {
                 found.add(descriptor);

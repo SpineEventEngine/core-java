@@ -21,6 +21,7 @@
 package org.spine3.protobuf.error;
 
 import org.junit.Test;
+import org.spine3.type.error.UnknownTypeException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

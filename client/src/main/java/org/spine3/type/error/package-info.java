@@ -18,34 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
-
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Descriptors;
-import org.junit.Test;
-import org.spine3.base.Command;
-
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-
 /**
- * Provides only class-level tests.
- *
- * <p>Other methods of {@link TypeName} are just over {@link TypeUrl} which are tested by
- * its own set of tests.
+ * This package contains exceptions related to type identification.
  */
-public class TypeNameShould {
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(TypeName.class);
-    }
+@ParametersAreNonnullByDefault
+package org.spine3.type.error;
 
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .setDefault(Descriptors.Descriptor.class, Command.getDefaultInstance()
-                                                                 .getDescriptorForType())
-                .testAllPublicStaticMethods(TypeName.class);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

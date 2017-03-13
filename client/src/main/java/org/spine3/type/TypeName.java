@@ -18,71 +18,97 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 
+import java.util.regex.Pattern;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Utility class for obtaining a type name from a {@code Message}.
  *
  * @author Alexander Yevsyukov
  */
-public class TypeName {
+public class TypeName extends StringTypeValue {
 
-    private TypeName() {
-        // Prevent instantiation of this utility class.
+    private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN =
+            Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
+
+    private TypeName(String value) {
+        super(value);
+    }
+
+    private static TypeName create(String value) {
+        return new TypeName(value);
+    }
+
+    /**
+     * Creates instance from the passed type URL.
+     */
+    public static TypeName from(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
+        return create(typeUrl.getTypeName());
     }
 
     /**
      * Obtains type name for the passed message.
      */
-    public static String of(Message message) {
+    public static TypeName of(Message message) {
         checkNotNull(message);
-        final String result = TypeUrl.of(message)
-                                     .getTypeName();
-        return result;
+        return from(TypeUrl.of(message));
     }
 
     /**
      * Obtains type name for the passed message class.
      */
-    public static String of(Class<? extends Message> clazz) {
-        checkNotNull(clazz);
-        return TypeUrl.of(clazz).getTypeName();
+    public static TypeName of(Class<? extends Message> cls) {
+        checkNotNull(cls);
+        return from(TypeUrl.of(cls));
     }
 
     /**
      * Obtains type name from the message of the passed command.
      */
-    public static String ofCommand(Command command) {
+    public static TypeName ofCommand(Command command) {
         checkNotNull(command);
-        final String result = TypeUrl.ofCommand(command)
-                                     .getTypeName();
-        return result;
+        return from(TypeUrl.ofCommand(command));
     }
 
     /**
      * Obtains type name from the message of the passed event.
      */
-    public static String ofEvent(Event event) {
+    public static TypeName ofEvent(Event event) {
         checkNotNull(event);
-        final String result = TypeUrl.ofEvent(event)
-                                     .getTypeName();
-        return result;
+        return from(TypeUrl.ofEvent(event));
     }
 
     /**
      * Obtains type name for the message type by its descriptor.
      */
-    public static String from(Descriptor descriptor) {
+    public static TypeName from(Descriptor descriptor) {
         checkNotNull(descriptor);
-        final String result = TypeUrl.from(descriptor)
-                                     .getTypeName();
-        return result;
+        return from(TypeUrl.from(descriptor));
+    }
+
+    /**
+     * Returns the unqualified name of the Protobuf type, for example: {@code StringValue}.
+     */
+    public String getSimpleName() {
+        final String typeName = value();
+        if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
+            final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
+            checkState(parts.length > 0, "Invalid type name: " + typeName);
+            final String result = parts[parts.length - 1];
+            return result;
+        } else {
+            return typeName;
+        }
     }
 }

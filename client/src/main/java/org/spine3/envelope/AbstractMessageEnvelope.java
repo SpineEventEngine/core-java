@@ -18,59 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.envelope;
 
-import com.google.protobuf.Message;
-import org.spine3.type.ClassName;
-
-import javax.annotation.Nullable;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * A base class for value objects storing references to message classes.
+ * Abstract base for classes implementing {@link MessageEnvelope}.
  *
+ * @param <T> the type of the object that wraps a message
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public abstract class MessageClass {
+abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
 
-    private final Class<? extends Message> value;
+    private final T object;
 
-    protected MessageClass(Class<? extends Message> value) {
-        this.value = value;
-    }
-
-    /** Returns value of the object. */
-    public Class<? extends Message> value() {
-        return this.value;
+    AbstractMessageEnvelope(T object) {
+        checkNotNull(object);
+        this.object = object;
     }
 
     @Override
-    public String toString() {
-        return String.valueOf(value);
+    public T getOuterObject() {
+        return object;
     }
 
-    /** Obtains the {@code ClassName} for this message class. */
-    public ClassName getClassName() {
-        return ClassName.of(value());
-    }
-
-    /** {@inheritDoc} */
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hash(object);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final MessageClass other = (MessageClass) obj;
-        return Objects.equals(this.value, other.value);
+        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
+        return Objects.equals(this.object, other.object);
     }
 }

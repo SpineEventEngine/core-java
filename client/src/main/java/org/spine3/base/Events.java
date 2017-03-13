@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import java.util.Collections;
@@ -236,7 +236,8 @@ public class Events {
             return Optional.absent();
         }
         final Enrichment.Container enrichments = value.get();
-        final String typeName = TypeName.of(enrichmentClass);
+        final String typeName = TypeName.of(enrichmentClass)
+                                        .value();
         final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {

@@ -23,7 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 /**
  * A container for the storage fields used in multiple {@link Storage storages}.

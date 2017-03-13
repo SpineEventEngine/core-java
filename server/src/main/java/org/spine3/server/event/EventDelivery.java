@@ -20,10 +20,10 @@
 package org.spine3.server.event;
 
 import com.google.common.base.Function;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.server.delivery.Delivery;
+import org.spine3.type.EventClass;
 
 import java.util.Collection;
 import java.util.Set;

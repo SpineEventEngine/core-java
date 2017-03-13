@@ -22,10 +22,10 @@ package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 

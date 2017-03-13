@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
@@ -42,6 +41,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
+import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

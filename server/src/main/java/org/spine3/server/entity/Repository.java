@@ -26,13 +26,13 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
