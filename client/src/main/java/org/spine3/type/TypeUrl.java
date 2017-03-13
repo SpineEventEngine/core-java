@@ -60,11 +60,6 @@ public final class TypeUrl {
     private static final String SEPARATOR = "/";
     private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
 
-    @VisibleForTesting
-    static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
-
-    public static final String SPINE_TYPE_URL_PREFIX = "type.spine3.org";
-
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
     /** The prefix of the type URL. */
@@ -207,7 +202,7 @@ public final class TypeUrl {
     private static String getTypeUrlPrefix(GenericDescriptor descriptor) {
         final Descriptors.FileDescriptor file = descriptor.getFile();
         if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
-            return GOOGLE_TYPE_URL_PREFIX;
+            return Prefix.GOOGLE_APIS.value();
         }
         final String result = file.getOptions()
                                   .getExtension(AnnotationsProto.typeUrlPrefix);
@@ -274,5 +269,42 @@ public final class TypeUrl {
     @Override
     public int hashCode() {
         return Objects.hash(prefix, typeName);
+    }
+
+    /**
+     * Enumeration of known type URL prefixes.
+     */
+    public enum Prefix {
+
+        /**
+         * Type prefix for standard Protobuf types.
+         */
+        GOOGLE_APIS("type.googleapis.com"),
+
+        /**
+         * Type prefix for types provided by the Spine framework.
+         */
+        SPINE("type.spine3.org");
+
+        private final String value;
+
+        Prefix(String value) {
+            this.value = value;
+        }
+
+        /**
+         * Obtains the value of the prefix.
+         */
+        public String value() {
+            return value;
+        }
+
+        /**
+         * Returns the value of the prefix.
+         */
+        @Override
+        public String toString() {
+            return value();
+        }
     }
 }

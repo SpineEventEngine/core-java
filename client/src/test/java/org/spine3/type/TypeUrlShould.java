@@ -40,8 +40,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.type.TypeUrl.GOOGLE_TYPE_URL_PREFIX;
-import static org.spine3.type.TypeUrl.SPINE_TYPE_URL_PREFIX;
 import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 public class TypeUrlShould {
@@ -49,8 +47,9 @@ public class TypeUrlShould {
     private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor()
                                                                     .getFullName();
 
-    private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX,
-                                                                           STRING_VALUE_TYPE_NAME);
+    private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(
+            TypeUrl.Prefix.GOOGLE_APIS.value(),
+            STRING_VALUE_TYPE_NAME);
 
     private final TypeUrl stringValueTypeUrl = TypeUrl.from(StringValue.getDescriptor());
 
@@ -97,7 +96,7 @@ public class TypeUrlShould {
 
     @Test
     public void return_type_url_prefix() {
-        assertEquals(GOOGLE_TYPE_URL_PREFIX, stringValueTypeUrl.getPrefix());
+        assertEquals(TypeUrl.Prefix.GOOGLE_APIS.value(), stringValueTypeUrl.getPrefix());
     }
 
     @Test
@@ -115,7 +114,8 @@ public class TypeUrlShould {
     @Test
     public void create_by_descriptor_of_spine_msg() {
         final Descriptors.Descriptor descriptor = UserId.getDescriptor();
-        final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, descriptor.getFullName());
+        final String expectedUrl = composeTypeUrl(TypeUrl.Prefix.SPINE.value(),
+                                                  descriptor.getFullName());
 
         final TypeUrl typeUrl = TypeUrl.from(descriptor);
 
@@ -124,12 +124,14 @@ public class TypeUrlShould {
 
     @Test
     public void create_by_enum_descriptor_of_google_msg() {
-        assertCreatesTypeUrlFromEnum(Field.Kind.getDescriptor(), GOOGLE_TYPE_URL_PREFIX);
+        assertCreatesTypeUrlFromEnum(Field.Kind.getDescriptor(),
+                                     TypeUrl.Prefix.GOOGLE_APIS.value());
     }
 
     @Test
     public void create_by_enum_descriptor_of_spine_msg() {
-        assertCreatesTypeUrlFromEnum(CommandValidationError.getDescriptor(), SPINE_TYPE_URL_PREFIX);
+        assertCreatesTypeUrlFromEnum(CommandValidationError.getDescriptor(),
+                                     TypeUrl.Prefix.SPINE.value());
     }
 
     private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor,
@@ -161,7 +163,7 @@ public class TypeUrlShould {
 
     private static void assertIsStringValueUrl(TypeUrl typeUrl) {
         assertEquals(STRING_VALUE_TYPE_URL_STR, typeUrl.value());
-        assertEquals(GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
+        assertEquals(TypeUrl.Prefix.GOOGLE_APIS.value(), typeUrl.getPrefix());
         assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
         assertEquals(StringValue.class.getSimpleName(), TypeName.from(typeUrl)
                                                                 .getSimpleName());

@@ -72,7 +72,7 @@ class Given {
                                                                       .setId("12345AD0"))
                                                .build())
                                     .toBuilder()
-                                    .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' +
+                                    .setTypeUrl(TypeUrl.Prefix.SPINE.value() + '/' +
                                                 ProjectCreated.getDescriptor()
                                                               .getFullName())
                                     .build())
