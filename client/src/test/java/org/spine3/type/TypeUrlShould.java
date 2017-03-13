@@ -176,4 +176,19 @@ public class TypeUrlShould {
                 .addEqualityGroup(TypeUrl.of(Timestamp.class))
                 .testEquals();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_empty_prefix() {
+        TypeUrl.of(" /package.Type");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_empty_name() {
+        TypeUrl.of("type.prefix/ ");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_malformed_type_URL() {
+        TypeUrl.of("prefix/prefix/type.Name");
+    }
 }

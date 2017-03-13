@@ -188,7 +188,8 @@ public class Messages {
                 final Class<? extends Message> msgClass = typeUrl.toMessageClass();
                 return msgClass;
             default:
-                throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
+                throw new IllegalArgumentException("Unknown field type discovered: " +
+                                                   field.getFullName());
         }
     }
 }
