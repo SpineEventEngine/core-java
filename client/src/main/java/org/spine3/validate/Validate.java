@@ -162,7 +162,8 @@ public class Validate {
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
         if (!isDefault(object)) {
-            final String typeName = TypeName.of(object).value();
+            final String typeName = TypeName.of(object)
+                                            .value();
             throw newIllegalStateException("The message is not in the default state: %s", typeName);
         }
         return object;
@@ -172,8 +173,8 @@ public class Validate {
      * Ensures the truth of an expression involving one parameter to the calling method.
      *
      * @param expression         a boolean expression with the parameter we check
-     * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
-     *                           the parameter name
+     * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder
+     *                           for the parameter name
      * @param parameterName      the name of the parameter
      * @throws IllegalArgumentException if {@code expression} is false
      */

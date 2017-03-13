@@ -39,6 +39,11 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
 import static org.spine3.validate.Validate.checkDefault;
+import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkValid;
+import static org.spine3.validate.Validate.isDefault;
+import static org.spine3.validate.Validate.isNotDefault;
 
 public class ValidateShould {
 
@@ -61,8 +66,8 @@ public class ValidateShould {
     public void verify_that_message_is_not_in_default_state() {
         final Message msg = newStringValue("check_if_message_is_not_in_default_state");
 
-        assertTrue(Validate.isNotDefault(msg));
-        assertFalse(Validate.isNotDefault(StringValue.getDefaultInstance()));
+        assertTrue(isNotDefault(msg));
+        assertFalse(isNotDefault(StringValue.getDefaultInstance()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -74,32 +79,23 @@ public class ValidateShould {
     public void verify_that_message_is_in_default_state() {
         final Message nonDefault = newUuidValue();
 
-        assertTrue(Validate.isDefault(StringValue.getDefaultInstance()));
-        assertFalse(Validate.isDefault(nonDefault));
+        assertTrue(isDefault(StringValue.getDefaultInstance()));
+        assertFalse(isDefault(nonDefault));
     }
 
     @Test(expected = IllegalStateException.class)
-    public void check_a_message_is_default_with_parametrized_error_message() {
-        final StringValue msg = newUuidValue();
-        checkDefault(msg, "Non default value: %s", msg.getValue());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void check_a_message_is_default() {
-        checkDefault(newUuidValue());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_default_state_throwing_exception_if_not() {
+    public void check_if_message_is_in_default() {
         final StringValue nonDefault = newUuidValue();
         checkDefault(nonDefault);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_default_state_throwing_exception_with_parameterized_error_message() {
+    public void check_a_message_is_default_with_parametrized_error_message() {
         final StringValue nonDefault = newUuidValue();
         checkDefault(nonDefault,
-                              "Message value: %s, Type name: %s", nonDefault, TypeName.of(nonDefault));
+                     "Message value: %s, Type name: %s",
+                     nonDefault,
+                     TypeName.of(nonDefault));
     }
 
     @Test
@@ -111,54 +107,54 @@ public class ValidateShould {
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_not_in_default_state_throwing_exception_if_not() {
-        Validate.checkNotDefault(StringValue.getDefaultInstance());
+        checkNotDefault(StringValue.getDefaultInstance());
     }
 
     @Test
     public void return_non_default_value_on_check() {
         final StringValue nonDefault = newUuidValue();
-        assertEquals(nonDefault, Validate.checkNotDefault(nonDefault));
-        assertEquals(nonDefault, Validate.checkNotDefault(nonDefault, "with error message"));
+        assertEquals(nonDefault, checkNotDefault(nonDefault));
+        assertEquals(nonDefault, checkNotDefault(nonDefault, "with error message"));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_checked_string_is_null() {
-        Validate.checkNotEmptyOrBlank(Tests.<String>nullRef(), "");
+        checkNotEmptyOrBlank(Tests.<String>nullRef(), "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_string_is_empty() {
-        Validate.checkNotEmptyOrBlank("", "");
+        checkNotEmptyOrBlank("", "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_string_is_blank() {
-        Validate.checkNotEmptyOrBlank("   ", "");
+        checkNotEmptyOrBlank("   ", "");
     }
 
     @Test
     public void do_not_throw_exception_if_checked_string_is_valid() {
-        Validate.checkNotEmptyOrBlank("valid_string", "");
+        checkNotEmptyOrBlank("valid_string", "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_command_id_is_empty() {
-        Validate.checkValid(CommandId.getDefaultInstance());
+        checkValid(CommandId.getDefaultInstance());
     }
 
     @Test
     public void not_throw_exception_if_checked_command_id_is_valid() {
-        Validate.checkValid(Commands.generateId());
+        checkValid(Commands.generateId());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_checked_event_id_is_empty() {
-        Validate.checkValid(EventId.getDefaultInstance());
+        checkValid(EventId.getDefaultInstance());
     }
 
     @Test
     public void not_throw_exception_if_checked_event_id_is_valid() {
-        Validate.checkValid(Events.generateId());
+        checkValid(Events.generateId());
     }
 
     @Test
