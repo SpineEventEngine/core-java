@@ -23,11 +23,20 @@ package org.spine3.type;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.Event;
+import org.spine3.client.CommandFactory;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestEventFactory;
 import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.test.Tests.newUuidValue;
 
 /**
  * Provides only class-level tests.
@@ -36,6 +45,9 @@ import static org.junit.Assert.assertEquals;
  * its own set of tests.
  */
 public class TypeNameShould {
+
+    private static final CommandFactory commandFactory =
+            TestCommandFactory.newInstance(TypeNameShould.class);
 
     @Test
     public void pass_the_null_tolerance_check() {
@@ -62,5 +74,48 @@ public class TypeNameShould {
                                       .getSimpleName();
 
         assertEquals(name, actual);
+    }
+
+    @Test
+    public void obtain_instance_for_message() {
+        final TypeName typeName = TypeName.of(StringValue.getDefaultInstance());
+        assertNotNull(typeName);
+        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_instance_for_Java_class() {
+        final TypeName typeName = TypeName.of(StringValue.class);
+        assertNotNull(typeName);
+        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_type_of_command() {
+        final Command command = commandFactory.createCommand(newUuidValue());
+
+        final TypeName typeName = TypeName.ofCommand(command);
+        assertNotNull(typeName);
+        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_type_name_of_event() {
+        final Command command = commandFactory.createCommand(newUuidValue());
+        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
+        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
+                                                     command.getContext());
+
+        final TypeName typeName = TypeName.ofEvent(event);
+        assertNotNull(typeName);
+        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_instance_by_descriptor() {
+        final TypeName typeName = TypeName.from(UInt64Value.getDescriptor());
+        assertNotNull(typeName);
+        assertEquals(UInt64Value.class.getSimpleName(), typeName.getSimpleName());
     }
 }
