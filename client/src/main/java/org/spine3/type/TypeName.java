@@ -50,23 +50,27 @@ public class TypeName extends StringTypeValue {
     }
 
     /**
+     * Creates instance from the passed type URL.
+     */
+    public static TypeName from(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
+        return create(typeUrl.getTypeName());
+    }
+
+    /**
      * Obtains type name for the passed message.
      */
     public static TypeName of(Message message) {
         checkNotNull(message);
-        final String typeName = TypeUrl.of(message)
-                                       .getTypeName();
-        return create(typeName);
+        return from(TypeUrl.of(message));
     }
 
     /**
      * Obtains type name for the passed message class.
      */
-    public static TypeName of(Class<? extends Message> clazz) {
-        checkNotNull(clazz);
-        final String typeName = TypeUrl.of(clazz)
-                                       .getTypeName();
-        return create(typeName);
+    public static TypeName of(Class<? extends Message> cls) {
+        checkNotNull(cls);
+        return from(TypeUrl.of(cls));
     }
 
     /**
@@ -74,9 +78,7 @@ public class TypeName extends StringTypeValue {
      */
     public static TypeName ofCommand(Command command) {
         checkNotNull(command);
-        final String typeName = TypeUrl.ofCommand(command)
-                                       .getTypeName();
-        return create(typeName);
+        return from(TypeUrl.ofCommand(command));
     }
 
     /**
@@ -84,9 +86,7 @@ public class TypeName extends StringTypeValue {
      */
     public static TypeName ofEvent(Event event) {
         checkNotNull(event);
-        final String typeName = TypeUrl.ofEvent(event)
-                                       .getTypeName();
-        return create(typeName);
+        return from(TypeUrl.ofEvent(event));
     }
 
     /**
@@ -94,18 +94,7 @@ public class TypeName extends StringTypeValue {
      */
     public static TypeName from(Descriptor descriptor) {
         checkNotNull(descriptor);
-        final String typeName = TypeUrl.from(descriptor)
-                                       .getTypeName();
-        return create(typeName);
-    }
-
-    /**
-     * Creates instance from the passed type URL.
-     */
-    public static TypeName from(TypeUrl typeUrl) {
-        checkNotNull(typeUrl);
-
-        return create(typeUrl.getTypeName());
+        return from(TypeUrl.from(descriptor));
     }
 
     /**
