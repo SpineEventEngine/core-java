@@ -135,14 +135,27 @@ public final class TypeUrl {
 
     private static TypeUrl ofTypeUrl(String typeUrl) {
         final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
-        if (parts.length != 2 || parts[0].trim()
-                                         .isEmpty() || parts[1].trim()
-                                                               .isEmpty()) {
-            throw new IllegalArgumentException(
-                    new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
-                                                       + typeUrl));
+        if (parts.length != 2) {
+            throw malformedTypeUrl(typeUrl);
         }
-        return create(parts[0], parts[1]);
+
+        final String prefix = parts[0].trim();
+        if (prefix.isEmpty()) {
+            throw malformedTypeUrl(typeUrl);
+        }
+
+        final String typeName = parts[1].trim();
+        if (typeName.isEmpty()) {
+            throw malformedTypeUrl(typeUrl);
+        }
+
+        return create(prefix, typeName);
+    }
+
+    private static IllegalArgumentException malformedTypeUrl(String typeUrl) {
+        throw new IllegalArgumentException(
+                new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
+                                                   + typeUrl));
     }
 
     private static TypeUrl ofTypeName(String typeName) {
