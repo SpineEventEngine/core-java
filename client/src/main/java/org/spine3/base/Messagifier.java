@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
@@ -35,30 +36,32 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
+ * // TODO:2017-03-13:dmytro.dashenkov: Edit javadoc
  * Wrapper of an identifier value.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-class Identifier<I> {
+class Messagifier<I> {
 
     private final Type type;
     private final I value;
 
-    static <I> Identifier<I> from(I value) {
+    static <I> Messagifier<I> from(I value) {
         checkNotNull(value);
         final Type type = Type.getType(value);
-        final Identifier<I> result = create(type, value);
+        final Messagifier<I> result = create(type, value);
         return result;
     }
 
-    static Identifier<Message> fromMessage(Message value) {
+    static Messagifier<Message> fromMessage(Message value) {
         checkNotNull(value);
-        final Identifier<Message> result = create(Type.MESSAGE, value);
+        final Messagifier<Message> result = create(Type.MESSAGE, value);
         return result;
     }
 
-    private static <I> Identifier<I> create(Type type, I value) {
-        return new Identifier<>(type, value);
+    private static <I> Messagifier<I> create(Type type, I value) {
+        return new Messagifier<>(type, value);
     }
 
     static <I> I getDefaultValue(Class<I> idClass) {
@@ -67,7 +70,7 @@ class Identifier<I> {
         return result;
     }
 
-    private Identifier(Type type, I value) {
+    private Messagifier(Type type, I value) {
         this.value = value;
         this.type = type;
     }
@@ -84,6 +87,10 @@ class Identifier<I> {
         return type == Type.LONG;
     }
 
+    boolean isBoolean() {
+        return type == Type.BOOLEAN;
+    }
+
     boolean isMessage() {
         return type == Type.MESSAGE;
     }
@@ -93,11 +100,14 @@ class Identifier<I> {
         return result;
     }
 
+
+
     @Override
     public String toString() {
         String result;
 
         switch (type) {
+            case BOOLEAN:
             case INTEGER:
             case LONG:
                 result = value.toString();
@@ -131,8 +141,8 @@ class Identifier<I> {
     enum Type {
         STRING {
             @Override
-            <I> boolean matchValue(I id) {
-                return id instanceof String;
+            <I> boolean matchValue(I object) {
+                return object instanceof String;
             }
 
             @Override
@@ -141,13 +151,13 @@ class Identifier<I> {
             }
 
             @Override
-            <I> boolean matchClass(Class<I> idClass) {
-                return String.class.equals(idClass);
+            <I> boolean matchClass(Class<I> cls) {
+                return String.class.equals(cls);
             }
 
             @Override
-            <I> Message toMessage(I id) {
-                return newStringValue((String)id);
+            <I> Message toMessage(I object) {
+                return newStringValue((String) object);
             }
 
             @Override
@@ -156,15 +166,50 @@ class Identifier<I> {
             }
 
             @Override
-            <I> I getDefaultValue(Class<I> idClass) {
+            <I> I getDefaultValue(Class<I> cls) {
                 return (I) "";
+            }
+        },
+
+        BOOLEAN {
+            @Override
+            <I> boolean matchValue(I object) {
+                return object instanceof Boolean;
+            }
+
+            @Override
+            boolean matchMessage(Message message) {
+                return message instanceof BoolValue;
+            }
+
+            @Override
+            <I> boolean matchClass(Class<I> cls) {
+                // TODO:2017-03-13:dmytro.dashenkov: Check if we need to math primitive types here.
+                return Boolean.class.equals(cls);
+            }
+
+            @Override
+            <I> Message toMessage(I object) {
+                return BoolValue.newBuilder()
+                                .setValue((Boolean) object)
+                                .build();
+            }
+
+            @Override
+            Object fromMessage(Message message) {
+                return ((BoolValue) message).getValue();
+            }
+
+            @Override
+            <I> I getDefaultValue(Class<I> cls) {
+                return (I) Boolean.FALSE;
             }
         },
 
         INTEGER {
             @Override
-            <I> boolean matchValue(I id) {
-                return id instanceof Integer;
+            <I> boolean matchValue(I object) {
+                return object instanceof Integer;
             }
 
             @Override
@@ -173,14 +218,14 @@ class Identifier<I> {
             }
 
             @Override
-            <I> boolean matchClass(Class<I> idClass) {
-                return Integer.class.equals(idClass);
+            <I> boolean matchClass(Class<I> cls) {
+                return Integer.class.equals(cls);
             }
 
             @Override
-            <I> Message toMessage(I id) {
+            <I> Message toMessage(I object) {
                 return UInt32Value.newBuilder()
-                                  .setValue((Integer) id)
+                                  .setValue((Integer) object)
                                   .build();
             }
 
@@ -190,15 +235,15 @@ class Identifier<I> {
             }
 
             @Override
-            <I> I getDefaultValue(Class<I> idClass) {
+            <I> I getDefaultValue(Class<I> cls) {
                 return (I) Integer.valueOf(0);
             }
         },
 
         LONG {
             @Override
-            <I> boolean matchValue(I id) {
-                return id instanceof Long;
+            <I> boolean matchValue(I object) {
+                return object instanceof Long;
             }
 
             @Override
@@ -207,14 +252,14 @@ class Identifier<I> {
             }
 
             @Override
-            <I> boolean matchClass(Class<I> idClass) {
-                return Long.class.equals(idClass);
+            <I> boolean matchClass(Class<I> cls) {
+                return Long.class.equals(cls);
             }
 
             @Override
-            <I> Message toMessage(I id) {
+            <I> Message toMessage(I object) {
                 return UInt64Value.newBuilder()
-                                  .setValue((Long) id)
+                                  .setValue((Long) object)
                                   .build();
             }
 
@@ -224,15 +269,15 @@ class Identifier<I> {
             }
 
             @Override
-            <I> I getDefaultValue(Class<I> idClass) {
+            <I> I getDefaultValue(Class<I> cls) {
                 return (I) Long.valueOf(0);
             }
         },
 
         MESSAGE {
             @Override
-            <I> boolean matchValue(I id) {
-                return id instanceof Message;
+            <I> boolean matchValue(I object) {
+                return object instanceof Message;
             }
 
             /**
@@ -249,13 +294,13 @@ class Identifier<I> {
             }
 
             @Override
-            <I> boolean matchClass(Class<I> idClass) {
-                return Message.class.isAssignableFrom(idClass);
+            <I> boolean matchClass(Class<I> cls) {
+                return Message.class.isAssignableFrom(cls);
             }
 
             @Override
-            <I> Message toMessage(I id) {
-                return (Message) id;
+            <I> Message toMessage(I object) {
+                return (Message) object;
             }
 
             @Override
@@ -264,47 +309,47 @@ class Identifier<I> {
             }
 
             @Override
-            <I> I getDefaultValue(Class<I> idClass) {
-                Class<? extends Message> msgClass = (Class<? extends Message>) idClass;
+            <I> I getDefaultValue(Class<I> cls) {
+                Class<? extends Message> msgClass = (Class<? extends Message>) cls;
                 final Message result = Messages.newInstance(msgClass);
                 return (I) result;
             }
         };
 
-        abstract <I> boolean matchValue(I id);
+        abstract <I> boolean matchValue(I object);
 
         abstract boolean matchMessage(Message message);
 
-        abstract <I> boolean matchClass(Class<I> idClass);
+        abstract <I> boolean matchClass(Class<I> cls);
 
-        abstract <I> Message toMessage(I id);
+        abstract <I> Message toMessage(I object);
 
         abstract Object fromMessage(Message message);
 
-        abstract <I> I getDefaultValue(Class<I> idClass);
+        abstract <I> I getDefaultValue(Class<I> cls);
 
-        private static <I> Type getType(I id) {
+        private static <I> Type getType(I object) {
             for (Type type : values()) {
-                if (type.matchValue(id)) {
+                if (type.matchValue(object)) {
                     return type;
                 }
             }
-            throw unsupported(id);
+            throw unsupported(object);
         }
 
-        <I> Any pack(I id) {
-            final Message msg = toMessage(id);
+        <I> Any pack(I object) {
+            final Message msg = toMessage(object);
             final Any result = AnyPacker.pack(msg);
             return result;
         }
 
-        static <I> Type getType(Class<I> idClass) {
+        static <I> Type getType(Class<I> cls) {
             for (Type type : values()) {
-                if (type.matchClass(idClass)) {
+                if (type.matchClass(cls)) {
                     return type;
                 }
             }
-            throw unsupportedClass(idClass);
+            throw unsupportedClass(cls);
         }
 
         static Object unpack(Any any) {

@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
-import org.spine3.base.Identifier.Type;
+import org.spine3.base.Messagifier.Type;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,18 +40,18 @@ public class IdentifierShould {
 
     @Test
     public void getDefaultValue_by_class_id() {
-        assertEquals(0L, Identifier.getDefaultValue(Long.class).longValue());
-        assertEquals(0, Identifier.getDefaultValue(Integer.class).intValue());
-        assertEquals("", Identifier.getDefaultValue(String.class));
-        assertEquals(Timestamp.getDefaultInstance(), Identifier.getDefaultValue(Timestamp.class));
+        assertEquals(0L, Messagifier.getDefaultValue(Long.class).longValue());
+        assertEquals(0, Messagifier.getDefaultValue(Integer.class).intValue());
+        assertEquals("", Messagifier.getDefaultValue(String.class));
+        assertEquals(Timestamp.getDefaultInstance(), Messagifier.getDefaultValue(Timestamp.class));
     }
 
     @Test
     public void create_values_by_type() {
-        assertTrue(Identifier.from("").isString());
-        assertTrue(Identifier.from(0).isInteger());
-        assertTrue(Identifier.from(0L).isLong());
-        assertTrue(Identifier.from(newIntValue(300)).isMessage());
+        assertTrue(Messagifier.from("").isString());
+        assertTrue(Messagifier.from(0).isInteger());
+        assertTrue(Messagifier.from(0L).isLong());
+        assertTrue(Messagifier.from(newIntValue(300)).isMessage());
     }
 
     @Test
@@ -75,6 +75,6 @@ public class IdentifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_unpack_unsupported_types () {
-        Identifier.Type.unpack(Any.getDefaultInstance());
+        Messagifier.Type.unpack(Any.getDefaultInstance());
     }
 }
