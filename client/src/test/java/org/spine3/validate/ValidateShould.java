@@ -38,6 +38,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
+import static org.spine3.validate.Validate.checkDefault;
 
 public class ValidateShould {
 
@@ -78,23 +79,34 @@ public class ValidateShould {
     }
 
     @Test(expected = IllegalStateException.class)
+    public void check_a_message_is_default_with_parametrized_error_message() {
+        final StringValue msg = newUuidValue();
+        checkDefault(msg, "Non default value: %s", msg.getValue());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void check_a_message_is_default() {
+        checkDefault(newUuidValue());
+    }
+
+    @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default_state_throwing_exception_if_not() {
         final StringValue nonDefault = newUuidValue();
-        Validate.checkDefault(nonDefault);
+        checkDefault(nonDefault);
     }
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default_state_throwing_exception_with_parameterized_error_message() {
         final StringValue nonDefault = newUuidValue();
-        Validate.checkDefault(nonDefault,
+        checkDefault(nonDefault,
                               "Message value: %s, Type name: %s", nonDefault, TypeName.of(nonDefault));
     }
 
     @Test
     public void return_default_value_on_check() {
         final Message defaultValue = StringValue.getDefaultInstance();
-        assertEquals(defaultValue, Validate.checkDefault(defaultValue));
-        assertEquals(defaultValue, Validate.checkDefault(defaultValue, "error message"));
+        assertEquals(defaultValue, checkDefault(defaultValue));
+        assertEquals(defaultValue, checkDefault(defaultValue, "error message"));
     }
 
     @Test(expected = IllegalStateException.class)
