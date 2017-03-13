@@ -24,16 +24,19 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.stand.AggregateStateId;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage keeping messages with identity.
@@ -41,9 +44,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-@SPI
 public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
-        implements BulkStorageOperationsMixin<I, EntityRecord> {
+        implements StorageWithLifecycleFlags<I, EntityRecord>,
+                   BulkStorageOperationsMixin<I, EntityRecord> {
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -115,22 +118,34 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         writeRecords(records);
     }
 
-    /**
-     * Marks the record with the passed ID as {@code archived}.
-     *
-     * @param id the ID of the record to mark
-     */
-    public abstract void markArchived(I id);
+    @Override
+    public Optional<LifecycleFlags> readLifecycleFlags(I id) {
+        final Optional<EntityRecord> optional = read(id);
+        if (optional.isPresent()) {
+            return Optional.of(optional.get()
+                                       .getLifecycleFlags());
+        }
+        return Optional.absent();
+    }
 
-    /**
-     * Marks the record with the passed ID as {@code deleted}.
-     *
-     * <p>This method does not delete the record.
-     * To delete the record please call {@link #delete(Object)}
-     *
-     * @param id the ID of the record to mark
-     */
-    public abstract void markDeleted(I id);
+    @Override
+    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
+        final Optional<EntityRecord> optional = read(id);
+        if (optional.isPresent()) {
+            final EntityRecord record = optional.get();
+            final EntityRecord updated = record.toBuilder()
+                                               .setLifecycleFlags(flags)
+                                               .build();
+            write(id, updated);
+        } else {
+            // The AggregateStateId is a special case, which is not handled by the Identifier class.
+            final String idStr = id instanceof AggregateStateId
+                                 ? id.toString()
+                                 : idToString(id);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s",
+                                            idStr);
+        }
+    }
 
     /**
      * Deletes the record with the passed ID.
@@ -203,7 +218,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
+    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                                  FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords();

@@ -31,9 +31,8 @@ import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.Predicates;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.entity.Visibility;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
@@ -49,10 +48,11 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -296,6 +296,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         }
         aggregate.commitEvents();
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
+
+        if (aggregate.lifecycleFlagsChanged()) {
+            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
+        }
     }
 
     /**
@@ -304,7 +308,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>If the aggregate is not available in the repository this method
      * returns a newly created aggregate.
      *
-     * <p>If the aggregate is “invisible” to regular queries,
+     * <p>If the aggregate has at least one {@linkplain LifecycleFlags lifecycle flag} set
      * {@code Optional.absent()} is returned.
      *
      * @param id the ID of the aggregate to load
@@ -315,11 +319,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> load(I id) throws IllegalStateException {
-        final Optional<Visibility> status = aggregateStorage().readVisibility(id);
-        if (status.isPresent() && !Predicates.isEntityVisible()
-                                             .apply(status.get())) {
-            // If there is a status that hides the aggregate, return nothing.
-            return Optional.absent();
+        final Optional<LifecycleFlags> loadedFlags = aggregateStorage().readLifecycleFlags(id);
+        if (loadedFlags.isPresent()) {
+            final boolean isVisible = isEntityVisible().apply(loadedFlags.get());
+            // If there is a flag that hides the aggregate, return nothing.
+            if (!isVisible) {
+                return Optional.absent();
+            }
         }
 
         A result = loadOrCreate(id);
@@ -330,16 +336,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected Storage<I, ?> createStorage(StorageFactory factory) {
         final Storage<I, ?> result = factory.createAggregateStorage(getAggregateClass());
         return result;
-    }
-
-    @Override
-    protected void markArchived(I id) {
-        aggregateStorage().markArchived(id);
-    }
-
-    @Override
-    protected void markDeleted(I id) {
-        aggregateStorage().markDeleted(id);
     }
 
     private static <I> IllegalStateException unableToLoadEvents(I id) {

@@ -57,6 +57,7 @@ import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.protobuf.Messages.toMessageClass;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * {@code EventEnricher} extends information of an event basing on its type and content.
@@ -443,11 +444,10 @@ public class EventEnricher {
         final Optional<EnrichmentFunction<?, ?>> duplicate = from(currentFns)
                 .firstMatch(SameTransition.asFor(function));
         if (duplicate.isPresent()) {
-            final String msg = String.format("Enrichment from %s to %s already added as: %s",
-                                             function.getEventClass(),
-                                             function.getEnrichmentClass(),
-                                             duplicate.get());
-            throw new IllegalArgumentException(msg);
+            throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
+                                               function.getEventClass(),
+                                               function.getEnrichmentClass(),
+                                               duplicate.get());
         }
     }
 

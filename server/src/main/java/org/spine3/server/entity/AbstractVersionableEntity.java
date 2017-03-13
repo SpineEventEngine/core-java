@@ -33,8 +33,9 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Versions.checkIsIncrement;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An abstract base for entities with versions.
@@ -48,11 +49,20 @@ import static org.spine3.base.Versions.checkIsIncrement;
  */
 public abstract class AbstractVersionableEntity<I, S extends Message>
         extends AbstractEntity<I, S>
-        implements VersionableEntity<I, S> {
+        implements VersionableEntity<I, S>,
+                   EntityWithLifecycle<I, S> {
 
     private Version version;
 
-    private Visibility visibility;
+    private LifecycleFlags lifecycleFlags;
+
+    /**
+     * If {@code true} the visibility of the entity was changed since initialization.
+     *
+     * <p>If so, the visibility status of the entity should be updated when
+     * {@linkplain Repository#store(Entity) storing}.
+     */
+    private volatile boolean lifecycleFlagsChanged;
 
     /**
      * Creates a new instance.
@@ -64,7 +74,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected AbstractVersionableEntity(I id) {
         super(id);
         setVersion(Versions.create());
-        setVisibility(Visibility.getDefaultInstance());
+        setVisible();
     }
 
     /**
@@ -74,7 +84,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * <ul>
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
      *   <li>The version number is set to zero.
-     *   <li>The {@link #visibility} field is set to the default instance.
+     *   <li>The {@link #lifecycleFlags} field is set to the default instance.
      * </ul>
      *
      * <p>This method cannot be called from within {@code Entity} constructor because
@@ -86,7 +96,12 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         super.init();
         injectState(getDefaultState());
         initVersion(Versions.create());
-        setVisibility(Visibility.getDefaultInstance());
+        setVisible();
+    }
+
+    private void setVisible() {
+        setLifecycleFlags(LifecycleFlags.getDefaultInstance());
+        lifecycleFlagsChanged = false;
     }
 
     /**
@@ -125,8 +140,19 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Sets status for the entity.
      */
-    void setVisibility(Visibility visibility) {
-        this.visibility = visibility;
+    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
+        if (!lifecycleFlags.equals(this.lifecycleFlags)) {
+            this.lifecycleFlags = lifecycleFlags;
+            this.lifecycleFlagsChanged = true;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean lifecycleFlagsChanged() {
+        return lifecycleFlagsChanged;
     }
 
     /**
@@ -179,12 +205,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         final int currentVersionNumber = versionNumber();
         final int newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
-            final String errMsg = format(
+            throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
                     "of the entity with the version number %d.",
-                    newVersionNumber, currentVersionNumber
-            );
-            throw new IllegalArgumentException(errMsg);
+                    newVersionNumber, currentVersionNumber);
         }
 
         setVersion(newVersion);
@@ -235,12 +259,13 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Obtains the entity status.
+     * {@inheritDoc}
      */
-    protected Visibility getVisibility() {
-        final Visibility result = this.visibility == null
-                ? Visibility.getDefaultInstance()
-                : this.visibility;
+    @Override
+    public LifecycleFlags getLifecycleFlags() {
+        final LifecycleFlags result = this.lifecycleFlags == null
+                ? LifecycleFlags.getDefaultInstance()
+                : this.lifecycleFlags;
         return result;
     }
 
@@ -250,16 +275,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
     protected boolean isArchived() {
-        return getVisibility().getArchived();
+        return getLifecycleFlags().getArchived();
     }
 
     /**
      * Sets {@code archived} status flag to the passed value.
      */
     protected void setArchived(boolean archived) {
-        setVisibility(getVisibility().toBuilder()
-                                     .setArchived(archived)
-                                     .build());
+        setLifecycleFlags(getLifecycleFlags().toBuilder()
+                                             .setArchived(archived)
+                                             .build());
     }
 
     /**
@@ -268,16 +293,16 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
     protected boolean isDeleted() {
-        return getVisibility().getDeleted();
+        return getLifecycleFlags().getDeleted();
     }
 
     /**
      * Sets {@code deleted} status flag to the passed value.
      */
     protected void setDeleted(boolean deleted) {
-        setVisibility(getVisibility().toBuilder()
-                                     .setDeleted(deleted)
-                                     .build());
+        setLifecycleFlags(getLifecycleFlags().toBuilder()
+                                             .setDeleted(deleted)
+                                             .build());
     }
 
     /**
@@ -285,11 +310,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
-     * @see #getVisibility()
-     * @see Visibility#getArchived()
+     * @see #getLifecycleFlags()
+     * @see LifecycleFlags#getArchived()
      */
     protected void checkNotArchived(Command modification) throws CannotModifyArchivedEntity {
-        if (getVisibility().getArchived()) {
+        if (getLifecycleFlags().getArchived()) {
             final String idStr = idToString(getId());
             throw new CannotModifyArchivedEntity(modification.getMessage(),
                                                  modification.getContext(),
@@ -302,11 +327,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
-     * @see #getVisibility()
-     * @see Visibility#getDeleted()
+     * @see #getLifecycleFlags()
+     * @see LifecycleFlags#getDeleted()
      */
     protected void checkNotDeleted(Command modification) throws CannotModifyDeletedEntity {
-        if (getVisibility().getDeleted()) {
+        if (getLifecycleFlags().getDeleted()) {
             final String idStr = idToString(getId());
             throw new CannotModifyDeletedEntity(modification.getMessage(),
                                                 modification.getContext(),
@@ -327,11 +352,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         }
         AbstractVersionableEntity<?, ?> that = (AbstractVersionableEntity<?, ?>) o;
         return Objects.equals(getVersion(), that.getVersion()) &&
-               Objects.equals(getVisibility(), that.getVisibility());
+               Objects.equals(getLifecycleFlags(), that.getLifecycleFlags());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getVersion(), getVisibility());
+        return Objects.hash(super.hashCode(), getVersion(), getLifecycleFlags());
     }
 }

@@ -21,12 +21,17 @@
 package org.spine3.util;
 
 import com.google.common.base.Throwables;
+import org.spine3.validate.ConversionError;
+import org.spine3.validate.IllegalConversionArgumentException;
+
+import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * Utility class for working with exceptions for cases that are not
- * supported by {@link com.google.common.base.Throwables Throwables}.
+ * covered by {@link com.google.common.base.Throwables Throwables} class from Guava.
  *
  * @author Alexander Yevsyukov
  */
@@ -54,8 +59,7 @@ public class Exceptions {
      * @return nothing ever
      * @throws UnsupportedOperationException always
      */
-    public static UnsupportedOperationException unsupported(String message)
-            throws UnsupportedOperationException {
+    public static UnsupportedOperationException unsupported(String message) {
         checkNotNull(message);
         throw new UnsupportedOperationException(message);
     }
@@ -80,7 +84,7 @@ public class Exceptions {
      * @throws UnsupportedOperationException always
      */
     @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
-    public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {
+    public static UnsupportedOperationException unsupported() {
         throw new UnsupportedOperationException();
     }
 
@@ -88,11 +92,76 @@ public class Exceptions {
      * Sets a throwable's cause as the cause of a {@link IllegalStateException} and throws it.
      *
      * @param throwable to wrap
-     * @return always throws an exception, the return type is for convenience
+     * @return nothing ever, always throws an exception, the return type is for convenience
+     * @throws IllegalStateException always
      */
     public static IllegalStateException wrappedCause(Throwable throwable) {
         checkNotNull(throwable);
         final Throwable cause = Throwables.getRootCause(throwable);
         throw new IllegalStateException(cause);
+    }
+
+    private static String formatMessage(String format, Object[] args) {
+        checkNotNull(format);
+        checkNotNull(args);
+        return format(Locale.ROOT, format, args);
+    }
+
+    /**
+     * Throws {@code IllegalArgumentException} with the formatted string.
+     *
+     * @param format the format string
+     * @param args formatting parameters
+     * @return nothing ever, always throws an exception. The return type is given for convenience.
+     * @throws IllegalArgumentException always
+     */
+    public static IllegalArgumentException newIllegalArgumentException(String format,
+                                                                       Object... args) {
+        final String errMsg = formatMessage(format, args);
+        throw new IllegalArgumentException(errMsg);
+    }
+
+    /**
+     * Throws {@code IllegalArgumentException} with the formatted string and the cause.
+     *
+     * @param cause the cause of the exception
+     * @param format the format string
+     * @param args formatting parameters
+     * @return nothing ever, always throws an exception. The return type is given for convenience.
+     * @throws IllegalArgumentException always
+     */
+    public static IllegalArgumentException newIllegalArgumentException(Throwable cause,
+                                                                       String format,
+                                                                       Object... args) {
+        checkNotNull(cause);
+        final String errMsg = formatMessage(format, args);
+        throw new IllegalArgumentException(errMsg, cause);
+    }
+
+    /**
+     * Throws {@code IllegalStateException} with the formatted string.
+     *
+     * @param format the format string
+     * @param args formatting parameters
+     * @return nothing ever, always throws an exception. The return type is given for convenience.
+     * @throws IllegalStateException always
+     */
+    public static IllegalStateException newIllegalStateException(String format,
+                                                                 Object... args) {
+        final String errMsg = formatMessage(format, args);
+        throw new IllegalStateException(errMsg);
+    }
+
+    /**
+     * Creates {@link IllegalConversionArgumentException}
+     * with specified exception message and throws it.
+     *
+     * @param exMessage a message for exception
+     * @return always throws an exception, the return type is for convenience
+     * @throws IllegalConversionArgumentException always
+     */
+    public static IllegalConversionArgumentException conversionArgumentException(String exMessage) {
+        checkNotNull(exMessage);
+        throw new IllegalConversionArgumentException(new ConversionError(exMessage));
     }
 }

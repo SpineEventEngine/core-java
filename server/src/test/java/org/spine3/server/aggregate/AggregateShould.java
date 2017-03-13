@@ -33,6 +33,7 @@ import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.test.TimeTests;
@@ -345,7 +346,7 @@ public class AggregateShould {
         anotherAggregate.restore(snapshotNewProject);
         assertEquals(aggregate.getState(), anotherAggregate.getState());
         assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
-        assertEquals(aggregate.getVisibility(), anotherAggregate.getVisibility());
+        assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
@@ -509,10 +510,18 @@ public class AggregateShould {
         private final boolean brokenHandler;
         private final boolean brokenApplier;
 
-        public FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
+        private FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
             super(id);
             this.brokenHandler = brokenHandler;
             this.brokenApplier = brokenApplier;
+        }
+
+        /**
+         * This method attempts to call {@link #setState(Message, Version) setState()}
+         * directly, which should result in {@link IllegalStateException}.
+         */
+        void tryToUpdateStateDirectly() {
+            setState(Project.getDefaultInstance(), Version.getDefaultInstance());
         }
 
         @Assign
@@ -586,6 +595,15 @@ public class AggregateShould {
     }
 
     @Test(expected = IllegalStateException.class)
+    public void reject_direct_calls_to_setState() {
+        final FaultyAggregate faultyAggregate =
+                new FaultyAggregate(ID, false, false);
+
+        // This should throw ISE.
+        faultyAggregate.tryToUpdateStateDirectly();
+    }
+
+    @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new TestAggregateWithIdInteger(100).getBuilder();
     }
@@ -619,10 +637,6 @@ public class AggregateShould {
     }
 
     private static List<Event> getProjectEvents() {
-
-        //TODO:2017-02-19:alexander.yevsyukov: Use TestCommandFactory instead of
-        // ”re-using” EVENT_CONTEXT.
-        // We need to have increasing version numbers in event contexts.
 
         final List<Event> events = ImmutableList.<Event>builder()
                 .add(projectCreated(ID, EVENT_CONTEXT.toBuilder()

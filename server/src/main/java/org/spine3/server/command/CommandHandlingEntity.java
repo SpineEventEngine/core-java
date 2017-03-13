@@ -58,7 +58,8 @@ import static org.spine3.base.Identifiers.idToAny;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message> extends AbstractVersionableEntity<I, S> {
+public abstract class CommandHandlingEntity<I, S extends Message>
+        extends AbstractVersionableEntity<I, S> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;
@@ -83,7 +84,10 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandContext commandContext) {
-        return CommandHandlerMethod.createEventContext(getProducerId(), getVersion(), commandContext);
+        final EventContext result = CommandHandlerMethod.createEventContext(getProducerId(),
+                                                                            getVersion(),
+                                                                            commandContext);
+        return result;
     }
 
     /**
@@ -154,7 +158,8 @@ public abstract class CommandHandlingEntity<I, S extends Message> extends Abstra
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value different
+     * than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected value

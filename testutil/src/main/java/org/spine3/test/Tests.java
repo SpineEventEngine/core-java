@@ -32,6 +32,7 @@ import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
@@ -231,5 +232,22 @@ public class Tests {
      */
     public static Version newVersionWithNumber(int number) {
         return Versions.newVersion(number, Timestamps2.getCurrentTime());
+    }
+
+    /**
+     * Creates {@code Visibility} with archived flag set to {@code true}.
+     */
+    public static LifecycleFlags archived() {
+        return LifecycleFlags.newBuilder()
+                             .setArchived(true)
+                             .build();
+    }
+    /**
+     * Creates {@code Visibility} with deleted flag set to {@code true}.
+     */
+    public static LifecycleFlags deleted() {
+        return LifecycleFlags.newBuilder()
+                             .setDeleted(true)
+                             .build();
     }
 }
