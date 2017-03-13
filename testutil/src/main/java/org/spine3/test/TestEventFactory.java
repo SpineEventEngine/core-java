@@ -34,7 +34,7 @@ import org.spine3.server.reflect.CommandHandlerMethod;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * A factory for creating tests instances of {@link org.spine3.base.Event Event}s.
+ * A factory for creating tests instances of {@link Event}s.
  *
  * @author Alexander Yevsyukov
  */
