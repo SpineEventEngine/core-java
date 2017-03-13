@@ -24,6 +24,8 @@ import com.google.protobuf.Any;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Dmytro Dashenkov.
  */
@@ -39,5 +41,15 @@ public class Messagifiers {
         final Messagifier<I> converter = Messagifier.from(object);
         final Any packed = converter.pack();
         return packed;
+    }
+
+    public static boolean isSupported(@Nullable Object object) {
+        return object != null && isSupported(object.getClass());
+    }
+
+    public static boolean isSupported(Class<?> cls) {
+        checkNotNull(cls);
+        final Messagifier.Type type = Messagifier.Type.getTypeOrNull(cls);
+        return type != null;
     }
 }
