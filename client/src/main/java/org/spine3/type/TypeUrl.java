@@ -42,7 +42,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -59,11 +58,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 public final class TypeUrl {
 
     private static final String SEPARATOR = "/";
-    private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
-
-    private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN =
-            Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
+    private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
 
     @VisibleForTesting
     static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
@@ -144,7 +139,7 @@ public final class TypeUrl {
     }
 
     private static TypeUrl ofTypeUrl(String typeUrl) {
-        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
+        final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
         if (parts.length != 2 || parts[0].trim()
                                          .isEmpty() || parts[1].trim()
                                                                .isEmpty()) {
@@ -251,21 +246,6 @@ public final class TypeUrl {
      */
     public String getTypeName() {
         return typeName;
-    }
-
-    //TODO:2017-03-13:alexander.yevsyukov: Move to TypeName
-    /**
-     * Returns the unqualified name of the Protobuf type, for example: {@code StringValue}.
-     */
-    public String getSimpleName() {
-        if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
-            final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
-            checkState(parts.length > 0, "Invalid type name: " + typeName);
-            final String result = parts[parts.length - 1];
-            return result;
-        } else {
-            return typeName;
-        }
     }
 
     @Override

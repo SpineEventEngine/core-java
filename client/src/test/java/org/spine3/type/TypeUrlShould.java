@@ -35,7 +35,6 @@ import org.spine3.client.CommandFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
-import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,9 +46,11 @@ import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 public class TypeUrlShould {
 
-    private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor().getFullName();
+    private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor()
+                                                                    .getFullName();
 
-    private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
+    private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX,
+                                                                           STRING_VALUE_TYPE_NAME);
 
     private final TypeUrl stringValueTypeUrl = TypeUrl.from(StringValue.getDescriptor());
 
@@ -105,22 +106,6 @@ public class TypeUrlShould {
     }
 
     @Test
-    public void return_simple_type_name() {
-        assertEquals(StringValue.class.getSimpleName(), stringValueTypeUrl.getSimpleName());
-    }
-
-    @Test
-    public void return_simple_name_if_no_package() {
-        // A msg type without Protobuf package
-        final String name = IfMissingOption.class.getSimpleName();
-        final TypeUrl typeUrl = TypeUrl.of(name);
-
-        final String actual = typeUrl.getSimpleName();
-
-        assertEquals(name, actual);
-    }
-
-    @Test
     public void create_by_descriptor_of_google_msg() {
         final TypeUrl typeUrl = TypeUrl.from(StringValue.getDescriptor());
 
@@ -147,7 +132,8 @@ public class TypeUrlShould {
         assertCreatesTypeUrlFromEnum(CommandValidationError.getDescriptor(), SPINE_TYPE_URL_PREFIX);
     }
 
-    private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor, String typeUrlPrefix) {
+    private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor,
+                                                     String typeUrlPrefix) {
         final String expected = composeTypeUrl(typeUrlPrefix, enumDescriptor.getFullName());
 
         final TypeUrl typeUrl = TypeUrl.from(enumDescriptor);
@@ -177,7 +163,8 @@ public class TypeUrlShould {
         assertEquals(STRING_VALUE_TYPE_URL_STR, typeUrl.value());
         assertEquals(GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
         assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
-        assertEquals(StringValue.class.getSimpleName(), typeUrl.getSimpleName());
+        assertEquals(StringValue.class.getSimpleName(), TypeName.from(typeUrl)
+                                                                .getSimpleName());
     }
 
     @Test

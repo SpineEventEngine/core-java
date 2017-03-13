@@ -23,17 +23,15 @@ package org.spine3.server.command;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.storage.AbstractStorage;
-import org.spine3.type.TypeUrl;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -187,9 +185,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
                                     ? generatedCommandId
                                     : context.getCommandId();
 
-        final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeUrl.of(commandMessage)
-                                          .getSimpleName();
+        final String commandType = TypeName.ofCommand(command)
+                                           .getSimpleName();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

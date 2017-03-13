@@ -25,7 +25,10 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 
+import java.util.regex.Pattern;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Utility class for obtaining a type name from a {@code Message}.
@@ -33,6 +36,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class TypeName extends StringTypeValue {
+
+    private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN =
+            Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
 
     private TypeName(String value) {
         super(value);
@@ -90,5 +97,29 @@ public class TypeName extends StringTypeValue {
         final String typeName = TypeUrl.from(descriptor)
                                        .getTypeName();
         return create(typeName);
+    }
+
+    /**
+     * Creates instance from the passed type URL.
+     */
+    public static TypeName from(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
+
+        return create(typeUrl.getTypeName());
+    }
+
+    /**
+     * Returns the unqualified name of the Protobuf type, for example: {@code StringValue}.
+     */
+    public String getSimpleName() {
+        final String typeName = value();
+        if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
+            final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
+            checkState(parts.length > 0, "Invalid type name: " + typeName);
+            final String result = parts[parts.length - 1];
+            return result;
+        } else {
+            return typeName;
+        }
     }
 }

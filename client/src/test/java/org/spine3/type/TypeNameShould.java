@@ -22,8 +22,12 @@ package org.spine3.type;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.validate.internal.IfMissingOption;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Provides only class-level tests.
@@ -40,5 +44,23 @@ public class TypeNameShould {
                 .setDefault(Descriptors.Descriptor.class, Command.getDefaultInstance()
                                                                  .getDescriptorForType())
                 .testAllPublicStaticMethods(TypeName.class);
+    }
+
+    @Test
+    public void return_simple_type_name() {
+        assertEquals(StringValue.class.getSimpleName(), TypeName.of(StringValue.class)
+                                                                .getSimpleName());
+    }
+
+    @Test
+    public void return_simple_name_if_no_package() {
+        // A msg type without Protobuf package
+        final String name = IfMissingOption.class.getSimpleName();
+        final TypeUrl typeUrl = TypeUrl.of(name);
+
+        final String actual = TypeName.from(typeUrl)
+                                      .getSimpleName();
+
+        assertEquals(name, actual);
     }
 }
