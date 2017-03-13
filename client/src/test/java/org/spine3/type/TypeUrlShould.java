@@ -20,12 +20,14 @@
 
 package org.spine3.type;
 
+import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Field;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
@@ -176,5 +178,13 @@ public class TypeUrlShould {
         assertEquals(GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
         assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
         assertEquals(StringValue.class.getSimpleName(), typeUrl.getSimpleName());
+    }
+
+    @Test
+    public void use_fields_in_equality() {
+        new EqualsTester()
+                .addEqualityGroup(TypeUrl.of(StringValue.class), TypeUrl.of(StringValue.class))
+                .addEqualityGroup(TypeUrl.of(Timestamp.class))
+                .testEquals();
     }
 }

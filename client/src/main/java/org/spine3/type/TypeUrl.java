@@ -38,6 +38,7 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
 import org.spine3.type.error.UnknownTypeException;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,7 +56,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * @see Any#getTypeUrl()
  * @see Descriptors.FileDescriptor#getFullName()
  */
-public final class TypeUrl extends StringTypeValue {
+public final class TypeUrl {
 
     private static final String SEPARATOR = "/";
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
@@ -78,7 +79,6 @@ public final class TypeUrl extends StringTypeValue {
     private final String typeName;
 
     private TypeUrl(String prefix, String typeName) {
-        super(composeTypeUrl(prefix, typeName));
         this.prefix = checkNotEmptyOrBlank(prefix, "typeUrlPrefix");
         this.typeName = checkNotEmptyOrBlank(typeName, "typeName");
     }
@@ -91,8 +91,8 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     @VisibleForTesting
-    static String composeTypeUrl(String typeUrlPrefix, String typeName) {
-        final String url = typeUrlPrefix + SEPARATOR + typeName;
+    static String composeTypeUrl(String prefix, String typeName) {
+        final String url = prefix + SEPARATOR + typeName;
         return url;
     }
 
@@ -145,9 +145,12 @@ public final class TypeUrl extends StringTypeValue {
 
     private static TypeUrl ofTypeUrl(String typeUrl) {
         final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
-        if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
+        if (parts.length != 2 || parts[0].trim()
+                                         .isEmpty() || parts[1].trim()
+                                                               .isEmpty()) {
             throw new IllegalArgumentException(
-                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
+                    new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
+                                                       + typeUrl));
         }
         return create(parts[0], parts[1]);
     }
@@ -263,5 +266,33 @@ public final class TypeUrl extends StringTypeValue {
         } else {
             return typeName;
         }
+    }
+
+    @Override
+    public String toString() {
+        return value();
+    }
+
+    public String value() {
+        final String result = composeTypeUrl(prefix, typeName);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TypeUrl)) {
+            return false;
+        }
+        TypeUrl typeUrl = (TypeUrl) o;
+        return Objects.equals(prefix, typeUrl.prefix) &&
+               Objects.equals(typeName, typeUrl.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(prefix, typeName);
     }
 }
