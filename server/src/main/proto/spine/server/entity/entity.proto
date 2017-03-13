@@ -49,6 +49,9 @@ message EntityRecord {
 
     // The lifecycle flags of the entity.
     LifecycleFlags lifecycle_flags = 4;
+
+    // Custom fields of the entity to store in the storage.
+    StorageFields storage_fields = 5;
 }
 
 // The lifecycle flags of an entity.
@@ -71,4 +74,18 @@ message LifecycleFlags {
     // marked with this flag.
     //
     bool deleted = 2;
+}
+
+// Custom fields to store in the storage.
+//
+// These fields should be searchable in an effiefient way.
+//
+message StorageFields {
+    option (SPI_type) = true;
+
+    // The ID of the entity.
+    google.protobuf.Any entity_id = 1;
+
+    // A map of the field names to the field values.
+    map<string, google.protobuf.Any> fields = 2;
 }
