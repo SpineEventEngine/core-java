@@ -84,7 +84,7 @@ public class StorageFieldsExtractor {
                 }
             }
         }
-        final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(null);
+        final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(getters);
         fieldGenerators.put(entityClass, generator);
         return new StorageFieldsGenerator<>(null);
     }
