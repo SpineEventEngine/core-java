@@ -58,7 +58,7 @@ public class IdentifiersShould {
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_object_of_unsupported_class_passed() {
         //noinspection UnnecessaryBoxing
-        idToString(Boolean.valueOf(true));
+        idToString(Character.valueOf('x'));
     }
 
     @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
@@ -80,7 +80,7 @@ public class IdentifiersShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_convert_unsupported_ID_type_to_Any() {
         //noinspection UnnecessaryBoxing
-        idToAny(Boolean.valueOf(false));
+        idToAny(Short.valueOf((short) 0));
     }
 
     @Test

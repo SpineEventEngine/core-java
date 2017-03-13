@@ -344,12 +344,20 @@ class Messagifier<I> {
         }
 
         static <I> Type getType(Class<I> cls) {
+            final Type type = getTypeOrNull(cls);
+            if (type == null) {
+                throw unsupportedClass(cls);
+            }
+            return type;
+        }
+
+        static <I> Type getTypeOrNull(Class<I> cls) {
             for (Type type : values()) {
                 if (type.matchClass(cls)) {
                     return type;
                 }
             }
-            throw unsupportedClass(cls);
+            return null;
         }
 
         static Object unpack(Any any) {
@@ -365,13 +373,13 @@ class Messagifier<I> {
             throw unsupported(unpacked);
         }
 
-        static <I> IllegalArgumentException unsupported(I id) {
-            return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
+        static <I> IllegalArgumentException unsupported(I object) {
+            return newIllegalArgumentException("Object of unsupported type encountered: %s", object);
         }
 
-        private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return newIllegalArgumentException("Unsupported ID class encountered: %s",
-                                               idClass.getName());
+        private static <I> IllegalArgumentException unsupportedClass(Class<I> cls) {
+            return newIllegalArgumentException("Unsupported class encountered: %s",
+                                               cls.getName());
         }
     }
 }
