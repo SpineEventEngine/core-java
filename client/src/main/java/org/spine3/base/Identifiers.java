@@ -83,7 +83,7 @@ public class Identifiers {
      */
     public static <I> void checkSupported(Class<I> idClass) {
         checkNotNull(idClass);
-        Identifier.Type.getType(idClass);
+        Messagifier.Type.getType(idClass);
     }
 
     /**
@@ -107,9 +107,7 @@ public class Identifiers {
      */
     public static <I> Any idToAny(I id) {
         checkNotNull(id);
-        final Identifier<I> identifier = Identifier.from(id);
-        final Any anyId = identifier.pack();
-        return anyId;
+        return Messagifiers.toAny(id);
     }
 
     /**
@@ -128,7 +126,7 @@ public class Identifiers {
      */
     public static Object idFromAny(Any any) {
         checkNotNull(any);
-        final Object result = Identifier.Type.unpack(any);
+        final Object result = Messagifier.Type.unpack(any);
         return result;
     }
 
@@ -149,7 +147,7 @@ public class Identifiers {
     @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
         checkNotNull(idClass);
-        return Identifier.getDefaultValue(idClass);
+        return Messagifier.getDefaultValue(idClass);
     }
 
     /**
@@ -173,12 +171,12 @@ public class Identifiers {
             return NULL_ID;
         }
 
-        final Identifier<?> identifier;
+        final Messagifier<?> identifier;
         if (id instanceof Any) {
             final Message unpacked = unpack((Any) id);
-            identifier = Identifier.fromMessage(unpacked);
+            identifier = Messagifier.fromMessage(unpacked);
         } else {
-            identifier = Identifier.from(id);
+            identifier = Messagifier.from(id);
         }
 
         final String result = identifier.toString();
