@@ -61,7 +61,7 @@ import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.type.error.UnknownTypeException;
 
 import javax.annotation.Nullable;

@@ -29,6 +29,6 @@
 @ParametersAreNonnullByDefault
 package org.spine3.server.reflect;
 
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

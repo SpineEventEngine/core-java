@@ -20,7 +20,7 @@
 
 package org.spine3.server.event.storage;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Event;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.event.EventStorage;

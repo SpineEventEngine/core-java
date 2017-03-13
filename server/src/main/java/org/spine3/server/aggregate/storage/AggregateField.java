@@ -20,7 +20,7 @@
 
 package org.spine3.server.aggregate.storage;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.storage.StorageField;

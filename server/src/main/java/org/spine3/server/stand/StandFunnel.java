@@ -19,7 +19,7 @@
  */
 package org.spine3.server.stand;
 
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.server.entity.VersionableEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;

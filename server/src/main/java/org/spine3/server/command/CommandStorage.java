@@ -23,7 +23,7 @@ package org.spine3.server.command;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;

@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.FieldPath;
 import org.spine3.validate.ConstraintViolation;
 

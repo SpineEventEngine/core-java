@@ -19,12 +19,11 @@
  */
 
 /**
- * This package contains gRPC-based implementation of client-server communication.
- *
- * <p>This package is not a part of public API of the framework.
+ * This package contains common annotation types for Java code and
+ * generated classes for annotations of Proto types.
  */
 
-@Internal
-package org.spine3.client.grpc;
+@ParametersAreNonnullByDefault
+package org.spine3.annotations;
 
-import org.spine3.annotations.Internal;
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,7 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
