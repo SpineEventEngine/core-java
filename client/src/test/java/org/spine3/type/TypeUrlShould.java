@@ -198,8 +198,8 @@ public class TypeUrlShould {
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_for_unknown_Java_class() {
-        TypeUrl.of("unknown/JavaClass")
-               .toMessageClass();
+        final TypeUrl url = TypeUrl.of("unknown/JavaClass");
+        url.toMessageClass();
     }
 
     @Test

@@ -231,8 +231,7 @@ public final class TypeUrl {
      *         there is no corresponding Java class
      */
     public <T extends Message> Class<T> toMessageClass() {
-        final TypeUrl typeUrl = this;
-        return KnownTypes.getClass(typeUrl);
+        return KnownTypes.getClass(this);
     }
 
     /**
