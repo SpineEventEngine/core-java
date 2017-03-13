@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefields;
+package org.spine3.server.entity.storagefield;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;

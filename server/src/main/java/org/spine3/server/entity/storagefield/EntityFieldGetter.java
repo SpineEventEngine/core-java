@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefields;
+package org.spine3.server.entity.storagefield;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -68,6 +67,9 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
     }
 
     private void ensureGetter() {
+        if (getter != null) {
+            return;
+        }
         lookupGetter();
         checkState(getter != null,
                    "Getter for property %s was not found.",
@@ -85,14 +87,7 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
 
     private void initialize() {
         checkNotNull(getter);
-        final Annotation[] annotations = getter.getDeclaredAnnotations();
-        for (Annotation annotation : annotations) {
-            if (annotation.annotationType()
-                          .equals(Nullable.class)) {
-                nullable = true;
-                return;
-            }
-        }
+        nullable = getter.isAnnotationPresent(Nullable.class);
     }
 
     private static Logger log() {
