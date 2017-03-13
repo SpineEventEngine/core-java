@@ -71,14 +71,6 @@ public final class CommandClass extends MessageClass {
         return result;
     }
 
-    /**
-     * Obtains Java class of the command message or a {@link Command} instance
-     * containing the message of interest.
-     */
-    public static Class<? extends Message> valueOf(Message command) {
-        return of(command).value();
-    }
-
     /** Creates immutable set of {@code CommandClass} from the passed set. */
     public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
         final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
