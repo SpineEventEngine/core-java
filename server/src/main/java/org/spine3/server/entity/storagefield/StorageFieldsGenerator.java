@@ -20,35 +20,30 @@
 
 package org.spine3.server.entity.storagefield;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.protobuf.Any;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Dmytro Dashenkov.
  */
-class StorageFieldsGenerator<E extends Entity<?, ?>> implements Function<E, StorageFields> {
+class StorageFieldsGenerator<E extends Entity<?, ?>> {
 
     private final Collection<EntityFieldGetter<E>> descriptors;
 
     StorageFieldsGenerator(Collection<EntityFieldGetter<E>> descriptors) {
-        this.descriptors = Preconditions.checkNotNull(descriptors);
+        this.descriptors = checkNotNull(descriptors);
     }
 
-    @Override
-    public StorageFields apply(@Nullable E entity) {
-        if (entity == null) {
-            return StorageFields.getDefaultInstance();
-        }
-
+    public StorageFields generate(E entity) {
+        checkNotNull(entity);
         final Map<String, Any> properties = new HashMap<>(descriptors.size());
         for (EntityFieldGetter<E> descriptor : descriptors) {
             final String name = descriptor.getName();

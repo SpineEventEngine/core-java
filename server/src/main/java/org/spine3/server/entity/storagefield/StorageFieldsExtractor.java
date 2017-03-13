@@ -59,7 +59,7 @@ public class StorageFieldsExtractor {
         if (fieldsGenerator == null) {
             fieldsGenerator = newGenerator(entityClass);
         }
-        final StorageFields fields = fieldsGenerator.apply(entity);
+        final StorageFields fields = fieldsGenerator.generate(entity);
         return fields;
     }
 
