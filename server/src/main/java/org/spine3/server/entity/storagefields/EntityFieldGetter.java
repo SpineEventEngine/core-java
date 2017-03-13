@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity.storagefields;
 
-import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
@@ -37,9 +36,6 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov.
  */
 class EntityFieldGetter<E extends Entity<?, ?>> {
-
-    private static final String GETTER_PREFIX = "get";
-    private static final String BOOLEAN_GETTER_PREFIX = "is";
 
     private final String name;
     private final Class<E> entityClass;
@@ -72,31 +68,18 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
     }
 
     private void ensureGetter() {
-        if (getter != null) {
-            return;
-        }
-        lookupGetter(getterName());
-        if (getter != null) {
-            initialize();
-            return;
-        }
-        lookupGetter(booleanGetterName());
+        lookupGetter();
         checkState(getter != null,
                    "Getter for property %s was not found.",
                    name);
         initialize();
     }
 
-    private void lookupGetter(String methodName) {
+    private void lookupGetter() {
         checkState(getter == null, "Getter is already initialized.");
         try {
-            getter = entityClass.getDeclaredMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            log().debug(Throwables.getStackTraceAsString(e));
-            try {
-                getter = entityClass.getMethod(methodName);
-            } catch (NoSuchMethodException ignored) {
-            }
+            getter = entityClass.getDeclaredMethod(name);
+        } catch (NoSuchMethodException ignored) {
         }
     }
 
@@ -110,17 +93,6 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
                 return;
             }
         }
-    }
-
-    private String getterName() {
-        // TODO:2017-03-13:dmytro.dashenkov: Improve performance through chars and binary operations.
-        return GETTER_PREFIX + name.substring(0, 1)
-                                   .toUpperCase() + name.substring(1);
-    }
-
-    private String booleanGetterName() {
-        return BOOLEAN_GETTER_PREFIX + name.substring(0, 1)
-                                           .toUpperCase() + name.substring(1);
     }
 
     private static Logger log() {
