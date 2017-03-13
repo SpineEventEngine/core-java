@@ -18,13 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefields;
+package org.spine3.server.entity.storagefield;
 
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,6 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov.
  */
 public class StorageFieldsExtractor {
+
+    private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
+    private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
     private static final Map<
             Class<? extends Entity<?, ?>>,
@@ -58,7 +65,25 @@ public class StorageFieldsExtractor {
 
     private static <E extends Entity<?, ?>> StorageFieldsGenerator<E> newGenerator(
             Class<E> entityClass) {
-        
+        final Collection<EntityFieldGetter<E>> getters = new LinkedList<>();
+        final Method[] methods = entityClass.getDeclaredMethods();
+        for (Method method : methods) {
+            final String methodName = method.getName();
+            final boolean returnTypeMatches = !method.getReturnType()
+                                                     .equals(Void.TYPE);
+            final boolean accessMatches = method.isAccessible();
+            if (accessMatches && returnTypeMatches) {
+                // Regex operations are not fast enough to check all the methods.
+                // Instead, we check the method's access level and return type, and then the name.
+                final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
+                                                          .matches();
+                if (nameMatches) {
+                    final EntityFieldGetter<E> getter
+                            = new EntityFieldGetter<>(methodName, entityClass);
+                    getters.add(getter);
+                }
+            }
+        }
         final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(null);
         fieldGenerators.put(entityClass, generator);
         return new StorageFieldsGenerator<>(null);
