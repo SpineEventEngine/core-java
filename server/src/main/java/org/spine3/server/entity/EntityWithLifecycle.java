@@ -35,8 +35,6 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     /**
      * Obtains the current visibility status.
      */
-    @Deprecated
-    // TODO:2017-03-13:dmytro.dashenkov: Delete.
     LifecycleFlags getLifecycleFlags();
 
     boolean isArchived();
