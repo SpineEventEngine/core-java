@@ -36,8 +36,8 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.type.error.UnknownTypeException;
 
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -217,6 +217,26 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     /**
+     * Returns a message {@link Class} corresponding to the Protobuf type represented
+     * by this type URL.
+     *
+     * @return the message class
+     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
+     *         there is no corresponding Java class
+     */
+    public <T extends Message> Class<T> toMessageClass() {
+        checkNotNull(this);
+        final ClassName className = KnownTypes.getClassName(this);
+        try {
+            @SuppressWarnings("unchecked") // the client considers this message is of this class
+            final Class<T> result = (Class<T>) Class.forName(className.value());
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw new UnknownTypeException(getTypeName(), e);
+        }
+    }
+
+    /**
      * Obtains the prefix of the type URL.
      */
     public String getPrefix() {
@@ -230,6 +250,7 @@ public final class TypeUrl extends StringTypeValue {
         return typeName;
     }
 
+    //TODO:2017-03-13:alexander.yevsyukov: Move to TypeName
     /**
      * Returns the unqualified name of the Protobuf type, for example: {@code StringValue}.
      */
@@ -242,22 +263,5 @@ public final class TypeUrl extends StringTypeValue {
         } else {
             return typeName;
         }
-    }
-
-    /**
-     * Retrieves all the type URLs that belong to the given package or its subpackages.
-     *
-     * @param packageName proto package name
-     * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
-     */
-    public static Set<TypeUrl> getAllFromPackage(String packageName) {
-        return KnownTypes.getTypesFromPackage(packageName);
-    }
-
-    /**
-     * Obtains all type URLs known to the application.
-     */
-    public static Set<TypeUrl> getAll() {
-        return KnownTypes.getTypeUrls();
     }
 }

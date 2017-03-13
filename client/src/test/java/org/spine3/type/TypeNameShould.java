@@ -25,8 +25,6 @@ import com.google.protobuf.Descriptors;
 import org.junit.Test;
 import org.spine3.base.Command;
 
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-
 /**
  * Provides only class-level tests.
  *
@@ -34,11 +32,6 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
  * its own set of tests.
  */
 public class TypeNameShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(TypeName.class);
-    }
 
     @Test
     public void pass_the_null_tolerance_check() {

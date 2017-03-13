@@ -29,7 +29,6 @@ import org.spine3.type.error.UnexpectedTypeException;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
  * Utilities for packing messages into {@link Any} and unpacking them.
@@ -80,7 +79,7 @@ public class AnyPacker {
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
         final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
-        final Class<T> messageClass = toMessageClass(typeUrl);
+        final Class<T> messageClass = typeUrl.toMessageClass();
         return unpack(any, messageClass);
     }
 

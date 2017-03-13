@@ -188,7 +188,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
                                     : context.getCommandId();
 
         final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeUrl.of(commandMessage).getSimpleName();
+        final String commandType = TypeUrl.of(commandMessage)
+                                          .getSimpleName();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

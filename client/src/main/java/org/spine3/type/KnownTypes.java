@@ -123,7 +123,7 @@ public class KnownTypes {
     /**
      * Retrieves Protobuf type URLs known to the application.
      */
-    static ImmutableSet<TypeUrl> getTypeUrls() {
+    public static Set<TypeUrl> getAllUrls() {
         final Set<TypeUrl> result = knownTypes.keySet();
         return ImmutableSet.copyOf(result);
     }
@@ -181,7 +181,7 @@ public class KnownTypes {
      * @param packageName proto package name
      * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
      */
-    static Set<TypeUrl> getTypesFromPackage(final String packageName) {
+    public static Set<TypeUrl> getAllFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
         final Collection<TypeUrl> resultCollection = Collections2.filter(
                 knownTypeUrls, new Predicate<TypeUrl>() {

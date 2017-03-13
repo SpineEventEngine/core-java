@@ -56,7 +56,6 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
-import static org.spine3.protobuf.Messages.toMessageClass;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -110,10 +109,12 @@ public class EventEnricher {
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
-            final Class<Message> enrichmentClass = toMessageClass(TypeUrl.of(enrichmentType));
+            final Class<Message> enrichmentClass = TypeUrl.of(enrichmentType)
+                                                          .toMessageClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
-                final Class<Message> eventClass = toMessageClass(TypeUrl.of(eventType));
+                final Class<Message> eventClass = TypeUrl.of(eventType)
+                                                         .toMessageClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
                                                          eventClass,
