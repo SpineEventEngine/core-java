@@ -31,16 +31,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Dmytro Dashenkov.
  */
-public class StorageFieldsExtracter {
+public class StorageFieldsExtractor {
 
-    private static final Map<Class<? extends Entity<?, ?>>, StorageFieldsGenerator> fieldGenerators
+    private static final Map<
+            Class<? extends Entity<?, ?>>,
+            StorageFieldsGenerator<? extends Entity<?, ?>>> fieldGenerators
             = new ConcurrentHashMap<>();
 
-    public static StorageFields extract(Entity<?, ?> entity) {
+    private StorageFieldsExtractor() {
+    }
+
+    @SuppressWarnings("unchecked") // Reflection - type param conflict
+    public static <E extends Entity<?, ?>> StorageFields extract(E entity) {
         checkNotNull(entity);
-        final Class<? extends Entity> entityClass = entity.getClass();
-        @SuppressWarnings("SuspiciousMethodCalls") // Generic parameters mismatch
-        StorageFieldsGenerator fieldsGenerator = fieldGenerators.get(entityClass);
+        final Class<E> entityClass = (Class<E>) entity.getClass();
+
+        StorageFieldsGenerator<E> fieldsGenerator =
+                (StorageFieldsGenerator<E>) fieldGenerators.get(entityClass);
+
         if (fieldsGenerator == null) {
             fieldsGenerator = newGenerator(entityClass);
         }
@@ -48,7 +56,11 @@ public class StorageFieldsExtracter {
         return fields;
     }
 
-    private static StorageFieldsGenerator newGenerator(Class<? extends Entity> entityClass) {
-        return new StorageFieldsGenerator();
+    private static <E extends Entity<?, ?>> StorageFieldsGenerator<E> newGenerator(
+            Class<E> entityClass) {
+        
+        final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(null);
+        fieldGenerators.put(entityClass, generator);
+        return new StorageFieldsGenerator<>(null);
     }
 }

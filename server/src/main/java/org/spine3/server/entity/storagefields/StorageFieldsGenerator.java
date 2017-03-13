@@ -21,18 +21,49 @@
 package org.spine3.server.entity.storagefields;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.Any;
+import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Dmytro Dashenkov.
  */
-class StorageFieldsGenerator implements Function<Entity<?, ?>, StorageFields> {
+class StorageFieldsGenerator<E extends Entity<?, ?>> implements Function<E, StorageFields> {
+
+    private final Collection<EntityFieldGetter<E>> descriptors;
+
+    StorageFieldsGenerator(Collection<EntityFieldGetter<E>> descriptors) {
+        this.descriptors = Preconditions.checkNotNull(descriptors);
+    }
 
     @Override
-    public StorageFields apply(@Nullable Entity<?, ?> input) {
-        return StorageFields.getDefaultInstance();
+    public StorageFields apply(@Nullable E entity) {
+        if (entity == null) {
+            return StorageFields.getDefaultInstance();
+        }
+
+        final Map<String, Any> properties = new HashMap<>(descriptors.size());
+        for (EntityFieldGetter<E> descriptor : descriptors) {
+            final String name = descriptor.getName();
+            final Object value = descriptor.get(entity);
+            // TODO:2017-03-13:dmytro.dashenkov: Replace Identifiers with custom wider logic.
+            final Any anyValue = Identifiers.idToAny(value);
+            properties.put(name, anyValue);
+        }
+        final Object genericId = entity.getId();
+        final Any id = Identifiers.idToAny(genericId);
+
+        final StorageFields fields = StorageFields.newBuilder()
+                                                  .setEntityId(id)
+                                                  .putAllFields(properties)
+                                                  .build();
+        return fields;
     }
 }
