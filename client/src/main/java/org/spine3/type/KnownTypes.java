@@ -46,6 +46,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.ListValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.Method;
 import com.google.protobuf.Mixin;
 import com.google.protobuf.NullValue;
@@ -72,6 +73,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -214,13 +216,8 @@ public class KnownTypes {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkArgument(typeUrl != null, "Given type name is invalid");
 
-        final ClassName className = getClassName(typeUrl);
-        final Class<?> cls;
-        try {
-            cls = Class.forName(className.value());
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
+        final Class<?> cls = getClass(typeUrl);
+
         final Descriptors.Descriptor descriptor;
         try {
             final java.lang.reflect.Method descriptorGetter =
@@ -241,6 +238,24 @@ public class KnownTypes {
             builder.put(typeUrl.getTypeName(), typeUrl);
         }
         return builder.build();
+    }
+
+    /**
+     * Obtains a Java class for the passed type URL.
+     *
+     * @throws UnknownTypeException if there is no Java class for the passed type URL
+     */
+    @VisibleForTesting
+    public static <T extends Message> Class<T> getClass(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
+        final ClassName className = getClassName(typeUrl);
+        try {
+            @SuppressWarnings("unchecked") // the client considers this message is of this class
+            final Class<T> result = (Class<T>) Class.forName(className.value());
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw new UnknownTypeException(typeUrl.getTypeName(), e);
+        }
     }
 
     /** The helper class for building internal immutable typeUrl-to-JavaClass map. */

@@ -186,7 +186,8 @@ public class FieldMasks {
         return result;
     }
 
-    @SuppressWarnings("unchecked")      // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
+    @SuppressWarnings("unchecked")
+        // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;

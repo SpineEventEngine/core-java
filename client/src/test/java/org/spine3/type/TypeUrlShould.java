@@ -22,18 +22,21 @@ package org.spine3.type;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Field;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.client.CommandFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
+import org.spine3.type.error.UnknownTypeException;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
@@ -174,6 +177,7 @@ public class TypeUrlShould {
         new EqualsTester()
                 .addEqualityGroup(TypeUrl.of(StringValue.class), TypeUrl.of(StringValue.class))
                 .addEqualityGroup(TypeUrl.of(Timestamp.class))
+                .addEqualityGroup(TypeUrl.of(UInt32Value.class))
                 .testEquals();
     }
 
@@ -190,5 +194,24 @@ public class TypeUrlShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_malformed_type_URL() {
         TypeUrl.of("prefix/prefix/type.Name");
+    }
+
+    @Test(expected = UnknownTypeException.class)
+    public void throw_exception_for_unknown_Java_class() {
+        TypeUrl.of("unknown/JavaClass")
+               .toMessageClass();
+    }
+
+    @Test
+    public void return_value() {
+        assertTrue(TypeUrl.of(BoolValue.class)
+                          .toString()
+                          .contains(BoolValue.class.getSimpleName()));
+    }
+
+    @Test
+    public void have_prefix_enumeration() {
+        assertTrue(TypeUrl.Prefix.SPINE.toString()
+                                       .contains("spine"));
     }
 }

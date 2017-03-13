@@ -231,15 +231,8 @@ public final class TypeUrl {
      *         there is no corresponding Java class
      */
     public <T extends Message> Class<T> toMessageClass() {
-        checkNotNull(this);
-        final ClassName className = KnownTypes.getClassName(this);
-        try {
-            @SuppressWarnings("unchecked") // the client considers this message is of this class
-            final Class<T> result = (Class<T>) Class.forName(className.value());
-            return result;
-        } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(getTypeName(), e);
-        }
+        final TypeUrl typeUrl = this;
+        return KnownTypes.getClass(typeUrl);
     }
 
     /**
