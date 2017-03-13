@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.type.TypeUrl;
-import org.spine3.server.entity.storagefields.StorageFieldsExtracter;
+import org.spine3.server.entity.storagefields.StorageFieldsExtractor;
 
 import static org.spine3.base.Identifiers.idFromAny;
 import static org.spine3.base.Identifiers.idToAny;
@@ -67,7 +67,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
                             .setEntityId(entityId)
                             .setState(stateAny);
 
-        final StorageFields storageFields = StorageFieldsExtracter.extract(entity);
+        final StorageFields storageFields = StorageFieldsExtractor.extract(entity);
         builder.setStorageFields(storageFields);
 
         return builder.build();
