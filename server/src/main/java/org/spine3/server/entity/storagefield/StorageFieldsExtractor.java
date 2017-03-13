@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storagefield;
 
+import org.spine3.base.Messagifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 
@@ -65,27 +66,34 @@ public class StorageFieldsExtractor {
 
     private static <E extends Entity<?, ?>> StorageFieldsGenerator<E> newGenerator(
             Class<E> entityClass) {
+        final Collection<EntityFieldGetter<E>> getters = collectGetters(entityClass);
+        final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(getters);
+        fieldGenerators.put(entityClass, generator);
+        return generator;
+    }
+
+    private static <E extends Entity<?, ?>> Collection<EntityFieldGetter<E>> collectGetters(
+            Class<E> entityClass) {
         final Collection<EntityFieldGetter<E>> getters = new LinkedList<>();
-        final Method[] methods = entityClass.getDeclaredMethods();
-        for (Method method : methods) {
+
+        final Method[] publicMethods = entityClass.getMethods();
+        for (Method method : publicMethods) {
             final String methodName = method.getName();
-            final boolean returnTypeMatches = !method.getReturnType()
-                                                     .equals(Void.TYPE);
-            final boolean accessMatches = method.isAccessible();
-            if (accessMatches && returnTypeMatches) {
+            final boolean returnTypeMatches = Messagifiers.isSupported(method.getReturnType());
+            final boolean argumentsMatch = method.getParameterTypes().length == 0;
+            if (returnTypeMatches && argumentsMatch) {
                 // Regex operations are not fast enough to check all the methods.
-                // Instead, we check the method's access level and return type, and then the name.
+                // That's wht we check the Method object fields first
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
                                                           .matches();
                 if (nameMatches) {
                     final EntityFieldGetter<E> getter
-                            = new EntityFieldGetter<>(methodName, entityClass);
+                            = new EntityFieldGetter<>(methodName, method);
                     getters.add(getter);
                 }
             }
         }
-        final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(getters);
-        fieldGenerators.put(entityClass, generator);
-        return generator;
+
+        return getters;
     }
 }

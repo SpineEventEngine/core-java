@@ -20,8 +20,6 @@
 
 package org.spine3.server.entity.storagefield;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
@@ -29,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @author Dmytro Dashenkov.
@@ -37,13 +34,14 @@ import static com.google.common.base.Preconditions.checkState;
 class EntityFieldGetter<E extends Entity<?, ?>> {
 
     private final String name;
-    private final Class<E> entityClass;
-    private Method getter;
+    private final Method getter;
+
+    private boolean initialized;
     private boolean nullable;
 
-    EntityFieldGetter(String name, Class<E> entityClass) {
+    EntityFieldGetter(String name, Method getter) {
         this.name = checkNotNull(name);
-        this.entityClass = checkNotNull(entityClass);
+        this.getter = checkNotNull(getter);
     }
 
     public String getName() {
@@ -51,7 +49,7 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
     }
 
     Object get(E entity) {
-        ensureGetter();
+        initialize();
         final Object property;
         try {
             property = getter.invoke(entity);
@@ -66,37 +64,11 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
         return property;
     }
 
-    private void ensureGetter() {
-        if (getter != null) {
+    private void initialize() {
+        if (initialized) {
             return;
         }
-        lookupGetter();
-        checkState(getter != null,
-                   "Getter for property %s was not found.",
-                   name);
-        initialize();
-    }
-
-    private void lookupGetter() {
-        checkState(getter == null, "Getter is already initialized.");
-        try {
-            getter = entityClass.getDeclaredMethod(name);
-        } catch (NoSuchMethodException ignored) {
-        }
-    }
-
-    private void initialize() {
-        checkNotNull(getter);
         nullable = getter.isAnnotationPresent(Nullable.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EntityFieldGetter.class);
+        initialized = true;
     }
 }
