@@ -41,6 +41,7 @@ import org.spine3.type.error.UnknownTypeException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -53,7 +54,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
- * @see Descriptors.FileDescriptor#getFullName()
+ * @see Descriptors.Descriptor#getFullName()
  */
 public final class TypeUrl {
 
@@ -116,17 +117,26 @@ public final class TypeUrl {
     }
 
     /**
-     * Creates a new instance from the passed type URL or type name.
+     * Creates a new instance from the passed {@code TypeName}.
+     */
+    static TypeUrl from(TypeName typeName) {
+        checkNotNull(typeName);
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName.value());
+        return typeUrl;
+    }
+
+    /**
+     * Creates a new instance from the passed type URL.
      *
-     * @param typeUrlOrName the type URL of the Protobuf message type or its fully-qualified name
+     * @param typeUrl the type URL of the Protobuf message type
      */
     @Internal
-    public static TypeUrl of(String typeUrlOrName) {
-        checkNotEmptyOrBlank(typeUrlOrName, "type URL or name");
-        final TypeUrl typeUrl = isTypeUrl(typeUrlOrName)
-                                ? ofTypeUrl(typeUrlOrName)
-                                : ofTypeName(typeUrlOrName);
-        return typeUrl;
+    public static TypeUrl of(String typeUrl) {
+        checkNotEmptyOrBlank(typeUrl, "type URL or name");
+        checkArgument(isTypeUrl(typeUrl), "Malformed type URL: %s", typeUrl);
+
+        final TypeUrl result = ofTypeUrl(typeUrl);
+        return result;
     }
 
     private static boolean isTypeUrl(String str) {
@@ -156,11 +166,6 @@ public final class TypeUrl {
         throw new IllegalArgumentException(
                 new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
                                                    + typeUrl));
-    }
-
-    private static TypeUrl ofTypeName(String typeName) {
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName);
-        return typeUrl;
     }
 
     /**

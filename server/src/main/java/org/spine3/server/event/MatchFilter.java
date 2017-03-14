@@ -31,6 +31,7 @@ import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.reflect.Classes;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -81,16 +82,29 @@ class MatchFilter implements Predicate<Event> {
     };
 
     MatchFilter(EventFilter filter) {
-        final String eventType = filter.getEventType();
-        this.eventTypeUrl = eventType.isEmpty()
-                            ? null
-                            : TypeUrl.of(eventType);
-        final List<Any> aggregateIdList = filter.getAggregateIdList();
-        this.aggregateIds = aggregateIdList.isEmpty()
-                            ? null
-                            : aggregateIdList;
+        eventTypeUrl = getEventTypeUrl(filter);
+        this.aggregateIds = getAggregateIdentifiers(filter);
         this.eventFieldFilters = filter.getEventFieldFilterList();
         this.contextFieldFilters = filter.getContextFieldFilterList();
+    }
+
+    @Nullable
+    private static TypeUrl getEventTypeUrl(EventFilter filter) {
+        final String eventType = filter.getEventType();
+        final TypeUrl result = eventType.isEmpty()
+                               ? null
+                               : TypeName.of(eventType)
+                                         .toUrl();
+        return result;
+    }
+
+    @Nullable
+    private static List<Any> getAggregateIdentifiers(EventFilter filter) {
+        final List<Any> aggregateIdList = filter.getAggregateIdList();
+        final List<Any> result = aggregateIdList.isEmpty()
+                            ? null
+                            : aggregateIdList;
+        return result;
     }
 
     @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want tracability of exits.

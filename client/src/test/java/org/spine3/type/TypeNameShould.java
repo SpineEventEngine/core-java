@@ -68,7 +68,8 @@ public class TypeNameShould {
     public void return_simple_name_if_no_package() {
         // A msg type without Protobuf package
         final String name = IfMissingOption.class.getSimpleName();
-        final TypeUrl typeUrl = TypeUrl.of(name);
+        final TypeUrl typeUrl = TypeName.of(name)
+                                        .toUrl();
 
         final String actual = TypeName.from(typeUrl)
                                       .getSimpleName();

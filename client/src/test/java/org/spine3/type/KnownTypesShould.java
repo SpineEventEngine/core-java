@@ -48,7 +48,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 /**
  * @author Alexander Litus
@@ -182,7 +181,7 @@ public class KnownTypesShould {
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_if_no_java_class_name_by_type_url() {
-        final TypeUrl unexpectedUrl = TypeUrl.of(composeTypeUrl("prefix", "unexpected.type"));
+        final TypeUrl unexpectedUrl = TypeUrl.of("prefix/unexpected.type");
         KnownTypes.getClassName(unexpectedUrl);
     }
 }

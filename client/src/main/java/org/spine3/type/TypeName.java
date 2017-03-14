@@ -27,6 +27,7 @@ import org.spine3.base.Event;
 
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -47,6 +48,15 @@ public class TypeName extends StringTypeValue {
 
     private static TypeName create(String value) {
         return new TypeName(value);
+    }
+
+    /**
+     * Creates new instance by the passed type name value.
+     */
+    public static TypeName of(String typeName) {
+        checkNotNull(typeName);
+        checkArgument(!typeName.isEmpty());
+        return create(typeName);
     }
 
     /**
@@ -110,5 +120,12 @@ public class TypeName extends StringTypeValue {
         } else {
             return typeName;
         }
+    }
+
+    /**
+     * Creates URL instance corresponding to this type name.
+     */
+    public TypeUrl toUrl() {
+        return TypeUrl.from(this);
     }
 }

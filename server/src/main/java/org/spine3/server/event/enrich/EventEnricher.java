@@ -40,7 +40,6 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
-import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -109,12 +108,14 @@ public class EventEnricher {
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
-            final Class<Message> enrichmentClass = TypeUrl.of(enrichmentType)
-                                                          .toMessageClass();
+            final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
+                                                           .toUrl()
+                                                           .toMessageClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
-                final Class<Message> eventClass = TypeUrl.of(eventType)
-                                                         .toMessageClass();
+                final Class<Message> eventClass = TypeName.of(eventType)
+                                                          .toUrl()
+                                                          .toMessageClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
                                                          eventClass,
