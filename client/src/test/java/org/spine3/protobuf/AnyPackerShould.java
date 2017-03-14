@@ -119,4 +119,12 @@ public class AnyPackerShould {
         assertNull(AnyPacker.unpackFunc()
                             .apply(null));
     }
+
+    @Test
+    public void have_unpacking_func() {
+        final StringValue value = newUuidValue();
+
+        assertEquals(value, AnyPacker.unpackFunc()
+                                     .apply(Any.pack(value)));
+    }
 }
