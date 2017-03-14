@@ -83,7 +83,10 @@ public class Identifiers {
      */
     public static <I> void checkSupported(Class<I> idClass) {
         checkNotNull(idClass);
-        Messagifier.Type.getType(idClass);
+        final Messagifier.Type type = Messagifier.Type.getType(idClass);
+        if (!type.isSupportedIdType()) {
+            throw Messagifier.Type.unsupportedClass(idClass);
+        }
     }
 
     /**
@@ -107,6 +110,7 @@ public class Identifiers {
      */
     public static <I> Any idToAny(I id) {
         checkNotNull(id);
+        checkSupported(id.getClass());
         return Messagifiers.toAny(id);
     }
 
@@ -127,6 +131,7 @@ public class Identifiers {
     public static Object idFromAny(Any any) {
         checkNotNull(any);
         final Object result = Messagifier.Type.unpack(any);
+        checkSupported(result.getClass());
         return result;
     }
 
@@ -147,6 +152,7 @@ public class Identifiers {
     @Internal
     public static <I> I getDefaultValue(Class<I> idClass) {
         checkNotNull(idClass);
+        checkSupported(idClass);
         return Messagifier.getDefaultValue(idClass);
     }
 
@@ -170,6 +176,8 @@ public class Identifiers {
         if (id == null) {
             return NULL_ID;
         }
+
+        checkSupported(id.getClass());
 
         final Messagifier<?> identifier;
         if (id instanceof Any) {
