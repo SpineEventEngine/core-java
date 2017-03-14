@@ -45,8 +45,23 @@ public final class Field {
      */
     private final String name;
 
+    /**
+     * The method of obtaining the field value.
+     */
     private final Method getter;
 
+    private Field(String name, Method getter) {
+        this.name = name;
+        this.getter = getter;
+    }
+
+    /**
+     * Creates a new instance for a field of a message class.
+     *
+     * @param messageClass the class with the field
+     * @param name         the field name
+     * @return new field instance
+     */
     private static Optional<Field> newField(Class<? extends Message> messageClass,
                                             String name) {
         checkNotNull(messageClass);
@@ -67,26 +82,14 @@ public final class Field {
      * Creates instance for a field specified by the passed filter.
      *
      * @param messageClass the class of messages containing the field
-     * @param filter the field filter
+     * @param filter       the field filter
      * @return an {@code Field} wrapped into {@code Optional} or
-     *         {@code Optional.absent()} if there is no such field in the passed message class
+     * {@code Optional.absent()} if there is no such field in the passed message class
      */
     public static Optional<Field> forFilter(Class<? extends Message> messageClass,
                                             FieldFilter filter) {
         final String fieldName = getFieldName(filter);
         return newField(messageClass, fieldName);
-    }
-
-    private Field(String name, Method getter) {
-        this.name = name;
-        this.getter = getter;
-    }
-
-    /**
-     * Obtains the name of the field.
-     */
-    public String getName() {
-        return name;
     }
 
     private static String getFieldName(FieldFilter filter) {
@@ -102,12 +105,19 @@ public final class Field {
     }
 
     /**
+     * Obtains the name of the field.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Obtains the value of the field in the passed object.
      *
      * <p>If the corresponding field is of type {@code Any} it will be unpacked.
      *
      * @throws IllegalStateException if getting the field value caused an exception.
-     * The root cause will be available from the thrown instance.
+     *                               The root cause will be available from the thrown instance.
      */
     public Message getValue(Message object) {
         final Message fieldValue;
