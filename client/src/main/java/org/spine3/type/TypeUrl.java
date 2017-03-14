@@ -135,7 +135,7 @@ public final class TypeUrl {
         checkNotEmptyOrBlank(typeUrl, "type URL or name");
         checkArgument(isTypeUrl(typeUrl), "Malformed type URL: %s", typeUrl);
 
-        final TypeUrl result = ofTypeUrl(typeUrl);
+        final TypeUrl result = parse(typeUrl);
         return result;
     }
 
@@ -143,7 +143,7 @@ public final class TypeUrl {
         return str.contains(SEPARATOR);
     }
 
-    private static TypeUrl ofTypeUrl(String typeUrl) {
+    private static TypeUrl parse(String typeUrl) {
         final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
         if (parts.length != 2) {
             throw malformedTypeUrl(typeUrl);
@@ -175,7 +175,7 @@ public final class TypeUrl {
      * @return a type URL
      */
     public static TypeUrl ofEnclosed(AnyOrBuilder any) {
-        final TypeUrl typeUrl = ofTypeUrl(any.getTypeUrl());
+        final TypeUrl typeUrl = parse(any.getTypeUrl());
         return typeUrl;
     }
 
