@@ -282,7 +282,7 @@ public class KnownTypes {
         private void putProperties(Properties properties) {
             final Set<String> typeUrls = properties.stringPropertyNames();
             for (String typeUrlStr : typeUrls) {
-                final TypeUrl typeUrl = TypeUrl.of(typeUrlStr);
+                final TypeUrl typeUrl = TypeUrl.parse(typeUrlStr);
                 final ClassName className = ClassName.of(properties.getProperty(typeUrlStr));
                 put(typeUrl, className);
             }

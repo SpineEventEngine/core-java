@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * In-memory implementation of {@link StandStorage}.
@@ -46,8 +46,8 @@ import static com.google.common.base.Preconditions.checkState;
  */
 class InMemoryStandStorage extends StandStorage {
 
-    private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN
-            = "The typeUrl of the record (%s) does not correspond to id (for type %s)";
+    private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN =
+            "The typeUrl of the record (%s) does not correspond to id (for type %s)";
 
     private final InMemoryRecordStorage<AggregateStateId> recordStorage;
 
@@ -130,13 +130,13 @@ class InMemoryStandStorage extends StandStorage {
 
     @Override
     protected void writeRecord(AggregateStateId id, EntityRecord record) {
-        final TypeUrl recordType = TypeUrl.of(record.getState()
-                                                    .getTypeUrl());
+        final TypeUrl recordType = TypeUrl.parse(record.getState()
+                                                       .getTypeUrl());
         final TypeUrl recordTypeFromId = id.getStateType();
-        checkState(
-                recordTypeFromId.equals(recordType),
-                String.format(TYPE_URL_MISMATCH_MESSAGE_PATTERN, recordType, recordTypeFromId));
-
+        if (!recordTypeFromId.equals(recordType)) {
+            throw newIllegalStateException(TYPE_URL_MISMATCH_MESSAGE_PATTERN,
+                                           recordType, recordTypeFromId);
+        }
         recordStorage.write(id, record);
     }
 

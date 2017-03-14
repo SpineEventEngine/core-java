@@ -29,7 +29,8 @@ public class UnknownTypeException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String ERR_MSG = "No Java class found for the Protobuf message of type: ";
+    private static final String ERR_MSG_NO_JAVA_CLASS_FOUND =
+            "No Java class found for the Protobuf message of type: %s";
 
     /**
      * Creates a new instance with the type name.
@@ -37,7 +38,11 @@ public class UnknownTypeException extends RuntimeException {
      * @param typeName the unknown type
      */
     public UnknownTypeException(String typeName) {
-        super(ERR_MSG + typeName);
+        super(makeMsg(typeName));
+    }
+
+    private static String makeMsg(String typeName) {
+        return String.format(ERR_MSG_NO_JAVA_CLASS_FOUND, typeName);
     }
 
     /**
@@ -47,7 +52,7 @@ public class UnknownTypeException extends RuntimeException {
      * @param cause    the exception cause
      */
     public UnknownTypeException(String typeName, Throwable cause) {
-        super(ERR_MSG + typeName, cause);
+        super(makeMsg(typeName), cause);
     }
 
     /**
@@ -55,7 +60,8 @@ public class UnknownTypeException extends RuntimeException {
      *
      * <p>Use this constructor when propagating
      * {@link com.google.protobuf.InvalidProtocolBufferException InvalidProtocolBufferException}
-     * without knowing which type caused the exception (e.g. when calling {@code JsonFormat.print()}.
+     * without knowing which type caused the exception (e.g. when calling
+     * {@code JsonFormat.print()}.
      */
     public UnknownTypeException(Throwable cause) {
         super(cause);

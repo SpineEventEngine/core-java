@@ -58,12 +58,12 @@ public class TypeUrlShould {
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_value() {
-        TypeUrl.of(Tests.<String>nullRef());
+        TypeUrl.parse(Tests.<String>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_string() {
-        TypeUrl.of("");
+        TypeUrl.parse("");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class TypeUrlShould {
 
     @Test
     public void create_from_type_url_string() {
-        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_URL_STR);
+        final TypeUrl typeUrl = TypeUrl.parse(STRING_VALUE_TYPE_URL_STR);
 
         assertIsStringValueUrl(typeUrl);
     }
@@ -184,22 +184,22 @@ public class TypeUrlShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_prefix() {
-        TypeUrl.of(" /package.Type");
+        TypeUrl.parse(" /package.Type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_name() {
-        TypeUrl.of("type.prefix/ ");
+        TypeUrl.parse("type.prefix/ ");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_malformed_type_URL() {
-        TypeUrl.of("prefix/prefix/type.Name");
+        TypeUrl.parse("prefix/prefix/type.Name");
     }
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_for_unknown_Java_class() {
-        final TypeUrl url = TypeUrl.of("unknown/JavaClass");
+        final TypeUrl url = TypeUrl.parse("unknown/JavaClass");
         url.getJavaClass();
     }
 

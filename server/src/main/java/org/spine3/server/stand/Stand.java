@@ -149,7 +149,7 @@ public class Stand implements AutoCloseable {
      */
     void update(Object id, Any entityState, Version entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
-        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
+        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
 
         final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
 

@@ -131,11 +131,12 @@ public final class TypeUrl {
      * @param typeUrl the type URL of the Protobuf message type
      */
     @Internal
-    public static TypeUrl of(String typeUrl) {
-        checkNotEmptyOrBlank(typeUrl, "type URL or name");
+    public static TypeUrl parse(String typeUrl) {
+        checkNotNull(typeUrl);
+        checkArgument(!typeUrl.isEmpty());
         checkArgument(isTypeUrl(typeUrl), "Malformed type URL: %s", typeUrl);
 
-        final TypeUrl result = parse(typeUrl);
+        final TypeUrl result = doParse(typeUrl);
         return result;
     }
 
@@ -143,7 +144,7 @@ public final class TypeUrl {
         return str.contains(SEPARATOR);
     }
 
-    private static TypeUrl parse(String typeUrl) {
+    private static TypeUrl doParse(String typeUrl) {
         final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
         if (parts.length != 2) {
             throw malformedTypeUrl(typeUrl);
@@ -175,7 +176,7 @@ public final class TypeUrl {
      * @return a type URL
      */
     public static TypeUrl ofEnclosed(AnyOrBuilder any) {
-        final TypeUrl typeUrl = parse(any.getTypeUrl());
+        final TypeUrl typeUrl = doParse(any.getTypeUrl());
         return typeUrl;
     }
 
