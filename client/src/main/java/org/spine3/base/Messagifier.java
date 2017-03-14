@@ -29,6 +29,8 @@ import com.google.protobuf.UInt64Value;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -184,8 +186,7 @@ class Messagifier<I> {
 
             @Override
             <I> boolean matchClass(Class<I> cls) {
-                // TODO:2017-03-13:dmytro.dashenkov: Check if we need to math primitive types here.
-                return Boolean.class.equals(cls);
+                return Boolean.class.equals(cls) || Boolean.TYPE.equals(cls);
             }
 
             @Override
@@ -219,7 +220,7 @@ class Messagifier<I> {
 
             @Override
             <I> boolean matchClass(Class<I> cls) {
-                return Integer.class.equals(cls);
+                return Integer.class.equals(cls) || Integer.TYPE.equals(cls);
             }
 
             @Override
@@ -253,7 +254,7 @@ class Messagifier<I> {
 
             @Override
             <I> boolean matchClass(Class<I> cls) {
-                return Long.class.equals(cls);
+                return Long.class.equals(cls) || Long.TYPE.equals(cls);
             }
 
             @Override
@@ -281,6 +282,8 @@ class Messagifier<I> {
             }
 
             /**
+             * // TODO:2017-03-13:dmytro.dashenkov: Resolve.
+             *
              * Verifies if the passed message is not an instance of a wrapper for
              * simple types that are used for packing simple Java types into {@code Any}.
              *
@@ -289,8 +292,9 @@ class Messagifier<I> {
             @Override
             boolean matchMessage(Message message) {
                 return !(message instanceof StringValue
-                        || message instanceof UInt32Value
-                        || message instanceof UInt64Value);
+                         || message instanceof BoolValue
+                         || message instanceof UInt32Value
+                         || message instanceof UInt64Value);
             }
 
             @Override
@@ -351,6 +355,7 @@ class Messagifier<I> {
             return type;
         }
 
+        @Nullable
         static <I> Type getTypeOrNull(Class<I> cls) {
             for (Type type : values()) {
                 if (type.matchClass(cls)) {
