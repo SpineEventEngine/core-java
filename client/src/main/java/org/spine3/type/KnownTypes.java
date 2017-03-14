@@ -245,7 +245,7 @@ public class KnownTypes {
      *
      * @throws UnknownTypeException if there is no Java class for the passed type URL
      */
-    static <T extends Message> Class<T> getJavaClass(TypeUrl typeUrl) {
+    static <T extends Message> Class<T> getJavaClass(TypeUrl typeUrl) throws UnknownTypeException {
         checkNotNull(typeUrl);
         final ClassName className = getClassName(typeUrl);
         try {

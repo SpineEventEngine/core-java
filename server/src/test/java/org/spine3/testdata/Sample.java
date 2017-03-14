@@ -210,8 +210,8 @@ public class Sample {
     }
 
     @SuppressWarnings("unchecked") // Reflective class definition retrieving
-    private static <M extends Message> Class<M> classFor(TypeUrl type) {
-        final Class<M> javaClass = type.getJavaClass();
+    private static <M extends Message> Class<M> classFor(TypeUrl url) {
+        final Class<M> javaClass = url.getJavaClass();
         return javaClass;
     }
 

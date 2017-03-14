@@ -235,7 +235,7 @@ public final class TypeUrl {
      * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
      *         there is no corresponding Java class
      */
-    public <T extends Message> Class<T> getJavaClass() {
+    public <T extends Message> Class<T> getJavaClass() throws UnknownTypeException {
         return KnownTypes.getJavaClass(this);
     }
 

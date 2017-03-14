@@ -24,6 +24,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
+import org.spine3.type.error.UnknownTypeException;
 
 import java.util.regex.Pattern;
 
@@ -127,5 +128,17 @@ public class TypeName extends StringTypeValue {
      */
     public TypeUrl toUrl() {
         return TypeUrl.from(this);
+    }
+
+    /**
+     * Returns a message {@link Class} corresponding to the Protobuf type represented
+     * by this type name.
+     *
+     * @return the message class
+     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
+     *         there is no corresponding Java class
+     */
+    public <T extends Message> Class<T> getJavaClass() throws UnknownTypeException {
+        return KnownTypes.getJavaClass(toUrl());
     }
 }

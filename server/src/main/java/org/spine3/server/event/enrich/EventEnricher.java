@@ -93,7 +93,8 @@ public class EventEnricher {
      */
     EventEnricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = synchronizedMultimap(rawMap);
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap =
+                synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
             functionMap.put(function.getEventClass(), function);
         }
@@ -109,12 +110,10 @@ public class EventEnricher {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
-                                                           .toUrl()
                                                            .getJavaClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = TypeName.of(eventType)
-                                                          .toUrl()
                                                           .getJavaClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
@@ -188,8 +187,9 @@ public class EventEnricher {
             this.eventMessage = eventMessage;
             this.eventContext = eventContext;
             final Class<? extends Message> eventClass = EventClass.of(eventMessage)
-                                                             .value();
-            final Collection<EnrichmentFunction<?, ?>> functionsPerClass = parent.functions.get(eventClass);
+                                                                  .value();
+            final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
+                    parent.functions.get(eventClass);
             this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
         }
 
