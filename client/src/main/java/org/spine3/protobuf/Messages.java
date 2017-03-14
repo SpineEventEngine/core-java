@@ -95,7 +95,7 @@ public class Messages {
     static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Class<? extends Message> clazz = typeUrl.toMessageClass();
+            final Class<? extends Message> clazz = typeUrl.getJavaClass();
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.
             if (descriptor instanceof Descriptor) {
@@ -183,11 +183,11 @@ public class Messages {
                 return ByteString.class;
             case ENUM:
                 typeUrl = TypeUrl.from(field.getEnumType());
-                final Class<? extends Message> enumClass = typeUrl.toMessageClass();
+                final Class<? extends Message> enumClass = typeUrl.getJavaClass();
                 return enumClass;
             case MESSAGE:
                 typeUrl = TypeUrl.from(field.getMessageType());
-                final Class<? extends Message> msgClass = typeUrl.toMessageClass();
+                final Class<? extends Message> msgClass = typeUrl.getJavaClass();
                 return msgClass;
             default:
                 throw newIllegalArgumentException("Unknown field type discovered: %s",

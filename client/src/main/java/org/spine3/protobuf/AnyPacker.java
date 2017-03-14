@@ -79,7 +79,7 @@ public class AnyPacker {
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
         final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
-        final Class<T> messageClass = typeUrl.toMessageClass();
+        final Class<T> messageClass = typeUrl.getJavaClass();
         return unpack(any, messageClass);
     }
 

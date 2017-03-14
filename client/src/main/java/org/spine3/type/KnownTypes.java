@@ -216,7 +216,7 @@ public class KnownTypes {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkArgument(typeUrl != null, "Given type name is invalid");
 
-        final Class<?> cls = getClass(typeUrl);
+        final Class<?> cls = getJavaClass(typeUrl);
 
         final Descriptors.Descriptor descriptor;
         try {
@@ -245,8 +245,7 @@ public class KnownTypes {
      *
      * @throws UnknownTypeException if there is no Java class for the passed type URL
      */
-    @VisibleForTesting
-    public static <T extends Message> Class<T> getClass(TypeUrl typeUrl) {
+    static <T extends Message> Class<T> getJavaClass(TypeUrl typeUrl) {
         checkNotNull(typeUrl);
         final ClassName className = getClassName(typeUrl);
         try {

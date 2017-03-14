@@ -110,12 +110,12 @@ public class EventEnricher {
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
                                                            .toUrl()
-                                                           .toMessageClass();
+                                                           .getJavaClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
                 final Class<Message> eventClass = TypeName.of(eventType)
                                                           .toUrl()
-                                                          .toMessageClass();
+                                                          .getJavaClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
                                                          eventClass,

@@ -200,7 +200,7 @@ public class TypeUrlShould {
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_for_unknown_Java_class() {
         final TypeUrl url = TypeUrl.of("unknown/JavaClass");
-        url.toMessageClass();
+        url.getJavaClass();
     }
 
     @Test
