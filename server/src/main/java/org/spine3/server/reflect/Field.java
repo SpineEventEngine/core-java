@@ -30,8 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Provides information and dynamic access to a field of a {@code Message}.
@@ -130,8 +130,7 @@ public final class Field {
                      : fieldValue;
 
         } catch (IllegalAccessException | InvocationTargetException e) {
-            final Throwable rootCause = getRootCause(e);
-            throw new IllegalStateException(rootCause);
+            throw wrappedCause(e);
         }
 
         return result;

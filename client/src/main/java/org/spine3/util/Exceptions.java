@@ -20,13 +20,13 @@
 
 package org.spine3.util;
 
-import com.google.common.base.Throwables;
 import org.spine3.validate.ConversionError;
 import org.spine3.validate.IllegalConversionArgumentException;
 
 import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static java.lang.String.format;
 
 /**
@@ -97,7 +97,7 @@ public class Exceptions {
      */
     public static IllegalStateException wrappedCause(Throwable throwable) {
         checkNotNull(throwable);
-        final Throwable cause = Throwables.getRootCause(throwable);
+        final Throwable cause = getRootCause(throwable);
         throw new IllegalStateException(cause);
     }
 
