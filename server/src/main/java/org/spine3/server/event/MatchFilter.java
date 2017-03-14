@@ -67,7 +67,7 @@ class MatchFilter implements Predicate<Event> {
     private final Collection<FieldFilter> contextFieldFilters;
 
     MatchFilter(EventFilter filter) {
-        eventTypeUrl = getEventTypeUrl(filter);
+        this.eventTypeUrl = getEventTypeUrl(filter);
         this.aggregateIds = getAggregateIdentifiers(filter);
         this.eventFieldFilters = filter.getEventFieldFilterList();
         this.contextFieldFilters = filter.getContextFieldFilterList();
