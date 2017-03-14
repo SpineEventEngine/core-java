@@ -89,11 +89,6 @@ public class MessagesShould {
     }
 
     @Test
-    public void return_descriptor_by_message_class() {
-        assertEquals(StringValue.getDescriptor(), Messages.getClassDescriptor(StringValue.class));
-    }
-
-    @Test
     public void return_int_msg_field_class_by_descriptor() {
         assertReturnsFieldClass(Integer.class, Int32Value.getDescriptor());
     }

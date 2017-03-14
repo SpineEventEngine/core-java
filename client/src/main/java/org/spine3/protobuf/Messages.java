@@ -36,8 +36,10 @@ import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.GenericDescriptor;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -140,15 +142,15 @@ public class Messages {
     }
 
     /** Returns descriptor for the passed message class. */
-    public static GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
-        checkNotNull(clazz);
+    private static GenericDescriptor getClassDescriptor(Class<? extends Message> cls) {
+        checkNotNull(cls);
         try {
-            final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
+            final Method method = cls.getMethod(METHOD_GET_DESCRIPTOR);
             final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new MissingDescriptorException(clazz, e.getCause());
+            final Throwable rootCause = getRootCause(e);
+            throw new MissingDescriptorException(cls, rootCause);
         }
     }
 
@@ -163,6 +165,7 @@ public class Messages {
     public static Class<?> getFieldClass(FieldDescriptor field) {
         checkNotNull(field);
         final FieldDescriptor.JavaType javaType = field.getJavaType();
+        final TypeUrl typeUrl;
         switch (javaType) {
             case INT:
                 return Integer.class;
@@ -179,16 +182,15 @@ public class Messages {
             case BYTE_STRING:
                 return ByteString.class;
             case ENUM:
-                final String enumTypeName = field.getEnumType().getFullName();
-                final Class<? extends Message> enumClass = TypeUrl.of(enumTypeName)
-                                                                  .toMessageClass();
+                typeUrl = TypeUrl.from(field.getEnumType());
+                final Class<? extends Message> enumClass = typeUrl.toMessageClass();
                 return enumClass;
             case MESSAGE:
-                final TypeUrl typeUrl = TypeUrl.from(field.getMessageType());
+                typeUrl = TypeUrl.from(field.getMessageType());
                 final Class<? extends Message> msgClass = typeUrl.toMessageClass();
                 return msgClass;
             default:
-                throw new IllegalArgumentException("Unknown field type discovered: " +
+                throw newIllegalArgumentException("Unknown field type discovered: %s",
                                                    field.getFullName());
         }
     }
