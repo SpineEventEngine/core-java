@@ -20,7 +20,6 @@
 
 package org.spine3.server.event;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
@@ -68,18 +67,6 @@ class MatchFilter implements Predicate<Event> {
 
     private final Collection<FieldFilter> eventFieldFilters;
     private final Collection<FieldFilter> contextFieldFilters;
-
-    private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
-        @Nullable
-        @Override
-        public Message apply(@Nullable Any input) {
-            if (input == null) {
-                return null;
-            }
-
-            return AnyPacker.unpack(input);
-        }
-    };
 
     MatchFilter(EventFilter filter) {
         eventTypeUrl = getEventTypeUrl(filter);
@@ -177,7 +164,7 @@ class MatchFilter implements Predicate<Event> {
         //TODO:2017-02-22:alexander.yevsyukov: Packing `actualValue` into Any and then verifying would be faster.
         final Collection<Any> expectedAnys = filter.getValueList();
         final Collection<Message> expectedValues =
-                Collections2.transform(expectedAnys, ANY_UNPACKER);
+                Collections2.transform(expectedAnys, AnyPacker.unpackFunc());
         Message actualValue;
 
         try {

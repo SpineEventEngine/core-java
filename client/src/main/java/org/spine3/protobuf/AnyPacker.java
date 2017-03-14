@@ -20,12 +20,14 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.type.TypeUrl;
 import org.spine3.type.error.UnexpectedTypeException;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,6 +46,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Any#unpack(Class)
  */
 public class AnyPacker {
+
+    private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
+        @Nullable
+        @Override
+        public Message apply(@Nullable Any input) {
+            if (input == null) {
+                return null;
+            }
+
+            return unpack(input);
+        }
+    };
 
     private AnyPacker() {
         // Prevent instantiation of this utility class.
@@ -112,5 +126,14 @@ public class AnyPacker {
      */
     public static Iterator<Any> pack(Iterator<Message> iterator) {
         return new PackingIterator(iterator);
+    }
+
+    /**
+     * Provides the function for unpacking messages from {@code Any}.
+     *
+     * <p>The function returns {@code null} for {@code null} input.
+     */
+    public static Function<Any, Message> unpackFunc() {
+        return ANY_UNPACKER;
     }
 }

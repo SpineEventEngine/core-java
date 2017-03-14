@@ -20,10 +20,11 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.Lists;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.BytesValue;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
@@ -33,7 +34,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.Tests;
 import org.spine3.test.messages.MessageWithStringValue;
 import org.spine3.test.messages.TestEnum;
@@ -45,7 +45,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -77,9 +76,9 @@ public class MessagesShould {
     public void build_JsonFormat_registry_for_known_types() {
         final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
 
-        final List<Descriptors.Descriptor> found = Lists.newLinkedList();
+        final List<Descriptor> found = Lists.newLinkedList();
         for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Descriptors.Descriptor descriptor = typeRegistry.find(typeUrl.getTypeName());
+            final Descriptor descriptor = typeRegistry.find(typeUrl.getTypeName());
             if (descriptor != null) {
                 found.add(descriptor);
             }
@@ -135,22 +134,17 @@ public class MessagesShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final Class<StringValue> stringValueClass = StringValue.class;
         final FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
                                                                   .getDescriptorForType()
                                                                   .getFields()
                                                                   .get(0);
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Messages.class)
-                                                                     .addDefaultValue(TypeUrl.of(stringValueClass))
-                                                                     .addDefaultValue(stringValueClass)
-                                                                     .addDefaultValue(defaultFieldDescriptor)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(TypeUrl.class, TypeUrl.of(StringValue.class))
+                .setDefault(FieldDescriptor.class, defaultFieldDescriptor)
+                .testAllPublicStaticMethods(Messages.class);
     }
 
-    private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptors.Descriptor msgDescriptor) {
+    private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
         final FieldDescriptor field = msgDescriptor.getFields()
                                                    .get(0);
 
