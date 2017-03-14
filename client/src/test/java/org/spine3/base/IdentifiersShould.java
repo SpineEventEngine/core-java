@@ -80,7 +80,7 @@ public class IdentifiersShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_convert_unsupported_ID_type_to_Any() {
         //noinspection UnnecessaryBoxing
-        idToAny(Short.valueOf((short) 0));
+        idToAny(Boolean.TRUE);
     }
 
     @Test

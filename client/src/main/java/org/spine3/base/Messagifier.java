@@ -205,6 +205,16 @@ class Messagifier<I> {
             <I> I getDefaultValue(Class<I> cls) {
                 return (I) Boolean.FALSE;
             }
+
+            /**
+             * Flags that the {@code boolean} identifiers are not supported.
+             *
+             * @return {@code false}
+             */
+            @Override
+            boolean isSupportedIdType() {
+                return false;
+            }
         },
 
         INTEGER {
@@ -332,6 +342,16 @@ class Messagifier<I> {
 
         abstract <I> I getDefaultValue(Class<I> cls);
 
+        /**
+         * Flags if this type is a supported
+         * <a href="https://docs.spine3.org/biz-model/identifiers.html">Spine identifier type</a>.
+         *
+         * @return {@code true} if the type may act as an {@code Entity} ID, {@code false} otherwise
+         */
+        boolean isSupportedIdType() {
+            return true;
+        }
+
         private static <I> Type getType(I object) {
             for (Type type : values()) {
                 if (type.matchValue(object)) {
@@ -382,7 +402,7 @@ class Messagifier<I> {
             return newIllegalArgumentException("Object of unsupported type encountered: %s", object);
         }
 
-        private static <I> IllegalArgumentException unsupportedClass(Class<I> cls) {
+        static <I> IllegalArgumentException unsupportedClass(Class<I> cls) {
             return newIllegalArgumentException("Unsupported class encountered: %s",
                                                cls.getName());
         }
