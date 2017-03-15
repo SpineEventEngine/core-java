@@ -149,7 +149,7 @@ public class KnownTypesShould {
     @Test
     public void provide_proto_descriptor_by_type_name() {
         final String typeName = "spine.test.types.Task";
-        final Descriptors.Descriptor typeDescriptor = KnownTypes.getDescriptorForType(typeName);
+        final Descriptors.Descriptor typeDescriptor = DescriptorUtil.getDescriptorForType(typeName);
         assertNotNull(typeDescriptor);
         assertEquals(typeName, typeDescriptor.getFullName());
     }
@@ -157,7 +157,7 @@ public class KnownTypesShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_find_invalid_type_descriptor() {
         final String invalidTypeName = "no.such.package.InvalidType";
-        KnownTypes.getDescriptorForType(invalidTypeName);
+        DescriptorUtil.getDescriptorForType(invalidTypeName);
     }
 
     @Test(expected = IllegalStateException.class)

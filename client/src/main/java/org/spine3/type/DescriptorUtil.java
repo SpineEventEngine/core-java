@@ -20,13 +20,17 @@
 
 package org.spine3.type;
 
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
@@ -41,6 +45,8 @@ class DescriptorUtil {
     @SuppressWarnings("DuplicateStringLiteralInspection")
         // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String DESCRIPTOR_GETTER_NAME = "getDescriptor";
 
     private DescriptorUtil() {
         // Prevent instantiation of this utility class.
@@ -56,5 +62,32 @@ class DescriptorUtil {
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw wrappedCause(e);
         }
+    }
+
+    /**
+     * Retrieve {@link Descriptors proto descriptor} from the type name.
+     *
+     * @param typeName <b>valid</b> name of the desired type
+     * @return {@link Descriptors proto descriptor} for given type
+     * @see TypeName
+     * @throws IllegalArgumentException if the name does not correspond to any known type
+     */
+    static Descriptor getDescriptorForType(String typeName) {
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName);
+        checkArgument(typeUrl != null, "Given type name is invalid");
+
+        final Class<?> cls = KnownTypes.getJavaClass(typeUrl);
+
+        final Descriptor descriptor;
+        try {
+            final Method descriptorGetter =
+                    cls.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
+            descriptor = (Descriptor) descriptorGetter.invoke(null);
+        } catch (NoSuchMethodException
+                | IllegalAccessException
+                | InvocationTargetException e) {
+            throw newIllegalArgumentException(e, "Type %s is not a protobuf Message", typeName);
+        }
+        return descriptor;
     }
 }

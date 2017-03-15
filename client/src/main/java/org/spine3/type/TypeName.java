@@ -141,7 +141,7 @@ public class TypeName extends StringTypeValue {
      */
     public Descriptor getDescriptor() {
         try {
-            return KnownTypes.getDescriptorForType(value());
+            return DescriptorUtil.getDescriptorForType(value());
         } catch (IllegalArgumentException e) {
             throw wrappedCause(e);
         }
