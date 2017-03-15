@@ -33,6 +33,7 @@ import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -111,5 +112,19 @@ public class AnyPackerShould {
     public void create_packing_iterator() {
         final Iterator<Message> iterator = Lists.<Message>newArrayList(newUuidValue()).iterator();
         assertNotNull(AnyPacker.pack(iterator));
+    }
+
+    @Test
+    public void have_null_accepting_func() {
+        assertNull(AnyPacker.unpackFunc()
+                            .apply(null));
+    }
+
+    @Test
+    public void have_unpacking_func() {
+        final StringValue value = newUuidValue();
+
+        assertEquals(value, AnyPacker.unpackFunc()
+                                     .apply(Any.pack(value)));
     }
 }

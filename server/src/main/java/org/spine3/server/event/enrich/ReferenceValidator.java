@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.Messages;
+import org.spine3.server.reflect.Field;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -91,7 +91,8 @@ class ReferenceValidator {
     /**
      * Returns those fields and functions, that may be used for the enrichment at the moment.
      *
-     * @return a {@code ValidationResult} data transfer object, containing the valid fields and functions.
+     * @return a {@code ValidationResult} data transfer object, containing the valid fields and
+     * functions.
      */
     ValidationResult validate() {
         final List<EnrichmentFunction<?, ?>> functions = new LinkedList<>();
@@ -100,9 +101,12 @@ class ReferenceValidator {
             final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
             putEnrichmentsByField(functions, fields, enrichmentField, sourceFields);
         }
-        final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap = ImmutableMultimap.copyOf(fields);
-        final ImmutableList<EnrichmentFunction<?, ?>> enrichmentFunctions = ImmutableList.copyOf(functions);
-        final ValidationResult result = new ValidationResult(enrichmentFunctions, sourceToTargetMap);
+        final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
+                ImmutableMultimap.copyOf(fields);
+        final ImmutableList<EnrichmentFunction<?, ?>> enrichmentFunctions =
+                ImmutableList.copyOf(functions);
+        final ValidationResult result = new ValidationResult(enrichmentFunctions,
+                                                             sourceToTargetMap);
         return result;
     }
 
@@ -111,7 +115,8 @@ class ReferenceValidator {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            final Optional<EnrichmentFunction<?, ?>> function = getEnrichmentFunction(sourceField, enrichmentField);
+            final Optional<EnrichmentFunction<?, ?>> function =
+                    getEnrichmentFunction(sourceField, enrichmentField);
             if (function.isPresent()) {
                 functions.add(function.get());
                 fields.put(sourceField, enrichmentField);
@@ -119,7 +124,10 @@ class ReferenceValidator {
         }
     }
 
-    /** Searches for the event/context field with the name parsed from the enrichment field `by` option. */
+    /**
+     * Searches for the event/context field with the name parsed from the enrichment
+     * field {@code by} option.
+     */
     private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
         final String byOptionArgument = enrichmentField.getOptions()
                                                        .getExtension(EventAnnotationsProto.by);
@@ -127,7 +135,10 @@ class ReferenceValidator {
         final String targetFields = removeSpaces(byOptionArgument);
         final int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
         if (pipeSeparatorIndex < 0) {
-            return Collections.singleton(findSourceFieldByName(targetFields, enrichmentField, true));
+            final FieldDescriptor fieldDescriptor = findSourceFieldByName(targetFields,
+                                                                          enrichmentField,
+                                                                          true);
+            return Collections.singleton(fieldDescriptor);
         } else {
             final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
             return findSourceFieldsByNames(targetFieldNames, enrichmentField);
@@ -135,16 +146,21 @@ class ReferenceValidator {
     }
 
     /**
-     * Searches for the event/context field with the name retrieved from the enrichment field `by` option.
+     * Searches for the event/context field with the name retrieved from the
+     * enrichment field {@code by} option.
      *
      * @param name            the name of the searched field
      * @param enrichmentField the field of the enrichment targeted onto the searched field
-     * @param strict          if {@code true} the field must be found, an exception is thrown otherwise.
-     *                        <p>If {@code false} {@code null} will be returned upon an unsuccessful search
-     * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the field is absent and
-     * if not in the strict mode
+     * @param strict          if {@code true} the field must be found, an exception is thrown
+     *                        otherwise.
+     *                        <p>If {@code false} {@code null} will be returned upon an
+     *                        unsuccessful search
+     * @return {@link FieldDescriptor} for the field with the given name or {@code null} if the
+     * field is absent and if not in the strict mode
      */
-    private FieldDescriptor findSourceFieldByName(String name, FieldDescriptor enrichmentField, boolean strict) {
+    private FieldDescriptor findSourceFieldByName(String name,
+                                                  FieldDescriptor enrichmentField,
+                                                  boolean strict) {
         checkSourceFieldName(name, enrichmentField);
         final Descriptor srcMessage = getSrcMessage(name);
         final FieldDescriptor field = findField(name, srcMessage);
@@ -161,10 +177,12 @@ class ReferenceValidator {
         return result;
     }
 
-    private Collection<FieldDescriptor> findSourceFieldsByNames(String[] names, FieldDescriptor enrichmentField) {
+    private Collection<FieldDescriptor> findSourceFieldsByNames(String[] names,
+                                                                FieldDescriptor enrichmentField) {
         checkArgument(names.length > 0, "Names may not be empty");
         checkArgument(names.length > 1,
-                      "Enrichment target field names may not be a singleton array. Use findSourceFieldByName.");
+                      "Enrichment target field names may not be a singleton array. " +
+                      "Use findSourceFieldByName().");
         final Collection<FieldDescriptor> result = new HashSet<>(names.length);
 
         FieldDescriptor.Type basicType = null;
@@ -172,8 +190,9 @@ class ReferenceValidator {
         for (String name : names) {
             final FieldDescriptor field = findSourceFieldByName(name, enrichmentField, false);
             if (field == null) {
-                // We don't know at this stage the type of the event
-                // The enrichment is to be included anyway, but by other {@code ReferenceValidator} instance
+                /* We don't know at this stage the type of the event.
+                   The enrichment is to be included anyway,
+                   but by other ReferenceValidator instance */
                 continue;
             }
 
@@ -183,16 +202,20 @@ class ReferenceValidator {
                     messageType = field.getMessageType();
                 }
             } else { // Compare the type with each of the next
-                checkState(basicType == field.getType(), differentTypesErrorMessage(enrichmentField));
+                checkState(basicType == field.getType(),
+                           differentTypesErrorMessage(enrichmentField));
                 if (basicType == MESSAGE) {
-                    checkState(messageType.equals(field.getMessageType()), differentTypesErrorMessage(enrichmentField));
+                    checkState(messageType.equals(field.getMessageType()),
+                               differentTypesErrorMessage(enrichmentField));
                 }
             }
 
             final boolean noDuplicateFiled = result.add(field);
             checkState(
                     noDuplicateFiled,
-                    "Enrichment target field names may contain no duplicates. Found duplicate field " + name
+                    "Enrichment target field names may contain no duplicates. " +
+                    "Found duplicate field: %s",
+                    name
             );
         }
         return result;
@@ -225,16 +248,19 @@ class ReferenceValidator {
 
     private Optional<EnrichmentFunction<?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
                                                                      FieldDescriptor targetField) {
-        final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
-        final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
-        final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
+        final Class<?> sourceFieldClass = Field.getFieldClass(srcField);
+        final Class<?> targetFieldClass = Field.getFieldClass(targetField);
+        final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass,
+                                                                             targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);
         }
         return func;
     }
 
-    /** Checks if the source field name (from event or context) is not empty. */
+    /**
+     * Checks if the source field name (from event or context) is not empty.
+     */
     private static void checkSourceFieldName(String srcFieldName, FieldDescriptor enrichmentField) {
         if (srcFieldName.isEmpty()) {
             throw newIllegalStateException("There is no `by` option for the enrichment field `%s`",
@@ -276,8 +302,8 @@ class ReferenceValidator {
         }
 
         /**
-         * Returns the validated list of {@code EnrichmentFunction}s that may be used for the conversion
-         * in scope of the validated {@code EventEnricher}.
+         * Returns the validated list of {@code EnrichmentFunction}s that may be used for
+         * the conversion in scope of the validated {@code EventEnricher}.
          */
         @SuppressWarnings("ReturnOfCollectionOrArrayField")     // OK, since an `ImmutableList` is returned.
         List<EnrichmentFunction<?, ?>> getFunctions() {

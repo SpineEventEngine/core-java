@@ -20,7 +20,7 @@
 
 package org.spine3.server.event;
 
-import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
@@ -29,17 +29,15 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.Field;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
-import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.protobuf.AnyPacker.unpackFunc;
 
 /**
  * The predicate for filtering events by {@link EventFilter}.
@@ -68,29 +66,30 @@ class MatchFilter implements Predicate<Event> {
     private final Collection<FieldFilter> eventFieldFilters;
     private final Collection<FieldFilter> contextFieldFilters;
 
-    private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
-        @Nullable
-        @Override
-        public Message apply(@Nullable Any input) {
-            if (input == null) {
-                return null;
-            }
-
-            return AnyPacker.unpack(input);
-        }
-    };
-
     MatchFilter(EventFilter filter) {
-        final String eventType = filter.getEventType();
-        this.eventTypeUrl = eventType.isEmpty()
-                            ? null
-                            : TypeUrl.of(eventType);
-        final List<Any> aggregateIdList = filter.getAggregateIdList();
-        this.aggregateIds = aggregateIdList.isEmpty()
-                            ? null
-                            : aggregateIdList;
+        this.eventTypeUrl = getEventTypeUrl(filter);
+        this.aggregateIds = getAggregateIdentifiers(filter);
         this.eventFieldFilters = filter.getEventFieldFilterList();
         this.contextFieldFilters = filter.getContextFieldFilterList();
+    }
+
+    @Nullable
+    private static TypeUrl getEventTypeUrl(EventFilter filter) {
+        final String eventType = filter.getEventType();
+        final TypeUrl result = eventType.isEmpty()
+                               ? null
+                               : TypeName.of(eventType)
+                                         .toUrl();
+        return result;
+    }
+
+    @Nullable
+    private static List<Any> getAggregateIdentifiers(EventFilter filter) {
+        final List<Any> aggregateIdList = filter.getAggregateIdList();
+        final List<Any> result = aggregateIdList.isEmpty()
+                            ? null
+                            : aggregateIdList;
+        return result;
     }
 
     @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want tracability of exits.
@@ -158,40 +157,33 @@ class MatchFilter implements Predicate<Event> {
     }
 
     private static boolean checkFields(Message object, FieldFilter filter) {
-        final String fieldName = getFieldName(filter);
-
-        //TODO:2017-02-22:alexander.yevsyukov: Packing `actualValue` into Any and then verifying would be faster.
-        final Collection<Any> expectedAnys = filter.getValueList();
-        final Collection<Message> expectedValues =
-                Collections2.transform(expectedAnys, ANY_UNPACKER);
-        Message actualValue;
-
-        try {
-            final Method getter = Classes.getGetterForField(object.getClass(), fieldName);
-            actualValue = (Message) getter.invoke(object);
-            if (actualValue instanceof Any) {
-                actualValue = AnyPacker.unpack((Any) actualValue);
-            }
-        } catch (NoSuchMethodException
-                 | IllegalAccessException
-                 | InvocationTargetException ignored) {
-            // Wrong Message class -> does not satisfy the criteria
+        final Optional<Field> fieldOptional = Field.forFilter(object.getClass(), filter);
+        if (!fieldOptional.isPresent()) {
             return false;
         }
 
-        final boolean result = expectedValues.contains(actualValue);
-        return result;
-    }
+        final Field field = fieldOptional.get();
+        final Optional<Message> value;
 
-    private static String getFieldName(FieldFilter filter) {
-        final String fieldPath = filter.getFieldPath();
-        final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
-
-        if (fieldName.isEmpty()) {
-            throw newIllegalArgumentException(
-                    "Unable to get a field name from the field filter: %s",
-                    filter);
+        try {
+            value = field.getValue(object);
+        } catch (IllegalStateException ignored) {
+            // Wrong Message class -> does not satisfy the criteria.
+            return false;
         }
-        return fieldName;
+
+        final Collection<Any> expectedAnys = filter.getValueList();
+        final Collection<Message> expectedValues =
+                Collections2.transform(expectedAnys, unpackFunc());
+
+        if (!value.isPresent()) {
+            /* If there is no value in the field return `true`
+               if the list of required values is also empty. */
+            final boolean nothingIsExpected = expectedValues.isEmpty();
+            return nothingIsExpected;
+        }
+
+        final boolean result = expectedValues.contains(value.get());
+        return result;
     }
 }

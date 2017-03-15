@@ -22,6 +22,7 @@ package org.spine3.server.stand;
 import org.spine3.base.Identifiers;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import java.util.HashSet;
@@ -68,7 +69,8 @@ final class SubscriptionRegistry {
     synchronized Subscription addSubscription(Target target) {
         final String subscriptionId = Identifiers.newUuid();
         final String typeAsString = target.getType();
-        final TypeUrl type = TypeUrl.of(typeAsString);
+        final TypeUrl type = TypeName.of(typeAsString)
+                                     .toUrl();
         final Subscription subscription = Subscription.newBuilder()
                                                       .setId(subscriptionId)
                                                       .setType(typeAsString)

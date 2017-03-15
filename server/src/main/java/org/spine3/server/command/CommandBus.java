@@ -21,7 +21,6 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
@@ -46,6 +45,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -280,7 +280,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             dispatcher.dispatch(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
-            final Throwable cause = Throwables.getRootCause(e);
+            final Throwable cause = getRootCause(e);
             updateCommandStatus(commandEnvelope, cause);
         }
     }

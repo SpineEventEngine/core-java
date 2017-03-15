@@ -35,7 +35,7 @@ import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.client.grpc.SubscriptionServiceGrpc;
 import org.spine3.server.stand.Stand;
-import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import java.util.Map;
@@ -126,17 +126,15 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        final String typeAsString = subscription.getType();
-        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
-        checkNotNull(type, "Unknown type of the subscription");
+        final TypeName typeName = TypeName.of(subscription.getType());
+        final TypeUrl type = typeName.toUrl();
         final BoundedContext result = typeToContextMap.get(type);
         return result;
     }
 
     private BoundedContext selectBoundedContext(Target target) {
-        final String typeAsString = target.getType();
-        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
-        checkNotNull(type, "Unknown type of the target");
+        final TypeName typeName = TypeName.of(target.getType());
+        final TypeUrl type = typeName.toUrl();
         final BoundedContext result = typeToContextMap.get(type);
         return result;
     }

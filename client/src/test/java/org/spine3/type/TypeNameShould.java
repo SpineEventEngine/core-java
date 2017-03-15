@@ -58,6 +58,11 @@ public class TypeNameShould {
                 .testAllPublicStaticMethods(TypeName.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_empty_name() {
+        TypeName.of("");
+    }
+
     @Test
     public void return_simple_type_name() {
         assertEquals(StringValue.class.getSimpleName(), TypeName.of(StringValue.class)
@@ -68,7 +73,8 @@ public class TypeNameShould {
     public void return_simple_name_if_no_package() {
         // A msg type without Protobuf package
         final String name = IfMissingOption.class.getSimpleName();
-        final TypeUrl typeUrl = TypeUrl.of(name);
+        final TypeUrl typeUrl = TypeName.of(name)
+                                        .toUrl();
 
         final String actual = TypeName.from(typeUrl)
                                       .getSimpleName();

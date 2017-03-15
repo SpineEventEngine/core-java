@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.event.enrich.EventEnricher.SupportsFieldConversion;
+import org.spine3.server.reflect.Field;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -142,10 +142,13 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
             for (FieldDescriptor targetField : targetFields) {
                 final Optional<EnrichmentFunction> function = FluentIterable.from(functions)
-                        .firstMatch(SupportsFieldConversion.of(sourceFieldClass, Messages.getFieldClass(targetField)));
-                @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"}) // the model is checked during
-                                                                                // the initialization and activation
-                final Object targetValue = function.get().apply(srcFieldValue);
+                        .firstMatch(SupportsFieldConversion.of(sourceFieldClass,
+                                                               Field.getFieldClass(targetField)));
+                @SuppressWarnings({
+                        "unchecked" /* the model is checked during */,
+                        "OptionalGetWithoutIsPresent" /* the initialization and activation */})
+                final Object targetValue = function.get()
+                                                   .apply(srcFieldValue);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);
                 }
@@ -154,7 +157,8 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
     }
 
     private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg) {
-        final boolean isContextField = srcField.getContainingType().equals(EventContext.getDescriptor());
+        final boolean isContextField = srcField.getContainingType()
+                                               .equals(EventContext.getDescriptor());
         final Object result = isContextField
                               ? getContext().getField(srcField)
                               : eventMsg.getField(srcField);

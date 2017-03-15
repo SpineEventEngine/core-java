@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
 import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -154,8 +155,8 @@ class EventEnrichmentsMap {
         }
 
         private static Set<String> getBoundFields(String enrichmentType) {
-            final Descriptor enrichmentDescriptor = KnownTypes.getDescriptorForType(enrichmentType);
-
+            final Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
+                                                            .getDescriptor();
             final Set<String> result = new HashSet<>();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 final String extension = field.getOptions()
@@ -191,8 +192,8 @@ class EventEnrichmentsMap {
 
         private static boolean hasOneOfTargetFields(String eventType,
                                                     Collection<String> targetFields) {
-            final Descriptor eventDescriptor = KnownTypes.getDescriptorForType(eventType);
-
+            final Descriptor eventDescriptor = TypeName.of(eventType)
+                                                       .getDescriptor();
             final List<FieldDescriptor> fields = eventDescriptor.getFields();
             final Collection<String> fieldNames = Collections2.transform(
                     fields,

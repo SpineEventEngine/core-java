@@ -34,18 +34,18 @@ public final class ClassName extends StringTypeValue {
         super(checkNotNull(value));
     }
 
-    private ClassName(Class clazz) {
-        this(clazz.getName());
+    private ClassName(Class cls) {
+        this(cls.getName());
     }
 
     /**
      * Creates a new instance with the name of the passed class.
      *
-     * @param clazz the class to get name from
+     * @param cls the class to get name from
      * @return new instance
      */
-    public static ClassName of(Class clazz) {
-        return new ClassName(checkNotNull(clazz));
+    public static ClassName of(Class cls) {
+        return new ClassName(checkNotNull(cls));
     }
 
     /**

@@ -20,13 +20,16 @@
 
 package org.spine3.type;
 
+import com.google.common.base.Splitter;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
+import org.spine3.type.error.UnknownTypeException;
 
-import java.util.regex.Pattern;
+import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -37,16 +40,23 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class TypeName extends StringTypeValue {
 
-    private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN =
-            Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
-
+    private static final Splitter packageSplitter = Splitter.on('.');
+    
     private TypeName(String value) {
         super(value);
     }
 
     private static TypeName create(String value) {
         return new TypeName(value);
+    }
+
+    /**
+     * Creates new instance by the passed type name value.
+     */
+    public static TypeName of(String typeName) {
+        checkNotNull(typeName);
+        checkArgument(!typeName.isEmpty());
+        return create(typeName);
     }
 
     /**
@@ -102,13 +112,37 @@ public class TypeName extends StringTypeValue {
      */
     public String getSimpleName() {
         final String typeName = value();
-        if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
-            final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
-            checkState(parts.length > 0, "Invalid type name: " + typeName);
-            final String result = parts[parts.length - 1];
-            return result;
-        } else {
-            return typeName;
-        }
+        final List<String> tokens = packageSplitter.splitToList(typeName);
+        final String result = tokens.get(tokens.size() - 1);
+        return result;
+    }
+
+    /**
+     * Creates URL instance corresponding to this type name.
+     */
+    public TypeUrl toUrl() {
+        final String typeName = value();
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName);
+        checkState(typeUrl != null, "Unable to find URL for type: %s", typeName);
+        return typeUrl;
+    }
+
+    /**
+     * Returns a message {@link Class} corresponding to the Protobuf type represented
+     * by this type name.
+     *
+     * @return the message class
+     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
+     *         there is no corresponding Java class
+     */
+    public <T extends Message> Class<T> getJavaClass() throws UnknownTypeException {
+        return KnownTypes.getJavaClass(toUrl());
+    }
+
+    /**
+     * Obtains descriptor for the type.
+     */
+    public Descriptor getDescriptor() {
+        return (Descriptor) KnownTypes.getDescriptor(value());
     }
 }

@@ -18,24 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf.error;
+package org.spine3.server.event;
 
-import com.google.protobuf.StringValue;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-public class MissingDescriptorExceptionShould {
-    
+public class MatchFilterShould {
+
     @Test
-    public void have_ctor() {
-        final Class<StringValue> clazz = StringValue.class;
-        final RuntimeException cause = new RuntimeException("");
-
-        final MissingDescriptorException exception = new MissingDescriptorException(clazz, cause);
-
-        assertTrue(exception.getMessage().contains(clazz.getName()));
-        assertEquals(cause, exception.getCause());
+    public void do_not_pass_null_events() {
+        final MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        assertFalse(filter.apply(null));
     }
 }

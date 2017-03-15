@@ -18,39 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.type;
 
 import com.google.common.testing.NullPointerTester;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+/**
+ * @author Alexander Yevsyukov
+ */
+public class ClassNameShould {
 
-public class StatusesShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Statuses.class);
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_empty_value() {
+        ClassName.of("");
     }
 
     @Test
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public void create_invalid_argument_status_exception() {
-        final IllegalArgumentException exception = new IllegalArgumentException("");
-
-        final StatusRuntimeException statusRuntimeException = Statuses.invalidArgumentWithCause(exception);
-
-        assertEquals(exception, statusRuntimeException.getCause());
-        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus()
-                                                                              .getCode());
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
+    public void pass_null_tolerance_check() throws Exception {
         new NullPointerTester()
-                .setDefault(Exception.class, new RuntimeException("Statuses test"))
-                .testAllPublicStaticMethods(Statuses.class);
+                .testAllPublicStaticMethods(ClassName.class);
     }
 }
