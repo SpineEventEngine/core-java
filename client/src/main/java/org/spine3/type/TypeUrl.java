@@ -22,6 +22,7 @@ package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
@@ -42,12 +43,13 @@ import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.protobuf.Internal.getDefaultInstance;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -64,11 +66,12 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 public final class TypeUrl {
 
     private static final String SEPARATOR = "/";
-    private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
+    private static final Splitter splitter = Splitter.on(SEPARATOR);
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+        // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     /** The prefix of the type URL. */
@@ -153,12 +156,12 @@ public final class TypeUrl {
     }
 
     private static TypeUrl doParse(String typeUrl) {
-        final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
-        if (parts.length != 2) {
+        final List<String> strings = splitter.splitToList(typeUrl);
+        if (strings.size() != 2) {
             throw malformedTypeUrl(typeUrl);
         }
-        final String prefix = parts[0];
-        final String typeName = parts[1];
+        final String prefix = strings.get(0);
+        final String typeName = strings.get(1);
         return create(prefix, typeName);
     }
 
@@ -211,8 +214,8 @@ public final class TypeUrl {
     }
 
     /** Obtains the type URL for the passed message class. */
-    public static TypeUrl of(Class<? extends Message> clazz) {
-        final Message defaultInstance = com.google.protobuf.Internal.getDefaultInstance(clazz);
+    public static TypeUrl of(Class<? extends Message> cls) {
+        final Message defaultInstance = getDefaultInstance(cls);
         final TypeUrl result = of(defaultInstance);
         return result;
     }
@@ -258,6 +261,7 @@ public final class TypeUrl {
      * @return {@code Descriptor} or {@code Optional.absent()} if this type URL
      *         represents an outer class
      */
+    @Internal
     public Optional<Descriptor> getTypeDescriptor() {
         final Class<? extends Message> clazz = getJavaClass();
         final GenericDescriptor descriptor = getClassDescriptor(clazz);
