@@ -21,6 +21,8 @@ package org.spine3.protobuf.error;
 
 import com.google.protobuf.Message;
 
+import static java.lang.String.format;
+
 /**
  * Exception that is thrown when no descriptor for a message class can be found.
  *
@@ -30,7 +32,14 @@ public class MissingDescriptorException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
-    public MissingDescriptorException(Class<? extends Message> clazz, Throwable cause) {
-        super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
+    public MissingDescriptorException(Class<? extends Message> cls, Throwable cause) {
+        super(makeMessage(cls, cause), cause);
+    }
+
+    private static String makeMessage(Class<? extends Message> clazz, Throwable cause) {
+        final String result = format("Could not get descriptor for class: %s, cause: %s",
+                                     clazz.getName(),
+                                     cause.getMessage());
+        return result;
     }
 }
