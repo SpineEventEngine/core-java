@@ -333,6 +333,14 @@ public class RepositoryShould {
         assertEquals(3, entities.size());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void do_not_allow_removal_in_iterator() {
+        createAndStoreEntities();
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        repository.iterator(all)
+                  .remove();
+    }
+
     private void createAndStoreEntities() {
         repository.initStorage(storageFactory);
 
