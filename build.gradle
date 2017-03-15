@@ -51,8 +51,8 @@ buildscript {
                                              version: spineToolsVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
-        classpath group: 'org.spine3.tools', name: 'javadoc-checker',
-                version: spineToolsVersion
+//        classpath group: 'org.spine3.tools', name: 'javadoc-checker',
+//                version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
