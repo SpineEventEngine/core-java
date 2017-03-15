@@ -43,7 +43,7 @@ public class StringifierRegistry {
     private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
                     ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
-                            .put(TypeToken.of(Timestamp.class), Timestamps2.idStringifier())
+                            .put(TypeToken.of(Timestamp.class), Timestamps2.stringifier())
                             .put(TypeToken.of(EventId.class), Events.idStringifier())
                             .put(TypeToken.of(CommandId.class), Commands.idStringifier())
                             .build()

@@ -118,7 +118,7 @@ public class StringifiersShould {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         final String time = Timestamps2.getCurrentTime()
                                        .toString();

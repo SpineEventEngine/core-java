@@ -29,11 +29,10 @@ import org.spine3.base.Stringifier;
 import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static org.spine3.util.Exceptions.conversionArgumentException;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -92,6 +91,8 @@ public class Timestamps2 {
             return new SystemTimeProvider();
         }
     };
+
+    private static final Stringifier<Timestamp> stringifier = new TimestampStringifier();
 
     private Timestamps2() {
         // Prevent instantiation of this utility class.
@@ -228,53 +229,32 @@ public class Timestamps2 {
         return date;
     }
 
-    private static final Stringifier<Timestamp> stringifier = new IdTimestampStringifer();
-
     /**
-     * Obtains a stringifier which identifiers based on {@code Timestamp}s.
+     * Obtains a stringifier that coverts a Timestamp into to RFC 3339 date string format.
      *
      * @see Timestamps#toString(Timestamp)
      */
-    public static Stringifier<Timestamp> idStringifier() {
+    public static Stringifier<Timestamp> stringifier() {
         return stringifier;
     }
 
     /**
-     * The stringifier for IDs based on {@code Timestamp}s.
+     * The stringifier of timestamps into RFC 3339 date string format.
      */
-    static class IdTimestampStringifer extends Stringifier<Timestamp> {
-
-        private static final Pattern PATTERN_COLON = Pattern.compile(":");
-        private static final Pattern PATTERN_T = Pattern.compile("T");
+    private static class TimestampStringifier extends Stringifier<Timestamp> {
 
         @Override
-        protected String toString(Timestamp timestamp) {
-            final String result = stringify(timestamp);
-            return result;
+        protected String toString(Timestamp obj) {
+            return Timestamps.toString(obj);
         }
 
         @Override
         protected Timestamp fromString(String str) {
             try {
                 return Timestamps.parse(str);
-            } catch (ParseException ignored) {
-                throw conversionArgumentException("Occurred exception during conversion");
+            } catch (ParseException e) {
+                throw wrappedCause(e);
             }
-        }
-
-        /**
-         * Converts the passed timestamp to the string.
-         *
-         * @param timestamp the value to convert
-         * @return the string representation of the timestamp
-         */
-        private static String stringify(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = PATTERN_COLON.matcher(result)
-                                  .replaceAll("-");
-            result = PATTERN_T.matcher(result)
-                              .replaceAll("_T");
-            return result;
         }
     }
 }

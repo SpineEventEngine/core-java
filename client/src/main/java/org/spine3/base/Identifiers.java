@@ -24,9 +24,12 @@ import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
 
 import javax.annotation.Nullable;
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -34,6 +37,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * Utility class for working with identifiers.
@@ -51,6 +55,9 @@ public class Identifiers {
     public static final String EMPTY_ID = "EMPTY";
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
     private static final String EQUAL_SIGN = "=";
+
+    private static final Stringifier<Timestamp> timestampIdStringifier =
+            new TimestampIdStringifer();
 
     private Identifiers() {
         // Prevent instantiation of this utility class.
@@ -228,5 +235,54 @@ public class Identifiers {
         result = PATTERN_COLON_SPACE.matcher(result)
                                     .replaceAll(EQUAL_SIGN);
         return result;
+    }
+
+    /**
+     * Obtains a stringifier for IDs based on {@code Timestamp}s.
+     *
+     * @see Timestamps#toString(Timestamp)
+     */
+    public static Stringifier<Timestamp> timestampIdStringifier() {
+        return timestampIdStringifier;
+    }
+
+    /**
+     * The stringifier for IDs based on {@code Timestamp}s.
+     */
+    static class TimestampIdStringifer extends Stringifier<Timestamp> {
+
+        private static final Pattern PATTERN_COLON = Pattern.compile(":");
+        private static final Pattern PATTERN_T = Pattern.compile("T");
+
+        @Override
+        protected String toString(Timestamp timestamp) {
+            final String result = stringify(timestamp);
+            return result;
+        }
+
+        @Override
+        protected Timestamp fromString(String str) {
+            try {
+                //TODO:2017-03-15:alexander.yevsyukov: Escape the passed string back
+                return Timestamps.parse(str);
+            } catch (ParseException ignored) {
+                throw conversionArgumentException("Occurred exception during conversion");
+            }
+        }
+
+        /**
+         * Converts the passed timestamp to the string.
+         *
+         * @param timestamp the value to convert
+         * @return the string representation of the timestamp
+         */
+        private static String stringify(Timestamp timestamp) {
+            String result = Timestamps.toString(timestamp);
+            result = PATTERN_COLON.matcher(result)
+                                  .replaceAll("-");
+            result = PATTERN_T.matcher(result)
+                              .replaceAll("_T");
+            return result;
+        }
     }
 }
