@@ -20,43 +20,22 @@
 
 package org.spine3.type;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.testing.NullPointerTester;
+import org.junit.Test;
 
 /**
- * A value object holding a fully-qualified Java class name.
- *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-public final class ClassName extends StringTypeValue {
+public class ClassNameShould {
 
-    private ClassName(String value) {
-        super(checkNotNull(value));
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_empty_value() {
+        ClassName.of("");
     }
 
-    private ClassName(Class cls) {
-        this(cls.getName());
-    }
-
-    /**
-     * Creates a new instance with the name of the passed class.
-     *
-     * @param cls the class to get name from
-     * @return new instance
-     */
-    public static ClassName of(Class cls) {
-        return new ClassName(checkNotNull(cls));
-    }
-
-    /**
-     * Creates a new instance with the passed class name value.
-     *
-     * @param className a fully-qualified Java class name
-     * @return new
-     */
-    public static ClassName of(String className) {
-        checkNotNull(className);
-        checkArgument(className.length() > 0, "Class name cannot me empty");
-        return new ClassName(className);
+    @Test
+    public void pass_null_tolerance_check() throws Exception {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(ClassName.class);
     }
 }
