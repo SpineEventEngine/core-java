@@ -29,10 +29,37 @@ import com.google.common.base.Converter;
  * <p>It is used for converting back and forth between the different
  * representations of the same information.
  *
+ * @param <T> the type of converted objects
  * @author Alexander Yevsyukov
  * @author Illia Shepilov
  * @see #convert(Object)
  * @see #reverse()
  */
-public abstract class Stringifier<I> extends Converter<I, String> {
+public abstract class Stringifier<T> extends Converter<T, String> {
+
+    /**
+     * Convert the thing to a string.
+     */
+    protected abstract String toString(T obj);
+
+    /**
+     * Convert the string back to a thing.
+     */
+    protected abstract T fromString(String s);
+
+    /**
+     * Invokes {@link #toString(Object)}.
+     */
+    @Override
+    protected final String doForward(T obj) {
+        return toString(obj);
+    }
+
+    /**
+     * Invokes {@link #fromString(String)}.
+     */
+    @Override
+    protected final T doBackward(String str) {
+        return fromString(str);
+    }
 }

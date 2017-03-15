@@ -100,15 +100,15 @@ public class Stringifiers {
         private static final Pattern PATTERN_T = Pattern.compile("T");
 
         @Override
-        protected String doForward(Timestamp timestamp) {
-            final String result = toString(timestamp);
+        protected String toString(Timestamp timestamp) {
+            final String result = stringify(timestamp);
             return result;
         }
 
         @Override
-        protected Timestamp doBackward(String s) {
+        protected Timestamp fromString(String str) {
             try {
-                return Timestamps.parse(s);
+                return Timestamps.parse(str);
             } catch (ParseException ignored) {
                 throw conversionArgumentException("Occurred exception during conversion");
             }
@@ -120,7 +120,7 @@ public class Stringifiers {
          * @param timestamp the value to convert
          * @return the string representation of the timestamp
          */
-        private static String toString(Timestamp timestamp) {
+        private static String stringify(Timestamp timestamp) {
             String result = Timestamps.toString(timestamp);
             result = PATTERN_COLON.matcher(result)
                                   .replaceAll("-");
@@ -132,15 +132,15 @@ public class Stringifiers {
 
     protected static class EventIdStringifier extends Stringifier<EventId> {
         @Override
-        protected String doForward(EventId eventId) {
+        protected String toString(EventId eventId) {
             final String result = eventId.getUuid();
             return result;
         }
 
         @Override
-        protected EventId doBackward(String s) {
+        protected EventId fromString(String str) {
             final EventId result = EventId.newBuilder()
-                                          .setUuid(s)
+                                          .setUuid(str)
                                           .build();
             return result;
         }
@@ -148,15 +148,15 @@ public class Stringifiers {
 
     protected static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
-        protected String doForward(CommandId commandId) {
+        protected String toString(CommandId commandId) {
             final String result = commandId.getUuid();
             return result;
         }
 
         @Override
-        protected CommandId doBackward(String s) {
+        protected CommandId fromString(String str) {
             final CommandId result = CommandId.newBuilder()
-                                              .setUuid(s)
+                                              .setUuid(str)
                                               .build();
             return result;
         }

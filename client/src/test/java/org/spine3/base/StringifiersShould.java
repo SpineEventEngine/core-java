@@ -50,14 +50,14 @@ public class StringifiersShould {
     private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
             new Stringifier<IdWithPrimitiveFields>() {
                 @Override
-                protected String doForward(IdWithPrimitiveFields id) {
+                protected String toString(IdWithPrimitiveFields id) {
                     return id.getName();
                 }
 
                 @Override
-                protected IdWithPrimitiveFields doBackward(String s) {
+                protected IdWithPrimitiveFields fromString(String str) {
                     return IdWithPrimitiveFields.newBuilder()
-                                                .setName(s)
+                                                .setName(str)
                                                 .build();
                 }
             };
