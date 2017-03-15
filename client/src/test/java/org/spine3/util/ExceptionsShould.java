@@ -53,7 +53,7 @@ public class ExceptionsShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void create_and_throw_illegal_conversion_argument_exception(){
-        Exceptions.conversionArgumentException("Occured exception dueing the conversion");
+        Exceptions.conversionArgumentException("some message");
     }
 
     @Test
@@ -77,5 +77,11 @@ public class ExceptionsShould {
     @Test(expected = IllegalStateException.class)
     public void throw_formatted_ISE() {
         newIllegalStateException("%s check %s", "state", "failed");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_formatted_ISE_with_cause() {
+        newIllegalStateException(new RuntimeException(getClass().getSimpleName()),
+                                 "%s %s", "taram", "param");
     }
 }
