@@ -182,7 +182,7 @@ class ReferenceValidator {
         checkArgument(names.length > 0, "Names may not be empty");
         checkArgument(names.length > 1,
                       "Enrichment target field names may not be a singleton array. " +
-                      "Use findSourceFieldByName.");
+                      "Use findSourceFieldByName().");
         final Collection<FieldDescriptor> result = new HashSet<>(names.length);
 
         FieldDescriptor.Type basicType = null;
