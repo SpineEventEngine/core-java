@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -33,7 +34,6 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class GivenShould {
@@ -102,13 +102,8 @@ public class GivenShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Given.class)
-                                                                     .addDefaultValue(
-                                                                             AProjection.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Given.class);
     }
 
     private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {

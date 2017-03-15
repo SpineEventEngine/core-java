@@ -20,11 +20,10 @@
 
 package org.spine3.change;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
 import static org.spine3.change.StringMismatch.expectedEmpty;
 import static org.spine3.change.StringMismatch.expectedNotEmpty;
@@ -109,10 +108,7 @@ public class StringMismatchShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(StringMismatch.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(StringMismatch.class);
     }
 }
