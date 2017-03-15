@@ -37,7 +37,9 @@ import static java.lang.String.format;
  */
 public class Exceptions {
 
-    private Exceptions() {}
+    private Exceptions() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Always throws {@code UnsupportedOperationException} initialized with the passed string.
@@ -150,6 +152,23 @@ public class Exceptions {
                                                                  Object... args) {
         final String errMsg = formatMessage(format, args);
         throw new IllegalStateException(errMsg);
+    }
+
+    /**
+     * Throws {@code IllegalStateException} with the formatted string and the cause.
+     *
+     * @param cause the cause of the exception
+     * @param format the format string
+     * @param args formatting parameters
+     * @return nothing ever, always throws an exception. The return type is given for convenience.
+     * @throws IllegalStateException always
+     */
+    public static IllegalStateException newIllegalStateException(Throwable cause,
+                                                                 String format,
+                                                                 Object... args) {
+        checkNotNull(cause);
+        final String errMsg = formatMessage(format, args);
+        throw new IllegalStateException(errMsg, cause);
     }
 
     /**

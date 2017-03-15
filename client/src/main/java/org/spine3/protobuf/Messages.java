@@ -19,7 +19,7 @@
  */
 package org.spine3.protobuf;
 
-import com.google.common.base.Optional;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
@@ -86,10 +86,10 @@ public class Messages {
     static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Optional<Descriptor> typeDescriptor = typeUrl.getDescriptor();
-            // Skip outer class descriptors.
-            if (typeDescriptor.isPresent()) {
-                builder.add(typeDescriptor.get());
+            final Descriptors.GenericDescriptor genericDescriptor = typeUrl.getDescriptor();
+            if (genericDescriptor instanceof Descriptor) {
+                final Descriptor descriptor = (Descriptor) genericDescriptor;
+                builder.add(descriptor);
             }
         }
         return builder.build();

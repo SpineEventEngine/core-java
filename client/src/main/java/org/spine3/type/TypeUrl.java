@@ -21,7 +21,6 @@
 package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
@@ -46,6 +45,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Internal.getDefaultInstance;
+import static java.lang.String.format;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -149,9 +149,8 @@ public final class TypeUrl {
     }
 
     private static IllegalArgumentException malformedTypeUrl(String typeUrl) {
-        throw new IllegalArgumentException(
-                new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
-                                                   + typeUrl));
+        final String errMsg = format("Invalid Protobuf type URL encountered: %s", typeUrl);
+        throw new IllegalArgumentException(new InvalidProtocolBufferException(errMsg));
     }
 
     /**
@@ -226,21 +225,14 @@ public final class TypeUrl {
     }
 
     /**
-     * Obtains the type descriptor for the type of this URL.
+     * Obtains a descriptor for the type of this URL.
      *
-     * @return {@code Descriptor} or {@code Optional.absent()} if this type URL
-     *         represents an outer class
+     * @return {@link Descriptor} if the URL represents a proto type,
+     *         {@link EnumDescriptor} if the URL represents a proto enum
      */
     @Internal
-    public Optional<Descriptor> getDescriptor() {
-        final Class<? extends Message> clazz = getJavaClass();
-        final GenericDescriptor descriptor = DescriptorUtil.getDescriptorForClass(clazz);
-        // Skip outer class descriptors.
-        if (descriptor instanceof Descriptor) {
-            final Descriptor typeDescriptor = (Descriptor) descriptor;
-            return Optional.of(typeDescriptor);
-        }
-        return Optional.absent();
+    public GenericDescriptor getDescriptor() {
+        return KnownTypes.getDescriptor(typeName);
     }
 
     /**

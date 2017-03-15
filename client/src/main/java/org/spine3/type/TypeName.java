@@ -32,7 +32,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Utility class for obtaining a type name from a {@code Message}.
@@ -144,10 +143,6 @@ public class TypeName extends StringTypeValue {
      * Obtains descriptor for the type.
      */
     public Descriptor getDescriptor() {
-        try {
-            return DescriptorUtil.getDescriptorForType(value());
-        } catch (IllegalArgumentException e) {
-            throw wrappedCause(e);
-        }
+        return (Descriptor) KnownTypes.getDescriptor(value());
     }
 }

@@ -30,8 +30,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Api;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.BytesValue;
-import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
@@ -64,13 +65,34 @@ import org.spine3.annotations.Internal;
 import org.spine3.type.error.UnknownTypeException;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.protobuf.DescriptorProtos.DescriptorProto;
+import static com.google.protobuf.DescriptorProtos.EnumDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.EnumOptions;
+import static com.google.protobuf.DescriptorProtos.EnumValueDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.EnumValueOptions;
+import static com.google.protobuf.DescriptorProtos.FieldDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.FieldOptions;
+import static com.google.protobuf.DescriptorProtos.FileDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import static com.google.protobuf.DescriptorProtos.FileOptions;
+import static com.google.protobuf.DescriptorProtos.GeneratedCodeInfo;
+import static com.google.protobuf.DescriptorProtos.MessageOptions;
+import static com.google.protobuf.DescriptorProtos.MethodDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.MethodOptions;
+import static com.google.protobuf.DescriptorProtos.OneofDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.ServiceDescriptorProto;
+import static com.google.protobuf.DescriptorProtos.ServiceOptions;
+import static com.google.protobuf.DescriptorProtos.SourceCodeInfo;
+import static com.google.protobuf.DescriptorProtos.UninterpretedOption;
 import static org.spine3.io.IoUtil.loadAllProperties;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -110,6 +132,7 @@ public class KnownTypes {
      * @see TypeUrl
      */
     private static final ImmutableMap<String, TypeUrl> typeUrls = buildTypeToUrlMap(knownTypes);
+    private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     private KnownTypes() {
     }
@@ -215,6 +238,33 @@ public class KnownTypes {
         }
     }
 
+    /**
+     * Retrieve {@link Descriptors proto descriptor} from the type name.
+     *
+     * @param typeName <b>valid</b> name of the desired type
+     * @return {@link Descriptors proto descriptor} for given type
+     * @see TypeName
+     * @throws IllegalArgumentException if the name does not correspond to any known type
+     */
+    static GenericDescriptor getDescriptor(String typeName) {
+        final TypeUrl typeUrl = getTypeUrl(typeName);
+        checkArgument(typeUrl != null, "Given type name is invalid");
+
+        final Class<?> cls = getJavaClass(typeUrl);
+
+        final GenericDescriptor descriptor;
+        try {
+            final java.lang.reflect.Method descriptorGetter =
+                    cls.getDeclaredMethod(METHOD_GET_DESCRIPTOR);
+            descriptor = (GenericDescriptor) descriptorGetter.invoke(null);
+        } catch (NoSuchMethodException
+                | IllegalAccessException
+                | InvocationTargetException e) {
+            throw newIllegalStateException(e, "Unable to get descriptor for the type %s", typeName);
+        }
+        return descriptor;
+    }
+
     /** The helper class for building internal immutable typeUrl-to-JavaClass map. */
     private static class Builder {
 
@@ -265,44 +315,44 @@ public class KnownTypes {
             put(Mixin.class);
 
             // Types from `descriptor.proto`
-            put(DescriptorProtos.FileDescriptorSet.class);
-            put(DescriptorProtos.FileDescriptorProto.class);
-            put(DescriptorProtos.DescriptorProto.class);
+            put(FileDescriptorSet.class);
+            put(FileDescriptorProto.class);
+            put(DescriptorProto.class);
             // Inner types of `DescriptorProto`
-            put(DescriptorProtos.DescriptorProto.ExtensionRange.class);
-            put(DescriptorProtos.DescriptorProto.ReservedRange.class);
+            put(DescriptorProto.ExtensionRange.class);
+            put(DescriptorProto.ReservedRange.class);
 
-            put(DescriptorProtos.FieldDescriptorProto.class);
-            putEnum(DescriptorProtos.FieldDescriptorProto.Type.getDescriptor(),
-                    DescriptorProtos.FieldDescriptorProto.Type.class);
-            putEnum(DescriptorProtos.FieldDescriptorProto.Label.getDescriptor(),
-                    DescriptorProtos.FieldDescriptorProto.Label.class);
+            put(FieldDescriptorProto.class);
+            putEnum(FieldDescriptorProto.Type.getDescriptor(),
+                    FieldDescriptorProto.Type.class);
+            putEnum(FieldDescriptorProto.Label.getDescriptor(),
+                    FieldDescriptorProto.Label.class);
 
-            put(DescriptorProtos.OneofDescriptorProto.class);
-            put(DescriptorProtos.EnumDescriptorProto.class);
-            put(DescriptorProtos.EnumValueDescriptorProto.class);
-            put(DescriptorProtos.ServiceDescriptorProto.class);
-            put(DescriptorProtos.MethodDescriptorProto.class);
-            put(DescriptorProtos.FileOptions.class);
-            putEnum(DescriptorProtos.FileOptions.OptimizeMode.getDescriptor(),
-                    DescriptorProtos.FileOptions.OptimizeMode.class);
-            put(DescriptorProtos.MessageOptions.class);
-            put(DescriptorProtos.FieldOptions.class);
-            putEnum(DescriptorProtos.FieldOptions.CType.getDescriptor(),
-                    DescriptorProtos.FieldOptions.CType.class);
-            putEnum(DescriptorProtos.FieldOptions.JSType.getDescriptor(),
-                    DescriptorProtos.FieldOptions.JSType.class);
-            put(DescriptorProtos.EnumOptions.class);
-            put(DescriptorProtos.EnumValueOptions.class);
-            put(DescriptorProtos.ServiceOptions.class);
-            put(DescriptorProtos.MethodOptions.class);
-            put(DescriptorProtos.UninterpretedOption.class);
-            put(DescriptorProtos.SourceCodeInfo.class);
+            put(OneofDescriptorProto.class);
+            put(EnumDescriptorProto.class);
+            put(EnumValueDescriptorProto.class);
+            put(ServiceDescriptorProto.class);
+            put(MethodDescriptorProto.class);
+            put(FileOptions.class);
+            putEnum(FileOptions.OptimizeMode.getDescriptor(),
+                    FileOptions.OptimizeMode.class);
+            put(MessageOptions.class);
+            put(FieldOptions.class);
+            putEnum(FieldOptions.CType.getDescriptor(),
+                    FieldOptions.CType.class);
+            putEnum(FieldOptions.JSType.getDescriptor(),
+                    FieldOptions.JSType.class);
+            put(EnumOptions.class);
+            put(EnumValueOptions.class);
+            put(ServiceOptions.class);
+            put(MethodOptions.class);
+            put(UninterpretedOption.class);
+            put(SourceCodeInfo.class);
             // Inner types of `SourceCodeInfo`.
-            put(DescriptorProtos.SourceCodeInfo.Location.class);
-            put(DescriptorProtos.GeneratedCodeInfo.class);
+            put(SourceCodeInfo.Location.class);
+            put(GeneratedCodeInfo.class);
             // Inner types of `GeneratedCodeInfo`.
-            put(DescriptorProtos.GeneratedCodeInfo.Annotation.class);
+            put(GeneratedCodeInfo.Annotation.class);
 
             // Types from `duration.proto`.
             put(Duration.class);
