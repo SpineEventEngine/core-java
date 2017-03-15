@@ -70,7 +70,8 @@ public class IdentifierShould {
     public void create_values_depending_from_message_type() {
         assertEquals(10, Type.INTEGER.fromMessage(newUIntValue(10)));
         assertEquals(1024L, Type.LONG.fromMessage(newUInt64Value(1024L)));
-        assertEquals("", Type.STRING.fromMessage(newStringValue("")));
+        final String value = getClass().getSimpleName();
+        assertEquals(value, Type.STRING.fromMessage(newStringValue(value)));
     }
 
     @Test(expected = IllegalArgumentException.class)

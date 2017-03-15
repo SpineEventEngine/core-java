@@ -104,12 +104,11 @@ class Identifier<I> {
                 break;
 
             case STRING:
-                result = value.toString().trim();
+                result = value.toString();
                 break;
 
             case MESSAGE:
                 result = Identifiers.idMessageToString((Message)value);
-                result = result.trim();
                 break;
             default:
                 throw newIllegalStateException("toString() is not supported for type: %s", type);
@@ -239,7 +238,8 @@ class Identifier<I> {
              * Verifies if the passed message is not an instance of a wrapper for
              * simple types that are used for packing simple Java types into {@code Any}.
              *
-             * @return {@code true} if the message is not {@code StringValue}, or {@code UInt32Value}, or {@code UInt64Value}
+             * @return {@code true} if the message is neither {@code StringValue}, nor
+             *         {@code UInt32Value}, nor {@code UInt64Value}
              */
             @Override
             boolean matchMessage(Message message) {
@@ -265,7 +265,7 @@ class Identifier<I> {
 
             @Override
             <I> I getDefaultValue(Class<I> idClass) {
-                Class<? extends Message> msgClass = (Class<? extends Message>) idClass;
+                final Class<? extends Message> msgClass = (Class<? extends Message>) idClass;
                 final Message result = Messages.newInstance(msgClass);
                 return (I) result;
             }
