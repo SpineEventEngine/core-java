@@ -25,6 +25,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Stringifiers.CommandIdStringifier;
+import org.spine3.base.Stringifiers.EventIdStringifier;
+import org.spine3.base.Stringifiers.TimestampStringifer;
 
 import java.util.Map;
 
@@ -42,12 +45,9 @@ public class StringifierRegistry {
     private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
                     ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
-                            .put(TypeToken.of(Timestamp.class),
-                                 new Stringifiers.TimestampStringifer())
-                            .put(TypeToken.of(EventId.class),
-                                 new Stringifiers.EventIdStringifier())
-                            .put(TypeToken.of(CommandId.class),
-                                 new Stringifiers.CommandIdStringifier())
+                            .put(TypeToken.of(Timestamp.class), new TimestampStringifer())
+                            .put(TypeToken.of(EventId.class), new EventIdStringifier())
+                            .put(TypeToken.of(CommandId.class), new CommandIdStringifier())
                             .build()
             )
     );
@@ -73,12 +73,28 @@ public class StringifierRegistry {
 
         final Stringifier<?> func = entries.get(valueToken);
 
-        @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-         @see #register(Class, Stringifier) */
-        final Stringifier<I> result = (Stringifier<I>) func;
+        final Stringifier<I> result = cast(func);
         return Optional.fromNullable(result);
     }
 
+    /**
+     * Casts the passed instance.
+     *
+     * <p>The cast is safe as we check the first type when
+     * {@linkplain #register(TypeToken, Stringifier) adding}.
+     */
+    @SuppressWarnings("unchecked")
+    private static <I> Stringifier<I> cast(Stringifier<?> func) {
+        return (Stringifier<I>) func;
+    }
+
+    /**
+     * Tells whether there is a Stringifier registered for the passed type.
+     *
+     * @param valueToken the token with the type info
+     * @param <I> the type to be converted to a string
+     * @return {@code true} if there is a registered stringifier, {@code false} otherwise
+     */
     public synchronized <I> boolean hasStringifierFor(TypeToken<I> valueToken) {
         final boolean contains = entries.containsKey(valueToken);
         return contains;
