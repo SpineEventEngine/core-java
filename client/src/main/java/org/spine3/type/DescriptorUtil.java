@@ -49,7 +49,7 @@ class DescriptorUtil {
     }
 
     /** Returns descriptor for the passed message class. */
-    static GenericDescriptor getClassDescriptor(Class<? extends Message> cls) {
+    static GenericDescriptor getDescriptorForClass(Class<? extends Message> cls) {
         checkNotNull(cls);
         try {
             final Method method = cls.getMethod(METHOD_GET_DESCRIPTOR);
@@ -76,8 +76,7 @@ class DescriptorUtil {
 
         final Descriptor descriptor;
         try {
-            final Method descriptorGetter =
-                    cls.getDeclaredMethod(METHOD_GET_DESCRIPTOR);
+            final Method descriptorGetter = cls.getDeclaredMethod(METHOD_GET_DESCRIPTOR);
             descriptor = (Descriptor) descriptorGetter.invoke(null);
         } catch (NoSuchMethodException
                 | IllegalAccessException

@@ -86,7 +86,7 @@ public class Messages {
     static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Optional<Descriptor> typeDescriptor = typeUrl.getTypeDescriptor();
+            final Optional<Descriptor> typeDescriptor = typeUrl.getDescriptor();
             // Skip outer class descriptors.
             if (typeDescriptor.isPresent()) {
                 builder.add(typeDescriptor.get());

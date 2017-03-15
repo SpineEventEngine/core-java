@@ -146,6 +146,7 @@ public class KnownTypesShould {
         assertTrue(packageTypes.isEmpty());
     }
 
+    //TODO:2017-03-15:alexander.yevsyukov: Move to separate test suite if DescriptorUtil survives.
     @Test
     public void provide_proto_descriptor_by_type_name() {
         final String typeName = "spine.test.types.Task";

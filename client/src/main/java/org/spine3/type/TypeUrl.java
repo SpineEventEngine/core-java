@@ -232,9 +232,9 @@ public final class TypeUrl {
      *         represents an outer class
      */
     @Internal
-    public Optional<Descriptor> getTypeDescriptor() {
+    public Optional<Descriptor> getDescriptor() {
         final Class<? extends Message> clazz = getJavaClass();
-        final GenericDescriptor descriptor = DescriptorUtil.getClassDescriptor(clazz);
+        final GenericDescriptor descriptor = DescriptorUtil.getDescriptorForClass(clazz);
         // Skip outer class descriptors.
         if (descriptor instanceof Descriptor) {
             final Descriptor typeDescriptor = (Descriptor) descriptor;
