@@ -31,6 +31,7 @@ import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.Messages;
@@ -40,6 +41,7 @@ import org.spine3.test.messages.TestEnumValue;
 import org.spine3.type.TypeUrl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
@@ -52,6 +54,22 @@ public class FieldShould {
                 .setDefault(FieldFilter.class, FieldFilter.getDefaultInstance())
                 .testAllPublicStaticMethods(Field.class);
     }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the field is present in this type.
+    @Test
+    public void return_name() {
+        final String fieldName = "seconds";
+        assertEquals(fieldName, Field.newField(Timestamp.class, fieldName)
+                                     .get()
+                                     .getName());
+    }
+
+    @Test
+    public void return_absent_for_missing_field() {
+        assertFalse(Field.newField(Timestamp.class, "min")
+                         .isPresent());
+    }
+
 
     private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
         final FieldDescriptor field = msgDescriptor.getFields()

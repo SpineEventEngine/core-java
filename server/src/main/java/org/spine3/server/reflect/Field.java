@@ -20,6 +20,7 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
@@ -65,7 +66,8 @@ public final class Field {
      * @param name         the field name
      * @return new field instance
      */
-    private static Optional<Field> newField(Class<? extends Message> messageClass,
+    @VisibleForTesting
+    static Optional<Field> newField(Class<? extends Message> messageClass,
                                             String name) {
         checkNotNull(messageClass);
         checkNotNull(name);
