@@ -70,6 +70,10 @@ public class FieldShould {
                          .isPresent());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_field_filter_without_a_field_name() {
+        Field.forFilter(Timestamp.class, FieldFilter.getDefaultInstance());
+    }
 
     private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
         final FieldDescriptor field = msgDescriptor.getFields()
