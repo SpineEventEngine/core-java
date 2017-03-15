@@ -82,7 +82,7 @@ public class RepositoryShould {
          *
          * @param boundedContext the {@link BoundedContext} in which this repository works
          */
-        protected RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
+        private RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
@@ -98,7 +98,6 @@ public class RepositoryShould {
 
         @Override
         protected void store(EntityWithUnsupportedId obj) {
-
         }
 
         @Override
@@ -142,7 +141,6 @@ public class RepositoryShould {
             if (id.equals(troublesome)) {
                 return Optional.absent();
             }
-
             return super.load(id);
         }
     }
