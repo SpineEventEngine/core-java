@@ -61,6 +61,8 @@ public class Commands {
     private static final char FILE_PATH_SEPARATOR = '/';
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
+    private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
+
     private Commands() {
         // Prevent instantiation of this utility class.
     }
@@ -357,5 +359,31 @@ public class Commands {
         checkNotNull(c2);
         return  c1.getActor().equals(c2.getActor()) &&
                 c1.getTenantId().equals(c2.getTenantId());
+    }
+
+    /**
+     * Obtains stringifier for command IDs.
+     */
+    public static Stringifier<CommandId> idStringifier() {
+        return idStringifier;
+    }
+
+    /**
+     * The stringifier for command IDs.
+     */
+    static class CommandIdStringifier extends Stringifier<CommandId> {
+        @Override
+        protected String toString(CommandId commandId) {
+            final String result = commandId.getUuid();
+            return result;
+        }
+
+        @Override
+        protected CommandId fromString(String str) {
+            final CommandId result = CommandId.newBuilder()
+                                              .setUuid(str)
+                                              .build();
+            return result;
+        }
     }
 }

@@ -25,9 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Stringifiers.CommandIdStringifier;
-import org.spine3.base.Stringifiers.EventIdStringifier;
-import org.spine3.base.Stringifiers.TimestampStringifer;
+import org.spine3.protobuf.Timestamps2;
 
 import java.util.Map;
 
@@ -45,9 +43,9 @@ public class StringifierRegistry {
     private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
                     ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
-                            .put(TypeToken.of(Timestamp.class), new TimestampStringifer())
-                            .put(TypeToken.of(EventId.class), new EventIdStringifier())
-                            .put(TypeToken.of(CommandId.class), new CommandIdStringifier())
+                            .put(TypeToken.of(Timestamp.class), Timestamps2.idStringifier())
+                            .put(TypeToken.of(EventId.class), Events.idStringifier())
+                            .put(TypeToken.of(CommandId.class), Commands.idStringifier())
                             .build()
             )
     );

@@ -22,11 +22,6 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-
-import java.text.ParseException;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -94,71 +89,4 @@ public class Stringifiers {
         return stringifier;
     }
 
-    static class TimestampStringifer extends Stringifier<Timestamp> {
-
-        private static final Pattern PATTERN_COLON = Pattern.compile(":");
-        private static final Pattern PATTERN_T = Pattern.compile("T");
-
-        @Override
-        protected String toString(Timestamp timestamp) {
-            final String result = stringify(timestamp);
-            return result;
-        }
-
-        @Override
-        protected Timestamp fromString(String str) {
-            try {
-                return Timestamps.parse(str);
-            } catch (ParseException ignored) {
-                throw conversionArgumentException("Occurred exception during conversion");
-            }
-        }
-
-        /**
-         * Converts the passed timestamp to the string.
-         *
-         * @param timestamp the value to convert
-         * @return the string representation of the timestamp
-         */
-        private static String stringify(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = PATTERN_COLON.matcher(result)
-                                  .replaceAll("-");
-            result = PATTERN_T.matcher(result)
-                              .replaceAll("_T");
-            return result;
-        }
-    }
-
-    static class EventIdStringifier extends Stringifier<EventId> {
-        @Override
-        protected String toString(EventId eventId) {
-            final String result = eventId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected EventId fromString(String str) {
-            final EventId result = EventId.newBuilder()
-                                          .setUuid(str)
-                                          .build();
-            return result;
-        }
-    }
-
-    static class CommandIdStringifier extends Stringifier<CommandId> {
-        @Override
-        protected String toString(CommandId commandId) {
-            final String result = commandId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected CommandId fromString(String str) {
-            final CommandId result = CommandId.newBuilder()
-                                              .setUuid(str)
-                                              .build();
-            return result;
-        }
-    }
 }

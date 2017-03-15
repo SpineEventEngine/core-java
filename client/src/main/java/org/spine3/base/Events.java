@@ -58,6 +58,8 @@ public class Events {
         }
     };
 
+    private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
+
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
         final String value = Identifiers.newUuid();
@@ -245,5 +247,31 @@ public class Events {
         }
         final E result = unpack(any);
         return Optional.fromNullable(result);
+    }
+
+    /**
+     * Obtains the stringifier for event IDs.
+     */
+    public static Stringifier<EventId> idStringifier() {
+        return idStringifier;
+    }
+
+    /**
+     * The stringifier of event IDs.
+     */
+    static class EventIdStringifier extends Stringifier<EventId> {
+        @Override
+        protected String toString(EventId eventId) {
+            final String result = eventId.getUuid();
+            return result;
+        }
+
+        @Override
+        protected EventId fromString(String str) {
+            final EventId result = EventId.newBuilder()
+                                          .setUuid(str)
+                                          .build();
+            return result;
+        }
     }
 }

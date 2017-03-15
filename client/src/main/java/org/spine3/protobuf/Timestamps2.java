@@ -22,13 +22,18 @@ package org.spine3.protobuf;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
+import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
+import org.spine3.base.Stringifier;
 
 import javax.annotation.Nullable;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
+import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -221,5 +226,55 @@ public class Timestamps2 {
         final long millisecsFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
+    }
+
+    private static final Stringifier<Timestamp> stringifier = new IdTimestampStringifer();
+
+    /**
+     * Obtains a stringifier which identifiers based on {@code Timestamp}s.
+     *
+     * @see Timestamps#toString(Timestamp)
+     */
+    public static Stringifier<Timestamp> idStringifier() {
+        return stringifier;
+    }
+
+    /**
+     * The stringifier for IDs based on {@code Timestamp}s.
+     */
+    static class IdTimestampStringifer extends Stringifier<Timestamp> {
+
+        private static final Pattern PATTERN_COLON = Pattern.compile(":");
+        private static final Pattern PATTERN_T = Pattern.compile("T");
+
+        @Override
+        protected String toString(Timestamp timestamp) {
+            final String result = stringify(timestamp);
+            return result;
+        }
+
+        @Override
+        protected Timestamp fromString(String str) {
+            try {
+                return Timestamps.parse(str);
+            } catch (ParseException ignored) {
+                throw conversionArgumentException("Occurred exception during conversion");
+            }
+        }
+
+        /**
+         * Converts the passed timestamp to the string.
+         *
+         * @param timestamp the value to convert
+         * @return the string representation of the timestamp
+         */
+        private static String stringify(Timestamp timestamp) {
+            String result = Timestamps.toString(timestamp);
+            result = PATTERN_COLON.matcher(result)
+                                  .replaceAll("-");
+            result = PATTERN_T.matcher(result)
+                              .replaceAll("_T");
+            return result;
+        }
     }
 }
