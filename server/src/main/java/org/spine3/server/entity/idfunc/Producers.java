@@ -22,7 +22,7 @@ package org.spine3.server.entity.idfunc;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 

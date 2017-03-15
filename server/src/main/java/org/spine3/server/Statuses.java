@@ -22,7 +22,7 @@ package org.spine3.server;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

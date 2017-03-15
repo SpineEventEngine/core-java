@@ -27,7 +27,7 @@ import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.List;

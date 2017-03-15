@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
@@ -29,44 +29,36 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.annotations.AnnotationsProto;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
-import org.spine3.base.EventEnvelope;
-import org.spine3.base.MessageEnvelope;
-import org.spine3.type.StringTypeValue;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.envelope.EventEnvelope;
+import org.spine3.envelope.MessageEnvelope;
+import org.spine3.type.error.UnknownTypeException;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
- * A wrapper for the Protobuf type URL.
+ * A URL of a Protobuf type.
  *
- * <p>Consists of the two parts separated with {@link TypeUrl#SEPARATOR}.
- * The first part is the type URL prefix (for example, {@link TypeUrl#GOOGLE_TYPE_URL_PREFIX});
- * the second one is the fully-qualified Protobuf type name.
+ * <p>Consists of the two parts separated with a slash.
+ * The first part is the type URL prefix (for example, {@code "type.googleapis.com"});
+ * the second part is a fully-qualified Protobuf type name.
  *
  * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
  * @see Descriptors.FileDescriptor#getFullName()
  */
-public final class TypeUrl extends StringTypeValue {
+public final class TypeUrl {
 
     private static final String SEPARATOR = "/";
-    private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
-
-    private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN = Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
-
-    @VisibleForTesting
-    static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
-
-    public static final String SPINE_TYPE_URL_PREFIX = "type.spine3.org";
+    private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
@@ -77,7 +69,6 @@ public final class TypeUrl extends StringTypeValue {
     private final String typeName;
 
     private TypeUrl(String prefix, String typeName) {
-        super(composeTypeUrl(prefix, typeName));
         this.prefix = checkNotEmptyOrBlank(prefix, "typeUrlPrefix");
         this.typeName = checkNotEmptyOrBlank(typeName, "typeName");
     }
@@ -90,8 +81,8 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     @VisibleForTesting
-    static String composeTypeUrl(String typeUrlPrefix, String typeName) {
-        final String url = typeUrlPrefix + SEPARATOR + typeName;
+    static String composeTypeUrl(String prefix, String typeName) {
+        final String url = prefix + SEPARATOR + typeName;
         return url;
     }
 
@@ -143,12 +134,28 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     private static TypeUrl ofTypeUrl(String typeUrl) {
-        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
-        if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeUrl));
+        final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
+        if (parts.length != 2) {
+            throw malformedTypeUrl(typeUrl);
         }
-        return create(parts[0], parts[1]);
+
+        final String prefix = parts[0].trim();
+        if (prefix.isEmpty()) {
+            throw malformedTypeUrl(typeUrl);
+        }
+
+        final String typeName = parts[1].trim();
+        if (typeName.isEmpty()) {
+            throw malformedTypeUrl(typeUrl);
+        }
+
+        return create(prefix, typeName);
+    }
+
+    private static IllegalArgumentException malformedTypeUrl(String typeUrl) {
+        throw new IllegalArgumentException(
+                new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
+                                                   + typeUrl));
     }
 
     private static TypeUrl ofTypeName(String typeName) {
@@ -208,11 +215,23 @@ public final class TypeUrl extends StringTypeValue {
     private static String getTypeUrlPrefix(GenericDescriptor descriptor) {
         final Descriptors.FileDescriptor file = descriptor.getFile();
         if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
-            return GOOGLE_TYPE_URL_PREFIX;
+            return Prefix.GOOGLE_APIS.value();
         }
         final String result = file.getOptions()
                                   .getExtension(AnnotationsProto.typeUrlPrefix);
         return result;
+    }
+
+    /**
+     * Returns a message {@link Class} corresponding to the Protobuf type represented
+     * by this type URL.
+     *
+     * @return the message class
+     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
+     *         there is no corresponding Java class
+     */
+    public <T extends Message> Class<T> toMessageClass() {
+        return KnownTypes.getClass(this);
     }
 
     /**
@@ -229,15 +248,68 @@ public final class TypeUrl extends StringTypeValue {
         return typeName;
     }
 
-    /** Returns the unqualified name of the Protobuf type, for example: `StringValue`. */
-    public String getSimpleName() {
-        if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
-            final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
-            checkState(parts.length > 0, "Invalid type name: " + typeName);
-            final String result = parts[parts.length - 1];
-            return result;
-        } else {
-            return typeName;
+    @Override
+    public String toString() {
+        return value();
+    }
+
+    public String value() {
+        final String result = composeTypeUrl(prefix, typeName);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TypeUrl)) {
+            return false;
+        }
+        TypeUrl typeUrl = (TypeUrl) o;
+        return Objects.equals(prefix, typeUrl.prefix) &&
+               Objects.equals(typeName, typeUrl.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(prefix, typeName);
+    }
+
+    /**
+     * Enumeration of known type URL prefixes.
+     */
+    public enum Prefix {
+
+        /**
+         * Type prefix for standard Protobuf types.
+         */
+        GOOGLE_APIS("type.googleapis.com"),
+
+        /**
+         * Type prefix for types provided by the Spine framework.
+         */
+        SPINE("type.spine3.org");
+
+        private final String value;
+
+        Prefix(String value) {
+            this.value = value;
+        }
+
+        /**
+         * Obtains the value of the prefix.
+         */
+        public String value() {
+            return value;
+        }
+
+        /**
+         * Returns the value of the prefix.
+         */
+        @Override
+        public String toString() {
+            return value();
         }
     }
 }

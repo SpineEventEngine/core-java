@@ -25,10 +25,10 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

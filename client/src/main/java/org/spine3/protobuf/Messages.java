@@ -19,7 +19,6 @@
  */
 package org.spine3.protobuf;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -27,8 +26,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
-import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
+import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -51,29 +51,8 @@ public class Messages {
     @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
-    private Messages() {}
-
-    /**
-     * Returns message {@link Class} for the given Protobuf message type.
-     *
-     * <p>This method is temporary until full support of {@link Any} is provided.
-     *
-     * @param typeUrl the type URL of the message
-     * @return message class
-     * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if there is no corresponding class
-     *                              for the given Protobuf message type
-     * @see AnyPacker#unpack(Any) that uses the same convention
-     */
-    public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
-        checkNotNull(typeUrl);
-        final ClassName className = KnownTypes.getClassName(typeUrl);
-        try {
-            @SuppressWarnings("unchecked") // the client considers this message is of this class
-            final Class<T> result = (Class<T>) Class.forName(className.value());
-            return result;
-        } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(typeUrl.getTypeName(), e);
-        }
+    private Messages() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -111,10 +90,10 @@ public class Messages {
      *
      * @return {@code JsonFormat.TypeRegistry} instance
      */
-    public static JsonFormat.TypeRegistry forKnownTypes() {
+    static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeUrl typeUrl : KnownTypes.getTypeUrls()) {
-            final Class<? extends Message> clazz = toMessageClass(typeUrl);
+        for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
+            final Class<? extends Message> clazz = typeUrl.toMessageClass();
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.
             if (descriptor instanceof Descriptor) {
@@ -201,14 +180,16 @@ public class Messages {
                 return ByteString.class;
             case ENUM:
                 final String enumTypeName = field.getEnumType().getFullName();
-                final Class<? extends Message> enumClass = toMessageClass(TypeUrl.of(enumTypeName));
+                final Class<? extends Message> enumClass = TypeUrl.of(enumTypeName)
+                                                                  .toMessageClass();
                 return enumClass;
             case MESSAGE:
                 final TypeUrl typeUrl = TypeUrl.from(field.getMessageType());
-                final Class<? extends Message> msgClass = toMessageClass(typeUrl);
+                final Class<? extends Message> msgClass = typeUrl.toMessageClass();
                 return msgClass;
             default:
-                throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
+                throw new IllegalArgumentException("Unknown field type discovered: " +
+                                                   field.getFullName());
         }
     }
 }

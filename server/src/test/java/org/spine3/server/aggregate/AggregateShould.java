@@ -29,7 +29,6 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -48,6 +47,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

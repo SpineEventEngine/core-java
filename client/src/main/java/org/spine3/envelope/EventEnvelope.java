@@ -18,26 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.envelope;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Event;
+import org.spine3.base.Events;
 
 /**
- * A common interface for obtaining messages from wrapping objects.
+ * The holder of an {@code Event} which provides convenient access to its properties.
  *
- * @param <T> the type of the object that wraps a message
- * @author Alex Tymchenko
  * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public interface MessageEnvelope<T> {
+public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
+
+    private final Message eventMessage;
+
+    private EventEnvelope(Event object) {
+        super(object);
+        this.eventMessage = Events.getMessage(object);
+    }
 
     /**
-     * Obtains the object which contains the message of interest.
+     * Creates instance for the passed event.
      */
-    T getOuterObject();
+    public static EventEnvelope of(Event event) {
+        return new EventEnvelope(event);
+    }
 
     /**
-     * Obtains the message.
+     * Obtains the event message.
      */
-    Message getMessage();
+    @Override
+    public Message getMessage() {
+        return this.eventMessage;
+    }
 }

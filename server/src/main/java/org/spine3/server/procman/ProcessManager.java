@@ -22,15 +22,15 @@ package org.spine3.server.procman;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;

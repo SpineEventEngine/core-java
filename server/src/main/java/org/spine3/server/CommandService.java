@@ -26,12 +26,12 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.Response;
 import org.spine3.client.grpc.CommandServiceGrpc;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

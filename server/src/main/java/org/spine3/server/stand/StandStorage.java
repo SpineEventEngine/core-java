@@ -21,10 +21,10 @@ package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
-import org.spine3.SPI;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.annotations.SPI;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.type.TypeUrl;
 
 /**
  * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate Aggregate} states.

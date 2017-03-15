@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Duration;
@@ -33,11 +32,10 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.test.types.Task;
 import org.spine3.test.types.TaskId;
 import org.spine3.test.types.TaskName;
-import org.spine3.type.ClassName;
+import org.spine3.type.error.UnknownTypeException;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,9 +46,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 /**
  * @author Alexander Litus
@@ -64,7 +62,7 @@ public class KnownTypesShould {
 
     @Test
     public void return_known_proto_message_type_urls() {
-        final ImmutableSet<TypeUrl> typeUrls = KnownTypes.getTypeUrls();
+        final Set<TypeUrl> typeUrls = KnownTypes.getAllUrls();
 
         assertFalse(typeUrls.isEmpty());
     }
@@ -129,7 +127,7 @@ public class KnownTypesShould {
 
         final String packageName = "spine.test.types";
 
-        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(packageName);
+        final Collection<TypeUrl> packageTypes = KnownTypes.getAllFromPackage(packageName);
         assertSize(3, packageTypes);
         assertTrue(packageTypes.containsAll(Arrays.asList(taskId, taskName, task)));
     }
@@ -137,7 +135,7 @@ public class KnownTypesShould {
     @Test
     public void return_empty_collection_if_package_is_empty_or_invalid() {
         final String packageName = "com.foo.invalid.package";
-        final Collection<?> emptyTypesCollection = KnownTypes.getTypesFromPackage(packageName);
+        final Collection<?> emptyTypesCollection = KnownTypes.getAllFromPackage(packageName);
         assertNotNull(emptyTypesCollection);
         assertTrue(emptyTypesCollection.isEmpty());
     }
@@ -146,7 +144,7 @@ public class KnownTypesShould {
     public void do_not_return_types_of_package_by_package_prefix() {
         final String prefix = "spine.test.ty"; // "spine.test.types" is a valid package
 
-        final Collection<TypeUrl> packageTypes = KnownTypes.getTypesFromPackage(prefix);
+        final Collection<TypeUrl> packageTypes = KnownTypes.getAllFromPackage(prefix);
         assertTrue(packageTypes.isEmpty());
     }
 

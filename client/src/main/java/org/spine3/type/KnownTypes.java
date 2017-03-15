@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -46,6 +46,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.ListValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.Method;
 import com.google.protobuf.Mixin;
 import com.google.protobuf.NullValue;
@@ -61,9 +62,8 @@ import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
-import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.type.ClassName;
+import org.spine3.annotations.Internal;
+import org.spine3.type.error.UnknownTypeException;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -73,6 +73,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -116,13 +117,15 @@ public class KnownTypes {
      *
      * @see TypeUrl
      */
-    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(knownTypes);
+    private static final ImmutableMap<String, TypeUrl> typeUrls = buildTypeToUrlMap(knownTypes);
 
     private KnownTypes() {
     }
 
-    /** Retrieves Protobuf type URLs known to the application. */
-    public static ImmutableSet<TypeUrl> getTypeUrls() {
+    /**
+     * Retrieves Protobuf type URLs known to the application.
+     */
+    public static Set<TypeUrl> getAllUrls() {
         final Set<TypeUrl> result = knownTypes.keySet();
         return ImmutableSet.copyOf(result);
     }
@@ -170,17 +173,17 @@ public class KnownTypes {
     /** Returns a Protobuf type URL by Protobuf type name. */
     @Nullable
     public static TypeUrl getTypeUrl(String typeName) {
-        final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
+        final TypeUrl typeUrl = typeUrls.get(typeName);
         return typeUrl;
     }
 
     /**
-     * Retrieves all the types that belong to the given package or it's subpackages.
+     * Retrieves all the types that belong to the given package or its subpackages.
      *
-     * @param packageName protobuf-style package
-     * @return set of {@link TypeUrl TypeUrls} for types that belong to the given package
+     * @param packageName proto package name
+     * @return set of {@link TypeUrl TypeUrl}s of types that belong to the given package
      */
-    public static Set<TypeUrl> getTypesFromPackage(final String packageName) {
+    public static Set<TypeUrl> getAllFromPackage(final String packageName) {
         final Collection<TypeUrl> knownTypeUrls = knownTypes.keySet();
         final Collection<TypeUrl> resultCollection = Collections2.filter(
                 knownTypeUrls, new Predicate<TypeUrl>() {
@@ -213,13 +216,8 @@ public class KnownTypes {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkArgument(typeUrl != null, "Given type name is invalid");
 
-        final ClassName className = getClassName(typeUrl);
-        final Class<?> cls;
-        try {
-            cls = Class.forName(className.value());
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
+        final Class<?> cls = getClass(typeUrl);
+
         final Descriptors.Descriptor descriptor;
         try {
             final java.lang.reflect.Method descriptorGetter =
@@ -233,12 +231,31 @@ public class KnownTypes {
         return descriptor;
     }
 
-    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> knownTypes) {
+    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl,
+                                                                   ClassName> knownTypes) {
         final ImmutableMap.Builder<String, TypeUrl> builder = ImmutableMap.builder();
         for (TypeUrl typeUrl : knownTypes.keySet()) {
             builder.put(typeUrl.getTypeName(), typeUrl);
         }
         return builder.build();
+    }
+
+    /**
+     * Obtains a Java class for the passed type URL.
+     *
+     * @throws UnknownTypeException if there is no Java class for the passed type URL
+     */
+    @VisibleForTesting
+    public static <T extends Message> Class<T> getClass(TypeUrl typeUrl) {
+        checkNotNull(typeUrl);
+        final ClassName className = getClassName(typeUrl);
+        try {
+            @SuppressWarnings("unchecked") // the client considers this message is of this class
+            final Class<T> result = (Class<T>) Class.forName(className.value());
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw new UnknownTypeException(typeUrl.getTypeName(), e);
+        }
     }
 
     /** The helper class for building internal immutable typeUrl-to-JavaClass map. */
@@ -250,7 +267,8 @@ public class KnownTypes {
             final Builder builder = new Builder()
                     .addStandardProtobufTypes()
                     .loadNamesFromProperties();
-            final ImmutableBiMap<TypeUrl, ClassName> result = ImmutableBiMap.copyOf(builder.resultMap);
+            final ImmutableBiMap<TypeUrl, ClassName> result =
+                    ImmutableBiMap.copyOf(builder.resultMap);
             return result;
         }
 

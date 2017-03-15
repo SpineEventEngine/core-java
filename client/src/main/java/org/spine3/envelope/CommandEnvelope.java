@@ -18,9 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.envelope;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getId;

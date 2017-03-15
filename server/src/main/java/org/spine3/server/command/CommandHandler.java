@@ -24,13 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.util.List;

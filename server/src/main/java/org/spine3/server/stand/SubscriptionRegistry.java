@@ -22,7 +22,7 @@ package org.spine3.server.stand;
 import org.spine3.base.Identifiers;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import java.util.HashSet;
 import java.util.Map;

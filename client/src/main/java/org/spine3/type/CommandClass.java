@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
+import org.spine3.base.Commands;
 
 import java.util.Arrays;
 
@@ -67,14 +69,6 @@ public final class CommandClass extends MessageClass {
         }
         final CommandClass result = of(command.getClass());
         return result;
-    }
-
-    /**
-     * Obtains Java class of the command message or a {@link Command} instance
-     * containing the message of interest.
-     */
-    public static Class<? extends Message> valueOf(Message command) {
-        return of(command).value();
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */

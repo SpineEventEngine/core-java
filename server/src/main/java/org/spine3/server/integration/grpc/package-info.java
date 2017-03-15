@@ -26,6 +26,6 @@
 @ParametersAreNonnullByDefault
 package org.spine3.server.integration.grpc;
 
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

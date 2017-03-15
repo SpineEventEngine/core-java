@@ -21,14 +21,14 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
 import org.spine3.annotations.EventAnnotationsProto;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -45,7 +45,8 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * A map from an event enrichment Protobuf type name to the corresponding type name(s) of event(s) to enrich.
+ * A map from an event enrichment Protobuf type name to the corresponding
+ * type name(s) of event(s) to enrich.
  *
  * <p>Example:
  * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},{@code proto.type.SecondEvent}
@@ -64,7 +65,9 @@ class EventEnrichmentsMap {
     /** A separator between event types in the `.properties` file. */
     private static final String EVENT_TYPE_SEPARATOR = ",";
 
-    private static final Pattern PIPE_SEPARATOR_PATTERN = Pattern.compile("\\|");
+    private static final Splitter eventTypeSplitter = Splitter.on(EVENT_TYPE_SEPARATOR);
+
+    private static final Pattern pipeSeparatorPattern = Pattern.compile("\\|");
 
     private static final char PROTO_PACKAGE_SEPARATOR = '.';
 
@@ -113,8 +116,8 @@ class EventEnrichmentsMap {
             final Set<String> enrichmentTypes = props.stringPropertyNames();
             for (String enrichmentType : enrichmentTypes) {
                 final String eventTypesStr = props.getProperty(enrichmentType);
-                final Iterable<String> eventQualifier = FluentIterable.from(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
-                put(enrichmentType, eventQualifier);
+                final Iterable<String> eventTypes = eventTypeSplitter.split(eventTypesStr);
+                put(enrichmentType, eventTypes);
             }
         }
 
@@ -129,16 +132,19 @@ class EventEnrichmentsMap {
         }
 
         /**
-         * Puts all the events from the given package into the map to match the given enrichment type.
+         * Puts all the events from the given package into the map to match the
+         * given enrichment type.
          *
          * @param enrichmentType type of the enrichment for the given events
-         * @param eventsPackage  package qualifier representing the protobuf package containing the event to enrich
+         * @param eventsPackage  package qualifier representing the protobuf package containing
+         *                       the event to enrich
          */
         private void putAllTypesFromPackage(String enrichmentType, String eventsPackage) {
-            final int lastSignificantCharPos = eventsPackage.length() - PACKAGE_WILDCARD_INDICATOR.length();
+            final int lastSignificantCharPos = eventsPackage.length() -
+                                               PACKAGE_WILDCARD_INDICATOR.length();
             final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             final Set<String> boundFields = getBoundFields(enrichmentType);
-            final Collection<TypeUrl> eventTypes = KnownTypes.getTypesFromPackage(packageName);
+            final Collection<TypeUrl> eventTypes = KnownTypes.getAllFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 final String typeQualifier = type.getTypeName();
                 if (hasOneOfTargetFields(typeQualifier, boundFields)) {
@@ -162,7 +168,7 @@ class EventEnrichmentsMap {
 
         private static Collection<String> parseFieldNames(String qualifiers) {
             final Collection<String> result = new LinkedList<>();
-            final String[] fieldNames = PIPE_SEPARATOR_PATTERN.split(qualifiers);
+            final String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
             for (String singleFieldName : fieldNames) {
                 final String normalizedFieldName = singleFieldName.trim();
                 if (normalizedFieldName.isEmpty()) {
@@ -183,7 +189,8 @@ class EventEnrichmentsMap {
             return fieldName;
         }
 
-        private static boolean hasOneOfTargetFields(String eventType, Collection<String> targetFields) {
+        private static boolean hasOneOfTargetFields(String eventType,
+                                                    Collection<String> targetFields) {
             final Descriptor eventDescriptor = KnownTypes.getDescriptorForType(eventType);
 
             final List<FieldDescriptor> fields = eventDescriptor.getFields();
@@ -215,7 +222,8 @@ class EventEnrichmentsMap {
             final int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
             final int qualifierLength = qualifier.length();
 
-            final boolean result = indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length());
+            final boolean result =
+                    indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length());
             return result;
         }
     }

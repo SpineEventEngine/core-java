@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.type.TypeUrl;
 
 import java.util.Iterator;
 import java.util.Map;
