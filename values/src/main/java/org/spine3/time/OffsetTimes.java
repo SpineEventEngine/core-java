@@ -37,6 +37,7 @@ import static org.spine3.validate.Validate.checkPositive;
 public class OffsetTimes {
 
     private OffsetTimes() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

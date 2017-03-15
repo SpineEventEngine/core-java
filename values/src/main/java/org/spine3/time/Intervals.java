@@ -37,6 +37,7 @@ import static org.spine3.protobuf.Timestamps2.isLaterThan;
 public class Intervals {
 
     private Intervals() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

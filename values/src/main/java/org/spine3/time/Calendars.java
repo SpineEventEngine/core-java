@@ -46,8 +46,9 @@ import static java.util.Calendar.getInstance;
  *
  * @author Alexander Aleksandrov
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
-public class Calendars {
+@SuppressWarnings({"ClassWithTooManyMethods" /* OK for this utility class. */,
+                   "MagicConstant" /* We use conversion methods instead. */})
+class Calendars {
 
     private static final String TIME_ZONE_GMT = "GMT";
 
@@ -58,7 +59,7 @@ public class Calendars {
     /**
      * Obtains zone offset using {@code Calendar}.
      */
-    public static int getZoneOffset(Calendar cal) {
+    static int getZoneOffset(Calendar cal) {
         final int zoneOffset = cal.get(ZONE_OFFSET) / 1000;
         return zoneOffset;
     }
@@ -66,7 +67,7 @@ public class Calendars {
     /**
      * Obtains year using {@code Calendar}.
      */
-    public static int getYear(Calendar cal) {
+    static int getYear(Calendar cal) {
         final int year = cal.get(YEAR);
         return year;
     }
@@ -74,7 +75,7 @@ public class Calendars {
     /**
      * Obtains month using {@code Calendar}.
      */
-    public static int getMonth(Calendar cal) {
+    static int getMonth(Calendar cal) {
         // The Calendar class assumes JANUARY is zero.
         // Therefore add 1 to get the reasonable value of month
         final int month = cal.get(MONTH) + 1;
@@ -84,7 +85,7 @@ public class Calendars {
     /**
      * Obtains day of month using {@code Calendar}.
      */
-    public static int getDay(Calendar cal) {
+    static int getDay(Calendar cal) {
         final int result = cal.get(DAY_OF_MONTH);
         return result;
     }
@@ -92,7 +93,7 @@ public class Calendars {
     /**
      * Obtains hours using {@code Calendar}.
      */
-    public static int getHours(Calendar cal) {
+    static int getHours(Calendar cal) {
         final int hours = cal.get(HOUR);
         return hours;
     }
@@ -100,7 +101,7 @@ public class Calendars {
     /**
      * Obtains minutes using {@code Calendar}.
      */
-    public static int getMinutes(Calendar cal) {
+    static int getMinutes(Calendar cal) {
         final int minutes = cal.get(MINUTE);
         return minutes;
     }
@@ -108,7 +109,7 @@ public class Calendars {
     /**
      * Obtains seconds using {@code Calendar}.
      */
-    public static int getSeconds(Calendar cal) {
+    static int getSeconds(Calendar cal) {
         final int seconds = cal.get(SECOND);
         return seconds;
     }
@@ -116,7 +117,7 @@ public class Calendars {
     /**
      * Obtains milliseconds using {@code Calendar}.
      */
-    public static int getMillis(Calendar cal) {
+    static int getMillis(Calendar cal) {
         final int millis = cal.get(MILLISECOND);
         return millis;
     }
@@ -124,10 +125,20 @@ public class Calendars {
     /**
      * Obtains calendar from year, month, and day values.
      */
-    public static Calendar createDate(int year, int month, int day) {
+    private static Calendar createWithDate(int year, int month, int day) {
         final Calendar calendar = getInstance();
-        calendar.set(year, month - 1, day);
+        calendar.set(year, toMagicMonthNumber(month), day);
         return calendar;
+    }
+
+    /**
+     * Converts the passed number of a month into a value of a magic constant used
+     * by {@link Calendar} API.
+     *
+     * @param month a one-based number of a month
+     */
+    private static int toMagicMonthNumber(int month) {
+        return month - 1;
     }
 
     /**
@@ -136,15 +147,17 @@ public class Calendars {
      * @param calendar the target calendar
      * @param date     the date to set
      */
-    public static void setDate(Calendar calendar, LocalDate date) {
-        calendar.set(date.getYear(), date.getMonth()
-                                         .getNumber() - 1, date.getDay());
+    private static void setDate(Calendar calendar, LocalDate date) {
+        calendar.set(date.getYear(),
+                     toMagicMonthNumber(date.getMonth()
+                                            .getNumber()),
+                     date.getDay());
     }
 
     /**
      * Obtains {@code Calendar} from hours, minutes, seconds and milliseconds values.
      */
-    public static Calendar createWithTime(int hours, int minutes, int seconds, int millis) {
+    private static Calendar createWithTime(int hours, int minutes, int seconds, int millis) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -156,7 +169,7 @@ public class Calendars {
     /**
      * Obtains {@code Calendar} from hours, minutes and seconds values.
      */
-    public static Calendar createWithTime(int hours, int minutes, int seconds) {
+    static Calendar createWithTime(int hours, int minutes, int seconds) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -167,7 +180,7 @@ public class Calendars {
     /**
      * Obtains {@code Calendar} from hours and minutes values.
      */
-    public static Calendar createWithTime(int hours, int minutes) {
+    static Calendar createWithTime(int hours, int minutes) {
         final Calendar calendar = getInstance();
         calendar.set(HOUR, hours);
         calendar.set(MINUTE, minutes);
@@ -179,7 +192,7 @@ public class Calendars {
      *
      * @return new {@code Calendar} instance
      */
-    public static Calendar nowAtGmt() {
+    private static Calendar nowAtGmt() {
         Calendar gmtCal = getInstance(TimeZone.getTimeZone(TIME_ZONE_GMT));
         return gmtCal;
     }
@@ -187,7 +200,7 @@ public class Calendars {
     /**
      * Obtains current time calendar for the passed zone offset.
      */
-    public static Calendar nowAt(ZoneOffset zoneOffset) {
+    static Calendar nowAt(ZoneOffset zoneOffset) {
         final Calendar utc = nowAtGmt();
         final Date timeAtGmt = utc.getTime();
         long msFromEpoch = timeAtGmt.getTime();
@@ -209,7 +222,7 @@ public class Calendars {
      * @param zoneOffset time offset for specified zone
      * @return new {@code Calendar} instance at specific zone offset
      */
-    public static Calendar at(ZoneOffset zoneOffset) {
+    static Calendar at(ZoneOffset zoneOffset) {
         @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset isn't that big.
         final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
         final SimpleTimeZone timeZone = new SimpleTimeZone(offsetMillis, "temp");
@@ -220,7 +233,7 @@ public class Calendars {
     /**
      * Obtains current calendar.
      */
-    public static Calendar now() {
+    static Calendar now() {
         final Calendar calendar = getInstance();
         return calendar;
     }
@@ -228,7 +241,7 @@ public class Calendars {
     /**
      * Obtains month of year using calendar.
      */
-    public static MonthOfYear getMonthOfYear(Calendar calendar) {
+    static MonthOfYear getMonthOfYear(Calendar calendar) {
         // The Calendar class assumes JANUARY is zero.
         // Therefore add 1 to get the value of MonthOfYear.
         final int monthByCalendar = calendar.get(MONTH);
@@ -239,7 +252,7 @@ public class Calendars {
     /**
      * Obtains local date using calendar.
      */
-    public static LocalDate toLocalDate(Calendar cal) {
+    static LocalDate toLocalDate(Calendar cal) {
         return LocalDates.of(getYear(cal),
                              getMonthOfYear(cal),
                              getDay(cal));
@@ -248,7 +261,7 @@ public class Calendars {
     /**
      * Obtains local time using calendar.
      */
-    public static LocalTime toLocalTime(Calendar calendar) {
+    static LocalTime toLocalTime(Calendar calendar) {
         final int hours = getHours(calendar);
         final int minutes = getMinutes(calendar);
         final int seconds = getSeconds(calendar);
@@ -262,7 +275,7 @@ public class Calendars {
      *
      * <p>The calendar is initialized at the offset from the passed date.
      */
-    public static Calendar toCalendar(OffsetDate offsetDate) {
+    static Calendar toCalendar(OffsetDate offsetDate) {
         final Calendar calendar = at(offsetDate.getOffset());
         setDate(calendar, offsetDate.getDate());
         return calendar;
@@ -271,7 +284,7 @@ public class Calendars {
     /**
      * Converts the passed {@code LocalTime} into {@code Calendar}.
      */
-    public static Calendar toCalendar(LocalTime localTime) {
+    static Calendar toCalendar(LocalTime localTime) {
         return createWithTime(localTime.getHours(),
                               localTime.getMinutes(),
                               localTime.getSeconds(),
@@ -281,14 +294,16 @@ public class Calendars {
     /**
      * Converts the passed {@code LocalDate} into {@code Calendar}.
      */
-    public static Calendar toCalendar(LocalDate localDate) {
-        return createDate(localDate.getYear(), localDate.getMonthValue(), localDate.getDay());
+    static Calendar toCalendar(LocalDate localDate) {
+        return createWithDate(localDate.getYear(),
+                              localDate.getMonthValue(),
+                              localDate.getDay());
     }
 
     /**
      * Converts the passed {@code OffsetTime} into {@code Calendar}.
      */
-    public static Calendar toCalendar(OffsetTime offsetTime) {
+    static Calendar toCalendar(OffsetTime offsetTime) {
         final LocalTime time = offsetTime.getTime();
         final Calendar calendar = at(offsetTime.getOffset());
         calendar.set(HOUR_OF_DAY, time.getHours());
@@ -301,16 +316,17 @@ public class Calendars {
     /**
      * Converts the passed {@code OffsetDateTime} into {@code Calendar}.
      */
-    public static Calendar toCalendar(OffsetDateTime dateTime) {
+    static Calendar toCalendar(OffsetDateTime dateTime) {
         final Calendar cal = at(dateTime.getOffset());
         final LocalDate date = dateTime.getDate();
         final LocalTime time = dateTime.getTime();
         cal.set(date.getYear(),
-              date.getMonth().getNumber() - 1,
-              date.getDay(),
-              time.getHours(),
-              time.getMinutes(),
-              time.getSeconds());
+                toMagicMonthNumber(date.getMonth()
+                                       .getNumber()),
+                date.getDay(),
+                time.getHours(),
+                time.getMinutes(),
+                time.getSeconds());
         cal.set(MILLISECOND, time.getMillis());
         return cal;
     }
