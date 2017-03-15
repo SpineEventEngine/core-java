@@ -54,7 +54,6 @@ public class AnyPacker {
             if (input == null) {
                 return null;
             }
-
             return unpack(input);
         }
     };
