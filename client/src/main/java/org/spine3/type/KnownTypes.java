@@ -157,7 +157,7 @@ public class KnownTypes {
 
     /** Returns a Protobuf type URL by Protobuf type name. */
     @Nullable
-    public static TypeUrl getTypeUrl(String typeName) {
+    static TypeUrl getTypeUrl(String typeName) {
         final TypeUrl typeUrl = typeUrls.get(typeName);
         return typeUrl;
     }

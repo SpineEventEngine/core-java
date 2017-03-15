@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
@@ -121,7 +122,10 @@ public class TypeName extends StringTypeValue {
      * Creates URL instance corresponding to this type name.
      */
     public TypeUrl toUrl() {
-        return TypeUrl.from(this);
+        final String typeName = value();
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName);
+        checkState(typeUrl != null, "Unable to find URL for type: %s", typeName);
+        return typeUrl;
     }
 
     /**

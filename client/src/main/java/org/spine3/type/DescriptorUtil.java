@@ -42,11 +42,7 @@ class DescriptorUtil {
     /* This class is named with `Util` suffix instead of being `Descriptors` to avoid
        the name clash with Descriptors class from Protobuf. */
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-        // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String DESCRIPTOR_GETTER_NAME = "getDescriptor";
 
     private DescriptorUtil() {
         // Prevent instantiation of this utility class.
@@ -81,7 +77,7 @@ class DescriptorUtil {
         final Descriptor descriptor;
         try {
             final Method descriptorGetter =
-                    cls.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
+                    cls.getDeclaredMethod(METHOD_GET_DESCRIPTOR);
             descriptor = (Descriptor) descriptorGetter.invoke(null);
         } catch (NoSuchMethodException
                 | IllegalAccessException

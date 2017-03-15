@@ -23,7 +23,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -43,6 +42,7 @@ import static org.spine3.client.Queries.Targets.someOf;
 public class Queries {
 
     private Queries() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -150,13 +150,12 @@ public class Queries {
      * <p>Returns null if the {@code Target} type is unknown to the application.
      *
      * @param query the query of interest.
-     * @return the type of the {@code Query#getTarget()} or null, if the type is unknown.
+     * @return the URL of the type of the query {@linkplain Query#getTarget() target}
      */
-    @Nullable
     public static TypeUrl typeOf(Query query) {
         final Target target = query.getTarget();
-        final String typeAsString = target.getType();
-        final TypeUrl type = KnownTypes.getTypeUrl(typeAsString);
+        final TypeName typeName = TypeName.of(target.getType());
+        final TypeUrl type = typeName.toUrl();
         return type;
     }
 

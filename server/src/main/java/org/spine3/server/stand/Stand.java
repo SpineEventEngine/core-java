@@ -48,8 +48,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * A container for storing the latest {@link org.spine3.server.aggregate.Aggregate Aggregate}
  * states.
@@ -259,7 +257,6 @@ public class Stand implements AutoCloseable {
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
 
         final TypeUrl type = Queries.typeOf(query);
-        checkNotNull(type, "Query target type unknown");
         final QueryProcessor queryProcessor = processorFor(type);
 
         final ImmutableCollection<Any> readResult = queryProcessor.process(query);

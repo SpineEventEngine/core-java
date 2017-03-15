@@ -34,7 +34,6 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -148,16 +147,15 @@ public class QueriesShould {
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
 
-    @Test
-    public void return_null_if_target_type_unknown() {
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_for_unknown_type() {
         final Target target = Target.newBuilder()
                                     .setType("Inexistent Message Type")
                                     .build();
         final Query query = Query.newBuilder()
                                  .setTarget(target)
                                  .build();
-        final TypeUrl type = Queries.typeOf(query);
-        assertNull(type);
+        Queries.typeOf(query);
     }
 
     private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {

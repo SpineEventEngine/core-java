@@ -120,15 +120,6 @@ public final class TypeUrl {
     }
 
     /**
-     * Creates a new instance from the passed {@code TypeName}.
-     */
-    static TypeUrl from(TypeName typeName) {
-        checkNotNull(typeName);
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName.value());
-        return typeUrl;
-    }
-
-    /**
      * Creates a new instance from the passed type URL.
      *
      * @param typeUrl the type URL of the Protobuf message type
