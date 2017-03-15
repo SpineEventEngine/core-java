@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Exceptions.newIllegalStateException;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * In-memory implementation of {@link StandStorage}.
@@ -133,10 +133,10 @@ class InMemoryStandStorage extends StandStorage {
         final TypeUrl recordType = TypeUrl.parse(record.getState()
                                                        .getTypeUrl());
         final TypeUrl recordTypeFromId = id.getStateType();
-        if (!recordTypeFromId.equals(recordType)) {
-            throw newIllegalStateException(TYPE_URL_MISMATCH_MESSAGE_PATTERN,
-                                           recordType, recordTypeFromId);
-        }
+        checkState(recordTypeFromId.equals(recordType),
+                   TYPE_URL_MISMATCH_MESSAGE_PATTERN,
+                   recordType,
+                   recordTypeFromId);
         recordStorage.write(id, record);
     }
 
