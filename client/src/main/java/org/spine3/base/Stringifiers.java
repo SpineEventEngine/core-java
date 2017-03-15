@@ -94,7 +94,7 @@ public class Stringifiers {
         return stringifier;
     }
 
-    protected static class TimestampStringifer extends Stringifier<Timestamp> {
+    static class TimestampStringifer extends Stringifier<Timestamp> {
 
         private static final Pattern PATTERN_COLON = Pattern.compile(":");
         private static final Pattern PATTERN_T = Pattern.compile("T");
@@ -130,7 +130,7 @@ public class Stringifiers {
         }
     }
 
-    protected static class EventIdStringifier extends Stringifier<EventId> {
+    static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
             final String result = eventId.getUuid();
@@ -146,7 +146,7 @@ public class Stringifiers {
         }
     }
 
-    protected static class CommandIdStringifier extends Stringifier<CommandId> {
+    static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String toString(CommandId commandId) {
             final String result = commandId.getUuid();
