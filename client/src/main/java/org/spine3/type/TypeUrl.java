@@ -38,7 +38,6 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
-import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,8 +47,8 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.protobuf.Internal.getDefaultInstance;
+import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -238,8 +237,7 @@ public final class TypeUrl {
             final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            final Throwable rootCause = getRootCause(e);
-            throw new MissingDescriptorException(cls, rootCause);
+            throw wrappedCause(e);
         }
     }
 
