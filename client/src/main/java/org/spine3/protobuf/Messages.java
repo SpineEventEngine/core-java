@@ -19,26 +19,23 @@
  */
 package org.spine3.protobuf;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
-import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
 import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.protobuf.Descriptors.Descriptor;
-import static com.google.protobuf.Descriptors.GenericDescriptor;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -49,9 +46,6 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 public class Messages {
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
-    private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     private Messages() {
         // Prevent instantiation of this utility class.
@@ -95,12 +89,10 @@ public class Messages {
     static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Class<? extends Message> clazz = typeUrl.getJavaClass();
-            final GenericDescriptor descriptor = getClassDescriptor(clazz);
+            final Optional<Descriptor> typeDescriptor = typeUrl.getTypeDescriptor();
             // Skip outer class descriptors.
-            if (descriptor instanceof Descriptor) {
-                final Descriptor typeDescriptor = (Descriptor) descriptor;
-                builder.add(typeDescriptor);
+            if (typeDescriptor.isPresent()) {
+                builder.add(typeDescriptor.get());
             }
         }
         return builder.build();
@@ -138,19 +130,6 @@ public class Messages {
 
         private static JsonFormat.Printer instance() {
             return INSTANCE.value;
-        }
-    }
-
-    /** Returns descriptor for the passed message class. */
-    private static GenericDescriptor getClassDescriptor(Class<? extends Message> cls) {
-        checkNotNull(cls);
-        try {
-            final Method method = cls.getMethod(METHOD_GET_DESCRIPTOR);
-            final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
-            return result;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            final Throwable rootCause = getRootCause(e);
-            throw new MissingDescriptorException(cls, rootCause);
         }
     }
 

@@ -21,6 +21,7 @@
 package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
@@ -36,13 +37,17 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.type.error.UnknownTypeException;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -62,6 +67,9 @@ public final class TypeUrl {
     private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
+    private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     /** The prefix of the type URL. */
     private final String prefix;
@@ -228,6 +236,19 @@ public final class TypeUrl {
         return result;
     }
 
+    /** Returns descriptor for the passed message class. */
+    private static GenericDescriptor getClassDescriptor(Class<? extends Message> cls) {
+        checkNotNull(cls);
+        try {
+            final Method method = cls.getMethod(METHOD_GET_DESCRIPTOR);
+            final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
+            return result;
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            final Throwable rootCause = getRootCause(e);
+            throw new MissingDescriptorException(cls, rootCause);
+        }
+    }
+
     /**
      * Returns a message {@link Class} corresponding to the Protobuf type represented
      * by this type URL.
@@ -238,6 +259,23 @@ public final class TypeUrl {
      */
     public <T extends Message> Class<T> getJavaClass() throws UnknownTypeException {
         return KnownTypes.getJavaClass(this);
+    }
+
+    /**
+     * Obtains the type descriptor for the type of this URL.
+     *
+     * @return {@code Descriptor} or {@code Optional.absent()} if this type URL
+     *         represents an outer class
+     */
+    public Optional<Descriptor> getTypeDescriptor() {
+        final Class<? extends Message> clazz = getJavaClass();
+        final GenericDescriptor descriptor = getClassDescriptor(clazz);
+        // Skip outer class descriptors.
+        if (descriptor instanceof Descriptor) {
+            final Descriptor typeDescriptor = (Descriptor) descriptor;
+            return Optional.of(typeDescriptor);
+        }
+        return Optional.absent();
     }
 
     /**
