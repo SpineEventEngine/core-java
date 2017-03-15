@@ -34,5 +34,3 @@ apply from: generateDescriptorSetScript
 apply from: testArtifactsScript
 
 apply plugin: spineProtobufPluginId
-
-apply plugin: spineJavadocPluginId

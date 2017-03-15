@@ -51,7 +51,7 @@ buildscript {
                                              version: spineToolsVersion
                                             //, changing: true // Uncomment this if you want the dependency to be
                                             // fetched on each build, but offline builds will not be available then.
-        classpath group: 'org.spine3.tools', name: 'javadocs-checker',
+        classpath group: 'org.spine3.tools', name: 'javadoc-checker',
                 version: spineToolsVersion
     }
     configurations.all({
@@ -78,7 +78,7 @@ ext {
     jUnitVersion = '4.12'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
-    spineJavadocPluginId = 'org.spine3.tools.javadocs-checker'
+    spineJavadocPluginId = 'org.spine3.tools.javadoc-checker'
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
