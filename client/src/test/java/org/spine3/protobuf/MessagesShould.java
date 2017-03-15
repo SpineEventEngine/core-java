@@ -20,30 +20,17 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.Lists;
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.BytesValue;
 import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.DoubleValue;
-import com.google.protobuf.FloatValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.test.messages.MessageWithStringValue;
-import org.spine3.test.messages.TestEnum;
-import org.spine3.test.messages.TestEnumValue;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -85,69 +72,5 @@ public class MessagesShould {
         }
 
         assertFalse(found.isEmpty());
-    }
-
-    @Test
-    public void return_int_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(Integer.class, Int32Value.getDescriptor());
-    }
-
-    @Test
-    public void return_long_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(Long.class, Int64Value.getDescriptor());
-    }
-
-    @Test
-    public void return_float_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(Float.class, FloatValue.getDescriptor());
-    }
-
-    @Test
-    public void return_double_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(Double.class, DoubleValue.getDescriptor());
-    }
-
-    @Test
-    public void return_boolean_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(Boolean.class, BoolValue.getDescriptor());
-    }
-
-    @Test
-    public void return_string_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(String.class, StringValue.getDescriptor());
-    }
-
-    @Test
-    public void return_byte_string_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(ByteString.class, BytesValue.getDescriptor());
-    }
-
-    @Test
-    public void return_enum_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(TestEnum.class, TestEnumValue.getDescriptor());
-    }
-
-    @Test
-    public void return_msg_field_class_by_descriptor() {
-        assertReturnsFieldClass(StringValue.class, MessageWithStringValue.getDescriptor());
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        final FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
-                                                                  .getDescriptorForType()
-                                                                  .getFields()
-                                                                  .get(0);
-        new NullPointerTester()
-                .setDefault(TypeUrl.class, TypeUrl.of(StringValue.class))
-                .setDefault(FieldDescriptor.class, defaultFieldDescriptor)
-                .testAllPublicStaticMethods(Messages.class);
-    }
-
-    private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
-        final FieldDescriptor field = msgDescriptor.getFields()
-                                                   .get(0);
-
-        assertEquals(expectedClass, Messages.getFieldClass(field));
     }
 }

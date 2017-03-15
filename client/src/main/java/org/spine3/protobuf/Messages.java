@@ -20,8 +20,6 @@
 package org.spine3.protobuf;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
@@ -36,7 +34,6 @@ import java.lang.reflect.InvocationTargetException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
-import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -130,47 +127,6 @@ public class Messages {
 
         private static JsonFormat.Printer instance() {
             return INSTANCE.value;
-        }
-    }
-
-    /**
-     * Returns the class of the Protobuf message field.
-     *
-     * @param field the field descriptor
-     * @return the class of the field
-     * @throws IllegalArgumentException if the field type is unknown
-     */
-    @SuppressWarnings("OverlyComplexMethod")    // as each branch is a fairly simple.
-    public static Class<?> getFieldClass(FieldDescriptor field) {
-        checkNotNull(field);
-        final FieldDescriptor.JavaType javaType = field.getJavaType();
-        final TypeUrl typeUrl;
-        switch (javaType) {
-            case INT:
-                return Integer.class;
-            case LONG:
-                return Long.class;
-            case FLOAT:
-                return Float.class;
-            case DOUBLE:
-                return Double.class;
-            case BOOLEAN:
-                return Boolean.class;
-            case STRING:
-                return String.class;
-            case BYTE_STRING:
-                return ByteString.class;
-            case ENUM:
-                typeUrl = TypeUrl.from(field.getEnumType());
-                final Class<? extends Message> enumClass = typeUrl.getJavaClass();
-                return enumClass;
-            case MESSAGE:
-                typeUrl = TypeUrl.from(field.getMessageType());
-                final Class<? extends Message> msgClass = typeUrl.getJavaClass();
-                return msgClass;
-            default:
-                throw newIllegalArgumentException("Unknown field type discovered: %s",
-                                                   field.getFullName());
         }
     }
 }
