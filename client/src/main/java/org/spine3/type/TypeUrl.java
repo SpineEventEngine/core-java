@@ -40,15 +40,12 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
 import org.spine3.type.error.UnknownTypeException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Internal.getDefaultInstance;
-import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -68,10 +65,6 @@ public final class TypeUrl {
     private static final Splitter splitter = Splitter.on(SEPARATOR);
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
-
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-        // This constant is used in generated classes.
-    private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     /** The prefix of the type URL. */
     private final String prefix;
@@ -229,18 +222,6 @@ public final class TypeUrl {
         return result;
     }
 
-    /** Returns descriptor for the passed message class. */
-    private static GenericDescriptor getClassDescriptor(Class<? extends Message> cls) {
-        checkNotNull(cls);
-        try {
-            final Method method = cls.getMethod(METHOD_GET_DESCRIPTOR);
-            final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
-            return result;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw wrappedCause(e);
-        }
-    }
-
     /**
      * Returns a message {@link Class} corresponding to the Protobuf type represented
      * by this type URL.
@@ -262,7 +243,7 @@ public final class TypeUrl {
     @Internal
     public Optional<Descriptor> getTypeDescriptor() {
         final Class<? extends Message> clazz = getJavaClass();
-        final GenericDescriptor descriptor = getClassDescriptor(clazz);
+        final GenericDescriptor descriptor = DescriptorUtil.getClassDescriptor(clazz);
         // Skip outer class descriptors.
         if (descriptor instanceof Descriptor) {
             final Descriptor typeDescriptor = (Descriptor) descriptor;

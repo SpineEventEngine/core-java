@@ -205,7 +205,7 @@ public class KnownTypes {
      * @see TypeName
      * @throws IllegalArgumentException if the name does not correspond to any known type
      */
-    public static Descriptor getDescriptorForType(String typeName) {
+    static Descriptor getDescriptorForType(String typeName) {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkArgument(typeUrl != null, "Given type name is invalid");
 
