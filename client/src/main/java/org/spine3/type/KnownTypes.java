@@ -20,7 +20,6 @@
 
 package org.spine3.type;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Collections2;
@@ -33,6 +32,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.BytesValue;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Duration;
@@ -130,13 +130,6 @@ public class KnownTypes {
         return ImmutableSet.copyOf(result);
     }
 
-    /** Retrieves names of Java classes generated for Protobuf types known to the application. */
-    @VisibleForTesting
-    public static ImmutableSet<ClassName> getJavaClasses() {
-        final Set<ClassName> result = knownTypes.values();
-        return ImmutableSet.copyOf(result);
-    }
-
     /**
      * Retrieves a Java class name generated for the Protobuf type by its type url
      * to be used to parse {@link com.google.protobuf.Message Message} from {@link Any}.
@@ -212,17 +205,17 @@ public class KnownTypes {
      * @see TypeName
      * @throws IllegalArgumentException if the name does not correspond to any known type
      */
-    public static Descriptors.Descriptor getDescriptorForType(String typeName) {
+    public static Descriptor getDescriptorForType(String typeName) {
         final TypeUrl typeUrl = getTypeUrl(typeName);
         checkArgument(typeUrl != null, "Given type name is invalid");
 
         final Class<?> cls = getJavaClass(typeUrl);
 
-        final Descriptors.Descriptor descriptor;
+        final Descriptor descriptor;
         try {
             final java.lang.reflect.Method descriptorGetter =
                     cls.getDeclaredMethod(DESCRIPTOR_GETTER_NAME);
-            descriptor = (Descriptors.Descriptor) descriptorGetter.invoke(null);
+            descriptor = (Descriptor) descriptorGetter.invoke(null);
         } catch (NoSuchMethodException
                 | IllegalAccessException
                 | InvocationTargetException e) {

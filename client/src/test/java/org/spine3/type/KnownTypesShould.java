@@ -45,7 +45,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
 
@@ -145,19 +144,6 @@ public class KnownTypesShould {
 
         final Collection<TypeUrl> packageTypes = KnownTypes.getAllFromPackage(prefix);
         assertTrue(packageTypes.isEmpty());
-    }
-
-    @Test
-    public void have_all_valid_java_class_names() {
-        final Set<ClassName> classes = KnownTypes.getJavaClasses();
-        assertFalse(classes.isEmpty());
-        for (ClassName name : classes) {
-            try {
-                Class.forName(name.value());
-            } catch (ClassNotFoundException e) {
-                fail("Invalid Java class name in the '.properties' file: " + name.value());
-            }
-        }
     }
 
     @Test
