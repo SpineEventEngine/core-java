@@ -58,6 +58,11 @@ public class TypeNameShould {
                 .testAllPublicStaticMethods(TypeName.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_empty_name() {
+        TypeName.of("");
+    }
+
     @Test
     public void return_simple_type_name() {
         assertEquals(StringValue.class.getSimpleName(), TypeName.of(StringValue.class)
