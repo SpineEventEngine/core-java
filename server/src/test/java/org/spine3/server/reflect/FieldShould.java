@@ -20,6 +20,7 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.ByteString;
@@ -30,9 +31,11 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.Messages;
 import org.spine3.test.messages.MessageWithStringValue;
@@ -68,6 +71,15 @@ public class FieldShould {
     public void return_absent_for_missing_field() {
         assertFalse(Field.newField(Timestamp.class, "min")
                          .isPresent());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK since we know the field is present.
+    @Test
+    public void return_absent_for_default_Any_field() {
+        final Field messageField = Field.newField(Command.class, "message")
+                                        .get();
+        final Optional<Message> value = messageField.getValue(Command.getDefaultInstance());
+        assertFalse(value.isPresent());
     }
 
     @Test(expected = IllegalArgumentException.class)

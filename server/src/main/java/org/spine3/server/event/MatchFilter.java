@@ -163,7 +163,7 @@ class MatchFilter implements Predicate<Event> {
         }
 
         final Field field = fieldOptional.get();
-        final Message value;
+        final Optional<Message> value;
 
         try {
             value = field.getValue(object);
@@ -176,7 +176,14 @@ class MatchFilter implements Predicate<Event> {
         final Collection<Message> expectedValues =
                 Collections2.transform(expectedAnys, unpackFunc());
 
-        final boolean result = expectedValues.contains(value);
+        if (!value.isPresent()) {
+            /* If there is no value in the field return `true`
+               if the list of required values is also empty. */
+            final boolean nothingIsExpected = expectedValues.isEmpty();
+            return nothingIsExpected;
+        }
+
+        final boolean result = expectedValues.contains(value.get());
         return result;
     }
 }

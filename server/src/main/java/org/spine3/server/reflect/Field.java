@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * Provides information and dynamic access to a field of a {@code Message}.
@@ -164,23 +165,29 @@ public final class Field {
      *
      * <p>If the corresponding field is of type {@code Any} it will be unpacked.
      *
+     * @return field value or unpacked field value, or
+     *         {@code Optional.absent()} if the field is a defaulf {@code Any}
      * @throws IllegalStateException if getting the field value caused an exception.
      *                               The root cause will be available from the thrown instance.
      */
-    public Message getValue(Message object) {
+    public Optional<Message> getValue(Message object) {
         final Message fieldValue;
         final Message result;
         try {
             fieldValue = (Message) getter.invoke(object);
-
-            result = fieldValue instanceof Any
-                     ? AnyPacker.unpack((Any) fieldValue)
-                     : fieldValue;
-
+            if (fieldValue instanceof Any) {
+                final Any any = (Any)fieldValue;
+                if (isDefault(any)) {
+                    return Optional.absent();
+                }
+                result = AnyPacker.unpack(any);
+            } else {
+                result = fieldValue;
+            }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw wrappedCause(e);
         }
 
-        return result;
+        return Optional.fromNullable(result);
     }
 }
