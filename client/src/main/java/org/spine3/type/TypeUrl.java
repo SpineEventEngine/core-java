@@ -157,17 +157,8 @@ public final class TypeUrl {
         if (parts.length != 2) {
             throw malformedTypeUrl(typeUrl);
         }
-
         final String prefix = parts[0];
-        if (prefix.isEmpty()) {
-            throw malformedTypeUrl(typeUrl);
-        }
-
         final String typeName = parts[1];
-        if (typeName.isEmpty()) {
-            throw malformedTypeUrl(typeUrl);
-        }
-
         return create(prefix, typeName);
     }
 
