@@ -183,13 +183,18 @@ public class TypeUrlShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_value_without_prefix_separator() {
+        TypeUrl.parse("prefix:Type");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_prefix() {
-        TypeUrl.parse(" /package.Type");
+        TypeUrl.parse("/package.Type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_name() {
-        TypeUrl.parse("type.prefix/ ");
+        TypeUrl.parse("type.prefix/");
     }
 
     @Test(expected = IllegalArgumentException.class)
