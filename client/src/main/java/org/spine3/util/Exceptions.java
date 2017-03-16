@@ -20,8 +20,8 @@
 
 package org.spine3.util;
 
-import org.spine3.validate.ConversionError;
-import org.spine3.validate.IllegalConversionArgumentException;
+import org.spine3.validate.error.ConversionError;
+import org.spine3.validate.error.IllegalConversionArgumentException;
 
 import java.util.Locale;
 

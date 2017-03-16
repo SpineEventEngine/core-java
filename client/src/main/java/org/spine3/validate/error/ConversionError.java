@@ -18,27 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate;
+package org.spine3.validate.error;
 
 /**
- * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during the conversion from one type to another.
+ * Signals that an error has been reached unexpectedly while converting from one type to another.
  *
  * @author Illia Shepilov
- * @see ConversionError
  */
-public class IllegalConversionArgumentException extends IllegalArgumentException {
+@SuppressWarnings("ExceptionClassNameDoesntEndWithException")
+// It is OK, because it is not {@code Exception} in usual meaning.
+// It is occurred when input value cannot be converted to desirable type
+// and repeated input is required.
+public class ConversionError extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    private final ConversionError conversionError;
-
-    public IllegalConversionArgumentException(ConversionError conversionError) {
-        super();
-        this.conversionError = conversionError;
-    }
-
-    public ConversionError getConversionError() {
-        return conversionError;
+    public ConversionError(String message) {
+        super(message);
     }
 }

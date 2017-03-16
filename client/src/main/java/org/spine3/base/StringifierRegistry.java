@@ -39,6 +39,7 @@ import static org.spine3.util.Exceptions.conversionArgumentException;
  * The registry of converters of types to their string representations.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  */
 public class StringifierRegistry {
 
