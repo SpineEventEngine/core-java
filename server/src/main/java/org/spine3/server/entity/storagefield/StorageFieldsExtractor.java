@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity.storagefield;
 
-import org.spine3.base.Messagifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 
@@ -79,7 +78,7 @@ public class StorageFieldsExtractor {
         final Method[] publicMethods = entityClass.getMethods();
         for (Method method : publicMethods) {
             final String methodName = method.getName();
-            final boolean returnTypeMatches = Messagifiers.isSupported(method.getReturnType());
+            final boolean returnTypeMatches = !void.class.equals(method.getReturnType());
             final boolean argumentsMatch = method.getParameterTypes().length == 0;
             if (returnTypeMatches && argumentsMatch) {
                 // Regex operations are not fast enough to check all the methods.

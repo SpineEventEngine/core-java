@@ -83,10 +83,7 @@ public class Identifiers {
      */
     public static <I> void checkSupported(Class<I> idClass) {
         checkNotNull(idClass);
-        final Messagifier.Type type = Messagifier.Type.getType(idClass);
-        if (!type.isSupportedIdType()) {
-            throw Messagifier.Type.unsupportedClass(idClass);
-        }
+        Identifier.Type.getType(idClass);
     }
 
     /**
@@ -111,7 +108,8 @@ public class Identifiers {
     public static <I> Any idToAny(I id) {
         checkNotNull(id);
         checkSupported(id.getClass());
-        return Messagifiers.toAny(id);
+        final Identifier<I> identifier = Identifier.from(id);
+        return identifier.pack();
     }
 
     /**
@@ -130,7 +128,7 @@ public class Identifiers {
      */
     public static Object idFromAny(Any any) {
         checkNotNull(any);
-        final Object result = Messagifier.Type.unpack(any);
+        final Object result = Identifier.Type.unpack(any);
         checkSupported(result.getClass());
         return result;
     }
@@ -153,7 +151,7 @@ public class Identifiers {
     public static <I> I getDefaultValue(Class<I> idClass) {
         checkNotNull(idClass);
         checkSupported(idClass);
-        return Messagifier.getDefaultValue(idClass);
+        return Identifier.getDefaultValue(idClass);
     }
 
     /**
@@ -179,12 +177,12 @@ public class Identifiers {
 
         checkSupported(id.getClass());
 
-        final Messagifier<?> identifier;
+        final Identifier<?> identifier;
         if (id instanceof Any) {
             final Message unpacked = unpack((Any) id);
-            identifier = Messagifier.fromMessage(unpacked);
+            identifier = Identifier.fromMessage(unpacked);
         } else {
-            identifier = Messagifier.from(id);
+            identifier = Identifier.from(id);
         }
 
         final String result = identifier.toString();

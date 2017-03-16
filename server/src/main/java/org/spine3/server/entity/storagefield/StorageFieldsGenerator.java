@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Messagifiers.toAny;
 
 /**
  * @author Dmytro Dashenkov.
@@ -49,8 +48,8 @@ class StorageFieldsGenerator<E extends Entity<?, ?>> {
         for (EntityFieldGetter<E> descriptor : descriptors) {
             final String name = descriptor.getName();
             final Object value = descriptor.get(entity);
-            final Any anyValue = toAny(value);
-            properties.put(name, anyValue);
+            //final Any anyValue = toAny(value);
+            //properties.put(name, anyValue);
         }
         final Object genericId = entity.getId();
         final Any id = Identifiers.idToAny(genericId);
