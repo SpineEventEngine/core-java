@@ -114,7 +114,7 @@ public class StringifiersShould {
                                             .setUuid(id)
                                             .build();
 
-        final CommandId actual = Stringifiers.parse(id, TypeToken.of(CommandId.class));
+        final CommandId actual = Stringifiers.fromString(id, TypeToken.of(CommandId.class));
         assertEquals(expected, actual);
     }
 
@@ -122,14 +122,14 @@ public class StringifiersShould {
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         final String time = Timestamps2.getCurrentTime()
                                        .toString();
-        Stringifiers.parse(time, TypeToken.of(Timestamp.class));
+        Stringifiers.fromString(time, TypeToken.of(Timestamp.class));
     }
 
     @Test
     public void convert_string_to_timestamp() throws ParseException {
         final String date = "1972-01-01T10:00:20.021-05:00";
         final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
+        final Timestamp actual = Stringifiers.fromString(date, TypeToken.of(Timestamp.class));
         assertEquals(expected, actual);
     }
 
@@ -159,7 +159,7 @@ public class StringifiersShould {
         final EventId expected = EventId.newBuilder()
                                         .setUuid(id)
                                         .build();
-        final EventId actual = Stringifiers.parse(id, TypeToken.of(EventId.class));
+        final EventId actual = Stringifiers.fromString(id, TypeToken.of(EventId.class));
         assertEquals(expected, actual);
     }
 

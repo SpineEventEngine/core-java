@@ -20,12 +20,10 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.spine3.util.Exceptions.conversionArgumentException;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
  * Utility class for working with {@code Stringifier}s.
@@ -42,18 +40,18 @@ public class Stringifiers {
     /**
      * Converts the passed value to the string representation.
      *
-     * @param valueToConvert value to convert
-     * @param typeToken      the type token of the passed value
-     * @param <I>            the type of the value to convert
+     * @param object    to object to convert
+     * @param typeToken the type token of the passed value
+     * @param <I>       the type of the object to convert
      * @return the string representation of the passed value
      * @throws org.spine3.validate.IllegalConversionArgumentException if passed value cannot be converted
      */
-    public static <I> String toString(I valueToConvert, TypeToken<I> typeToken) {
-        checkNotNull(valueToConvert);
+    public static <I> String toString(I object, TypeToken<I> typeToken) {
+        checkNotNull(object);
         checkNotNull(typeToken);
 
         final Stringifier<I> stringifier = getStringifier(typeToken);
-        final String result = stringifier.convert(valueToConvert);
+        final String result = stringifier.convert(object);
         return result;
     }
 
@@ -66,7 +64,7 @@ public class Stringifiers {
      * @return the parsed value from string
      * @throws org.spine3.validate.IllegalConversionArgumentException if passed string cannot be parsed
      */
-    public static <I> I parse(String valueToParse, TypeToken<I> typeToken) {
+    public static <I> I fromString(String valueToParse, TypeToken<I> typeToken) {
         checkNotNull(valueToParse);
         checkNotNull(typeToken);
 
@@ -75,18 +73,4 @@ public class Stringifiers {
                                     .convert(valueToParse);
         return result;
     }
-
-    private static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
-        final Optional<Stringifier<I>> stringifierOptional = StringifierRegistry.getInstance()
-                                                                                .get(typeToken);
-
-        if (!stringifierOptional.isPresent()) {
-            final String exMessage =
-                    format("Stringifier for the %s is not provided", typeToken);
-            throw conversionArgumentException(exMessage);
-        }
-        final Stringifier<I> stringifier = stringifierOptional.get();
-        return stringifier;
-    }
-
 }

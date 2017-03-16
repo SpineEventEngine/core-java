@@ -31,7 +31,9 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
+import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * The registry of converters of types to their string representations.
@@ -52,6 +54,18 @@ public class StringifierRegistry {
 
     private StringifierRegistry() {
         // Prevent external instantiation of this singleton class.
+    }
+
+    static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
+        final Optional<Stringifier<I>> stringifierOptional = getInstance().get(typeToken);
+
+        if (!stringifierOptional.isPresent()) {
+            final String exMessage =
+                    format("Stringifier for the %s is not provided", typeToken);
+            throw conversionArgumentException(exMessage);
+        }
+        final Stringifier<I> stringifier = stringifierOptional.get();
+        return stringifier;
     }
 
     public <I extends Message> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
