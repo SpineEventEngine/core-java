@@ -26,7 +26,7 @@ package org.spine3.base.error;
  *
  * @author Alexander Yevsyukov
  * @see org.spine3.base.StringifierRegistry#register(org.spine3.base.Stringifier,
- *  java.lang.reflect.Type) StringifierRegistry.register()
+ *      java.lang.reflect.Type) StringifierRegistry.register()
  */
 public class MissingStringifierException extends RuntimeException {
 
