@@ -58,6 +58,7 @@ public class StringifierRegistry {
     }
 
     static <T> Stringifier<T> getStringifier(Type typeOfT) {
+        checkNotNull(typeOfT);
         final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
 
         if (!stringifierOptional.isPresent()) {
@@ -69,10 +70,17 @@ public class StringifierRegistry {
         return stringifier;
     }
 
-    public <T extends Message> void register(Stringifier<T> converter, Type typeOfT) {
+    /**
+     * Registers the passed stringifier in the registry.
+     *
+     * @param stringifier the stringifier to register
+     * @param typeOfT the value of the type of objects handled by the stringifier
+     * @param <T> the type of the objects handled by the stringifier
+     */
+    public <T extends Message> void register(Stringifier<T> stringifier, Type typeOfT) {
         checkNotNull(typeOfT);
-        checkNotNull(converter);
-        stringifiers.put(typeOfT, converter);
+        checkNotNull(stringifier);
+        stringifiers.put(typeOfT, stringifier);
     }
 
     /**
@@ -105,12 +113,11 @@ public class StringifierRegistry {
     /**
      * Tells whether there is a Stringifier registered for the passed type.
      *
-     * @param <T> the type to be converted to a string
-     * @param typeOfT the type for which to find a stringifier
+     * @param type the type for which to find a stringifier
      * @return {@code true} if there is a registered stringifier, {@code false} otherwise
      */
-    synchronized <T> boolean hasStringifierFor(Type typeOfT) {
-        final boolean contains = stringifiers.containsKey(typeOfT);
+    synchronized boolean hasStringifierFor(Type type) {
+        final boolean contains = stringifiers.containsKey(type);
         return contains;
     }
 
