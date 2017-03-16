@@ -110,7 +110,7 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
-    apply plugin: spineJavadocFqnCheckerId
+    apply plugin: 'org.spine3.tools.javadoc-checker'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
