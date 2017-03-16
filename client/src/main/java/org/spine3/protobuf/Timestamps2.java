@@ -285,11 +285,25 @@ public class Timestamps2 {
 
     /**
      * The stringifier for web-safe representation of timestamps.
+     *
+     * <p>The stringifier replaces colons in the time part of a a RFC 3339 date string
+     * with dashes when converting a timestamp to a string. It also restores the colons
+     * back during the backward conversion.
      */
     static class WebSafeTimestampStringifer extends Stringifier<Timestamp> {
 
         private static final char COLON = ':';
         private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
+        private static final String DASH = "-";
+
+        /**
+         * The index of a character separating hours and minutes.
+         */
+        private static final int HOUR_SEPARATOR_INDEX = 13;
+        /**
+         * The index of a character separating minutes and seconds.
+         */
+        private static final int MINUTE_SEPARATOR_INDEX = 16;
 
         @Override
         protected String toString(Timestamp timestamp) {
@@ -313,18 +327,17 @@ public class Timestamps2 {
          */
         private static String toWebSafe(String str) {
             final String result = PATTERN_COLON.matcher(str)
-                                               .replaceAll("-");
+                                               .replaceAll(DASH);
             return result;
         }
 
         /**
          * Converts the passed web-safe timestamp representation to the RFC 3339 date string format.
          */
-        @SuppressWarnings("MagicNumber") // are fixed positions in the timestamp string
         private static String fromWebSafe(String webSafe) {
             char[] chars = webSafe.toCharArray();
-            chars[13] = COLON;
-            chars[16] = COLON;
+            chars[HOUR_SEPARATOR_INDEX] = COLON;
+            chars[MINUTE_SEPARATOR_INDEX] = COLON;
             return String.valueOf(chars);
         }
     }
