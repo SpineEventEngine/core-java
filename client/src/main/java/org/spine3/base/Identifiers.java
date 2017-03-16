@@ -24,12 +24,9 @@ import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
 
 import javax.annotation.Nullable;
-import java.text.ParseException;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -37,7 +34,6 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * Utility class for working with identifiers.
@@ -55,9 +51,6 @@ public class Identifiers {
     public static final String EMPTY_ID = "EMPTY";
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
     private static final String EQUAL_SIGN = "=";
-
-    private static final Stringifier<Timestamp> timestampIdStringifier =
-            new WebSafeTimestampStringifer();
 
     private Identifiers() {
         // Prevent instantiation of this utility class.
@@ -235,71 +228,5 @@ public class Identifiers {
         result = PATTERN_COLON_SPACE.matcher(result)
                                     .replaceAll(EQUAL_SIGN);
         return result;
-    }
-
-    /**
-     * Obtains a stringifier for IDs based on {@code Timestamp}s.
-     *
-     * <p>The stringifier replaces colons in time part of a string representation of a timestamp.
-     *
-     * <p>For example, the following string:
-     * <pre>
-     * "1973-01-01T23:59:59.999999999Z"
-     * </pre>
-     * would be converted to:
-     * <pre>
-     * "1973-01-01T23-59-59.999999999Z"
-     * </pre>
-     *
-     * <p>This stringifier can be convenient for storing IDs based on {@code Timestamp}s.
-     */
-    public static Stringifier<Timestamp> webSafeTimestampStringifier() {
-        return timestampIdStringifier;
-    }
-
-    /**
-     * The stringifier for IDs based on {@code Timestamp}s.
-     */
-    static class WebSafeTimestampStringifer extends Stringifier<Timestamp> {
-
-        private static final char COLON = ':';
-        private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
-
-        @Override
-        protected String toString(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = toWebSafe(result);
-            return result;
-        }
-
-        @Override
-        protected Timestamp fromString(String webSafe) {
-            try {
-                final String rfcStr = fromWebSafe(webSafe);
-                return Timestamps.parse(rfcStr);
-            } catch (ParseException ignored) {
-                throw conversionArgumentException("Occurred exception during conversion");
-            }
-        }
-
-        /**
-         * Converts the passed timestamp string into a web-safe string, replacing colons to dashes.
-         */
-        private static String toWebSafe(String str) {
-            final String result = PATTERN_COLON.matcher(str)
-                                               .replaceAll("-");
-            return result;
-        }
-
-        /**
-         * Converts the passed web-safe timestamp representation to the RFC 3339 date string format.
-         */
-        @SuppressWarnings("MagicNumber") // are fixed positions in the timestamp string
-        private static String fromWebSafe(String webSafe) {
-            char[] chars = webSafe.toCharArray();
-            chars[13] = COLON;
-            chars[16] = COLON;
-            return String.valueOf(chars);
-        }
     }
 }
