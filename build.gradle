@@ -50,10 +50,12 @@ buildscript {
         }
         classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
                                              version: spineToolsVersion
-                                            //, changing: true // Uncomment this if you want the dependency to be
-                                            // fetched on each build, but offline builds will not be available then.
+        /* Uncomment the below statement if you want the dependency to be fetched on each build.
+           Please note that offline builds will not be available then. */
+                                             //, changing: true
+
         classpath group: 'org.spine3.tools', name: 'javadoc-checker',
-                version: spineToolsVersion
+                                             version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
