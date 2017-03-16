@@ -24,26 +24,31 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.error.MissingStringifierException;
+import org.spine3.protobuf.Timestamps2;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
 
 /**
  * The registry of converters of types to their string representations.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  */
-class StringifierRegistry {
+public class StringifierRegistry {
 
-    private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<Class<?>, Stringifier<?>>builder()
-                            .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
-                            .put(EventId.class, new Stringifiers.EventIdStringifier())
-                            .put(CommandId.class, new Stringifiers.CommandIdStringifier())
+                    ImmutableMap.<Type, Stringifier<?>>builder()
+                            .put(Timestamp.class, Timestamps2.stringifier())
+                            .put(EventId.class, Events.idStringifier())
+                            .put(CommandId.class, Commands.idStringifier())
                             .build()
             )
     );
@@ -52,31 +57,67 @@ class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> valueClass, Stringifier<I> converter) {
-        checkNotNull(valueClass);
-        checkNotNull(converter);
-        entries.put(valueClass, converter);
+    static <T> Stringifier<T> getStringifier(Type typeOfT) {
+        checkNotNull(typeOfT);
+        final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
+
+        if (!stringifierOptional.isPresent()) {
+            final String errMsg =
+                    format("No stringifier registered for the type: %s", typeOfT);
+            throw new MissingStringifierException(errMsg);
+        }
+        final Stringifier<T> stringifier = stringifierOptional.get();
+        return stringifier;
+    }
+
+    /**
+     * Registers the passed stringifier in the registry.
+     *
+     * @param stringifier the stringifier to register
+     * @param typeOfT the value of the type of objects handled by the stringifier
+     * @param <T> the type of the objects handled by the stringifier
+     */
+    public <T extends Message> void register(Stringifier<T> stringifier, Type typeOfT) {
+        checkNotNull(typeOfT);
+        checkNotNull(stringifier);
+        stringifiers.put(typeOfT, stringifier);
     }
 
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
-     * @param <I> the type of the values to convert
+     * @param <T> the type of the values to convert
+     * @param typeOfT the type to stringify
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
-        checkNotNull(valueClass);
+    public <T> Optional<Stringifier<T>> get(Type typeOfT) {
+        checkNotNull(typeOfT);
 
-        final Stringifier<?> func = entries.get(valueClass);
+        final Stringifier<?> func = stringifiers.get(typeOfT);
 
-        @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-            @see #register(Class, Stringifier) */
-        final Stringifier<I> result = (Stringifier<I>) func;
+        final Stringifier<T> result = cast(func);
         return Optional.fromNullable(result);
     }
 
-    public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {
-        final boolean contains = entries.containsKey(valueClass);
+    /**
+     * Casts the passed instance.
+     *
+     * <p>The cast is safe as we check the first type when
+     * {@linkplain #register(Stringifier, Type) adding}.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> Stringifier<T> cast(Stringifier<?> func) {
+        return (Stringifier<T>) func;
+    }
+
+    /**
+     * Tells whether there is a Stringifier registered for the passed type.
+     *
+     * @param type the type for which to find a stringifier
+     * @return {@code true} if there is a registered stringifier, {@code false} otherwise
+     */
+    synchronized boolean hasStringifierFor(Type type) {
+        final boolean contains = stringifiers.containsKey(type);
         return contains;
     }
 

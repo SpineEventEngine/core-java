@@ -41,7 +41,7 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * <p>The size of {@link Iterable} returned is always the same as the size of given IDs.
      *
      * <p>In case there is no record for a particular ID, {@code null} will be present in the result instead.
-     * In this way {@code readMultiple()} callees are able to track the absenсe of a certain element by comparing
+     * In this way {@code readMultiple()} callees are able to track the absence of a certain element by comparing
      * the input IDs and resulting {@code Iterable}.
      *
      * <p>E.g. {@code readMultiple( Lists.newArrayList(idPresentInStorage, idNonPresentInStorage) )} will return

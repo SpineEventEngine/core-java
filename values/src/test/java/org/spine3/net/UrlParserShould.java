@@ -164,8 +164,8 @@ public class UrlParserShould {
         assertEquals("password", record.getAuth().getPassword());
         assertEquals("spine3.org", record.getHost());
         assertEquals("index", record.getPath());
-        assertEquals("auth=none", QueryParameters.toString(record.getQuery(0)));
-        assertEquals("locale=us", QueryParameters.toString(record.getQuery(1)));
+        assertEquals("auth=none", UrlQueryParameters.toString(record.getQuery(0)));
+        assertEquals("locale=us", UrlQueryParameters.toString(record.getQuery(1)));
         assertEquals("fragment9", record.getFragment());
     }
 }

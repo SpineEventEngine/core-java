@@ -36,11 +36,10 @@ import com.google.protobuf.Message;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Enrichment.Container;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeName;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.EventClass;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -56,7 +55,7 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.isEnrichmentEnabled;
-import static org.spine3.protobuf.Messages.toMessageClass;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * {@code EventEnricher} extends information of an event basing on its type and content.
@@ -94,7 +93,8 @@ public class EventEnricher {
      */
     EventEnricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = synchronizedMultimap(rawMap);
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap =
+                synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
             functionMap.put(function.getEventClass(), function);
         }
@@ -109,10 +109,12 @@ public class EventEnricher {
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
-            final Class<Message> enrichmentClass = toMessageClass(TypeUrl.of(enrichmentType));
+            final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
+                                                           .getJavaClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
-                final Class<Message> eventClass = toMessageClass(TypeUrl.of(eventType));
+                final Class<Message> eventClass = TypeName.of(eventType)
+                                                          .getJavaClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
                                                          eventClass,
@@ -185,8 +187,9 @@ public class EventEnricher {
             this.eventMessage = eventMessage;
             this.eventContext = eventContext;
             final Class<? extends Message> eventClass = EventClass.of(eventMessage)
-                                                             .value();
-            final Collection<EnrichmentFunction<?, ?>> functionsPerClass = parent.functions.get(eventClass);
+                                                                  .value();
+            final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
+                    parent.functions.get(eventClass);
             this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
         }
 
@@ -202,7 +205,8 @@ public class EventEnricher {
                 function.setContext(eventContext);
                 final Message enriched = apply(function, eventMessage);
                 checkResult(enriched, function);
-                final String typeName = TypeName.of(enriched);
+                final String typeName = TypeName.of(enriched)
+                                                .value();
                 enrichments.put(typeName, AnyPacker.pack(enriched));
             }
         }
@@ -443,11 +447,10 @@ public class EventEnricher {
         final Optional<EnrichmentFunction<?, ?>> duplicate = from(currentFns)
                 .firstMatch(SameTransition.asFor(function));
         if (duplicate.isPresent()) {
-            final String msg = String.format("Enrichment from %s to %s already added as: %s",
-                                             function.getEventClass(),
-                                             function.getEnrichmentClass(),
-                                             duplicate.get());
-            throw new IllegalArgumentException(msg);
+            throw newIllegalArgumentException("Enrichment from %s to %s already added as: %s",
+                                               function.getEventClass(),
+                                               function.getEnrichmentClass(),
+                                               duplicate.get());
         }
     }
 

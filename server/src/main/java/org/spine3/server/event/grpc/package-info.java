@@ -28,6 +28,6 @@
 @ParametersAreNonnullByDefault
 package org.spine3.server.event.grpc;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

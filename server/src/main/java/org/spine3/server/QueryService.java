@@ -25,17 +25,15 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Queries;
+import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.grpc.QueryServiceGrpc;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.stand.Stand;
+import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
@@ -64,8 +62,6 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         log().debug("Incoming query: {}", query);
 
         final TypeUrl type = Queries.typeOf(query);
-        checkNotNull(type, "Unknown type for query target");
-
         final BoundedContext boundedContext = typeToContextMap.get(type);
         final Stand stand = boundedContext.getStand();
         try {

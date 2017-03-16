@@ -23,16 +23,17 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * This class provides general validation routines.
@@ -113,7 +114,9 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
+        checkNotDefault(object,
+                        "The message is in the default state: %s",
+                        TypeName.of(object));
         return object;
     }
 
@@ -159,9 +162,9 @@ public class Validate {
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
         if (!isDefault(object)) {
-            final String typeName = TypeName.of(object);
-            final String errorMessage = "The message is not in the default state: " + typeName;
-            throw new IllegalStateException(errorMessage);
+            final String typeName = TypeName.of(object)
+                                            .value();
+            throw newIllegalStateException("The message is not in the default state: %s", typeName);
         }
         return object;
     }
@@ -170,8 +173,8 @@ public class Validate {
      * Ensures the truth of an expression involving one parameter to the calling method.
      *
      * @param expression         a boolean expression with the parameter we check
-     * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder for
-     *                           the parameter name
+     * @param errorMessageFormat the format of the error message, which has {@code %s} placeholder
+     *                           for the parameter name
      * @param parameterName      the name of the parameter
      * @throws IllegalArgumentException if {@code expression} is false
      */
@@ -181,8 +184,7 @@ public class Validate {
         checkNotNull(errorMessageFormat);
         checkNotNull(parameterName);
         if (!expression) {
-            final String errorMessage = format(errorMessageFormat, parameterName);
-            throw new IllegalArgumentException(errorMessage);
+            throw newIllegalArgumentException(errorMessageFormat, parameterName);
         }
     }
 
@@ -215,8 +217,7 @@ public class Validate {
      */
     public static void checkPositive(long value) {
         if (value <= 0) {
-            final String errMsg = format("value (%d) must be positive", value);
-            throw new IllegalArgumentException(errMsg);
+            throw newIllegalArgumentException("value (%d) must be positive", value);
         }
     }
 
@@ -253,10 +254,8 @@ public class Validate {
     public static void checkBounds(int value, String paramName, int lowBound, int highBound) {
         checkNotNull(paramName);
         if (!isBetween(value, lowBound, highBound)) {
-            final String errMsg = format(
-                    "%s (%d) should be in bounds [%d, %d] inclusive",
-                    paramName, value, lowBound, highBound);
-            throw new IllegalArgumentException(errMsg);
+            throw newIllegalArgumentException("%s (%d) should be in bounds [%d, %d] inclusive",
+                                              paramName, value, lowBound, highBound);
         }
     }
 

@@ -21,6 +21,9 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
@@ -30,6 +33,9 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,7 +82,7 @@ public class RepositoryShould {
          *
          * @param boundedContext the {@link BoundedContext} in which this repository works
          */
-        protected RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
+        private RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
@@ -92,177 +98,18 @@ public class RepositoryShould {
 
         @Override
         protected void store(EntityWithUnsupportedId obj) {
-
         }
 
         @Override
-        protected void markArchived(Exception id) {
-        }
-
-        @Override
-        protected void markDeleted(Exception id) {
-        }
-
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
+        protected Storage<Exception, ?> createStorage(StorageFactory factory) {
             return null;
         }
     }
 
-    @Test
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
-    public void throw_exception_if_entity_constructor_is_private() {
-        try {
-            new RepositoryForEntitiesWithPrivateConstructor(boundedContext);
-        } catch (RuntimeException e) {
-            assertEquals(e.getCause().getClass(), IllegalAccessException.class);
-        }
-    }
-
-    private static class EntityWithPrivateConstructor
-            extends AbstractVersionableEntity<ProjectId, Project> {
-        private EntityWithPrivateConstructor(ProjectId id) {
-            super(id);
-        }
-    }
-
-    @SuppressWarnings("ReturnOfNull")
-    private static class RepositoryForEntitiesWithPrivateConstructor
-            extends Repository<ProjectId, EntityWithPrivateConstructor> {
-        private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-
-        @Override
-        public EntityWithPrivateConstructor create(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return null;
-        }
-
-        @Override
-        public void store(EntityWithPrivateConstructor obj) {
-        }
-
-        @Override
-        public Optional<EntityWithPrivateConstructor> load(ProjectId id) {
-            return Optional.absent();
-        }
-
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
-    }
-
-    @Test
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
-    public void throw_exception_if_entity_constructor_is_protected() {
-        try {
-            new RepositoryForEntitiesWithProtectedConstructor(boundedContext);
-        } catch (RuntimeException e) {
-            assertEquals(e.getCause().getClass(), IllegalAccessException.class);
-        }
-    }
-
-    private static class EntityWithProtectedConstructor
-            extends AbstractVersionableEntity<ProjectId, Project> {
-        protected EntityWithProtectedConstructor(ProjectId id) {
-            super(id);
-        }
-    }
-
-    @SuppressWarnings("ReturnOfNull")
-    private static class RepositoryForEntitiesWithProtectedConstructor
-            extends Repository<ProjectId, EntityWithProtectedConstructor> {
-        public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-
-        @Override
-        public EntityWithProtectedConstructor create(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return null;
-        }
-
-        @Override
-        public void store(EntityWithProtectedConstructor obj) {
-        }
-
-        @Override
-        public Optional<EntityWithProtectedConstructor> load(ProjectId id) {
-            return Optional.absent();
-        }
-
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
-    }
-
-    @Test
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
-    public void throw_exception_if_entity_has_no_required_constructor() {
-        try {
-            new RepositoryForEntitiesWithoutRequiredConstructor(boundedContext);
-        } catch (RuntimeException e) {
-            assertEquals(e.getCause().getClass(), NoSuchMethodException.class);
-        }
-    }
-
-    private static class EntityWithoutRequiredConstructor
-            extends AbstractVersionableEntity<ProjectId, Project> {
-        private EntityWithoutRequiredConstructor() {
-            super(ProjectId.getDefaultInstance());
-        }
-    }
-
-    @SuppressWarnings("ReturnOfNull")
-    private static class RepositoryForEntitiesWithoutRequiredConstructor
-            extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
-        private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-
-        @Override
-        public EntityWithoutRequiredConstructor create(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return null;
-        }
-
-        @Override
-        public void store(EntityWithoutRequiredConstructor obj) {
-        }
-
-        @Override
-        public Optional<EntityWithoutRequiredConstructor> load(ProjectId id) {
-            return Optional.absent();
-        }
-
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
+    @Test(expected = IllegalStateException.class)
+    public void reject_repeated_storage_initialization() {
+        repository.initStorage(storageFactory);
+        repository.initStorage(storageFactory);
     }
 
     //
@@ -275,37 +122,26 @@ public class RepositoryShould {
         }
     }
 
-    private static class TestRepo extends Repository<ProjectId, ProjectEntity> {
+    private static class TestRepo
+            extends DefaultRecordBasedRepository<ProjectId, ProjectEntity, Project> {
+
+        /**
+         * The ID value to simulate failure to load an entity.
+         */
+        private static final ProjectId troublesome = ProjectId.newBuilder()
+                                                              .setId("CANNOT_BE_LOADED")
+                                                              .build();
 
         private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        @SuppressWarnings("ReturnOfNull")
-        @Override
-        public ProjectEntity create(ProjectId id) {
-            return null;
-        }
-
-        @Override
-        protected void store(ProjectEntity obj) {}
-
         @Override
         public Optional<ProjectEntity> load(ProjectId id) {
-            return Optional.absent();
-        }
-
-        @Override
-        protected void markArchived(ProjectId id) {
-        }
-
-        @Override
-        protected void markDeleted(ProjectId id) {
-        }
-
-        @Override
-        protected Storage createStorage(StorageFactory factory) {
-            return factory.createRecordStorage(getEntityClass());
+            if (id.equals(troublesome)) {
+                return Optional.absent();
+            }
+            return super.load(id);
         }
     }
 
@@ -352,5 +188,65 @@ public class RepositoryShould {
         repository.close();
         assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
+    }
+
+    @Test
+    public void iterate_over_entities() {
+        createAndStoreEntities();
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        final List<ProjectEntity> entities = Lists.newArrayList(
+                repository.iterator(all)
+        );
+
+        assertEquals(3, entities.size());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void do_not_allow_removal_in_iterator() {
+        createAndStoreEntities();
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        repository.iterator(all)
+                  .remove();
+    }
+
+    private void createAndStoreEntities() {
+        repository.initStorage(storageFactory);
+
+        createAndStore("Eins");
+        createAndStore("Zwei");
+        createAndStore("Drei");
+    }
+
+    private static ProjectId createId(String value) {
+        return ProjectId.newBuilder()
+                        .setId(value)
+                        .build();
+    }
+
+    private void createAndStore(String entityId) {
+        ProjectEntity entity = repository.create(createId(entityId));
+        repository.store(entity);
+
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void do_not_allow_removal_from_iterator() {
+        createAndStoreEntities();
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        repository.iterator(all).remove();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
+        createAndStoreEntities();
+        createAndStore(TestRepo.troublesome.getId());
+
+        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
+        final Iterator<ProjectEntity> iterator = repository.iterator(all);
+
+        // This should iterate through all.
+        Lists.newArrayList(iterator);
     }
 }

@@ -20,6 +20,7 @@
 
 package org.spine3.change;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import org.junit.Test;
 
@@ -31,6 +32,12 @@ public class PreconditionsShould {
     @Test
     public void have_private_constructor() {
         assertHasPrivateParameterlessCtor(Preconditions.class);
+    }
+
+    @Test
+    public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Preconditions.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -46,13 +46,19 @@ public interface StorageFactory extends AutoCloseable {
      */
     boolean isMultitenant();
 
-    /** Creates a new {@link CommandStorage} instance. */
+    /**
+     * Creates a new {@link CommandStorage} instance.
+     */
     CommandStorage createCommandStorage();
 
-    /** Creates a new {@link EventStorage} instance. */
+    /**
+     * Creates a new {@link EventStorage} instance.
+     */
     EventStorage createEventStorage();
 
-    /** Creates a new {@link StandStorage} instance. */
+    /**
+     * Creates a new {@link StandStorage} instance.
+     */
     StandStorage createStandStorage();
 
     /**
@@ -61,7 +67,8 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>            the type of aggregate IDs
      * @param aggregateClass the class of aggregates to store
      */
-    <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> aggregateClass);
+    <I> AggregateStorage<I> createAggregateStorage(
+            Class<? extends Aggregate<I, ?, ?>> aggregateClass);
 
     /**
      * Creates a new {@link RecordStorage} instance.
@@ -69,7 +76,8 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(
+            Class<? extends Entity<I, ?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
@@ -77,5 +85,6 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>             the type of stream projection IDs
      * @param projectionClass the class of projections to store
      */
-    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> projectionClass);
+    <I> ProjectionStorage<I> createProjectionStorage(
+            Class<? extends Entity<I, ?>> projectionClass);
 }

@@ -28,12 +28,13 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
-import org.spine3.server.entity.Predicates;
-import org.spine3.server.entity.Visibility;
+import org.spine3.server.entity.EntityWithLifecycle;
+import org.spine3.server.entity.LifecycleFlags;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,22 +54,29 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private final Map<I, Visibility> statuses = newHashMap();
+    private final Map<I, LifecycleFlags> statuses = newHashMap();
 
     private final Predicate<I> isVisible = new Predicate<I>() {
         @Override
         public boolean apply(@Nullable I input) {
-            final Visibility entityStatus = statuses.get(input);
+            final LifecycleFlags entityStatus = statuses.get(input);
 
             return entityStatus == null
-                    || Predicates.isEntityVisible()
-                                 .apply(entityStatus);
+                   || EntityWithLifecycle.Predicates.isEntityVisible()
+                                                    .apply(entityStatus);
         }
     };
 
     private final Multimap<I, AggregateEventRecord> filtered = Multimaps.filterKeys(records, isVisible);
 
     private final Map<I, Integer> eventCounts = newHashMap();
+
+    @Override
+    public Iterator<I> index() {
+        final Iterator<I> result = filtered.keySet()
+                                           .iterator();
+        return result;
+    }
 
     /**
      * Always throws {@code UnsupportedOperationException}.
@@ -113,8 +121,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      *
      * <p>If no status stored, the default instance is returned.
      */
-    Optional<Visibility> getStatus(I id) {
-        final Visibility entityStatus = statuses.get(id);
+    Optional<LifecycleFlags> getStatus(I id) {
+        final LifecycleFlags entityStatus = statuses.get(id);
         return Optional.fromNullable(entityStatus);
     }
 
@@ -134,7 +142,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         eventCounts.put(id, eventCount);
     }
 
-    void putStatus(I id, Visibility status) {
+    void putStatus(I id, LifecycleFlags status) {
         statuses.put(id, status);
     }
 

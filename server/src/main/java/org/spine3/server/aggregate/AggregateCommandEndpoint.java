@@ -23,9 +23,9 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
-import org.spine3.base.Stringifiers;
-import org.spine3.server.entity.Visibility;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.base.Identifiers;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.storage.TenantDataOperation;
 
 import javax.annotation.Nullable;
@@ -139,14 +139,14 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
-            final Visibility statusBefore = aggregate.getVisibility();
+            final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
             aggregate.dispatchCommand(commandMessage, context);
 
             // Update status only if the command was handled successfully.
-            final Visibility statusAfter = aggregate.getVisibility();
+            final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();
             if (statusAfter != null && !statusBefore.equals(statusAfter)) {
-                storage().writeVisibility(aggregateId, statusAfter);
+                storage().writeLifecycleFlags(aggregateId, statusAfter);
             }
 
             return aggregate;
@@ -162,7 +162,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         private void logConcurrentModification(I aggregateId,
                                                Message commandMessage,
                                                int newEventCount) {
-            final String idStr = Stringifiers.idToString(aggregateId);
+            final String idStr = Identifiers.idToString(aggregateId);
             final Class<?> aggregateClass = repository.getAggregateClass();
             AggregateRepository.log()
                .warn("Detected the concurrent modification of {} ID: {}. " +

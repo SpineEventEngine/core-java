@@ -23,8 +23,8 @@ package org.spine3.server.command;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
-import org.spine3.base.CommandEnvelope;
+import org.spine3.type.CommandClass;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.server.command.error.InvalidCommandException;
@@ -242,7 +242,8 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     /**
      * The dispatcher that remembers that
-     * {@link CommandDispatcher#dispatch(org.spine3.base.MessageEnvelope) dispatch()} was called.
+     * {@link CommandDispatcher#dispatch(org.spine3.envelope.MessageEnvelope) dispatch()}
+     * was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {
 

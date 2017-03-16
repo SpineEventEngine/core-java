@@ -22,16 +22,17 @@ package org.spine3.server.command.error;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
+import org.spine3.type.CommandClass;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * The exception for reporting invalid commands.
@@ -154,7 +155,7 @@ public class InvalidCommandException extends CommandException {
             this.commandMessage = Commands.getMessage(command);
             this.commandClass = CommandClass.of(commandMessage);
             this.commandId = idToString(command.getContext().getCommandId());
-            this.typeName = TypeName.of(commandMessage);
+            this.typeName = TypeName.of(commandMessage).value();
         }
 
         private Message getCommandMessage() {

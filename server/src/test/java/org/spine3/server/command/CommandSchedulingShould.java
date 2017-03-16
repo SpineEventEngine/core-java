@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
 import org.spine3.test.TestCommandFactory;
 

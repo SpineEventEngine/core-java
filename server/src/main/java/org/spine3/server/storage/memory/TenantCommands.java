@@ -43,6 +43,13 @@ class TenantCommands implements TenantStorage<CommandId, CommandRecord> {
 
     private final Map<CommandId, CommandRecord> storage = newHashMap();
 
+    @Override
+    public Iterator<CommandId> index() {
+        final Iterator<CommandId> result = storage.keySet()
+                                           .iterator();
+        return result;
+    }
+
     @Nullable
     @Override
     public Optional<CommandRecord> get(CommandId id) {

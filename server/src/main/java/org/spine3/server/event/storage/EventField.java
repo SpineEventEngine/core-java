@@ -20,7 +20,7 @@
 
 package org.spine3.server.event.storage;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
 
@@ -50,8 +50,8 @@ public enum EventField implements StorageField {
     event_id,
 
     /**
-     * A field representing the type of an {@link org.spine3.base.Event event} message,
-     * e.g. as a {@link org.spine3.protobuf.TypeUrl type URL}.
+     * A field representing the type of an {@linkplain org.spine3.base.Event event} message,
+     * e.g. as a {@link org.spine3.type.TypeUrl type URL}.
      *
      * <p>This field may be used for serialization.
      */
