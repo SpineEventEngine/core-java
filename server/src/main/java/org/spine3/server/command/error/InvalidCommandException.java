@@ -22,12 +22,11 @@ package org.spine3.server.command.error;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.type.CommandClass;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
+import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
 

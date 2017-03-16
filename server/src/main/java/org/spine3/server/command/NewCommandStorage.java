@@ -22,14 +22,14 @@ package org.spine3.server.command;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.base.Stringifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
@@ -167,7 +167,7 @@ public class NewCommandStorage
     private CommandEntity loadEntity(CommandId commandId) {
         final Optional<CommandEntity> loaded = load(commandId);
         if (!loaded.isPresent()) {
-            final String idStr = Stringifiers.idToString(commandId);
+            final String idStr = Identifiers.idToString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
         }
 

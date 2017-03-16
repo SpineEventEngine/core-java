@@ -26,16 +26,16 @@ import com.google.protobuf.Timestamp;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.type.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.envelope.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nonnull;
 import java.util.List;

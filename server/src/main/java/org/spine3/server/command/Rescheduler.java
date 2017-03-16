@@ -26,8 +26,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.time.Interval;
 
 import java.util.Iterator;

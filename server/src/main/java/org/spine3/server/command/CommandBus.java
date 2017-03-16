@@ -21,25 +21,17 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
-import org.spine3.annotations.Internal;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Command;
-import org.spine3.type.CommandClass;
-import org.spine3.envelope.CommandEnvelope;
-import org.spine3.base.CommandId;
-import org.spine3.base.Error;
-import org.spine3.base.Errors;
-import org.spine3.base.FailureThrowable;
+import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.base.Stringifiers;
-import org.spine3.server.BoundedContext;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
 
 import java.util.Set;

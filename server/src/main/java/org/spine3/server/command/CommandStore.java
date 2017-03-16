@@ -22,13 +22,13 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.storage.TenantDataOperation;
 

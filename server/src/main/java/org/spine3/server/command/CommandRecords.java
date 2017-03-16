@@ -20,20 +20,18 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.base.Commands;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -72,8 +70,8 @@ class CommandRecords {
                                     ? generatedCommandId
                                     : context.getCommandId();
 
-        final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeUrl.of(commandMessage).getSimpleName();
+        final String commandType = TypeName.ofCommand(command)
+                                           .getSimpleName();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
