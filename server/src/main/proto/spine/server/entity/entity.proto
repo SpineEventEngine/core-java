@@ -107,3 +107,15 @@ message StorageFields {
     // A map of double filed values.
     map<string, double> double_field = 8;
 }
+
+enum StorageFieldType {
+
+    SFT_UNKNOWN = 0;
+    MESSAGE = 1;
+    INTEGER = 2;
+    LONG = 3;
+    STRING = 4;
+    BOOLEAN = 5;
+    FLOAT = 6;
+    DOUBLE = 7;
+}
