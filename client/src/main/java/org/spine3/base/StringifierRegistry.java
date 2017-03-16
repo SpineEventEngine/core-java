@@ -43,7 +43,7 @@ import static org.spine3.util.Exceptions.conversionArgumentException;
  */
 public class StringifierRegistry {
 
-    private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<TypeToken<?>, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
                     ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
                             .put(TypeToken.of(Timestamp.class), Timestamps2.stringifier())
@@ -72,7 +72,7 @@ public class StringifierRegistry {
     public <T extends Message> void register(TypeToken<T> valueClass, Stringifier<T> converter) {
         checkNotNull(valueClass);
         checkNotNull(converter);
-        entries.put(valueClass, converter);
+        stringifiers.put(valueClass, converter);
     }
 
     /**
@@ -84,7 +84,7 @@ public class StringifierRegistry {
     public <T> Optional<Stringifier<T>> get(TypeToken<T> valueToken) {
         checkNotNull(valueToken);
 
-        final Stringifier<?> func = entries.get(valueToken);
+        final Stringifier<?> func = stringifiers.get(valueToken);
 
         final Stringifier<T> result = cast(func);
         return Optional.fromNullable(result);
@@ -109,7 +109,7 @@ public class StringifierRegistry {
      * @return {@code true} if there is a registered stringifier, {@code false} otherwise
      */
     public synchronized <T> boolean hasStringifierFor(TypeToken<T> valueToken) {
-        final boolean contains = entries.containsKey(valueToken);
+        final boolean contains = stringifiers.containsKey(valueToken);
         return contains;
     }
 
