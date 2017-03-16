@@ -110,7 +110,9 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
-    apply plugin: 'org.spine3.tools.javadoc-checker'
+
+    //TODO:2017-03-16:alexander.yevsyukov: Uncomment the below line when the .DS_Store bug is fixed.
+    // apply plugin: 'org.spine3.tools.javadoc-checker'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
