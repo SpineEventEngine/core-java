@@ -22,7 +22,6 @@ package org.spine3.util;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.validate.error.IllegalConversionArgumentException;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -49,11 +48,6 @@ public class ExceptionsShould {
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
         unsupported(newUuid());
-    }
-
-    @Test(expected = IllegalConversionArgumentException.class)
-    public void create_and_throw_illegal_conversion_argument_exception(){
-        Exceptions.conversionArgumentException("some message");
     }
 
     @Test

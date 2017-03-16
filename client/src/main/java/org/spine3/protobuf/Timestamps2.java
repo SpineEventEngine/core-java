@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static org.spine3.util.Exceptions.conversionArgumentException;
 import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
@@ -304,8 +303,8 @@ public class Timestamps2 {
             try {
                 final String rfcStr = fromWebSafe(webSafe);
                 return Timestamps.parse(rfcStr);
-            } catch (ParseException ignored) {
-                throw conversionArgumentException("Occurred exception during conversion");
+            } catch (ParseException e) {
+                throw wrappedCause(e);
             }
         }
 

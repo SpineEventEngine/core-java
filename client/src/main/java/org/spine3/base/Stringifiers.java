@@ -21,7 +21,7 @@
 package org.spine3.base;
 
 import com.google.common.reflect.TypeToken;
-import org.spine3.validate.error.IllegalConversionArgumentException;
+import org.spine3.base.error.MissingStringifierException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.StringifierRegistry.getStringifier;
@@ -45,7 +45,7 @@ public class Stringifiers {
      * @param typeToken the type token of the passed value
      * @param <T>       the type of the object to convert
      * @return the string representation of the passed value
-     * @throws IllegalConversionArgumentException if passed value cannot be converted
+     * @throws MissingStringifierException if passed value cannot be converted
      */
     public static <T> String toString(T object, TypeToken<T> typeToken) {
         checkNotNull(object);
@@ -63,7 +63,7 @@ public class Stringifiers {
      * @param typeToken    the type token of the returned value
      * @param <T>          the type of the value to return
      * @return the parsed value from string
-     * @throws IllegalConversionArgumentException if passed string cannot be parsed
+     * @throws MissingStringifierException if passed value cannot be converted
      */
     public static <T> T fromString(String valueToParse, TypeToken<T> typeToken) {
         checkNotNull(valueToParse);

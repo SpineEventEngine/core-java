@@ -18,22 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate.error;
-
 /**
- * Signals that an error has been reached unexpectedly while converting from one type to another.
- *
- * @author Illia Shepilov
+ * This package provides general exceptions.
  */
-@SuppressWarnings("ExceptionClassNameDoesntEndWithException")
-// It is OK, because it is not {@code Exception} in usual meaning.
-// It is occurred when input value cannot be converted to desirable type
-// and repeated input is required.
-public class ConversionError extends Exception {
 
-    private static final long serialVersionUID = 1L;
+@ParametersAreNonnullByDefault
+package org.spine3.base.error;
 
-    public ConversionError(String message) {
-        super(message);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

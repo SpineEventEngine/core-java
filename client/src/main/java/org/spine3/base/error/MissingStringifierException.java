@@ -18,27 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate.error;
+package org.spine3.base.error;
+
+import com.google.common.reflect.TypeToken;
+import org.spine3.base.Stringifier;
 
 /**
- * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during the conversion from one type to another.
+ * Thrown when a string conversion operation encounters a type for which
+ * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
  *
- * @author Illia Shepilov
- * @see ConversionError
+ * @author Alexander Yevsyukov
+ * @see org.spine3.base.StringifierRegistry#register(TypeToken, Stringifier)
+ *      StringifierRegistry.register()
  */
-public class IllegalConversionArgumentException extends IllegalArgumentException {
+public class MissingStringifierException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final ConversionError conversionError;
-
-    public IllegalConversionArgumentException(ConversionError conversionError) {
-        super();
-        this.conversionError = conversionError;
-    }
-
-    public ConversionError getConversionError() {
-        return conversionError;
+    public MissingStringifierException(String message) {
+        super(message);
     }
 }

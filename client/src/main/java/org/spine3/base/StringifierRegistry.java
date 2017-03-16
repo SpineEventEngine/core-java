@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.error.MissingStringifierException;
 import org.spine3.protobuf.Timestamps2;
 
 import java.util.Map;
@@ -33,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
-import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * The registry of converters of types to their string representations.
@@ -61,9 +61,9 @@ public class StringifierRegistry {
         final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeToken);
 
         if (!stringifierOptional.isPresent()) {
-            final String exMessage =
-                    format("Stringifier for the %s is not provided", typeToken);
-            throw conversionArgumentException(exMessage);
+            final String errMsg =
+                    format("No stringifier registered for the type: %s", typeToken);
+            throw new MissingStringifierException(errMsg);
         }
         final Stringifier<T> stringifier = stringifierOptional.get();
         return stringifier;
