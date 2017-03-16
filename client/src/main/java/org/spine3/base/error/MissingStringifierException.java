@@ -20,15 +20,13 @@
 
 package org.spine3.base.error;
 
-import org.spine3.base.Stringifier;
-
 /**
  * Thrown when a string conversion operation encounters a type for which
  * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
  *
  * @author Alexander Yevsyukov
- * @see org.spine3.base.StringifierRegistry#register(Stringifier, java.lang.reflect.Type)
- *      StringifierRegistry.register()
+ * @see org.spine3.base.StringifierRegistry#register(org.spine3.base.Stringifier,
+ *  java.lang.reflect.Type) StringifierRegistry.register()
  */
 public class MissingStringifierException extends RuntimeException {
 
