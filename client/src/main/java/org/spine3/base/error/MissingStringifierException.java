@@ -20,7 +20,6 @@
 
 package org.spine3.base.error;
 
-import com.google.common.reflect.TypeToken;
 import org.spine3.base.Stringifier;
 
 /**
@@ -28,7 +27,7 @@ import org.spine3.base.Stringifier;
  * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
  *
  * @author Alexander Yevsyukov
- * @see org.spine3.base.StringifierRegistry#register(TypeToken, Stringifier)
+ * @see org.spine3.base.StringifierRegistry#register(Stringifier, java.lang.reflect.Type)
  *      StringifierRegistry.register()
  */
 public class MissingStringifierException extends RuntimeException {

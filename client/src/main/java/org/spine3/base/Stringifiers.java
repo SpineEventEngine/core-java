@@ -20,8 +20,9 @@
 
 package org.spine3.base;
 
-import com.google.common.reflect.TypeToken;
 import org.spine3.base.error.MissingStringifierException;
+
+import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.StringifierRegistry.getStringifier;
@@ -41,17 +42,17 @@ public class Stringifiers {
     /**
      * Converts the passed value to the string representation.
      *
-     * @param object    to object to convert
-     * @param typeToken the type token of the passed value
      * @param <T>       the type of the object to convert
+     * @param object    to object to convert
+     * @param typeOfT the type token of the passed value
      * @return the string representation of the passed value
      * @throws MissingStringifierException if passed value cannot be converted
      */
-    public static <T> String toString(T object, TypeToken<T> typeToken) {
+    public static <T> String toString(T object, Type typeOfT) {
         checkNotNull(object);
-        checkNotNull(typeToken);
+        checkNotNull(typeOfT);
 
-        final Stringifier<T> stringifier = getStringifier(typeToken);
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
         final String result = stringifier.convert(object);
         return result;
     }
@@ -59,19 +60,19 @@ public class Stringifiers {
     /**
      * Parses string to the appropriate value.
      *
-     * @param valueToParse value to convert
-     * @param typeToken    the type token of the returned value
-     * @param <T>          the type of the value to return
+     * @param <T>      the type of the value to return
+     * @param str      the string to convert
+     * @param typeOfT  the type into which to convert the string
      * @return the parsed value from string
      * @throws MissingStringifierException if passed value cannot be converted
      */
-    public static <T> T fromString(String valueToParse, TypeToken<T> typeToken) {
-        checkNotNull(valueToParse);
-        checkNotNull(typeToken);
+    public static <T> T fromString(String str, Type typeOfT) {
+        checkNotNull(str);
+        checkNotNull(typeOfT);
 
-        final Stringifier<T> stringifier = getStringifier(typeToken);
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
         final T result = stringifier.reverse()
-                                    .convert(valueToParse);
+                                    .convert(str);
         return result;
     }
 }

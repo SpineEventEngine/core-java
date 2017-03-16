@@ -22,12 +22,12 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.error.MissingStringifierException;
 import org.spine3.protobuf.Timestamps2;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -43,12 +43,12 @@ import static java.util.Collections.synchronizedMap;
  */
 public class StringifierRegistry {
 
-    private final Map<TypeToken<?>, Stringifier<?>> stringifiers = synchronizedMap(
+    private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
-                            .put(TypeToken.of(Timestamp.class), Timestamps2.stringifier())
-                            .put(TypeToken.of(EventId.class), Events.idStringifier())
-                            .put(TypeToken.of(CommandId.class), Commands.idStringifier())
+                    ImmutableMap.<Type, Stringifier<?>>builder()
+                            .put(Timestamp.class, Timestamps2.stringifier())
+                            .put(EventId.class, Events.idStringifier())
+                            .put(CommandId.class, Commands.idStringifier())
                             .build()
             )
     );
@@ -57,34 +57,35 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    static <T> Stringifier<T> getStringifier(TypeToken<T> typeToken) {
-        final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeToken);
+    static <T> Stringifier<T> getStringifier(Type typeOfT) {
+        final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
 
         if (!stringifierOptional.isPresent()) {
             final String errMsg =
-                    format("No stringifier registered for the type: %s", typeToken);
+                    format("No stringifier registered for the type: %s", typeOfT);
             throw new MissingStringifierException(errMsg);
         }
         final Stringifier<T> stringifier = stringifierOptional.get();
         return stringifier;
     }
 
-    public <T extends Message> void register(TypeToken<T> valueClass, Stringifier<T> converter) {
-        checkNotNull(valueClass);
+    public <T extends Message> void register(Stringifier<T> converter, Type typeOfT) {
+        checkNotNull(typeOfT);
         checkNotNull(converter);
-        stringifiers.put(valueClass, converter);
+        stringifiers.put(typeOfT, converter);
     }
 
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
      * @param <T> the type of the values to convert
+     * @param typeOfT the type to stringify
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <T> Optional<Stringifier<T>> get(TypeToken<T> valueToken) {
-        checkNotNull(valueToken);
+    public <T> Optional<Stringifier<T>> get(Type typeOfT) {
+        checkNotNull(typeOfT);
 
-        final Stringifier<?> func = stringifiers.get(valueToken);
+        final Stringifier<?> func = stringifiers.get(typeOfT);
 
         final Stringifier<T> result = cast(func);
         return Optional.fromNullable(result);
@@ -94,7 +95,7 @@ public class StringifierRegistry {
      * Casts the passed instance.
      *
      * <p>The cast is safe as we check the first type when
-     * {@linkplain #register(TypeToken, Stringifier) adding}.
+     * {@linkplain #register(Stringifier, Type) adding}.
      */
     @SuppressWarnings("unchecked")
     private static <T> Stringifier<T> cast(Stringifier<?> func) {
@@ -104,12 +105,12 @@ public class StringifierRegistry {
     /**
      * Tells whether there is a Stringifier registered for the passed type.
      *
-     * @param valueToken the token with the type info
      * @param <T> the type to be converted to a string
+     * @param typeOfT the type for which to find a stringifier
      * @return {@code true} if there is a registered stringifier, {@code false} otherwise
      */
-    public synchronized <T> boolean hasStringifierFor(TypeToken<T> valueToken) {
-        final boolean contains = stringifiers.containsKey(valueToken);
+    synchronized <T> boolean hasStringifierFor(Type typeOfT) {
+        final boolean contains = stringifiers.containsKey(typeOfT);
         return contains;
     }
 
